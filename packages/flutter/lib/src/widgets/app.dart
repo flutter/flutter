@@ -769,8 +769,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     assert(() {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
-          'Could not find a generator for route $settings in the $runtimeType.\n'
-          'Generators for routes are searched for in the following order:\n'
+          'Could not find a generator for route $settings in the $runtimeType.',
+          hint: 'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
           ' 2. Otherwise, the "routes" table is used, if it has an entry for '
           'the route.\n'
@@ -786,8 +786,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     assert(() {
       if (result == null) {
         throw FlutterError(
-          'The onUnknownRoute callback returned null.\n'
-          'When the $runtimeType requested the route $settings from its '
+          'The onUnknownRoute callback returned null.',
+          violation: 'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '
           'must never return null.'
         );

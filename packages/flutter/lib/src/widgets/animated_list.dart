@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show binarySearch;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -165,15 +166,16 @@ class AnimatedList extends StatefulWidget {
     final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
     if (nullOk || result != null)
       return result;
-    throw FlutterError(
-      'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
-      'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
-      'This can happen when the context provided is from the same StatefulWidget that '
-      'built the AnimatedList. Please see the AnimatedList documentation for examples '
-      'of how to refer to an AnimatedListState object: '
-      '  https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html \n'
-      'The context used was:\n'
-      '  $context'
+    throw FlutterError.from(FlutterErrorBuilder()
+      ..addError('AnimatedList.of() called with a context that does not contain an AnimatedList.')
+      ..addViolation('No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().')
+      ..addHint(
+        'This can happen when the context provided is from the same StatefulWidget that '
+        'built the AnimatedList. Please see the AnimatedList documentation for examples '
+        'of how to refer to an AnimatedListState object',
+        url: 'https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html',
+      )
+      ..addProperty('The context used was', context)
     );
   }
 

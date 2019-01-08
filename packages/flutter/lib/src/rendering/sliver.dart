@@ -413,18 +413,25 @@ class SliverConstraints extends Constraints {
   }
 
   @override
-  bool debugAssertIsValid({
+  bool debugAssertIsValidStructured({
     bool isAppliedConstraint = false,
     InformationCollector informationCollector,
+    RenderErrorBuilder errorBuilder,
   }) {
     assert(() {
       void verify(bool check, String message) {
         if (check)
           return;
-        final StringBuffer information = StringBuffer();
-        if (informationCollector != null)
+        final RenderErrorBuilder errorBuilder = RenderErrorBuilder()
+          ..addError('$runtimeType is not valid: $message');
+
+        if (informationCollector != null) {
+          final StringBuffer information = StringBuffer();
           informationCollector(information);
-        throw FlutterError('$runtimeType is not valid: $message\n${information}The offending constraints were:\n  $this');
+          errorBuilder.addDescription(information.toString());
+        }
+        errorBuilder.addConstraintsProperty('The offending constraints were', this);
+        throw errorBuilder.build();
       }
       verify(axis != null, 'The "axis" is null.');
       verify(growthDirection != null, 'The "growthDirection" is null.');
@@ -454,7 +461,7 @@ class SliverConstraints extends Constraints {
     if (other is! SliverConstraints)
       return false;
     final SliverConstraints typedOther = other;
-    assert(typedOther.debugAssertIsValid());
+    assert(typedOther.debugAssertIsValidStructured());
     return typedOther.axisDirection == axisDirection
         && typedOther.growthDirection == growthDirection
         && typedOther.scrollOffset == scrollOffset
@@ -688,20 +695,30 @@ class SliverGeometry extends Diagnosticable {
 
   static const double _epsilon = 1e-10;
 
+  // TODO(jacobr): adding a named parameter is a breaking change.
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
   bool debugAssertIsValid({
     InformationCollector informationCollector,
+    RenderErrorBuilder errorBuilder,
   }) {
     assert(() {
-      void verify(bool check, String message) {
+      void verify(
+        bool check,
+        String message, {
+        RenderErrorBuilder errorBuilder,
+      }) {
         if (check)
           return;
-        final StringBuffer information = StringBuffer();
-        if (informationCollector != null)
+        if (informationCollector != null) {
+          final StringBuffer information = StringBuffer();
           informationCollector(information);
-        throw FlutterError('$runtimeType is not valid: $message\n$information');
+          errorBuilder ??= RenderErrorBuilder();
+          errorBuilder.addDescription(information.toString());
+        }
+        errorBuilder.error = '$runtimeType is not valid: $message';
+        throw errorBuilder.build();
       }
       verify(scrollExtent != null, 'The "scrollExtent" is null.');
       verify(scrollExtent >= 0.0, 'The "scrollExtent" is negative.');
@@ -713,8 +730,8 @@ class SliverGeometry extends Diagnosticable {
       verify(cacheExtent >= 0.0, 'The "cacheExtent" is negative.');
       if (layoutExtent > paintExtent) {
         verify(false,
-          'The "layoutExtent" exceeds the "paintExtent".\n' +
-          _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent),
+          'The "layoutExtent" exceeds the "paintExtent".',
+          errorBuilder: _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent),
         );
       }
       verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
@@ -722,9 +739,9 @@ class SliverGeometry extends Diagnosticable {
       // than epsilon, we will not throw the assert below.
       if (paintExtent - maxPaintExtent > _epsilon) {
         verify(false,
-          'The "maxPaintExtent" is less than the "paintExtent".\n' +
-          _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
-          'By definition, a sliver can\'t paint more than the maximum that it can paint!'
+          'The "maxPaintExtent" is less than the "paintExtent".',
+          errorBuilder: _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent)
+            ..addContract('By definition, a sliver can\'t paint more than the maximum that it can paint!')
         );
       }
       verify(hitTestExtent != null, 'The "hitTestExtent" is null.');
@@ -864,14 +881,22 @@ class SliverPhysicalParentData extends ParentData {
 /// children using absolute coordinates.
 class SliverPhysicalContainerParentData extends SliverPhysicalParentData with ContainerParentDataMixin<RenderSliver> { }
 
-String _debugCompareFloats(String labelA, double valueA, String labelB, double valueB) {
+RenderErrorBuilder _debugCompareFloats(String labelA, double valueA, String labelB, double valueB) {
+  final RenderErrorBuilder errorBuilder = RenderErrorBuilder();
   if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1)) {
-    return 'The $labelA is ${valueA.toStringAsFixed(1)}, but '
-           'the $labelB is ${valueB.toStringAsFixed(1)}. ';
+    errorBuilder..addViolation(
+        'The $labelA is ${valueA.toStringAsFixed(1)}, but '
+        'the $labelB is ${valueB.toStringAsFixed(1)}.'
+      );
+  } else {
+    errorBuilder
+      ..addViolation('The $labelA is $valueA, but the $labelB is $valueB.')
+      ..addHint(
+          'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
+              'apply the min() or max() functions, or the clamp() method, to the $labelB?'
+      );
   }
-  return 'The $labelA is $valueA, but the $labelB is $valueB. '
-         'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
-         'apply the min() or max() functions, or the clamp() method, to the $labelB? ';
+  return errorBuilder;
 }
 
 /// Base class for the render objects that implement scroll effects in viewports.
@@ -1009,7 +1034,9 @@ String _debugCompareFloats(String labelA, double valueA, String labelB, double v
 /// If the subclass positions children in the cross-axis at a position other
 /// than zero, then it should override [childCrossAxisPosition]. For example
 /// [RenderSliverGrid] overrides this method.
-abstract class RenderSliver extends RenderObject {
+abstract class
+
+RenderSliver extends RenderObject {
   // layout input
   @override
   SliverConstraints get constraints => super.constraints;
@@ -1048,14 +1075,17 @@ abstract class RenderSliver extends RenderObject {
         contract = 'Because this RenderSliver has sizedByParent set to true, it must set its geometry in performResize().';
       else
         contract = 'Because this RenderSliver has sizedByParent set to false, it must set its geometry in performLayout().';
-      throw FlutterError(
-        'RenderSliver geometry setter called incorrectly.\n'
-        '$violation\n'
-        '$hint\n'
-        '$contract\n'
-        'The RenderSliver in question is:\n'
-        '  $this'
-      );
+
+      final RenderErrorBuilder errorBuilder = RenderErrorBuilder()
+        ..addError('RenderSliver geometry setter called incorrectly.')
+        ..addViolation(violation);
+      if (hint.isNotEmpty) {
+        errorBuilder.addHint(hint);
+      }
+      errorBuilder.addContract(contract);
+      errorBuilder.addRenderObject('The RenderSliver in question is', this);
+
+      throw errorBuilder.build();
     }());
     _geometry = value;
   }
@@ -1089,21 +1119,25 @@ abstract class RenderSliver extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {
     assert(geometry.debugAssertIsValid(
-      informationCollector: (StringBuffer information) {
-        information.writeln('The RenderSliver that returned the offending geometry was:');
-        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-      },
+      errorBuilder: RenderErrorBuilder()..addRenderObject(
+        'The RenderSliver that returned the offending geometry was',
+        this,
+      ),
     ));
     assert(() {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
-        throw FlutterError(
-          'SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.\n'
-          'The render object whose geometry violates the constraints is the following:\n'
-          '  ${toStringShallow(joiner: '\n  ')}\n' +
-          _debugCompareFloats('remainingPaintExtent', constraints.remainingPaintExtent,
-                              'paintExtent', geometry.paintExtent) +
-          'The paintExtent must cause the child sliver to paint within the viewport, and so '
-          'cannot exceed the remainingPaintExtent.'
+        throw FlutterError.from(RenderErrorBuilder()
+          ..error = 'SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.'
+          ..addRenderObject('The render object whose geometry violates the constraints is the following', this)
+          ..addAll(
+            _debugCompareFloats('remainingPaintExtent', constraints.remainingPaintExtent,
+                              'paintExtent', geometry.paintExtent)
+              .toDiagnostics()
+          )
+          ..addViolation(
+            'The paintExtent must cause the child sliver to paint within the viewport, and so '
+            'cannot exceed the remainingPaintExtent.',
+          )
         );
       }
       return true;

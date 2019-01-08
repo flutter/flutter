@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 /// Whether in portrait or landscape.
@@ -506,14 +507,15 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw FlutterError(
-      'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
-      'No MediaQuery ancestor could be found starting from the context that was passed '
-      'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
-      'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
-      'if the context you use comes from a widget above those widgets.\n'
-      'The context used was:\n'
-      '  $context'
+    throw FlutterError.from(WidgetErrorBuilder()
+      ..addError('MediaQuery.of() called with a context that does not contain a MediaQuery.')
+      ..addViolation(
+        'No MediaQuery ancestor could be found starting from the context that was passed '
+        'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
+        'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
+        'if the context you use comes from a widget above those widgets.'
+      )
+      ..describeElement('The context used was', context),
     );
   }
 

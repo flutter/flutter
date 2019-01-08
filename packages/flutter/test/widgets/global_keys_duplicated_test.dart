@@ -82,7 +82,7 @@ void main() {
     expect(error.toString(), contains('The following GlobalKey was specified multiple times'));
     // The following line is verifying the grammar is correct in this common case.
     // We should probably also verify the three other combinations that can be generated...
-    expect(error.toString(), contains('This was determined by noticing that after the widget with the above global key was moved out of its previous parent, that previous parent never updated during this frame, meaning that it either did not update at all or updated before the widget was moved, in either case implying that it still thinks that it should have a child with that global key.'));
+    expect(error.toString().split('\n').join(' '), contains('This was determined by noticing that after the widget with the above global key was moved out of its previous parent, that previous parent never updated during this frame, meaning that it either did not update at all or updated before the widget was moved, in either case implying that it still thinks that it should have a child with that global key.'));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
     expect(error.toString(), contains('Container'));
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));

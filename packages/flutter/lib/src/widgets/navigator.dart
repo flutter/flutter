@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -1289,7 +1290,7 @@ class Navigator extends StatefulWidget {
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
-          'Navigator operation requested with a context that does not include a Navigator.\n'
+          'Navigator operation requested with a context that does not include a Navigator.'
           'The context used to push or pop routes from the Navigator must be that of a '
           'widget that is a descendant of a Navigator widget.'
         );
@@ -1427,12 +1428,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
-          throw FlutterError(
-            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
-            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
-            'onUnknownRoute callback specified.\n'
-            'The Navigator was:\n'
-            '  $this'
+          throw FlutterError.from(WidgetErrorBuilder()
+            ..addError('If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.')
+            ..addViolation(
+              'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+              'onUnknownRoute callback specified.'
+            )
+            ..addProperty<NavigatorState>('The Navigator was', this),
           );
         }
         return true;

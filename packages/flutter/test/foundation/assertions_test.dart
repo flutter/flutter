@@ -23,9 +23,7 @@ void main() {
         stack: StackTrace.current,
         library: 'Example library',
         context: 'Example context',
-        informationCollector: (StringBuffer information) {
-          information.writeln('Example information');
-        },
+        errorBuilder: FlutterErrorBuilder ()..addDescription('Example information'),
       );
 
       FlutterError.dumpErrorToConsole(details);
@@ -47,11 +45,9 @@ void main() {
         exception: 'MESSAGE',
         library: 'LIBRARY',
         context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
-        },
+        errorBuilder: FlutterErrorBuilder()..addDescription('INFO'),
       ).toString(),
-      'Error caught by LIBRARY, thrown CONTEXTING.\n'
+      'Error caught by LIBRARY, thrown CONTEXTING:\n'
       'MESSAGE\n'
       'INFO',
     );
@@ -59,11 +55,9 @@ void main() {
       FlutterErrorDetails(
         library: 'LIBRARY',
         context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
-        },
+        errorBuilder: FlutterErrorBuilder()..addDescription('INFO'),
       ).toString(),
-      'Error caught by LIBRARY, thrown CONTEXTING.\n'
+      'Error caught by LIBRARY, thrown CONTEXTING:\n'
       '  null\n'
       'INFO',
     );
@@ -71,24 +65,33 @@ void main() {
       FlutterErrorDetails(
         exception: 'MESSAGE',
         context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
-        },
+        errorBuilder: FlutterErrorBuilder()..addDescription('INFO'),
       ).toString(),
-      'Error caught by Flutter framework, thrown CONTEXTING.\n'
+      'Error caught by Flutter framework, thrown CONTEXTING:\n'
       'MESSAGE\n'
       'INFO',
+    );
+    expect(
+      FlutterErrorDetails(
+        exception: 'MESSAGE',
+        context: 'CONTEXTING',
+        contextObject: 'SomeContext(BlaBla)',
+        errorBuilder: FlutterErrorBuilder()..addDescription('INFO'),
+      ).toString(),
+      'Error caught by Flutter framework, thrown CONTEXTING SomeContext(BlaBla):\n'
+          'MESSAGE\n'
+          'INFO',
     );
     expect(
       const FlutterErrorDetails(
         exception: 'MESSAGE',
       ).toString(),
-      'Error caught by Flutter framework.\n'
+      'Error caught by Flutter framework:\n'
       'MESSAGE'
     );
     expect(
       const FlutterErrorDetails().toString(),
-      'Error caught by Flutter framework.\n'
+      'Error caught by Flutter framework:\n'
       '  null'
     );
   });

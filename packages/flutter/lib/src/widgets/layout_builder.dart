@@ -111,14 +111,14 @@ class _LayoutBuilderElement extends RenderObjectElement {
           built = widget.builder(this, constraints);
           debugWidgetBuilderValue(widget, built);
         } catch (e, stack) {
-          built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+          built = ErrorWidget.builder(_debugReportException('building', widget, e, stack));
         }
       }
       try {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+        built = ErrorWidget.builder(_debugReportException('building', widget, e, stack));
         _child = updateChild(null, built, slot);
       }
     });
@@ -165,8 +165,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         throw FlutterError(
-          'LayoutBuilder does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require running the layout '
+          'LayoutBuilder does not support returning intrinsic dimensions.',
+          description: 'Calculating the intrinsic dimensions would require running the layout '
           'callback speculatively, which might mutate the live render object tree.'
         );
       }
@@ -224,7 +224,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 }
 
 FlutterErrorDetails _debugReportException(
-  String context,
+  String contextName,
+  Object contextObject,
   dynamic exception,
   StackTrace stack,
 ) {
@@ -232,7 +233,8 @@ FlutterErrorDetails _debugReportException(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: contextName,
+    contextObject: contextObject,
   );
   FlutterError.reportError(details);
   return details;

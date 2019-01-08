@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'object.dart';
@@ -198,16 +199,22 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, String overflowHints) {
-    overflowHints ??= 'The edge of the $runtimeType that is '
-      'overflowing has been marked in the rendering with a yellow and black '
-      'striped pattern. This is usually caused by the contents being too big '
-      'for the $runtimeType.\n'
-      'This is considered an error condition because it indicates that there '
-      'is content that cannot be seen. If the content is legitimately bigger '
-      'than the available space, consider clipping it with a ClipRect widget '
-      'before putting it in the $runtimeType, or using a scrollable '
-      'container, like a ListView.';
+  void _reportOverflow(RelativeRect overflow, RenderErrorBuilder overflowHints) {
+    if (overflowHints.isEmpty) {
+      overflowHints.addHint(
+        'The edge of the $runtimeType that is '
+        'overflowing has been marked in the rendering with a yellow and black '
+        'striped pattern. This is usually caused by the contents being too big '
+        'for the $runtimeType.'
+      );
+      overflowHints.addHint(
+        'This is considered an error condition because it indicates that there '
+        'is content that cannot be seen. If the content is legitimately bigger '
+        'than the available space, consider clipping it with a ClipRect widget '
+        'before putting it in the $runtimeType, or using a scrollable '
+        'container, like a ListView.'
+      );
+    }
 
     final List<String> overflows = <String>[];
     if (overflow.left > 0.0)
@@ -232,18 +239,20 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         overflows[overflows.length - 1] = 'and ${overflows[overflows.length - 1]}';
         overflowText = overflows.join(', ');
     }
+    // TODO(jacobr): add the overflows in pixels as structured data so they can
+    // be visualized in debugging tools.
     FlutterError.reportError(
       FlutterErrorDetailsForRendering(
         exception: 'A $runtimeType overflowed by $overflowText.',
         library: 'rendering library',
         context: 'during layout',
         renderObject: this,
-        informationCollector: (StringBuffer information) {
-          information.writeln(overflowHints);
-          information.writeln('The specific $runtimeType in question is:');
-          information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-          information.writeln('◢◤' * (FlutterError.wrapWidth ~/ 2));
-        },
+        errorBuilder: RenderErrorBuilder()
+          ..addAll(overflowHints.toDiagnostics())
+          ..addRenderObject('The specific $runtimeType in question is', this)
+          // TODO(jacobr): this line is ascii art that it would be nice to handle
+          // more generically in GUI debugging clients in the future.
+          ..addDiagnostic(DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false)),
       ),
     );
   }
@@ -260,6 +269,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Rect containerRect,
     Rect childRect, {
     String overflowHints,
+    RenderErrorBuilder overflowHintsBuilder,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
@@ -295,7 +305,11 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
     if (_overflowReportNeeded) {
       _overflowReportNeeded = false;
-      _reportOverflow(overflow, overflowHints);
+      overflowHintsBuilder ??= RenderErrorBuilder();
+      if (overflowHints != null) {
+        overflowHintsBuilder.addHint(overflowHints);
+      }
+      _reportOverflow(overflow, overflowHintsBuilder);
     }
   }
 

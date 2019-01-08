@@ -359,8 +359,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             if (refreshResult == null)
               FlutterError.reportError(FlutterErrorDetails(
                 exception: FlutterError(
-                  'The onRefresh callback returned null.\n'
-                  'The RefreshIndicator onRefresh callback must return a Future.'
+                  'The onRefresh callback returned null.',
+                  hint: 'The RefreshIndicator onRefresh callback must return a Future.'
                 ),
                 context: 'when calling onRefresh',
                 library: 'material library',

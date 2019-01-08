@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'page_storage.dart';
@@ -203,11 +204,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
-          throw FlutterError(
-            '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
-            'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
-            'That is a delta of $delta units.\n'
-            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
+          throw FlutterError.from(WidgetErrorBuilder()
+            ..addError('$runtimeType.applyBoundaryConditions returned invalid overscroll value.')
+            ..addViolation('setPixels() was called to change the scroll offset from $pixels to $newPixels.')
+            ..addDescription('That is a delta of $delta units.')
+            // TODO(jacobr): make this a doubleProperty with custom formatting.
+            ..addError('$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.')
           );
         }
         return true;
@@ -375,12 +377,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
         throw FlutterError(
-          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
-          'The method was called to consider a change from $pixels to $value, which is a '
+          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.',
+          violation: 'The method was called to consider a change from $pixels to $value, which is a '
           'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
           '${result.toStringAsFixed(1)} units, which has a greater magnitude than the delta. '
           'The applyBoundaryConditions method is only supposed to reduce the possible range '
-          'of movement, not increase it.\n'
+          'of movement, not increase it.',
+          description:
           'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
           'viewport dimension is $viewportDimension.'
         );

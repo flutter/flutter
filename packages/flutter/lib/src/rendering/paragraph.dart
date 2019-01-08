@@ -234,7 +234,7 @@ class RenderParagraph extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     assert(constraints != null);
-    assert(constraints.debugAssertIsValid());
+    assert(constraints.debugAssertIsValidStructured());
     _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }

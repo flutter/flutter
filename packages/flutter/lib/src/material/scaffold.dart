@@ -252,8 +252,8 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
       final RenderObject renderObject = context.findRenderObject();
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw FlutterError(
-            'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
-            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'Scaffold.geometryOf() must only be accessed during the paint phase.',
+            hint: 'The ScaffoldGeometry is only available during the paint phase, because\n'
             'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;
@@ -1016,24 +1016,27 @@ class Scaffold extends StatefulWidget {
     final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
     if (nullOk || result != null)
       return result;
-    throw FlutterError(
-      'Scaffold.of() called with a context that does not contain a Scaffold.\n'
-      'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
+    throw FlutterError.from(FlutterErrorBuilder()
+      ..addError('Scaffold.of() called with a context that does not contain a Scaffold.')
+      ..addDescription(
+        'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
       'This usually happens when the context provided is from the same StatefulWidget as that '
-      'whose build function actually creates the Scaffold widget being sought.\n'
-      'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-      'context that is "under" the Scaffold. For an example of this, please see the '
-      'documentation for Scaffold.of():\n'
-      '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
-      'A more efficient solution is to split your build function into several widgets. This '
+      'whose build function actually creates the Scaffold widget being sought.')
+      ..addHint(
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the Scaffold. For an example of this, please see the '
+        'documentation for Scaffold.of()',
+        url: 'https://docs.flutter.io/flutter/material/Scaffold/of.html'
+      )
+      ..addHint('A more efficient solution is to split your build function into several widgets. This '
       'introduces a new context from which you can obtain the Scaffold. In this solution, '
       'you would have an outer widget that creates the Scaffold populated by instances of '
       'your new inner widgets, and then in these inner widgets you would use Scaffold.of().\n'
       'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
       'then use the key.currentState property to obtain the ScaffoldState rather than '
-      'using the Scaffold.of() function.\n'
-      'The context used was:\n'
-      '  $context'
+      'using the Scaffold.of() function.')
+      ..addSeparator()
+      ..addProperty('The context used was', context)
     );
   }
 
@@ -1060,20 +1063,24 @@ class Scaffold extends StatefulWidget {
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
-      throw FlutterError(
-        'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
-        'This usually happens when the context provided is from the same StatefulWidget as that '
-        'whose build function actually creates the Scaffold widget being sought.\n'
-        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-        'context that is "under" the Scaffold. For an example of this, please see the '
-        'documentation for Scaffold.of():\n'
-        '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
-        'A more efficient solution is to split your build function into several widgets. This '
+      throw FlutterError.from(FlutterErrorBuilder()
+        ..addError('Scaffold.geometryOf() called with a context that does not contain a Scaffold.')
+        ..addDescription(
+          'This usually happens when the context provided is from the same StatefulWidget as that '
+          'whose build function actually creates the Scaffold widget being sought.\n'
+        )
+        ..addHint(
+          'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+          'context that is "under" the Scaffold. For an example of this, please see the '
+          'documentation for Scaffold.of():\n'
+          '  https://docs.flutter.io/flutter/material/Scaffold/of.html'
+        )
+        ..addHint('A more efficient solution is to split your build function into several widgets. This '
         'introduces a new context from which you can obtain the Scaffold. In this solution, '
         'you would have an outer widget that creates the Scaffold populated by instances of '
-        'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
-        'The context used was:\n'
-        '  $context'
+        'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n',
+        )
+        ..addProperty('The context used was', context)
       );
 
     return scaffoldScope.geometryNotifier;
@@ -1511,7 +1518,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
           throw FlutterError(
             'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
-            'with showBottomSheet() is still visible.\n Use the PersistentBottomSheetController '
+            'with showBottomSheet() is still visible.',
+            fix: 'Use the PersistentBottomSheetController '
             'returned by showBottomSheet() to close the old bottom sheet before creating '
             'a Scaffold with a (non null) bottomSheet.'
           );

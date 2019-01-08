@@ -428,10 +428,12 @@ class AnimationController extends Animation<double>
   TickerFuture forward({ double from }) {
     assert(() {
       if (duration == null) {
-        throw FlutterError(
-          'AnimationController.forward() called with no default Duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
-          'calling the forward() function.'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addError('AnimationController.forward() called with no default Duration.')
+          ..addHint(
+            'The "duration" property should be set, either in the constructor or later, before '
+            'calling the forward() function.'
+          )
         );
       }
       return true;
@@ -462,8 +464,8 @@ class AnimationController extends Animation<double>
     assert(() {
       if (duration == null) {
         throw FlutterError(
-          'AnimationController.reverse() called with no default Duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
+          'AnimationController.reverse() called with no default Duration.',
+          fix: 'The "duration" property should be set, either in the constructor or later, before '
           'calling the reverse() function.'
         );
       }
@@ -544,8 +546,8 @@ class AnimationController extends Animation<double>
       assert(() {
         if (this.duration == null) {
           throw FlutterError(
-            'AnimationController.animateTo() called with no explicit Duration and no default Duration.\n'
-            'Either the "duration" argument to the animateTo() method should be provided, or the '
+            'AnimationController.animateTo() called with no explicit Duration and no default Duration.',
+            fix: 'Either the "duration" argument to the animateTo() method should be provided, or the '
             '"duration" property should be set, either in the constructor or later, before '
             'calling the animateTo() function.'
           );
@@ -598,8 +600,8 @@ class AnimationController extends Animation<double>
     assert(() {
       if (period == null) {
         throw FlutterError(
-          'AnimationController.repeat() called without an explicit period and with no default Duration.\n'
-          'Either the "period" argument to the repeat() method should be provided, or the '
+          'AnimationController.repeat() called without an explicit period and with no default Duration.',
+          fix: 'Either the "period" argument to the repeat() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
           'calling the repeat() function.'
         );
@@ -714,11 +716,10 @@ class AnimationController extends Animation<double>
   void dispose() {
     assert(() {
       if (_ticker == null) {
-        throw FlutterError(
-          'AnimationController.dispose() called more than once.\n'
-          'A given $runtimeType cannot be disposed more than once.\n'
-          'The following $runtimeType object was disposed multiple times:\n'
-          '  $this'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addError('AnimationController.dispose() called more than once.')
+          ..addHint('A given $runtimeType cannot be disposed more than once.\n')
+          ..addProperty('The following $runtimeType object was disposed multiple times', this)
         );
       }
       return true;

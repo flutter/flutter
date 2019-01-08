@@ -235,7 +235,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(_currentImage, true);
       } catch (exception, stack) {
         reportError(
-          context: 'by a synchronously-called image listener',
+          contextName: 'by a synchronously-called image listener',
           exception: exception,
           stack: stack,
         );
@@ -282,7 +282,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(image, false);
       } catch (exception, stack) {
         reportError(
-          context: 'by an image listener',
+          contextName: 'by an image listener',
           exception: exception,
           stack: stack,
         );
@@ -297,18 +297,22 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// instead.
   @protected
   void reportError({
-    String context,
+    String contextName,
+    Object contextObject,
     dynamic exception,
     StackTrace stack,
     InformationCollector informationCollector,
+    FlutterErrorBuilder errorBuilder,
     bool silent = false,
   }) {
     _currentError = FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'image resource service',
-      context: context,
+      context: contextName,
+      contextObject: contextObject,
       informationCollector: informationCollector,
+      errorBuilder: errorBuilder,
       silent: silent,
     );
 
@@ -370,14 +374,18 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
-    : assert(image != null) {
+  OneFrameImageStreamCompleter(
+    Future<ImageInfo> image, {
+    InformationCollector informationCollector,
+    FlutterErrorBuilder errorBuilder,
+  }) : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving a single-frame image stream',
+        contextName: 'resolving a single-frame image stream',
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
+        errorBuilder: errorBuilder,
         silent: true,
       );
     });
@@ -428,18 +436,21 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
+    FlutterErrorBuilder errorBuilder,
   }) : assert(codec != null),
-       _informationCollector = informationCollector,
+        _informationCollector = informationCollector,
+       _errorBuilder = errorBuilder,
        _scale = scale,
        _framesEmitted = 0,
        _timer = null {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving an image codec',
+        contextName: 'resolving an image codec',
         exception: error,
         stack: stack,
-        informationCollector: informationCollector,
+        informationCollector: _informationCollector,
+        errorBuilder: _errorBuilder,
         silent: true,
       );
     });
@@ -448,6 +459,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ui.Codec _codec;
   final double _scale;
   final InformationCollector _informationCollector;
+  final FlutterErrorBuilder _errorBuilder;
   ui.FrameInfo _nextFrame;
   // When the current was first shown.
   Duration _shownTimestamp;
@@ -498,10 +510,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
       reportError(
-        context: 'resolving an image frame',
+        contextName: 'resolving an image frame',
         exception: exception,
         stack: stack,
         informationCollector: _informationCollector,
+        errorBuilder: _errorBuilder,
         silent: true,
       );
       return;

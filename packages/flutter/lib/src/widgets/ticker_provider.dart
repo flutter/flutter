@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/scheduler.dart' show TickerProvider;
@@ -83,9 +84,10 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
       if (_ticker == null)
         return true;
       throw FlutterError(
-        '$runtimeType is a SingleTickerProviderStateMixin but multiple tickers were created.\n'
-        'A SingleTickerProviderStateMixin can only be used as a TickerProvider once. If a '
-        'State is used for multiple AnimationController objects, or if it is passed to other '
+        '$runtimeType is a SingleTickerProviderStateMixin but multiple tickers were created.',
+        contract:
+        'A SingleTickerProviderStateMixin can only be used as a TickerProvider once.',
+        hint: 'If a State is used for multiple AnimationController objects, or if it is passed to other '
         'objects and those objects might use it more than one time in total, then instead of '
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
@@ -103,14 +105,19 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     assert(() {
       if (_ticker == null || !_ticker.isActive)
         return true;
-      throw FlutterError(
-        '$this was disposed with an active Ticker.\n'
-        '$runtimeType created a Ticker via its SingleTickerProviderStateMixin, but at the time '
-        'dispose() was called on the mixin, that Ticker was still active. The Ticker must '
-        'be disposed before calling super.dispose(). Tickers used by AnimationControllers '
-        'should be disposed by calling dispose() on the AnimationController itself. '
-        'Otherwise, the ticker will leak.\n'
-        'The offending ticker was: ${_ticker.toString(debugIncludeStack: true)}'
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('$this was disposed with an active Ticker.')
+        ..addViolation(
+          '$runtimeType created a Ticker via its SingleTickerProviderStateMixin, but at the time '
+          'dispose() was called on the mixin, that Ticker was still active. The Ticker must '
+          'be disposed before calling super.dispose().'
+        )
+        ..addHint(
+          'Tickers used by AnimationControllers '
+          'should be disposed by calling dispose() on the AnimationController itself. '
+          'Otherwise, the ticker will leak.'
+        )
+        ..describeTicker('The offending ticker was', _ticker)
       );
     }());
     super.dispose();
@@ -175,14 +182,20 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
       if (_tickers != null) {
         for (Ticker ticker in _tickers) {
           if (ticker.isActive) {
-            throw FlutterError(
-              '$this was disposed with an active Ticker.\n'
-              '$runtimeType created a Ticker via its TickerProviderStateMixin, but at the time '
-              'dispose() was called on the mixin, that Ticker was still active. All Tickers must '
-              'be disposed before calling super.dispose(). Tickers used by AnimationControllers '
-              'should be disposed by calling dispose() on the AnimationController itself. '
-              'Otherwise, the ticker will leak.\n'
-              'The offending ticker was: ${ticker.toString(debugIncludeStack: true)}'
+            throw FlutterError.from(WidgetErrorBuilder()
+              ..addError('$this was disposed with an active Ticker.')
+              ..addViolation(
+                '$runtimeType created a Ticker via its TickerProviderStateMixin, but at the time '
+                'dispose() was called on the mixin, that Ticker was still active. All Tickers must '
+                'be disposed before calling super.dispose().'
+              )
+              ..addHint(
+                'Tickers used by AnimationControllers '
+                'should be disposed by calling dispose() on the AnimationController itself. '
+                'Otherwise, the ticker will leak.'
+              )
+              ..describeTicker('The offending ticker was', ticker),
+              // TODO(jacobr): expose this as a diagnostic as well.
             );
           }
         }

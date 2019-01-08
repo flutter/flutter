@@ -255,8 +255,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     assert(() {
       if (result == null) {
         throw FlutterError(
-          'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.'
+          'The builder for route "${settings.name}" returned null.',
+          fix: 'Route builders must never return null.'
         );
       }
       return true;

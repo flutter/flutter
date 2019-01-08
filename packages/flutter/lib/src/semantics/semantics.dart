@@ -1264,11 +1264,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           }
         }
         if (mutationErrors.isNotEmpty) {
-          throw FlutterError(
-            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
-            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
-            'Error details:\n'
-            '$mutationErrors'
+          throw FlutterError.from(FlutterErrorBuilder()
+            ..addError('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.')
+            ..addHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.')
+            ..addProperty('Error details', mutationErrors)
           );
         }
       }

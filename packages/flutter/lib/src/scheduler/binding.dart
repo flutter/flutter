@@ -92,11 +92,11 @@ class _FrameCallbackEntry {
         assert(() {
           if (debugCurrentCallbackStack == null) {
             throw FlutterError(
-              'scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
-              'The "rescheduling" argument should only be set to true if the '
+              'scheduleFrameCallback called with rescheduling true, but no callback is in scope.',
+              contract: 'The "rescheduling" argument should only be set to true if the '
               'callback is being reregistered from within the callback itself, '
-              'and only then if the callback itself is entirely synchronous. '
-              'If this is the initial registration of the callback, or if the '
+              'and only then if the callback itself is entirely synchronous.',
+              hint: 'If this is the initial registration of the callback, or if the '
               'callback is asynchronous, then do not use the "rescheduling" '
               'argument.'
             );
@@ -367,19 +367,23 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
           callbackStack = entry.debugStack;
           return true;
         }());
+        FlutterErrorBuilder errorBuilder;
+        if (callbackStack != null) {
+          errorBuilder = FlutterErrorBuilder()
+            ..addSeparator()
+            ..addStackTrace(
+              'This exception was thrown in the context of a task callback. '
+                  'When the task callback was _registered_ (as opposed to when the '
+                  'exception was thrown), this was the stack',
+              callbackStack,
+            );
+        }
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: exceptionStack,
           library: 'scheduler library',
           context: 'during a task callback',
-          informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-            information.writeln(
-              '\nThis exception was thrown in the context of a task callback. '
-              'When the task callback was _registered_ (as opposed to when the '
-              'exception was thrown), this was the stack:'
-            );
-            FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-          }
+          errorBuilder: errorBuilder,
         ));
       }
       return _taskQueue.isNotEmpty;
@@ -471,24 +475,26 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-          informationCollector: (StringBuffer information) {
+          errorBuilder: FlutterErrorBuilder.lazy(() {
+            final FlutterErrorBuilder errorBuilder = FlutterErrorBuilder();
             if (count == 1) {
-              information.writeln(
-                'There was one transient callback left. '
-                'The stack trace for when it was registered is as follows:'
-              );
+              // TODO(jacobr): I have added an extra line break in this case.
+              errorBuilder.addViolation('There was one transient callback left.');
             } else {
-              information.writeln(
-                'There were $count transient callbacks left. '
-                'The stack traces for when they were registered are as follows:'
-              );
+              errorBuilder.addViolation('There were $count transient callbacks left.');
             }
+            final List<DiagnosticsStackTrace> stackTraces = <DiagnosticsStackTrace>[];
             for (int id in callbacks.keys) {
               final _FrameCallbackEntry entry = callbacks[id];
-              information.writeln('── callback $id ──');
-              FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
+              stackTraces.add(DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false));
             }
-          }
+
+            errorBuilder.addIterable<DiagnosticsStackTrace>(
+              'The stack trace${count == 1 ? 's' : ''} for when they were registered are as follows',
+              stackTraces,
+            );
+            return errorBuilder;
+          })
         ));
       }
       return true;
@@ -989,19 +995,23 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
+      FlutterErrorBuilder errorBuilder;
+      if (callbackStack != null) {
+        errorBuilder = FlutterErrorBuilder()
+          ..addSeparator()
+          ..addStackTrace(
+            'This exception was thrown in the context of a scheduler callback. '
+            'When the scheduler callback was _registered_ (as opposed to when the '
+            'exception was thrown), this was the stack',
+            callbackStack,
+          );
+      }
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: exceptionStack,
         library: 'scheduler library',
         context: 'during a scheduler callback',
-        informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-          information.writeln(
-            '\nThis exception was thrown in the context of a scheduler callback. '
-            'When the scheduler callback was _registered_ (as opposed to when the '
-            'exception was thrown), this was the stack:'
-          );
-          FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-        }
+        errorBuilder: errorBuilder,
       ));
     }
     assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());

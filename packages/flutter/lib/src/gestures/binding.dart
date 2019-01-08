@@ -164,12 +164,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           context: 'while dispatching a pointer event',
           event: event,
           hitTestEntry: entry,
-          informationCollector: (StringBuffer information) {
-            information.writeln('Event:');
-            information.writeln('  $event');
-            information.writeln('Target:');
-            information.write('  ${entry.target}');
-          }
+          errorBuilder: FlutterErrorBuilder()
+            ..addProperty('Event', event)
+            ..addProperty('Target', entry.target)
         ));
       }
     }
@@ -202,16 +199,20 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     StackTrace stack,
     String library,
     String context,
+    Object contextObject,
     this.event,
     this.hitTestEntry,
     InformationCollector informationCollector,
+    FlutterErrorBuilder errorBuilder,
     bool silent = false
   }) : super(
     exception: exception,
     stack: stack,
     library: library,
     context: context,
+    contextObject: contextObject,
     informationCollector: informationCollector,
+    errorBuilder: errorBuilder,
     silent: silent
   );
 

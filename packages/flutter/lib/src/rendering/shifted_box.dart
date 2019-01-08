@@ -1111,7 +1111,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
     size = _getSize(constraints);
     if (child != null) {
       final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+      assert(childConstraints.debugAssertIsValidStructured(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size);

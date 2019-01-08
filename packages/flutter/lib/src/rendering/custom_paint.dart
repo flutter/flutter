@@ -533,9 +533,9 @@ class RenderCustomPaint extends RenderProxyBox {
           'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
           '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
           'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
-          'than it called canvas.restore().\n'
-          'This leaves the canvas in an inconsistent state and will probably result in a broken display.\n'
-          'You must pair each call to save()/saveLayer() with a later matching call to restore().'
+          'than it called canvas.restore().',
+          description: 'This leaves the canvas in an inconsistent state and will probably result in a broken display.',
+          hint: 'You must pair each call to save()/saveLayer() with a later matching call to restore().'
         );
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
@@ -543,9 +543,9 @@ class RenderCustomPaint extends RenderProxyBox {
           'The $painter custom painter called canvas.restore() '
           '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
           'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
-          'than it called canvas.save() or canvas.saveLayer().\n'
-          'This leaves the canvas in an inconsistent state and will result in a broken display.\n'
-          'You should only call restore() if you first called save() or saveLayer().'
+          'than it called canvas.save() or canvas.saveLayer().',
+          description: 'This leaves the canvas in an inconsistent state and will result in a broken display.',
+          hint: 'You should only call restore() if you first called save() or saveLayer().'
         );
       }
       return debugNewCanvasSaveCount == debugPreviousCanvasSaveCount;
@@ -601,9 +601,12 @@ class RenderCustomPaint extends RenderProxyBox {
   ) {
     assert(() {
       if (child == null && children.isNotEmpty) {
-        throw FlutterError(
-          '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode:\n'
-          '${children.join('\n')}'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addIterable<SemanticsNode>(
+            '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode',
+            children,
+            level: DiagnosticLevel.error,
+          )
         );
       }
       return true;
@@ -668,24 +671,20 @@ class RenderCustomPaint extends RenderProxyBox {
 
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();
-      final StringBuffer errors = StringBuffer();
+      final FlutterErrorBuilder errorBuilder = FlutterErrorBuilder();
       for (int i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {
-            errors.writeln(
-              '- duplicate key ${child.key} found at position $i',
-            );
+            errorBuilder.addError('- duplicate key ${child.key} found at position $i');
           }
           keys[child.key] = i;
         }
       }
 
-      if (errors.isNotEmpty) {
-        throw FlutterError(
-          'Failed to update the list of CustomPainterSemantics:\n'
-          '$errors'
-        );
+      if (!errorBuilder.isEmpty) {
+        errorBuilder.error = 'Failed to update the list of CustomPainterSemantics:';
+        throw errorBuilder.build();
       }
 
       return true;

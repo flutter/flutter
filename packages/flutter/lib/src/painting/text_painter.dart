@@ -379,8 +379,8 @@ class TextPainter {
     assert(() {
       if (_needsLayout) {
         throw FlutterError(
-          'TextPainter.paint called when text geometry was not yet calculated.\n'
-          'Please call layout() before paint() to position the text before painting it.'
+          'TextPainter.paint called when text geometry was not yet calculated.',
+          fix: 'Please call layout() before paint() to position the text before painting it.',
         );
       }
       return true;

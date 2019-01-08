@@ -75,10 +75,11 @@ class RenderListBody extends RenderBox
           break;
       }
       throw FlutterError(
-        'RenderListBody must have unlimited space along its main axis.\n'
-        'RenderListBody does not clip or resize its children, so it must be '
+        'RenderListBody must have unlimited space along its main axis.',
+        contract: 'RenderListBody does not clip or resize its children, so it must be '
         'placed in a parent that does not constrain the main '
-        'axis. You probably want to put the RenderListBody inside a '
+        'axis.',
+        hint: 'You probably want to put the RenderListBody inside a '
         'RenderViewport with a matching main axis.'
       );
     }());
@@ -97,10 +98,11 @@ class RenderListBody extends RenderBox
       // more specific to the exact situation in that case, and don't mention
       // nesting blocks in the negative case.
       throw FlutterError(
-        'RenderListBody must have a bounded constraint for its cross axis.\n'
-        'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
+        'RenderListBody must have a bounded constraint for its cross axis.',
+        contract: 'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
         'so it must be placed in a parent that constrains the cross '
-        'axis to a finite dimension. If you are attempting to nest a RenderListBody with '
+        'axis to a finite dimension.',
+        hint: 'If you are attempting to nest a RenderListBody with '
         'one direction inside one of another direction, you will want to '
         'wrap the inner one inside a box that fixes the dimension in that direction, '
         'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '

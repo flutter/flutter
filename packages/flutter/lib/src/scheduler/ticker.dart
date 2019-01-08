@@ -53,6 +53,7 @@ abstract class TickerProvider {
 ///
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
+// TODO(jacobr): make Ticker Diagnosticable. XXX and then cleanup all uses of it. XXX The Diagnosticable version should include the stack.
 class Ticker {
   /// Creates a ticker that will call the provided callback once per frame while
   /// running.
@@ -145,10 +146,10 @@ class Ticker {
   TickerFuture start() {
     assert(() {
       if (isActive) {
-        throw FlutterError(
-          'A ticker was started twice.\n'
-          'A ticker that is already active cannot be started again without first stopping it.\n'
-          'The affected ticker was: ${ toString(debugIncludeStack: true) }'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addError('A ticker was started twice.')
+          ..addContract('A ticker that is already active cannot be started again without first stopping it.')
+          ..addDiagnostic(DiagnosticsProperty<Ticker>('The affected ticker was', this, description: toString(debugIncludeStack: true)))
         );
       }
       return true;

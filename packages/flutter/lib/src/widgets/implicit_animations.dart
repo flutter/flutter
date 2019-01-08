@@ -443,7 +443,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(constraints == null || constraints.debugAssertIsValidStructured()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'

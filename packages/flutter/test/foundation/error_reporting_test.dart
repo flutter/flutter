@@ -57,18 +57,20 @@ Future<void> main() async {
       stack: sampleStack,
       library: 'error handling test',
       context: 'testing the error handling logic',
-      informationCollector: (StringBuffer information) {
-        information.writeln('line 1 of extra information');
-        information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
-      },
+      errorBuilder: FlutterErrorBuilder.lazy(() {
+        return FlutterErrorBuilder()
+          ..addContract('line 1 of extra information')
+          ..addHint('line 2 of extra information\n');
+      }),
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       'Message goes here\\.\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
+      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
@@ -83,7 +85,8 @@ Future<void> main() async {
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      '════════════════════════════════════════════════════════════════════════════════════════════════════\n'
+      '\$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -102,18 +105,20 @@ Future<void> main() async {
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following assertion was thrown:\n'
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
+      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      '════════════════════════════════════════════════════════════════════════════════════════════════════\n'
+      '\$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -139,17 +144,17 @@ Future<void> main() async {
       stack: sampleStack,
       library: 'error handling test',
       context: 'testing the error handling logic',
-      informationCollector: (StringBuffer information) {
-        information.writeln('line 1 of extra information');
-        information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
-      },
+      errorBuilder: FlutterErrorBuilder()
+        ..addContract('line 1 of extra information')
+        ..addDescription('line 2 of extra information\n') // the double trailing newlines here are intentional
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
+      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
@@ -164,7 +169,8 @@ Future<void> main() async {
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      '════════════════════════════════════════════════════════════════════════════════════════════════════\n'
+      '\$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -186,7 +192,8 @@ Future<void> main() async {
       'The following NoSuchMethodError was thrown:\n'
       'Receiver: 5\n'
       'Tried calling: foo = 2, 4\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      '════════════════════════════════════════════════════════════════════════════════════════════════════\n'
+      '\$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -206,7 +213,8 @@ Future<void> main() async {
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following message was thrown:\n'
       'hello\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      '════════════════════════════════════════════════════════════════════════════════════════════════════\n'
+      '\$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
