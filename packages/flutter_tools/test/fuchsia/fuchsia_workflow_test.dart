@@ -16,6 +16,11 @@ class MockFile extends Mock implements File {}
 
 void main() {
   group('android workflow', () {
+    final MockFile devFinder = MockFile();
+    final MockFile sshConfig = MockFile();
+    when(devFinder.absolute).thenReturn(devFinder);
+    when(sshConfig.absolute).thenReturn(sshConfig);
+
     testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, false);
@@ -29,7 +34,7 @@ void main() {
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: MockFile(), sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
     });
 
     testUsingContext('can list and launch devices supported if there is a `fx` command', () {
@@ -37,7 +42,7 @@ void main() {
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: MockFile(), sshConfig: MockFile()),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
     });
   });
 }
