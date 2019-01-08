@@ -966,7 +966,7 @@ mixin WidgetInspectorService {
       json['information'] = information.toString();
     }
     if (details is FlutterErrorDetailsForRendering) {
-      json['renderObject'] = details.renderObject;
+      json['renderObject'] = toId(details.renderObject, consoleObjectGroup);
     }
     postEvent('Flutter.Error', json);
   }
