@@ -85,8 +85,6 @@ void main() {
 
       final RawKeyEventDataAndroid data = events[0].data;
 
-      print('Meta State: '+data.metaState.toString());
-
       expect(data.isCtrlPressed(), true);
       expect(data.isShiftPressed(), true);
       expect(data.isAltPressed(), true);
