@@ -770,11 +770,11 @@ class Curves {
   static const Cubic easeInOutQuint = Cubic(0.86, 0, 0.07, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends
-  /// slowly. This curve can be imagined as [Curves.easeInExpo] as the first
-  /// half, and [Curves.easeOutExpo] as the second.
+  /// slowly.
   ///
-  /// Using this curve can give your animations extra flare, but a longer
-  /// duration may need to be used to compensate for the steepness of the curve.
+  /// Since this curve is arrived at with an exponential function, the midpoint
+  /// is exceptionally steep. Extra consideration should be taken when designing
+  /// an animation using this.
   ///
   /// Compared to [Curves.easeInOutQuint], this curve is slightly steeper.
   ///
