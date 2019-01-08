@@ -229,7 +229,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('two_level_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
@@ -462,7 +462,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('two_level_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
@@ -775,7 +775,7 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets('two_level_list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('expansion_tile_list_demo $themeName', (WidgetTester tester) async {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
         binding.addTime(const Duration(seconds: 3));
         final SemanticsHandle handle = tester.ensureSemantics();
