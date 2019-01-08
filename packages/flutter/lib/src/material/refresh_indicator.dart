@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -358,11 +359,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           assert(() {
             if (refreshResult == null)
               FlutterError.reportError(FlutterErrorDetails(
-                exception: FlutterError(
-                  'The onRefresh callback returned null.\n'
-                  'The RefreshIndicator onRefresh callback must return a Future.'
-                ),
-                context: 'when calling onRefresh',
+                exception: FlutterError(<DiagnosticsNode>[
+                  ErrorSummary('The onRefresh callback returned null.'),
+                  ErrorHint('The RefreshIndicator onRefresh callback must return a Future.')
+                ]),
+                context: ErrorDescription('when calling onRefresh'),
                 library: 'material library',
               ));
             return true;

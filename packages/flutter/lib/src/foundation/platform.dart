@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'assertions.dart';
+import 'diagnostics.dart';
 
 /// The platform that user interaction should adapt to target.
 ///
@@ -65,11 +66,11 @@ TargetPlatform get defaultTargetPlatform {
   if (debugDefaultTargetPlatformOverride != null)
     result = debugDefaultTargetPlatformOverride;
   if (result == null) {
-    throw FlutterError(
-      'Unknown platform.\n'
-      '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
+    throw FlutterError(<DiagnosticsNode>[
+      ErrorSummary('Unknown platform.'),
+      ErrorDescription('${Platform.operatingSystem} was not recognized as a target platform.'),
+      ErrorHint('Consider updating the list of TargetPlatforms to include this platform.')
+    ]);
   }
   return result;
 }

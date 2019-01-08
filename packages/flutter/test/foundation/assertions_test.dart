@@ -22,9 +22,9 @@ void main() {
         exception: 'Example exception',
         stack: StackTrace.current,
         library: 'Example library',
-        context: 'Example context',
-        informationCollector: (StringBuffer information) {
-          information.writeln('Example information');
+        context: ErrorDescription('Example context'),
+        informationCollector: (List<DiagnosticsNode> information) {
+          information.add(ErrorDescription('Example information'));
         },
       );
 
@@ -46,50 +46,75 @@ void main() {
       FlutterErrorDetails(
         exception: 'MESSAGE',
         library: 'LIBRARY',
-        context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
+        context: ErrorDescription('CONTEXTING'),
+        informationCollector: (List<DiagnosticsNode> information) {
+          information.add(ErrorDescription('INFO'));
         },
       ).toString(),
-      'Error caught by LIBRARY, thrown CONTEXTING.\n'
-      'MESSAGE\n'
-      'INFO',
+        '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
+        'The following message was thrown CONTEXTING:\n'
+        'MESSAGE\n'
+        'INFO\n'
+        '═════════════════════════════════════════════════════════════════\n'
+
     );
     expect(
       FlutterErrorDetails(
         library: 'LIBRARY',
-        context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
+        context: ErrorDescription('CONTEXTING'),
+        informationCollector: (List<DiagnosticsNode> information) {
+          information.add(ErrorDescription('INFO'));
         },
       ).toString(),
-      'Error caught by LIBRARY, thrown CONTEXTING.\n'
+      '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
+      'The following Null object was thrown CONTEXTING:\n'
       '  null\n'
-      'INFO',
+      'INFO\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
         exception: 'MESSAGE',
-        context: 'CONTEXTING',
-        informationCollector: (StringBuffer information) {
-          information.writeln('INFO');
+        context: ErrorDescription('CONTEXTING'),
+        informationCollector: (List<DiagnosticsNode> information) {
+          information.add(ErrorDescription('INFO'));
         },
       ).toString(),
-      'Error caught by Flutter framework, thrown CONTEXTING.\n'
+        '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+        'The following message was thrown CONTEXTING:\n'
+        'MESSAGE\n'
+        'INFO\n'
+        '═════════════════════════════════════════════════════════════════\n'
+    );
+    expect(
+      FlutterErrorDetails(
+        exception: 'MESSAGE',
+        context: ErrorDescription('CONTEXTING ${'SomeContext(BlaBla)'}'),
+        informationCollector: (List<DiagnosticsNode> information) {
+          information.add(ErrorDescription('INFO'));
+        },
+      ).toString(),
+      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+      'The following message was thrown CONTEXTING SomeContext(BlaBla):\n'
       'MESSAGE\n'
-      'INFO',
+      'INFO\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       const FlutterErrorDetails(
         exception: 'MESSAGE',
       ).toString(),
-      'Error caught by Flutter framework.\n'
-      'MESSAGE',
+      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+      'The following message was thrown:\n'
+      'MESSAGE\n'
+      '═════════════════════════════════════════════════════════════════\n'
     );
     expect(
       const FlutterErrorDetails().toString(),
-      'Error caught by Flutter framework.\n'
-      '  null',
+      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+      'The following Null object was thrown:\n'
+      '  null\n'
+      '═════════════════════════════════════════════════════════════════\n'
     );
   });
 }

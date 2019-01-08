@@ -56,8 +56,9 @@ class ExpandingBottomSheet extends StatefulWidget {
     if (isNullOk || result != null) {
       return result;
     }
-    throw FlutterError(
-      'ExpandingBottomSheet.of() called with a context that does not contain a ExpandingBottomSheet.\n');
+    throw FlutterError(<DiagnosticsNode>[
+      ErrorSummary('ExpandingBottomSheet.of() called with a context that does not contain a ExpandingBottomSheet.')
+    ]);
   }
 }
 

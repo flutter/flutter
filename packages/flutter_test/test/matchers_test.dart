@@ -149,7 +149,8 @@ void main() {
     expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#000000')));
     expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#123456')));
 
-    expect('Foo#A3b4D', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect('FOO#A3b4D', equalsIgnoringHashCodes('FOO#00000'));
+    expect('FOO#A3b4J', isNot(equalsIgnoringHashCodes('FOO#00000')));
 
     expect('Foo#12345(Bar#9110f)',
         equalsIgnoringHashCodes('Foo#00000(Bar#00000)'));

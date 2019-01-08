@@ -1274,30 +1274,32 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
       if (identical(newChildren, _children)) {
-        final StringBuffer mutationErrors = StringBuffer();
+        // TODO(jacobr): make mutationErrors a child of the node with the
+        // title. "Error details:" so that the block can be collapsible in
+        // GUI tools.
+        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
         if (newChildren.length != _debugPreviousSnapshot.length) {
-          mutationErrors.writeln(
+          mutationErrors.add(ErrorDescription(
             'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
             'to ${newChildren.length}.'
-          );
+          ));
         } else {
           for (int i = 0; i < newChildren.length; i++) {
             if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
-              mutationErrors.writeln(
+              mutationErrors.add(ErrorDescription(
                 'Child node at position $i was replaced:\n'
                 'Previous child: ${newChildren[i]}\n'
                 'New child: ${_debugPreviousSnapshot[i]}\n'
-              );
+              ));
             }
           }
         }
         if (mutationErrors.isNotEmpty) {
-          throw FlutterError(
-            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
-            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
-            'Error details:\n'
-            '$mutationErrors'
-          );
+          throw FlutterError(<DiagnosticsNode>[
+            ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
+            ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
+            ErrorDescription('Error details:')
+          ]..addAll(mutationErrors));
         }
       }
       assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);

@@ -109,19 +109,19 @@ class Table extends RenderObjectWidget {
        assert(defaultVerticalAlignment != null),
        assert(() {
          if (children.any((TableRow row) => row.children.any((Widget cell) => cell == null))) {
-           throw FlutterError(
-             'One of the children of one of the rows of the table was null.\n'
-             'The children of a TableRow must not be null.'
-           );
+           throw FlutterError(<DiagnosticsNode>[
+             ErrorSummary('One of the children of one of the rows of the table was null.'),
+             ErrorDescription('The children of a TableRow must not be null.')
+           ]);
          }
          return true;
        }()),
        assert(() {
          if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
-           throw FlutterError(
-             'Two or more TableRow children of this Table had the same key.\n'
-             'All the keyed TableRow children of a Table must have different Keys.'
-           );
+           throw FlutterError(<DiagnosticsNode>[
+             ErrorSummary('Two or more TableRow children of this Table had the same key.'),
+             ErrorDescription('All the keyed TableRow children of a Table must have different Keys.')
+           ]);
          }
          return true;
        }()),
@@ -129,11 +129,13 @@ class Table extends RenderObjectWidget {
          if (children.isNotEmpty) {
            final int cellCount = children.first.children.length;
            if (children.any((TableRow row) => row.children.length != cellCount)) {
-             throw FlutterError(
-               'Table contains irregular row lengths.\n'
-               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-               'Otherwise, the table will contain holes.'
-             );
+             throw FlutterError(<DiagnosticsNode>[
+               ErrorSummary('Table contains irregular row lengths.'),
+               ErrorDescription(
+                'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
+                'Otherwise, the table will contain holes.'
+               )
+             ]);
            }
          }
          return true;
@@ -145,12 +147,14 @@ class Table extends RenderObjectWidget {
     assert(() {
       final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
-        throw FlutterError(
-          'Two or more cells in this Table contain widgets with the same key.\n'
-          'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
-          'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
-          'different rows.'
-        );
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorSummary('Two or more cells in this Table contain widgets with the same key.'),
+          ErrorDescription(
+            'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
+            'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
+            'different rows.'
+          )
+        ]);
       }
       return true;
     }());

@@ -382,7 +382,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       do {
         if (binding.clock.now().isAfter(endTime))
-          throw FlutterError('pumpAndSettle timed out');
+          throw FlutterError(<DiagnosticsNode>[ErrorSummary('pumpAndSettle timed out')]);
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -601,13 +601,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         if (ticker.isActive) {
-          throw FlutterError(
-            'A Ticker was active $when.\n'
-            'All Tickers must be disposed. Tickers used by AnimationControllers '
-            'should be disposed by calling dispose() on the AnimationController itself. '
-            'Otherwise, the ticker will leak.\n'
-            'The offending ticker was: ${ticker.toString(debugIncludeStack: true)}'
-          );
+          throw FlutterError(<DiagnosticsNode>[
+            ErrorSummary('A Ticker was active $when.'),
+            ErrorDescription('All Tickers must be disposed.'),
+            ErrorHint(
+              'Tickers used by AnimationControllers '
+              'should be disposed by calling dispose() on the AnimationController itself. '
+              'Otherwise, the ticker will leak.'
+            ),
+            ticker.describeForError('The offending ticker was')
+          ]);
         }
       }
     }
@@ -621,13 +624,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      throw FlutterError(
-        'A SemanticsHandle was active at the end of the test.\n'
-        'All SemanticsHandle instances must be disposed by calling dispose() on '
-        'the SemanticsHandle. If your test uses SemanticsTester, it is '
-        'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-        'existing handle will leak into another test and alter its behavior.'
-      );
+      // TODO(jacobr): The hint for this one causes a change in line breaks but
+      // I think it is for the best.
+      throw FlutterError(<DiagnosticsNode>[
+        ErrorSummary('A SemanticsHandle was active at the end of the test.'),
+        ErrorDescription(
+          'All SemanticsHandle instances must be disposed by calling dispose() on '
+          'the SemanticsHandle.'
+        ),
+        ErrorHint(
+          'If your test uses SemanticsTester, it is '
+          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+          'existing handle will leak into another test and alter its behavior.'
+        )
+      ]);
     }
     _lastRecordedSemanticsHandles = null;
   }

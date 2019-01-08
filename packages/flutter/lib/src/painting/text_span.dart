@@ -269,12 +269,11 @@ class TextSpan extends DiagnosticableTree {
         }
         return true;
       })) {
-        throw FlutterError(
-          'TextSpan contains a null child.\n'
-          'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-          'The full text in question was:\n'
-          '${toStringDeep(prefixLineOne: '  ')}'
-        );
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorSummary('TextSpan contains a null child.'),
+          ErrorDescription('A TextSpan object with a non-null child list should not have any nulls in its child list.'),
+          DiagnosticsProperty<TextSpan>('The full text in question was', this, style: DiagnosticsTreeStyle.whitespace)
+        ]);
       }
       return true;
     }());

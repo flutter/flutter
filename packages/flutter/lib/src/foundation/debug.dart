@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'assertions.dart';
+import 'diagnostics.dart';
 import 'platform.dart';
 import 'print.dart';
 
@@ -25,7 +26,7 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)
-      throw FlutterError(reason);
+      throw FlutterError(<DiagnosticsNode>[ErrorSummary('$reason')]);
     return true;
   }());
   return true;

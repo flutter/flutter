@@ -297,14 +297,18 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         assert(this is! RenderShrinkWrappingViewport); // it has its own message
-        throw FlutterError(
-          '$runtimeType does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require instantiating every child of '
-          'the viewport, which defeats the point of viewports being lazy.\n'
-          'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
-          'consider a RenderShrinkWrappingViewport render object (ShrinkWrappingViewport widget), '
-          'which achieves that effect without implementing the intrinsic dimension API.'
-        );
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
+          ErrorDescription(
+            'Calculating the intrinsic dimensions would require instantiating every child of '
+            'the viewport, which defeats the point of viewports being lazy.',
+          ),
+          ErrorHint(
+            'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
+            'consider a RenderShrinkWrappingViewport render object (ShrinkWrappingViewport widget), '
+            'which achieves that effect without implementing the intrinsic dimension API.'
+          ),
+        ]);
       }
       return true;
     }());
@@ -1132,54 +1136,66 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         switch (axis) {
           case Axis.vertical:
             if (!constraints.hasBoundedHeight) {
-              throw FlutterError(
-                'Vertical viewport was given unbounded height.\n'
-                'Viewports expand in the scrolling direction to fill their container.'
-                'In this case, a vertical viewport was given an unlimited amount of '
-                'vertical space in which to expand. This situation typically happens '
-                'when a scrollable widget is nested inside another scrollable widget.\n'
-                'If this widget is always nested in a scrollable widget there '
-                'is no need to use a viewport because there will always be enough '
-                'vertical space for the children. In this case, consider using a '
-                'Column instead. Otherwise, consider using the "shrinkWrap" property '
-                '(or a ShrinkWrappingViewport) to size the height of the viewport '
-                'to the sum of the heights of its children.'
-              );
+              throw FlutterError(<DiagnosticsNode>[
+                ErrorSummary('Vertical viewport was given unbounded height.'),
+                ErrorDescription(
+                  'Viewports expand in the scrolling direction to fill their container.'
+                  'In this case, a vertical viewport was given an unlimited amount of '
+                  'vertical space in which to expand. This situation typically happens '
+                  'when a scrollable widget is nested inside another scrollable widget.'
+                ),
+                ErrorHint(
+                  'If this widget is always nested in a scrollable widget there '
+                  'is no need to use a viewport because there will always be enough '
+                  'vertical space for the children. In this case, consider using a '
+                  'Column instead. Otherwise, consider using the "shrinkWrap" property '
+                  '(or a ShrinkWrappingViewport) to size the height of the viewport '
+                  'to the sum of the heights of its children.'
+                )
+              ]);
             }
             if (!constraints.hasBoundedWidth) {
-              throw FlutterError(
-                'Vertical viewport was given unbounded width.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a vertical viewport was given an unlimited amount of '
-                'horizontal space in which to expand.'
-              );
+              throw FlutterError(<DiagnosticsNode>[
+                ErrorSummary('Vertical viewport was given unbounded width.'),
+                ErrorDescription(
+                  'Viewports expand in the cross axis to fill their container and '
+                  'constrain their children to match their extent in the cross axis.'
+                  'In this case, a vertical viewport was given an unlimited amount of '
+                  'horizontal space in which to expand.'
+                )
+              ]);
             }
             break;
           case Axis.horizontal:
             if (!constraints.hasBoundedWidth) {
-              throw FlutterError(
-                'Horizontal viewport was given unbounded width.\n'
-                'Viewports expand in the scrolling direction to fill their container.'
-                'In this case, a horizontal viewport was given an unlimited amount of '
-                'horizontal space in which to expand. This situation typically happens '
-                'when a scrollable widget is nested inside another scrollable widget.\n'
-                'If this widget is always nested in a scrollable widget there '
-                'is no need to use a viewport because there will always be enough '
-                'horizontal space for the children. In this case, consider using a '
-                'Row instead. Otherwise, consider using the "shrinkWrap" property '
-                '(or a ShrinkWrappingViewport) to size the width of the viewport '
-                'to the sum of the widths of its children.'
-              );
+              throw FlutterError(<DiagnosticsNode>[
+                ErrorSummary('Horizontal viewport was given unbounded width.'),
+                ErrorDescription(
+                  'Viewports expand in the scrolling direction to fill their container.'
+                  'In this case, a horizontal viewport was given an unlimited amount of '
+                  'horizontal space in which to expand. This situation typically happens '
+                  'when a scrollable widget is nested inside another scrollable widget.'
+                ),
+                ErrorHint(
+                  'If this widget is always nested in a scrollable widget there '
+                  'is no need to use a viewport because there will always be enough '
+                  'horizontal space for the children. In this case, consider using a '
+                  'Row instead. Otherwise, consider using the "shrinkWrap" property '
+                  '(or a ShrinkWrappingViewport) to size the width of the viewport '
+                  'to the sum of the widths of its children.'
+                )
+              ]);
             }
             if (!constraints.hasBoundedHeight) {
-              throw FlutterError(
-                'Horizontal viewport was given unbounded height.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a horizontal viewport was given an unlimited amount of '
-                'vertical space in which to expand.'
-              );
+              throw FlutterError(<DiagnosticsNode>[
+                ErrorSummary('Horizontal viewport was given unbounded height.'),
+                ErrorDescription(
+                  'Viewports expand in the cross axis to fill their container and '
+                  'constrain their children to match their extent in the cross axis.'
+                  'In this case, a horizontal viewport was given an unlimited amount of '
+                  'vertical space in which to expand.'
+                )
+              ]);
             }
             break;
         }
@@ -1252,24 +1268,27 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     assert(() {
       if (count >= _maxLayoutCycles) {
         assert(count != 1);
-        throw FlutterError(
-          'A RenderViewport exceeded its maximum number of layout cycles.\n'
-          'RenderViewport render objects, during layout, can retry if either their '
-          'slivers or their ViewportOffset decide that the offset should be corrected '
-          'to take into account information collected during that layout.\n'
-          'In the case of this RenderViewport object, however, this happened $count '
-          'times and still there was no consensus on the scroll offset. This usually '
-          'indicates a bug. Specifically, it means that one of the following three '
-          'problems is being experienced by the RenderViewport object:\n'
-          ' * One of the RenderSliver children or the ViewportOffset have a bug such'
-          ' that they always think that they need to correct the offset regardless.\n'
-          ' * Some combination of the RenderSliver children and the ViewportOffset'
-          ' have a bad interaction such that one applies a correction then another'
-          ' applies a reverse correction, leading to an infinite loop of corrections.\n'
-          ' * There is a pathological case that would eventually resolve, but it is'
-          ' so complicated that it cannot be resolved in any reasonable number of'
-          ' layout passes.'
-        );
+        // TODO(jacobr): should this message be broken up to include 3 hints?
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorSummary('A RenderViewport exceeded its maximum number of layout cycles.'),
+          ErrorDescription(
+            'RenderViewport render objects, during layout, can retry if either their '
+            'slivers or their ViewportOffset decide that the offset should be corrected '
+            'to take into account information collected during that layout.\n'
+            'In the case of this RenderViewport object, however, this happened $count '
+            'times and still there was no consensus on the scroll offset. This usually '
+            'indicates a bug. Specifically, it means that one of the following three '
+            'problems is being experienced by the RenderViewport object:\n'
+            ' * One of the RenderSliver children or the ViewportOffset have a bug such'
+            ' that they always think that they need to correct the offset regardless.\n'
+            ' * Some combination of the RenderSliver children and the ViewportOffset'
+            ' have a bad interaction such that one applies a correction then another'
+            ' applies a reverse correction, leading to an infinite loop of corrections.\n'
+            ' * There is a pathological case that would eventually resolve, but it is'
+            ' so complicated that it cannot be resolved in any reasonable number of'
+            ' layout passes.'
+          )
+        ]);
       }
       return true;
     }());
@@ -1552,14 +1571,18 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   bool debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError(
-          '$runtimeType does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require instantiating every child of '
-          'the viewport, which defeats the point of viewports being lazy.\n'
-          'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
-          'you should be able to achieve that effect by just giving the viewport loose '
-          'constraints, without needing to measure its intrinsic dimensions.'
-        );
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
+          ErrorDescription(
+           'Calculating the intrinsic dimensions would require instantiating every child of '
+           'the viewport, which defeats the point of viewports being lazy.'
+          ),
+          ErrorHint(
+            'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
+            'you should be able to achieve that effect by just giving the viewport loose '
+            'constraints, without needing to measure its intrinsic dimensions.'
+          )
+        ]);
       }
       return true;
     }());
