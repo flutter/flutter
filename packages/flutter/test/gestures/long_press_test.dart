@@ -193,15 +193,15 @@ void main() {
 
   group('long press drag', () {
     LongPressDragGestureRecognizer longPressDrag;
-    bool longPressDown;
+    bool longPressStart;
     bool longPressUp;
     Offset longPressDragUpdate;
 
     setUp(() {
       longPressDrag = LongPressDragGestureRecognizer();
-      longPressDown = false;
+      longPressStart = false;
       longPressDrag.onLongPressStart = (GestureLongPressDragStartDetails details) {
-        longPressDown = true;
+        longPressStart = true;
       };
       longPressUp = false;
       longPressDrag.onLongPressUp = (GestureLongPressDragUpDetails details) {
@@ -216,13 +216,13 @@ void main() {
     testGesture('Should recognize long press down', (GestureTester tester) {
       longPressDrag.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(milliseconds: 700));
-      expect(longPressDown, isTrue);
+      expect(longPressStart, isTrue);
 
       longPressDrag.dispose();
     });
@@ -230,15 +230,15 @@ void main() {
     testGesture('Short up cancels long press', (GestureTester tester) {
       longPressDrag.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(up);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
 
       longPressDrag.dispose();
     });
@@ -246,17 +246,17 @@ void main() {
     testGesture('Moving before accept cancels', (GestureTester tester) {
       longPressDrag.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(move);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(seconds: 1));
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       expect(longPressUp, isFalse);
 
       longPressDrag.dispose();
@@ -265,16 +265,16 @@ void main() {
     testGesture('Moving after accept does not cancel', (GestureTester tester) {
       longPressDrag.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(longPressStart, isFalse);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressDown, isTrue);
+      expect(longPressStart, isTrue);
       tester.route(move);
       expect(longPressDragUpdate, const Offset(100, 200));
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isTrue);
+      expect(longPressStart, isTrue);
       expect(longPressUp, isTrue);
 
       longPressDrag.dispose();
