@@ -214,9 +214,7 @@ FILE: ../../../flutter/fml/unique_object.h
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries.json
-FILE: ../../../flutter/lib/snapshot/snapshot.dart
 FILE: ../../../flutter/lib/snapshot/snapshot.h
-FILE: ../../../flutter/lib/snapshot/snapshot_fuchsia.dart
 FILE: ../../../flutter/lib/ui/compositing.dart
 FILE: ../../../flutter/lib/ui/compositing/scene.cc
 FILE: ../../../flutter/lib/ui/compositing/scene.h

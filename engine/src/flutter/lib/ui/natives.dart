@@ -73,11 +73,3 @@ int _isolateId;
 Function _getPrintClosure() => _print;
 @pragma('vm:entry-point')
 Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
-
-// Though the "main" symbol is not included in any of the libraries imported
-// above, the builtin library will be included manually during VM setup. This
-// symbol is only necessary for precompilation. It is marked as a stanalone
-// entry point into the VM. This prevents the precompiler from tree shaking
-// away "main".
-@pragma('vm:entry-point')
-Function _getMainClosure() => main;
