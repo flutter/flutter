@@ -12,11 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
-=======
 import 'package:flutter/gestures.dart' show DragStartBehavior;
->>>>>>> 08538f91f0b7f3f448355e998bb536b06a1d1145
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
