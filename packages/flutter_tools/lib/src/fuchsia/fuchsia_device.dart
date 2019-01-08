@@ -152,6 +152,9 @@ class FuchsiaDevice extends Device {
   bool get supportsHotRestart => false;
 
   @override
+  bool get supportsStopApp => false;
+
+  @override
   final String name;
 
   @override
