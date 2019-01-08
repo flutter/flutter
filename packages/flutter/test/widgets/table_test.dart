@@ -626,6 +626,26 @@ void main() {
     expect(state22.mounted, isTrue);
   });
 
+  testWidgets('Table widget - hasBuilt', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                TestStatefulWidget(key: ValueKey<int>(21)),
+              ],
+            ),
+          ],
+        )
+      ),
+    );
+
+    final TestStatefulWidgetState state1 = tester.state(find.byKey(const ValueKey<int>(21)));
+    expect(state1.hasBuilt, true);
+  });
+
   testWidgets('Table widget - global key reparenting', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Key tableKey = UniqueKey();
