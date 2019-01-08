@@ -54,5 +54,6 @@
   "collapsedIconTapHint": "הרחבה",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "נותר תו אחד",
-  "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים"
+  "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים",
+  "refreshIndicatorSemanticLabel": "רענון"
 }

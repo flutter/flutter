@@ -29,13 +29,12 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
+<img src="https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive and flexible UI
 Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
-
 
 Delight your users with Flutter's built-in
 beautiful Material Design and
@@ -119,8 +118,8 @@ Future<void> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
-write <a href="https://flutter.io/platform-channels/">platform channels</a>,
+Learn how to use <a href="https://flutter.io/using-packages/">packages</a> or
+write <a href="https://flutter.io/platform-channels/">platform channels</a>
 to access native code, APIs, and SDKs.
 
 ## Unified app development

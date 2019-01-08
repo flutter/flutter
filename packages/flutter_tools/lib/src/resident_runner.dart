@@ -109,6 +109,9 @@ class FlutterDevice {
   }
 
   Future<void> stopApps() async {
+    if (!device.supportsStopApp) {
+      return;
+    }
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
       return;
@@ -368,7 +371,7 @@ class FlutterDevice {
     return 0;
   }
 
-  Future<bool> updateDevFS({
+  Future<UpdateFSReport> updateDevFS({
     String mainPath,
     String target,
     AssetBundle bundle,
@@ -384,9 +387,9 @@ class FlutterDevice {
       'Syncing files to device ${device.name}...',
       expectSlowOperation: true,
     );
-    int bytes = 0;
+    UpdateFSReport report;
     try {
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: mainPath,
         target: target,
         bundle: bundle,
@@ -403,11 +406,11 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return false;
+      return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
-    printTrace('Synced ${getSizeAsMB(bytes)}.');
-    return true;
+    printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    return report;
   }
 
   void updateReloadStatus(bool wasReloadSuccessful) {
@@ -426,6 +429,7 @@ abstract class ResidentRunner {
     this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
+    this.saveCompilationTrace,
     this.stayResident,
     this.ipv6,
   }) {
@@ -440,6 +444,7 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
+  final bool saveCompilationTrace;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
@@ -487,6 +492,8 @@ abstract class ResidentRunner {
 
   Future<void> stop() async {
     _stopped = true;
+    if (saveCompilationTrace)
+      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -588,6 +595,35 @@ abstract class ResidentRunner {
     } catch (error) {
       status.cancel();
       printError('Error taking screenshot: $error');
+    }
+  }
+
+  Future<void> _debugSaveCompilationTrace() async {
+    if (!supportsServiceProtocol)
+      return;
+
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        final int index = device.views.indexOf(view);
+        final File outputFile = fs.currentDirectory
+            .childFile('compilation${index == 0 ? '' : index}.txt');
+
+        printStatus('Saving compilation training data '
+            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
+            'to ${fs.path.relative(outputFile.path)}...');
+
+        List<int> buffer;
+        try {
+          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
+          assert(buffer != null);
+        } catch (error) {
+          printError('Error communicating with Flutter on the device: $error');
+          continue;
+        }
+
+        outputFile.parent.createSync(recursive: true);
+        outputFile.writeAsBytesSync(buffer);
+      }
     }
   }
 

@@ -93,34 +93,50 @@ class CircleAvatar extends StatelessWidget {
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
   final ImageProvider backgroundImage;
 
-  /// The size of the avatar. Changing the radius will cause the
-  /// avatar to animate to the new size.
+  /// The size of the avatar, expressed as the radius (half the diameter).
   ///
   /// If [radius] is specified, then neither [minRadius] nor [maxRadius] may be
   /// specified. Specifying [radius] is equivalent to specifying a [minRadius]
   /// and [maxRadius], both with the value of [radius].
   ///
-  /// Defaults to 20 logical pixels.
+  /// If neither [minRadius] nor [maxRadius] are specified, defaults to 20
+  /// logical pixels. This is the appropriate size for use with
+  /// [ListTile.leading].
+  ///
+  /// Changes to the [radius] are animated (including changing from an explicit
+  /// [radius] to a [minRadius]/[maxRadius] pair or vice versa).
   final double radius;
 
-  /// The minimum size of the avatar.
+  /// The minimum size of the avatar, expressed as the radius (half the
+  /// diameter).
   ///
-  /// Changing the minRadius may cause the avatar to animate to the new size, if
-  /// constraints allow.
-  ///
-  /// If minRadius is specified, then [radius] must not also be specified.
+  /// If [minRadius] is specified, then [radius] must not also be specified.
   ///
   /// Defaults to zero.
+  ///
+  /// Constraint changes are animated, but size changes due to the environment
+  /// itself changing are not. For example, changing the [minRadius] from 10 to
+  /// 20 when the [CircleAvatar] is in an unconstrained environment will cause
+  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
+  /// However, if the [minRadius] is 40 and the [CircleAvatar] has a parent
+  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
+  /// the size will snap to 40 pixels instantly.
   final double minRadius;
 
-  /// The maximum size of the avatar.
+  /// The maximum size of the avatar, expressed as the radius (half the
+  /// diameter).
   ///
-  /// Changing the maxRadius will cause the avatar to animate to the new size,
-  /// if constraints allow.
-  ///
-  /// If maxRadius is specified, then [radius] must not also be specified.
+  /// If [maxRadius] is specified, then [radius] must not also be specified.
   ///
   /// Defaults to [double.infinity].
+  ///
+  /// Constraint changes are animated, but size changes due to the environment
+  /// itself changing are not. For example, changing the [maxRadius] from 10 to
+  /// 20 when the [CircleAvatar] is in an unconstrained environment will cause
+  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
+  /// However, if the [maxRadius] is 40 and the [CircleAvatar] has a parent
+  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
+  /// the size will snap to 40 pixels instantly.
   final double maxRadius;
 
   // The default radius if nothing is specified.

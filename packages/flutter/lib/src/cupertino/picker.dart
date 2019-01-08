@@ -23,7 +23,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// Can be used with [showModalBottomSheet] to display the picker modally at the
+/// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
 ///
 /// See also:
@@ -215,7 +215,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
       return Container();
 
-    final Color widgetBackgroundColor = widget.backgroundColor;
+    final Color widgetBackgroundColor = widget.backgroundColor ?? const Color(0xFFFFFFFF);
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(

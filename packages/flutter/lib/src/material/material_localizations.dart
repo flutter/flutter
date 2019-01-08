@@ -38,7 +38,7 @@ import 'typography.dart';
 //
 // 6. If you're adding a String for the sake of Flutter, not for an app-specific
 //    version of this interface, you are making a breaking API change. See
-//    https://flutter.io/design-principles/#handling-breaking-changes.
+//    https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -309,6 +309,9 @@ abstract class MaterialLocalizations {
 
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
+
+  /// The default semantics label for a [RefreshIndicator].
+  String get refreshIndicatorSemanticLabel;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -697,6 +700,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get collapsedIconTapHint => 'Expand';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Refresh';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.

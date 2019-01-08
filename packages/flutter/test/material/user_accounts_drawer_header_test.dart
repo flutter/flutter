@@ -113,7 +113,7 @@ void main() {
 
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pumpAndSettle();
@@ -126,7 +126,7 @@ void main() {
 
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pumpAndSettle();
@@ -149,25 +149,25 @@ void main() {
     // Icon starts to rotate down.
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(tester.hasRunningAnimations, isTrue);
 
     // Icon starts to rotate up mid animation.
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(tester.hasRunningAnimations, isTrue);
 
     // Icon starts to rotate down again still mid animation.
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(tester.hasRunningAnimations, isTrue);
 
     // Icon starts to rotate up to its original position mid animation.
     await tester.tap(find.byType(Icon));
     await tester.pump();
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pumpAndSettle();

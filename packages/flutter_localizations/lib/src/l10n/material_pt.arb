@@ -52,5 +52,6 @@
   "collapsedIconTapHint": "Expandir",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 caractere restante",
-  "remainingTextFieldCharacterCountOther": "$remainingCount caracteres restantes"
+  "remainingTextFieldCharacterCountOther": "$remainingCount caracteres restantes",
+  "refreshIndicatorSemanticLabel": "Atualizar"
 }

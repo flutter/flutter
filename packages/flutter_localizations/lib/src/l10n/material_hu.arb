@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Kibontás",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter maradt",
-  "remainingTextFieldCharacterCountOther": "$remainingCount karakter maradt"
+  "remainingTextFieldCharacterCountOther": "$remainingCount karakter maradt",
+  "refreshIndicatorSemanticLabel": "Frissítés"
 }
