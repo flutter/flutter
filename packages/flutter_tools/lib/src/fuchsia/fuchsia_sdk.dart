@@ -24,8 +24,6 @@ FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaSdk {
-  static const List<String> _netaddrCommand = <String>['fx', 'netaddr', '--fuchsia', '--nowait'];
-  static const List<String> _netlsCommand = <String>['fx', 'netls', '--nowait'];
   static const List<String> _syslogCommand = <String>['fx', 'syslog', '--clock', 'Local'];
 
   /// Example output:
@@ -36,29 +34,6 @@ class FuchsiaSdk {
       final String path = fuchsiaArtifacts.devFinder.absolute.path;
       final RunResult process = await runAsync(<String>[path, 'list', '-full']);
       return process.stdout.trim();
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
-    }
-    return null;
-  }
-
-  /// Invokes the `netaddr` command.
-  ///
-  /// This returns the network address of an attached fuchsia device. Does
-  /// not currently support multiple attached devices.
-  ///
-  /// Example output:
-  ///     $ fx netaddr --fuchsia --nowait
-  ///     > fe80::9aaa:fcff:fe60:d3af%eth1
-  @Deprecated('Use listDevices instead')
-  Future<String> netaddr() async {
-    try {
-      final RunResult process = await runAsync(_netaddrCommand);
-      final String result = process.stdout.trim();
-      if (result.contains('timeout')) {
-        return '';
-      }
-      return result;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }
@@ -83,26 +58,6 @@ class FuchsiaSdk {
         controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
-    }
-    return null;
-  }
-
-  /// Invokes the `netls` command.
-  ///
-  /// This lists attached fuchsia devices with their name and address. Does
-  /// not currently support multiple attached devices.
-  ///
-  /// Example output:
-  ///     $ fx netls --nowait
-  ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
-  @Deprecated('Use listDevices instead')
-
-  Future<String> netls() async {
-    try {
-      final RunResult process = await runAsync(_netlsCommand);
-      return process.stdout;
     } on ArgumentError catch (exception) {
       throwToolExit('$exception');
     }

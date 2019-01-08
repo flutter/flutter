@@ -117,27 +117,6 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-/// Parses output from the netls tool into fuchsia devices names.
-///
-/// Example output:
-///     $ ./netls
-///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
-@visibleForTesting
-@Deprecated('Use parseListDevices with listDevices instead')
-List<String> parseFuchsiaDeviceOutput(String text) {
-  final List<String> names = <String>[];
-  for (String rawLine in text.trim().split('\n')) {
-    final String line = rawLine.trim();
-    if (!line.startsWith('device'))
-      continue;
-    // ['device', 'device name', '(id)']
-    final List<String> words = line.split(' ');
-    final String name = words[1];
-    names.add(name);
-  }
-  return names;
-}
-
 @visibleForTesting
 List<FuchsiaDevice> parseListDevices(String text) {
   final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
