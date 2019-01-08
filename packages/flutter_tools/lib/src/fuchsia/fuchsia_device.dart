@@ -25,6 +25,11 @@ import 'fuchsia_workflow.dart';
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
+// Enables testing the fuchsia isolate discovery
+Future<VMService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+  return VMService.connect(uri);
+}
+
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device, [this._app]);
@@ -295,23 +300,29 @@ class FuchsiaDevice extends Device {
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
-  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName);
+  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
+    this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
+    this._maxIterations = -1,
+  ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
   final Map<int, VMService> _ports = <int, VMService>{};
   final FuchsiaDevice _device;
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
+  final Future<VMService> Function(Uri) _vmServiceConnector;
+  // maximum number of times to poll for a flutter isolate. Defaults to -1 (unbounded).
+  final int _maxIterations;
   Timer _pollingTimer;
   Status _status;
-  bool _locked = false;
+  int _iteration = 0;
 
   Future<Uri> get uri {
     _status ??= logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
       expectSlowOperation: true,
     );
-    _pollingTimer ??= Timer.periodic(_pollDuration, _findIsolate);
+    _pollingTimer ??= Timer(_pollDuration, _findIsolate);
     return _foundUri.future;
   }
 
@@ -319,17 +330,14 @@ class FuchsiaIsolateDiscoveryProtocol {
     if (!_foundUri.isCompleted) {
       _status?.cancel();
       _status = null;
+      _pollingTimer?.cancel();
+      _pollingTimer = null;
       _foundUri.completeError(Exception('Did not complete'));
     }
   }
 
-  Future<void> _findIsolate(Timer timer) async {
-    // Prevent a timer callback from firing while there is already an operation
-    // pending
-    if (_locked) {
-      return;
-    }
-    _locked = true;
+  Future<void> _findIsolate() async {
+    _iteration += 1;
     final List<int> ports = await _device.servicePorts();
     for (int port in ports) {
       VMService service;
@@ -339,10 +347,11 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          service = await VMService.connect(uri);
+          service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
           printTrace('Failed to connect to $localPort: $err');
+          continue;
         }
       }
       await service.getVM();
@@ -356,13 +365,17 @@ class FuchsiaIsolateDiscoveryProtocol {
           _foundUri.complete(_device.ipv6
             ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
             : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
-          timer.cancel();
           _status.stop();
           return;
         }
       }
     }
-    _locked = false;
+    if (_iteration != _maxIterations) {
+      _pollingTimer = Timer(_pollDuration, _findIsolate);
+    } else {
+      _foundUri.completeError(Exception('Max iterations exceeded'));
+      _status.stop();
+    }
   }
 }
 
