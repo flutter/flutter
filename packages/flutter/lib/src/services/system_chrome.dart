@@ -348,7 +348,6 @@ class SystemChrome {
   ///
   /// ```dart imports
   ///    import 'dart:math' as math;
-  ///    import 'package:flutter/src/services/system_chrome.dart';
   /// ```
   ///
   /// ```dart
