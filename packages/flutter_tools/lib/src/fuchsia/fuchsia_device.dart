@@ -108,8 +108,12 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices();
-    final List<FuchsiaDevice> devices = parseListDevices(text);
+    final String text = await fuchsiaSdk.netls();
+    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+    for (String name in parseFuchsiaDeviceOutput(text)) {
+      final String id = await fuchsiaSdk.netaddr();
+      devices.add(FuchsiaDevice(id, name: name));
+    }
     return devices;
   }
 
@@ -117,18 +121,24 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
+/// Parses output from the netls tool into fuchsia devices names.
+///
+/// Example output:
+///     $ ./netls
+///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
-List<FuchsiaDevice> parseListDevices(String text) {
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+List<String> parseFuchsiaDeviceOutput(String text) {
+  final List<String> names = <String>[];
   for (String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
-    // ['ip', 'device name']
+    if (!line.startsWith('device'))
+      continue;
+    // ['device', 'device name', '(id)']
     final List<String> words = line.split(' ');
     final String name = words[1];
-    final String id = words[0];
-    devices.add(FuchsiaDevice(id, name: name));
+    names.add(name);
   }
-  return devices;
+  return names;
 }
 
 class FuchsiaDevice extends Device {
