@@ -974,6 +974,11 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// It is an error to call [setState] unless [mounted] is true.
   bool get mounted => _element != null;
 
+  /// It is false while your widget haven't called [build]
+  /// No matters how many times your widget call [build]
+  /// After the first [build] will be true
+  bool get hasBuilt => _element.hasBuilt;
+
   /// Called when this object is inserted into the tree.
   ///
   /// The framework will call this method exactly once for each [State] object
@@ -3816,6 +3821,10 @@ class StatefulElement extends ComponentElement {
   State<StatefulWidget> get state => _state;
   State<StatefulWidget> _state;
 
+  /// Indicate the state of build method
+  /// This just change to true after first build
+  bool hasBuilt = false;
+
   @override
   void _reassemble() {
     state.reassemble();
@@ -3846,6 +3855,7 @@ class StatefulElement extends ComponentElement {
     _state.didChangeDependencies();
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; }());
     super._firstBuild();
+    hasBuilt = true;
   }
 
   @override
