@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -733,10 +732,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
-    this.drawerDragStartBehavior = DragStartBehavior.start,
-  }) : assert(primary != null),
-       assert(drawerDragStartBehavior != null),
-       super(key: key);
+  }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -868,9 +864,6 @@ class Scaffold extends StatefulWidget {
   /// The default value of this property, like the default value of
   /// [AppBar.primary], is true.
   final bool primary;
-
-  /// {@macro flutter.material.drawer.dragStartBehavior}
-  final DragStartBehavior drawerDragStartBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1507,7 +1500,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.end,
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
-          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1529,7 +1521,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.start,
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
-          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
