@@ -93,7 +93,7 @@ Future<void> precacheImage(
       onError(exception, stackTrace);
     } else {
       FlutterError.reportError(FlutterErrorDetails(
-        context: 'image failed to precache',
+        context: ErrorDescription('image failed to precache'),
         library: 'image resource service',
         exception: exception,
         stack: stackTrace,
