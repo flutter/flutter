@@ -52,6 +52,15 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
        assert(scanCode != null),
        assert(metaState != null);
 
+  /// Provides the state of either control key.
+  bool isCtrlPressed() => (metaState & 0x1000) != 0;
+
+  /// Provides the state of either alt key.
+  bool isAltPressed() => (metaState & 0x02) != 0;
+
+  /// Provides the state of either shift key.
+  bool isShiftPressed() => (metaState & 0x1) != 0;
+
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getFlags()>
   final int flags;
 

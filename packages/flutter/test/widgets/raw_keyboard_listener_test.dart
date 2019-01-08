@@ -59,6 +59,41 @@ void main() {
     focusNode.dispose();
   });
 
+  testWidgets('Combined modifier keys pass check',
+    (WidgetTester tester) async{
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+      final FocusNode focusNode = FocusNode();
+
+      await tester.pumpWidget(RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: events.add,
+        child: Container(),
+      ));
+
+      tester.binding.focusManager.rootScope.requestFocus(focusNode);
+      await tester.idle();
+
+      sendFakeKeyEvent(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'hidUsage': 0x04,
+        'codePoint': 0x64,
+        'metaState': 1<<12|1|2, // Ctrl, Shift, Alt
+      });
+      await tester.idle();
+
+      final RawKeyEventDataAndroid data = events[0].data;
+
+      expect(data.isCtrlPressed(), equals(true));
+      expect(data.isShiftPressed(), equals(true));
+      expect(data.isAltPressed(), equals(true));
+
+      await tester.pumpWidget(Container());
+      focusNode.dispose();
+    }
+  );
+
   testWidgets('Defunct listeners do not receive events',
       (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
