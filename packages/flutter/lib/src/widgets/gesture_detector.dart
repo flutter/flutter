@@ -184,10 +184,8 @@ class GestureDetector extends StatelessWidget {
     this.onScaleUpdate,
     this.onScaleEnd,
     this.behavior,
-    this.excludeFromSemantics = false,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.excludeFromSemantics = false
   }) : assert(excludeFromSemantics != null),
-       assert(dragStartBehavior != null),
        assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
@@ -372,23 +370,6 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  /// Determines the way that drag start behavior is handled.
-  ///
-  /// If set to [DragStartBehavior.start], gesture drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
-  ///
-  /// In general, setting this to [DragStartBehavior.start] will make drag
-  /// animation smoother and setting it to [DragStartBehavior.down] will make
-  /// drag behavior feel slightly more reactive.
-  ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
-  ///
-  /// See also:
-  ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
-  final DragStartBehavior dragStartBehavior;
-
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -440,8 +421,7 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onVerticalDragStart
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
-            ..onCancel = onVerticalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..onCancel = onVerticalDragCancel;
         },
       );
     }
@@ -459,8 +439,7 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onHorizontalDragStart
             ..onUpdate = onHorizontalDragUpdate
             ..onEnd = onHorizontalDragEnd
-            ..onCancel = onHorizontalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..onCancel = onHorizontalDragCancel;
         },
       );
     }
@@ -478,8 +457,7 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onPanStart
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
-            ..onCancel = onPanCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..onCancel = onPanCancel;
         },
       );
     }
@@ -518,11 +496,6 @@ class GestureDetector extends StatelessWidget {
       excludeFromSemantics: excludeFromSemantics,
       child: child,
     );
-  }
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('startBehavior', dragStartBehavior));
   }
 }
 
@@ -577,7 +550,7 @@ class RawGestureDetector extends StatefulWidget {
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    this.excludeFromSemantics = false,
+    this.excludeFromSemantics = false
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);

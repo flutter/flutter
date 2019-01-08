@@ -383,7 +383,6 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: ListView(
-        dragStartBehavior: DragStartBehavior.down,
         children: <Widget>[
           DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -490,7 +489,6 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: ListView(
-        dragStartBehavior: DragStartBehavior.down,
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           DragTarget<int>(

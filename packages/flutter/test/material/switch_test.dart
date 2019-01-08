@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -25,7 +25,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   key: switchKey,
                   value: value,
                   onChanged: (bool newValue) {
@@ -55,7 +54,6 @@ void main() {
           child: Material(
             child: Center(
               child: Switch(
-                dragStartBehavior: DragStartBehavior.down,
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -75,7 +73,6 @@ void main() {
           child: Material(
             child: Center(
               child: Switch(
-                dragStartBehavior: DragStartBehavior.down,
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -99,7 +96,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -135,93 +131,6 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
-    bool value = false;
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                    dragStartBehavior: DragStartBehavior.down,
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      }
-                    );
-                  }
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    expect(value, isFalse);
-    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
-    expect(value, isFalse);
-
-    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
-    expect(value, isTrue);
-    await tester.pump();
-    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
-    expect(value, isTrue);
-    await tester.pump();
-    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
-    expect(value, isFalse);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                    dragStartBehavior: DragStartBehavior.start,
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    }
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final Rect switchRect = tester.getRect(find.byType(Switch));
-
-    TestGesture gesture = await tester.startGesture(switchRect.center);
-    // We have to execute the drag in two frames because the first update will
-    // just set the start position.
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
-    await gesture.up();
-    await tester.pump();
-
-    gesture = await tester.startGesture(switchRect.center);
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
-    await gesture.up();
-    await tester.pump();
-
-    gesture = await tester.startGesture(switchRect.center);
-    await gesture.moveBy(const Offset(-20.0, 0.0));
-    await gesture.moveBy(const Offset(-20.0, 0.0));
-    expect(value, isFalse);
-  });
-
   testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
     bool value = false;
 
@@ -233,7 +142,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -277,7 +185,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -399,7 +306,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -459,7 +365,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  dragStartBehavior: DragStartBehavior.down,
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {

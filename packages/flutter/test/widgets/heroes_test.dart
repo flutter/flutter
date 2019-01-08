@@ -1373,11 +1373,8 @@ void main() {
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
 
-    final TestGesture  gesture = await tester.startGesture(const Offset(5.0, 200.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(180.0, 0.0));
-    await gesture.up();
-    await tester.pump();
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(200.0, 0.0));
 
     await tester.pump();
 

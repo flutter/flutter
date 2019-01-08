@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -47,10 +46,8 @@ void _tests() {
             return Container(
               width: 400.0,
               child: SingleChildScrollView(
-                dragStartBehavior: DragStartBehavior.down,
                 child: Material(
                   child: MonthPicker(
-                    dragStartBehavior: DragStartBehavior.down,
                     firstDate: DateTime(0),
                     lastDate: DateTime(9999),
                     key: _datePickerKey,
@@ -66,7 +63,7 @@ void _tests() {
             );
           },
         ),
-      ),
+      )
     );
 
     expect(_selectedDate, equals(DateTime(2016, DateTime.july, 26)));

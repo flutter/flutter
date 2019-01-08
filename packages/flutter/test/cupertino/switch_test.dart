@@ -4,7 +4,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -19,7 +18,6 @@ void main() {
               child: CupertinoSwitch(
                 key: switchKey,
                 value: value,
-                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -48,7 +46,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -79,88 +76,6 @@ void main() {
     await tester.pump();
     await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
 
-    expect(value, isFalse);
-  });
-
-  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
-    bool value = false;
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Center(
-              child: CupertinoSwitch(
-                value: value,
-                dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    expect(value, isFalse);
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
-    expect(value, isFalse);
-
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
-    expect(value, isTrue);
-    await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
-    expect(value, isTrue);
-    await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
-    expect(value, isFalse);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Center(
-              child: CupertinoSwitch(
-                value: value,
-                dragStartBehavior: DragStartBehavior.start,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
-              ),
-            );
-          },
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final Rect switchRect = tester.getRect(find.byType(CupertinoSwitch));
-
-    TestGesture gesture = await tester.startGesture(switchRect.center);
-    // We have to execute the drag in two frames because the first update will
-    // just set the start position.
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
-    await gesture.up();
-    await tester.pump();
-
-    gesture = await tester.startGesture(switchRect.center);
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
-    await gesture.up();
-    await tester.pump();
-
-    gesture = await tester.startGesture(switchRect.center);
-    await gesture.moveBy(const Offset(-20.0, 0.0));
-    await gesture.moveBy(const Offset(-20.0, 0.0));
     expect(value, isFalse);
   });
 
@@ -175,7 +90,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;

@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 void main() {
   testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
@@ -14,7 +13,6 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
-          dragStartBehavior: DragStartBehavior.down,
           itemExtent: 200.0,
           itemCount: itemCount,
           itemBuilder: (BuildContext context, int index) => Text('item $index'),
@@ -42,7 +40,6 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
-          dragStartBehavior: DragStartBehavior.down,
           itemCount: itemCount,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
