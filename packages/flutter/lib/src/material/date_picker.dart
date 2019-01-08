@@ -902,6 +902,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleYearChanged(DateTime value) {
+    if (value.isBefore(widget.firstDate))
+      value = widget.firstDate;
+    else if (value.isAfter(widget.lastDate))
+      value = widget.lastDate;
+    if (value == _selectedDate)
+      return;
+
     _vibrate();
     setState(() {
       _mode = DatePickerMode.day;
@@ -1067,8 +1074,11 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
+/// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
+///
+/// The [context], [initialDate], [firstDate], and [lastDate] parameters must
+/// not be null.
 ///
 /// See also:
 ///
@@ -1090,6 +1100,9 @@ Future<DateTime> showDatePicker({
   Locale locale,
   TextDirection textDirection,
 }) async {
+  assert(initialDate != null);
+  assert(firstDate != null);
+  assert(lastDate != null);
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
   assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');
