@@ -109,6 +109,9 @@ class FlutterDevice {
   }
 
   Future<void> stopApps() async {
+    if (!device.supportsStopApp) {
+      return;
+    }
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
       return;
