@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:mockito/mockito.dart';
 
@@ -14,28 +15,29 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockFile extends Mock implements File {}
 
 void main() {
-  bool fxPresent = false;
-  final MockOperatingSystemUtils utils = MockOperatingSystemUtils();
-  final MockFile file = MockFile();
-  when(utils.which('fx')).thenAnswer((Invocation _) => fxPresent ? file : null);
-
   group('android workflow', () {
-    testUsingContext('can not list and launch devices if there is no `fx` command', () {
-      fxPresent = false;
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, false);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => utils,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: null, sshConfig: null),
+    });
+
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
+      expect(fuchsiaWorkflow.canLaunchDevices, false);
+      expect(fuchsiaWorkflow.canListDevices, true);
+      expect(fuchsiaWorkflow.canListEmulators, false);
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: MockFile(), sshConfig: null),
     });
 
     testUsingContext('can list and launch devices supported if there is a `fx` command', () {
-      fxPresent = true;
       expect(fuchsiaWorkflow.canLaunchDevices, true);
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => utils,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: MockFile(), sshConfig: MockFile()),
     });
   });
 }
