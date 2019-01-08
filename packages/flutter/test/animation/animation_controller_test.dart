@@ -600,6 +600,32 @@ void main() {
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 125));
     expect(controller.value, 0.75);
+
+    controller.reset();
+    controller.value = 1.0;
+    expect(controller.value, 1.0);
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 25));
+    expect(controller.value, 0.75);
+
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 125));
+    expect(controller.value, 0.25);
+
+    controller.reset();
+    controller.value = 0.5;
+    expect(controller.value, 0.5);
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.value, 1.0);
+
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.0);
   });
 
   group('AnimationBehavior', () {
