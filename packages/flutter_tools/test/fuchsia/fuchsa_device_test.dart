@@ -229,7 +229,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => vmService,
-        1 // only check once.
+        true // only poll once.
       );
       when(fuchsiaDevice.servicePorts()).thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1)).thenAnswer((Invocation invocation) async => 2);

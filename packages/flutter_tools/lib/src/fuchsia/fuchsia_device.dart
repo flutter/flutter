@@ -302,7 +302,7 @@ class FuchsiaDevice extends Device {
 class FuchsiaIsolateDiscoveryProtocol {
   FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
     this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
-    this._maxIterations = -1,
+    this._pollOnce = false,
   ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
@@ -311,11 +311,10 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<VMService> Function(Uri) _vmServiceConnector;
-  // maximum number of times to poll for a flutter isolate. Defaults to -1 (unbounded).
-  final int _maxIterations;
+  // whether to only poll once.
+  final bool _pollOnce;
   Timer _pollingTimer;
   Status _status;
-  int _iteration = 0;
 
   FutureOr<Uri> get uri {
     if (_uri != null) {
@@ -344,7 +343,6 @@ class FuchsiaIsolateDiscoveryProtocol {
   }
 
   Future<void> _findIsolate() async {
-    _iteration += 1;
     final List<int> ports = await _device.servicePorts();
     for (int port in ports) {
       VMService service;
@@ -377,12 +375,12 @@ class FuchsiaIsolateDiscoveryProtocol {
         }
       }
     }
-    if (_iteration != _maxIterations) {
-      _pollingTimer = Timer(_pollDuration, _findIsolate);
-    } else {
+    if (_pollOnce) {
       _foundUri.completeError(Exception('Max iterations exceeded'));
       _status.stop();
+      return;
     }
+    _pollingTimer = Timer(_pollDuration, _findIsolate);
   }
 }
 
