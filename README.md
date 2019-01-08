@@ -145,3 +145,12 @@ Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our
 To join the team working on Flutter, see our [contributor guide](CONTRIBUTING.md).
 
 [flutter.io]: https://flutter.io/
+
+### Code Visualization:
+
+Here is a cool visualization of the code evolution
+
+ [![Watch the video](https://img.youtube.com/vi/LDakg8l4g98/0.jpg)](https://www.youtube.com/watch?v=LDakg8l4g98)
+
+ [https://www.youtube.com/watch?v=LDakg8l4g98](https://www.youtube.com/watch?v=LDakg8l4g98)
+
