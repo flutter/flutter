@@ -816,6 +816,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -835,24 +836,24 @@ void main() {
 
     expect(renderEditable.cursorColor.alpha, 255);
 
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(renderEditable.cursorColor.alpha, 255);
 
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(renderEditable.cursorColor.alpha, 110);
 
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(renderEditable.cursorColor.alpha, 0);
 
@@ -868,6 +869,7 @@ void main() {
     final Widget widget =
       MaterialApp(
         home: EditableText(
+          backgroundCursorColor: Colors.grey,
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: focusNode,
