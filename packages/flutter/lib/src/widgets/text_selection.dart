@@ -617,8 +617,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onForcePressEnd,
     this.onSingleTapUp,
     this.onSingleTapCancel,
-    this.onSingleLongTapDown,
-    this.onSingleLongTapDrag,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapDragUpdate,
     this.onSingleLongTapUp,
     this.onDoubleTapDown,
     this.behavior,
@@ -653,11 +653,11 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
-  final GestureLongPressDragDownCallback onSingleLongTapDown;
+  final GestureLongPressDragStartCallback onSingleLongTapStart;
 
   /// Called for a single long tap that's dragged while the pointer is still
   /// down.
-  final GestureLongPressDragUpdateCallback onSingleLongTapDrag;
+  final GestureLongPressDragUpdateCallback onSingleLongTapDragUpdate;
 
   /// Called for a single long tap that's now lifted.
   final GestureLongPressDragUpCallback onSingleLongTapUp;
@@ -739,15 +739,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       widget.onForcePressStart(details);
   }
 
-  void _handleLongDragDown(GestureLongPressDragDownDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
-      widget.onSingleLongTapDown(details);
+  void _handleLongDragStart(GestureLongPressDragStartDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+      widget.onSingleLongTapStart(details);
     }
   }
 
   void _handleLongDragUpdate(GestureLongPressDragUpdateDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapDrag != null) {
-      widget.onSingleLongTapDrag(details);
+    if (!_isDoubleTap && widget.onSingleLongTapDragUpdate != null) {
+      widget.onSingleLongTapDragUpdate(details);
     }
   }
 
@@ -781,7 +781,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
       onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
-      onLongPressDragDown: _handleLongDragDown,
+      onLongPressDragStart: _handleLongDragStart,
       onLongPressDragUpdate: _handleLongDragUpdate,
       onLongPressDragUp: _handleLongDragUp,
       excludeFromSemantics: true,

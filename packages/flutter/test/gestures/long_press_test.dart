@@ -200,7 +200,7 @@ void main() {
     setUp(() {
       longPressDrag = LongPressDragGestureRecognizer();
       longPressDown = false;
-      longPressDrag.onLongPressDown = (GestureLongPressDragDownDetails details) {
+      longPressDrag.onLongPressStart = (GestureLongPressDragStartDetails details) {
         longPressDown = true;
       };
       longPressUp = false;
@@ -208,7 +208,7 @@ void main() {
         longPressUp = true;
       };
       longPressDragUpdate = null;
-      longPressDrag.onLongPressDrag = (GestureLongPressDragUpdateDetails details) {
+      longPressDrag.onLongPressDragUpdate = (GestureLongPressDragUpdateDetails details) {
         longPressDragUpdate = details.globalPosition;
       };
     });

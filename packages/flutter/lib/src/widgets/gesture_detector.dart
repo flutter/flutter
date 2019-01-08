@@ -20,7 +20,7 @@ export 'package:flutter/gestures.dart' show
   GestureTapCancelCallback,
   GestureLongPressCallback,
   GestureLongPressUpCallback,
-  GestureLongPressDragDownCallback,
+  GestureLongPressDragStartCallback,
   GestureLongPressDragUpdateCallback,
   GestureLongPressDragUpCallback,
   GestureDragDownCallback,
@@ -35,7 +35,7 @@ export 'package:flutter/gestures.dart' show
   GestureForcePressPeakCallback,
   GestureForcePressEndCallback,
   GestureForcePressUpdateCallback,
-  GestureLongPressDragDownDetails,
+  GestureLongPressDragStartDetails,
   GestureLongPressDragUpdateDetails,
   GestureLongPressDragUpDetails,
   ScaleStartDetails,
@@ -173,7 +173,7 @@ class GestureDetector extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onLongPressUp,
-    this.onLongPressDragDown,
+    this.onLongPressDragStart,
     this.onLongPressDragUpdate,
     this.onLongPressDragUp,
     this.onVerticalDragDown,
@@ -209,7 +209,7 @@ class GestureDetector extends StatelessWidget {
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
          final bool haveLongPress = onLongPress != null || onLongPressUp != null;
-         final bool haveLongPressDrag = onLongPressDragDown != null || onLongPressDragUpdate != null || onLongPressDragUp != null;
+         final bool haveLongPressDrag = onLongPressDragStart != null || onLongPressDragUpdate != null || onLongPressDragUp != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
              throw FlutterError(
@@ -283,13 +283,13 @@ class GestureDetector extends StatelessWidget {
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
   ///
-  /// The long press drag callbacks [onLongPressDragDown], [onLongPressDragUpdate]
+  /// The long press drag callbacks [onLongPressDragStart], [onLongPressDragUpdate]
   /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressCallback onLongPress;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
   ///
-  /// The long press drag callbacks [onLongPressDragDown], [onLongPressDragUpdate]
+  /// The long press drag callbacks [onLongPressDragStart], [onLongPressDragUpdate]
   /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressUpCallback onLongPressUp;
 
@@ -298,7 +298,7 @@ class GestureDetector extends StatelessWidget {
   ///
   /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
   /// be set while this callback is set.
-  final GestureLongPressDragDownCallback onLongPressDragDown;
+  final GestureLongPressDragStartCallback onLongPressDragStart;
 
   /// A pointer has been drag-moved after a long press.
   ///
@@ -483,13 +483,13 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPressDragDown != null || onLongPressDragUpdate != null || onLongPressDragUp != null) {
+    if (onLongPressDragStart != null || onLongPressDragUpdate != null || onLongPressDragUp != null) {
       gestures[LongPressDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressDragGestureRecognizer>(
         () => LongPressDragGestureRecognizer(debugOwner: this),
         (LongPressDragGestureRecognizer instance) {
           instance
-            ..onLongPressDown = onLongPressDragDown
-            ..onLongPressDrag = onLongPressDragUpdate
+            ..onLongPressStart = onLongPressDragStart
+            ..onLongPressDragUpdate = onLongPressDragUpdate
             ..onLongPressUp = onLongPressDragUp;
         },
       );

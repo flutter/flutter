@@ -655,7 +655,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
-  void _handleSingleLongTapDown(GestureLongPressDragDownDetails details) {
+  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
     if (widget.selectionEnabled) {
       // We can't break the API for SelectionChangedCause now.
       // The various SelectionChangedCause.tap below are really meant to imply
@@ -680,7 +680,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _confirmCurrentSplash();
   }
 
-  void _handleSingleLongTapDrag(GestureLongPressDragUpdateDetails details) {
+  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
@@ -882,8 +882,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
-          onSingleLongTapDown: _handleSingleLongTapDown,
-          onSingleLongTapDrag: _handleSingleLongTapDrag,
+          onSingleLongTapStart: _handleSingleLongTapStart,
+          onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
           onSingleLongTapUp: _handleSingleLongTapUp,
           onDoubleTapDown: _handleDoubleTapDown,
           behavior: HitTestBehavior.translucent,
