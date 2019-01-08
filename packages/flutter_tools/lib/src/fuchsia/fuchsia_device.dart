@@ -318,7 +318,7 @@ class FuchsiaIsolateDiscoveryProtocol {
 
   Future<Uri> get uri {
     _status ??= logger.startProgress(
-      'Waiting for a connection from Flutter on ${_device.name}...',
+      'Waiting for a connection from $_isolateName on ${_device.name}...',
       expectSlowOperation: true,
     );
     _pollingTimer ??= Timer.periodic(_pollDuration, _findIsolate);

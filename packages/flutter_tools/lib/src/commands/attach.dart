@@ -141,7 +141,6 @@ class AttachCommand extends FlutterCommand {
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          printStatus('Waiting for a connection from $module on ${device.name}...');
           observatoryUri = await isolateDiscoveryProtocol.uri;
           printStatus('Done.');
         } catch (_) {
