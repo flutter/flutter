@@ -231,7 +231,7 @@ void main() {
 
     testWidgets('two_level_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(MaterialApp(home: TwoLevelListDemo()));
+      await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -464,7 +464,7 @@ void main() {
 
     testWidgets('two_level_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(MaterialApp(home: TwoLevelListDemo()));
+      await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
@@ -779,7 +779,7 @@ void main() {
         final AutomatedTestWidgetsFlutterBinding binding = tester.binding;
         binding.addTime(const Duration(seconds: 3));
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(MaterialApp(theme: theme, home: TwoLevelListDemo()));
+        await tester.pumpWidget(MaterialApp(theme: theme, home: ExpansionTileListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
