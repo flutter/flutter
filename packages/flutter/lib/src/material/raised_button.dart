@@ -44,7 +44,8 @@ class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], and
-  /// [clipBehavior] arguments must not be null.
+  /// [clipBehavior] arguments must not be null. Additionally,  [elevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,

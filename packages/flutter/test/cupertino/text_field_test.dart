@@ -1098,4 +1098,42 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
+
+  testWidgets(
+    'text field respects theme',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(
+            brightness: Brightness.dark,
+          ),
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      final BoxDecoration decoration = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(DecoratedBox)
+        ),
+      ).decoration;
+
+      expect(
+        decoration.border.bottom.color,
+        CupertinoColors.lightBackgroundGray, // Border color is the same regardless.
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), 'smoked meat');
+      await tester.pump();
+
+      expect(
+        tester.renderObject<RenderEditable>(
+          find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
+        ).text.style.color,
+        CupertinoColors.white,
+      );
+    },
+  );
 }
