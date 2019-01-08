@@ -19,12 +19,13 @@ typedef GestureLongPressUpCallback = void Function();
 typedef GestureLongPressDragDownCallback = void Function(GestureLongPressDragDownDetails details);
 
 /// Signature from a [LongPressDragGestureRecognizer] when a pointer is moving
-/// after being herd in contact at the same location for a long period of time.
+/// after being held in contact at the same location for a long period of time.
 typedef GestureLongPressDragUpdateCallback = void Function(GestureLongPressDragUpdateDetails details);
 
 /// Signature from a [LongPressDragGestureRecognizer] after a pointer stops
-/// contacting the screen. The contact stop position may be different from the
-/// contact start position.
+/// contacting the screen.
+///
+/// The contact stop position may be different from the contact start position.
 typedef GestureLongPressDragUpCallback = void Function(GestureLongPressDragUpDetails details);
 
 /// Details for callbacks that use [GestureLongPressDragDownCallback].
@@ -75,11 +76,12 @@ class GestureLongPressDragUpdateDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration sourceTimeStamp;
 
-  /// The global position at which the pointer contacted the screen.
+  /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
-  /// the screen.
+  /// the screen to the point where the pointer is currently located when
+  /// this callback is triggered.
   final Offset offsetFromOrigin;
 }
 
@@ -103,7 +105,7 @@ class GestureLongPressDragUpDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration sourceTimeStamp;
 
-  /// The global position at which the pointer contacted the screen.
+  /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
 }
 

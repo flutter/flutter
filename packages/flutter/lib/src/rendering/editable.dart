@@ -1250,7 +1250,7 @@ class RenderEditable extends RenderBox {
     selectPositionAt(from: _lastTapDownPosition, cause: cause);
   }
 
-  /// Select text between the [from] and [to] locations.
+  /// Select text between the global positions [from] and [to].
   void selectPositionAt({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);

@@ -1014,7 +1014,7 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
-      // Toolbar now dismissed.
+      // The toolbar from the long press is now dismissed by the second tap.
       expect(find.byType(CupertinoButton), findsNothing);
     },
   );
@@ -1041,7 +1041,7 @@ void main() {
           await tester.startGesture(textfieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
-      // Collapsed cursor for iOS long press.
+      // Long press on iOS shows collapsed selection cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
