@@ -2,4 +2,7 @@ name: flutter_analysis_options
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: The base analysis options for the Flutter project
 homepage: http://flutter.io
+
 version: 1.0.0
+
+# PUBSPEC CHECKSUM: 0000
