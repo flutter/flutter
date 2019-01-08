@@ -279,6 +279,39 @@ void _tests() {
     });
   });
 
+  testWidgets('Selecting firstDate year respects firstDate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17309
+    initialDate = DateTime(2018, DateTime.may, 4);
+    firstDate = DateTime(2016, DateTime.june, 9);
+    lastDate = DateTime(2019, DateTime.january, 15);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2016'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(await date, DateTime(2016, DateTime.june, 9));
+    });
+  });
+
+  testWidgets('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17309
+    initialDate = DateTime(2018, DateTime.may, 4);
+    firstDate = DateTime(2016, DateTime.june, 9);
+    lastDate = DateTime(2019, DateTime.january, 15);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2019'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(await date, DateTime(2019, DateTime.january, 15));
+    });
+  });
+
+
   testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
     initialDate = DateTime(2017, DateTime.january, 16);
     firstDate = DateTime(2017, DateTime.january, 10);
