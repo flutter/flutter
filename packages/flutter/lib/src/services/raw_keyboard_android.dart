@@ -101,9 +101,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getMetaState()>
   final int metaState;
 
-  @override
-  String get unicode => codePoint != 0 ? String.fromCharCode(codePoint) : null;
-
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
     if (metaState == _kAndroidModifierNone || metaState & anyMask == 0) {
       return false;

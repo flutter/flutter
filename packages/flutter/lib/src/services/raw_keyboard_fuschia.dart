@@ -57,9 +57,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// for the numerical values of the modifiers.
   final int modifiers;
 
-  @override
-  String get unicode => codePoint != 0 ? String.fromCharCode(codePoint) : null;
-
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
     if (modifiers == _kFuschiaModifierNone || modifiers & anyMask == 0) {
       return false;

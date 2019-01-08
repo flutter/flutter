@@ -76,13 +76,6 @@ abstract class RawKeyEventData {
   /// const constructors so that they can be used in const expressions.
   const RawKeyEventData();
 
-  /// Returns a String containing the Unicode representation of the character
-  /// that the key produces. If the key does not produce a character, this
-  /// returns null. Dead keys are represented as Unicode combining characters.
-  /// Some keys can produce multiple characters, so this string does not have to
-  /// have a length of one.
-  String get unicode;
-
   /// Returns true if the given [ModifierKey] is pressed.  If [side] is
   /// specified, then restricts check to the specified side of the keyboard.
   /// Defaults to checking for the key being down on either side of the
