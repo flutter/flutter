@@ -131,12 +131,21 @@ void main() {
       final File outputFile = File(path.join(tmpDir.absolute.path, 'snippet_out.dart'));
       final File expectedMetadataFile = File(path.join(tmpDir.absolute.path, 'snippet_out.json'));
 
-      generator.generate(inputFile, SnippetType.application, template: 'template', id: 'id', output: outputFile);
+      generator.generate(
+        inputFile,
+        SnippetType.application,
+        template: 'template',
+        id: 'id',
+        output: outputFile,
+        metadata: <String, Object>{'sourcePath': 'some/path.dart'},
+      );
       expect(expectedMetadataFile.existsSync(), isTrue);
       final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
       expect(json['id'], equals('id'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));
+      // Ensure any passed metadata is included in the output JSON too.
+      expect(json['sourcePath'], equals('some/path.dart'));
     });
   });
 }
