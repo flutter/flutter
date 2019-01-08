@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -165,7 +164,6 @@ void main() {
               link: LayerLink(),
               child: ListView(
                 addAutomaticKeepAlives: keepAlive,
-                dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
                   Container(height: 500.0, child: InkWell(onTap: () { }, child: const Placeholder())),
                   Container(height: 500.0),
