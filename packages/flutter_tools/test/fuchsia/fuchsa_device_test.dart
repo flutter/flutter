@@ -29,12 +29,13 @@ void main() {
       expect(device.name, name);
     });
 
-    test('parse netls log output', () {
-      const String example = 'device lilia-shore-only-last (fe80::0000:a00a:f00f:2002/3)';
-      final List<String> names = parseFuchsiaDeviceOutput(example);
+    test('parse dev_finder output', () {
+      const String example = '192.168.42.56 paper-pulp-bush-angel';
+      final List<FuchsiaDevice> names = parseListDevices(example);
 
       expect(names.length, 1);
-      expect(names.first, 'lilia-shore-only-last');
+      expect(names.first.name, 'paper-pulp-bush-angel');
+      expect(names.first.id, '192.168.42.56');
     });
 
     test('default capabilities', () async {
