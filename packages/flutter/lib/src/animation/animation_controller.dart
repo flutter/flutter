@@ -569,7 +569,7 @@ class AnimationController extends Animation<double>
       return true;
     }());
     assert(reverse != null);
-    return animateWith(_RepeatingSimulation(min, max, reverse, period));
+    return animateWith(_RepeatingSimulation(_value, min, max, reverse, period));
   }
 
   /// Drives the animation with a critically damped spring (within [lowerBound]
@@ -746,9 +746,15 @@ class _InterpolationSimulation extends Simulation {
 }
 
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(this.min, this.max, this.reverse, Duration period)
-    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
+  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period)
+    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
+      _initialT = (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
+    assert(_initialT >= 0.0);
+
+    if (initialValue == max && reverse) {
+      _isPlayingReverse = true;
+    }
   }
 
   final double min;
@@ -756,6 +762,7 @@ class _RepeatingSimulation extends Simulation {
   final bool reverse;
 
   final double _periodInSeconds;
+  final double _initialT;
 
   double _previousT = 0.0;
   bool _isPlayingReverse = false;
@@ -763,7 +770,8 @@ class _RepeatingSimulation extends Simulation {
   @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
-    final double t = (timeInSeconds / _periodInSeconds) % 1.0;
+
+    final double t = ((timeInSeconds + _initialT) / _periodInSeconds) % 1.0;
 
     if (_previousT > t) {
       _isPlayingReverse = !_isPlayingReverse;
