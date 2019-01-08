@@ -305,8 +305,10 @@ abstract class SelectableChipAttributes {
   /// are) of the chip.
   String get tooltip;
 
-  /// The shape of the avatar, used to draw a darkended layer when a checkmark
-  /// is drawn over it.
+  /// The shape of the translucent highlight painted over the avatar when the
+  /// [selected] property is true.
+  ///
+  /// Only the outer path of the shape is used.
   ///
   /// Defaults to [CircleBorder].
   ShapeBorder get avatarBorder;
