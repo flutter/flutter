@@ -124,8 +124,14 @@ class IMobileDevice {
   Future<String> getAvailableDeviceIDs() async {
     try {
       final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
-      if (result.exitCode != 0)
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+      if (result.exitCode != 0) {
+        if (result.stderr.toString().contains('ERROR: Unable to retrieve device list!')) {
+          // idevice_id might throw this error if there are no connected devices
+          return '';
+        } else {
+          throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+        }
+      }
       return result.stdout;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
