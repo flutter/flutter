@@ -58,12 +58,12 @@ public final class ResourceUpdater {
         IMMEDIATE
     }
 
-    private static class DownloadTask extends AsyncTask<String, String, Void> {
+    private class DownloadTask extends AsyncTask<String, String, Void> {
         @Override
-        protected Void doInBackground(String... args) {
+        protected Void doInBackground(String... unused) {
             try {
-                URL unresolvedURL = new URL(args[0]);
-                File localFile = new File(args[1]);
+                URL unresolvedURL = new URL(buildUpdateDownloadURL());
+                File localFile = getPatch();
 
                 long startMillis = new Date().getTime();
                 Log.i(TAG, "Checking for updates at " + unresolvedURL);
@@ -71,10 +71,10 @@ public final class ResourceUpdater {
                 HttpURLConnection connection =
                         (HttpURLConnection)unresolvedURL.openConnection();
 
-                long lastModified = localFile.lastModified();
-                if (lastModified != 0) {
-                    Log.i(TAG, "Active update timestamp " + lastModified);
-                    connection.setIfModifiedSince(lastModified);
+                long lastDownloadTime = localFile.lastModified();
+                if (lastDownloadTime != 0) {
+                    Log.i(TAG, "Active update timestamp " + lastDownloadTime);
+                    connection.setIfModifiedSince(lastDownloadTime);
                 }
 
                 try (InputStream input = connection.getInputStream()) {
@@ -108,7 +108,6 @@ public final class ResourceUpdater {
                         long totalMillis = new Date().getTime() - startMillis;
                         Log.i(TAG, "Update downloaded in " + totalMillis / 100 / 10. + "s");
 
-                        output.flush();
                         return null;
                     }
                 }
@@ -127,7 +126,7 @@ public final class ResourceUpdater {
         this.context = context;
     }
 
-    public String getAPKVersion() {
+    private String getAPKVersion() {
         try {
             PackageManager packageManager = context.getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
@@ -138,11 +137,11 @@ public final class ResourceUpdater {
         }
     }
 
-    public String getUpdateInstallationPath() {
-        return context.getFilesDir().toString() + "/patch.zip";
+    public File getPatch() {
+        return new File(context.getFilesDir().toString() + "/patch.zip");
     }
 
-    public String buildUpdateDownloadURL() {
+    private String buildUpdateDownloadURL() {
         Bundle metaData;
         try {
             metaData = context.getPackageManager().getApplicationInfo(
@@ -168,7 +167,7 @@ public final class ResourceUpdater {
         return uri.normalize().toString();
     }
 
-    public DownloadMode getDownloadMode() {
+    DownloadMode getDownloadMode() {
         Bundle metaData;
         try {
             metaData = context.getPackageManager().getApplicationInfo(
@@ -195,7 +194,7 @@ public final class ResourceUpdater {
         }
     }
 
-    public InstallMode getInstallMode() {
+    InstallMode getInstallMode() {
         Bundle metaData;
         try {
             metaData = context.getPackageManager().getApplicationInfo(
@@ -222,21 +221,21 @@ public final class ResourceUpdater {
         }
     }
 
-    public void startUpdateDownloadOnce() {
+    void startUpdateDownloadOnce() {
         if (downloadTask != null ) {
             return;
         }
         downloadTask = new DownloadTask();
-        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                buildUpdateDownloadURL(), getUpdateInstallationPath());
+        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void waitForDownloadCompletion() {
+    void waitForDownloadCompletion() {
         if (downloadTask == null) {
             return;
         }
         try {
             downloadTask.get();
+            downloadTask = null;
         } catch (CancellationException e) {
             Log.w(TAG, "Download cancelled: " + e.getMessage());
             return;

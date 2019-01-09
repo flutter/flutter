@@ -123,17 +123,6 @@ class ResourceExtractor {
         }
     }
 
-    boolean filesMatch() {
-        JSONObject updateManifest = readUpdateManifest();
-        if (!validateUpdateManifest(updateManifest)) {
-            updateManifest = null;
-        }
-
-        final File dataDir = new File(PathUtils.getDataDirectory(mContext));
-        final String timestamp = checkTimestamp(dataDir, updateManifest);
-        return (timestamp == null);
-    }
-
     private String[] getExistingTimestamps(File dataDir) {
         return dataDir.list(new FilenameFilter() {
             @Override
@@ -159,7 +148,6 @@ class ResourceExtractor {
             new File(dataDir, timestamp).delete();
         }
     }
-
 
     /// Returns true if successfully unpacked APK resources,
     /// otherwise deletes all resources and returns false.
@@ -208,11 +196,12 @@ class ResourceExtractor {
     /// Returns true if successfully unpacked update resources or if there is no update,
     /// otherwise deletes all resources and returns false.
     private boolean extractUpdate(File dataDir) {
-        if (FlutterMain.getUpdateInstallationPath() == null) {
+        ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
+        if (resourceUpdater == null) {
             return true;
         }
 
-        final File updateFile = new File(FlutterMain.getUpdateInstallationPath());
+        File updateFile = resourceUpdater.getPatch();
         if (!updateFile.exists()) {
             return true;
         }
@@ -298,11 +287,14 @@ class ResourceExtractor {
                 if (!buildNumber.equals(Long.toString(getVersionCode(packageInfo)))) {
                     Log.w(TAG, "Outdated update file for " + getVersionCode(packageInfo));
                 } else {
-                    final File updateFile = new File(FlutterMain.getUpdateInstallationPath());
+                    ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
+                    assert resourceUpdater != null;
+                    File patchFile = resourceUpdater.getPatch();
+                    assert patchFile.exists();
                     if (patchNumber != null) {
-                        expectedTimestamp += "-" + patchNumber + "-" + updateFile.lastModified();
+                        expectedTimestamp += "-" + patchNumber + "-" + patchFile.lastModified();
                     } else {
-                        expectedTimestamp += "-" + updateFile.lastModified();
+                        expectedTimestamp += "-" + patchFile.lastModified();
                     }
                 }
             }
@@ -365,11 +357,12 @@ class ResourceExtractor {
 
     /// Returns null if no update manifest is found.
     private JSONObject readUpdateManifest() {
-        if (FlutterMain.getUpdateInstallationPath() == null) {
+        ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
+        if (resourceUpdater == null) {
             return null;
         }
 
-        File updateFile = new File(FlutterMain.getUpdateInstallationPath());
+        File updateFile = resourceUpdater.getPatch();
         if (!updateFile.exists()) {
             return null;
         }

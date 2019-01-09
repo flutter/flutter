@@ -360,8 +360,13 @@ public class FlutterMain {
         return appBundle.exists() ? appBundle.getPath() : null;
     }
 
-    public static String getUpdateInstallationPath() {
-        return sResourceUpdater == null ? null : sResourceUpdater.getUpdateInstallationPath();
+    /**
+     * Returns the main internal interface for the dynamic patching subsystem.
+     *
+     * If this is null, it means that dynamic patching is disabled in this app.
+     */
+    public static ResourceUpdater getResourceUpdater() {
+        return sResourceUpdater;
     }
 
     /**
