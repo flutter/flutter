@@ -17,9 +17,7 @@ import 'object.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
-
-/// TODO document this or find a better way to expose this info
-const double kCaretHeightOffset = 2.0; // pixels
+const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
@@ -1244,7 +1242,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = Rect.fromLTWH(0.0, kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * kCaretHeightOffset);
+    _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
