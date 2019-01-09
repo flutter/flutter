@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:watcher/watcher.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -34,6 +35,7 @@ Future<int> runTests(
   Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
+  bool watchTests = false,
   TestWatcher watcher,
   @required int concurrency,
 }) async {
@@ -88,7 +90,11 @@ Future<int> runTests(
         updateGoldens,
       );
 
-      final String dillPath = await compiler.compile(mainDart);
+      final String dillPath = await compiler.compile(mainDart, invalidatedFiles: invalidatedFiles);
+      // We only need to invalidate the changed file once, so clear the list
+      if (invalidatedFiles.isNotEmpty) {
+        invalidatedFiles = <String>[];
+      }
       precompiledDillFiles[file] = dillPath;
       finalizers[file] = fileFinalizers;
       index++;
@@ -127,6 +133,30 @@ Future<int> runTests(
 
     printTrace('running test package with arguments: $testArgs');
     await test.main(testArgs);
+
+    if (watchTests) {
+      final Completer<void> completer = Completer<void>();
+      final DirectoryWatcher directoryWatcher = DirectoryWatcher(saved.path);
+
+       directoryWatcher.events.listen(
+        (WatchEvent event) async {
+          if (!event.path.endsWith('.dart')) {
+            return;
+          }
+          await compileTestFiles(invalidatedFiles: <String>[event.path]);
+          await test.main(testArgs);
+        },
+        onDone: completer.complete
+      );
+
+       await directoryWatcher.ready;
+
+       printStatus('Watcher is ready for events...', emphasis: true, color: TerminalColor.blue);
+
+       await completer.future;
+    }
+
+     await compiler.dispose();
 
     // test.main() sets dart:io's exitCode global.
     printTrace('test package returned with exit code $exitCode');

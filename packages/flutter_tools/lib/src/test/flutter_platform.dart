@@ -80,6 +80,7 @@ void installHook({
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
+      fileFinalizers: fileFinalizers,
     ),
   );
 }
@@ -101,6 +102,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.trackWidgetCreation,
     this.updateGoldens,
     this.projectRootDirectory,
+    this.fileFinalizers,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -115,6 +117,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
+  final Map<String, List<Finalizer>> fileFinalizers;
 
   Directory fontsDirectory;
 
@@ -195,8 +198,8 @@ class _FlutterPlatform extends PlatformPlugin {
     _AsyncError
         outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<Finalizer> finalizers =
-        <Finalizer>[]; // Will be run in reverse order.
+    final List<Finalizer> finalizers = <Finalizer>[];
+    finalizers.addAll(fileFinalizers[testPath]); // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {

@@ -14,9 +14,13 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 
 class _CompilationRequest {
-  _CompilationRequest(this.path, this.result);
+  _CompilationRequest(this.path, this.result, {List<String> invalidatedFiles = const <String>[]}) {
+    this.invalidatedFiles = <String>[path];
+    this.invalidatedFiles.addAll(invalidatedFiles);
+  }
   String path;
   Completer<String> result;
+  List<String> invalidatedFiles;
 }
 
 // This class is a wrapper around compiler that allows multiple isolates to
@@ -87,7 +91,7 @@ class TestCompiler {
           final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
             compiler.recompile(
               request.path,
-              <String>[request.path],
+              request.invalidatedFiles,
               outputPath: outputDill.path),
               request.path,
             );
@@ -130,9 +134,15 @@ class TestCompiler {
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   ResidentCompiler compiler;
 
-  Future<String> compile(String mainDart) {
+  Future<String> compile(String mainDart, {List<String> invalidatedFiles = const <String>[]}) {
     final Completer<String> completer = Completer<String>();
-    compilerController.add(_CompilationRequest(mainDart, completer));
+    compilerController.add(
+      _CompilationRequest(
+        mainDart,
+        completer,
+        invalidatedFiles: invalidatedFiles
+      )
+    );
     return handleTimeout<String>(completer.future, mainDart);
   }
 
