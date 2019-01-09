@@ -555,6 +555,8 @@ FILE: ../../../flutter/shell/platform/embedder/embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_engine.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_engine.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_include.c
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h

@@ -356,13 +356,65 @@ FlutterResult FlutterEngineRun(size_t version,
         return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
       };
 
+  // TODO(chinmaygarde): This is the wrong spot for this. It belongs in the
+  // platform view jump table.
+  shell::EmbedderExternalTextureGL::ExternalTextureCallback
+      external_texture_callback;
+  if (config->type == kOpenGL) {
+    const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+    if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
+                    nullptr) != nullptr) {
+      external_texture_callback =
+          [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
+              int64_t texture_identifier, GrContext* context,
+              const SkISize& size) -> sk_sp<SkImage> {
+        FlutterOpenGLTexture texture = {};
+
+        if (!ptr(user_data, texture_identifier, size.width(), size.height(),
+                 &texture)) {
+          return nullptr;
+        }
+
+        GrGLTextureInfo gr_texture_info = {texture.target, texture.name,
+                                           texture.format};
+
+        GrBackendTexture gr_backend_texture(size.width(), size.height(),
+                                            GrMipMapped::kNo, gr_texture_info);
+        SkImage::TextureReleaseProc release_proc = texture.destruction_callback;
+        auto image = SkImage::MakeFromTexture(
+            context,                   // context
+            gr_backend_texture,        // texture handle
+            kTopLeft_GrSurfaceOrigin,  // origin
+            kRGBA_8888_SkColorType,    // color type
+            kPremul_SkAlphaType,       // alpha type
+            nullptr,                   // colorspace
+            release_proc,              // texture release proc
+            texture.user_data          // texture release context
+        );
+
+        if (!image) {
+          // In case Skia rejects the image, call the release proc so that
+          // embedders can perform collection of intermediates.
+          if (release_proc) {
+            release_proc(texture.user_data);
+          }
+          FML_LOG(ERROR) << "Could not create external texture.";
+          return nullptr;
+        }
+
+        return image;
+      };
+    }
+  }
+
   // Step 1: Create the engine.
   auto embedder_engine =
-      std::make_unique<shell::EmbedderEngine>(std::move(thread_host),   //
-                                              std::move(task_runners),  //
-                                              settings,                 //
-                                              on_create_platform_view,  //
-                                              on_create_rasterizer      //
+      std::make_unique<shell::EmbedderEngine>(std::move(thread_host),    //
+                                              std::move(task_runners),   //
+                                              settings,                  //
+                                              on_create_platform_view,   //
+                                              on_create_rasterizer,      //
+                                              external_texture_callback  //
       );
 
   if (!embedder_engine->IsValid()) {
@@ -522,5 +574,45 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
 
 FlutterResult __FlutterEngineFlushPendingTasksNow() {
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  return kSuccess;
+}
+
+FlutterResult FlutterEngineRegisterExternalTexture(FlutterEngine engine,
+                                                   int64_t texture_identifier) {
+  if (engine == nullptr || texture_identifier == 0) {
+    return kInvalidArguments;
+  }
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)->RegisterTexture(
+          texture_identifier)) {
+    return kInternalInconsistency;
+  }
+  return kSuccess;
+}
+
+FlutterResult FlutterEngineUnregisterExternalTexture(
+    FlutterEngine engine,
+    int64_t texture_identifier) {
+  if (engine == nullptr || texture_identifier == 0) {
+    return kInvalidArguments;
+  }
+
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)->UnregisterTexture(
+          texture_identifier)) {
+    return kInternalInconsistency;
+  }
+
+  return kSuccess;
+}
+
+FlutterResult FlutterEngineMarkExternalTextureFrameAvailable(
+    FlutterEngine engine,
+    int64_t texture_identifier) {
+  if (engine == nullptr || texture_identifier == 0) {
+    return kInvalidArguments;
+  }
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)
+           ->MarkTextureFrameAvailable(texture_identifier)) {
+    return kInternalInconsistency;
+  }
   return kSuccess;
 }
