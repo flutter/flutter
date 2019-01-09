@@ -15,7 +15,7 @@ import 'edge_insets.dart';
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     shape: SuperellipseShape(25.0),
-///   ); // Material
+///   );
 /// }
 /// ```
 class SuperellipseShape extends ShapeBorder {
