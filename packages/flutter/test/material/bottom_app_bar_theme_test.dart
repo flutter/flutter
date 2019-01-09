@@ -88,8 +88,8 @@ void main() {
   });
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Scaffold(body: BottomAppBar()),
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(body: BottomAppBar()),
     ));
 
     final PhysicalShape widget = _getBabRenderObject(tester);
