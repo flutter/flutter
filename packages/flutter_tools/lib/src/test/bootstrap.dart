@@ -131,7 +131,7 @@ void main() {
 }
 
 String createListenerDart(List<Finalizer> finalizers, int ourTestCount,
-      String testPath, HttpServer server, InternetAddress host, bool updateGoldens) {
+      String testPath, InternetAddress host, bool updateGoldens) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
