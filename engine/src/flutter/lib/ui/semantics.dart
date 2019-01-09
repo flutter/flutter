@@ -628,8 +628,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     Float64List transform,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
-    @Deprecated('use additionalActions instead')
-    Int32List customAcccessibilityActions,
     Int32List additionalActions,
   }) {
     if (transform.length != 16)
@@ -658,7 +656,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
       transform,
       childrenInTraversalOrder,
       childrenInHitTestOrder,
-      additionalActions ?? customAcccessibilityActions,
+      additionalActions,
     );
   }
   void _updateNode(
