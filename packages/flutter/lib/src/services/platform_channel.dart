@@ -130,9 +130,9 @@ class MethodChannel {
   ///
   /// The generic argument `T` of the method can be inferred by the surrounding
   /// context, or provided explicitly. If it does not match the returned type of
-  /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be class
-  /// with generics, such as `Map<String, String>`, instead it must always
-  /// return an untyped map or list.
+  /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be a class
+  /// with generics other than `dynamic`. For example, `Map<String, String>`
+  /// is not supported but `Map<dynamic, dynamic>` or `Map` is.
   ///
   /// Returns a [Future] which completes to one of the following:
   ///
