@@ -184,6 +184,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
+
   Device(this.id);
 
   final String id;
@@ -276,10 +277,16 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
+  bool get supportsStopApp => true;
+
+  /// Whether the device supports taking screenshots of a running flutter
+  /// application.
+  bool get supportsScreenshot => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
-
-  bool get supportsScreenshot => false;
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
