@@ -35,7 +35,32 @@ AssertExists() {
   return 0
 }
 
+# Check if the project.pbxproj file will end up embedding Flutter.framework multiple
+# times (once for Cocoapods and once from the template).  This will cause cryptic 
+# build errors in Xcode 10, and we don't have a good way to remedy it without
+# potentially damaging the project configuration.
+ValidateFlutterFrameworkXcode10() {
+  # Bail out if we're below Xcode 10
+  if [[ "Xcode 9.9.9" != "$(printf "$(xcodebuild -version | head -n1 )\nXcode 9.9.9" | sort -V | head -n1)" ]]; then
+    return 0
+  fi
+
+  local pbxproj="${PROJECT_FILE_PATH}/project.pbxproj"
+  AssertExists ${pbxproj}
+
+  if grep -q "\"\${PODS_ROOT}\/\.\.\/Flutter\/engine\/Flutter\.framework\"" ${pbxproj} && 
+     grep -q "/\* Flutter\.framework in Embed Frameworks \*/" ${pbxproj}; then
+    EchoError "\"${pbxproj}\" attempts to embed Flutter.framework\
+in multiple places (once in 'EmbedFrameworks' and once from Cocapods). \
+This configuration is not supported in the Xcode 10 build system. \
+To resolve this issue, remove Flutter.framework from the 'Embed Frameworks' phase."
+    exit -1
+  fi
+}
+
 BuildApp() {
+  ValidateFlutterFrameworkXcode10
+  
   local project_path="${SOURCE_ROOT}/.."
   if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
     project_path="${FLUTTER_APPLICATION_PATH}"
