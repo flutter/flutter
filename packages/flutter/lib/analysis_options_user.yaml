@@ -1,1 +1,1 @@
-include: ../../flutter_analysis_options/lib/analysis_options_base.yaml
+include: package:flutter_analysis_options/analysis_options_base.yaml
