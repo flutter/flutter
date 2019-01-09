@@ -9,6 +9,8 @@ class TestNotifier extends ChangeNotifier {
   void notify() {
     notifyListeners();
   }
+
+  bool get isListenedTo => hasListeners;
 }
 
 class HasListenersTester<T> extends ValueNotifier<T> {
@@ -262,15 +264,15 @@ void main() {
     final VoidCallback fakeListener = () {};
 
     final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
-    expect(source1.hasListeners, isFalse);
-    expect(source2.hasListeners, isFalse);
+    expect(source1.isListenedTo, isFalse);
+    expect(source2.isListenedTo, isFalse);
     listenableUnderTest.addListener(fakeListener);
-    expect(source1.hasListeners, isTrue);
-    expect(source2.hasListeners, isTrue);
+    expect(source1.isListenedTo, isTrue);
+    expect(source2.isListenedTo, isTrue);
 
     listenableUnderTest.removeListener(fakeListener);
-    expect(source1.hasListeners, isFalse);
-    expect(source2.hasListeners, isFalse);
+    expect(source1.isListenedTo, isFalse);
+    expect(source2.isListenedTo, isFalse);
   });
 
 
