@@ -559,6 +559,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _didAutoFocus = false;
 
   static const Duration _fadeDuration = Duration(milliseconds: 250);
+
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
   static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);

@@ -423,7 +423,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   Radius get _cursorRadius {
     if (widget.cursorRadius != null)
       return widget.cursorRadius;
-    if (defaultTargetPlatform == TargetPlatform.iOS)
+    if (Theme.of(context).platform == TargetPlatform.iOS)
       return const Radius.circular(2.0);
     return null;
   }
@@ -610,7 +610,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
-  bool get cursorOpacityAnimates => defaultTargetPlatform == TargetPlatform.iOS ? true : false;
+  bool get cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
 
   @override
   void deactivate() {

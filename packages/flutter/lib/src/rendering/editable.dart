@@ -728,9 +728,9 @@ class RenderEditable extends RenderBox {
   /// By default, the cursor will be painted on top for iOS platforms and
   /// underneath for Android platforms.
   /// {@end template}
-  bool get paintCursorOnTop => _paintCursorOnTop;
+  bool get paintCursorOnAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
-  set paintCursorOnTop(bool value) {
+  set paintCursorOnAboveText(bool value) {
     if (_paintCursorOnTop == value)
       return;
     _paintCursorOnTop = value;
@@ -1369,7 +1369,8 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     assert(_floatingCursorOn);
 
-    final Paint paint = Paint()..color = _cursorColor;
+    // We always want the floating cursor to render at full opacity.
+    final Paint paint = Paint()..color = _cursorColor.withAlpha(255);
 
     double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
     double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
@@ -1462,11 +1463,11 @@ class RenderEditable extends RenderBox {
 
     // On iOS, the cursor is painted over the text, on android, it's painted
     // under it.
-    if (paintCursorOnTop)
+    if (paintCursorOnAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_selection != null && !_floatingCursorOn) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
+      if (_selection.isCollapsed && cursorColor != null && _hasFocus) {
         _paintCaret(context.canvas, effectiveOffset, _selection.extent);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
@@ -1474,7 +1475,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    if (!paintCursorOnTop)
+    if (!paintCursorOnAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_floatingCursorOn) {

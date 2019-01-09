@@ -34,6 +34,10 @@ const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
+
+// An eyeballed value that moves the cursor slightly left of where it is
+// rendered by default so it's positioning more accurately matches the native
+// iOS.
 const int _iOSHorizontalCursorOffsetPixels = -2;
 
 /// Visibility of text field overlays based on the state of the current text entry.
