@@ -77,7 +77,14 @@ Future<int> _handleToolError(
     ) async {
   if (error is UsageException) {
     printError('${error.message}\n');
-    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    String commandHint = 'flutter <command> -h -v';
+    const String usagePrefix = 'Usage: ';
+    final String usageLine = error.usage.split('\n').firstWhere((String line) => line.startsWith(usagePrefix), orElse: () => null);
+    if (usageLine != null) {
+        final String expectedCommandUsage = usageLine.replaceAll(usagePrefix, '').trim();
+        commandHint = '$expectedCommandUsage -h -v';
+    }
+    printError("Run '$commandHint' (or 'flutter -h -v') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
