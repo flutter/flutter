@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -396,6 +397,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
                 Container(
                   key: childKey,
@@ -1509,7 +1511,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1518,7 +1520,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1543,7 +1545,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1552,7 +1554,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
