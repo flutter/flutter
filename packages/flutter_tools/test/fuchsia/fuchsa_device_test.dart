@@ -29,12 +29,13 @@ void main() {
       expect(device.name, name);
     });
 
-    test('parse netls log output', () {
-      const String example = 'device lilia-shore-only-last (fe80::0000:a00a:f00f:2002/3)';
-      final List<String> names = parseFuchsiaDeviceOutput(example);
+    test('parse dev_finder output', () {
+      const String example = '192.168.42.56 paper-pulp-bush-angel';
+      final List<FuchsiaDevice> names = parseListDevices(example);
 
       expect(names.length, 1);
-      expect(names.first, 'lilia-shore-only-last');
+      expect(names.first.name, 'paper-pulp-bush-angel');
+      expect(names.first.id, '192.168.42.56');
     });
 
     test('default capabilities', () async {
@@ -50,7 +51,6 @@ void main() {
   group('displays friendly error when', () {
     final MockProcessManager mockProcessManager = MockProcessManager();
     final MockProcessResult mockProcessResult = MockProcessResult();
-    final MockFuchsiaArtifacts mockFuchsiaArtifacts = MockFuchsiaArtifacts();
     final MockFile mockFile = MockFile();
     when(mockProcessManager.run(
       any,
@@ -60,22 +60,8 @@ void main() {
     when(mockProcessResult.exitCode).thenReturn(1);
     when<String>(mockProcessResult.stdout).thenReturn('');
     when<String>(mockProcessResult.stderr).thenReturn('');
-    when(mockFuchsiaArtifacts.sshConfig).thenReturn(mockFile);
     when(mockFile.absolute).thenReturn(mockFile);
     when(mockFile.path).thenReturn('');
-
-    testUsingContext('No BUILD_DIR set', () async {
-      final FuchsiaDevice device = FuchsiaDevice('id');
-      ToolExit toolExit;
-      try {
-        await device.servicePorts();
-      } on ToolExit catch (err) {
-        toolExit = err;
-      }
-      expect(toolExit.message, contains('BUILD_DIR must be supplied to locate SSH keys'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
 
     final MockProcessManager emptyStdoutProcessManager = MockProcessManager();
     final MockProcessResult emptyStdoutProcessResult = MockProcessResult();
@@ -99,7 +85,10 @@ void main() {
       expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
-      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+        sshConfig: mockFile,
+        devFinder: mockFile,
+      ),
     });
 
     group('device logs', () {
@@ -210,8 +199,6 @@ void main() {
     });
   });
 }
-
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
