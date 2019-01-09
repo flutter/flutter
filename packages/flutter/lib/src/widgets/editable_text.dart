@@ -346,8 +346,13 @@ class EditableText extends StatefulWidget {
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
   ///
-  /// If this is null, there is no limit to the number of lines. If it is not
-  /// null, the value must be greater than zero.
+  /// If this is null, there is no limit to the number of lines, and the text
+  /// container will start with enough vertical space for one line and
+  /// automatically grow to accomodate additional lines as they are entered.
+  ///
+  /// If it is not null, the value must be greater than zero. If it is greater
+  /// than 1, it will take up enough horizontal space to accomodate that number
+  /// of lines.
   /// {@endtemplate}
   final int maxLines;
 
