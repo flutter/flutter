@@ -254,6 +254,26 @@ void main() {
     );
   });
 
+  test('Listenable.merge does not leak', () {
+    // Regression test for https://github.com/flutter/flutter/issues/25163.
+
+    final TestNotifier source1 = TestNotifier();
+    final TestNotifier source2 = TestNotifier();
+    final VoidCallback fakeListener = () {};
+
+    final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
+    expect(source1.hasListeners, isFalse);
+    expect(source2.hasListeners, isFalse);
+    listenableUnderTest.addListener(fakeListener);
+    expect(source1.hasListeners, isTrue);
+    expect(source2.hasListeners, isTrue);
+
+    listenableUnderTest.removeListener(fakeListener);
+    expect(source1.hasListeners, isFalse);
+    expect(source2.hasListeners, isFalse);
+  });
+
+
   test('hasListeners', () {
     final HasListenersTester<bool> notifier = HasListenersTester<bool>(true);
     expect(notifier.testHasListeners, isFalse);
