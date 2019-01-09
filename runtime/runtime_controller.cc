@@ -24,7 +24,8 @@ RuntimeController::RuntimeController(
     fml::WeakPtr<GrContext> p_resource_context,
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
-    std::string p_advisory_script_entrypoint)
+    std::string p_advisory_script_entrypoint,
+    fml::closure p_idle_notification_callback)
     : RuntimeController(p_client,
                         p_vm,
                         std::move(p_isolate_snapshot),
@@ -35,6 +36,7 @@ RuntimeController::RuntimeController(
                         std::move(p_unref_queue),
                         std::move(p_advisory_script_uri),
                         std::move(p_advisory_script_entrypoint),
+                        p_idle_notification_callback,
                         WindowData{/* default window data */}) {}
 
 RuntimeController::RuntimeController(
@@ -48,6 +50,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
+    fml::closure idle_notification_callback,
     WindowData p_window_data)
     : client_(p_client),
       vm_(p_vm),
@@ -59,6 +62,7 @@ RuntimeController::RuntimeController(
       unref_queue_(p_unref_queue),
       advisory_script_uri_(p_advisory_script_uri),
       advisory_script_entrypoint_(p_advisory_script_entrypoint),
+      idle_notification_callback_(idle_notification_callback),
       window_data_(std::move(p_window_data)),
       root_isolate_(
           DartIsolate::CreateRootIsolate(vm_,
@@ -120,6 +124,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       unref_queue_,                 //
       advisory_script_uri_,         //
       advisory_script_entrypoint_,  //
+      idle_notification_callback_,  //
       window_data_                  //
       ));
 }
@@ -201,7 +206,14 @@ bool RuntimeController::NotifyIdle(int64_t deadline) {
   }
 
   tonic::DartState::Scope scope(root_isolate);
+
   Dart_NotifyIdle(deadline);
+
+  // Idle notifications being in isolate scope are part of the contract.
+  if (idle_notification_callback_) {
+    TRACE_EVENT0("flutter", "EmbedderIdleNotification");
+    idle_notification_callback_();
+  }
   return true;
 }
 
