@@ -128,6 +128,12 @@ class MethodChannel {
   /// result. The values supported by the default codec and their platform-specific
   /// counterparts are documented with [StandardMessageCodec].
   ///
+  /// The generic argument `T` of the method can be inferred by the surrounding
+  /// context, or provided explicitly. If it does not match the returned type of
+  /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be class
+  /// with generics, such as `Map<String, String>`, instead it must always
+  /// return an untyped map or list.
+  ///
   /// Returns a [Future] which completes to one of the following:
   ///
   /// * a result (possibly null), on successful invocation;
@@ -149,10 +155,9 @@ class MethodChannel {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
-  ///     // invokeMethod returns a Future<dynamic>, and we cannot pass that for
-  ///     // a Future<bool>, hence the indirection.
-  ///     final bool result = await _channel.invokeMethod('isLicensed');
-  ///     return result;
+  ///     // invokeMethod returns a Future<T> which can be inferred as bool
+  ///     // in this context.
+  ///     return _channel.invokeMethod('isLicensed');
   ///   }
   ///
   ///   static Future<List<Song>> songs() async {
@@ -160,6 +165,7 @@ class MethodChannel {
   ///     // List<dynamic> with Map<dynamic, dynamic> entries. Post-processing
   ///     // code thus cannot assume e.g. List<Map<String, String>> even though
   ///     // the actual values involved would support such a typed container.
+  ///     // The correct type cannot be inferred with any value of `T`.
   ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
   ///     return songs.map(Song.fromJson).toList();
   ///   }
@@ -168,7 +174,7 @@ class MethodChannel {
   ///     // Errors occurring on the platform side cause invokeMethod to throw
   ///     // PlatformExceptions.
   ///     try {
-  ///       await _channel.invokeMethod('play', <String, dynamic>{
+  ///       return _channel.invokeMethod('play', <String, dynamic>{
   ///         'song': song.id,
   ///         'volume': volume,
   ///       });
@@ -298,6 +304,10 @@ class MethodChannel {
 
   /// An implementation of [invokeMethod] that can return typed lists.
   ///
+  /// Dart generics are reified, meaning that an untyped List<dynamic>
+  /// cannot masquerade as a List<T>. Since invokeMethod can only return
+  /// dynamic maps, we instead create a new typed list using [List.cast].
+  ///
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
@@ -307,6 +317,10 @@ class MethodChannel {
   }
 
   /// An implementation of [invokeMethod] that can return typed maps.
+  ///
+  /// Dart generics are reified, meaning that an untyped Map<dynamic, dynamic>
+  /// cannot masquerade as a Map<K, V>. Since invokeMethod can only return
+  /// dynamic maps, we instead create a new typed map using [Map.cast].
   ///
   /// See also:
   ///
