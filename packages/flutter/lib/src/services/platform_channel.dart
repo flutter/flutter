@@ -296,8 +296,9 @@ class MethodChannel {
       name,
       codec.encodeMethodCall(MethodCall(method, arguments)),
     );
-    if (result == null)
+    if (result == null) {
       throw MissingPluginException('No implementation found for method $method on channel $name');
+    }
     final T typedResult = codec.decodeEnvelope(result);
     return typedResult;
   }
@@ -406,11 +407,25 @@ class OptionalMethodChannel extends MethodChannel {
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     try {
-      return super.invokeMethod<T>(method, arguments);
+      final T result = await super.invokeMethod<T>(method, arguments);
+      return result;
     } on MissingPluginException {
       return null;
     }
   }
+
+  @override
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) async {
+    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
+    return result.cast<T>();
+  }
+
+  @override
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
+    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+    return result.cast<K, V>();
+  }
+
 }
 
 /// A named channel for communicating with platform plugins using event streams.
