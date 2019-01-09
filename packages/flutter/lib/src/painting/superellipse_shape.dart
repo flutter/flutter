@@ -26,7 +26,7 @@ class SuperellipseShape extends ShapeBorder {
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
        assert(borderRadius != null);
-  
+
   /// The radius for each corner.
   ///
   /// Each corner [Radius] defines the endpoints for a line segment that
@@ -38,10 +38,10 @@ class SuperellipseShape extends ShapeBorder {
   final BorderRadiusGeometry borderRadius;
   /// The style of this border.
   final BorderSide side;
-  
+
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
-  
+
   @override
   ShapeBorder scale(double t) {
     return SuperellipseShape(
@@ -73,10 +73,10 @@ class SuperellipseShape extends ShapeBorder {
     }
     return super.lerpTo(b, t);
   }
-  
+
   double _clampToShortest(RRect rrect, double value) =>
   value > rrect.shortestSide ? rrect.shortestSide : value;
-  
+
   Path _getPath(RRect rrect) {
     /// Define the different variables of [rrect].
     final double left = rrect.left;
@@ -101,7 +101,7 @@ class SuperellipseShape extends ShapeBorder {
       math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
     final double brRadiusY =
       math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
-    
+
     return Path()
       ..moveTo(left, top + tlRadiusX)
       ..cubicTo(left, top, left, top, left + tlRadiusY, top)
@@ -113,17 +113,17 @@ class SuperellipseShape extends ShapeBorder {
       ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
       ..close();
   }
-  
+
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
-  
+
   @override
   Path getOuterPath(Rect rect, {TextDirection textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
-  
+
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
     if (rect.isEmpty)
