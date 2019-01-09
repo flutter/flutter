@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'colors.dart';
 import 'debug.dart';
@@ -179,7 +180,9 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(child != null),
+       assert(dragStartBehavior != null),
        assert(alignment != null),
        super(key: key);
 
@@ -196,6 +199,26 @@ class DrawerController extends StatefulWidget {
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
+
+  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag behavior used for opening
+  /// and closing a drawer will begin upon the detection of a drag gesture. If
+  /// set to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  /// {@endtemplate}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -399,6 +422,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
+          dragStartBehavior: widget.dragStartBehavior,
           child: Container(width: dragAreaWidth),
         ),
       );
@@ -410,6 +434,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
+        dragStartBehavior: widget.dragStartBehavior,
         child: RepaintBoundary(
           child: Stack(
             children: <Widget>[

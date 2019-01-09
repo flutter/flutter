@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'container.dart';
@@ -229,6 +230,7 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }): assert(value != null),
       assert(context != null),
       _value = value {
@@ -262,6 +264,23 @@ class TextSelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   final TextSelectionDelegate selectionDelegate;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], handle drag behavior will
+  /// begin upon the detection of a drag gesture. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
 
   /// Controls the fade-in animations.
   static const Duration _fadeDuration = Duration(milliseconds: 150);
@@ -365,9 +384,8 @@ class TextSelectionOverlay {
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-        selectionControls == null)
+         selectionControls == null)
       return Container(); // hide the second handle when collapsed
-
     return FadeTransition(
       opacity: _handleOpacity,
       child: _TextSelectionHandleOverlay(
@@ -378,6 +396,7 @@ class TextSelectionOverlay {
         selection: _selection,
         selectionControls: selectionControls,
         position: position,
+        dragStartBehavior: dragStartBehavior,
       )
     );
   }
@@ -447,7 +466,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.renderObject,
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
-    @required this.selectionControls
+    @required this.selectionControls,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final TextSelection selection;
@@ -457,6 +477,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -528,6 +549,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       link: widget.layerLink,
       showWhenUnlinked: false,
       child: GestureDetector(
+        dragStartBehavior: widget.dragStartBehavior,
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,
