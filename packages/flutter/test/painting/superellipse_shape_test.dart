@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -55,6 +57,26 @@ void main() {
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
+  });
+
+  testWidgets('SuperellipseShape golden', (WidgetTester tester) async {
+    await tester.pumpWidget(RepaintBoundary(
+      child: Material(
+        color: Colors.blueAccent[400],
+        shape: SuperellipseShape(
+          borderRadius: BorderRadius.circular(28.0),
+        ),
+        child: Container(width: 100.0, height: 100.0),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('superellipse_shape.superellipse_shape_golden.png'),
+      skip: !Platform.isLinux,
+    );
   });
 
 }
