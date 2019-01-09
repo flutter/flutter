@@ -146,6 +146,7 @@ void main(List<String> argList) {
     output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
     metadata: <String, Object>{
       'sourcePath': environment['SOURCE_PATH'],
+      'sourceLine': environment['SOURCE_LINE'],
       'package': packageName,
       'library': libraryName,
       'element': elementName,
