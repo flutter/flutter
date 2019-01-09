@@ -33,7 +33,6 @@ void main() {
     expect(const SuperellipseShape().getOuterPath(rect1), looksLikeRect1);
     expect(const SuperellipseShape().getInnerPath(rect1), looksLikeRect1);
 
-
     // Represents the inner path when borderSide.width = 4, which is just rect1
     // inset by 4 on all sides.
     final Matcher looksLikeInnerPath = isPathThat(

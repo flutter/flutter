@@ -9,9 +9,11 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a superellipse - a shape constituting a transition between a rectangle and a circle
-/// that is used to create smooth rounded corners.
+/// Creates a superellipse - a shape similar to a rounded rectangle, but with
+/// a smoother transition from the sides to the rounded corners and greater
+/// curve continuity.
 ///
+/// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
@@ -19,6 +21,7 @@ import 'edge_insets.dart';
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 class SuperellipseShape extends ShapeBorder {
   /// The arguments must not be null.
   const SuperellipseShape({
@@ -29,13 +32,10 @@ class SuperellipseShape extends ShapeBorder {
 
   /// The radius for each corner.
   ///
-  /// Each corner [Radius] defines the endpoints for a line segment that
-  /// spans the corner. The endpoints are located in the same place as
-  /// They would be for [RoundedRectangleBorder].
-  ///
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
+
   /// The style of this border.
   final BorderSide side;
 
@@ -74,8 +74,9 @@ class SuperellipseShape extends ShapeBorder {
     return super.lerpTo(b, t);
   }
 
-  double _clampToShortest(RRect rrect, double value) =>
-  value > rrect.shortestSide ? rrect.shortestSide : value;
+  double _clampToShortest(RRect rrect, double value) {
+    return value > rrect.shortestSide ? rrect.shortestSide : value;
+  }
 
   Path _getPath(RRect rrect) {
     final double left = rrect.left;
