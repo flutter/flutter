@@ -242,7 +242,7 @@ class TextPainter {
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
-        ..layout(ui.ParagraphConstraints(width: double.infinity));
+        ..layout(const ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;
   }

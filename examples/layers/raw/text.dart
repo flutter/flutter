@@ -84,7 +84,7 @@ void main() {
     // Next, we supply a width that the text is permitted to occupy and we ask
     // the paragraph to the visual position of each its glyphs as well as its
     // overall size, subject to its sizing constraints.
-    ..layout(ui.ParagraphConstraints(width: 180.0));
+    ..layout(const ui.ParagraphConstraints(width: 180.0));
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.window.onBeginFrame = beginFrame;
