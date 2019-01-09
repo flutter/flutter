@@ -45,7 +45,6 @@ ValidateFlutterFrameworkXcode10() {
     return 0
   fi
 
-  PROJECT_FILE_PATH="/Users/dnfield/src/ios_test_mod/.ios/Runner.xcodeproj"
   local pbxproj="${PROJECT_FILE_PATH}/project.pbxproj"
   AssertExists ${pbxproj}
 
