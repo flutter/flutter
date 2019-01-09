@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -16,19 +17,15 @@ import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_impo
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
-import '../base/terminal.dart';
-import '../build_info.dart';
-import '../bundle.dart';
-import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
+import 'compiler.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -223,142 +220,6 @@ enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef _Finalizer = Future<void> Function();
 
-class _CompilationRequest {
-  _CompilationRequest(this.path, this.result);
-  String path;
-  Completer<String> result;
-}
-
-// This class is a wrapper around compiler that allows multiple isolates to
-// enqueue compilation requests, but ensures only one compilation at a time.
-class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
-    // Compiler maintains and updates single incremental dill file.
-    // Incremental compilation requests done for each test copy that file away
-    // for independent execution.
-    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
-    final File outputDill = outputDillDirectory.childFile('output.dill');
-
-    printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
-
-    bool suppressOutput = false;
-    void reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
-      if (suppressOutput) {
-        return;
-      }
-
-      if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
-        printTrace(message);
-        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
-          emphasis: emphasis,
-          color: color,
-        );
-        suppressOutput = true;
-        return;
-      }
-
-      printError('$message');
-    }
-
-    final String testFilePath = getKernelPathForTransformerOptions(
-      fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
-      trackWidgetCreation: trackWidgetCreation,
-    );
-
-    ResidentCompiler createCompiler() {
-      return ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        unsafePackageSerialization: false,
-      );
-    }
-
-    printTrace('Listening to compiler controller...');
-    compilerController.stream.listen((_CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
-      compilationQueue.add(request);
-      // Only trigger processing if queue was empty - i.e. no other requests
-      // are currently being processed. This effectively enforces "one
-      // compilation request at a time".
-      if (isEmpty) {
-        while (compilationQueue.isNotEmpty) {
-          final _CompilationRequest request = compilationQueue.first;
-          printTrace('Compiling ${request.path}');
-          final Stopwatch compilerTime = Stopwatch()..start();
-          bool firstCompile = false;
-          if (compiler == null) {
-            compiler = createCompiler();
-            firstCompile = true;
-          }
-          suppressOutput = false;
-          final CompilerOutput compilerOutput = await compiler.recompile(
-            request.path,
-            <String>[request.path],
-            outputPath: outputDill.path,
-          );
-          final String outputPath = compilerOutput?.outputFilename;
-
-          // In case compiler didn't produce output or reported compilation
-          // errors, pass [null] upwards to the consumer and shutdown the
-          // compiler to avoid reusing compiler that might have gotten into
-          // a weird state.
-          if (outputPath == null || compilerOutput.errorCount > 0) {
-            request.result.complete(null);
-            await _shutdown();
-          } else {
-            final File outputFile = fs.file(outputPath);
-            final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
-            final File testCache = fs.file(testFilePath);
-            if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
-              // The idea is to keep the cache file up-to-date and include as
-              // much as possible in an effort to re-use as many packages as
-              // possible.
-              ensureDirectoryExists(testFilePath);
-              await outputFile.copy(testFilePath);
-            }
-            request.result.complete(kernelReadyToRun.path);
-            compiler.accept();
-            compiler.reset();
-          }
-          printTrace('Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
-          // Only remove now when we finished processing the element
-          compilationQueue.removeAt(0);
-        }
-      }
-    }, onDone: () {
-      printTrace('Deleting ${outputDillDirectory.path}...');
-      outputDillDirectory.deleteSync(recursive: true);
-    });
-  }
-
-  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
-  ResidentCompiler compiler;
-
-  Future<String> compile(String mainDart) {
-    final Completer<String> completer = Completer<String>();
-    compilerController.add(_CompilationRequest(mainDart, completer));
-    return completer.future;
-  }
-
-  Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
-    // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler.shutdown();
-      compiler = null;
-    }
-  }
-
-  Future<void> dispose() async {
-    await _shutdown();
-    await compilerController.close();
-  }
-}
-
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
     @required this.shellPath,
@@ -391,7 +252,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
 
   Directory fontsDirectory;
-  _Compiler compiler;
+  TestCompiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -540,7 +401,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory);
+        compiler ??= TestCompiler(trackWidgetCreation, projectRootDirectory);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
