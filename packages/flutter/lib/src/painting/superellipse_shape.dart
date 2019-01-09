@@ -17,11 +17,19 @@ import 'edge_insets.dart';
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: SuperellipseShape(25.0),
+///     shape: SuperellipseShape(
+///       borderRadius: BorderRadius.circular(28.0),
+///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
+/// 
+/// See also:
+/// 
+/// * [RoundedRectangleBorder] Which creates a square with rounded corners,
+///   however it doesn't allow the corners to bend the sides of the square
+///   lika a superellipse, resulting in a more square shape.
 class SuperellipseShape extends ShapeBorder {
   /// The arguments must not be null.
   const SuperellipseShape({
