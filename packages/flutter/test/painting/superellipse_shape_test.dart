@@ -101,4 +101,24 @@ void main() {
     );
   });
 
+  testWidgets('Golden test large radii', (WidgetTester tester) async {
+    await tester.pumpWidget(RepaintBoundary(
+      child: Material(
+        color: Colors.redAccent[400],
+        shape: SuperellipseShape(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
+        child: Container(width: 100.0, height: 100.0),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('superellipse_shape.golden_test_large_radii.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
 }
