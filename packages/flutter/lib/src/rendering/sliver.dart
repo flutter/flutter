@@ -99,6 +99,7 @@ class SliverConstraints extends Constraints {
     @required this.growthDirection,
     @required this.userScrollDirection,
     @required this.scrollOffset,
+    @required this.precedingScrollExtent,
     @required this.overlap,
     @required this.remainingPaintExtent,
     @required this.crossAxisExtent,
@@ -110,6 +111,7 @@ class SliverConstraints extends Constraints {
        assert(growthDirection != null),
        assert(userScrollDirection != null),
        assert(scrollOffset != null),
+       assert(precedingScrollExtent != null),
        assert(overlap != null),
        assert(remainingPaintExtent != null),
        assert(crossAxisExtent != null),
@@ -125,6 +127,7 @@ class SliverConstraints extends Constraints {
     GrowthDirection growthDirection,
     ScrollDirection userScrollDirection,
     double scrollOffset,
+    double precedingScrollExtent,
     double overlap,
     double remainingPaintExtent,
     double crossAxisExtent,
@@ -138,6 +141,7 @@ class SliverConstraints extends Constraints {
       growthDirection: growthDirection ?? this.growthDirection,
       userScrollDirection: userScrollDirection ?? this.userScrollDirection,
       scrollOffset: scrollOffset ?? this.scrollOffset,
+      precedingScrollExtent: precedingScrollExtent ?? this.precedingScrollExtent,
       overlap: overlap ?? this.overlap,
       remainingPaintExtent: remainingPaintExtent ?? this.remainingPaintExtent,
       crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
@@ -224,6 +228,29 @@ class SliverConstraints extends Constraints {
   /// Whether this corresponds to the beginning or the end of the sliver's
   /// contents depends on the [growthDirection].
   final double scrollOffset;
+
+  /// The scroll distance that has been consumed by all [Sliver]s that came
+  /// before this [Sliver].
+  ///
+  /// # Edge Cases
+  ///
+  /// [Sliver]s often lazily create their internal content as layout occurs,
+  /// e.g., [SliverList]. In this case, when [Sliver]s exceed the viewport,
+  /// their children are built lazily, and the [Sliver] does not have enough
+  /// information to estimate its total extent, [precedingScrollExtent] will be
+  /// [double.infinity] for all [Sliver]s that appear after the lazily
+  /// constructed child. This is because a total [scrollExtent] cannot be
+  /// calculated unless all inner children have been created and sized, or the
+  /// number of children and estimated extents are provided. The infinite
+  /// [scrollExtent] will become finite as soon as enough information is
+  /// available to estimate the overall extent of all children within the given
+  /// [Sliver].
+  ///
+  /// [Sliver]s may legitimately be infinite, meaning that they can scroll
+  /// content forever without reaching the end. For any [Sliver]s that appear
+  /// after the infinite [Sliver], the [precedingScrollExtent] will be
+  /// [double.infinity].
+  final double precedingScrollExtent;
 
   /// The number of pixels from where the pixels corresponding to the
   /// [scrollOffset] will be painted up to the first pixel that has not yet been
