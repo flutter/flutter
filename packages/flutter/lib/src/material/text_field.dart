@@ -610,7 +610,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
-  bool get cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
+  bool get _cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
 
   @override
   void deactivate() {
@@ -677,9 +677,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorWidth: widget.cursorWidth,
         cursorRadius: _cursorRadius,
         cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
-        cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorOpacityAnimates: _cursorOpacityAnimates,
         cursorOffset: const Offset(0, 0),
-        paintCursorOnTop: false,
+        paintCursorAboveText: false,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
