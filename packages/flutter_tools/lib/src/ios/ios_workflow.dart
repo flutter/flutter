@@ -27,7 +27,7 @@ class IOSWorkflow implements Workflow {
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
+  bool get canListDevices => iMobileDevice.isInstalled || (xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled);
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
