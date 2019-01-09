@@ -23,6 +23,7 @@ typedef enum {
   kSuccess = 0,
   kInvalidLibraryVersion,
   kInvalidArguments,
+  kInternalInconsistency,
 } FlutterResult;
 
 typedef enum {
@@ -53,6 +54,22 @@ typedef struct {
   double pers2;
 } FlutterTransformation;
 
+typedef void (*VoidCallback)(void* /* user data */);
+
+typedef struct {
+  //    Target texture of the active texture unit (example GL_TEXTURE_2D).
+  uint32_t target;
+  //    The name of the texture.
+  uint32_t name;
+  //    The texture format (example GL_RGBA8).
+  uint32_t format;
+  //    User data to be returned on the invocation of the destruction callback.
+  void* user_data;
+  //    Callback invoked (on an engine managed thread) that asks the embedder to
+  //    collect the texture.
+  VoidCallback destruction_callback;
+} FlutterOpenGLTexture;
+
 typedef bool (*BoolCallback)(void* /* user data */);
 typedef FlutterTransformation (*TransformationCallback)(void* /* user data */);
 typedef uint32_t (*UIntCallback)(void* /* user data */);
@@ -61,6 +78,11 @@ typedef bool (*SoftwareSurfacePresentCallback)(void* /* user data */,
                                                size_t /* row bytes */,
                                                size_t /* height */);
 typedef void* (*ProcResolver)(void* /* user data */, const char* /* name */);
+typedef bool (*TextureFrameCallback)(void* /* user data */,
+                                     int64_t /* texture identifier */,
+                                     size_t /* width */,
+                                     size_t /* height */,
+                                     FlutterOpenGLTexture* /* texture out */);
 
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
@@ -79,6 +101,11 @@ typedef struct {
   // operations. This callback is optional.
   TransformationCallback surface_transformation;
   ProcResolver gl_proc_resolver;
+  // When the embedder specifies that a texture has a frame available, the
+  // engine will call this method (on an internal engine managed thread) so that
+  // external texture details can be suppplied to the engine for subsequent
+  // composition.
+  TextureFrameCallback gl_external_texture_frame_callback;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {
@@ -219,6 +246,27 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
 // deprecated soon.
 FLUTTER_EXPORT
 FlutterResult __FlutterEngineFlushPendingTasksNow();
+
+// Register an external texture with a unique (per engine) identifier. Only
+// rendering backends that support external textures accept external texture
+// registrations. After the external texture is registered, the application can
+// mark that a frame is available by calling
+// |FlutterEngineMarkExternalTextureFrameAvailable|.
+FLUTTER_EXPORT
+FlutterResult FlutterEngineRegisterExternalTexture(FlutterEngine engine,
+                                                   int64_t texture_identifier);
+
+// Unregister a previous texture registration.
+FLUTTER_EXPORT
+FlutterResult FlutterEngineUnregisterExternalTexture(
+    FlutterEngine engine,
+    int64_t texture_identifier);
+
+// Mark that a new texture frame is available for a given texture identifier.
+FLUTTER_EXPORT
+FlutterResult FlutterEngineMarkExternalTextureFrameAvailable(
+    FlutterEngine engine,
+    int64_t texture_identifier);
 
 #if defined(__cplusplus)
 }  // extern "C"
