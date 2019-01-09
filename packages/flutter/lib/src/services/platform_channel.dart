@@ -275,6 +275,8 @@ class MethodChannel {
   ///
   /// See also:
   ///
+  ///  * [invokeListMethod], for automatically returning typed lists.
+  ///  * [invokeMapMethod], for automatically returning typed maps.
   ///  * [StandardMessageCodec] which defines the payload values supported by
   ///    [StandardMethodCodec].
   ///  * [JSONMessageCodec] which defines the payload values supported by
@@ -282,14 +284,8 @@ class MethodChannel {
   ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T extends dynamic>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     assert(method != null);
-    assert(T is Map && T is! Map<dynamic, dynamic>,
-      'invokeMethod can not return typed maps. '
-      'Instead use Map<dynamic, dynamic> or invokeMapMethod.');
-    assert(T is List && T is! List<dynamic>,
-      'invokeMethod can not return typed lists. '
-      'Instead use List<dynamic> or invokeListMethod.');
     final ByteData result = await BinaryMessages.send(
       name,
       codec.encodeMethodCall(MethodCall(method, arguments)),
@@ -301,12 +297,20 @@ class MethodChannel {
   }
 
   /// An implementation of [invokeMethod] that can return typed lists.
+  ///
+  /// See also:
+  ///
+  ///  * [invokeMethod], which this call delegates to.
   Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) async {
     final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
     return result.cast<T>();
   }
 
   /// An implementation of [invokeMethod] that can return typed maps.
+  ///
+  /// See also:
+  ///
+  ///  * [invokeMethod], which this call delegates to.
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
     final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result.cast<K, V>();
