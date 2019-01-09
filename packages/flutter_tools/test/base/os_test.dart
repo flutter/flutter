@@ -24,29 +24,37 @@ void main() {
   });
 
   group('which on POSIX', () {
+    FakePlatform fakePlatform;
+
+    setUp(() {
+      fakePlatform = FakePlatform(
+        operatingSystem: 'linux',
+        environment: const <String, String>{},
+      );
+    });
 
     testUsingContext('returns null when executable does not exist', () async {
-      when(mockProcessManager.runSync(<String>['which', kExecutable]))
+      when(mockProcessManager.runSync(<String>['which', kExecutable], environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, null, null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('returns exactly one result', () async {
-      when(mockProcessManager.runSync(<String>['which', 'foo']))
+      when(mockProcessManager.runSync(<String>['which', 'foo'], environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 0, kPath1, null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('returns all results for whichAll', () async {
-      when(mockProcessManager.runSync(<String>['which', '-a', kExecutable]))
+      when(mockProcessManager.runSync(<String>['which', '-a', kExecutable], environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       final List<File> result = utils.whichAll(kExecutable);
@@ -55,7 +63,7 @@ void main() {
       expect(result[1].path, kPath2);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => fakePlatform,
     });
   });
 
