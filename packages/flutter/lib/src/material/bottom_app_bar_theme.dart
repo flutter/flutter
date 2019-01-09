@@ -18,8 +18,8 @@ import 'theme.dart';
 /// Typically a [BottomAppBarTheme] is specified as part of the overall [Theme]
 /// with [ThemeData.bottomAppBarTheme].
 ///
-/// All properties are `null` by default. When null, the [BottomAppBar] constructor
-/// provides defaults.
+/// All [BottomAppBarTheme] properties are `null` by default. When null, the
+/// [BottomAppBar] constructor provides defaults.
 ///
 /// See also:
 ///
@@ -35,8 +35,7 @@ class BottomAppBarTheme extends Diagnosticable {
 
   /// Default value for [BottomAppBar.color].
   ///
-  /// If null, [ThemeData.bottomAppBarColor] is used, if that's null, defaults
-  /// to [Colors.white].
+  /// If null, [ThemeData.bottomAppBarColor] is used.
   final Color color;
 
   /// Default value for [BottomAppBar.elevation].

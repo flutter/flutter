@@ -89,7 +89,6 @@ void main() {
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme()),
       home: const Scaffold(body: BottomAppBar()),
     ));
 
