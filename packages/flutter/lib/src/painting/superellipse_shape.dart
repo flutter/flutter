@@ -9,7 +9,7 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a shape constituting a transition between a rectangle and a circle.
+/// Creates a superellipse - a shape constituting a transition between a rectangle and a circle.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
