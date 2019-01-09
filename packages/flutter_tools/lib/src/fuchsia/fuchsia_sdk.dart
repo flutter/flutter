@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 
@@ -68,45 +67,13 @@ class FuchsiaSdk {
 /// Fuchsia-specific artifacts used to interact with a device.
 class FuchsiaArtifacts {
   /// Creates a new [FuchsiaArtifacts].
-  ///
-  /// May optionally provide a file `sshConfig` file and `devFinder` file.
-  FuchsiaArtifacts({File sshConfig, File devFinder})
-    : _sshConfig = sshConfig,
-      _devFinder = devFinder;
+  FuchsiaArtifacts({this.sshConfig, this.devFinder});
 
   /// The location of the SSH configuration file used to interact with a
   /// Fuchsia device.
-  ///
-  /// Requires the env variable `BUILD_DIR` to be set if not provided by
-  /// the constructor.
-  File get sshConfig {
-    if (_sshConfig == null) {
-      final String buildDirectory = platform.environment['BUILD_DIR'];
-      if (buildDirectory == null) {
-        throwToolExit('BUILD_DIR must be supplied to locate SSH keys. For example:\n'
-          '  export BUILD_DIR=path/to/fuchsia/out/x64\n');
-      }
-      _sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
-    }
-    return _sshConfig;
-  }
-  File _sshConfig;
+  final File sshConfig;
 
   /// The location of the dev finder tool used to locate connected
   /// Fuchsia devices.
-  ///
-  /// Requires the env variable `BUILD_DIR` to be set if not provided by
-  /// the constructor.
-  File get devFinder {
-    if (_devFinder == null) {
-      final String buildDirectory = platform.environment['BUILD_DIR'];
-      if (buildDirectory == null) {
-        throwToolExit('BUILD_DIR must be supplied to dev_finder. For example:\n'
-          '  export BUILD_DIR=path/to/fuchsia/out/x64\n');
-      }
-      _devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
-    }
-    return _devFinder;
-  }
-  File _devFinder;
+  final File devFinder;
 }
