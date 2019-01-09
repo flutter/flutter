@@ -281,15 +281,35 @@ class MethodChannel {
   ///    [JSONMethodCodec].
   ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
-  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
+  @optionalTypeArgs
+  Future<T> invokeMethod<T extends dynamic>(String method, [dynamic arguments]) async {
     assert(method != null);
-    final dynamic result = await BinaryMessages.send(
+    assert(T is Map && T is! Map<dynamic, dynamic>,
+      'invokeMethod can not return typed maps. '
+      'Instead use Map<dynamic, dynamic> or invokeMapMethod.');
+    assert(T is List && T is! List<dynamic>,
+      'invokeMethod can not return typed lists. '
+      'Instead use List<dynamic> or invokeListMethod.');
+    final ByteData result = await BinaryMessages.send(
       name,
       codec.encodeMethodCall(MethodCall(method, arguments)),
     );
     if (result == null)
       throw MissingPluginException('No implementation found for method $method on channel $name');
-    return codec.decodeEnvelope(result);
+    final T typedResult = codec.decodeEnvelope(result);
+    return typedResult;
+  }
+
+  /// An implementation of [invokeMethod] that can return typed lists.
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) async {
+    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
+    return result.cast<T>();
+  }
+
+  /// An implementation of [invokeMethod] that can return typed maps.
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
+    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+    return result.cast<K, V>();
   }
 
   /// Sets a callback for receiving method calls on this channel.
@@ -366,9 +386,9 @@ class OptionalMethodChannel extends MethodChannel {
     : super(name, codec);
 
   @override
-  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     try {
-      return await super.invokeMethod(method, arguments);
+      return super.invokeMethod<T>(method, arguments);
     } on MissingPluginException {
       return null;
     }
@@ -434,7 +454,7 @@ class EventChannel {
         return null;
       });
       try {
-        await methodChannel.invokeMethod('listen', arguments);
+        await methodChannel.invokeMethod<void>('listen', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -446,7 +466,7 @@ class EventChannel {
     }, onCancel: () async {
       BinaryMessages.setMessageHandler(name, null);
       try {
-        await methodChannel.invokeMethod('cancel', arguments);
+        await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
