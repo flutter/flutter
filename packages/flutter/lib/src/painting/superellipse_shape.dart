@@ -24,9 +24,9 @@ import 'edge_insets.dart';
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
-/// 
+///
 /// * [RoundedRectangleBorder] Which creates a square with rounded corners,
 ///   however it doesn't allow the corners to bend the sides of the square
 ///   lika a superellipse, resulting in a more square shape.
