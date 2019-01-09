@@ -58,7 +58,7 @@ void main() {
     expect(border.getInnerPath(rect), looksLikeRect);
   });
 
-  testWidgets('SuperellipseShape golden', (WidgetTester tester) async {
+  testWidgets('Golden test even radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.blueAccent[400],
@@ -73,7 +73,30 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('superellipse_shape.superellipse_shape_golden.png'),
+      matchesGoldenFile('superellipse_shape.golden_test_even_radii.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Golden test varying radii', (WidgetTester tester) async {
+    await tester.pumpWidget(RepaintBoundary(
+      child: Material(
+        color: Colors.greenAccent[400],
+        shape: const SuperellipseShape(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28.0),
+            bottomRight: Radius.circular(14.0),
+          ),
+        ),
+        child: Container(width: 100.0, height: 100.0),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('superellipse_shape.golden_test_varying_radii.png'),
       skip: !Platform.isLinux,
     );
   });
