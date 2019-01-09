@@ -156,7 +156,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       try {
         final Iterable<Directory> directories = fs
             .directory(path)
-            .listSync()
+            .listSync(followLinks: false)
             .whereType<Directory>();
         for (Directory directory in directories) {
           final String name = directory.basename;
@@ -210,7 +210,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
     if (fs.directory(homeDirPath).existsSync()) {
-      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
+      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync(followLinks: false)) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
