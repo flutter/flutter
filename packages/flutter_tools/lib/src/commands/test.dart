@@ -75,6 +75,12 @@ class TestCommand extends FlutterCommand {
         help: 'Whether matchesGoldenFile() calls within your test methods should '
               'update the golden files rather than test for an existing match.',
       )
+      ..addFlag('watch',
+        negatable: false,
+        help: 'After initial run, continue watching application directory for '
+              'changes and re-run tests on change.\n'
+              'Should be called with only the test files that you care to track.'
+      )
       ..addOption('concurrency',
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
@@ -148,6 +154,11 @@ class TestCommand extends FlutterCommand {
       throwToolExit("The test command doesn't support --machine and coverage together");
     }
 
+    final bool watchTests = argResults['watch'];
+    if (collector != null && watchTests) {
+      throwToolExit("The test command doesn't support --watch and coverage together");
+    }
+
     TestWatcher watcher;
     if (collector != null) {
       watcher = collector;
@@ -167,6 +178,7 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
+      watchTests: watchTests,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
