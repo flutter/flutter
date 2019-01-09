@@ -158,7 +158,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.0"
+    version: "0.12.0+1"
   http_multi_server:
     dependency: "direct dev"
     description:
@@ -291,7 +291,7 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.6"
+    version: "1.4.0"
   process:
     dependency: "direct dev"
     description:
@@ -320,6 +320,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  share:
+    dependency: "direct main"
+    description:
+      name: share
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.3"
   shared_preferences:
     dependency: "direct main"
     description:

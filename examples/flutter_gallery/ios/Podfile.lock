@@ -6,6 +6,10 @@ PODS:
     - Flutter
   - Flutter (1.0.0)
   - Reachability (3.2)
+  - share (0.5.2):
+    - Flutter
+  - shared_preferences (0.0.1):
+    - Flutter
   - url_launcher (0.0.1):
     - Flutter
   - video_player (0.0.1):
@@ -14,7 +18,9 @@ PODS:
 DEPENDENCIES:
   - connectivity (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/connectivity-0.3.2/ios`)
   - device_info (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/device_info-0.3.0/ios`)
-  - Flutter (from `/Users/xster/development/flutter/bin/cache/artifacts/engine/ios`)
+  - Flutter (from `/Users/xster/development/flutter/bin/cache/artifacts/engine/ios-release`)
+  - share (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/share-0.5.3/ios`)
+  - shared_preferences (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.4.3/ios`)
   - url_launcher (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/url_launcher-4.0.3/ios`)
   - video_player (from `/Users/xster/.pub-cache/hosted/pub.dartlang.org/video_player-0.8.0/ios`)
 
@@ -28,7 +34,11 @@ EXTERNAL SOURCES:
   device_info:
     :path: "/Users/xster/.pub-cache/hosted/pub.dartlang.org/device_info-0.3.0/ios"
   Flutter:
-    :path: "/Users/xster/development/flutter/bin/cache/artifacts/engine/ios"
+    :path: "/Users/xster/development/flutter/bin/cache/artifacts/engine/ios-release"
+  share:
+    :path: "/Users/xster/.pub-cache/hosted/pub.dartlang.org/share-0.5.3/ios"
+  shared_preferences:
+    :path: "/Users/xster/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.4.3/ios"
   url_launcher:
     :path: "/Users/xster/.pub-cache/hosted/pub.dartlang.org/url_launcher-4.0.3/ios"
   video_player:
@@ -39,6 +49,8 @@ SPEC CHECKSUMS:
   device_info: 76ce0b32e13034d1883be4a382433648f9dcee63
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  share: 222b5dcc8031238af9d7de91149df65bad1aef75
+  shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
   url_launcher: 92b89c1029a0373879933c21642958c874539095
   video_player: 906796a841943c8d370ac7c13b18039aa9b56498
 

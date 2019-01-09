@@ -18,11 +18,9 @@ packages:
   assets_for_android_views:
     dependency: "direct main"
     description:
-      path: "dev/integration_tests/assets_for_android_views"
-      ref: c47f1308188dca65b3899228cac37f252ea8b411
-      resolved-ref: c47f1308188dca65b3899228cac37f252ea8b411
-      url: "https://github.com/flutter/goldens.git"
-    source: git
+      path: "../../../bin/cache/pkg/goldens/dev/integration_tests/assets_for_android_views"
+      relative: true
+    source: path
     version: "0.1.0"
   async:
     dependency: "direct main"
@@ -90,6 +88,18 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_goldens:
+    dependency: "direct dev"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  flutter_goldens_client:
+    dependency: transitive
+    description:
+      path: "../../../packages/flutter_goldens_client"
+      relative: true
+    source: path
+    version: "0.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -127,7 +137,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.0"
+    version: "0.12.0+1"
   http_multi_server:
     dependency: "direct dev"
     description:
@@ -248,7 +258,7 @@ packages:
     source: hosted
     version: "0.4.1"
   platform:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: platform
       url: "https://pub.dartlang.org"
@@ -267,9 +277,9 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.6"
+    version: "1.4.0"
   process:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: process
       url: "https://pub.dartlang.org"

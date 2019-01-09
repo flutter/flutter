@@ -73,7 +73,7 @@ packages:
       name: petitparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.1.0"
   quiver:
     dependency: "direct dev"
     description:
@@ -148,6 +148,6 @@ packages:
       name: xml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.3"
+    version: "3.2.5"
 sdks:
   dart: ">=2.0.0 <3.0.0"
