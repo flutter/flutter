@@ -27,7 +27,7 @@ class SuperellipseShape extends ShapeBorder {
   }) : assert(side != null),
        assert(borderRadius != null);
   
-  /// The radii for each corner.
+  /// The radius for each corner.
   ///
   /// Each corner [Radius] defines the endpoints for a line segment that
   /// spans the corner. The endpoints are located in the same place as
