@@ -46,7 +46,7 @@ class BottomAppBar extends StatefulWidget {
   /// Additionally, [elevation] must be non-negative.
   ///
   /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
-  /// If the corresponding [BottomAppBar] property is null, then the default
+  /// If the corresponding [BottomAppBarTheme] property is null, then the default
   /// specified in the property's documentation will be used.
   const BottomAppBar({
     Key key,
@@ -82,7 +82,7 @@ class BottomAppBar extends StatefulWidget {
   /// value is non-negative.
   ///
   /// If this property is null then [ThemeData.bottomAppBarTheme.elevation] is used,
-  /// if that's null, default value is 8.
+  /// if that's null, the default value is 8.
   final double elevation;
 
   /// The notch that is made for the floating action button.
