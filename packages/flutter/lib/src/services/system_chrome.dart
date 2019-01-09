@@ -347,6 +347,7 @@ class SystemChrome {
   /// to a random value on Android.
   ///
   /// ```dart imports
+  ///    import 'package:flutter/services';
   ///    import 'dart:math' as math;
   /// ```
   ///
