@@ -78,7 +78,6 @@ class SuperellipseShape extends ShapeBorder {
   value > rrect.shortestSide ? rrect.shortestSide : value;
 
   Path _getPath(RRect rrect) {
-    /// Define the different variables of [rrect].
     final double left = rrect.left;
     final double right = rrect.right;
     final double top = rrect.top;
