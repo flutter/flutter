@@ -42,7 +42,6 @@ void main() {
   group('displays friendly error when', () {
     final MockProcessManager mockProcessManager = MockProcessManager();
     final MockProcessResult mockProcessResult = MockProcessResult();
-    final MockFuchsiaArtifacts mockFuchsiaArtifacts = MockFuchsiaArtifacts();
     final MockFile mockFile = MockFile();
     when(mockProcessManager.run(
       any,
@@ -52,22 +51,8 @@ void main() {
     when(mockProcessResult.exitCode).thenReturn(1);
     when<String>(mockProcessResult.stdout).thenReturn('');
     when<String>(mockProcessResult.stderr).thenReturn('');
-    when(mockFuchsiaArtifacts.sshConfig).thenReturn(mockFile);
     when(mockFile.absolute).thenReturn(mockFile);
     when(mockFile.path).thenReturn('');
-
-    testUsingContext('No BUILD_DIR set', () async {
-      final FuchsiaDevice device = FuchsiaDevice('id');
-      ToolExit toolExit;
-      try {
-        await device.servicePorts();
-      } on ToolExit catch (err) {
-        toolExit = err;
-      }
-      expect(toolExit.message, contains('BUILD_DIR must be supplied to locate SSH keys'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
 
     final MockProcessManager emptyStdoutProcessManager = MockProcessManager();
     final MockProcessResult emptyStdoutProcessResult = MockProcessResult();
@@ -91,7 +76,10 @@ void main() {
       expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
-      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+        sshConfig: mockFile,
+        devFinder: mockFile,
+      ),
     });
 
     group('device logs', () {
@@ -202,8 +190,6 @@ void main() {
     });
   });
 }
-
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
