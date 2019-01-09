@@ -74,6 +74,12 @@ struct Settings {
   // The isolate is not current and may have already been destroyed when this
   // call is made.
   fml::closure root_isolate_shutdown_callback;
+  // The callback made on the UI thread in an isolate scope when the engine
+  // detects that the framework is idle. The VM also uses this time to perform
+  // tasks suitable when idling. Due to this, embedders are still advised to be
+  // as fast as possible in returning from this callback. Long running
+  // operations in this callback do have the capability of introducing jank.
+  fml::closure idle_notification_callback;
   bool enable_software_rendering = false;
   bool skia_deterministic_rendering_on_cpu = false;
   bool verbose_logging = false;
