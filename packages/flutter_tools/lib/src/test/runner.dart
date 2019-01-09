@@ -15,6 +15,8 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import 'bootstrap.dart';
+import 'compiler.dart';
 import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
@@ -68,19 +70,47 @@ Future<int> runTests(
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  loader.installHook(
-    shellPath: shellPath,
-    watcher: watcher,
-    enableObservatory: enableObservatory,
-    machine: machine,
-    startPaused: startPaused,
-    serverType: serverType,
-    precompiledDillPath: precompiledDillPath,
-    precompiledDillFiles: precompiledDillFiles,
-    trackWidgetCreation: trackWidgetCreation,
-    updateGoldens: updateGoldens,
-    projectRootDirectory: fs.currentDirectory.uri,
-  );
+  final Uri projectRootDirectory = fs.currentDirectory.uri;
+
+  final TestCompiler compiler = TestCompiler(trackWidgetCreation, projectRootDirectory);
+
+  final Function compileTestFiles = ({List<String> invalidatedFiles = const <String>[]}) async {
+    int index = 0;
+    final Map<String, String> precompiledDillFiles = <String, String>{};
+    final Map<String, List<Finalizer>> finalizers = <String, List<Finalizer>>{};
+    for (String file in testFiles) {
+      final List<Finalizer> fileFinalizers = <Finalizer>[];
+      final String mainDart = createListenerDart(
+        fileFinalizers,
+        index,
+        file,
+        loader.kHosts[serverType],
+        updateGoldens,
+      );
+
+      final String dillPath = await compiler.compile(mainDart);
+      precompiledDillFiles[file] = dillPath;
+      finalizers[file] = fileFinalizers;
+      index++;
+    }
+
+    loader.installHook(
+      shellPath: shellPath,
+      watcher: watcher,
+      enableObservatory: enableObservatory,
+      machine: machine,
+      startPaused: startPaused,
+      serverType: serverType,
+      precompiledDillFiles: precompiledDillFiles,
+      trackWidgetCreation: trackWidgetCreation,
+      updateGoldens: updateGoldens,
+      projectRootDirectory: projectRootDirectory,
+      fileFinalizers: finalizers,
+    );
+  };
+
+
+  await compileTestFiles();
 
   // Make the global packages path absolute.
   // (Makes sure it still works after we change the current directory.)

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -26,7 +25,6 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
 import 'bootstrap.dart';
-import 'compiler.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -40,7 +38,7 @@ const Duration _kTestProcessTimeout = Duration(minutes: 5);
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
-final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
+final Map<InternetAddressType, InternetAddress> kHosts = <InternetAddressType, InternetAddress>{
   InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
@@ -57,15 +55,16 @@ void installHook({
   bool machine = false,
   bool startPaused = false,
   int port = 0,
-  String precompiledDillPath,
-  Map<String, String> precompiledDillFiles,
+  @required Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
+  Map<String, List<Finalizer>> fileFinalizers = const <String, List<Finalizer>>{},
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
+  assert(precompiledDillFiles != null && precompiledDillFiles.isNotEmpty);
   hack.registerPlatformPlugin(
     <Runtime>[Runtime.vm],
     () => _FlutterPlatform(
@@ -75,9 +74,8 @@ void installHook({
       enableObservatory: enableObservatory,
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
-      host: _kHosts[serverType],
+      host: kHosts[serverType],
       port: port,
-      precompiledDillPath: precompiledDillPath,
       precompiledDillFiles: precompiledDillFiles,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
@@ -99,7 +97,6 @@ class _FlutterPlatform extends PlatformPlugin {
     this.explicitObservatoryPort,
     this.host,
     this.port,
-    this.precompiledDillPath,
     this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
@@ -114,14 +111,12 @@ class _FlutterPlatform extends PlatformPlugin {
   final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
-  final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
 
   Directory fontsDirectory;
-  TestCompiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -168,9 +163,6 @@ class _FlutterPlatform extends PlatformPlugin {
       // Fail if there will be a port conflict.
       if (explicitObservatoryPort != null)
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
-      // Fail if we're passing in a precompiled entry-point.
-      if (precompiledDillPath != null)
-        throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
@@ -191,22 +183,6 @@ class _FlutterPlatform extends PlatformPlugin {
     );
     testCompleteCompleter.complete(_startTest(testPath, localChannel, ourTestCount));
     return remoteChannel;
-  }
-
-  Future<String> _compileExpressionService(String isolateId, String expression,
-      List<String> definitions, List<String> typeDefinitions,
-      String libraryUri, String klass, bool isStatic,
-      ) async {
-    if (compiler == null || compiler.compiler == null) {
-      throw 'Compiler is not set up properly to compile $expression';
-    }
-    final CompilerOutput compilerOutput =
-      await compiler.compiler.compileExpression(expression, definitions,
-        typeDefinitions, libraryUri, klass, isStatic);
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
-      return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
-    }
-    throw 'Failed to compile $expression';
   }
 
   Future<_AsyncError> _startTest(
@@ -259,31 +235,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // If a kernel file is given, then use that to launch the test.
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
-      String mainDart;
-      if (precompiledDillPath != null) {
-        mainDart = precompiledDillPath;
-      } else if (precompiledDillFiles != null) {
-        mainDart = precompiledDillFiles[testPath];
-      }
-      mainDart ??= createListenerDart(
-        finalizers,
-        ourTestCount,
-        testPath,
-        server,
-        host,
-        updateGoldens
-      );
-
-      if (precompiledDillPath == null && precompiledDillFiles == null) {
-        // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(trackWidgetCreation, projectRootDirectory);
-        mainDart = await compiler.compile(mainDart);
-
-        if (mainDart == null) {
-          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
-          return null;
-        }
-      }
+      final String mainDart = precompiledDillFiles[testPath];
 
       final Process process = await _startProcess(
         shellPath,
@@ -340,8 +292,7 @@ class _FlutterPlatform extends PlatformPlugin {
           processObservatoryUri = detectedUri;
           {
             printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
-              compileExpression: _compileExpressionService);
+            final Future<VMService> localVmService = VMService.connect(processObservatoryUri);
             localVmService.then((VMService vmservice) {
               printTrace('Successfully connected to service protocol: $processObservatoryUri');
             });
@@ -547,10 +498,6 @@ class _FlutterPlatform extends PlatformPlugin {
 
   @override
   Future<dynamic> close() async {
-    if (compiler != null) {
-      await compiler.dispose();
-      compiler = null;
-    }
     if (fontsDirectory != null) {
       printTrace('Deleting ${fontsDirectory.path}...');
       fontsDirectory.deleteSync(recursive: true);
