@@ -24,8 +24,8 @@ class SuperellipseShape extends ShapeBorder {
   const SuperellipseShape({
     this.side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  })  : assert(side != null),
-        assert(borderRadius != null);
+  }) : assert(side != null),
+       assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
@@ -36,7 +36,6 @@ class SuperellipseShape extends ShapeBorder {
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
-
   /// The style of this border.
   final BorderSide side;
 
@@ -57,8 +56,7 @@ class SuperellipseShape extends ShapeBorder {
     if (a is SuperellipseShape) {
       return SuperellipseShape(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius:
-            BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -70,15 +68,14 @@ class SuperellipseShape extends ShapeBorder {
     if (b is SuperellipseShape) {
       return SuperellipseShape(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius:
-            BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
   }
 
   double _clampToShortest(RRect rrect, double value) =>
-      value > rrect.shortestSide ? rrect.shortestSide : value;
+  value > rrect.shortestSide ? rrect.shortestSide : value;
 
   Path _getPath(RRect rrect) {
     /// Define the different variables of [rrect].
@@ -86,25 +83,24 @@ class SuperellipseShape extends ShapeBorder {
     final double right = rrect.right;
     final double top = rrect.top;
     final double bottom = rrect.bottom;
-
     /// Radii will be clamped to the value of the shortest side
     /// of [rrect] to avoid strange tie-fighter shapes.
     final double tlRadiusX =
-        math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
+      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
     final double tlRadiusY =
-        math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
+      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
     final double trRadiusX =
-        math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
+      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
     final double trRadiusY =
-        math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
+      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
     final double blRadiusX =
-        math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
+      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
     final double blRadiusY =
-        math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
+      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
     final double brRadiusX =
-        math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
+      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
     final double brRadiusY =
-        math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
+      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
 
     return Path()
       ..moveTo(left, top + tlRadiusX)
@@ -120,8 +116,7 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(
-        borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
@@ -131,10 +126,11 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
-    if (rect.isEmpty) return;
+    if (rect.isEmpty)
+      return;
     switch (side.style) {
       case BorderStyle.none:
-        break;
+      break;
       case BorderStyle.solid:
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint();
@@ -145,9 +141,11 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType) return false;
+    if (runtimeType != other.runtimeType)
+      return false;
     final SuperellipseShape typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius;
+    return side == typedOther.side
+        && borderRadius == typedOther.borderRadius;
   }
 
   @override
