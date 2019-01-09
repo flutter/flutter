@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -23,6 +24,11 @@ import 'fuchsia_workflow.dart';
 
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
+// Enables testing the fuchsia isolate discovery
+Future<VMService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+  return VMService.connect(uri);
+}
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -207,6 +213,17 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsScreenshot => false;
 
+  bool get ipv6 {
+    // Workaround for https://github.com/dart-lang/sdk/issues/29456
+    final String fragment = id.split('%').first;
+    try {
+      Uri.parseIPv6Address(fragment);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
+
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
     final String findOutput = await shell('find /hub -name vmservice-port');
@@ -277,6 +294,93 @@ class FuchsiaDevice extends Device {
     }
     throwToolExit('No ports found running $isolateName');
     return null;
+  }
+
+  FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+}
+
+class FuchsiaIsolateDiscoveryProtocol {
+  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
+    this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
+    this._pollOnce = false,
+  ]);
+
+  static const Duration _pollDuration = Duration(seconds: 10);
+  final Map<int, VMService> _ports = <int, VMService>{};
+  final FuchsiaDevice _device;
+  final String _isolateName;
+  final Completer<Uri> _foundUri = Completer<Uri>();
+  final Future<VMService> Function(Uri) _vmServiceConnector;
+  // whether to only poll once.
+  final bool _pollOnce;
+  Timer _pollingTimer;
+  Status _status;
+
+  FutureOr<Uri> get uri {
+    if (_uri != null) {
+      return _uri;
+    }
+    _status ??= logger.startProgress(
+      'Waiting for a connection from $_isolateName on ${_device.name}...',
+      expectSlowOperation: true,
+    );
+    _pollingTimer ??= Timer(_pollDuration, _findIsolate);
+    return _foundUri.future.then((Uri uri) {
+      _uri = uri;
+      return uri;
+    });
+  }
+  Uri _uri;
+
+  void dispose() {
+    if (!_foundUri.isCompleted) {
+      _status?.cancel();
+      _status = null;
+      _pollingTimer?.cancel();
+      _pollingTimer = null;
+      _foundUri.completeError(Exception('Did not complete'));
+    }
+  }
+
+  Future<void> _findIsolate() async {
+    final List<int> ports = await _device.servicePorts();
+    for (int port in ports) {
+      VMService service;
+      if (_ports.containsKey(port)) {
+        service = _ports[port];
+      } else {
+        final int localPort = await _device.portForwarder.forward(port);
+        try {
+          final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
+          service = await _vmServiceConnector(uri);
+          _ports[port] = service;
+        } on SocketException catch (err) {
+          printTrace('Failed to connect to $localPort: $err');
+          continue;
+        }
+      }
+      await service.getVM();
+      await service.refreshViews();
+      for (FlutterView flutterView in service.vm.views) {
+        if (flutterView.uiIsolate == null) {
+          continue;
+        }
+        final Uri address = flutterView.owner.vmService.httpAddress;
+        if (flutterView.uiIsolate.name.contains(_isolateName)) {
+          _foundUri.complete(_device.ipv6
+            ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
+            : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
+          _status.stop();
+          return;
+        }
+      }
+    }
+    if (_pollOnce) {
+      _foundUri.completeError(Exception('Max iterations exceeded'));
+      _status.stop();
+      return;
+    }
+    _pollingTimer = Timer(_pollDuration, _findIsolate);
   }
 }
 
