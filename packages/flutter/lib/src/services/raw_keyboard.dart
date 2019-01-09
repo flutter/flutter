@@ -13,52 +13,72 @@ import 'system_channels.dart';
 /// An enum describing the side of the keyboard that a key is on, to allow
 /// discrimination between which key is pressed (e.g. the left or right SHIFT
 /// key).
+///
+/// See also:
+///
+///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
+///    argument.
 enum KeyboardSide {
   /// Matches either the left or right version of the key.
   any,
-  /// Matches either the left version of the key.
+
+  /// Matches the left version of the key.
   left,
-  /// Matches either the right version of the key.
+
+  /// Matches the right version of the key.
   right,
+
   /// Matches the left and right version of the key pressed simultaneously.
   both,
 }
 
 /// An enum describing the type of modifier key that is being pressed.
+///
+/// See also:
+///
+///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
+///    argument.
 enum ModifierKey {
   /// The CTRL modifier key. Typically, there are two of these.
-  ctrlModifier,
+  controlModifier,
+
   /// The SHIFT modifier key. Typically, there are two of these.
   shiftModifier,
+
   /// The ALT modifier key. Typically, there are two of these.
   altModifier,
-  /// The META modifier key. Typically, there are two of these.
-  /// Sometimes also called SUPER. This is, for example, the Windows key on
-  /// Windows (⊞), the Command (⌘) key on macOS and iOS, and the Search (🔍) key
-  /// on Android.
+
+  /// The META modifier key. Typically, there are two of these. This is, for
+  /// example, the Windows key on Windows (⊞), the Command (⌘) key on macOS and
+  /// iOS, and the Search (🔍) key on Android.
   metaModifier,
+
   /// The CAPS LOCK modifier key. Typically, there is one of these. Only shown
   /// as "pressed" when the caps lock is on, so on a key up when the mode is
   /// turned on, on each key press when it's enabled, and on a key down when it
   /// is turned off.
   capsLockModifier,
+
   /// The NUM LOCK modifier key. Typically, there is one of these. Only shown as
   /// "pressed" when the num lock is on, so on a key up when the mode is turned
   /// on, on each key press when it's enabled, and on a key down when it is
   /// turned off.
   numLockModifier,
+
   /// The SCROLL LOCK modifier key. Typically, there is one of these.  Only
   /// shown as "pressed" when the scroll lock is on, so on a key up when the
   /// mode is turned on, on each key press when it's enabled, and on a key down
   /// when it is turned off.
   scrollLockModifier,
+
   /// The FUNCTION (Fn) modifier key. Typically, there is one of these.
   functionModifier,
+
   /// The SYMBOL modifier key. Typically, there is one of these.
   symbolModifier,
 }
-  
-/// Base class for platform specific key event data.
+
+/// Base class for platform-specific key event data.
 ///
 /// This base class exists to have a common type to use for each of the
 /// target platform's key event data structures.
@@ -76,17 +96,39 @@ abstract class RawKeyEventData {
   /// const constructors so that they can be used in const expressions.
   const RawKeyEventData();
 
-  /// Returns true if the given [ModifierKey] is pressed.  If [side] is
-  /// specified, then restricts check to the specified side of the keyboard.
-  /// Defaults to checking for the key being down on either side of the
-  /// keyboard. If there is only instance of the key on the keyboard, returns
-  /// true for any value of [side].
-  bool isModifierPressed(ModifierKey key, [KeyboardSide side = KeyboardSide.any]);
+  /// Returns true if the given [ModifierKey] was pressed at the time of this
+  /// event.  If [side] is specified, then this restricts its check to the
+  /// specified side of the keyboard. Defaults to checking for the key being
+  /// down on either side of the keyboard. If there is only instance of the key
+  /// on the keyboard, then [side] is ignored.
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
+
+  /// Returns true if a CTRL modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
+  /// if you need to know which control key was pressed.
+  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier, side: KeyboardSide.any);
+
+  /// Returns true if a SHIFT modifier key was pressed at the time of this
+  /// event, regardless of which side of the keyboard it is on. Use
+  /// [isModifierPressed] if you need to know which shift key was pressed.
+  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.any);
+
+  /// Returns true if a ALT modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
+  /// if you need to know which alt key was pressed.
+  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier, side: KeyboardSide.any);
+
+  /// Returns true if a META modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
+  /// if you need to know which meta key was pressed.
+  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
 
   /// Returns the set of modifier keys that were pressed at the time of this
-  /// event, regardless of which side of the keyboard they were on.
+  /// event, regardless of which side of the keyboard they were on. Use
+  /// [isModifierPressed] if you need to know which side of the keyboard a
+  /// pressed modifier was on.
   Set<ModifierKey> get modifiersPressed {
-    Set<ModifierKey> result;
+    final Set<ModifierKey> result = Set<ModifierKey>();
     for (ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
         result.add(key);
@@ -104,8 +146,10 @@ abstract class RawKeyEventData {
 ///
 /// See also:
 ///
-///  * [RawKeyDownEvent], a specialization for events representing the user pressing a key.
-///  * [RawKeyUpEvent], a specialization for events representing the user releasing a key.
+///  * [RawKeyDownEvent], a specialization for events representing the user
+///    pressing a key.
+///  * [RawKeyUpEvent], a specialization for events representing the user
+///    releasing a key.
 ///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
@@ -139,8 +183,9 @@ abstract class RawKeyEvent {
         );
         break;
       default:
-        // We don't yet implement raw key events on iOS, but we don't hit this
-        // exception because the engine never sends us these messages.
+        // We don't yet implement raw key events on iOS or other platforms, but
+        // we don't hit this exception because the engine never sends us these
+        // messages.
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
@@ -225,13 +270,17 @@ class RawKeyboard {
   }
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    if (_listeners.isEmpty)
+    if (_listeners.isEmpty) {
       return;
+    }
     final RawKeyEvent event = RawKeyEvent.fromMessage(message);
-    if (event == null)
+    if (event == null) {
       return;
-    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners))
-      if (_listeners.contains(listener))
+    }
+    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+      if (_listeners.contains(listener)) {
         listener(event);
+      }
+    }
   }
 }

@@ -4,22 +4,6 @@
 
 import 'raw_keyboard.dart';
 
-// Keyboard modifier masks for Fuschia.
-const int _kFuschiaModifierNone = 0;
-const int _kFuschiaModifierCapsLock = 1;
-const int _kFuschiaModifierLeftShift = 2;
-const int _kFuschiaModifierRightShift = 4;
-const int _kFuschiaModifierShift = 6; // (_kFuschiaModifierLeftShift | _kFuschiaModifierRightShift);
-const int _kFuschiaModifierLeftControl = 8;
-const int _kFuschiaModifierRightControl = 16;
-const int _kFuschiaModifierControl = 24; // (_kFuschiaModifierLeftControl | _kFuschiaModifierRightControl);
-const int _kFuschiaModifierLeftAlt = 32;
-const int _kFuschiaModifierRightAlt = 64;
-const int _kFuschiaModifierAlt = 96; // (_kFuschiaModifierLeftAlt | _kFuschiaModifierRightAlt);
-const int _kFuschiaModifierLeftSuper = 128;
-const int _kFuschiaModifierRightSuper = 256;
-const int _kFuschiaModifierSuper = 384; // (_kFuschiaModifierLeftSuper | _kFuschiaModifierRightSuper);
-
 /// Platform-specific key event data for Fuchsia.
 ///
 /// This object contains information about key events obtained from Fuchsia's
@@ -42,30 +26,48 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   /// The USB HID usage.
   ///
-  /// See <http://www.usb.org/developers/hidpage/Hut1_12v2.pdf>
+  /// See <http://www.usb.org/developers/hidpage/Hut1_12v2.pdf> for more
+  /// information.
   final int hidUsage;
 
   /// The Unicode code point represented by the key event, if any.
-  /// Dead keys are represented as Unicode combining characters.
   ///
   /// If there is no Unicode code point, this value is zero.
+  ///
+  /// Dead keys are represented as Unicode combining characters.
   final int codePoint;
 
-  /// The modifiers that we present when the key event occurred.
+  /// The modifiers that were present when the key event occurred.
   ///
   /// See <https://fuchsia.googlesource.com/garnet/+/master/public/fidl/fuchsia.ui.input/input_event_constants.fidl>
-  /// for the numerical values of the modifiers.
+  /// for the numerical values of the modifiers. Many of these are also
+  /// replicated as static constants in this class.
+  ///
+  /// See also:
+  ///
+  ///  * The [modifiersPressed] accessor to get a Set of currently pressed
+  ///    modifiers.
+  ///  * The [isModifierPressed] function to query if a specific modifier is
+  ///    pressed.
+  ///  * The [isControlPressed] convenience accessor to see if the CTRL key is
+  ///    pressed.
+  ///  * The [isShiftPressed] convenience accessor to see if the SHIFT key is
+  ///    pressed.
+  ///  * The [isAltPressed] convenience accessor to see if the ALT key is
+  ///    pressed.
+  ///  * The [isMetaPressed] convenience accessor to see if the META key is
+  ///    pressed.
   final int modifiers;
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
-    if (modifiers == _kFuschiaModifierNone || modifiers & anyMask == 0) {
+    if (modifiers & anyMask == 0) {
       return false;
     }
     switch (side) {
       case KeyboardSide.any:
         return true;
       case KeyboardSide.both:
-        return modifiers & anyMask == anyMask;
+        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
       case KeyboardSide.left:
         return modifiers & leftMask != 0;
       case KeyboardSide.right:
@@ -75,18 +77,19 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, [KeyboardSide side = KeyboardSide.any]) {
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+    assert(side != null);
     switch (key) {
-      case ModifierKey.ctrlModifier:
-        return _isLeftRightModifierPressed(side, _kFuschiaModifierControl, _kFuschiaModifierLeftControl, _kFuschiaModifierRightControl);
+      case ModifierKey.controlModifier:
+        return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, _kFuschiaModifierShift, _kFuschiaModifierLeftShift, _kFuschiaModifierRightShift);
+        return _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, _kFuschiaModifierAlt, _kFuschiaModifierLeftAlt, _kFuschiaModifierRightAlt);
+        return _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
       case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, _kFuschiaModifierSuper, _kFuschiaModifierLeftSuper, _kFuschiaModifierRightSuper);
+        return _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
       case ModifierKey.capsLockModifier:
-        return modifiers & _kFuschiaModifierCapsLock != 0;
+        return modifiers & modifierCapsLock != 0;
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:
       case ModifierKey.functionModifier:
@@ -95,5 +98,68 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
         return false;
     }
     return false;
+  }
+
+  // Keyboard modifier masks for Fuschia modifiers.
+
+  /// The [modifier] field indicates that no modifier keys are pressed if it
+  /// equals this value.
+  static const int modifierNone = 0x0;
+
+  /// This mask is used to check the [modifiers] field to test whether the CAPS
+  /// LOCK modifier key is on.
+  static const int modifierCapsLock = 0x1;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// SHIFT modifier key is pressed.
+  static const int modifierLeftShift = 0x2;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// SHIFT modifier key is pressed.
+  static const int modifierRightShift = 0x4;
+
+  /// This mask is used to check the [modifiers] field to test whether one of
+  /// the SHIFT modifier keys is pressed.
+  static const int modifierShift = modifierLeftShift | modifierRightShift;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// CTRL modifier key is pressed.
+  static const int modifierLeftControl = 0x8;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// CTRL modifier key is pressed.
+  static const int modifierRightControl = 0x10;
+
+  /// This mask is used to check the [modifiers] field to test whether one of
+  /// the CTRL modifier keys is pressed.
+  static const int modifierControl = modifierLeftControl | modifierRightControl;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// ALT modifier key is pressed.
+  static const int modifierLeftAlt = 0x20;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// ALT modifier key is pressed.
+  static const int modifierRightAlt = 0x40;
+
+  /// This mask is used to check the [modifiers] field to test whether one of
+  /// the ALT modifier keys is pressed.
+  static const int modifierAlt = modifierLeftAlt | modifierRightAlt;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// META modifier key is pressed.
+  static const int modifierLeftMeta = 0x80;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// META modifier key is pressed.
+  static const int modifierRightMeta = 0x100;
+
+  /// This mask is used to check the [modifiers] field to test whether one of
+  /// the META modifier keys is pressed.
+  static const int modifierMeta = modifierLeftMeta | modifierRightMeta;
+
+  @override
+  String toString() {
+    return '$runtimeType(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, modifiers down: $modifiersPressed)';
   }
 }

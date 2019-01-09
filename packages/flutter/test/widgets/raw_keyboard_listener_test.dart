@@ -43,7 +43,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -54,6 +54,7 @@ void main() {
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
     expect(typedData.modifiers, 0x08);
+    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
@@ -79,7 +80,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -93,7 +94,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
 
     await tester.idle();
