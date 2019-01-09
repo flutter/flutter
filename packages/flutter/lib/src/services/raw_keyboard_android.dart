@@ -49,11 +49,17 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   /// The hardware key code corresponding to this key event.
   ///
+  /// This is the physical key that was pressed, not the Unicode character.
+  /// See [codePoint] for the Unicode character.
+  ///
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getKeyCode()>
   /// for more information.
   final int keyCode;
 
-  /// The hardware scan code corresponding to this key event.
+  /// The hardware scan code id corresponding to this key event.
+  ///
+  /// These values are not reliable and vary from device to device, so this
+  /// information is mainly useful for debugging.
   ///
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getScanCode()>
   /// for more information.
@@ -67,17 +73,17 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   ///
   /// See also:
   ///
-  ///  * The [modifiersPressed] accessor to get a Set of currently pressed
+  ///  * [modifiersPressed], an accessor to get a Set of currently pressed
   ///    modifiers.
-  ///  * The [isModifierPressed] function to query if a specific modifier is
+  ///  * [isModifierPressed], a function to query if a specific modifier is
   ///    pressed.
-  ///  * The [isControlPressed] convenience accessor to see if the CTRL key is
+  ///  * [isControlPressed], a convenience accessor to see if the CTRL key is
   ///    pressed.
-  ///  * The [isShiftPressed] convenience accessor to see if the SHIFT key is
+  ///  * [isShiftPressed], a convenience accessor to see if the SHIFT key is
   ///    pressed.
-  ///  * The [isAltPressed] convenience accessor to see if the ALT key is
+  ///  * [isAltPressed], a convenience accessor to see if the ALT key is
   ///    pressed.
-  ///  * The [isMetaPressed] convenience accessor to see if the META key is
+  ///  * [isMetaPressed], a convenience accessor to see if the META key is
   ///    pressed.
   final int metaState;
 
@@ -126,80 +132,152 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   // Modifier key masks.
 
-  /// No modifier keys are pressed.
+  /// No modifier keys are pressed in the [metaState] field.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierNone = 0;
 
   /// This mask is used to check the [metaState] field to test whether one of
   /// the ALT modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierAlt = 0x02;
 
   /// This mask is used to check the [metaState] field to test whether the left
   /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftAlt = 0x10;
 
   /// This mask is used to check the [metaState] field to test whether the right
   /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightAlt = 0x20;
 
   /// This mask is used to check the [metaState] field to test whether one of
-  /// the SHIFT modifier keys is
-  /// pressed.
+  /// the SHIFT modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierShift = 0x01;
 
   /// This mask is used to check the [metaState] field to test whether the left
   /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftShift = 0x40;
 
   /// This mask is used to check the [metaState] field to test whether the right
   /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightShift = 0x80;
 
   /// This mask is used to check the [metaState] field to test whether the SYM
   /// modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierSym = 0x04;
 
   /// This mask is used to check the [metaState] field to test whether the
   /// Function modifier key (Fn) is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierFunction = 0x08;
 
   /// This mask is used to check the [metaState] field to test whether one of
   /// the CTRL modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierControl = 0x1000;
 
   /// This mask is used to check the [metaState] field to test whether the left
   /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftControl = 0x2000;
 
   /// This mask is used to check the [metaState] field to test whether the right
   /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightControl = 0x4000;
 
   /// This mask is used to check the [metaState] field to test whether one of
   /// the META modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierMeta = 0x10000;
 
   /// This mask is used to check the [metaState] field to test whether the left
   /// META modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftMeta = 0x20000;
 
   /// This mask is used to check the [metaState] field to test whether the right
   /// META modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightMeta = 0x40000;
 
   /// This mask is used to check the [metaState] field to test whether the CAPS
   /// LOCK modifier key is on.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierCapsLock = 0x100000;
 
   /// This mask is used to check the [metaState] field to test whether the NUM
   /// LOCK modifier key is on.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierNumLock = 0x200000;
 
   /// This mask is used to check the [metaState] field to test whether the
   /// SCROLL LOCK modifier key is on.
+  ///
+  /// Use this value if you need to decode the [metaState] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierScrollLock = 0x400000;
 
   @override
   String toString() {
-    return '$runtimeType(flags: $flags, codePoint: $codePoint, keyCode: $keyCode, scanCode: $scanCode, metaState: $metaState, modifiers down: $modifiersPressed)';
+    return '$runtimeType(flags: $flags, codePoint: $codePoint, keyCode: $keyCode, '
+        'scanCode: $scanCode, metaState: $metaState, modifiers down: $modifiersPressed)';
   }
 }

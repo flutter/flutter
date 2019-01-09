@@ -39,42 +39,57 @@ enum KeyboardSide {
 ///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
 ///    argument.
 enum ModifierKey {
-  /// The CTRL modifier key. Typically, there are two of these.
+  /// The CTRL modifier key.
+  ///
+  /// Typically, there are two of these.
   controlModifier,
 
-  /// The SHIFT modifier key. Typically, there are two of these.
+  /// The SHIFT modifier key.
+  ///
+  /// Typically, there are two of these.
   shiftModifier,
 
-  /// The ALT modifier key. Typically, there are two of these.
+  /// The ALT modifier key.
+  ///
+  /// Typically, there are two of these.
   altModifier,
 
-  /// The META modifier key. Typically, there are two of these. This is, for
-  /// example, the Windows key on Windows (⊞), the Command (⌘) key on macOS and
-  /// iOS, and the Search (🔍) key on Android.
+  /// The META modifier key.
+  ///
+  /// Typically, there are two of these. This is, for example, the Windows key
+  /// on Windows (⊞), the Command (⌘) key on macOS and iOS, and the Search (🔍)
+  /// key on Android.
   metaModifier,
 
-  /// The CAPS LOCK modifier key. Typically, there is one of these. Only shown
-  /// as "pressed" when the caps lock is on, so on a key up when the mode is
-  /// turned on, on each key press when it's enabled, and on a key down when it
-  /// is turned off.
+  /// The CAPS LOCK modifier key.
+  ///
+  /// Typically, there is one of these. Only shown as "pressed" when the caps
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
   capsLockModifier,
 
-  /// The NUM LOCK modifier key. Typically, there is one of these. Only shown as
-  /// "pressed" when the num lock is on, so on a key up when the mode is turned
-  /// on, on each key press when it's enabled, and on a key down when it is
-  /// turned off.
+  /// The NUM LOCK modifier key.
+  ///
+  /// Typically, there is one of these. Only shown as "pressed" when the num
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
   numLockModifier,
 
-  /// The SCROLL LOCK modifier key. Typically, there is one of these.  Only
-  /// shown as "pressed" when the scroll lock is on, so on a key up when the
-  /// mode is turned on, on each key press when it's enabled, and on a key down
-  /// when it is turned off.
+  /// The SCROLL LOCK modifier key.
+  ///
+  /// Typically, there is one of these.  Only shown as "pressed" when the scroll
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
   scrollLockModifier,
 
-  /// The FUNCTION (Fn) modifier key. Typically, there is one of these.
+  /// The FUNCTION (Fn) modifier key.
+  ///
+  /// Typically, there is one of these.
   functionModifier,
 
-  /// The SYMBOL modifier key. Typically, there is one of these.
+  /// The SYMBOL modifier key.
+  ///
+  /// Typically, there is one of these.
   symbolModifier,
 }
 
@@ -92,40 +107,49 @@ enum ModifierKey {
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
 abstract class RawKeyEventData {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// Abstract const constructor.
+  ///
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const RawKeyEventData();
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
-  /// event.  If [side] is specified, then this restricts its check to the
-  /// specified side of the keyboard. Defaults to checking for the key being
-  /// down on either side of the keyboard. If there is only instance of the key
-  /// on the keyboard, then [side] is ignored.
+  /// event.
+  ///
+  /// If [side] is specified, then this restricts its check to the specified
+  /// side of the keyboard. Defaults to checking for the key being down on
+  /// either side of the keyboard. If there is only one instance of the key on
+  /// the keyboard, then [side] is ignored.
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
 
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
-  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
-  /// if you need to know which control key was pressed.
+  /// regardless of which side of the keyboard it is on.
+  ///
+  /// Use [isModifierPressed] if you need to know which control key was pressed.
   bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier, side: KeyboardSide.any);
 
   /// Returns true if a SHIFT modifier key was pressed at the time of this
-  /// event, regardless of which side of the keyboard it is on. Use
-  /// [isModifierPressed] if you need to know which shift key was pressed.
+  /// event, regardless of which side of the keyboard it is on.
+  ///
+  /// Use [isModifierPressed] if you need to know which shift key was pressed.
   bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.any);
 
   /// Returns true if a ALT modifier key was pressed at the time of this event,
-  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
-  /// if you need to know which alt key was pressed.
+  /// regardless of which side of the keyboard it is on.
+  ///
+  /// Use [isModifierPressed] if you need to know which alt key was pressed.
   bool get isAltPressed => isModifierPressed(ModifierKey.altModifier, side: KeyboardSide.any);
 
   /// Returns true if a META modifier key was pressed at the time of this event,
-  /// regardless of which side of the keyboard it is on. Use [isModifierPressed]
-  /// if you need to know which meta key was pressed.
+  /// regardless of which side of the keyboard it is on.
+  ///
+  /// Use [isModifierPressed] if you need to know which meta key was pressed.
   bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
 
   /// Returns the set of modifier keys that were pressed at the time of this
-  /// event, regardless of which side of the keyboard they were on. Use
-  /// [isModifierPressed] if you need to know which side of the keyboard a
+  /// event, regardless of which side of the keyboard they were on.
+  ///
+  /// Use [isModifierPressed] if you need to know which side of the keyboard a
   /// pressed modifier was on.
   Set<ModifierKey> get modifiersPressed {
     final Set<ModifierKey> result = Set<ModifierKey>();
@@ -141,8 +165,8 @@ abstract class RawKeyEventData {
 /// Base class for raw key events.
 ///
 /// Raw key events pass through as much information as possible from the
-/// underlying platform's key events, which makes they provide a high level of
-/// fidelity but a low level of portability.
+/// underlying platform's key events, which allows them to provide a high level
+/// of fidelity but a low level of portability.
 ///
 /// See also:
 ///

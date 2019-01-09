@@ -45,17 +45,17 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   ///
   /// See also:
   ///
-  ///  * The [modifiersPressed] accessor to get a Set of currently pressed
+  ///  * [modifiersPressed], an accessor to get a Set of currently pressed
   ///    modifiers.
-  ///  * The [isModifierPressed] function to query if a specific modifier is
+  ///  * [isModifierPressed], a function to query if a specific modifier is
   ///    pressed.
-  ///  * The [isControlPressed] convenience accessor to see if the CTRL key is
+  ///  * [isControlPressed], a convenience accessor to see if the CTRL key is
   ///    pressed.
-  ///  * The [isShiftPressed] convenience accessor to see if the SHIFT key is
+  ///  * [isShiftPressed], a convenience accessor to see if the SHIFT key is
   ///    pressed.
-  ///  * The [isAltPressed] convenience accessor to see if the ALT key is
+  ///  * [isAltPressed], a convenience accessor to see if the ALT key is
   ///    pressed.
-  ///  * The [isMetaPressed] convenience accessor to see if the META key is
+  ///  * [isMetaPressed], a convenience accessor to see if the META key is
   ///    pressed.
   final int modifiers;
 
@@ -102,64 +102,121 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   // Keyboard modifier masks for Fuschia modifiers.
 
-  /// The [modifier] field indicates that no modifier keys are pressed if it
+  /// The [modifiers] field indicates that no modifier keys are pressed if it
   /// equals this value.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierNone = 0x0;
 
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierCapsLock = 0x1;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftShift = 0x2;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightShift = 0x4;
 
   /// This mask is used to check the [modifiers] field to test whether one of
   /// the SHIFT modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierShift = modifierLeftShift | modifierRightShift;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftControl = 0x8;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightControl = 0x10;
 
   /// This mask is used to check the [modifiers] field to test whether one of
   /// the CTRL modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierControl = modifierLeftControl | modifierRightControl;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftAlt = 0x20;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightAlt = 0x40;
 
   /// This mask is used to check the [modifiers] field to test whether one of
   /// the ALT modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierAlt = modifierLeftAlt | modifierRightAlt;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// META modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierLeftMeta = 0x80;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// META modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierRightMeta = 0x100;
 
   /// This mask is used to check the [modifiers] field to test whether one of
   /// the META modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
   static const int modifierMeta = modifierLeftMeta | modifierRightMeta;
 
   @override
   String toString() {
-    return '$runtimeType(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, modifiers down: $modifiersPressed)';
+    return '$runtimeType(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, '
+        'modifiers down: $modifiersPressed)';
   }
 }
