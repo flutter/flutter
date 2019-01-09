@@ -53,7 +53,7 @@ void main() {
     final RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
-    expect(typedData.modifiers, 0x08);
+    expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
     await tester.pumpWidget(Container());
