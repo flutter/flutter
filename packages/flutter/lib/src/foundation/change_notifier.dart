@@ -220,19 +220,23 @@ class ChangeNotifier implements Listenable {
   }
 }
 
-class _MergingListenable extends ChangeNotifier {
-  _MergingListenable(this._children) {
-    for (Listenable child in _children)
-      child?.addListener(notifyListeners);
-  }
+class _MergingListenable extends Listenable {
+  _MergingListenable(this._children);
 
   final List<Listenable> _children;
 
   @override
-  void dispose() {
-    for (Listenable child in _children)
-      child?.removeListener(notifyListeners);
-    super.dispose();
+  void addListener(VoidCallback listener) {
+    for (final Listenable child  in _children) {
+      child?.addListener(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    for (final Listenable child in _children) {
+      child?.removeListener(listener);
+    }
   }
 
   @override

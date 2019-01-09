@@ -180,12 +180,12 @@ void main() {
     log.clear();
   });
 
-  test('Can dispose merged notifier', () {
+  test('Can remove from merged notifier', () {
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
     final List<String> log = <String>[];
 
-    final ChangeNotifier merged = Listenable.merge(<Listenable>[source1, source2]);
+    final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
     final VoidCallback listener = () { log.add('listener'); };
 
     merged.addListener(listener);
@@ -193,8 +193,8 @@ void main() {
     source2.notify();
     expect(log, <String>['listener', 'listener']);
     log.clear();
-    merged.dispose();
 
+    merged.removeListener(listener);
     source1.notify();
     source2.notify();
     expect(log, isEmpty);
@@ -229,7 +229,7 @@ void main() {
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
 
-    ChangeNotifier listenableUnderTest = Listenable.merge(<Listenable>[]);
+    Listenable listenableUnderTest = Listenable.merge(<Listenable>[]);
     expect(listenableUnderTest.toString(), 'Listenable.merge([])');
 
     listenableUnderTest = Listenable.merge(<Listenable>[null]);
