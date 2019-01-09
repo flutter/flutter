@@ -82,7 +82,7 @@ class SuperellipseShape extends ShapeBorder {
     final double right = rrect.right;
     final double top = rrect.top;
     final double bottom = rrect.bottom;
-    /// Radii will be clamped to the value of the shortest side
+    //  Radii will be clamped to the value of the shortest side
     /// of [rrect] to avoid strange tie-fighter shapes.
     final double tlRadiusX =
       math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
