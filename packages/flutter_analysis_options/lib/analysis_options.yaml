@@ -7,12 +7,11 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are other similar analysis options files in the flutter repos,
-# which should be kept in sync with this file:
+# When editing, keep in mind that this package will be used by at least the following
+# repositories:
 #
-#   - analysis_options.yaml (this file)
-#   - packages/flutter/lib/analysis_options_analysis_options_base.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
