@@ -109,7 +109,7 @@ fi
 # a custom index.html, placing everything into dev/docs/doc.
 (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" packages get)
 (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
-(cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
+# (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 
 # Create offline doc archives.
