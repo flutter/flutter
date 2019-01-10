@@ -753,13 +753,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // The caret is vertically centered in the line with an offset. Include this
     // offset so that text on the caret's line is fully visible.
     final double caretOffset = (lineHeight - caretRect.height) / 2;
-    final double lineStart = caretStart - caretOffset;
     final double lineEnd = caretEnd + caretOffset;
 
     double scrollOffset = _scrollController.offset;
     final double viewportExtent = _scrollController.position.viewportDimension;
-    if (lineStart < 0.0) // cursor before start of bounds
-      scrollOffset += lineStart;
+    if (caretStart < 0.0) // cursor before start of bounds
+      scrollOffset += caretStart;
     else if (lineEnd >= viewportExtent) // cursor after end of bounds
       scrollOffset += lineEnd - viewportExtent;
     return scrollOffset;
