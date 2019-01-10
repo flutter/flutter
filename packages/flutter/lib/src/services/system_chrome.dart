@@ -238,7 +238,7 @@ class SystemChrome {
   /// The empty list causes the application to defer to the operating system
   /// default.
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
     );
@@ -250,7 +250,7 @@ class SystemChrome {
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
   static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
       <String, dynamic>{
         'label': description.label,
@@ -282,7 +282,7 @@ class SystemChrome {
   /// or calling this again. Otherwise, the original UI overlay settings will be
   /// automatically restored only when the application loses and regains focus.
   static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setEnabledSystemUIOverlays',
       _stringify(overlays),
     );
@@ -298,7 +298,7 @@ class SystemChrome {
   /// On Android, the system UI cannot be changed until 1 second after the previous
   /// change. This is to prevent malware from permanently hiding navigation buttons.
   static Future<void> restoreSystemUIOverlays() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
       null,
     );
@@ -349,7 +349,7 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        SystemChannels.platform.invokeMethod(
+        SystemChannels.platform.invokeMethod<void>(
           'SystemChrome.setSystemUIOverlayStyle',
           _pendingStyle._toMap(),
         );
