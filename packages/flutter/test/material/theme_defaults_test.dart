@@ -222,7 +222,7 @@ void main() {
       // elevation shown, you have to query the piece of Material that
       // RawMaterialButton builds. Same as below.
       //
-      // TODO:(willlarche) Remove elevation tests on the Material inside
+      // TODO(willlarche): Remove elevation tests on the Material inside
       // RawMaterialButton. See github.com/flutter/flutter/issue/26317
       final Material underlyingMaterial = tester.widget<Material>(find.byType(Material));
       expect(underlyingMaterial.elevation, 6.0);
@@ -264,7 +264,7 @@ void main() {
       // elevation shown, you have to query the piece of Material that
       // RawMaterialButton builds. Same as below.
       //
-      // TODO:(willlarche) Remove elevation tests on the Material inside
+      // TODO(willlarche): Remove elevation tests on the Material inside
       // RawMaterialButton. Update value above to 0.0. See github.com/flutter/flutter/issue/26317
       final Material underlyingMaterial = tester.widget<Material>(find.byType(Material));
       expect(underlyingMaterial.elevation, 0.0);
