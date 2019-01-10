@@ -85,7 +85,7 @@ Future<void> build({
 
     } else if (!fs.file(compilationTraceFilePath).existsSync()) {
       // Be forgiving if compilation trace file is missing.
-      printError('No compilation trace available. To optimize performance, consider using --train.');
+      printStatus('No compilation trace available. To optimize performance, consider using --train.');
       final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
       compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
 
