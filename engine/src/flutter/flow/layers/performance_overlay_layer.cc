@@ -19,6 +19,7 @@ void DrawStatisticsText(SkCanvas& canvas,
   paint.setTextSize(15);
   paint.setLinearText(false);
   paint.setColor(SK_ColorGRAY);
+  paint.setAntiAlias(true);
   canvas.drawText(string.c_str(), string.size(), x, y, paint);
 }
 
