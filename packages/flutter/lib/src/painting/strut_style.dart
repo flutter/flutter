@@ -70,9 +70,9 @@ import 'basic_types.dart';
 /// ### Examples
 /// 
 /// {@tool sample}
-/// Here, the text will be rendered at font size 10, however, the vertical line
-/// height will be the strut height (Roboto in font size 30 * 1.5) as the text itself is
-/// smaller than the strut.
+/// In this simple case, the text will be rendered at font size 10, however, the vertical
+/// line height will be the strut height (Roboto in font size 30 * 1.5) as the text
+/// itself is smaller than the strut.
 /// 
 /// ```dart
 /// Text(
@@ -92,7 +92,7 @@ import 'basic_types.dart';
 /// 
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
-/// The strut [lineHeight] was defined as 1.2, which caused all lines to be laid out
+/// The strut [lineHeight] was defined as 1.5, which caused all lines to be laid out
 /// taller than without strut. This extra space was able to accomodate the larger
 /// font size `Second line!` without causing the line height to change for the second
 /// line only.
@@ -125,7 +125,7 @@ import 'basic_types.dart';
 ///   strutStyle: StrutStyle(
 ///     fontFamily: "Roboto",
 ///     fontSize: 14,
-///     lineHeight: 1.2,
+///     lineHeight: 1.5,
 ///   ),
 /// ),
 /// ```
@@ -244,7 +244,7 @@ class StrutStyle {
   /// it bypasses a large portion of the vertical layout system.
   final bool forceStrutHeight;
 
-    /// Describe the difference between this style and another, in terms of how
+  /// Describe the difference between this style and another, in terms of how
   /// much damage it will make to the rendering.
   ///
   /// See also:

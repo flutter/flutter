@@ -197,6 +197,17 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  /// The value may be null.
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);

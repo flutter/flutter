@@ -4550,10 +4550,7 @@ class RichText extends LeafRenderObjectWidget {
   /// See [RenderParagraph.locale] for more information.
   final Locale locale;
 
-  /// The strut style to use. Strut style defines the strut, which sets minimum
-  /// vertical layout metrics.
-  ///
-  /// See [StrutStyle] for details.
+  /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
   @override

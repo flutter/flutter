@@ -272,10 +272,7 @@ class Text extends StatelessWidget {
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
 
-  /// The strut style to use. Strut style defines the strut, which sets minimum
-  /// vertical layout metrics.
-  ///
-  /// See [StrutStyle] for details.
+  /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
   /// How the text should be aligned horizontally.

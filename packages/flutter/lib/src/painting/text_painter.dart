@@ -201,6 +201,12 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@template flutter.painting.textPainter.strutStyle}
+  /// The strut style to use. Strut style defines the strut, which sets minimum
+  /// vertical layout metrics.
+  ///
+  /// See [StrutStyle] for details.
+  /// {@endtemplate}
   StrutStyle get strutStyle => _strutStyle;
   StrutStyle _strutStyle;
   set strutStyle(StrutStyle value) {
