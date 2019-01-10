@@ -37,8 +37,7 @@ import 'theme.dart';
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///
-  /// The [header] should give the card's header, typically a [Text] widget. It
-  /// must not be null.
+  /// The [header] should give the card's header, typically a [Text] widget.
   ///
   /// The [columns] argument must be a list of as many [DataColumn] objects as
   /// the table is to have columns, ignoring the leading checkbox column if any.
@@ -64,7 +63,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// both have defaults, though, so don't have to be specified).
   PaginatedDataTable({
     Key key,
-    @required this.header,
+    this.header,
     this.actions,
     @required this.columns,
     this.sortColumnIndex,
@@ -77,8 +76,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     @required this.source
-  }) : assert(header != null),
-       assert(columns != null),
+  }) : assert(columns != null),
        assert(dragStartBehavior != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -300,15 +298,17 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
     if (_selectedRowCount == 0) {
-      headerWidgets.add(Expanded(child: widget.header));
-      if (widget.header is ButtonBar) {
-        // We adjust the padding when a button bar is present, because the
-        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-        // around each button on each side, and the button itself will have 8
-        // pixels internally on each side, yet we want the left edge of the
-        // inside of the button to line up with the 24.0 left inset.
-        // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
-        startPadding = 12.0;
+      if (widget.header != null){
+        headerWidgets.add(Expanded(child: widget.header));
+        if (widget.header is ButtonBar) {
+          // We adjust the padding when a button bar is present, because the
+          // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+          // around each button on each side, and the button itself will have 8
+          // pixels internally on each side, yet we want the left edge of the
+          // inside of the button to line up with the 24.0 left inset.
+          // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
+          startPadding = 12.0;
+        }
       }
     } else {
       headerWidgets.add(Expanded(
@@ -387,40 +387,42 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
+    var headerRow = Semantics(
+      container: true,
+      child: DefaultTextStyle(
+        // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+        // list and then tweak them appropriately.
+        // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+        style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+            : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+        child: IconTheme.merge(
+          data: const IconThemeData(
+              opacity: 0.54
+          ),
+          child: ButtonTheme.bar(
+            child: Ink(
+              height: 64.0,
+              color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: headerWidgets
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
     // CARD
     return Card(
       semanticContainer: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Semantics(
-            container: true,
-            child: DefaultTextStyle(
-              // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-              // list and then tweak them appropriately.
-              // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
-              style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
-                                           : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-              child: IconTheme.merge(
-                data: const IconThemeData(
-                  opacity: 0.54
-                ),
-                child: ButtonTheme.bar(
-                  child: Ink(
-                    height: 64.0,
-                    color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: headerWidgets
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          headerWidgets.length > 0 ? headerRow : Container(),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             dragStartBehavior: widget.dragStartBehavior,
