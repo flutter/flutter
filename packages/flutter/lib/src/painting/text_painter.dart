@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
@@ -48,6 +49,7 @@ class TextPainter {
     int maxLines,
     String ellipsis,
     Locale locale,
+    StrutStyle strutStyle,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -58,7 +60,8 @@ class TextPainter {
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _strutStyle = strutStyle;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -198,6 +201,17 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  StrutStyle get strutStyle => _strutStyle;
+  StrutStyle _strutStyle;
+  set strutStyle(StrutStyle value) {
+    if (_strutStyle == value)
+      return;
+    _strutStyle = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+
   ui.Paragraph _layoutTemplate;
 
   ui.ParagraphStyle _createParagraphStyle([TextDirection defaultTextDirection]) {
@@ -212,6 +226,12 @@ class TextPainter {
       maxLines: _maxLines,
       ellipsis: _ellipsis,
       locale: _locale,
+      fontFamily: (_strutStyle == null ? null : _strutStyle.fontFamily),
+      fontSize: (_strutStyle == null ? null : _strutStyle.fontSize),
+      fontWeight: (_strutStyle == null ? null : _strutStyle.fontWeight),
+      fontStyle: (_strutStyle == null ? null : strutStyle.fontStyle),
+      lineHeight: (_strutStyle == null ? null : strutStyle.lineHeight),
+      forceStrutHeight: (_strutStyle == null ? null : strutStyle.forceStrutHeight),
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,

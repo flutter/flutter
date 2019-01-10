@@ -4488,6 +4488,7 @@ class RichText extends LeafRenderObjectWidget {
     this.textScaleFactor = 1.0,
     this.maxLines,
     this.locale,
+    this.strutStyle,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -4549,6 +4550,12 @@ class RichText extends LeafRenderObjectWidget {
   /// See [RenderParagraph.locale] for more information.
   final Locale locale;
 
+  /// The strut style to use. Strut style defines the strut, which sets minimum
+  /// vertical layout metrics.
+  ///
+  /// See [StrutStyle] for details.
+  final StrutStyle strutStyle;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4559,6 +4566,7 @@ class RichText extends LeafRenderObjectWidget {
       overflow: overflow,
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
+      strutStyle: strutStyle,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }

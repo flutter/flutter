@@ -798,17 +798,25 @@ class TextStyle extends Diagnosticable {
       String ellipsis,
       int maxLines,
       Locale locale,
+      String fontFamily,
+      double fontSize,
+      FontWeight fontWeight,
+      FontStyle fontStyle,
+      double lineHeight,
+      bool forceStrutHeight,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      fontFamily: fontFamily,
-      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
-      lineHeight: height,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      fontFamily: fontFamily ?? this.fontFamily,
+      // Use zero fontSize if strut is not defined to have no effect on layout.
+      fontSize: (fontSize ?? 0) * textScaleFactor,
+      lineHeight: lineHeight ?? height,
+      forceStrutHeight: forceStrutHeight,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,

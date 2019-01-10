@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -224,6 +225,7 @@ class Text extends StatelessWidget {
   const Text(this.data, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -240,6 +242,7 @@ class Text extends StatelessWidget {
   const Text.rich(this.textSpan, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -268,6 +271,12 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
+
+  /// The strut style to use. Strut style defines the strut, which sets minimum
+  /// vertical layout metrics.
+  ///
+  /// See [StrutStyle] for details.
+  final StrutStyle strutStyle;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -356,6 +365,7 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
+      strutStyle: strutStyle,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
