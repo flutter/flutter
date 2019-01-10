@@ -20,6 +20,6 @@ class SystemNavigator {
   /// the latter may cause the underlying platform to act as if the application
   /// had crashed.
   static Future<void> pop() async {
-    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
   }
 }
