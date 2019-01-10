@@ -387,6 +387,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
+    // The header will be visible only if the headerWidgets collection is not empty
     final Semantics headerRow = Semantics(
       container: true,
       child: DefaultTextStyle(
