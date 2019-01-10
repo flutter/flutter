@@ -14,7 +14,13 @@ import 'package:flutter/animation.dart' show Curves;
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
+
+// An eyeballed value for the maximum time it takes for a page to animate forward
+// if the user releases a page mid swipe.
 const int _kMaxPageForwardAnimationTime = 800; // Milliseconds.
+
+// The maximum time for a page to get reset to it's original position if the
+// user releases a page mid swipe.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
 // Barrier color for a Cupertino modal barrier.
@@ -156,6 +162,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
+  // A relatively rigorous eyeball estimation.
   Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
@@ -350,6 +357,8 @@ class CupertinoPageTransition extends StatelessWidget {
     @required bool linearTransition,
   }) : assert(linearTransition != null),
        _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
+       // The curves below have been rigorously derived from plots of native
+       // iOS animation frames.
          CurvedAnimation(
            parent: primaryRouteAnimation,
            curve: Curves.linearToEaseOut,
@@ -597,8 +606,15 @@ class _CupertinoBackGestureController<T> {
     // Fling in the appropriate direction.
     // AnimationController.fling is guaranteed to
     // take at least one frame.
-    final Curve animationCurve = Curves.curveWithPower(8);
+    //
+    // This curve has been determined through rigorously eyeballing native iOS
+    // animations.
+    const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
     bool animateForward;
+
+    // If the user releases the page before mid screen with sufficient velocity,
+    // or after mid screen, we should animate the page out. Otherwise, the page
+    // should be animated back in.
     if (velocity.abs() >= _kMinFlingVelocity)
       animateForward = velocity > 0 ? false : true;
     else
@@ -606,6 +622,8 @@ class _CupertinoBackGestureController<T> {
 
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
+      // We want to cap the animation time, but we want to use a linear curve
+      // to determine it.
       final int milliseconds = min(lerpDouble(_kMaxPageForwardAnimationTime, 0, controller.value).floor(),
                                    _kMaxPageBackAnimationTime);
       controller.animateTo(1.01, duration: Duration(milliseconds: milliseconds), curve: animationCurve);

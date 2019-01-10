@@ -303,9 +303,7 @@ class FlippedCurve extends Curve {
 ///
 /// See [Curves.decelerate] for an instance of this class.
 class _DecelerateCurve extends Curve {
-  const _DecelerateCurve._(this.exponent);
-
-  final double exponent;
+  const _DecelerateCurve._();
 
   @override
   double transform(double t) {
@@ -314,7 +312,7 @@ class _DecelerateCurve extends Curve {
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
     // (for an exponent of 2)...as of December 2016.
     t = 1.0 - t;
-    return 1.0 - math.pow(t, exponent);
+    return 1.0 - t * t;
   }
 }
 
@@ -511,14 +509,16 @@ class Curves {
   /// factor (the default factor).
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
-  static const Curve decelerate = _DecelerateCurve._(2);
+  static const Curve decelerate = _DecelerateCurve._();
 
-  /// A curve where the rate of change is based on an exponential function; an
-  /// upside-down `f(t) = pow(t, [exponent])` curve.
+  /// A curve that is very steep and linear at the beginning, but quickly flattens out
+  /// and very slowly eases in.
   ///
-  /// For exponents greater than 1, the larger the exponent, the quicker the
-  /// animation starts and the slower it ends.
-  static Curve curveWithPower(double exponent) => _DecelerateCurve._(exponent);
+  /// By default is the curve used to animate pages on iOS back to their original
+  /// position if a swipe gesture is ended midway through a swipe.
+  ///
+  /// {http://cubic-bezier.com/#.22,.99,.08,1}
+  static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
@@ -533,7 +533,7 @@ class Curves {
   /// A cubic animation curve that starts starts slowly and ends linearly.
   ///
   /// The symmetric animation to [linearToEaseOut].
-  static const Cubic easeInToLinear = Cubic(0.42, 0.0, 0.55, 0.0);
+  static const Cubic easeInToLinear = Cubic(0.67, 0.03, 0.65, 0.09);
 
   /// A cubic animation curve that starts slowly and ends quickly. This is
   /// similar to [Curves.easeIn], but with sinusoidal easing for a slightly less
@@ -632,7 +632,7 @@ class Curves {
   /// A cubic animation curve that starts linearly and ends slowly.
   ///
   /// A symmetric animation to [easeInToLinear].
-  static const Cubic linearToEaseOut = Cubic(0.45, 1.0, 0.58, 1.0);
+  static const Cubic linearToEaseOut = Cubic(0.35, 0.91, 0.33, 0.97);
 
   /// A cubic animation curve that starts quickly and ends slowly. This is
   /// similar to [Curves.easeOut], but with sinusoidal easing for a slightly
