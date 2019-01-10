@@ -98,8 +98,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
-    _vmService =
-          await vmServiceConnectUri(_vmServiceWsUri.toString());
+    _vmService = await vmServiceConnectUri(_vmServiceWsUri.toString());
       _vmService.onSend.listen((String s) => _debugPrint('==> $s'));
       _vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
       await Future.wait(<Future<Success>>[
@@ -549,8 +548,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     _procPid = version['pid'];
 
     if (withDebugger) {
-      final Map<String, dynamic> startedProcess =
-          await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout);
+      final Map<String, dynamic> startedProcess = await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout);
       final String vmServiceHttpString = startedProcess['params']['observatoryUri'];
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
@@ -573,15 +571,12 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }
 
   Map<String, dynamic> _parseJsonResponse(String line) {
-    if (line.startsWith('{') && line.endsWith('}')) {
-      try {
-        return json.decode(line);
-      } catch (e) {
-        // Not valid JSON, so likely some other output that was surrounded by {braces}
-        return null;
-      }
+    try {
+      return json.decode(line);
+    } catch (e) {
+      // Not valid JSON, so likely some other output.
+      return null;
     }
-    return null;
   }
 }
 
