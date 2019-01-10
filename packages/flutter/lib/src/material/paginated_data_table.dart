@@ -387,7 +387,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
-    var headerRow = Semantics(
+    final Semantics headerRow = Semantics(
       container: true,
       child: DefaultTextStyle(
         // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
@@ -422,7 +422,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          headerWidgets.length > 0 ? headerRow : Container(),
+          headerWidgets.isNotEmpty ? headerRow : Container(),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             dragStartBehavior: widget.dragStartBehavior,
