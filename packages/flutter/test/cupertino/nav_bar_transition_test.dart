@@ -1169,16 +1169,10 @@ void main() {
     await gesture.up();
 
     await tester.pump();
-
     // Transition continues.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(655.2055835723877, 13.5),
-    );
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(
-      tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(749.777740240097, 13.5),
     );
 
     await tester.pump(const Duration(milliseconds: 500));

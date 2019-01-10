@@ -41,7 +41,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(158, 1.0));
+    expect(widget1TransientTopLeft.dx, closeTo(130, 1.0));
 
     await tester.pumpAndSettle();
 
@@ -66,7 +66,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(220, 1.0));
+    expect(widget1TransientTopLeft.dx, closeTo(249, 1.0));
 
     await tester.pumpAndSettle();
 

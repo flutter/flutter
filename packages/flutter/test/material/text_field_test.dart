@@ -124,7 +124,7 @@ void main() {
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   const String kThreeLines =
-    'First line of text is '
+    'First line of text is
     'Second line goes until '
     'Third line of stuff ';
   const String kMoreThanFourLines =
