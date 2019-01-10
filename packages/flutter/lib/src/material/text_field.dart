@@ -8,10 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
-=======
->>>>>>> 83af6f48d6d180cf76bf7f6715cd015ac0bf2674
 import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
