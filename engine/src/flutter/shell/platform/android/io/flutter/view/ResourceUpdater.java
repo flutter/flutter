@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.Math;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +23,8 @@ import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class ResourceUpdater {
     private static final String TAG = "ResourceUpdater";
@@ -58,12 +61,33 @@ public final class ResourceUpdater {
         IMMEDIATE
     }
 
+    /// Lock that prevents replacement of the install file by the downloader
+    /// while this file is being extracted, since these can happen in parallel.
+    Lock getInstallationLock() {
+        return installationLock;
+    }
+
+    // Patch file that's fully installed and is ready to serve assets.
+    // This file represents the final stage in the installation process.
+    public File getInstalledPatch() {
+        return new File(context.getFilesDir().toString() + "/patch.zip");
+    }
+
+    // Patch file that's finished downloading and is ready to be installed.
+    // This is a separate file in order to prevent serving assets from patch
+    // that failed installing for any reason, such as mismatched APK version.
+    File getDownloadedPatch() {
+        return new File(getInstalledPatch().getPath() + ".install");
+    }
+
     private class DownloadTask extends AsyncTask<String, String, Void> {
         @Override
         protected Void doInBackground(String... unused) {
             try {
                 URL unresolvedURL = new URL(buildUpdateDownloadURL());
-                File localFile = getPatch();
+
+                // Download to transient file to avoid extracting incomplete download.
+                File localFile = new File(getInstalledPatch().getPath() + ".download");
 
                 long startMillis = new Date().getTime();
                 Log.i(TAG, "Checking for updates at " + unresolvedURL);
@@ -71,7 +95,10 @@ public final class ResourceUpdater {
                 HttpURLConnection connection =
                         (HttpURLConnection)unresolvedURL.openConnection();
 
-                long lastDownloadTime = localFile.lastModified();
+                long lastDownloadTime = Math.max(
+                        getDownloadedPatch().lastModified(),
+                        getInstalledPatch().lastModified());
+
                 if (lastDownloadTime != 0) {
                     Log.i(TAG, "Active update timestamp " + lastDownloadTime);
                     connection.setIfModifiedSince(lastDownloadTime);
@@ -107,9 +134,29 @@ public final class ResourceUpdater {
 
                         long totalMillis = new Date().getTime() - startMillis;
                         Log.i(TAG, "Update downloaded in " + totalMillis / 100 / 10. + "s");
+                    }
+                }
 
+                // Wait renaming the file if extraction is in progress.
+                installationLock.lock();
+
+                try {
+                    File updateFile = getDownloadedPatch();
+
+                    // Graduate downloaded file as ready for installation.
+                    if (updateFile.exists() && !updateFile.delete()) {
+                        Log.w(TAG, "Could not delete file " + updateFile);
                         return null;
                     }
+                    if (!localFile.renameTo(updateFile)) {
+                        Log.w(TAG, "Could not create file " + updateFile);
+                        return null;
+                    }
+
+                    return null;
+
+                } finally {
+                    installationLock.unlock();
                 }
 
             } catch (IOException e) {
@@ -121,6 +168,7 @@ public final class ResourceUpdater {
 
     private final Context context;
     private DownloadTask downloadTask;
+    private final Lock installationLock = new ReentrantLock();
 
     public ResourceUpdater(Context context) {
         this.context = context;
@@ -135,10 +183,6 @@ public final class ResourceUpdater {
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
-    }
-
-    public File getPatch() {
-        return new File(context.getFilesDir().toString() + "/patch.zip");
     }
 
     private String buildUpdateDownloadURL() {

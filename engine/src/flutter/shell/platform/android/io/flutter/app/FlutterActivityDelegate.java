@@ -345,7 +345,7 @@ public final class FlutterActivityDelegate
             FlutterRunArguments args = new FlutterRunArguments();
             ArrayList<String> bundlePaths = new ArrayList<>();
             if (FlutterMain.getResourceUpdater() != null) {
-                File patchFile = FlutterMain.getResourceUpdater().getPatch();
+                File patchFile = FlutterMain.getResourceUpdater().getInstalledPatch();
                 bundlePaths.add(patchFile.getPath());
             }
             bundlePaths.add(appBundlePath);
