@@ -479,13 +479,7 @@ Future<void> _buildGradleProjectV2(
       }
 
       if (update.files.isEmpty) {
-        printStatus('No changes detected relative to baseline build.');
-
-        if (updateFile.existsSync()) {
-          updateFile.deleteSync();
-          printStatus('Deleted dynamic patch ${updateFile.path}.');
-        }
-        return;
+        printStatus('No changes detected, creating rollback patch.');
       }
 
       final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
