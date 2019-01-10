@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
@@ -33,7 +34,11 @@ Future<Archive> fetchArchive(String url, int maxTries) async {
       responseBytes = response.bodyBytes;
       break;
     }
-    print('Failed attempt ${i+1} to fetch $url. HTTP status code ${response.statusCode}.');
+    stderr.writeln('Failed attempt ${i+1} to fetch $url.');
+
+    // On failure print a short snipped from the body in case it's helpful.
+    final int bodyLength = min(80, response.body.length);
+    stderr.writeln('Response status code ${response.statusCode}. Body: ' + response.body.substring(0, bodyLength));
     sleep(const Duration(seconds: 1));
   }
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
