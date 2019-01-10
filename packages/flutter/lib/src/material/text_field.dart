@@ -623,6 +623,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.deactivate();
   }
 
+  bool get _showToolbarOnDoubleSlowTap => Theme.of(context).platform == TargetPlatform.iOS;
+  bool get _fadeOutSelectionControls => Theme.of(context).platform == TargetPlatform.iOS;
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -677,8 +680,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor: widget.cursorColor ?? themeData.cursorColor,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
-        showToolbarOnDoubleSlowTap: platformIsIOS,
-        fadeOutSelectionControls: platformIsIOS,
+        showToolbarOnDoubleSlowTap: _showToolbarOnDoubleSlowTap,
+        fadeOutSelectionControls: _fadeOutSelectionControls,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
