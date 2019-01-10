@@ -41,6 +41,7 @@ Future<void> main(List<String> args) async {
   final String buildDirectory = argResults['build-dir'];
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
+  final File devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
   final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
@@ -91,7 +92,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
         frontendServer: frontendServer,

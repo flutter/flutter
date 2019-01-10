@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bottom_app_bar_theme.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -41,19 +42,23 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [color], [elevation], and [clipBehavior] arguments must not be null.
+  /// The [clipBehavior] argument must not be null.
   /// Additionally, [elevation] must be non-negative.
+  ///
+  /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
+  /// If the corresponding [BottomAppBarTheme] property is null, then the default
+  /// specified in the property's documentation will be used.
   const BottomAppBar({
     Key key,
     this.color,
-    this.elevation = 8.0,
+    this.elevation,
     this.shape,
     this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
-  }) : assert(elevation != null),
-       assert(elevation >= 0.0),
-       assert(clipBehavior != null),
+  }) : assert(clipBehavior != null),
+       assert(elevation == null || elevation >= 0.0),
+       assert(notchMargin != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -66,7 +71,8 @@ class BottomAppBar extends StatefulWidget {
 
   /// The bottom app bar's background color.
   ///
-  /// When null defaults to [ThemeData.bottomAppBarColor].
+  /// If this property is null then [ThemeData.bottomAppBarTheme.color] is used,
+  /// if that's null then [ThemeData.bottomAppBarColor] is used.
   final Color color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -75,12 +81,14 @@ class BottomAppBar extends StatefulWidget {
   /// This controls the size of the shadow below the bottom app bar. The
   /// value is non-negative.
   ///
-  /// Defaults to 8, the appropriate elevation for bottom app bars.
+  /// If this property is null then [ThemeData.bottomAppBarTheme.elevation] is used,
+  /// if that's null, the default value is 8.
   final double elevation;
 
   /// The notch that is made for the floating action button.
   ///
-  /// If null the bottom app bar will be rectangular with no notch.
+  /// If this property is null then [ThemeData.bottomAppBarTheme.shape] is used,
+  /// if that's null then the shape will be rectangular with no notch.
   final NotchedShape shape;
 
   /// {@macro flutter.widgets.Clip}
@@ -98,6 +106,7 @@ class BottomAppBar extends StatefulWidget {
 
 class _BottomAppBarState extends State<BottomAppBar> {
   ValueListenable<ScaffoldGeometry> geometryListenable;
+  static const double _defaultElevation = 8.0;
 
   @override
   void didChangeDependencies() {
@@ -107,17 +116,20 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final CustomClipper<Path> clipper = widget.shape != null
+    final ThemeData theme = Theme.of(context);
+    final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
+    final NotchedShape notchedShape = widget.shape ?? babTheme.shape;
+    final CustomClipper<Path> clipper = notchedShape != null
       ? _BottomAppBarClipper(
         geometry: geometryListenable,
-        shape: widget.shape,
+        shape: notchedShape,
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     return PhysicalShape(
       clipper: clipper,
-      elevation: widget.elevation,
-      color: widget.color ?? Theme.of(context).bottomAppBarColor,
+      elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
+      color: widget.color ?? babTheme.color ?? theme.bottomAppBarColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,

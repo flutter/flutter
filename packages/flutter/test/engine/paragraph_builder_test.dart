@@ -13,7 +13,7 @@ void main() {
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
 
-    paragraph.layout(ParagraphConstraints(width: 800.0));
+    paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);
   });

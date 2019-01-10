@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
-import 'shape_decoration_test.dart' show TestBorder;
+import 'test_border.dart' show TestBorder;
 
 final List<String> log = <String>[];
 

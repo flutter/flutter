@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-class TwoLevelListDemo extends StatelessWidget {
-  static const String routeName = '/material/two-level-list';
+class ExpansionTileListDemo extends StatelessWidget {
+  static const String routeName = '/material/expansion-tile-list';
 
   @override
   Widget build(BuildContext context) {

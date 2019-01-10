@@ -68,7 +68,8 @@ enum ScriptCategory {
 /// `Typography(platform: platform)` which uses [englishLike2014],
 /// [dense2014] and [tall2014]. To use the 2018 text theme
 /// geometries, specify a typography value:
-/// ```
+///
+/// ```dart
 /// Typography(
 ///   platorm: platform,
 ///   englishLike: Typography.englishLike2018,
@@ -141,7 +142,7 @@ class Typography extends Diagnosticable {
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   /// A text theme's geometry depends on the locale. To look up a localized
-  /// [TextTheme], use the the overall [Theme], for example:
+  /// [TextTheme], use the overall [Theme], for example:
   /// `Theme.of(context).textTheme`.
   ///
   /// The [englishLike], [dense], and [tall] text theme's provide locale-specific

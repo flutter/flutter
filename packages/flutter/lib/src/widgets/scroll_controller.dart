@@ -297,11 +297,11 @@ class ScrollController extends ChangeNotifier {
 ///       controller: _trackingScrollController,
 ///       children: List<Widget>.generate(100, (int i) => Text('page 0 item $i')).toList(),
 ///     ),
-///    ListView(
-///      controller: _trackingScrollController,
-///      children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
-///    ),
-///    ListView(
+///     ListView(
+///       controller: _trackingScrollController,
+///       children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
+///     ),
+///     ListView(
 ///      controller: _trackingScrollController,
 ///      children: List<Widget>.generate(300, (int i) => Text('page 2 item $i')).toList(),
 ///     ),
