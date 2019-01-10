@@ -144,7 +144,17 @@ class _GalleryAppState extends State<GalleryApp> {
         builder: (BuildContext context, Widget child) {
           return Directionality(
             textDirection: _options.textDirection,
-            child: _applyTextScaleFactor(child),
+            child: _applyTextScaleFactor(
+              // Specifically use a blank Cupertino theme here and do not transfer
+              // over the Material primary color etc except the brightness to
+              // showcase standard iOS looks.
+              CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: _options.theme.data.brightness,
+                ),
+                child: child,
+              ),
+            ),
           );
         },
         home: home,
