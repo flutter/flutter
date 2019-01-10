@@ -59,6 +59,9 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   // missing from the requested font family.
   void DisableFontFallback();
 
+  // Remove all entries in the font family cache.
+  void ClearFontFamilyCache();
+
  private:
   struct FamilyKey {
     FamilyKey(const std::vector<std::string>& families, const std::string& loc);
