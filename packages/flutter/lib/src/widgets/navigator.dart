@@ -1288,8 +1288,8 @@ class Navigator extends StatefulWidget {
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null && !nullOk) {
-        throw FlutterError(
-          'Navigator operation requested with a context that does not include a Navigator.\n'
+        throw FlutterError.detailed(
+          'Navigator operation requested with a context that does not include a Navigator.'
           'The context used to push or pop routes from the Navigator must be that of a '
           'widget that is a descendant of a Navigator widget.'
         );
@@ -1427,12 +1427,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
-          throw FlutterError(
-            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
-            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
-            'onUnknownRoute callback specified.\n'
-            'The Navigator was:\n'
-            '  $this'
+          throw FlutterError.detailed(
+            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.',
+            violation: 'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+            'onUnknownRoute callback specified.\n',
+            diagnostic: errorProperty('The Navigator was:', this),
           );
         }
         return true;
@@ -1440,7 +1439,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route = widget.onUnknownRoute(settings);
       assert(() {
         if (route == null) {
-          throw FlutterError(
+          throw FlutterError.detailed(
             'A Navigator\'s onUnknownRoute returned null.\n'
             'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
             'null. The onUnknownRoute callback should never return null.\n'

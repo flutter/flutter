@@ -673,8 +673,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
-        throw FlutterError(
-          'Steppers must not be nested. The material specification advises '
+        throw FlutterError.detailed(
+          'Steppers must not be nested.',
+          hint: 'The material specification advises '
           'that one should avoid embedding steppers within steppers. '
           'https://material.google.com/components/steppers.html#steppers-usage\n'
         );

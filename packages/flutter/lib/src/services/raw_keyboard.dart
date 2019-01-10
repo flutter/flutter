@@ -150,7 +150,9 @@ abstract class RawKeyEvent {
       default:
         // We don't yet implement raw key events on iOS, but we don't hit this
         // exception because the engine never sends us these messages.
-        throw FlutterError('Unknown keymap for key events: $keymap');
+        throw FlutterError.diagnostic(<DiagnosticsNode>[
+          errorProperty('Unknown keymap for key events', keymap, level: DiagnosticLevel.error),
+        ]);
     }
 
     final String type = message['type'];
@@ -160,7 +162,9 @@ abstract class RawKeyEvent {
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:
-        throw FlutterError('Unknown key event type: $type');
+        throw FlutterError.diagnostic(<DiagnosticsNode>[
+          errorProperty('Unknown key event type', type, level: DiagnosticLevel.error),
+        ]);
     }
   }
 

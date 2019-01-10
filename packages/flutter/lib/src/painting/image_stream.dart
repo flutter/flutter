@@ -300,7 +300,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     String context,
     dynamic exception,
     StackTrace stack,
-    InformationCollector informationCollector,
+    // XXX InformationCollector informationCollector,
+    DiagnosticsCollector diagnosticsCollector,
     bool silent = false,
   }) {
     _currentError = FlutterErrorDetails(
@@ -308,7 +309,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       stack: stack,
       library: 'image resource service',
       context: context,
-      informationCollector: informationCollector,
+     // XXX informationCollector: informationCollector,
+      diagnosticsCollector: diagnosticsCollector,
       silent: silent,
     );
 
@@ -370,14 +372,18 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
-    : assert(image != null) {
+  OneFrameImageStreamCompleter(
+    Future<ImageInfo> image, {
+// XXX   InformationCollector informationCollector,
+    DiagnosticsCollector diagnosticsCollector,
+  }) : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: 'resolving a single-frame image stream',
         exception: error,
         stack: stack,
-        informationCollector: informationCollector,
+         // XXX informationCollector: informationCollector,
+        diagnosticsCollector: diagnosticsCollector,
         silent: true,
       );
     });
@@ -428,9 +434,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    DiagnosticsCollector diagnosticCollector
   }) : assert(codec != null),
-       _informationCollector = informationCollector,
+       _diagnosticCollector = diagnosticCollector,
        _scale = scale,
        _framesEmitted = 0,
        _timer = null {
@@ -439,7 +445,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         context: 'resolving an image codec',
         exception: error,
         stack: stack,
-        informationCollector: informationCollector,
+        diagnosticsCollector: diagnosticCollector,
         silent: true,
       );
     });
@@ -447,7 +453,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   ui.Codec _codec;
   final double _scale;
-  final InformationCollector _informationCollector;
+  final DiagnosticsCollector _diagnosticCollector;
   ui.FrameInfo _nextFrame;
   // When the current was first shown.
   Duration _shownTimestamp;
@@ -501,7 +507,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         context: 'resolving an image frame',
         exception: exception,
         stack: stack,
-        informationCollector: _informationCollector,
+        diagnosticsCollector: _diagnosticCollector,
         silent: true,
       );
       return;

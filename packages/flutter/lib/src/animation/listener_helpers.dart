@@ -128,10 +128,7 @@ mixin AnimationLocalListenersMixin {
           stack: stack,
           library: 'animation library',
           context: 'while notifying listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying listeners was:');
-            information.write('  $this');
-          }
+          diagnosticsCollector: () => <DiagnosticsNode>[errorProperty('The $runtimeType notifying listeners was', this)],
         ));
       }
     }
@@ -192,10 +189,7 @@ mixin AnimationLocalStatusListenersMixin {
           stack: stack,
           library: 'animation library',
           context: 'while notifying status listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying status listeners was:');
-            information.write('  $this');
-          }
+          diagnosticsCollector: () => <DiagnosticsNode>[errorProperty('The $runtimeType notifying status listeners was', this)]
         ));
       }
     }

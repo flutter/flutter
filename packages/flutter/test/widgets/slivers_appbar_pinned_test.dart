@@ -316,12 +316,12 @@ class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
 
   @override
   double get maxExtent {
-    return shouldThrow ? throw FlutterError('Unavailable maxExtent') : 200.0;
+    return shouldThrow ? throw FlutterError.detailed('Unavailable maxExtent') : 200.0;
   }
 
   @override
   double get minExtent {
-   return shouldThrow ? throw FlutterError('Unavailable minExtent') : 100.0;
+   return shouldThrow ? throw FlutterError.detailed('Unavailable minExtent') : 100.0;
   }
 
   @override

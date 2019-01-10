@@ -156,6 +156,6 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
           ),
         );
     }
-    throw FlutterError('Unknown platform for scrollbar insertion');
+    throw FlutterError.detailed('Unknown platform for scrollbar insertion');
   }
 }

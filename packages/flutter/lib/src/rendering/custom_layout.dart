@@ -115,26 +115,30 @@ abstract class MultiChildLayoutDelegate {
     final RenderBox child = _idToChild[childId];
     assert(() {
       if (child == null) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate tried to lay out a non-existent child.\n'
-          'There is no child with the id "$childId".'
+        throw FlutterError.detailed(
+          'The $this custom multichild layout delegate tried to lay out a non-existent child.',
+          description: 'There is no child with the id "$childId".'
         );
       }
       if (!_debugChildrenNeedingLayout.remove(child)) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.\n'
-          'Each child must be laid out exactly once.'
+        throw FlutterError.detailed(
+          'The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.',
+          description: 'Each child must be laid out exactly once.'
         );
       }
       try {
         assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
       } on AssertionError catch (exception) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".\n'
-          '$exception\n'
-          'The minimum width and height must be greater than or equal to zero.\n'
-          'The maximum width must be greater than or equal to the minimum width.\n'
-          'The maximum height must be greater than or equal to the minimum height.'
+        throw FlutterError.detailed(
+          'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".\n',
+          diagnostics: <DiagnosticsNode>[
+            DiagnosticsProperty('Exception', exception, showName: false),
+            contractMessage(
+              'The minimum width and height must be greater than or equal to zero.\n'
+              'The maximum width must be greater than or equal to the minimum width.\n'
+              'The maximum height must be greater than or equal to the minimum height.',
+             )
+          ],
         );
       }
       return true;
@@ -153,13 +157,13 @@ abstract class MultiChildLayoutDelegate {
     final RenderBox child = _idToChild[childId];
     assert(() {
       if (child == null) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
-          'There is no child with the id "$childId".'
+        throw FlutterError.detailed(
+          'The $this custom multichild layout delegate tried to position out a non-existent child:',
+          description: 'There is no child with the id "$childId".'
         );
       }
       if (offset == null) {
-        throw FlutterError(
+        throw FlutterError.detailed(
           'The $this custom multichild layout delegate provided a null position for the child with id "$childId".'
         );
       }
@@ -169,9 +173,10 @@ abstract class MultiChildLayoutDelegate {
     childParentData.offset = offset;
   }
 
-  String _debugDescribeChild(RenderBox child) {
+  DiagnosticsNode _debugDescribeChild(RenderBox child) {
     final MultiChildLayoutParentData childParentData = child.parentData;
-    return '${childParentData.id}: $child';
+    // XXX do we weant shallow in this case?
+    return child.toDiagnosticsNode(name: '${childParentData.id}', style: DiagnosticsTreeStyle.shallow);
   }
 
   void _callPerformLayout(Size size, RenderBox firstChild) {
@@ -194,11 +199,10 @@ abstract class MultiChildLayoutDelegate {
         final MultiChildLayoutParentData childParentData = child.parentData;
         assert(() {
           if (childParentData.id == null) {
-            throw FlutterError(
-              'The following child has no ID:\n'
-              '  $child\n'
-              'Every child of a RenderCustomMultiChildLayoutBox must have an ID in its parent data.'
-            );
+            throw FlutterError.diagnostic(<DiagnosticsNode>[
+              DiagnosticsProperty('The following child has no ID', child, style: DiagnosticsTreeStyle.shallow, level: DiagnosticLevel.error),
+              DiagnosticsNode.message('Every child of a RenderCustomMultiChildLayoutBox must have an ID in its parent data.', level: DiagnosticLevel.contract),
+            ]);
           }
           return true;
         }());
@@ -213,13 +217,17 @@ abstract class MultiChildLayoutDelegate {
       assert(() {
         if (_debugChildrenNeedingLayout.isNotEmpty) {
           if (_debugChildrenNeedingLayout.length > 1) {
-            throw FlutterError(
-              'The $this custom multichild layout delegate forgot to lay out the following children:\n'
-              '  ${_debugChildrenNeedingLayout.map<String>(_debugDescribeChild).join("\n  ")}\n'
-              'Each child must be laid out exactly once.'
-            );
+            //
+            throw FlutterError.diagnostic(<DiagnosticsNode>[
+              IterableProperty<DiagnosticsNode>(
+                'The $this custom multichild layout delegate forgot to lay out the following children',
+                _debugChildrenNeedingLayout.map<DiagnosticsNode>(_debugDescribeChild).toList(),
+                style: DiagnosticsTreeStyle.whitespace,
+              ),
+              contractMessage('Each child must be laid out exactly once.'),
+            ]);
           } else {
-            throw FlutterError(
+            throw FlutterError.detailed(
               'The $this custom multichild layout delegate forgot to lay out the following child:\n'
               '  ${_debugDescribeChild(_debugChildrenNeedingLayout.single)}\n'
               'Each child must be laid out exactly once.'

@@ -682,7 +682,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw FlutterError('Unknown text input action: $action');
+  throw FlutterError.errorProperty('Unknown text input action', action);
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
@@ -694,7 +694,9 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     case 'FloatingCursorDragState.end':
       return FloatingCursorDragState.End;
   }
-  throw FlutterError('Unknown text cursor action: $state');
+  throw FlutterError.diagnostic(<DiagnosticsNode>[
+    errorProperty('Unknown text cursor action',  state, level: DiagnosticLevel.error),
+  ]);
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {

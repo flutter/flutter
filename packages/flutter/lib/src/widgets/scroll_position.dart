@@ -203,11 +203,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
-          throw FlutterError(
-            '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
-            'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
-            'That is a delta of $delta units.\n'
-            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
+          throw FlutterError.detailed(
+            '$runtimeType.applyBoundaryConditions returned invalid overscroll value.',
+            violation: 'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
+            'That is a delta of $delta units.\n',
+            diagnostic: DiagnosticsNode.message('$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.', level: DiagnosticLevel.error),
           );
         }
         return true;
@@ -374,13 +374,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(() {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
-        throw FlutterError(
-          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
-          'The method was called to consider a change from $pixels to $value, which is a '
+        throw FlutterError.detailed(
+          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.',
+          violation: 'The method was called to consider a change from $pixels to $value, which is a '
           'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
           '${result.toStringAsFixed(1)} units, which has a greater magnitude than the delta. '
           'The applyBoundaryConditions method is only supposed to reduce the possible range '
-          'of movement, not increase it.\n'
+          'of movement, not increase it.',
+          description:
           'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
           'viewport dimension is $viewportDimension.'
         );

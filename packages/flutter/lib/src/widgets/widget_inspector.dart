@@ -935,20 +935,28 @@ mixin WidgetInspectorService {
     return Future<void>.value();
   }
 
-  static const String consoleObjectGroup = 'console-group';
+  static const String _consoleObjectGroup = 'console-group';
 
   void _reportError(FlutterErrorDetails details) {
-    print("XXX --- REPORTED AN ERROR!");
-
-
+    print("----- ERROR AS IT WOULD BE DUMPED TO CONSOLE --- XXXX");
+    FlutterError.dumpErrorToConsole(details);
+    print("----- END OF DUMP -----");
     Map<String, Object> json = {
-      'exceptionId': toId(details.exception, consoleObjectGroup),
-      'stackId' : toId(details.stack, consoleObjectGroup),
+      'exceptionId': toId(details.exception, _consoleObjectGroup),
+      'stackId' : toId(details.stack, _consoleObjectGroup),
       'library': details.library,
       'context': details.context,
-      'id': toId(details, consoleObjectGroup),
+      'id': toId(details, _consoleObjectGroup),
       'silent': details.silent,
     };
+    final dynamic exception = details.exception;
+    if (exception is FlutterError) {
+      if (exception.messageParts != null) {
+        json['exceptionMessageParts'] = _nodesToJson(exception.messageParts, _SerializeConfig(groupName: _consoleObjectGroup));
+      } else {
+        json['exceptionMessage'] = exception.message;
+      }
+    }
     if (details.stack != null) {
       Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
 
@@ -960,13 +968,18 @@ mixin WidgetInspectorService {
       json['filteredStackLines'] = stackLines.toList();
     }
 
-    if (details.informationCollector != null) {
-      StringBuffer information = new StringBuffer();
+    if (details.diagnosticsCollector != null) {
+      final List<DiagnosticsNode> diagnostics = details.diagnosticsCollector();
+      if (diagnostics != null && diagnostics.isNotEmpty) {
+        json['diagnostics'] = _nodesToJson(diagnostics, _SerializeConfig(groupName: _consoleObjectGroup));
+      }
+    } else if (details.informationCollector != null) {
+      StringBuffer information = StringBuffer();
       details.informationCollector(information);
       json['information'] = information.toString();
     }
     if (details is FlutterErrorDetailsForRendering) {
-      json['renderObject'] = toId(details.renderObject, consoleObjectGroup);
+      json['renderObject'] = toId(details.renderObject, _consoleObjectGroup);
     }
     postEvent('Flutter.Error', json);
   }
@@ -1251,7 +1264,7 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData data = _idToReferenceData[id];
     if (data == null) {
-      throw FlutterError('Id does not exist.');
+      throw FlutterError.detailed('Id does not exist.');
     }
     return data.object;
   }
@@ -1286,9 +1299,9 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData referenceData = _idToReferenceData[id];
     if (referenceData == null)
-      throw FlutterError('Id does not exist');
+      throw FlutterError.detailed('Id does not exist');
     if (_groups[groupName]?.remove(referenceData) != true)
-      throw FlutterError('Id is not in group');
+      throw FlutterError.detailed('Id is not in group');
     _decrementReferenceCount(referenceData);
   }
 
@@ -1372,7 +1385,7 @@ mixin WidgetInspectorService {
     else if (value is Element)
       path = _getElementParentChain(value, groupName);
     else
-      throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
+      throw FlutterError.detailed('Cannot get parent chain for node of type ${value.runtimeType}');
 
     return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
@@ -2568,7 +2581,7 @@ class _InspectorOverlayLayer extends Layer {
       return true;
     }());
     if (inDebugMode == false) {
-      throw FlutterError(
+      throw FlutterError.detailed(
         'The inspector should never be used in production mode due to the '
         'negative performance impact.'
       );

@@ -455,12 +455,13 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsValid());
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw FlutterError(
-          '$runtimeType has unbounded constraints.\n'
-          'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
-          'both unbounded width and unbounded height constraints. Because both '
-          'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
+        throw FlutterError.detailed(
+          '$runtimeType has unbounded constraints.',
+          violation:
+            'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
+            'both unbounded width and unbounded height constraints. Because both '
+            'constraints were unbounded, this render object doesn\'t know how much '
+            'size to consume.'
         );
       }
       return true;
@@ -1955,15 +1956,15 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
-          throw FlutterError(
-            '${_decoration.runtimeType} painter had mismatching save and restore calls.\n'
-            'Before painting the decoration, the canvas save count was $debugSaveCount. '
-            'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-            'Every call to save() or saveLayer() must be matched by a call to restore().\n'
-            'The decoration was:\n'
-            '  $decoration\n'
-            'The painter was:\n'
-            '  $_painter'
+          throw FlutterError.detailed(
+            '${_decoration.runtimeType} painter had mismatching save and restore calls.',
+            description: 'Before painting the decoration, the canvas save count was $debugSaveCount. '
+            'After painting it, the canvas save count was ${context.canvas.getSaveCount()}.',
+            hint: 'Every call to save() or saveLayer() must be matched by a call to restore().',
+            diagnostics: <DiagnosticsNode>[
+              errorProperty('The decoration was', decoration),
+              errorProperty('The painter was', _painter),
+            ],
           );
         }
         return true;

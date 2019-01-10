@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'basic_types.dart';
+import 'diagnostics.dart';
 import 'print.dart';
+export 'diagnostics.dart';
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -12,6 +16,70 @@ typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 /// and other callbacks that collect information into a string buffer.
 typedef InformationCollector = void Function(StringBuffer information);
 
+typedef DiagnosticsCollector = List<DiagnosticsNode> Function();
+
+/// Property constructor with nice defaults for a property of an error object.
+DiagnosticsProperty<T> errorProperty<T>(
+  String name,
+  T value, {
+  DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine,
+  DiagnosticLevel level = DiagnosticLevel.info,
+  String linePrefix,
+}) {
+  return DiagnosticsProperty<T>(name, value, style: style, level: level, linePrefix: linePrefix);
+}
+
+// Inject to add extra whitepsace between blocks of text.
+DiagnosticsNode errorSeparator() {
+  return DiagnosticsNode.message('');
+}
+
+DiagnosticsNode descriptionMessage(String description) {
+  return DiagnosticsNode.message(description);
+}
+
+DiagnosticsNode hintMessage(String description) {
+  return DiagnosticsNode.message(description, level: DiagnosticLevel.hint);
+}
+
+DiagnosticsNode contractMessage(String description) {
+  return DiagnosticsNode.message(description, level: DiagnosticLevel.contract);
+}
+
+DiagnosticsNode violationMessage(String description) {
+  return DiagnosticsNode.message(description, level: DiagnosticLevel.violation);
+}
+
+DiagnosticsNode errorMessage(String description) {
+  return DiagnosticsNode.message(description, level: DiagnosticLevel.error);
+}
+
+/// Property with an [StackTrace] [value] that can be filtered to only show
+/// relevant frames using a XXX.
+///
+// TODO(jacobr): Include frame #s as needed / avoid indenting when there are
+// frame #s?
+class StackTraceProperty extends IterableProperty<String> {
+  StackTraceProperty(
+    String name,
+    StackTrace stack, {
+    bool showSeparator = true,
+  }) : super(
+    name,
+    FlutterError.defaultStackFilter(stack.toString().trimRight().split('\n').toList()),
+    style: DiagnosticsTreeStyle.whitespace,
+    showSeparator: showSeparator,
+  );
+
+  StackTraceProperty.singleFrame(
+      String name,
+      String frame
+  ) : super(
+    name,
+    <String>[frame],
+    style: DiagnosticsTreeStyle.whitespace,
+  );
+}
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
@@ -31,9 +99,13 @@ class FlutterErrorDetails {
     this.library = 'Flutter framework',
     this.context,
     this.stackFilter,
-    this.informationCollector,
+   // InformationCollector informationCollector, XXX to strip missing deps
+    this.diagnosticsCollector,
     this.silent = false
-  });
+  }) : _informationCollector = null;
+// XXX ADD BACK
+//  }) : assert(diagnosticsCollector == null || informationCollector == null),
+//      _informationCollector = informationCollector;
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
@@ -85,7 +157,22 @@ class FlutterErrorDetails {
   ///
   /// The text written to the information argument may contain newlines but should
   /// not end with a newline.
-  final InformationCollector informationCollector;
+  InformationCollector get informationCollector {
+    if (_informationCollector != null) {
+      return _informationCollector;
+    }
+    if (diagnosticsCollector == null) {
+      return null;
+    }
+    return (StringBuffer information) {
+      for (DiagnosticsNode node in diagnosticsCollector()) {
+        information.writeln(node.toStringDeep());
+      }
+    };
+  }
+  final InformationCollector _informationCollector;
+
+  final DiagnosticsCollector diagnosticsCollector;
 
   /// Whether this error should be ignored by the default error reporting
   /// behavior in release mode.
@@ -185,7 +272,88 @@ class FlutterError extends AssertionError {
   /// Include as much detail as possible in the full error message,
   /// including specifics about the state of the app that might be
   /// relevant to debugging the error.
-  FlutterError(String message) : super(message);
+  // Commented out temporarily to simplify porting
+  //FlutterError(String message) : messageParts = null, super(message);
+
+  FlutterError.diagnostic(this.messageParts);
+
+  /// [error] describes the error that occurred.
+  /// [description] provides more details about the error that occurred.
+  /// [hint] explains the cause of the issue.
+  /// [fix] explains a way to fix the issue.
+  /// [diagnostic] provides an additional arbitrary diagnostic describing
+  /// the error.
+  FlutterError.detailed(
+    String error, {
+    String violation,
+    String description,
+    String fix,
+    String contract,
+    String hint,
+    String footer,
+    DiagnosticsNode diagnostic,
+    Iterable<DiagnosticsNode> diagnostics,
+  }) : this.diagnostic(_createDiagnosticsList(
+    error: error,
+    violation: violation,
+    description: description,
+    fix: fix,
+    contract: contract,
+    hint: hint,
+    footer: footer,
+    diagnostic: diagnostic,
+    diagnostics: diagnostics,
+  ));
+
+  FlutterError.errorProperty(
+    String name,
+    Object value, {
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine,
+  }) : this.diagnostic(<DiagnosticsNode>[
+    errorProperty<Object>(name, value, level: DiagnosticLevel.error, style: style),
+  ]);
+  static List<DiagnosticsNode> _createDiagnosticsList({
+    @required String error,
+    String violation,
+    String description,
+    String fix,
+    String contract,
+    String hint,
+    String footer,
+    DiagnosticsNode diagnostic,
+    Iterable<DiagnosticsNode> diagnostics,
+  }) {
+    List<DiagnosticsNode> allDiagnostics = <DiagnosticsNode>[DiagnosticsNode.message(error, level: DiagnosticLevel.error)];
+
+    if (violation?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(violation, level: DiagnosticLevel.error));
+
+    if (description?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(description));
+
+    if (fix?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(fix, level: DiagnosticLevel.fix));
+
+    if (hint?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(hint, level: DiagnosticLevel.hint));
+
+    if (contract?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(contract, level: DiagnosticLevel.contract));
+
+    if (footer?.isNotEmpty == true)
+      allDiagnostics.add(DiagnosticsNode.message(footer));
+
+    if (diagnostic != null)
+      allDiagnostics.add(diagnostic);
+
+    if (diagnostics != null)
+      allDiagnostics.addAll(diagnostics);
+    return allDiagnostics;
+  }
+
+  // Diagnostics providing a tool friendly description of the cause of the
+  // FlutterError.
+  final List<DiagnosticsNode> messageParts;
 
   /// The message associated with this error.
   ///
@@ -203,7 +371,12 @@ class FlutterError extends AssertionError {
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
   @override
-  String get message => super.message;
+  String get message {
+    if (messageParts == null) {
+      return super.message;
+    }
+    return messageParts.map((DiagnosticsNode node) => node.toStringDeep()).join('\n');
+  }
 
   @override
   String toString() => message;

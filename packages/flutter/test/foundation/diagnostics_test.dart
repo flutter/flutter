@@ -864,7 +864,7 @@ void main() {
 
     final DoubleProperty throwingProperty = DoubleProperty.lazy(
       'name',
-      () => throw FlutterError('Invalid constraints'),
+      () => throw FlutterError.detailed('Invalid constraints'),
     );
     // TODO(jacobr): it would be better if throwingProperty.object threw an
     // exception.
@@ -1308,7 +1308,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingWithDescription = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError('Property not available'),
+      () => throw FlutterError.detailed('Property not available'),
       description: 'missing',
       defaultValue: null,
     );
@@ -1320,7 +1320,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingProperty = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError('Property not available'),
+      () => throw FlutterError.detailed('Property not available'),
       defaultValue: null,
     );
     expect(throwingProperty.value, isNull);

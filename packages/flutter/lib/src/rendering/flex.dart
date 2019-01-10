@@ -688,26 +688,32 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           } else {
             return true;
           }
-          throw FlutterError(
-            '$error\n'
-            '$message\n'
-            'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
-            'cannot simultaneously expand to fit its parent.\n'
-            'Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible '
-            'children (using Flexible rather than Expanded). This will allow the flexible children '
-            'to size themselves to less than the infinite remaining space they would otherwise be '
-            'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
-            'rather than expanding to fit the maximum constraints provided by the parent.\n'
-            'The affected RenderFlex is:\n'
-            '  $this\n'
-            'The creator information is set to:\n'
-            '  $debugCreator\n'
-            '$addendum'
-            'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-            '  https://flutter.io/debugging/#rendering-layer\n'
-            '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
-            'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          throw FlutterError.detailed(
+            error,
+            description: message,
+            contract: 'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
+            'cannot simultaneously expand to fit its parent.',
+            diagnostics: <DiagnosticsNode>[
+              DiagnosticsNode.message(
+                'Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible '
+                'children (using Flexible rather than Expanded). This will allow the flexible children '
+                'to size themselves to less than the infinite remaining space they would otherwise be '
+                'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
+                'rather than expanding to fit the maximum constraints provided by the parent.',
+                level: DiagnosticLevel.hint,
+              ),
+              DiagnosticsProperty<RenderFlex>('The affected RenderFlex is:', this, style: DiagnosticsTreeStyle.indentedSingleLine),
+              DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.indentedSingleLine),
+              DiagnosticsNode.message(addendum),
+              DiagnosticsNode.message(
+                'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
+                '  https://flutter.io/debugging/#rendering-layer\n'
+                '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
+                'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+                '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
+                level: DiagnosticLevel.hint,
+              ),
+            ]
           );
         }());
         totalFlex += childParentData.flex;
@@ -805,7 +811,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(() {
             if (textBaseline == null)
-              throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+              throw FlutterError.detailed('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
             return true;
           }());
           final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);

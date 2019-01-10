@@ -193,16 +193,17 @@ class GestureDetector extends StatelessWidget {
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
-             throw FlutterError(
-               'Incorrect GestureDetector arguments.\n'
-               'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
+             throw FlutterError.detailed(
+               'Incorrect GestureDetector arguments.',
+               violation:'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan.',
+               hint: 'Just use the scale gesture recognizer.'
              );
            }
            final String recognizer = havePan ? 'pan' : 'scale';
            if (haveVerticalDrag && haveHorizontalDrag) {
-             throw FlutterError(
-               'Incorrect GestureDetector arguments.\n'
-               'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
+             throw FlutterError.detailed(
+               'Incorrect GestureDetector arguments.',
+               violation: 'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
                'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
              );
            }
@@ -618,10 +619,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
       if (!context.findRenderObject().owner.debugDoingLayout) {
-        throw FlutterError(
-          'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
-          'The replaceGestureRecognizers() method can only be called during the layout phase. '
-          'To set the gesture recognizers at other times, trigger a new build using setState() '
+        throw FlutterError.detailed(
+          'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.',
+          violation: 'The replaceGestureRecognizers() method can only be called during the layout phase.',
+          hint: 'To set the gesture recognizers at other times, trigger a new build using setState() '
           'and provide the new gesture recognizers as constructor arguments to the corresponding '
           'RawGestureDetector or GestureDetector object.'
         );
@@ -653,9 +654,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     assert(() {
       final Element element = context;
       if (element.owner.debugBuilding) {
-        throw FlutterError(
-          'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
-          'The replaceSemanticsActions() method can only be called outside of the build phase.'
+        throw FlutterError.detailed(
+          'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.',
+          fix: 'The replaceSemanticsActions() method can only be called outside of the build phase.'
         );
       }
       return true;

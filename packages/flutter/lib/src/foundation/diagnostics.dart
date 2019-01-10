@@ -56,6 +56,26 @@ enum DiagnosticLevel {
   /// message in ALL CAPS.
   warning,
 
+  /// Diagnostics that provide a hint about best practices.
+  ///
+  /// For example, a diagnostic providing a hint on  on how to fix an overflow
+  /// error.
+  hint,
+
+  /// Diagnostics that provide a hint for how to fix a problem.
+  ///
+  /// For example, a diagnostic providing advice for how to fix an overflow
+  /// error.
+  fix,
+
+  /// Diagnostics that describe a contract.
+  ///
+  /// For example, a diagnostic describing the constraints applying to layout or
+  /// invariants that must remain true to correctly compose objects.
+  contract,
+
+  violation,
+
   /// Diagnostics that indicate errors or unexpected conditions.
   ///
   /// For example, use for property values where computing the value throws an
@@ -117,6 +137,25 @@ enum DiagnosticsTreeStyle {
 
   /// Render the tree on a single line without showing children.
   singleLine,
+
+  /// Render the tree on a single line with the name and value on separate
+  /// lines.
+  indentedSingleLine,
+
+  /// Render only the immediate properties of a node instead of the full tree.
+  ///
+  /// See also:
+  ///
+  ///  * [DebugOverflowIndicator], which uses this style to display just the
+  ///    immediate children of a node.
+  shallow,
+
+  /// Render only the children of a node truncating before the tree becomes too
+  /// large.
+  ///
+  /// See also:
+  ///  * XXX
+  truncateChildren,
 }
 
 /// Configuration specifying how a particular [DiagnosticsTreeStyle] should be
@@ -520,6 +559,63 @@ final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   prefixOtherLinesRootNode: '',
 );
 
+/// Render a node as a single line omitting children.
+///
+/// Example:
+/// ```
+/// <name>:
+///   <description>(<property1>, <property2>, ..., <propertyN>)
+/// ```
+///
+/// See also:
+///
+///  * [DiagnosticsTreeStyle.indentedSingleLine]
+final TextTreeConfiguration singleLineTextConfigurationIndented = TextTreeConfiguration(
+  propertySeparator: ', ',
+  beforeProperties: '(',
+  afterProperties: ')',
+  prefixLineOne: '',
+  prefixOtherLines: '',
+  prefixLastChildLineOne: '',
+  lineBreak: '',
+  lineBreakProperties: false,
+  addBlankLineIfNoChildren: false,
+  showChildren: false,
+  propertyPrefixIfChildren: '',
+  propertyPrefixNoChildren: '',
+  linkCharacter: '',
+  prefixOtherLinesRootNode: '',
+  afterName: '\n  ', // This is the difference between this text configuration and the typical single line text configuration. TODO(jacobr): verify this is robust.
+);
+
+/// Render a node on multiple lines omitting children.
+///
+/// Example:
+/// `<name>: <description>
+///   <property1>
+///   <property2>
+///   <propertyN>`
+///
+/// See also:
+///
+///  * [DiagnosticsTreeStyle.shallow]
+final TextTreeConfiguration shallowTextConfiguration = TextTreeConfiguration(
+  prefixLineOne: '',
+  prefixLastChildLineOne: '',
+  prefixOtherLines: ' ',
+  prefixOtherLinesRootNode: '  ',
+  bodyIndent: '',
+  propertyPrefixIfChildren: '',
+  propertyPrefixNoChildren: '',
+  linkCharacter: ' ',
+  addBlankLineIfNoChildren: false,
+  // Add a colon after the description and before the properties to link the
+  // properties to the description line.
+  afterDescriptionIfBody: ':',
+  isBlankLineBetweenPropertiesAndChildren: false,
+  showChildren: false,
+);
+
 /// Builder that builds a String with specified prefixes for the first and
 /// subsequent lines.
 ///
@@ -646,6 +742,7 @@ abstract class DiagnosticsNode {
     this.style,
     this.showName = true,
     this.showSeparator = true,
+    this.linePrefix,
   }) : assert(showName != null),
        assert(showSeparator != null),
        // A name ending with ':' indicates that the user forgot that the ':' will
@@ -724,6 +821,8 @@ abstract class DiagnosticsNode {
   /// will make the name self-evident.
   final bool showName;
 
+  final String linePrefix;
+
   /// Description to show if the node has no displayed properties or children.
   String get emptyBodyDescription => null;
 
@@ -772,6 +871,9 @@ abstract class DiagnosticsNode {
       'type': runtimeType.toString(),
       'hasChildren': getChildren().isNotEmpty,
     };
+    if (linePrefix != null) {
+      data['linePrefix'] = linePrefix;
+    }
     return data;
   }
 
@@ -821,6 +923,12 @@ abstract class DiagnosticsNode {
         return transitionTextConfiguration;
       case DiagnosticsTreeStyle.singleLine:
         return singleLineTextConfiguration;
+      case DiagnosticsTreeStyle.indentedSingleLine:
+        return singleLineTextConfigurationIndented;
+      case DiagnosticsTreeStyle.shallow:
+        return shallowTextConfiguration;
+      case DiagnosticsTreeStyle.truncateChildren:
+        return null;
     }
     return null;
   }
@@ -865,16 +973,56 @@ abstract class DiagnosticsNode {
   }) {
     assert(minLevel != null);
     prefixOtherLines ??= prefixLineOne;
+    if (linePrefix != null) {
+      // TODO(jacobr): should it apply to line 1 or not??
+      prefixLineOne += linePrefix;
+      prefixOtherLines += linePrefix;
+    }
 
-    final List<DiagnosticsNode> children = getChildren();
     final TextTreeConfiguration config = textTreeConfiguration;
     if (prefixOtherLines.isEmpty)
       prefixOtherLines += config.prefixOtherLinesRootNode;
 
+    if (style == DiagnosticsTreeStyle.truncateChildren) {
+      // This style is different enough that it isn't worthwhile to reuse the
+      // existing logic.
+      final List<String> descendants = <String>[];
+      const int maxDepth = 5;
+      int depth = 0;
+      const int maxLines = 25;
+      int lines = 0;
+      void visitor(DiagnosticsNode node) {
+        for (DiagnosticsNode child in node.getChildren()) {
+          if (lines < maxLines) {
+            depth += 1;
+            descendants.add('$prefixOtherLines${"  " * depth}$child');
+            if (depth < maxDepth)
+              visitor(child);
+            depth -= 1;
+          } else if (lines == maxLines) {
+            descendants.add('$prefixOtherLines  ...(descendants list truncated after $lines lines)');
+          }
+          lines += 1;
+        }
+      }
+      visitor(this);
+      StringBuffer information = StringBuffer(prefixLineOne);
+      if (lines > 1) {
+        information.writeln('This $name had the following descendants (showing up to depth $maxDepth):');
+      } else if (descendants.length == 1) {
+        information.writeln('This $name had the following child:');
+      } else {
+        information.writeln('This $name has no descendants.');
+      }
+      information.writeAll(descendants, '\n');
+      return information.toString();
+    }
     final _PrefixedStringBuilder builder = _PrefixedStringBuilder(
       prefixLineOne,
       prefixOtherLines,
     );
+
+    final List<DiagnosticsNode> children = getChildren();
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
     if (description == null || description.isEmpty) {
@@ -1456,16 +1604,18 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// [defaultValue] is used to indicate that a specific concrete value is not
   /// interesting to display.
   ///
-  /// The [style], [showName], and [level] arguments must not be null.
+  /// The [style], [showName], [showSeparator], and [level] arguments must not be null.
   IterableProperty(String name, Iterable<T> value, {
     Object defaultValue = kNoDefaultValue,
     String ifNull,
     String ifEmpty = '[]',
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     bool showName = true,
+    bool showSeparator = true,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(style != null),
        assert(showName != null),
+       assert(showSeparator != null),
        assert(level != null),
        super(
     name,
@@ -1475,6 +1625,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     ifEmpty: ifEmpty,
     style: style,
     showName: showName,
+    showSeparator: showSeparator,
     level: level,
   );
 
@@ -1700,6 +1851,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     this.defaultValue = kNoDefaultValue,
     this.tooltip,
     this.missingIfNull = false,
+    String linePrefix,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
@@ -1717,6 +1869,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
          showName: showName,
          showSeparator: showSeparator,
          style: style,
+         linePrefix: linePrefix,
       );
 
   /// Property with a [value] that is computed only when needed.

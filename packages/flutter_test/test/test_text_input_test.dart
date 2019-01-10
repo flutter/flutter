@@ -23,7 +23,7 @@ void main() {
     // Register a handler for the text input channel that throws an error. This
     // error should be reported within a PlatformException by TestTextInput.
     SystemChannels.textInput.setMethodCallHandler((MethodCall call) {
-      throw FlutterError('A fake error occurred during action processing.');
+      throw FlutterError.detailed('A fake error occurred during action processing.');
     });
 
     try {

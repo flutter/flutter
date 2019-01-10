@@ -80,10 +80,7 @@ class PointerRouter {
         router: this,
         route: route,
         event: event,
-        informationCollector: (StringBuffer information) {
-          information.writeln('Event:');
-          information.write('  $event');
-        }
+        diagnosticsCollector: () => <DiagnosticsNode>[errorProperty('Event', event)],
       ));
     }
   }
@@ -127,14 +124,16 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     this.router,
     this.route,
     this.event,
-    InformationCollector informationCollector,
+    // XXX InformationCollector informationCollector,
+    DiagnosticsCollector diagnosticsCollector,
     bool silent = false
   }) : super(
     exception: exception,
     stack: stack,
     library: library,
     context: context,
-    informationCollector: informationCollector,
+    // XXX informationCollector: informationCollector,
+    diagnosticsCollector: diagnosticsCollector,
     silent: silent
   );
 

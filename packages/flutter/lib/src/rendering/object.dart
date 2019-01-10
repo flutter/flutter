@@ -17,7 +17,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder, errorProperty, hintMessage;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
@@ -579,7 +579,8 @@ abstract class Constraints {
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-    InformationCollector informationCollector
+//    InformationCollector informationCollector,
+    DiagnosticsCollector diagnosticsCollector,
   }) {
     assert(isNormalized);
     return isNormalized;
@@ -634,9 +635,9 @@ class SemanticsHandle {
   void dispose() {
     assert(() {
       if (_owner == null) {
-        throw FlutterError(
-          'SemanticsHandle has already been disposed.\n'
-          'Each SemanticsHandle should be disposed exactly once.'
+        throw FlutterError.detailed(
+          'SemanticsHandle has already been disposed.',
+          contract: 'Each SemanticsHandle should be disposed exactly once.'
         );
       }
       return true;
@@ -1179,35 +1180,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       library: 'rendering library',
       context: 'during $method()',
       renderObject: this,
-      informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-        final List<String> descendants = <String>[];
-        const int maxDepth = 5;
-        int depth = 0;
-        const int maxLines = 25;
-        int lines = 0;
-        void visitor(RenderObject child) {
-          if (lines < maxLines) {
-            depth += 1;
-            descendants.add('${"  " * depth}$child');
-            if (depth < maxDepth)
-              child.visitChildren(visitor);
-            depth -= 1;
-          } else if (lines == maxLines) {
-            descendants.add('  ...(descendants list truncated after $lines lines)');
-          }
-          lines += 1;
-        }
-        visitChildren(visitor);
-        if (lines > 1) {
-          information.writeln('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-        } else if (descendants.length == 1) {
-          information.writeln('This RenderObject had the following child:');
-        } else {
-          information.writeln('This RenderObject has no descendants.');
-        }
-        information.writeAll(descendants, '\n');
+      diagnosticsCollector: () {
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+        information.add(toDiagnosticsNode(
+          name: 'The following RenderObject was being processed when the exception was fired',
+          style: DiagnosticsTreeStyle.shallow,
+        ));
+        information.add(toDiagnosticsNode(
+          name: 'This RenderObject',
+          style: DiagnosticsTreeStyle.truncateChildren,
+        ));
       }
     ));
   }
@@ -1548,7 +1530,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
-      informationCollector: (StringBuffer information) {
+      diagnosticsCollector: () {
+        List<DiagnosticsNode> information = <DiagnosticsNode>[];
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1559,18 +1542,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           }
         }
         if (targetFrame != null && targetFrame < stack.length) {
-          information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s layout() '
-            'function by the following function, which probably computed the '
-            'invalid constraints in question:'
-          );
           final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
-          if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
-            information.writeln('  ${targetFrameMatch.group(1)}');
-          } else {
-            information.writeln(stack[targetFrame]);
-          }
+          final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
+          information.add(errorProperty(
+            'These invalid constraints were provided to $runtimeType\'s layout() '
+            'function by the following function, which probably computed the '
+            'invalid constraints in question',
+            problemFunction
+          ));
         }
       }
     ));
@@ -2045,13 +2025,20 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugDoingThisPaint) {
-        throw FlutterError(
-          'Tried to paint a RenderObject reentrantly.\n'
-          'The following RenderObject was already being painted when it was '
-          'painted again:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'Since this typically indicates an infinite recursion, it is '
-          'disallowed.'
+        throw FlutterError.detailed(
+          'Tried to paint a RenderObject reentrantly.',
+          diagnostics: <DiagnosticsNode>[
+            errorProperty(
+              'The following RenderObject was already being painted when it was '
+              'painted again',
+              this,
+              style: DiagnosticsTreeStyle.shallow,
+            ),
+            DiagnosticsNode.message(
+              'Since this typically indicates an infinite recursion, it is '
+              'disallowed.'
+            ),
+          ]
         );
       }
       return true;
@@ -2067,16 +2054,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        throw FlutterError(
+        throw FlutterError.detailed(
           'Tried to paint a RenderObject before its compositing bits were '
-          'updated.\n'
-          'The following RenderObject was marked as having dirty compositing '
-          'bits at the time that it was painted:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'A RenderObject that still has dirty compositing bits cannot be '
-          'painted because this indicates that the tree has not yet been '
-          'properly configured for creating the layer tree.\n'
-          'This usually indicates an error in the Flutter framework itself.'
+          'updated.',
+          diagnostics: <DiagnosticsNode>[
+            errorProperty('The following RenderObject was marked as having dirty compositing '
+                'bits at the time that it was painted', this, style: DiagnosticsTreeStyle.shallow),
+            hintMessage(
+              'A RenderObject that still has dirty compositing bits cannot be '
+              'painted because this indicates that the tree has not yet been '
+              'properly configured for creating the layer tree.\n'
+              'This usually indicates an error in the Flutter framework itself.'
+            ),
+          ],
         );
       }
       return true;
@@ -2716,20 +2706,22 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
+        throw FlutterError.detailed(
           'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
+          'child of type ${child.runtimeType}.',
+          description: 'RenderObjects expect specific types of children because they '
           'coordinate with their children during layout and paint. For '
           'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
+          'a RenderSliver does not understand the RenderBox layout protocol.\n',
+          diagnostics: <DiagnosticsNode>[
+            errorProperty<dynamic>('The $runtimeType that expected a $ChildType child was created by', debugCreator),
+            DiagnosticsNode.message(''),
+            errorProperty<dynamic>(
+              'The ${child.runtimeType} that did not match the expected child type '
+              'was created by',
+              child.debugCreator,
+            ),
+          ]
         );
       }
       return true;
@@ -2845,20 +2837,22 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
+        throw FlutterError.detailed(
           'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
+          'child of type ${child.runtimeType}.',
+          contract: 'RenderObjects expect specific types of children because they '
           'coordinate with their children during layout and paint. For '
           'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
+          'a RenderSliver does not understand the RenderBox layout protocol.\n',
+          diagnostics: <DiagnosticsNode>[
+            errorProperty<dynamic>('The $runtimeType that expected a $ChildType child was created by', debugCreator),
+            errorSeparator(),
+            errorProperty<dynamic>(
+              'The ${child.runtimeType} that did not match the expected child type '
+              'was created by',
+              child.debugCreator,
+            ),
+          ],
         );
       }
       return true;
@@ -3098,14 +3092,16 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String library,
     String context,
     this.renderObject,
-    InformationCollector informationCollector,
+    // XXX InformationCollector informationCollector,
+    DiagnosticsCollector diagnosticsCollector,
     bool silent = false
   }) : super(
     exception: exception,
     stack: stack,
     library: library,
     context: context,
-    informationCollector: informationCollector,
+    // XXX informationCollector: informationCollector,
+    diagnosticsCollector: diagnosticsCollector,
     silent: silent
   );
 

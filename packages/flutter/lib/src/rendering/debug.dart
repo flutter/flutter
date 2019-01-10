@@ -226,7 +226,7 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled ||
         debugOnProfilePaint != null) {
-      throw FlutterError(reason);
+      throw FlutterError.detailed(reason);
     }
     return true;
   }());

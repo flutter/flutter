@@ -106,11 +106,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         stack: stack,
         library: 'gesture',
         context: 'while handling a gesture',
-        informationCollector: (StringBuffer information) {
-          information.writeln('Handler: $name');
-          information.writeln('Recognizer:');
-          information.writeln('  $this');
-        }
+        diagnosticsCollector: () => <DiagnosticsNode>[
+          StringProperty('Handler', name),
+          errorProperty('Recognizer', this)
+        ]
       ));
     }
     return result;

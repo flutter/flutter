@@ -390,16 +390,16 @@ class ClampingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     assert(() {
       if (value == position.pixels) {
-        throw FlutterError(
-          '$runtimeType.applyBoundaryConditions() was called redundantly.\n'
-          'The proposed new position, $value, is exactly equal to the current position of the '
-          'given ${position.runtimeType}, ${position.pixels}.\n'
-          'The applyBoundaryConditions method should only be called when the value is '
-          'going to actually change the pixels, otherwise it is redundant.\n'
-          'The physics object in question was:\n'
-          '  $this\n'
-          'The position object in question was:\n'
-          '  $position\n'
+        throw FlutterError.detailed(
+          '$runtimeType.applyBoundaryConditions() was called redundantly.',
+          violation: 'The proposed new position, $value, is exactly equal to the current position of the '
+          'given ${position.runtimeType}, ${position.pixels}.',
+          contract: 'The applyBoundaryConditions method should only be called when the value is '
+          'going to actually change the pixels, otherwise it is redundant.',
+          diagnostics: <DiagnosticsNode>[
+            DiagnosticsProperty('The physics object in question was', this, style: DiagnosticsTreeStyle.indentedSingleLine),
+            DiagnosticsProperty('The position object in question was', position, style: DiagnosticsTreeStyle.indentedSingleLine),
+          ],
         );
       }
       return true;

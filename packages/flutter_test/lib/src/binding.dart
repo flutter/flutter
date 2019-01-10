@@ -509,14 +509,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // _this_ zone, the test framework would find this zone was the current
       // zone and helpfully throw the error in this zone, causing us to be
       // directly called again.
-      String treeDump;
+      DiagnosticsNode treeDump;
       try {
-        treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
+        treeDump = renderViewElement?.toDiagnosticsNode() ?? descriptionMessage('<no tree>');
+        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
+        // Potentially everything is good enough without this case.
+        treeDump.toStringDeep();
       } catch (exception) {
-        treeDump = '<additional error caught while dumping tree: $exception>';
+        treeDump = descriptionMessage('<additional error caught while dumping tree: $exception>');
       }
-      final StringBuffer expectLine = StringBuffer();
-      final int stackLinesToOmit = reportExpectCall(stack, expectLine);
+      final List<DiagnosticsNode> expectLineDiagnostics = <DiagnosticsNode>[];
+      final int stackLinesToOmit = reportExpectCall(stack, expectLineDiagnostics);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: _unmangle(stack),
@@ -525,15 +528,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         stackFilter: (Iterable<String> frames) {
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
-        informationCollector: (StringBuffer information) {
+        diagnosticsCollector: () {
+          final List<DiagnosticsNode> information = <DiagnosticsNode>[];
           if (stackLinesToOmit > 0)
-            information.writeln(expectLine.toString());
+            information.addAll(expectLineDiagnostics);
           if (showAppDumpInErrors) {
-            information.writeln('At the time of the failure, the widget tree looked as follows:');
-            information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
+            information.add(errorProperty('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# '));
           }
-          if (description.isNotEmpty)
-            information.writeln('The test description was:\n$description');
+          if (description.isNotEmpty) {
+            information.add(errorProperty('The test description was', description));
+          }
         }
       ));
       assert(_parentZone != null);
@@ -613,7 +617,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(() {
       if (autoUpdateGoldenFiles != valueBeforeTest) {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: FlutterError(
+          exception: FlutterError.detailed(
               'The value of autoUpdateGoldenFiles was changed by the test.',
           ),
           stack: StackTrace.current,
@@ -633,7 +637,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // this error.
         reportTestException = valueBeforeTest;
         FlutterError.reportError(FlutterErrorDetails(
-          exception: FlutterError(
+          exception: FlutterError.detailed(
             'The value of reportTestException was changed by the test.',
           ),
           stack: StackTrace.current,

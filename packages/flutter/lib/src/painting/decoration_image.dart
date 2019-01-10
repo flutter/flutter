@@ -220,14 +220,14 @@ class DecorationImagePainter {
         // We check this first so that the assert will fire immediately, not just
         // when the image is ready.
         if (configuration.textDirection == null) {
-          throw FlutterError(
-            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
-            'When DecorationImagePainter.paint() was called, there was no text direction provided '
-            'in the ImageConfiguration object to match.\n'
-            'The DecorationImage was:\n'
-            '  $_details\n'
-            'The ImageConfiguration was:\n'
-            '  $configuration'
+          throw FlutterError.detailed(
+            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.',
+            description: 'When DecorationImagePainter.paint() was called, there was no text direction provided '
+            'in the ImageConfiguration object to match.',
+            diagnostics: <DiagnosticsNode>[
+              errorProperty('The DecorationImage was', _details),
+              errorProperty('The ImageConfiguration was', configuration),
+            ],
           );
         }
         return true;
