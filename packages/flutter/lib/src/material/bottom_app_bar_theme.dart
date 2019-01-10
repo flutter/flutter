@@ -39,8 +39,6 @@ class BottomAppBarTheme extends Diagnosticable {
   final Color color;
 
   /// Default value for [BottomAppBar.elevation].
-  ///
-  /// If null, defaults to `8.0`.
   final double elevation;
 
   /// Default value for [BottomAppBar.shape].
