@@ -22,10 +22,30 @@ Future<void> main(List<String> args) async {
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
-Future<void> generateDocs(String url, String docName, String checkFile) async {
-  final http.Response response = await http.get(url);
+/// Fetches the zip archive at the specified url.
+///
+/// Returns null if the archive fails to download after [maxTries] attempts.
+Future<Archive> fetchArchive(String url, int maxTries) async {
+  List<int> responseBytes;
+  for (int i = 0; i < maxTries; i++) {
+    final http.Response response = await http.get(url);
+    if (response.statusCode == 200) {
+      responseBytes = response.bodyBytes;
+      break;
+    }
+    print('Failed attempt ${i+1} to fetch $url. HTTP status code ${response.statusCode}.');
+    sleep(const Duration(seconds: 1));
+  }
+  return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
+}
 
-  final Archive archive = ZipDecoder().decodeBytes(response.bodyBytes);
+Future<void> generateDocs(String url, String docName, String checkFile) async {
+  const int maxTries = 5;
+  final Archive archive = await fetchArchive(url, maxTries);
+  if (archive == null) {
+    stderr.writeln('Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
+    exit(1);
+  }
 
   final Directory output = Directory('$kDocRoot/$docName');
   print('Extracting $docName to ${output.path}');
