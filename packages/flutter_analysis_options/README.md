@@ -16,5 +16,5 @@ This is a subset of rules suitable for most Flutter projects.
 
 ## analysis_options.yaml
 
-This contains all of the rules in `analysis_options_base.yaml`, plus additional
+This imports all of the rules in `analysis_options_base.yaml`, plus additional
 rules that conform to the style guidelines for the Flutter repository.
