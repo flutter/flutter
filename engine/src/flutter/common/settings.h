@@ -79,7 +79,7 @@ struct Settings {
   // tasks suitable when idling. Due to this, embedders are still advised to be
   // as fast as possible in returning from this callback. Long running
   // operations in this callback do have the capability of introducing jank.
-  fml::closure idle_notification_callback;
+  std::function<void(int64_t)> idle_notification_callback;
   bool enable_software_rendering = false;
   bool skia_deterministic_rendering_on_cpu = false;
   bool verbose_logging = false;
