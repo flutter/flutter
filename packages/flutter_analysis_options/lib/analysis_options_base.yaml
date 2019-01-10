@@ -48,7 +48,6 @@ linter:
     - super_goes_last
     - test_types_in_equals
     - throw_in_finally
-    # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
