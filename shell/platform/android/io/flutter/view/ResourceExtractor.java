@@ -50,37 +50,68 @@ class ResourceExtractor {
         protected Void doInBackground(Void... unused) {
             final File dataDir = new File(PathUtils.getDataDirectory(mContext));
 
-            JSONObject updateManifest = readUpdateManifest();
-            if (!validateUpdateManifest(updateManifest)) {
-                updateManifest = null;
+            ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
+            if (resourceUpdater != null) {
+                // Protect patch file from being overwritten by downloader while
+                // it's being extracted since downloading happens asynchronously.
+                resourceUpdater.getInstallationLock().lock();
             }
 
-            final String timestamp = checkTimestamp(dataDir, updateManifest);
-            if (timestamp == null) {
-                return null;
-            }
+            try {
+                if (resourceUpdater != null) {
+                    File updateFile = resourceUpdater.getDownloadedPatch();
+                    File activeFile = resourceUpdater.getInstalledPatch();
 
-            deleteFiles();
+                    if (updateFile.exists()) {
+                        // Graduate patch file as active for asset manager.
+                        if (activeFile.exists() && !activeFile.delete()) {
+                            Log.w(TAG, "Could not delete file " + activeFile);
+                            return null;
+                        }
+                        if (!updateFile.renameTo(activeFile)) {
+                            Log.w(TAG, "Could not create file " + activeFile);
+                            return null;
+                        }
+                    }
+                }
 
-            if (updateManifest != null) {
-                if (!extractUpdate(dataDir)) {
+                JSONObject updateManifest = readUpdateManifest();
+                if (!validateUpdateManifest(updateManifest)) {
+                    updateManifest = null;
+                }
+
+                final String timestamp = checkTimestamp(dataDir, updateManifest);
+                if (timestamp == null) {
                     return null;
                 }
-            }
 
-            if (!extractAPK(dataDir)) {
-                return null;
-            }
+                deleteFiles();
 
-            if (timestamp != null) {
-                try {
-                    new File(dataDir, timestamp).createNewFile();
-                } catch (IOException e) {
-                    Log.w(TAG, "Failed to write resource timestamp");
+                if (updateManifest != null) {
+                    if (!extractUpdate(dataDir)) {
+                        return null;
+                    }
                 }
-            }
 
-            return null;
+                if (!extractAPK(dataDir)) {
+                    return null;
+                }
+
+                if (timestamp != null) {
+                    try {
+                        new File(dataDir, timestamp).createNewFile();
+                    } catch (IOException e) {
+                        Log.w(TAG, "Failed to write resource timestamp");
+                    }
+                }
+
+                return null;
+
+            } finally {
+              if (resourceUpdater != null) {
+                  resourceUpdater.getInstallationLock().unlock();
+              }
+          }
         }
     }
 
@@ -200,7 +231,7 @@ class ResourceExtractor {
             return true;
         }
 
-        File updateFile = resourceUpdater.getPatch();
+        File updateFile = resourceUpdater.getInstalledPatch();
         if (!updateFile.exists()) {
             return true;
         }
@@ -288,7 +319,7 @@ class ResourceExtractor {
                 } else {
                     ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
                     assert resourceUpdater != null;
-                    File patchFile = resourceUpdater.getPatch();
+                    File patchFile = resourceUpdater.getInstalledPatch();
                     assert patchFile.exists();
                     if (patchNumber != null) {
                         expectedTimestamp += "-" + patchNumber + "-" + patchFile.lastModified();
@@ -361,7 +392,7 @@ class ResourceExtractor {
             return null;
         }
 
-        File updateFile = resourceUpdater.getPatch();
+        File updateFile = resourceUpdater.getInstalledPatch();
         if (!updateFile.exists()) {
             return null;
         }
