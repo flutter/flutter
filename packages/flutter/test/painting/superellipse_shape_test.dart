@@ -65,7 +65,6 @@ void main() {
         shape: SuperellipseShape(
           borderRadius: BorderRadius.circular(28.0),
         ),
-        child: Container(width: 100.0, height: 100.0),
       ),
     ));
 
@@ -88,7 +87,6 @@ void main() {
             bottomRight: Radius.circular(14.0),
           ),
         ),
-        child: Container(width: 100.0, height: 100.0),
       ),
     ));
 
@@ -108,7 +106,6 @@ void main() {
         shape: SuperellipseShape(
           borderRadius: BorderRadius.circular(50.0),
         ),
-        child: Container(width: 100.0, height: 100.0),
       ),
     ));
 
