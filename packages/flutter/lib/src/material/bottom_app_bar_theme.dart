@@ -61,7 +61,7 @@ class BottomAppBarTheme extends Diagnosticable {
   }
 
   /// The [ThemeData.bottomAppBarTheme] property of the ambient [Theme].
-  BottomAppBarTheme of(BuildContext context) {
+  static BottomAppBarTheme of(BuildContext context) {
     return Theme.of(context).bottomAppBarTheme;
   }
 
