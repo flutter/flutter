@@ -25,7 +25,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
-    fml::closure p_idle_notification_callback)
+    std::function<void(int64_t)> p_idle_notification_callback)
     : RuntimeController(p_client,
                         p_vm,
                         std::move(p_isolate_snapshot),
@@ -50,7 +50,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<flow::SkiaUnrefQueue> p_unref_queue,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
-    fml::closure idle_notification_callback,
+    std::function<void(int64_t)> idle_notification_callback,
     WindowData p_window_data)
     : client_(p_client),
       vm_(p_vm),
@@ -212,7 +212,7 @@ bool RuntimeController::NotifyIdle(int64_t deadline) {
   // Idle notifications being in isolate scope are part of the contract.
   if (idle_notification_callback_) {
     TRACE_EVENT0("flutter", "EmbedderIdleNotification");
-    idle_notification_callback_();
+    idle_notification_callback_(deadline);
   }
   return true;
 }

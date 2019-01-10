@@ -37,7 +37,7 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
                     std::string advisory_script_uri,
                     std::string advisory_script_entrypoint,
-                    fml::closure idle_notification_callback);
+                    std::function<void(int64_t)> idle_notification_callback);
 
   ~RuntimeController() override;
 
@@ -126,7 +126,7 @@ class RuntimeController final : public WindowClient {
   fml::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
   std::string advisory_script_uri_;
   std::string advisory_script_entrypoint_;
-  fml::closure idle_notification_callback_;
+  std::function<void(int64_t)> idle_notification_callback_;
   WindowData window_data_;
   std::weak_ptr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
@@ -141,7 +141,7 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
                     std::string advisory_script_uri,
                     std::string advisory_script_entrypoint,
-                    fml::closure idle_notification_callback,
+                    std::function<void(int64_t)> idle_notification_callback,
                     WindowData data);
 
   Window* GetWindowIfAvailable();
