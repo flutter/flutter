@@ -220,7 +220,7 @@ class RenderEditable extends RenderBox {
   ///
   /// Should be obtained by querying MediaQuery for the devicePixelRatio.
   double get devicePixelRatio => _devicePixelRatio;
-  double _devicePixelRatio;
+  double _devicePixelRatio = 1.0;
   set devicePixelRatio(double value) {
     if (devicePixelRatio == value)
       return;
