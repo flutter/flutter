@@ -41,9 +41,6 @@
 #include "LayoutUtils.h"
 #include "MinikinInternal.h"
 
-using std::string;
-using std::vector;
-
 namespace minikin {
 
 const int kDirection_Mask = 0x1;
@@ -745,7 +742,8 @@ float Layout::doLayoutWord(const uint16_t* buf,
   return advance;
 }
 
-static void addFeatures(const string& str, vector<hb_feature_t>* features) {
+static void addFeatures(const std::string& str,
+                        std::vector<hb_feature_t>* features) {
   if (!str.size())
     return;
 
@@ -925,10 +923,10 @@ void Layout::doLayoutRun(const uint16_t* buf,
                          LayoutContext* ctx,
                          const std::shared_ptr<FontCollection>& collection) {
   hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
-  vector<FontCollection::Run> items;
+  std::vector<FontCollection::Run> items;
   collection->itemize(buf + start, count, ctx->style, &items);
 
-  vector<hb_feature_t> features;
+  std::vector<hb_feature_t> features;
   // Disable default-on non-required ligature features if letter-spacing
   // See http://dev.w3.org/csswg/css-text-3/#letter-spacing-property
   // "When the effective spacing between two characters is not zero (due to
