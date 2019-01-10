@@ -13,8 +13,7 @@ import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase
-    with ServicesBinding, SchedulerBinding, GestureBinding {
+class TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding {
   HandleEventCallback callback;
 
   @override
@@ -93,6 +92,15 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
+      final ui.PointerDataPacket packet5 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 301.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+          device: 1,
+        ),
+      ]);
       tracker.attachAnnotation(annotation);
       isInHitRegion = true;
       ui.window.onPointerDataPacket(packet1);
@@ -103,6 +111,7 @@ void main() {
         equals(MouseEnterDetails(
           globalPosition: const Offset(0.0, 0.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(exit.length, equals(0), reason: 'exit contains $exit');
@@ -112,6 +121,7 @@ void main() {
         equals(MouseMoveDetails(
           globalPosition: const Offset(0.0, 0.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       clear();
@@ -126,6 +136,7 @@ void main() {
         equals(MouseMoveDetails(
           globalPosition: const Offset(1.0, 101.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       clear();
@@ -140,6 +151,7 @@ void main() {
         equals(MouseExitDetails(
           globalPosition: null,
           sourceTimeStamp: null,
+          deviceId: 0,
         )),
       );
 
@@ -152,6 +164,7 @@ void main() {
         equals(MouseEnterDetails(
           globalPosition: const Offset(1.0, 201.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(exit.length, equals(0), reason: 'exit contains $exit');
@@ -161,6 +174,39 @@ void main() {
         equals(MouseMoveDetails(
           globalPosition: const Offset(1.0, 201.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
+        )),
+      );
+
+      // add in a second mouse simultaneously.
+      clear();
+      ui.window.onPointerDataPacket(packet5);
+      tracker.collectMousePositions();
+      expect(enter.length, equals(1), reason: 'enter contains $enter');
+      expect(
+        enter.first,
+        equals(MouseEnterDetails(
+          globalPosition: const Offset(1.0, 301.0),
+          sourceTimeStamp: Duration.zero,
+          deviceId: 1,
+        )),
+      );
+      expect(exit.length, equals(0), reason: 'exit contains $exit');
+      expect(move.length, equals(2), reason: 'move contains $move');
+      expect(
+        move.first,
+        equals(MouseMoveDetails(
+          globalPosition: const Offset(1.0, 201.0),
+          sourceTimeStamp: Duration.zero,
+          deviceId: 0,
+        )),
+      );
+      expect(
+        move.last,
+        equals(MouseMoveDetails(
+          globalPosition: const Offset(1.0, 301.0),
+          sourceTimeStamp: Duration.zero,
+          deviceId: 1,
         )),
       );
     });
@@ -198,6 +244,7 @@ void main() {
         equals(MouseEnterDetails(
           globalPosition: const Offset(1.0, 101.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(move.length, equals(1), reason: 'move contains $move');
@@ -206,6 +253,7 @@ void main() {
         equals(MouseMoveDetails(
           globalPosition: const Offset(1.0, 101.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(exit.length, equals(0), reason: 'exit contains $exit');
@@ -223,6 +271,7 @@ void main() {
         equals(MouseExitDetails(
           globalPosition: const Offset(1.0, 201.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
         reason: 'move contains $move',
       );
@@ -260,6 +309,7 @@ void main() {
         equals(MouseEnterDetails(
           globalPosition: const Offset(1.0, 101.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(move.length, equals(1), reason: 'move contains $move');
@@ -268,6 +318,7 @@ void main() {
         equals(MouseMoveDetails(
           globalPosition: const Offset(1.0, 101.0),
           sourceTimeStamp: Duration.zero,
+          deviceId: 0,
         )),
       );
       expect(exit.length, equals(1), reason: 'exit contains $exit');
@@ -276,6 +327,7 @@ void main() {
         equals(MouseExitDetails(
           globalPosition: null,
           sourceTimeStamp: null,
+          deviceId: 0,
         )),
       );
     });
