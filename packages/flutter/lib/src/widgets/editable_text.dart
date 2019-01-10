@@ -614,6 +614,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void dispose() {
     widget.controller.removeListener(_didChangeTextEditingValue);
+    _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
+    _floatingCursorResetController.removeListener(_onFloatingCursorResetTick);
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
     _stopCursorTimer();
@@ -993,6 +995,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // of 1.0, and likewise if we want to make it disappear, to 0.0. An easing
       // curve is used for the animation to mimic the aesthetics of the native
       // iOS cursor.
+      //
+      // These values and curves have been obtained through eyeballing, so are
+      // likely not exactly the same as the values for native iOS.
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorBlinkOpacityController.animateTo(toValue, curve: Curves.easeOut);
     } else {
