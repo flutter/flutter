@@ -25,6 +25,7 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -65,6 +66,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _validators.addAll(ideValidators);
       else
         _validators.add(NoIdeValidator());
+
+      if (ProxyValidator.shouldShow)
+      _validators.add(ProxyValidator());
 
       if (deviceManager.canListAnything)
         _validators.add(DeviceValidator());
