@@ -286,4 +286,8 @@ FontCollection::GetFallbackFontFamily(const sk_sp<SkFontMgr>& manager,
   return insert_it.first->second;
 }
 
+void FontCollection::ClearFontFamilyCache() {
+  font_collections_cache_.clear();
+}
+
 }  // namespace txt

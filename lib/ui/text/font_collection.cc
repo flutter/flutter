@@ -158,6 +158,7 @@ void FontCollection::LoadFontFromList(const uint8_t* font_data,
   } else {
     font_provider.RegisterTypeface(typeface, family_name);
   }
+  collection_->ClearFontFamilyCache();
 }
 
 }  // namespace blink
