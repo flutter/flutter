@@ -104,26 +104,23 @@ public final class ResourceUpdater {
                     connection.setIfModifiedSince(lastDownloadTime);
                 }
 
+                URL resolvedURL = connection.getURL();
+                Log.i(TAG, "Resolved update URL " + resolvedURL);
+
+                int responseCode = connection.getResponseCode();
+                Log.i(TAG, "HTTP response code " + responseCode);
+
+                if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    Log.i(TAG, "Latest update not found");
+                    return null;
+                }
+
+                if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
+                    Log.i(TAG, "Already have latest update");
+                    return null;
+                }
+
                 try (InputStream input = connection.getInputStream()) {
-                    URL resolvedURL = connection.getURL();
-                    Log.i(TAG, "Resolved update URL " + resolvedURL);
-
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                        if (resolvedURL.equals(unresolvedURL)) {
-                            Log.i(TAG, "Rolled back all updates");
-                            localFile.delete();
-                            return null;
-                        } else {
-                            Log.i(TAG, "Latest update not found");
-                            return null;
-                        }
-                    }
-
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                        Log.i(TAG, "Already have latest update");
-                        return null;
-                    }
-
                     Log.i(TAG, "Downloading update " + unresolvedURL);
                     try (OutputStream output = new FileOutputStream(localFile)) {
                         int count;
