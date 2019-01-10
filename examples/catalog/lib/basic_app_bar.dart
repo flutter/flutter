@@ -37,7 +37,7 @@ class _BasicAppBarSampleState extends State<BasicAppBarSample> {
             PopupMenuButton<Choice>( // overflow menu
               onSelected: _select,
               itemBuilder: (BuildContext context) {
-                return choices.skip(2).map((Choice choice) {
+                return choices.skip(2).map<PopupMenuItem<Choice>>((Choice choice) {
                   return PopupMenuItem<Choice>(
                     value: choice,
                     child: Text(choice.title),

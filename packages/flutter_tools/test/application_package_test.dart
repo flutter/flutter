@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/application_package.dart';
@@ -17,6 +18,11 @@ import 'package:flutter_tools/src/ios/ios_workflow.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
 
 void main() {
   group('ApkManifestData', () {
@@ -38,13 +44,14 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    });
+    }, overrides: noColorTerminalOverride);
   });
 
   group('PrebuiltIOSApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      IOSWorkflow: () => MockIosWorkFlow()
+      IOSWorkflow: () => MockIosWorkFlow(),
+      Platform: _kNoColorTerminalPlatform,
     };
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =

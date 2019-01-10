@@ -39,5 +39,5 @@
 /// new Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Poor wandering ones!'),
-/// ),
+/// )
 /// ```

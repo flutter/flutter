@@ -6,6 +6,8 @@ import 'dart:math' show Random;
 
 import 'package:flutter/cupertino.dart';
 
+import '../../gallery/demo.dart';
+
 class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
 
@@ -37,25 +39,28 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: const TextStyle(
-        fontFamily: '.SF UI Text',
-        inherit: false,
-        fontSize: 17.0,
-        color: CupertinoColors.black,
-      ),
+      style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: BoxDecoration(
+            color: CupertinoTheme.of(context).brightness == Brightness.light
+                ? CupertinoColors.extraLightBackgroundGray
+                : CupertinoColors.darkBackgroundGray,
+          ),
           child: CustomScrollView(
             slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
-                largeTitle: Text('Cupertino Refresh'),
+              CupertinoSliverNavigationBar(
+                largeTitle: const Text('Refresh'),
+                // We're specifying a back label here because the previous page
+                // is a Material page. CupertinoPageRoutes could auto-populate
+                // these back labels.
                 previousPageTitle: 'Cupertino',
+                trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
               ),
               CupertinoSliverRefreshControl(
                 onRefresh: () {
                   return Future<void>.delayed(const Duration(seconds: 2))
-                      ..then((_) {
+                      ..then<void>((_) {
                         if (mounted) {
                           setState(() => repopulateList());
                         }
@@ -149,7 +154,7 @@ class _ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CupertinoColors.white,
+      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
       height: 60.0,
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
@@ -212,11 +217,11 @@ class _ListItem extends StatelessWidget {
                       letterSpacing: -0.41,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 9.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 9.0),
                     child: Icon(
                       CupertinoIcons.info,
-                      color: CupertinoColors.activeBlue
+                      color: CupertinoTheme.of(context).primaryColor,
                     ),
                   ),
                 ],

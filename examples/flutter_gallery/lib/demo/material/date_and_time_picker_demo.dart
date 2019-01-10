@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../gallery/demo.dart';
+
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
     Key key,
@@ -62,7 +64,7 @@ class _DateTimePicker extends StatelessWidget {
   final ValueChanged<DateTime> selectDate;
   final ValueChanged<TimeOfDay> selectTime;
 
-  Future<Null> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -73,7 +75,7 @@ class _DateTimePicker extends StatelessWidget {
       selectDate(picked);
   }
 
-  Future<Null> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
       initialTime: selectedTime
@@ -129,7 +131,10 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Date and time pickers')),
+      appBar: AppBar(
+        title: const Text('Date and time pickers'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DateAndTimePickerDemo.routeName)],
+      ),
       body: DropdownButtonHideUnderline(
         child: SafeArea(
           top: false,
@@ -196,7 +201,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                       _activity = newValue;
                     });
                   },
-                  items: _allActivities.map((String value) {
+                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),

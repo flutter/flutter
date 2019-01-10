@@ -176,10 +176,31 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   });
+
+  /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
+  /// [animateTo] is called.
+  ///
+  /// If [animateTo] is called then [curve] defaults to [Curves.ease]. The
+  /// [clamp] parameter is ignored by this stub implementation but subclasses
+  /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
+  /// underscroll.
+  Future<void> moveTo(double to, {
+    Duration duration,
+    Curve curve,
+    bool clamp,
+  }) {
+    assert(to != null);
+    if (duration == null || duration == Duration.zero) {
+      jumpTo(to);
+      return Future<void>.value();
+    } else {
+      return animateTo(to, duration: duration, curve: curve ?? Curves.ease);
+    }
+  }
 
   /// The direction in which the user is trying to change [pixels], relative to
   /// the viewport's [RenderViewport.axisDirection].
@@ -252,10 +273,10 @@ class _FixedViewportOffset extends ViewportOffset {
   }
 
   @override
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
-  }) async => null;
+  }) async { }
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;

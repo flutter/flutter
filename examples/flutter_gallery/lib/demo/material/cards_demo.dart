@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class TravelDestination {
@@ -68,6 +70,7 @@ class TravelDestinationItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         height: height,
         child: Card(
+          clipBehavior: Clip.antiAlias,
           shape: shape,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,12 +134,12 @@ class TravelDestinationItem extends StatelessWidget {
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[
                     FlatButton(
-                      child: const Text('SHARE'),
+                      child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
                     FlatButton(
-                      child: const Text('EXPLORE'),
+                      child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
@@ -168,8 +171,12 @@ class _CardsDemoState extends State<CardsDemo> {
       appBar: AppBar(
         title: const Text('Travel stream'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(CardsDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(
+              Icons.sentiment_very_satisfied,
+              semanticLabel: 'update shape',
+            ),
             onPressed: () {
               setState(() {
                 _shape = _shape != null ? null : const RoundedRectangleBorder(
@@ -188,7 +195,7 @@ class _CardsDemoState extends State<CardsDemo> {
       body: ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        children: destinations.map((TravelDestination destination) {
+        children: destinations.map<Widget>((TravelDestination destination) {
           return Container(
             margin: const EdgeInsets.only(bottom: 8.0),
             child: TravelDestinationItem(

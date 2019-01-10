@@ -155,7 +155,7 @@ void main() {
   });
 
   testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
-    Future<Null> runTest(bool keepAlive) async {
+    Future<void> runTest(bool keepAlive) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

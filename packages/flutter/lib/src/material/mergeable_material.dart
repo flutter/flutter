@@ -278,10 +278,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void didUpdateWidget(MergeableMaterial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldWidget.children.map(
+    final Set<LocalKey> oldKeys = oldWidget.children.map<LocalKey>(
       (MergeableMaterialItem child) => child.key
     ).toSet();
-    final Set<LocalKey> newKeys = widget.children.map(
+    final Set<LocalKey> newKeys = widget.children.map<LocalKey>(
       (MergeableMaterialItem child) => child.key
     ).toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);

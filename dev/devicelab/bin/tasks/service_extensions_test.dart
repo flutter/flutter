@@ -21,7 +21,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -29,8 +29,8 @@ void main() {
         <String>['run', '--verbose', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         print('run:stdout: $line');
         if (vmServicePort == null) {
@@ -44,12 +44,12 @@ void main() {
         }
       });
       run.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then((int exitCode) { ok = false; });
+      run.exitCode.then<void>((int exitCode) { ok = false; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
@@ -59,6 +59,8 @@ void main() {
       final VMIsolateRef isolate = vm.isolates.first;
       final Stream<VMExtensionEvent> frameEvents = isolate.onExtensionEvent.where(
               (VMExtensionEvent e) => e.kind == 'Flutter.Frame');
+      final Stream<VMExtensionEvent> navigationEvents = isolate.onExtensionEvent.where(
+              (VMExtensionEvent e) => e.kind == 'Flutter.Navigation');
 
       print('reassembling app...');
       final Future<VMExtensionEvent> frameFuture = frameEvents.first;
@@ -76,6 +78,13 @@ void main() {
       expect(event.data['startTime'] >= 0);
       expect(event.data['elapsed'] is int);
       expect(event.data['elapsed'] >= 0);
+
+      final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
+      // This tap triggers a navigation event.
+      device.tap(100, 100);
+      final VMExtensionEvent navigationEvent = await navigationFuture;
+      // Validate that there are not any fields.
+      expect(navigationEvent.data.isEmpty);
 
       run.stdin.write('q');
       final int result = await run.exitCode;

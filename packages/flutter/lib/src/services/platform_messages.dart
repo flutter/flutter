@@ -16,14 +16,13 @@ typedef _MessageHandler = Future<ByteData> Function(ByteData message);
 ///
 /// See also:
 ///
-/// * [BasicMessageChannel], which provides basic messaging services similar to
-///   `BinaryMessages`, but with pluggable message codecs in support of sending
-///   strings or semi-structured messages.
-/// * [MethodChannel], which provides platform communication using asynchronous
-///   method calls.
-/// * [EventChannel], which provides platform communication using event streams.
-///
-/// See: <https://flutter.io/platform-channels/>
+///  * [BasicMessageChannel], which provides basic messaging services similar to
+///    `BinaryMessages`, but with pluggable message codecs in support of sending
+///    strings or semi-structured messages.
+///  * [MethodChannel], which provides platform communication using asynchronous
+///    method calls.
+///  * [EventChannel], which provides platform communication using event streams.
+///  * <https://flutter.io/platform-channels/>
 class BinaryMessages {
   BinaryMessages._();
 
@@ -58,7 +57,7 @@ class BinaryMessages {
   /// from [Window.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
-  static Future<Null> handlePlatformMessage(
+  static Future<void> handlePlatformMessage(
         String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
     ByteData response;
     try {

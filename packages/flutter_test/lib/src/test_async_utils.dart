@@ -40,7 +40,7 @@ class _AsyncScope {
 /// in a call to TestAsyncUtils.guard(), as follows:
 ///
 /// ```dart
-/// Future<Null> myTestFunction() => TestAsyncUtils.guard(() async {
+/// Future<void> myTestFunction() => TestAsyncUtils.guard(() async {
 ///   // ...
 /// });
 /// ```

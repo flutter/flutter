@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+
+import '../../gallery/demo.dart';
 
 class CupertinoSliderDemo extends StatefulWidget {
   static const String routeName = '/cupertino/slider';
@@ -18,48 +19,58 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cupertino Sliders'),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Sliders'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
+        previousPageTitle: 'Cupertino',
+        trailing: CupertinoDemoDocumentationButton(CupertinoSliderDemo.routeName),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget> [
-                CupertinoSlider(
-                  value: _value,
-                  min: 0.0,
-                  max: 100.0,
-                  onChanged: (double value) {
-                    setState(() {
-                      _value = value;
-                    });
-                  }
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget> [
+                    CupertinoSlider(
+                      value: _value,
+                      min: 0.0,
+                      max: 100.0,
+                      onChanged: (double value) {
+                        setState(() {
+                          _value = value;
+                        });
+                      }
+                    ),
+                    Text('Cupertino Continuous: ${_value.toStringAsFixed(1)}'),
+                  ]
                 ),
-                Text('Cupertino Continuous: ${_value.toStringAsFixed(1)}'),
-              ]
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget> [
-                CupertinoSlider(
-                  value: _discreteValue,
-                  min: 0.0,
-                  max: 100.0,
-                  divisions: 5,
-                  onChanged: (double value) {
-                    setState(() {
-                      _discreteValue = value;
-                    });
-                  }
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget> [
+                    CupertinoSlider(
+                      value: _discreteValue,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: 5,
+                      onChanged: (double value) {
+                        setState(() {
+                          _discreteValue = value;
+                        });
+                      }
+                    ),
+                    Text('Cupertino Discrete: $_discreteValue'),
+                  ]
                 ),
-                Text('Cupertino Discrete: $_discreteValue'),
-              ]
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

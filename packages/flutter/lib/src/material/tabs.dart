@@ -15,6 +15,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
@@ -25,6 +26,7 @@ const double _kTextAndIconTabHeight = 72.0;
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
 /// See also:
+///
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabBar.indicator], which defines the appearance of the selected tab
@@ -149,14 +151,22 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
     final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
-    final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
-    final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color selectedColor =
+        labelColor
+         ?? tabBarTheme.labelColor
+         ?? themeData.primaryTextTheme.body2.color;
+    final Color unselectedColor =
+        unselectedLabelColor
+        ?? tabBarTheme.unselectedLabelColor
+        ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -504,6 +514,8 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// Uses values from [TabBarTheme] if it is set in the current context.
+///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
@@ -537,6 +549,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
+    this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
@@ -649,6 +662,17 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
+  /// An optional callback that's called when the [TabBar] is tapped.
+  ///
+  /// The callback is applied to the index of the tab where the tap occurred.
+  ///
+  /// This callback has no effect on the default handling of taps. It's for
+  /// applications that want to do a little extra work when a tab is tapped,
+  /// even if the tap doesn't change the TabController's index. TabBar [onTap]
+  /// callbacks should not make changes to the TabController since that would
+  /// interfere with the default tap handler.
+  final ValueChanged<int> onTap;
+
   /// A size whose height depends on if the tabs have both icons and text.
   ///
   /// [AppBar] uses this this size to compute its own preferred size.
@@ -687,6 +711,9 @@ class _TabBarState extends State<TabBar> {
   Decoration get _indicator {
     if (widget.indicator != null)
       return widget.indicator;
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    if (tabBarTheme.indicator != null)
+      return tabBarTheme.indicator;
 
     Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
@@ -741,7 +768,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = _controller == null ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
-      indicatorSize: widget.indicatorSize,
+      indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -869,6 +896,9 @@ class _TabBarState extends State<TabBar> {
   void _handleTap(int index) {
     assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
+    if (widget.onTap != null) {
+      widget.onTap(index);
+    }
   }
 
   Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
@@ -885,6 +915,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -1104,12 +1135,12 @@ class _TabBarViewState extends State<TabBarView> {
     }
   }
 
-  Future<Null> _warpToCurrentIndex() async {
+  Future<void> _warpToCurrentIndex() async {
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     if (_pageController.page == _currentIndex.toDouble())
-      return Future<Null>.value();
+      return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
@@ -1133,7 +1164,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
-      return Future<Null>.value();
+      return Future<void>.value();
 
     setState(() {
       _warpUnderwayCount -= 1;
@@ -1153,7 +1184,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
-        _currentIndex=_controller.index;
+        _currentIndex =_controller.index;
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {

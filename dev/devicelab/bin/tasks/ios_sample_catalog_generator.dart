@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/sample_catalog_generator.dart';
 
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() => samplePageCatalogGenerator(extractCloudAuthTokenArg(args)));
 }

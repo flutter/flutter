@@ -44,8 +44,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Completer<int> port = Completer<int>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!port.isCompleted) {
       final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
@@ -58,8 +58,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   });
 
   final StreamSubscription<String> stderrSub = runner.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     stderr.writeln('[$taskName] [STDERR] $line');
   });
@@ -97,7 +97,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
   //                delay to let the task process open up the VM service port.
   //                Otherwise we almost always hit the non-ready case first and
   //                wait a whole 1 second, which is annoying.
-  await Future<Null>.delayed(const Duration(milliseconds: 100));
+  await Future<void>.delayed(const Duration(milliseconds: 100));
 
   while (true) {
     try {
@@ -123,7 +123,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       print('VM service not ready yet: $error');
       const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
-      await Future<Null>.delayed(pauseBetweenRetries);
+      await Future<void>.delayed(pauseBetweenRetries);
     }
   }
 }
@@ -143,7 +143,7 @@ Future<void> cleanupSystem() async {
     final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
     recursiveCopy(Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
-    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'create', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
+    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'app', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
     if (!Platform.isWindows) {
       await exec(
         'chmod',

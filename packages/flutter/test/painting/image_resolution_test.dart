@@ -13,10 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle(this._assetBundleMap);
 
   Map<String, List<String>> _assetBundleMap;
-
-  TestAssetBundle(this._assetBundleMap);
 
   Map<String, int> loadCallCount = <String, int>{};
 

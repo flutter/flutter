@@ -23,13 +23,14 @@ Future<void> holdRefresh() {
 void main() {
   testWidgets('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -42,10 +43,16 @@ void main() {
 
     await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
+
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
+    handle.dispose();
   });
 
   testWidgets('Refresh Indicator - nested', (WidgetTester tester) async {
@@ -61,7 +68,7 @@ void main() {
               width: 600.0,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
                   return SizedBox(
                     height: 200.0,
                     child: Text(item),
@@ -362,7 +369,7 @@ void main() {
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -393,7 +400,7 @@ void main() {
           child: ListView(
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),

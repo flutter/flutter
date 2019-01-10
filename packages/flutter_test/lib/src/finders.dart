@@ -633,7 +633,7 @@ class _DescendantFinder extends Finder {
   @override
   Iterable<Element> get allCandidates {
     final Iterable<Element> ancestorElements = ancestor.evaluate();
-    final List<Element> candidates = ancestorElements.expand(
+    final List<Element> candidates = ancestorElements.expand<Element>(
       (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
     ).toSet().toList();
     if (matchRoot)

@@ -18,7 +18,7 @@ void main() {
   final MockHttpHeaders headers = MockHttpHeaders();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    HttpOverrides.runZoned(() async {
+    HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',
         headers: const <String, String>{'flutter': 'flutter'},

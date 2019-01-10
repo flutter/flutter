@@ -61,8 +61,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           drawer: Drawer()
         ),
       ),
@@ -86,8 +86,8 @@ void main() {
   testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
             drawer: Drawer()
         ),
       ),

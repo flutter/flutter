@@ -54,5 +54,6 @@
   "collapsedIconTapHint": "Razširiti",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Še 1 znak",
-  "remainingTextFieldCharacterCountOther": "Še $remainingCount znakov"
+  "remainingTextFieldCharacterCountOther": "Še $remainingCount znakov",
+  "refreshIndicatorSemanticLabel": "Osveži"
 }

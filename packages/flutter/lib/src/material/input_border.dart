@@ -28,13 +28,6 @@ import 'package:flutter/widgets.dart';
 ///    rounded rectangle around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 abstract class InputBorder extends ShapeBorder {
-  /// No input border.
-  ///
-  /// Use this value with [InputDecoration.border] to specify that no border
-  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
-  /// its border to this value.
-  static const InputBorder none = _NoInputBorder();
-
   /// Creates a border for an [InputDecorator].
   ///
   /// The [borderSide] parameter must not be null. Applications typically do
@@ -44,6 +37,13 @@ abstract class InputBorder extends ShapeBorder {
   const InputBorder({
     this.borderSide = BorderSide.none,
   }) : assert(borderSide != null);
+
+  /// No input border.
+  ///
+  /// Use this value with [InputDecoration.border] to specify that no border
+  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
+  /// its border to this value.
+  static const InputBorder none = _NoInputBorder();
 
   /// Defines the border line's color and weight.
   ///
@@ -139,7 +139,7 @@ class UnderlineInputBorder extends InputBorder {
   /// and right corners have a circular radius of 4.0. The [borderRadius]
   /// parameter must not be null.
   const UnderlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
+    BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
@@ -195,6 +195,7 @@ class UnderlineInputBorder extends InputBorder {
     if (a is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -205,6 +206,7 @@ class UnderlineInputBorder extends InputBorder {
     if (b is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -256,17 +258,27 @@ class UnderlineInputBorder extends InputBorder {
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].
   ///
-  /// The [borderSide] parameter defaults to [BorderSide.none] (it must not be
-  /// null). Applications typically do not specify a [borderSide] parameter
-  /// because the input decorator substitutes its own, using [copyWith], based
-  /// on the current theme and [InputDecorator.isFocused].
+  /// If the [borderSide] parameter is [BorderSide.none], it will not draw a
+  /// border. However, it will still define a shape (which you can see if
+  /// [InputDecoration.filled] is true).
+  ///
+  /// If an application does not specify a [borderSide] parameter of
+  /// value [BorderSide.none], the input decorator substitutes its own, using
+  /// [copyWith], based on the current theme and [InputDecorator.isFocused].
   ///
   /// The [borderRadius] parameter defaults to a value where all four
   /// corners have a circular radius of 4.0. The [borderRadius] parameter
   /// must not be null and the corner radii must be circular, i.e. their
   /// [Radius.x] and [Radius.y] values must be the same.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.hasFloatingPlaceholder], which should be set to false
+  ///    when the [borderSide] is [BorderSide.none]. If let as true, the label
+  ///    will extend beyond the container as if the border were still being
+  ///    drawn.
   const OutlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
+    BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
   }) : assert(borderRadius != null),

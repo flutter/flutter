@@ -11,8 +11,6 @@ import 'package:meta/meta.dart';
 
 import 'run_command.dart';
 
-typedef ShardRunner = Future<Null> Function();
-
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
@@ -25,7 +23,7 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 ///
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   await _verifyNoTestPackageImports(flutterRoot);
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
@@ -84,7 +82,7 @@ Future<Null> main(List<String> args) async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _verifyInternationalizations() async {
+Future<void> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
@@ -134,7 +132,7 @@ Future<String> _getCommitRange() async {
 }
 
 
-Future<Null> _checkForTrailingSpaces() async {
+Future<void> _checkForTrailingSpaces() async {
   if (!Platform.isWindows) {
     final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
         ? Platform.environment['TEST_COMMIT_RANGE']
@@ -207,8 +205,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
   final EvalResult result = EvalResult(
-    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    stdout: utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()),
     exitCode: exitCode,
   );
 
@@ -229,15 +227,15 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
-Future<Null> _runFlutterAnalyze(String workingDirectory, {
+Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[]
 }) {
-  return runCommand(flutter, <String>['analyze']..addAll(options),
+  return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
     workingDirectory: workingDirectory,
   );
 }
 
-Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
+Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
   // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
   final List<String> shims = <String>[];
   final List<String> errors = Directory(workingDirectory)
@@ -268,6 +266,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
         if (path.split(file.path).contains('test_driver') ||
             name.startsWith('dev/missing_dependency_tests/') ||
             name.startsWith('dev/automated_tests/') ||
+            name.startsWith('dev/snippets/') ||
             name.startsWith('packages/flutter/test/engine/') ||
             name.startsWith('examples/layers/test/smoketests/raw/') ||
             name.startsWith('examples/layers/test/smoketests/rendering/') ||
@@ -315,7 +314,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
   }
 }
 
-Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
+Future<void> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
@@ -328,13 +327,13 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     .whereType<Directory>()
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
-  if (!_matches(packages, directories)) {
+  if (!_matches<String>(packages, directories)) {
     errors.add(
       'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
       'These are the exported packages:\n' +
-      packages.map((String path) => '  lib/$path.dart').join('\n') +
+      packages.map<String>((String path) => '  lib/$path.dart').join('\n') +
       'These are the directories:\n' +
-      directories.map((String path) => '  lib/src/$path/').join('\n')
+      directories.map<String>((String path) => '  lib/src/$path/').join('\n')
     );
   }
   // Verify that the imports are well-ordered.
@@ -350,7 +349,7 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     }
   }
   for (String package in dependencyMap.keys) {
-    final List<String> loop = _deepSearch(dependencyMap, package);
+    final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
       errors.add(
         '${yellow}Dependency loop:$reset ' +
@@ -421,7 +420,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
       continue; // we catch these separately
     if (seen != null && seen.contains(key))
       return <T>[start, key];
-    final List<T> result = _deepSearch(
+    final List<T> result = _deepSearch<T>(
       map,
       key,
       (seen == null ? Set<T>.from(<T>[start]) : Set<T>.from(seen))..add(key),
@@ -439,7 +438,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
   return null;
 }
 
-Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
+Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
   for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
     .listSync(recursive: true)
@@ -463,7 +462,7 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
 }
 
-Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   final Directory flutterRootDir = Directory(flutterRoot);
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};

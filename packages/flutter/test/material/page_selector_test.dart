@@ -52,7 +52,7 @@ List<Color> indicatorColors(WidgetTester tester) {
       matching: find.byType(TabPageSelectorIndicator)
     )
   );
-  return indicators.map((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
+  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
 
 void main() {

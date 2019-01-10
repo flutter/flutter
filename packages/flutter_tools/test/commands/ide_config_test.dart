@@ -76,7 +76,7 @@ void main() {
       return fs.file(absPath).existsSync() || fs.directory(absPath).existsSync();
     }
 
-    Future<Null> _updateIdeConfig({
+    Future<void> _updateIdeConfig({
       Directory dir,
       List<String> args = const <String>[],
       Map<String, String> expectedContents = const <String, String>{},
@@ -84,7 +84,7 @@ void main() {
     }) async {
       dir ??= tempDir;
       final IdeConfigCommand command = IdeConfigCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       final List<String> finalArgs = <String>['--flutter-root=${tempDir.absolute.path}', 'ide-config'];
       finalArgs.addAll(args);
       await runner.run(finalArgs);

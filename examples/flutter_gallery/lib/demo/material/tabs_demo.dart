@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 // Each TabBarView contains a _Page and for each _Page there is a list
 // of _CardData objects. Each _CardData object is displayed by a _CardItem.
 
@@ -150,11 +152,12 @@ class TabsDemo extends StatelessWidget {
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 child: SliverAppBar(
                   title: const Text('Tabs and scrolling'),
+                  actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
                   pinned: true,
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
-                    tabs: _allPages.keys.map(
+                    tabs: _allPages.keys.map<Widget>(
                       (_Page page) => Tab(text: page.label),
                     ).toList(),
                   ),
@@ -163,7 +166,7 @@ class TabsDemo extends StatelessWidget {
             ];
           },
           body: TabBarView(
-            children: _allPages.keys.map((_Page page) {
+            children: _allPages.keys.map<Widget>((_Page page) {
               return SafeArea(
                 top: false,
                 bottom: false,

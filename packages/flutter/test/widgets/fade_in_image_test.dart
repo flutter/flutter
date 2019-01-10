@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_test_utils.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
   final ui.Image placeholderImage = await createTestImage();

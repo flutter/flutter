@@ -13,6 +13,6 @@ void main() {
     throw FlutterError('Who lives, who dies, who tells your story?');
   });
   testWidgets('Exception handling in test harness - uncaught Future error', (WidgetTester tester) async {
-    Future<Null>.error('Who lives, who dies, who tells your story?');
+    Future<void>.error('Who lives, who dies, who tells your story?');
   });
 }

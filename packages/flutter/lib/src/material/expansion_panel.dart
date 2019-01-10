@@ -128,7 +128,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
-       this.initialOpenPanelValue = null,
+       initialOpenPanelValue = null,
        super(key: key);
 
   /// Creates a radio expansion panel list widget.

@@ -177,14 +177,13 @@ import 'scrollable.dart';
 ///
 /// See also:
 ///
-/// * [ListView], which handles multiple children in a scrolling list.
-/// * [GridView], which handles multiple children in a scrolling grid.
-/// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable], which handles arbitrary scrolling effects.
+///  * [ListView], which handles multiple children in a scrolling list.
+///  * [GridView], which handles multiple children in a scrolling grid.
+///  * [PageView], for a scrollable that works page by page.
+///  * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
-  SingleChildScrollView({ // ignore: prefer_const_constructors_in_immutables
-                          // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+  const SingleChildScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -198,7 +197,7 @@ class SingleChildScrollView extends StatelessWidget {
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'
        ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);
 
   /// The axis along which the scroll view scrolls.

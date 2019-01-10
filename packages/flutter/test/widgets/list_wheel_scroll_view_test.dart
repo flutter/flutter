@@ -331,7 +331,7 @@ void main() {
         )
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
       // value of childCount should be 4.
@@ -515,7 +515,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -573,7 +573,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -694,7 +694,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints
         ..transform(
           matrix4: equals(<dynamic>[

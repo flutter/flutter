@@ -12,14 +12,15 @@ import 'package:flutter/widgets.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'dialog.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
-import 'typography.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
@@ -1664,14 +1665,15 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   return await showDialog<TimeOfDay>(
     context: context,

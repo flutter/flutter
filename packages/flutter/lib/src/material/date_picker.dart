@@ -21,17 +21,18 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 /// Initial display mode of the date picker dialog.
 ///
 /// Date picker UI mode for either showing a list of available years or a
 /// monthly calendar initially in the dialog shown by calling [showDatePicker].
 ///
-/// Also see:
+/// See also:
 ///
-///  * <https://material.io/guidelines/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
 enum DatePickerMode {
   /// Show a date picker UI for choosing a month and day.
   day,
@@ -232,8 +233,10 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 /// See also:
 ///
-///  * [showDatePicker].
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
@@ -483,8 +486,10 @@ class DayPicker extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
@@ -720,11 +725,11 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 // Defines semantic traversal order of the top-level widgets inside the month
 // picker.
 class _MonthPickerSortKey extends OrdinalSortKey {
+  const _MonthPickerSortKey(double order) : super(order);
+
   static const _MonthPickerSortKey previousMonth = _MonthPickerSortKey(1.0);
   static const _MonthPickerSortKey nextMonth = _MonthPickerSortKey(2.0);
   static const _MonthPickerSortKey calendar = _MonthPickerSortKey(3.0);
-
-  const _MonthPickerSortKey(double order) : super(order);
 }
 
 /// A scrollable list of years to allow picking a year.
@@ -736,8 +741,10 @@ class _MonthPickerSortKey extends OrdinalSortKey {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
@@ -943,7 +950,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final Widget picker = Flexible(
       child: SizedBox(
@@ -1066,8 +1072,14 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 ///
 /// See also:
 ///
-///  * [showTimePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+///  * [showTimePicker], which shows a dialog that contains a material design
+///    time picker.
+///  * [DayPicker], which displays the days of a given month and allows
+///    choosing a day.
+///  * [MonthPicker], which displays a scrollable list of months to allow
+///    picking a month.
+///  * [YearPicker], which displays a scrollable list of years to allow picking
+///    a year.
 Future<DateTime> showDatePicker({
   @required BuildContext context,
   @required DateTime initialDate,
@@ -1086,6 +1098,8 @@ Future<DateTime> showDatePicker({
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
   assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
+  assert(context != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   Widget child = _DatePickerDialog(
     initialDate: initialDate,

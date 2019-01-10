@@ -9,6 +9,12 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// bool _lights;
+
+enum _SwitchListTileType { material, adaptive }
+
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
@@ -35,7 +41,7 @@ import 'theme_data.dart';
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -48,6 +54,7 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.lightbulb_outline),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -74,6 +81,9 @@ class SwitchListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.title,
@@ -82,7 +92,39 @@ class SwitchListTile extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-  }) : assert(value != null),
+  }) : _switchListTileType = _SwitchListTileType.material,
+       assert(value != null),
+       assert(isThreeLine != null),
+       assert(!isThreeLine || subtitle != null),
+       assert(selected != null),
+       super(key: key);
+
+  /// Creates the wrapped switch with [Switch.adaptive].
+  ///
+  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
+  /// material design switch otherwise.
+  ///
+  /// If a [CupertinoSwitch] is created, the following parameters are
+  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  const SwitchListTile.adaptive({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage,
+    this.title,
+    this.subtitle,
+    this.isThreeLine = false,
+    this.dense,
+    this.secondary,
+    this.selected = false,
+  }) : _switchListTileType = _SwitchListTileType.adaptive,
+       assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
@@ -123,10 +165,33 @@ class SwitchListTile extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color inactiveTrackColor;
+
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
   final ImageProvider inactiveThumbImage;
 
   /// The primary content of the list tile.
@@ -164,16 +229,40 @@ class SwitchListTile extends StatelessWidget {
   /// Normally, this property is left to its default value, false.
   final bool selected;
 
+  /// If adaptive, creates the switch with [Switch.adaptive].
+  final _SwitchListTileType _switchListTileType;
+
   @override
   Widget build(BuildContext context) {
-    final Widget control = Switch(
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor,
-      activeThumbImage: activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
+    Widget control;
+    switch (_switchListTileType) {
+      case _SwitchListTileType.adaptive:
+        control = Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
+        break;
+
+      case _SwitchListTileType.material:
+        control = Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
+    }
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,

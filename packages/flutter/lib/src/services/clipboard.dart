@@ -33,7 +33,7 @@ class Clipboard {
   static const String kTextPlain = 'text/plain';
 
   /// Stores the given clipboard data on the clipboard.
-  static Future<Null> setData(ClipboardData data) async {
+  static Future<void> setData(ClipboardData data) async {
     await SystemChannels.platform.invokeMethod(
       'Clipboard.setData',
       <String, dynamic>{

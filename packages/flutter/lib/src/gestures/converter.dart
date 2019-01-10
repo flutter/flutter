@@ -23,7 +23,6 @@ class _PointerState {
     assert(!_down);
     _down = true;
   }
-
   void setUp() {
     assert(_down);
     _down = false;
@@ -158,7 +157,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt,
+              tilt: datum.tilt
             );
             break;
           case ui.PointerChange.hover:
@@ -180,7 +179,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt,
+                tilt: datum.tilt
               );
             }
             final Offset offset = position - state.lastPosition;
@@ -197,12 +196,13 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distance: datum.distance,
               distanceMax: datum.distanceMax,
+              size: datum.size,
               radiusMajor: radiusMajor,
               radiusMinor: radiusMinor,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt,
+              tilt: datum.tilt
             );
             state.lastPosition = position;
             break;
@@ -225,7 +225,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt,
+                tilt: datum.tilt
               );
             }
             if (state.lastPosition != position) {
@@ -246,6 +246,7 @@ class PointerEventConverter {
                 pressureMax: datum.pressureMax,
                 distance: datum.distance,
                 distanceMax: datum.distanceMax,
+                size: datum.size,
                 radiusMajor: radiusMajor,
                 radiusMinor: radiusMinor,
                 radiusMin: radiusMin,
@@ -270,12 +271,13 @@ class PointerEventConverter {
               pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,
               distanceMax: datum.distanceMax,
+              size: datum.size,
               radiusMajor: radiusMajor,
               radiusMinor: radiusMinor,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt,
+              tilt: datum.tilt
             );
             break;
           case ui.PointerChange.move:
@@ -300,12 +302,14 @@ class PointerEventConverter {
               pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,
               distanceMax: datum.distanceMax,
+              size: datum.size,
               radiusMajor: radiusMajor,
               radiusMinor: radiusMinor,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              platformData: datum.platformData,
             );
             break;
           case ui.PointerChange.up:
@@ -334,6 +338,7 @@ class PointerEventConverter {
                 pressureMin: datum.pressureMin,
                 pressureMax: datum.pressureMax,
                 distanceMax: datum.distanceMax,
+                size: datum.size,
                 radiusMajor: radiusMajor,
                 radiusMinor: radiusMinor,
                 radiusMin: radiusMin,
@@ -360,12 +365,13 @@ class PointerEventConverter {
                 pressureMax: datum.pressureMax,
                 distance: datum.distance,
                 distanceMax: datum.distanceMax,
+                size: datum.size,
                 radiusMajor: radiusMajor,
                 radiusMinor: radiusMinor,
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt,
+                tilt: datum.tilt
               );
             } else {
               yield PointerCancelEvent(
@@ -380,12 +386,13 @@ class PointerEventConverter {
                 pressureMax: datum.pressureMax,
                 distance: datum.distance,
                 distanceMax: datum.distanceMax,
+                size: datum.size,
                 radiusMajor: radiusMajor,
                 radiusMinor: radiusMinor,
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt,
+                tilt: datum.tilt
               );
             }
             break;
@@ -405,12 +412,13 @@ class PointerEventConverter {
                 pressureMax: datum.pressureMax,
                 distance: datum.distance,
                 distanceMax: datum.distanceMax,
+                size: datum.size,
                 radiusMajor: radiusMajor,
                 radiusMinor: radiusMinor,
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt,
+                tilt: datum.tilt
               );
             }
             _pointers.remove(datum.device);
@@ -423,7 +431,7 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
-              radiusMax: radiusMax,
+              radiusMax: radiusMax
             );
             break;
         }

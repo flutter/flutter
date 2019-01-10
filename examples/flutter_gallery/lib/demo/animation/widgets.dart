@@ -47,19 +47,6 @@ class SectionCard extends StatelessWidget {
 // The title is rendered with two overlapping text widgets that are vertically
 // offset a little. It's supposed to look sort-of 3D.
 class SectionTitle extends StatelessWidget {
-  static const TextStyle sectionTitleStyle = TextStyle(
-    fontFamily: 'Raleway',
-    inherit: false,
-    fontSize: 24.0,
-    fontWeight: FontWeight.w500,
-    color: Colors.white,
-    textBaseline: TextBaseline.alphabetic,
-  );
-
-  static final TextStyle sectionTitleShadowStyle = sectionTitleStyle.copyWith(
-    color: const Color(0x19000000),
-  );
-
   const SectionTitle({
     Key key,
     @required this.section,
@@ -73,6 +60,19 @@ class SectionTitle extends StatelessWidget {
   final Section section;
   final double scale;
   final double opacity;
+
+  static const TextStyle sectionTitleStyle = TextStyle(
+    fontFamily: 'Raleway',
+    inherit: false,
+    fontSize: 24.0,
+    fontWeight: FontWeight.w500,
+    color: Colors.white,
+    textBaseline: TextBaseline.alphabetic,
+  );
+
+  static final TextStyle sectionTitleShadowStyle = sectionTitleStyle.copyWith(
+    color: const Color(0x19000000),
+  );
 
   @override
   Widget build(BuildContext context) {

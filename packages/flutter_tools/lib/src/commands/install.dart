@@ -25,7 +25,7 @@ class InstallCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     device = await findTargetDevice();
     if (device == null)
@@ -33,7 +33,7 @@ class InstallCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final ApplicationPackage package = await applicationPackages.getPackageForPlatform(await device.targetPlatform);
 
     Cache.releaseLockEarly();
@@ -42,6 +42,8 @@ class InstallCommand extends FlutterCommand {
 
     if (!await installApp(device, package))
       throwToolExit('Install failed');
+
+    return null;
   }
 }
 

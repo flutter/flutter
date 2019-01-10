@@ -235,7 +235,7 @@ void main() {
             return ListView(
               children: ListTile.divideTiles(
                 context: context,
-                tiles: titles.map((String title) => ListTile(title: Text(title))),
+                tiles: titles.map<Widget>((String title) => ListTile(title: Text(title))),
               ).toList(),
             );
           },

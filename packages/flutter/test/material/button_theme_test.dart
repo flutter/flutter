@@ -36,9 +36,12 @@ void main() {
 
   testWidgets('ButtonTheme defaults', (WidgetTester tester) async {
     ButtonTextTheme textTheme;
+    ButtonBarLayoutBehavior layoutBehavior;
     BoxConstraints constraints;
     EdgeInsets padding;
     ShapeBorder shape;
+    bool alignedDropdown;
+    ColorScheme colorScheme;
 
     await tester.pumpWidget(
       ButtonTheme(
@@ -49,13 +52,16 @@ void main() {
             constraints = theme.constraints;
             padding = theme.padding;
             shape = theme.shape;
+            layoutBehavior = theme.layoutBehavior;
+            colorScheme = theme.colorScheme;
+            alignedDropdown = theme.alignedDropdown;
             return Container(
               alignment: Alignment.topLeft,
-              child: const Directionality(
+              child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: FlatButton(
-                  onPressed: null,
-                  child: Text('b'), // intrinsic width < minimum width
+                  onPressed: () { },
+                  child: const Text('b'), // intrinsic width < minimum width
                 ),
               ),
             );
@@ -65,12 +71,14 @@ void main() {
     );
 
     expect(textTheme, ButtonTextTheme.normal);
+    expect(layoutBehavior, ButtonBarLayoutBehavior.padded);
     expect(constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
-
+    expect(alignedDropdown, false);
+    expect(colorScheme, ThemeData.light().colorScheme);
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 36.0));
   });
@@ -78,26 +86,33 @@ void main() {
   test('ButtonThemeData.copyWith', () {
     ButtonThemeData theme = const ButtonThemeData().copyWith();
     expect(theme.textTheme, ButtonTextTheme.normal);
+    expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(theme.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
+    expect(theme.colorScheme, null);
 
     theme = const ButtonThemeData().copyWith(
       textTheme: ButtonTextTheme.primary,
+      layoutBehavior: ButtonBarLayoutBehavior.constrained,
       minWidth: 100.0,
       height: 200.0,
       padding: EdgeInsets.zero,
       shape: const StadiumBorder(),
       alignedDropdown: true,
+      colorScheme: const ColorScheme.dark(),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     expect(theme.textTheme, ButtonTextTheme.primary);
+    expect(theme.layoutBehavior, ButtonBarLayoutBehavior.constrained);
     expect(theme.constraints, const BoxConstraints(minWidth: 100.0, minHeight: 200.0));
     expect(theme.padding, EdgeInsets.zero);
     expect(theme.shape, const StadiumBorder());
     expect(theme.alignedDropdown, true);
+    expect(theme.colorScheme, const ColorScheme.dark());
   });
 
   testWidgets('Theme buttonTheme defaults', (WidgetTester tester) async {
@@ -107,10 +122,12 @@ void main() {
     EdgeInsets padding;
     ShapeBorder shape;
 
+    const Color disabledColor = Color(0xFF00FF00);
     await tester.pumpWidget(
       Theme(
         data: lightTheme.copyWith(
-          disabledColor: const Color(0xFF00FF00), // disabled RaisedButton fill color
+          disabledColor: disabledColor, // disabled RaisedButton fill color
+          buttonTheme: const ButtonThemeData(disabledColor: disabledColor),
           textTheme: lightTheme.textTheme.copyWith(
             button: lightTheme.textTheme.button.copyWith(
               // The button's height will match because there's no
@@ -149,7 +166,7 @@ void main() {
     ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xFF00FF00));
+    expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
   });
 
@@ -169,6 +186,7 @@ void main() {
           minWidth: 100.0,
           height: 200.0,
           padding: EdgeInsets.zero,
+          buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
           shape: const RoundedRectangleBorder(),
           child: Builder(
             builder: (BuildContext context) {

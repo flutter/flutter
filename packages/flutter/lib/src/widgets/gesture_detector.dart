@@ -27,12 +27,21 @@ export 'package:flutter/gestures.dart' show
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
+  GestureForcePressStartCallback,
+  GestureForcePressPeakCallback,
+  GestureForcePressEndCallback,
+  GestureForcePressUpdateCallback,
   ScaleStartDetails,
   ScaleUpdateDetails,
   ScaleEndDetails,
   TapDownDetails,
   TapUpDetails,
   Velocity;
+
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
+// String _last;
 
 /// Factory for creating gesture recognizers.
 ///
@@ -108,7 +117,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example makes a rectangle react to being tapped by setting the
 /// `_lights` field:
@@ -124,6 +133,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Debugging
 ///
@@ -150,6 +160,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressUp,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -160,6 +171,10 @@ class GestureDetector extends StatelessWidget {
     this.onHorizontalDragUpdate,
     this.onHorizontalDragEnd,
     this.onHorizontalDragCancel,
+    this.onForcePressStart,
+    this.onForcePressPeak,
+    this.onForcePressUpdate,
+    this.onForcePressEnd,
     this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
@@ -242,6 +257,9 @@ class GestureDetector extends StatelessWidget {
   /// a long period of time.
   final GestureLongPressCallback onLongPress;
 
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
+  final GestureLongPressUpCallback onLongPressUp;
+
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
 
@@ -308,6 +326,37 @@ class GestureDetector extends StatelessWidget {
   /// The pointers are no longer in contact with the screen.
   final GestureScaleEndCallback onScaleEnd;
 
+  /// The pointer is in contact with the screen and has pressed with sufficient
+  /// force to initiate a force press. The amount of force is at least
+  /// [ForcePressGestureRecognizer.startPressure].
+  ///
+  /// Note that this callback will only be fired on devices with pressure
+  /// detecting screens.
+  final GestureForcePressStartCallback onForcePressStart;
+
+  /// The pointer is in contact with the screen and has pressed with the maximum
+  /// force. The amount of force is at least
+  /// [ForcePressGestureRecognizer.peakPressure].
+  ///
+  /// Note that this callback will only be fired on devices with pressure
+  /// detecting screens.
+  final GestureForcePressPeakCallback onForcePressPeak;
+
+  /// A pointer is in contact with the screen, has previously passed the
+  /// [ForcePressGestureRecognizer.startPressure] and is either moving on the
+  /// plane of the screen, pressing the screen with varying forces or both
+  /// simultaneously.
+  ///
+  /// Note that this callback will only be fired on devices with pressure
+  /// detecting screens.
+  final GestureForcePressUpdateCallback onForcePressUpdate;
+
+  /// The pointer is no longer in contact with the screen.
+  ///
+  /// Note that this callback will only be fired on devices with pressure
+  /// detecting screens.
+  final GestureForcePressEndCallback onForcePressEnd;
+
   /// How this gesture detector should behave during hit testing.
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
@@ -348,12 +397,13 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null) {
+    if (onLongPress != null || onLongPressUp !=null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress;
+            ..onLongPress = onLongPress
+            ..onLongPressUp = onLongPressUp;
         },
       );
     }
@@ -424,6 +474,22 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
+    if (onForcePressStart != null ||
+        onForcePressPeak != null ||
+        onForcePressUpdate != null ||
+        onForcePressEnd != null) {
+      gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+          () => ForcePressGestureRecognizer(debugOwner: this),
+          (ForcePressGestureRecognizer instance) {
+            instance
+              ..onStart = onForcePressStart
+              ..onPeak = onForcePressPeak
+              ..onUpdate = onForcePressUpdate
+              ..onEnd = onForcePressEnd;
+        },
+      );
+    }
+
     return RawGestureDetector(
       gestures: gestures,
       behavior: behavior,
@@ -443,7 +509,7 @@ class GestureDetector extends StatelessWidget {
 /// Configuring the gesture recognizers requires a carefully constructed map, as
 /// described in [gestures] and as shown in the example below.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how to hook up a [TapGestureRecognizer]. It assumes that
 /// the code is being used inside a [State] object with a `_last` field that is
@@ -466,6 +532,7 @@ class GestureDetector extends StatelessWidget {
 ///   child: Container(width: 300.0, height: 300.0, color: Colors.yellow, child: Text(_last)),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

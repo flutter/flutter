@@ -27,11 +27,6 @@ class _TestAppState extends State<TestApp> {
   Future<TestStepResult> _result;
   int _step = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _executeNextStep() {
     setState(() {
       if (_step < steps.length)

@@ -66,7 +66,7 @@ $assetsSection
       ..writeAsStringSync(packages);
   }
 
-  Future<Null> buildAndVerifyAssets(
+  Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
     String expectedAssetManifest,

@@ -601,7 +601,7 @@ class DrivenScrollActivity extends ScrollActivity {
        assert(duration > Duration.zero),
        assert(curve != null),
        super(delegate) {
-    _completer = Completer<Null>();
+    _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,
       debugLabel: '$runtimeType',
@@ -612,7 +612,7 @@ class DrivenScrollActivity extends ScrollActivity {
        .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
-  Completer<Null> _completer;
+  Completer<void> _completer;
   AnimationController _controller;
 
   /// A [Future] that completes when the activity stops.
@@ -620,7 +620,7 @@ class DrivenScrollActivity extends ScrollActivity {
   /// For example, this [Future] will complete if the animation reaches the end
   /// or if the user interacts with the scroll view in way that causes the
   /// animation to stop before it reaches the end.
-  Future<Null> get done => _completer.future;
+  Future<void> get done => _completer.future;
 
   @override
   double get velocity => _controller.velocity;

@@ -105,7 +105,7 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final List<int> parts = match.groups(<int>[1, 2, 3]).map(int.parse).toList();
+  final List<int> parts = match.groups(<int>[1, 2, 3]).map<int>(int.parse).toList();
 
   if (match.group(4) == '0') {
     print('This commit has already been released, as version ${parts.join(".")}.');

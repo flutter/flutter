@@ -46,7 +46,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
-    projectUnderTest.ios.directory.childDirectory('Runner.xcodeproj').createSync(recursive: true);
+    projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
@@ -90,6 +90,13 @@ void main() {
     testUsingContext('detects installed', () async {
       pretendPodVersionIs('0.0.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, isNot(CocoaPodsStatus.notInstalled));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('detects unknown version', () async {
+      pretendPodVersionIs('Plugin loaded.\n1.5.3');
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.unknownVersion);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

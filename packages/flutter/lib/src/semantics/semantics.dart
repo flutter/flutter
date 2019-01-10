@@ -90,7 +90,7 @@ class SemanticsTag {
 ///
 /// See also:
 ///
-///   * [SemanticsProperties], where the handler for a custom action is provided.
+///  * [SemanticsProperties], where the handler for a custom action is provided.
 @immutable
 class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
@@ -188,6 +188,8 @@ class SemanticsData extends Diagnosticable {
     @required this.textDirection,
     @required this.rect,
     @required this.textSelection,
+    @required this.scrollIndex,
+    @required this.scrollChildCount,
     @required this.scrollPosition,
     @required this.scrollExtentMax,
     @required this.scrollExtentMin,
@@ -249,6 +251,15 @@ class SemanticsData extends Diagnosticable {
   /// if this node represents a text field.
   final TextSelection textSelection;
 
+  /// The total number of scrollable children that contribute to semantics.
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  final int scrollChildCount;
+
+  /// The index of the first visible semantic child of a scroll node.
+  final int scrollIndex;
+
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
   ///
@@ -301,7 +312,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
 
   /// Whether [flags] contains the given flag.
@@ -343,6 +354,8 @@ class SemanticsData extends Diagnosticable {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
+    properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
+    properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
@@ -363,6 +376,8 @@ class SemanticsData extends Diagnosticable {
         && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
+        && typedOther.scrollChildCount == scrollChildCount
+        && typedOther.scrollIndex == scrollIndex
         && typedOther.textSelection == textSelection
         && typedOther.scrollPosition == scrollPosition
         && typedOther.scrollExtentMax == scrollExtentMax
@@ -385,6 +400,8 @@ class SemanticsData extends Diagnosticable {
       rect,
       tags,
       textSelection,
+      scrollChildCount,
+      scrollIndex,
       scrollPosition,
       scrollExtentMax,
       scrollExtentMin,
@@ -655,7 +672,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///   * [SemanticsFlag.image], for the flag this setting controls.
+  ///  * [SemanticsFlag.image], for the flag this setting controls.
   final bool image;
 
   /// If non-null, whether the node should be considered a live region.
@@ -676,9 +693,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// automatically.
   ///
   /// See also:
-  ///   * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
-  ///   * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///   * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
+  ///
+  ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
+  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// Provides a textual description of the widget.
@@ -948,8 +966,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback onDidGainAccessibilityFocus;
 
   /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
@@ -967,8 +985,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback onDidLoseAccessibilityFocus;
 
   /// The handler for [SemanticsAction.dismiss].
@@ -989,7 +1007,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explanation of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
 
   @override
@@ -1124,6 +1142,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
+
+  /// The index of this node within the parent's list of semantic children.
+  ///
+  /// This includes all semantic nodes, not just those currently in the
+  /// child list. For example, if a scrollable has five children but the first
+  /// two are not visible (and thus not included in the list of children), then
+  /// the index of the last node will still be 4.
+  int indexInParent;
 
   /// Whether the node is invisible.
   ///
@@ -1394,6 +1420,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _scrollExtentMax != config._scrollExtentMax ||
         _scrollExtentMin != config._scrollExtentMin ||
         _actionsAsBits != config._actionsAsBits ||
+        indexInParent != config.indexInParent ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
@@ -1415,7 +1442,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   int _flags = _kEmptyConfig._flags;
 
-  bool _hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
+  /// Whether this node currently has a given [SemanticsFlag].
+  bool hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
   /// A textual description of this node.
   ///
@@ -1478,6 +1506,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// if this node represents a text field.
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
+
+  /// The total number of scrollable children that contribute to semantics.
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  int get scrollChildCount => _scrollChildCount;
+  int _scrollChildCount;
+
+  /// The index of the first visible semantic child of a scroll node.
+  int get scrollIndex => _scrollIndex;
+  int _scrollIndex;
 
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
@@ -1553,6 +1592,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
+    _scrollChildCount = config.scrollChildCount;
+    _scrollIndex = config.scrollIndex;
+    indexInParent = config.indexInParent;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1582,6 +1624,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
+    int scrollChildCount = _scrollChildCount;
+    int scrollIndex = _scrollIndex;
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
@@ -1612,6 +1656,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
+        scrollChildCount ??= node._scrollChildCount;
+        scrollIndex ??= node._scrollIndex;
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
@@ -1674,6 +1720,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
+      scrollChildCount: scrollChildCount,
+      scrollIndex: scrollIndex,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
@@ -1732,6 +1780,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
+      scrollChildren: data.scrollChildCount != null ? data.scrollChildCount : 0,
+      scrollIndex: data.scrollIndex != null ? data.scrollIndex : 0 ,
       scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
       scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
       scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
@@ -1844,21 +1894,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       if (scale != null) {
         description = '$rect scaled by ${scale.toStringAsFixed(1)}x';
       } else if (transform != null && !MatrixUtils.isIdentity(transform)) {
-        final String matrix = transform.toString().split('\n').take(4).map((String line) => line.substring(4)).join('; ');
+        final String matrix = transform.toString().split('\n').take(4).map<String>((String line) => line.substring(4)).join('; ');
         description = '$rect with transform [$matrix]';
       }
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
-    final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
+    final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
     final List<String> customSemanticsActions = _customSemanticsActions.keys
       .map<String>((CustomSemanticsAction action) => action.label)
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String>('customActions', customSemanticsActions, ifEmpty: null));
-    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
-    properties.add(FlagProperty('isHidden', value: _hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
+    properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
     properties.add(StringProperty('label', _label, defaultValue: ''));
     properties.add(StringProperty('value', _value, defaultValue: ''));
     properties.add(StringProperty('increasedValue', _increasedValue, defaultValue: ''));
@@ -1868,6 +1918,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
+    properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
+    properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
@@ -2118,7 +2170,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       sortedIds.add(id);
     }
 
-    startNodes.map((SemanticsNode node) => node.id).forEach(search);
+    startNodes.map<int>((SemanticsNode node) => node.id).forEach(search);
     return sortedIds.map<SemanticsNode>((int id) => nodeMap[id]).toList().reversed.toList();
   }
 }
@@ -2467,7 +2519,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  /// * [addAction] to add an action.
+  ///  * [addAction] to add an action.
   final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
 
   int _actionsAsBits = 0;
@@ -2829,8 +2881,8 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback value) {
@@ -2853,8 +2905,8 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback value) {
@@ -2888,6 +2940,44 @@ class SemanticsConfiguration {
     _sortKey = value;
     _hasBeenAnnotated = true;
   }
+
+  /// The index of this node within the parent's list of semantic children.
+  ///
+  /// This includes all semantic nodes, not just those currently in the
+  /// child list. For example, if a scrollable has five children but the first
+  /// two are not visible (and thus not included in the list of children), then
+  /// the index of the last node will still be 4.
+  int get indexInParent => _indexInParent;
+  int _indexInParent;
+  set indexInParent(int value) {
+    _indexInParent = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The total number of scrollable children that contribute to semantics.
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  int get scrollChildCount => _scrollChildCount;
+  int _scrollChildCount;
+  set scrollChildCount(int value) {
+    if (value == scrollChildCount)
+      return;
+    _scrollChildCount = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The index of the first visible scrollable child that contributes to
+  /// semantics.
+  int get scrollIndex => _scrollIndex;
+  int _scrollIndex;
+  set scrollIndex(int value) {
+    if (value == scrollIndex)
+      return;
+    _scrollIndex = value;
+    _hasBeenAnnotated = true;
+  }
+
 
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
@@ -2957,9 +3047,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [decreasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.decrease]
+  ///    [SemanticsAction.decrease].
   ///  * [increasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.increase]
+  ///    [SemanticsAction.increase].
   String get value => _value;
   String _value = '';
   set value(String value) {
@@ -3029,6 +3119,7 @@ class SemanticsConfiguration {
   /// should be announced.
   ///
   /// See also:
+  ///
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
   set scopesRoute(bool value) {
@@ -3038,6 +3129,7 @@ class SemanticsConfiguration {
   /// Whether the semantics node contains the label of a route.
   ///
   /// See also:
+  ///
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
   set namesRoute(bool value) {
@@ -3066,7 +3158,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///   * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
+  ///  * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
   bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
   set liveRegion(bool value) {
     _setFlag(SemanticsFlag.isLiveRegion, value);
@@ -3082,6 +3174,11 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
+  ///
+  /// This is different from having accessibility focus. The element that is
+  /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
+  /// accessibility focus but have its [ListTile.selected] property set to false,
+  /// in which case it will not be flagged as selected.
   bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
     _setFlag(SemanticsFlag.isSelected, value);
@@ -3098,6 +3195,10 @@ class SemanticsConfiguration {
   ///
   /// The getter will return null if the owning [RenderObject] doesn't support
   /// the concept of being enabled/disabled.
+  ///
+  /// This property does not control whether semantics are enabled. If you wish to
+  /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
+  /// widget.
   bool get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
   set isEnabled(bool value) {
     _setFlag(SemanticsFlag.hasEnabledState, true);
@@ -3358,6 +3459,9 @@ class SemanticsConfiguration {
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
     _hintOverrides ??= other._hintOverrides;
+    _indexInParent ??= other.indexInParent;
+    _scrollIndex ??= other._scrollIndex;
+    _scrollChildCount ??= other._scrollChildCount;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3406,6 +3510,9 @@ class SemanticsConfiguration {
       .._scrollExtentMax = _scrollExtentMax
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
+      .._indexInParent = indexInParent
+      .._scrollIndex = _scrollIndex
+      .._scrollChildCount = _scrollChildCount
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions);
   }

@@ -9,9 +9,9 @@ import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -325,13 +325,13 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
   return _MatchesReferenceImage(image);
 }
 
-/// Asserts that a [SemanticsData] contains the specified information.
+/// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// To retrieve the semantics data of a widget, use [tester.getSemantics]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -339,15 +339,14 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
-/// expect(data, matchesSemanticsData(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
-Matcher matchesSemanticsData({
+///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+Matcher matchesSemantics({
   String label,
   String hint,
   String value,
@@ -401,6 +400,7 @@ Matcher matchesSemanticsData({
   String onTapHint,
   String onLongPressHint,
   List<CustomSemanticsAction> customActions,
+  List<Matcher> children,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -505,6 +505,7 @@ Matcher matchesSemanticsData({
     size: size,
     customActions: customActions,
     hintOverrides: hintOverrides,
+    children: children,
   );
 }
 
@@ -1342,7 +1343,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 }
 
-class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Null> {
+class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, RenderPhysicalModel> {
   const _RendersOnPhysicalShape({
     this.shape,
     this.elevation,
@@ -1443,7 +1444,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
 }
 
-class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
+class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
   const _ClipsWithShapeBorder({@required this.shape});
 
   final ShapeBorder shape;
@@ -1686,6 +1687,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.customActions,
     this.hintOverrides,
+    this.children,
   });
 
   final String label;
@@ -1700,43 +1702,51 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final List<Matcher> children;
 
   @override
   Description describe(Description description) {
     description.add('has semantics');
     if (label != null)
-      description.add('with label: $label ');
+      description.add(' with label: $label');
     if (value != null)
-      description.add('with value: $value ');
+      description.add(' with value: $value');
     if (hint != null)
-      description.add('with hint: $hint ');
+      description.add(' with hint: $hint');
     if (increasedValue != null)
-      description.add('with increasedValue: $increasedValue');
+      description.add(' with increasedValue: $increasedValue ');
     if (decreasedValue != null)
-      description.add('with decreasedValue: $decreasedValue');
+      description.add(' with decreasedValue: $decreasedValue ');
     if (actions != null)
-      description.add('with actions:').addDescriptionOf(actions);
+      description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
-      description.add('with flags:').addDescriptionOf(flags);
+      description.add(' with flags: ').addDescriptionOf(flags);
     if (textDirection != null)
-      description.add('with textDirection: $textDirection ');
+      description.add(' with textDirection: $textDirection ');
     if (rect != null)
-      description.add('with rect: $rect');
+      description.add(' with rect: $rect');
     if (size != null)
-      description.add('with size: $size');
+      description.add(' with size: $size');
     if (customActions != null)
-      description.add('with custom actions: $customActions');
+      description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
-      description.add('with custom hints: $hintOverrides');
+      description.add(' with custom hints: $hintOverrides');
+    if (children != null) {
+      description.add(' with children:\n');
+      for (_MatchesSemanticsData child in children)
+        child.describe(description);
+    }
     return description;
   }
 
 
   @override
-  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
-    if (data == null)
+  bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
+    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
+    if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
-        'Maybe you forgot to enabled semantics?');
+        'Maybe you forgot to enable semantics?');
+    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : node;
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
@@ -1800,7 +1810,16 @@ class _MatchesSemanticsData extends Matcher {
         return failWithDescription(matchState, 'flags were: $flagSummary');
       }
     }
-    return true;
+    bool allMatched = true;
+    if (children != null) {
+      int i = 0;
+      node.visitChildren((SemanticsNode child) {
+        allMatched = children[i].matches(child, matchState) && allMatched;
+        i += 1;
+        return allMatched;
+      });
+    }
+    return allMatched;
   }
 
   bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {

@@ -285,6 +285,7 @@ class SliverConstraints extends Constraints {
   /// content before its zero [scrollOffset].
   ///
   /// See also:
+  ///
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheOrigin;
 
@@ -304,6 +305,7 @@ class SliverConstraints extends Constraints {
   /// in the viewport.
   ///
   /// See also:
+  ///
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double remainingCacheExtent;
 
@@ -653,8 +655,11 @@ class SliverGeometry extends Diagnosticable {
   /// into the cache area of the viewport.
   ///
   /// See also:
+  ///
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
+
+  static const double _epsilon = 1e-10;
 
   /// Asserts that this geometry is internally consistent.
   ///
@@ -686,7 +691,9 @@ class SliverGeometry extends Diagnosticable {
         );
       }
       verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
-      if (maxPaintExtent < paintExtent) {
+      // If the paintExtent is slightly more than the maxPaintExtent, but the difference is still less
+      // than epsilon, we will not throw the assert below.
+      if (paintExtent - maxPaintExtent > _epsilon) {
         verify(false,
           'The "maxPaintExtent" is less than the "paintExtent".\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
@@ -1513,12 +1520,12 @@ abstract class RenderSliverHelpers implements RenderSliver {
 ///
 /// See also:
 ///
-/// * [RenderSliver], which explains more about the Sliver protocol.
-/// * [RenderBox], which explains more about the Box protocol.
-/// * [RenderSliverToBoxAdapter], which extends this class to size the child
-///   according to its preferred size.
-/// * [RenderSliverFillRemaining], which extends this class to size the child
-///   to fill the remaining space in the viewport.
+///  * [RenderSliver], which explains more about the Sliver protocol.
+///  * [RenderBox], which explains more about the Box protocol.
+///  * [RenderSliverToBoxAdapter], which extends this class to size the child
+///    according to its preferred size.
+///  * [RenderSliverFillRemaining], which extends this class to size the child
+///    to fill the remaining space in the viewport.
 abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverSingleBoxAdapter({
@@ -1598,10 +1605,10 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
 ///
 /// See also:
 ///
-/// * [RenderSliver], which explains more about the Sliver protocol.
-/// * [RenderBox], which explains more about the Box protocol.
-/// * [RenderViewport], which allows [RenderSliver] objects to be placed inside
-///   a [RenderBox] (the opposite of this class).
+///  * [RenderSliver], which explains more about the Sliver protocol.
+///  * [RenderBox], which explains more about the Box protocol.
+///  * [RenderViewport], which allows [RenderSliver] objects to be placed inside
+///    a [RenderBox] (the opposite of this class).
 class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverToBoxAdapter({

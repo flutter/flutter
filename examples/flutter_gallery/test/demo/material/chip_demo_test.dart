@@ -14,7 +14,7 @@ void main() {
       home: ChipDemo(),
     ));
 
-    expect(tester.getSemanticsData(find.byIcon(Icons.vignette)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byIcon(Icons.vignette)), matchesSemantics(
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -22,7 +22,7 @@ void main() {
       label: 'Update border shape',
     ));
 
-    expect(tester.getSemanticsData(find.byIcon(Icons.refresh)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byIcon(Icons.refresh)), matchesSemantics(
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,

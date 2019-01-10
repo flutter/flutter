@@ -13,6 +13,7 @@ library services;
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
+export 'src/services/font_loader.dart';
 export 'src/services/haptic_feedback.dart';
 export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';

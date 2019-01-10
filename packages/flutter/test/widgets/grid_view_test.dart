@@ -29,7 +29,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView.count(
           crossAxisCount: 4,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
               onTap: () {
                 log.add(state);
@@ -100,7 +100,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView.extent(
           maxCrossAxisExtent: 200.0,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
               onTap: () {
                 log.add(state);

@@ -19,7 +19,7 @@ const FileSystem _fs = io.LocalFileSystem();
 /// information required to build and run the project, if
 /// FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG is set. If it is not set,
 /// we rely on automatic signing by Xcode.
-Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
+Future<void> prepareProvisioningCertificates(String flutterProjectPath) async {
   final String certificateConfig = await _readProvisioningConfigFile();
   if (certificateConfig == null) {
     // No cert config available, rely on automatic signing by Xcode.
@@ -31,12 +31,12 @@ Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
   await testXcconfig.writeAsString(certificateConfig);
 }
 
-Future<Null> runPodInstallForCustomPodfile(String flutterProjectPath) async {
+Future<void> runPodInstallForCustomPodfile(String flutterProjectPath) async {
   final String iosPath = path.join(flutterProjectPath, 'ios');
   exec('pod', <String>['install', '--project-directory=$iosPath']);
 }
 
-Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
+Future<void> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
   final List<File> xcconfigFiles = <File>[
     _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig')),
     _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Debug.xcconfig')),

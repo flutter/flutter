@@ -19,8 +19,8 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 // Examples can assume:
 // void _airDress() { }
@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// AppBar(
@@ -113,6 +113,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -130,7 +131,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
   /// The arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity]
-  /// and [automaticallyImplyLeading] must not be null.
+  /// and [automaticallyImplyLeading] must not be null. Additionally,
+  /// [elevation] must be non-negative.
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
@@ -152,7 +154,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(primary != null),
        assert(titleSpacing != null),
        assert(toolbarOpacity != null),
@@ -168,6 +170,37 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
+  ///
+  /// {@tool sample}
+  ///
+  /// The following code shows how the drawer button could be manually specified
+  /// instead of relying on [automaticallyImplyLeading]:
+  ///
+  /// ```dart
+  /// AppBar(
+  ///   leading: Builder(
+  ///     builder: (BuildContext context) {
+  ///       return IconButton(
+  ///         icon: const Icon(Icons.menu),
+  ///         onPressed: () { Scaffold.of(context).openDrawer(); },
+  ///         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+  ///       );
+  ///     },
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The [Builder] is used in this example to ensure that the `context` refers
+  /// to that part of the subtree. That way this code snippet can be used even
+  /// inside the very code that is creating the [Scaffold] (in which case,
+  /// without the [Builder], the `context` wouldn't be able to see the
+  /// [Scaffold], since it would refer to an ancestor of that widget).
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold.appBar], in which an [AppBar] is usually placed.
+  ///  * [Scaffold.drawer], in which the [Drawer] is usually placed.
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -189,7 +222,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool snippet --template=stateless_widget}
+  ///
+  /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
   /// Scaffold(
@@ -207,6 +242,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
@@ -229,10 +265,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
-  /// The z-coordinate at which to place this app bar. This controls the size of
-  /// the shadow below the app bar.
+  /// The z-coordinate at which to place this app bar relative to its parent.
+  ///
+  /// This controls the size of the shadow below the app bar.
   ///
   /// Defaults to 4, the appropriate elevation for app bars.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The color to use for the app bar's material. Typically this should be set
@@ -611,8 +650,22 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double toolbarOpacity = pinned && !floating ? 1.0
-      : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
+
+    // Truth table for `toolbarOpacity`:
+    // pinned | floating | bottom != null || opacity
+    // ----------------------------------------------
+    //    0   |    0     |        0       ||  fade
+    //    0   |    0     |        1       ||  fade
+    //    0   |    1     |        0       ||  fade
+    //    0   |    1     |        1       ||  fade
+    //    1   |    0     |        0       ||  1.0
+    //    1   |    0     |        1       ||  1.0
+    //    1   |    1     |        0       ||  1.0
+    //    1   |    1     |        1       ||  fade
+    final double toolbarOpacity = !pinned || (floating && bottom != null)
+      ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0)
+      : 1.0;
+
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -689,7 +742,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This is an example that could be included in a [CustomScrollView]'s
 /// [CustomScrollView.slivers] list:
@@ -709,6 +762,32 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   ]
 /// )
 /// ```
+/// {@end-tool}
+///
+/// ## Animated Examples
+///
+/// The following animations show how app bars with different configurations
+/// behave when a user scrolls up and then down again.
+///
+/// * App bar with [floating]: false, [pinned]: false, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
+///
+/// * App bar with [floating]: true, [pinned]: false, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
+///
+/// * App bar with [floating]: true, [pinned]: false, [snap]: true:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating_snap.mp4}
+///
+/// * App bar with [floating]: true, [pinned]: true, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating.mp4}
+///
+/// * App bar with [floating]: true, [pinned]: true, [snap]: true:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned_floating_snap.mp4}
+///
+/// * App bar with [floating]: false, [pinned]: true, [snap]: false:
+///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
+///
+/// The property [snap] can only be set to true if [floating] is also true.
 ///
 /// See also:
 ///
@@ -787,7 +866,7 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Scaffold(
@@ -811,6 +890,7 @@ class SliverAppBar extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
@@ -912,12 +992,42 @@ class SliverAppBar extends StatefulWidget {
   /// If [snap] is true then a scroll that exposes the app bar will trigger an
   /// animation that slides the entire app bar into view. Similarly if a scroll
   /// dismisses the app bar, the animation will slide it completely out of view.
+  ///
+  /// ## Animated Examples
+  ///
+  /// The following animations show how the app bar changes its scrolling
+  /// behavior based on the value of this property.
+  ///
+  /// * App bar with [floating] set to false:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
+  /// * App bar with [floating] set to true:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
+  ///
+  /// See also:
+  ///
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [snap].
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
   ///
   /// The app bar can still expand and contract as the user scrolls, but it will
   /// remain visible rather than being scrolled out of view.
+  ///
+  /// ## Animated Examples
+  ///
+  /// The following animations show how the app bar changes its scrolling
+  /// behavior based on the value of this property.
+  ///
+  /// * App bar with [pinned] set to false:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.mp4}
+  /// * App bar with [pinned] set to true:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_pinned.mp4}
+  ///
+  /// See also:
+  ///
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -930,6 +1040,21 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// Snapping only applies when the app bar is floating, not when the appbar
   /// appears at the top of its scroll view.
+  ///
+  /// ## Animated Examples
+  ///
+  /// The following animations show how the app bar changes its scrolling
+  /// behavior based on the value of this property.
+  ///
+  /// * App bar with [snap] set to false:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating.mp4}
+  /// * App bar with [snap] set to true:
+  ///   {@animation 476 400 https://flutter.github.io/assets-for-api-docs/assets/material/app_bar_floating_snap.mp4}
+  ///
+  /// See also:
+  ///
+  ///  * [SliverAppBar] for more animated examples of how this property changes the
+  ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
   @override

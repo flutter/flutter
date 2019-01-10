@@ -93,6 +93,7 @@ void main() {
         '   image: [10×10]\n'
         '   alignment: center\n'
         '   invertColors: false\n'
+        '   filterQuality: low\n'
       ),
     );
 

@@ -6,11 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 class RenderSolidColorBox extends RenderDecoratedBox {
-  final Size desiredSize;
-  final Color backgroundColor;
-
   RenderSolidColorBox(this.backgroundColor, { this.desiredSize = Size.infinite })
       : super(decoration: BoxDecoration(color: backgroundColor));
+
+  final Size desiredSize;
+  final Color backgroundColor;
 
   @override
   double computeMinIntrinsicWidth(double height) {

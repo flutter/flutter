@@ -26,7 +26,7 @@
   "okButtonLabel": "Tamam",
   "pasteButtonLabel": "YAPIŞTIR",
   "selectAllButtonLabel": "TÜMÜNÜ SEÇ",
-  "viewLicensesButtonLabel": "LİSANLARI GÖSTER",
+  "viewLicensesButtonLabel": "LİSANSLARI GÖSTER",
   "anteMeridiemAbbreviation": "ÖÖ",
   "postMeridiemAbbreviation": "ÖS",
   "timePickerHourModeAnnouncement": "Saati seçin",
@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Genişlet",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter kaldı",
-  "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı"
+  "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı",
+  "refreshIndicatorSemanticLabel": "Yenile"
 }

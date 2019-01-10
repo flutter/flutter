@@ -59,7 +59,7 @@ class TestApp extends StatelessWidget {
         builder: (BuildContext context) {
           return Scaffold(
             body: ListView(
-              children: routes.map((String value) {
+              children: routes.map<Widget>((String value) {
                 return MaterialButton(
                   child: Text(value),
                   onPressed: () {

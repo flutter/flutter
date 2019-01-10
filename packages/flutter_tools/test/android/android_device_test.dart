@@ -4,13 +4,18 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('android_device', () {
@@ -22,6 +27,18 @@ void main() {
   });
 
   group('getAdbDevices', () {
+    testUsingContext('throws on missing adb path', () {
+      final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final File adbExe = fs.file(getAdbPath(androidSdk));
+      adbExe.deleteSync();
+      expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
+      FileSystem: () => MemoryFileSystem(),
+    });
+
     testUsingContext('physical devices', () {
       final List<AndroidDevice> devices = <AndroidDevice>[];
       parseADBDeviceOutput('''

@@ -141,7 +141,7 @@ class Table extends RenderObjectWidget {
                               : null,
        super(key: key) {
     assert(() {
-      final List<Widget> flatChildren = children.expand((TableRow row) => row.children).toList(growable: false);
+      final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
         throw FlutterError(
           'Two or more cells in this Table contain widgets with the same key.\n'
@@ -255,7 +255,7 @@ class _TableElement extends RenderObjectElement {
     super.mount(parent, newSlot);
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; }());
-    _children = widget.children.map((TableRow row) {
+    _children = widget.children.map<_TableElementRow>((TableRow row) {
       return _TableElementRow(
         key: row.key,
         children: row.children.map<Element>((Widget child) {
@@ -351,7 +351,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (Element child in _children.expand((_TableElementRow row) => row.children)) {
+    for (Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
     }

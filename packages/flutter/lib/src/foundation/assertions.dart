@@ -314,7 +314,7 @@ class FlutterError extends AssertionError {
                      'provide substantially more information in this error message to help you determine '
                      'and fix the underlying cause.', wrapWidth: wrapWidth);
           debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: wrapWidth);
-          debugPrint('  https://github.com/flutter/flutter/issues/new');
+          debugPrint('  https://github.com/flutter/flutter/issues/new?template=BUG.md');
         }
       }
       if (details.stack != null) {

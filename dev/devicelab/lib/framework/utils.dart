@@ -169,17 +169,17 @@ Future<String> getDartVersion() async {
 
 Future<String> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return null;
+    return Future<String>.value(null);
   }
 
-  return inDirectory(flutterDirectory, () {
+  return inDirectory<String>(flutterDirectory, () {
     return eval('git', <String>['rev-parse', 'HEAD']);
   });
 }
 
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
-  return inDirectory(flutterDirectory, () async {
+  return inDirectory<DateTime>(flutterDirectory, () async {
     final String unixTimestamp = await eval('git', <String>[
       'show',
       '-s',
@@ -235,7 +235,7 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then((int exitCode) {
+  process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   });
@@ -243,12 +243,12 @@ Future<Process> startProcess(
   return process;
 }
 
-Future<Null> forceQuitRunningProcesses() async {
+Future<void> forceQuitRunningProcesses() async {
   if (_runningProcesses.isEmpty)
     return;
 
   // Give normally quitting processes a chance to report their exit code.
-  await Future<Null>.delayed(const Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
@@ -270,22 +270,22 @@ Future<int> exec(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final Completer<Null> stdoutDone = Completer<Null>();
-  final Completer<Null> stderrDone = Completer<Null>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -307,23 +307,23 @@ Future<String> eval(
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final StringBuffer output = StringBuffer();
-  final Completer<Null> stdoutDone = Completer<Null>();
-  final Completer<Null> stderrDone = Completer<Null>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -420,18 +420,18 @@ String jsonEncode(dynamic data) {
   return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
-Future<Null> getFlutter(String revision) async {
+Future<void> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
     flutterDirectory.deleteSync(recursive: true);
   }
 
-  await inDirectory(flutterDirectory.parent, () async {
+  await inDirectory<void>(flutterDirectory.parent, () async {
     await exec('git', <String>['clone', 'https://github.com/flutter/flutter.git']);
   });
 
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     await exec('git', <String>['checkout', revision]);
   });
 
@@ -495,8 +495,8 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
-  final Completer<Null> completer = Completer<Null>();
+Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+  final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
     completer.complete();

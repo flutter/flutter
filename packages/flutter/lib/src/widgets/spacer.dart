@@ -14,10 +14,10 @@ import 'framework.dart';
 /// [Flex.mainAxisAlignment] on a flex container that contains a [Spacer] to
 /// [MainAxisAlignment.spaceAround], [MainAxisAlignment.spaceBetween], or
 /// [MainAxisAlignment.spaceEvenly] will not have any visible effect: the
-/// [Spacer] has taken up all of the additional space, so there is none left to
-/// redistribute.
+/// [Spacer] has taken up all of the additional space, therefore there is none
+/// left to redistribute.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Row(
@@ -31,6 +31,7 @@ import 'framework.dart';
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -59,10 +60,7 @@ class Spacer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       flex: flex,
-      child: const SizedBox(
-        height: 0.0,
-        width: 0.0,
-      ),
+      child: const SizedBox.shrink(),
     );
   }
 }

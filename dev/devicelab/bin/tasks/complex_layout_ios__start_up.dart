@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createComplexLayoutStartupTest());
 }

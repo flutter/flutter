@@ -21,11 +21,11 @@ import 'project.dart';
 import 'tester/flutter_tester.dart';
 
 abstract class ApplicationPackage {
-  /// Package ID from the Android Manifest or equivalent.
-  final String id;
-
   ApplicationPackage({ @required this.id })
     : assert(id != null);
+
+  /// Package ID from the Android Manifest or equivalent.
+  final String id;
 
   String get name;
 
@@ -38,15 +38,10 @@ abstract class ApplicationPackage {
 }
 
 class AndroidApk extends ApplicationPackage {
-  /// Path to the actual apk file.
-  final File file;
-
-  /// The path to the activity that should be launched.
-  final String launchActivity;
-
   AndroidApk({
     String id,
     @required this.file,
+    @required this.versionCode,
     @required this.launchActivity
   }) : assert(file != null),
        assert(launchActivity != null),
@@ -84,9 +79,19 @@ class AndroidApk extends ApplicationPackage {
     return AndroidApk(
       id: data.packageName,
       file: apk,
+      versionCode: int.tryParse(data.versionCode),
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
     );
   }
+
+  /// Path to the actual apk file.
+  final File file;
+
+  /// The path to the activity that should be launched.
+  final String launchActivity;
+
+  /// The version code of the APK.
+  final int versionCode;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
@@ -138,6 +143,7 @@ class AndroidApk extends ApplicationPackage {
     return AndroidApk(
       id: packageId,
       file: apkFile,
+      versionCode: null,
       launchActivity: launchActivity
     );
   }
@@ -250,14 +256,14 @@ class BuildableIOSApp extends IOSApp {
 }
 
 class PrebuiltIOSApp extends IOSApp {
-  final Directory bundleDir;
-  final String bundleName;
-
   PrebuiltIOSApp({
     this.bundleDir,
     this.bundleName,
     @required String projectBundleId,
   }) : super(projectBundleId: projectBundleId);
+
+  final Directory bundleDir;
+  final String bundleName;
 
   @override
   String get name => bundleName;
@@ -299,10 +305,10 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
 }
 
 class ApplicationPackageStore {
+  ApplicationPackageStore({ this.android, this.iOS });
+
   AndroidApk android;
   IOSApp iOS;
-
-  ApplicationPackageStore({ this.android, this.iOS });
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -332,9 +338,6 @@ class _Entry {
 }
 
 class _Element extends _Entry {
-  List<_Entry> children;
-  String name;
-
   _Element.fromLine(String line, _Element parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
@@ -343,6 +346,9 @@ class _Element extends _Entry {
     this.parent = parent;
     children = <_Entry>[];
   }
+
+  List<_Entry> children;
+  String name;
 
   void addChild(_Entry child) {
     children.add(child);
@@ -369,9 +375,6 @@ class _Element extends _Entry {
 }
 
 class _Attribute extends _Entry {
-  String key;
-  String value;
-
   _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
@@ -383,6 +386,9 @@ class _Attribute extends _Entry {
     level = line.length - line.trimLeft().length;
     this.parent = parent;
   }
+
+  String key;
+  String value;
 }
 
 class ApkManifestData {
@@ -449,8 +455,25 @@ class ApkManifestData {
     final String activityName = nameAttribute
         .value.substring(1, nameAttribute.value.indexOf('" '));
 
+    // Example format: (type 0x10)0x1
+    final _Attribute versionCodeAttr = manifest.firstAttribute('android:versionCode');
+    if (versionCodeAttr == null) {
+      printError('Error running $packageName. Manifest versionCode not found');
+      return null;
+    }
+    if (!versionCodeAttr.value.startsWith('(type 0x10)')) {
+      printError('Error running $packageName. Manifest versionCode invalid');
+      return null;
+    }
+    final int versionCode = int.tryParse(versionCodeAttr.value.substring(11));
+    if (versionCode == null) {
+      printError('Error running $packageName. Manifest versionCode invalid');
+      return null;
+    }
+
     final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
     map['package'] = <String, String>{'name': packageName};
+    map['version-code'] = <String, String>{'name': versionCode.toString()};
     map['launchable-activity'] = <String, String>{'name': activityName};
 
     return ApkManifestData._(map);
@@ -463,6 +486,8 @@ class ApkManifestData {
       UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
+
+  String get versionCode => _data['version-code'] == null ? null : _data['version-code']['name'];
 
   String get launchableActivityName {
     return _data['launchable-activity'] == null ? null : _data['launchable-activity']['name'];

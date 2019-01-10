@@ -50,6 +50,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 12.3, // about 50 widgets visible
           children: generateList(const Placeholder()),
         ),
@@ -97,6 +98,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
         ),
       ),
@@ -143,6 +145,7 @@ void main() {
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           children: generateList(Container(child: const Placeholder())),
@@ -190,6 +193,7 @@ void main() {
         child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
+          addSemanticIndexes: false,
           itemExtent: 400.0, // 2 visible children
           children: generateList(const Placeholder()),
         ),
@@ -460,7 +464,7 @@ void main() {
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'
       '                     ╎\n'
-      '                     ╎╌child with index 0 (kept alive offstage): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being offstage
+      '                     ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being kept alive but not laid out
       '                     ╎ │ parentData: index=0; keepAlive; layoutOffset=0.0\n'
       '                     ╎ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎ │ size: Size(800.0, 400.0)\n'
@@ -472,7 +476,7 @@ void main() {
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'
       '                     ╎\n'                                                                                  // <----- dashed line ends here
-      '                     └╌child with index 3 (kept alive offstage): RenderLimitedBox#00000\n'
+      '                     └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000\n'
       '                       │ parentData: index=3; keepAlive; layoutOffset=1200.0\n'
       '                       │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │ size: Size(800.0, 400.0)\n'
