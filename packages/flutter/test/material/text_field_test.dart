@@ -12,7 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
+=======
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+>>>>>>> 83af6f48d6d180cf76bf7f6715cd015ac0bf2674
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -563,9 +567,12 @@ void main() {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          controller: controller,
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
         ),
       ),
     );
@@ -604,7 +611,7 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.baseOffset, selection.baseOffset);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.extentOffset, selection.extentOffset);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -616,8 +623,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, selection.baseOffset-2);
-    expect(controller.selection.extentOffset, selection.extentOffset+2);
+    expect(controller.selection.baseOffset, selection.baseOffset);
+    expect(controller.selection.extentOffset, selection.extentOffset);
   });
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -888,6 +895,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
@@ -971,6 +979,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
           key: textFieldKey,
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
