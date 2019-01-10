@@ -144,15 +144,11 @@ class AttachCommand extends FlutterCommand {
           observatoryUri = await isolateDiscoveryProtocol.uri;
           printStatus('Done.');
         } catch (_) {
-<<<<<<< HEAD
-          status.cancel();
-=======
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
->>>>>>> 83af6f48d6d180cf76bf7f6715cd015ac0bf2674
           rethrow;
         }
       } else {
