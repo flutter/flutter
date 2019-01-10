@@ -280,10 +280,10 @@
     settings.advisory_script_uri = libraryURI.UTF8String;
   } else if (entrypoint) {
     settings.advisory_script_entrypoint = entrypoint.UTF8String;
-    settings.advisory_script_entrypoint = std::string("main.dart");
+    settings.advisory_script_uri = std::string("main.dart");
   } else {
     settings.advisory_script_entrypoint = std::string("main");
-    settings.advisory_script_entrypoint = std::string("main.dart");
+    settings.advisory_script_uri = std::string("main.dart");
   }
 
   const auto threadLabel = [NSString stringWithFormat:@"%@.%zu", _labelPrefix, shellCount++];
