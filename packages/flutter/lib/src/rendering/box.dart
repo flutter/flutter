@@ -494,12 +494,11 @@ class BoxConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
-//    InformationCollector informationCollector, // XXX add back
   }) {
     assert(() {
       void throwError(String message) {
-        InformationCollector informationCollector = null; // XXX hack to make sure we aren't using informationCollector.
         String description;
         if (informationCollector != null) {
           final StringBuffer information = StringBuffer();

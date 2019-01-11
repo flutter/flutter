@@ -388,14 +388,13 @@ class SliverConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-//    InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
   }) {
     assert(() {
       void verify(bool check, String message) {
         if (check)
           return;
-        InformationCollector informationCollector = null; // XXX
         final StringBuffer information = StringBuffer();
         if (informationCollector != null)
           informationCollector(information);
@@ -667,11 +666,12 @@ class SliverGeometry extends Diagnosticable {
 
   static const double _epsilon = 1e-10;
 
+  // TODO(jacobr): adding a named parameter is a breaking change.
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
   bool debugAssertIsValid({
-//    InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticCollector,
   }) {
     assert(() {
@@ -682,7 +682,6 @@ class SliverGeometry extends Diagnosticable {
       }) {
         if (check)
           return;
-        InformationCollector informationCollector = null; // XXX REMOVE
         if (informationCollector != null) {
           final StringBuffer information = StringBuffer();
           informationCollector(information);

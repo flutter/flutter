@@ -99,13 +99,10 @@ class FlutterErrorDetails {
     this.library = 'Flutter framework',
     this.context,
     this.stackFilter,
-   // InformationCollector informationCollector, XXX to strip missing deps
+    InformationCollector informationCollector,
     this.diagnosticsCollector,
     this.silent = false
-  }) : _informationCollector = null;
-// XXX ADD BACK
-//  }) : assert(diagnosticsCollector == null || informationCollector == null),
-//      _informationCollector = informationCollector;
+  }) : _informationCollector = informationCollector;
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
@@ -158,15 +155,17 @@ class FlutterErrorDetails {
   /// The text written to the information argument may contain newlines but should
   /// not end with a newline.
   InformationCollector get informationCollector {
-    if (_informationCollector != null) {
-      return _informationCollector;
-    }
     if (diagnosticsCollector == null) {
-      return null;
+      return _informationCollector;
     }
     return (StringBuffer information) {
       for (DiagnosticsNode node in diagnosticsCollector()) {
         information.writeln(node.toStringDeep());
+      }
+      // TODO(jacobr): for backwards compatibility, should informationCollector
+      // be run first or last?
+      if (_informationCollector != null) {
+        _informationCollector(information);
       }
     };
   }

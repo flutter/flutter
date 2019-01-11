@@ -579,7 +579,7 @@ abstract class Constraints {
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-//    InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
   }) {
     assert(isNormalized);
@@ -3092,7 +3092,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String library,
     String context,
     this.renderObject,
-    // XXX InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
     bool silent = false
   }) : super(
@@ -3100,7 +3100,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     stack: stack,
     library: library,
     context: context,
-    // XXX informationCollector: informationCollector,
+    informationCollector: informationCollector,
     diagnosticsCollector: diagnosticsCollector,
     silent: silent
   );

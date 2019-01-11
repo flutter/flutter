@@ -124,7 +124,7 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     this.router,
     this.route,
     this.event,
-    // XXX InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
     bool silent = false
   }) : super(
@@ -132,7 +132,7 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     stack: stack,
     library: library,
     context: context,
-    // XXX informationCollector: informationCollector,
+    informationCollector: informationCollector,
     diagnosticsCollector: diagnosticsCollector,
     silent: silent
   );

@@ -202,7 +202,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     String context,
     this.event,
     this.hitTestEntry,
-    // XXX InformationCollector informationCollector,
+    InformationCollector informationCollector,
     DiagnosticsCollector diagnosticsCollector,
     bool silent = false
   }) : super(
@@ -210,7 +210,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     stack: stack,
     library: library,
     context: context,
-    // informationCollector: informationCollector,
+    informationCollector: informationCollector,
     diagnosticsCollector: diagnosticsCollector,
     silent: silent
   );
