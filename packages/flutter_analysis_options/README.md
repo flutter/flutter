@@ -18,3 +18,13 @@ This is a subset of rules suitable for most Flutter projects.
 
 This imports all of the rules in `analysis_options_base.yaml`, plus additional
 rules that conform to the style guidelines for the Flutter repository.
+
+## Consumption
+
+This package can be consumed from the Flutter SDK like so:
+
+```yaml
+dependencies:
+  flutter_analysis_options:
+    sdk: flutter
+```
