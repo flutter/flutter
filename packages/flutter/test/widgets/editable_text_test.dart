@@ -923,10 +923,8 @@ void main() {
     expect(renderEditable.cursorColor.alpha, 0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
 
-    expect(renderEditable.cursorColor.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 255);
 
     debugDefaultTargetPlatformOverride = null;
   });
