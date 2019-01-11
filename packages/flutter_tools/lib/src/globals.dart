@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -13,6 +14,7 @@ Logger get logger => context[Logger];
 Cache get cache => Cache.instance;
 Config get config => Config.instance;
 Artifacts get artifacts => Artifacts.instance;
+ApplicationPackageFactory get applicationPackageFactory => ApplicationPackageFactory.instance;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
