@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Shadow;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic_types.dart';
 
@@ -803,10 +804,11 @@ class TextStyle extends Diagnosticable {
       FontWeight fontWeight,
       FontStyle fontStyle,
       double lineHeight,
-      bool forceStrutHeight,
+      StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
+    print(strutStyle);
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -814,9 +816,16 @@ class TextStyle extends Diagnosticable {
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
       // Use zero fontSize if strut is not defined to have no effect on layout.
-      fontSize: (fontSize ?? 0) * textScaleFactor,
-      lineHeight: lineHeight ?? height,
-      forceStrutHeight: forceStrutHeight,
+      fontSize: (fontSize ?? this.fontSize) * textScaleFactor,
+      strutStyle: strutStyle != null ? ui.StrutStyle(
+        fontFamily: strutStyle.fontFamily,
+        fontSize: strutStyle.fontSize,
+        lineHeight: strutStyle.lineHeight,
+        leading: strutStyle.leading,
+        fontWeight: strutStyle.fontWeight,
+        fontStyle: strutStyle.fontStyle,
+        forceStrutHeight: strutStyle.forceStrutHeight,
+      ) : null,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,

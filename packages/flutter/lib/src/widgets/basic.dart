@@ -4579,6 +4579,7 @@ class RichText extends LeafRenderObjectWidget {
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
+      ..strutStyle = strutStyle
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 

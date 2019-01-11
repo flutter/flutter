@@ -232,12 +232,7 @@ class TextPainter {
       maxLines: _maxLines,
       ellipsis: _ellipsis,
       locale: _locale,
-      fontFamily: (_strutStyle == null ? null : _strutStyle.fontFamily),
-      fontSize: (_strutStyle == null ? null : _strutStyle.fontSize),
-      fontWeight: (_strutStyle == null ? null : _strutStyle.fontWeight),
-      fontStyle: (_strutStyle == null ? null : strutStyle.fontStyle),
-      lineHeight: (_strutStyle == null ? null : strutStyle.lineHeight),
-      forceStrutHeight: (_strutStyle == null ? null : strutStyle.forceStrutHeight),
+      strutStyle: _strutStyle,
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
