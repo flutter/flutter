@@ -561,7 +561,7 @@ class ArchivePublisher {
       args.addAll(<String>['-h', 'Content-Type:$mimeType']);
     }
     args.addAll(<String>['cp', src, dest]);
-    return _runGsUtil(args);
+    return await _runGsUtil(args);
   }
 }
 
