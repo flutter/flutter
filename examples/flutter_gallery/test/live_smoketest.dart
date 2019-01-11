@@ -82,10 +82,10 @@ Future<void> main() async {
       await controller.tap(find.byTooltip('Back'));
     }
     print('Finished successfully!');
-    _kTestChannel.invokeMethod<void>('success');
+    _kTestChannel.invokeMethod('success');
   } catch (error, stack) {
     print('Caught error: $error\n$stack');
-    _kTestChannel.invokeMethod<void>('failure');
+    _kTestChannel.invokeMethod('failure');
   }
 }
 
