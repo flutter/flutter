@@ -294,10 +294,6 @@ class CupertinoTextField extends StatefulWidget {
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
-  ///
   /// ## Limitations
   ///
   /// The CupertinoTextField does not currently count Unicode grapheme clusters

@@ -10,6 +10,7 @@ import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -2499,8 +2500,8 @@ class SemanticsConfiguration {
   /// is set on the same node, all previously painted siblings and cousins up
   /// until the next ancestor that is a semantic boundary are dropped.
   ///
-  /// Paint order as established by [visitChildrenForSemantics] is used to
-  /// determine if a node is previous to this one.
+  /// Paint order as established by [RenderObject.visitChildrenForSemantics] is
+  /// used to determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS
