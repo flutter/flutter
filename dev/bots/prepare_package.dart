@@ -332,6 +332,9 @@ class ArchiveCreator {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
+        // Run it outside the cloned Flutter repo to not nest git repos, since
+        // they'll be git repos themselves too.
+        workingDirectory: tempDir,
       );
     }
 
