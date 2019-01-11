@@ -549,7 +549,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         case TargetPlatform.iOS:
           // The cause is not technically double tap, but we would like to show
           // the toolbar.
-          _renderEditable.selectWordAt(details.globalPosition, cause: SelectionChangedCause.doubleTap);
+          _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:

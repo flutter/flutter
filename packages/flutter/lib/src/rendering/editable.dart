@@ -1184,17 +1184,30 @@ class RenderEditable extends RenderBox {
 
   /// Select a word around the location of the last tap down.
   void selectWord({@required SelectionChangedCause cause}) {
-    selectWordAt(_lastTapDownPosition, cause: cause);
+    selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
 
-  /// Select a word at the given global position.
-  void selectWordAt(Offset globalPosition, {@required SelectionChangedCause cause}) {
+  /// Selects the set words of a paragraph in a given range of global positions.
+  ///
+  /// The first and last endpoints of the selection will always be at the
+  /// beginning and end of a word respectively.
+  void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
-    assert(globalPosition != null);
     _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, cause);
+      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from));
+      final TextSelection firstWord = _selectWordAtOffset(firstPosition);
+      final TextSelection lastWord = to == null ?
+        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to));
+
+      onSelectionChanged(
+        TextSelection(
+          baseOffset: firstWord.base.offset,
+          extentOffset: lastWord.extent.offset,
+          affinity: firstWord.affinity,
+        ), this, cause,
+      );
     }
   }
 
