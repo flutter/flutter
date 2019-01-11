@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
@@ -27,7 +26,7 @@ void main() {
   });
 
   test('Fails with invalid data', () async {
-    Uint8List data = new Uint8List.fromList([1, 2, 3]);
+    final Uint8List data = Uint8List.fromList(<int>[1, 2, 3]);
     expect(
       ui.instantiateImageCodec(data),
       throwsA(exceptionWithMessage('operation failed'))
@@ -35,64 +34,64 @@ void main() {
   });
 
   test('nextFrame', () async {
-    Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
-    ui.Codec codec = await ui.instantiateImageCodec(data);
-    List<List<int>> decodedFrameInfos = [];
+    final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+    final List<List<int>> decodedFrameInfos = <List<int>>[];
     for (int i = 0; i < 5; i++) {
-      ui.FrameInfo frameInfo = await codec.getNextFrame();
-      decodedFrameInfos.add([
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
         frameInfo.image.width,
         frameInfo.image.height,
       ]);
     }
-    expect(decodedFrameInfos, equals([
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
+    expect(decodedFrameInfos, equals(<List<int>>[
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
     ]));
   });
 
   test('decodedCacheRatioCap', () async {
     // No real way to test the native layer, but a smoke test here to at least
     // verify that animation is still consistent with caching disabled.
-    Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
-    ui.Codec codec = await ui.instantiateImageCodec(data, decodedCacheRatioCap: 1.0);
-    List<List<int>> decodedFrameInfos = [];
+    final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(data, decodedCacheRatioCap: 1.0);
+    final List<List<int>> decodedFrameInfos = <List<int>>[];
     for (int i = 0; i < 5; i++) {
-      ui.FrameInfo frameInfo = await codec.getNextFrame();
-      decodedFrameInfos.add([
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
         frameInfo.image.width,
         frameInfo.image.height,
       ]);
     }
-    expect(decodedFrameInfos, equals([
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
-      [200, 640, 479],
+    expect(decodedFrameInfos, equals(<List<int>>[
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
+      <int>[200, 640, 479],
     ]));
   });
 
   test('non animated image', () async {
-    Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
-    ui.Codec codec = await ui.instantiateImageCodec(data);
-    List<List<int>> decodedFrameInfos = [];
+    final Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+    final List<List<int>> decodedFrameInfos = <List<int>>[];
     for (int i = 0; i < 2; i++) {
-      ui.FrameInfo frameInfo = await codec.getNextFrame();
-      decodedFrameInfos.add([
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
         frameInfo.image.width,
         frameInfo.image.height,
       ]);
     }
-    expect(decodedFrameInfos, equals([
-      [0, 240, 246],
-      [0, 240, 246],
+    expect(decodedFrameInfos, equals(<List<int>>[
+      <int>[0, 240, 246],
+      <int>[0, 240, 246],
     ]));
   });
 }
@@ -104,13 +103,13 @@ File _getSkiaResource(String fileName) {
   // assuming the curent working directory is engine/src.
   // This is fragile and should be changed once the Platform.script issue is
   // resolved.
-  String assetPath =
+  final String assetPath =
     path.join('third_party', 'skia', 'resources', 'images', fileName);
-  return new File(assetPath);
+  return File(assetPath);
 }
 
 Matcher exceptionWithMessage(String m) {
-  return predicate((e) {
+  return predicate<Exception>((Exception e) {
     return e is Exception && e.toString().contains(m);
   });
 }

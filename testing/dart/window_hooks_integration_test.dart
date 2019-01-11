@@ -6,15 +6,14 @@
 library dart.ui;
 
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
+// this needs to be imported because painting.dart expects it this way
+import 'dart:collection' as collection;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'dart:nativewrappers';
+import 'dart:nativewrappers'; // ignore: unused_import
+import 'dart:typed_data';
 
-// this needs to be imported because painting.dart expects it this way
-import 'dart:collection' as collection;
 
 import 'package:test/test.dart';
 

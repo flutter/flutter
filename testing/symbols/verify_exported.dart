@@ -30,7 +30,7 @@ void main(List<String> arguments) {
 
   final Iterable<String> releaseBuilds = new Directory(outPath).listSync()
       .where((FileSystemEntity entity) => entity is Directory)
-      .map((FileSystemEntity dir) => p.basename(dir.path))
+      .map<String>((FileSystemEntity dir) => p.basename(dir.path))
       .where((String s) => s.contains('_release'));
 
   final Iterable<String> iosReleaseBuilds = releaseBuilds

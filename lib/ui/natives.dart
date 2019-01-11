@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(dnfield): remove unused_element ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
+
 part of dart.ui;
 
 // Corelib 'print' implementation.
@@ -28,7 +30,7 @@ Future<developer.ServiceExtensionResponse> _scheduleFrame(
 }
 
 @pragma('vm:entry-point')
-void _setupHooks() {
+void _setupHooks() {  // ignore: unused_element
   assert(() {
     // In debug mode, register the schedule frame extension.
     developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
@@ -67,9 +69,9 @@ int _getCallbackHandle(Function closure) native 'GetCallbackHandle';
 Function _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';
 
 // Required for gen_snapshot to work correctly.
-int _isolateId;
+int _isolateId; // ignore: unused_element
 
 @pragma('vm:entry-point')
-Function _getPrintClosure() => _print;
+Function _getPrintClosure() => _print;  // ignore: unused_element
 @pragma('vm:entry-point')
-Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
+Function _getScheduleMicrotaskClosure() => _scheduleMicrotask; // ignore: unused_element

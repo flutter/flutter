@@ -12,7 +12,7 @@ class NotAColor extends Color {
 
 void main() {
   test('color accessors should work', () {
-    final Color foo = const Color(0x12345678);
+    const Color foo = Color(0x12345678);
     expect(foo.alpha, equals(0x12));
     expect(foo.red, equals(0x34));
     expect(foo.green, equals(0x56));
@@ -20,7 +20,7 @@ void main() {
   });
 
   test('paint set to black', () {
-    final Color c = const Color(0x00000000);
+    const Color c = Color(0x00000000);
     final Paint p = new Paint();
     p.color = c;
     expect(c.toString(), equals('Color(0x00000000)'));
@@ -28,7 +28,7 @@ void main() {
 
   test('color created with out of bounds value', () {
     try {
-      final Color c = const Color(0x100 << 24);
+      const Color c = Color(0x100 << 24);
       final Paint p = new Paint();
       p.color = c;
     } catch (e) {
@@ -38,7 +38,7 @@ void main() {
 
   test('color created with wildly out of bounds value', () {
     try {
-      final Color c = const Color(1 << 1000000);
+      const Color c = Color(1 << 1000000);
       final Paint p = new Paint();
       p.color = c;
     } catch (e) {
@@ -48,7 +48,7 @@ void main() {
 
   test('two colors are only == if they have the same runtime type', () {
     expect(const Color(123), equals(const Color(123)));
-    expect(const Color(123), equals(new Color(123)));
+    expect(const Color(123), equals(Color(123))); // ignore: prefer_const_constructors
     expect(const Color(123), isNot(equals(const Color(321))));
     expect(const Color(123), isNot(equals(const NotAColor(123))));
     expect(const NotAColor(123), isNot(equals(const Color(123))));
@@ -123,14 +123,14 @@ void main() {
 
   test('compute gray luminance', () {
     // Each color component is at 20%.
-    final Color lightGray = const Color(0xFF333333);
+    const Color lightGray = Color(0xFF333333);
     // Relative luminance's formula is just the linearized color value for gray.
     // ((0.2 + 0.055) / 1.055) ^ 2.4.
     expect(lightGray.computeLuminance(), equals(0.033104766570885055));
   });
 
   test('compute color luminance', () {
-    final Color brightRed = const Color(0xFFFF3B30);
+    const Color brightRed = Color(0xFFFF3B30);
     // 0.2126 * ((1.0 + 0.055) / 1.055) ^ 2.4 +
     // 0.7152 * ((0.23137254902 +0.055) / 1.055) ^ 2.4 +
     // 0.0722 * ((0.18823529411 + 0.055) / 1.055) ^ 2.4

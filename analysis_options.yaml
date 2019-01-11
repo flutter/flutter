@@ -10,9 +10,6 @@
 #    private fields, especially on the Window object):
 
 analyzer:
-  language:
-    enableStrictCallChecks: true
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -20,6 +17,7 @@ analyzer:
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
+    native_function_body_in_non_sdk_code: ignore
     # allow having TODOs in the code
     todo: ignore
   # `flutter analyze` (without `--watch`) just ignores directories
@@ -94,7 +92,6 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
