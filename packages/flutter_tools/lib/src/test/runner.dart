@@ -132,7 +132,7 @@ Future<int> runTests(
     }
 
     printTrace('running test package with arguments: $testArgs');
-    await test.main(testArgs);
+    await test.runTests(testArgs);
 
     if (watchTests) {
       final Completer<void> completer = Completer<void>();
@@ -144,7 +144,7 @@ Future<int> runTests(
             return;
           }
           await compileTestFiles(invalidatedFiles: <String>[event.path]);
-          await test.main(testArgs);
+          await test.runTests(testArgs);
         },
         onDone: completer.complete
       );
@@ -154,6 +154,7 @@ Future<int> runTests(
        printStatus('Watcher is ready for events...', emphasis: true, color: TerminalColor.blue);
 
        await completer.future;
+       test.completeShutdown();
     }
 
      await compiler.dispose();
