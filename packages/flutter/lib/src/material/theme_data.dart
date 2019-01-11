@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
 import 'button_theme.dart';
+import 'card_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -148,6 +149,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
