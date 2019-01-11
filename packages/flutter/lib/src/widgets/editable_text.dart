@@ -1109,6 +1109,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   TextEditingValue get textEditingValue => _value;
 
+  double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio ?? 1.0;
+
   @override
   set textEditingValue(TextEditingValue value) {
     _selectionOverlay?.update(value);
@@ -1188,6 +1190,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               paintCursorAboveText: widget.paintCursorAboveText,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
+              devicePixelRatio: _devicePixelRatio,
             ),
           ),
         );
@@ -1313,7 +1316,7 @@ class _Editable extends LeafRenderObjectWidget {
       paintCursorAboveText: paintCursorAboveText,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
-      devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
     );
   }
 

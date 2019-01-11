@@ -285,7 +285,7 @@ void main() {
         home: Material(
           child: TextField(),
         ),
-      )
+      ),
     );
 
     final Finder textFinder = find.byType(TextField);
@@ -325,9 +325,11 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     await tester.pumpWidget(
-      overlay(
-        child: const TextField(),
-      )
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
+        ),
+      ),
     );
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
