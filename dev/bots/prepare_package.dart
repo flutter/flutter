@@ -534,7 +534,7 @@ class ArchivePublisher {
     bool failOk = false,
   }) async {
     return _processRunner.runProcess(
-      <String>['gsutil']..addAll(args),
+      <String>['gsutil.py', '--']..addAll(args),
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
