@@ -7,6 +7,7 @@ import 'dart:async';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
@@ -51,6 +52,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
