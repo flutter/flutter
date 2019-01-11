@@ -414,8 +414,17 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<void> drag(Finder finder, Offset offset, { int pointer }) {
-    return dragFrom(getCenter(finder), offset, pointer: pointer);
+  ///
+  /// {@template flutter.flutter_test.lib.src.controller}
+  /// By default, if the x or y component of offset is greater than kTouchSlop, the
+  /// gesture is broken up into two separate moves calls. Changing [touchSlopX] or
+  /// [touchSlopY] will change the minimum amount of movement in the respective axis
+  /// before the drag will be broken into multiply calls. To always send the
+  /// drag with just a single call to [TestGesture.moveBy], [touchSlopX] and [touchSlopY]
+  /// should be set to 0.
+  /// {@end template}
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
+    return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
@@ -424,11 +433,29 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
+  ///
+  /// {@macro flutter.flutter_test.lib.src.controller}
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
-      await gesture.moveBy(offset);
+
+      const double eps = 1.0;
+      final double xSign = offset.dx.sign;
+      final double ySign = offset.dy.sign;
+
+      if (offset.dx * xSign > touchSlopX + eps) {
+        await gesture.moveBy(Offset(xSign * (touchSlopX + eps), 0));
+        await gesture.moveBy(Offset(offset.dx - (xSign * (touchSlopX - eps)), 0));
+      } else {
+        await gesture.moveBy(Offset(offset.dx, 0));
+      }
+      if (offset.dy * ySign > touchSlopY + eps) {
+        await gesture.moveBy(Offset(0, ySign * (touchSlopY + eps)));
+        await gesture.moveBy(Offset(0, offset.dy - (ySign * (touchSlopY - eps))));
+      } else {
+        await gesture.moveBy(Offset(0, offset.dy));
+      }
       await gesture.up();
     });
   }
