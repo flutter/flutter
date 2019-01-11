@@ -2,24 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:test/test.dart';
 
-const kPortName = 'foobar';
-const kErrorCode = -1;
-const kStartCode = 0;
-const kCloseCode = 1;
-const kDeletedCode = 2;
+const String kPortName = 'foobar';
+const int kErrorCode = -1;
+const int kStartCode = 0;
+const int kCloseCode = 1;
+const int kDeletedCode = 2;
 
 void isolateSpawnEntrypoint(SendPort port) {
-  sendHelper(int code, [String message = '']) {
+  void sendHelper(int code, [String message = '']) {
     port.send(<dynamic>[code, message]);
   }
 
-  SendPort shared = IsolateNameServer.lookupPortByName(kPortName);
+  final SendPort shared = IsolateNameServer.lookupPortByName(kPortName);
   if (shared == null) {
     sendHelper(kErrorCode, 'Could not find port: $kPortName');
     return;
@@ -35,7 +34,7 @@ void isolateSpawnEntrypoint(SendPort port) {
   // send another message to ensure we don't crash.
   shared.send('garbage');
 
-  bool result = IsolateNameServer.removePortNameMapping(kPortName);
+  final bool result = IsolateNameServer.removePortNameMapping(kPortName);
   if (result) {
     sendHelper(kDeletedCode);
   } else {
@@ -55,14 +54,14 @@ void main() {
     expect(IsolateNameServer.removePortNameMapping(kPortName), isFalse);
 
     // Register a SendPort.
-    final receivePort = new ReceivePort();
-    final sendPort = receivePort.sendPort;
+    final ReceivePort receivePort = ReceivePort();
+    final SendPort sendPort = receivePort.sendPort;
     expect(IsolateNameServer.registerPortWithName(sendPort, kPortName), isTrue);
     expect(IsolateNameServer.lookupPortByName(kPortName), sendPort);
 
     // Check we can't register the same name twice.
-    final receivePort2 = new ReceivePort();
-    final sendPort2 = receivePort2.sendPort;
+    final ReceivePort receivePort2 = ReceivePort();
+    final SendPort sendPort2 = receivePort2.sendPort;
     expect(
         IsolateNameServer.registerPortWithName(sendPort2, kPortName), isFalse);
     expect(IsolateNameServer.lookupPortByName(kPortName), sendPort);
@@ -83,13 +82,13 @@ void main() {
 
   test('isolate name server multi-isolate', () async {
     // Register our send port with the name server.
-    final receivePort = new ReceivePort();
-    final sendPort = receivePort.sendPort;
+    final ReceivePort receivePort = ReceivePort();
+    final SendPort sendPort = receivePort.sendPort;
     expect(IsolateNameServer.registerPortWithName(sendPort, kPortName), isTrue);
 
     // Test driver.
-    final testReceivePort = new ReceivePort();
-    testReceivePort.listen(expectAsync1((response) {
+    final ReceivePort testReceivePort = ReceivePort();
+    testReceivePort.listen(expectAsync1<void, dynamic>((dynamic response) {
       final int code = response[0];
       final String message = response[1];
       switch (code) {
@@ -110,7 +109,7 @@ void main() {
       }
     }, count: 3));
 
-    receivePort.listen(expectAsync1((message) {
+    receivePort.listen(expectAsync1<void, dynamic>((dynamic message) {
       // If we don't get this message, we timeout and fail.
       expect(message, kPortName);
     }));

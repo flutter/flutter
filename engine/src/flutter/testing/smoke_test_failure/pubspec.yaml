@@ -1,0 +1,4 @@
+name: smoke_test_failure
+dependencies:
+  test: 1.3.0
+  path: 1.6.2

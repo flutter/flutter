@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -20,14 +20,14 @@ void main() {
   group('Image.toByteData', () {
     group('RGBA format', () {
       test('works with simple image', () async {
-        ByteData data = await Square4x4Image.image.toByteData();
-        expect(new Uint8List.view(data.buffer), Square4x4Image.bytes);
+        final ByteData data = await Square4x4Image.image.toByteData();
+        expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
       });
 
       test('converts grayscale images', () async {
-        Image image = await GrayscaleImage.load();
-        ByteData data = await image.toByteData();
-        Uint8List bytes = data.buffer.asUint8List();
+        final Image image = await GrayscaleImage.load();
+        final ByteData data = await image.toByteData();
+        final Uint8List bytes = data.buffer.asUint8List();
         expect(bytes, hasLength(16));
         expect(bytes, GrayscaleImage.bytesAsRgba);
       });
@@ -35,15 +35,15 @@ void main() {
 
     group('Unmodified format', () {
       test('works with simple image', () async {
-        Image image = Square4x4Image.image;
-        ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
-        expect(new Uint8List.view(data.buffer), Square4x4Image.bytes);
+        final Image image = Square4x4Image.image;
+        final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+        expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
       });
 
       test('works with grayscale images', () async {
-        Image image = await GrayscaleImage.load();
-        ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
-        Uint8List bytes = data.buffer.asUint8List();
+        final Image image = await GrayscaleImage.load();
+        final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+        final Uint8List bytes = data.buffer.asUint8List();
         expect(bytes, hasLength(4));
         expect(bytes, GrayscaleImage.bytesUnmodified);
       });
@@ -51,46 +51,48 @@ void main() {
 
     group('PNG format', () {
       test('works with simple image', () async {
-        Image image = Square4x4Image.image;
-        ByteData data = await image.toByteData(format: ImageByteFormat.png);
-        List<int> expected = await readFile('square.png');
-        expect(new Uint8List.view(data.buffer), expected);
+        final Image image = Square4x4Image.image;
+        final ByteData data = await image.toByteData(format: ImageByteFormat.png);
+        final List<int> expected = await readFile('square.png');
+        expect(Uint8List.view(data.buffer), expected);
       });
     });
   });
 }
 
 class Square4x4Image {
+  Square4x4Image._();
+
   static Image get image {
-    double width = _kWidth.toDouble();
-    double radius = _kRadius.toDouble();
-    double innerWidth = (_kWidth - 2 * _kRadius).toDouble();
+    final double width = _kWidth.toDouble();
+    final double radius = _kRadius.toDouble();
+    final double innerWidth = (_kWidth - 2 * _kRadius).toDouble();
 
-    PictureRecorder recorder = new PictureRecorder();
-    Canvas canvas =
-        new Canvas(recorder, new Rect.fromLTWH(0.0, 0.0, width, width));
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas =
+        Canvas(recorder, Rect.fromLTWH(0.0, 0.0, width, width));
 
-    Paint black = new Paint()
+    final Paint black = Paint()
       ..strokeWidth = 1.0
       ..color = _kBlack;
-    Paint green = new Paint()
+    final Paint green = Paint()
       ..strokeWidth = 1.0
       ..color = _kGreen;
 
-    canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, width, width), black);
+    canvas.drawRect(Rect.fromLTWH(0.0, 0.0, width, width), black);
     canvas.drawRect(
-        new Rect.fromLTWH(radius, radius, innerWidth, innerWidth), green);
+        Rect.fromLTWH(radius, radius, innerWidth, innerWidth), green);
     return recorder.endRecording().toImage(_kWidth, _kWidth);
   }
 
   static List<int> get bytes {
-    int bytesPerChannel = 4;
-    List<int> result = new List<int>(_kWidth * _kWidth * bytesPerChannel);
+    const int bytesPerChannel = 4;
+    final List<int> result = List<int>(_kWidth * _kWidth * bytesPerChannel);
 
-    fillWithColor(Color color, int min, int max) {
+    void fillWithColor(Color color, int min, int max) {
       for (int i = min; i < max; i++) {
         for (int j = min; j < max; j++) {
-          int offset = i * bytesPerChannel + j * _kWidth * bytesPerChannel;
+          final int offset = i * bytesPerChannel + j * _kWidth * bytesPerChannel;
           result[offset] = color.red;
           result[offset + 1] = color.green;
           result[offset + 2] = color.blue;
@@ -107,9 +109,11 @@ class Square4x4Image {
 }
 
 class GrayscaleImage {
+  GrayscaleImage._();
+
   static Future<Image> load() async {
-    Uint8List bytes = await readFile('4x4.png');
-    Completer<Image> completer = new Completer<Image>();
+    final Uint8List bytes = await readFile('4x4.png');
+    final Completer<Image> completer = Completer<Image>();
     decodeImageFromList(bytes, (Image image) => completer.complete(image));
     return await completer.future;
   }
@@ -126,7 +130,7 @@ class GrayscaleImage {
   static List<int> get bytesUnmodified => <int>[255, 127, 127, 0];
 }
 
-Future<Uint8List> readFile(fileName) async {
-  final file = new File(path.join('flutter', 'testing', 'resources', fileName));
+Future<Uint8List> readFile(String fileName) async {
+  final File file = File(path.join('flutter', 'testing', 'resources', fileName));
   return await file.readAsBytes();
 }

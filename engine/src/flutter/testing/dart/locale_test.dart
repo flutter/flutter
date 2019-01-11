@@ -8,12 +8,12 @@ import 'package:test/test.dart';
 
 void main() {
   test('Locale', () {
-    final Null $null = null;
+    const Null $null = null;
     expect(const Locale('en').toString(), 'en');
-    expect(const Locale('en'), new Locale('en', $null));
-    expect(const Locale('en').hashCode, new Locale('en', $null).hashCode);
-    expect(const Locale('en'), isNot(new Locale('en', '')));
-    expect(const Locale('en').hashCode, isNot(new Locale('en', '').hashCode));
+    expect(const Locale('en'), const Locale('en', $null));
+    expect(const Locale('en').hashCode, const Locale('en', $null).hashCode);
+    expect(const Locale('en'), isNot(const Locale('en', '')));
+    expect(const Locale('en').hashCode, isNot(const Locale('en', '').hashCode));
     expect(const Locale('en', 'US').toString(), 'en_US');
     expect(const Locale('iw').toString(), 'he');
     expect(const Locale('iw', 'DD').toString(), 'he_DE');
@@ -32,17 +32,17 @@ void main() {
     expect(const Locale.fromSubtags(countryCode: 'US').toString(), 'und_US');
     expect(const Locale.fromSubtags(countryCode: 'US').countryCode, 'US');
 
-    expect(Locale.fromSubtags(languageCode: 'es', countryCode: '419').toString(), 'es_419');
-    expect(Locale.fromSubtags(languageCode: 'es', countryCode: '419').languageCode, 'es');
-    expect(Locale.fromSubtags(languageCode: 'es', countryCode: '419').countryCode, '419');
+    expect(const Locale.fromSubtags(languageCode: 'es', countryCode: '419').toString(), 'es_419');
+    expect(const Locale.fromSubtags(languageCode: 'es', countryCode: '419').languageCode, 'es');
+    expect(const Locale.fromSubtags(languageCode: 'es', countryCode: '419').countryCode, '419');
 
-    expect(Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN').toString(), 'zh_Hans_CN');
+    expect(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN').toString(), 'zh_Hans_CN');
   });
 
   test('Locale equality', () {
-    expect(Locale.fromSubtags(languageCode: 'en'),
-           isNot(Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn')));
-    expect(Locale.fromSubtags(languageCode: 'en').hashCode,
-           isNot(Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn').hashCode));
+    expect(const Locale.fromSubtags(languageCode: 'en'),
+           isNot(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn')));
+    expect(const Locale.fromSubtags(languageCode: 'en').hashCode,
+           isNot(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn').hashCode));
   });
 }

@@ -93,7 +93,7 @@ void main() {
   test('transformation tests', () {
     final Rect bounds = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     final Path p = new Path()..addRect(bounds);
-    final Float64List scaleMatrix = new Float64List.fromList([
+    final Float64List scaleMatrix = Float64List.fromList(<double>[
       2.5, 0.0, 0.0, 0.0, // first col
       0.0, 0.5, 0.0, 0.0, // second col
       0.0, 0.0, 1.0, 0.0, // third col
@@ -178,7 +178,7 @@ void main() {
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
     final Tangent posTanDiagonal =
         simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint);
-    expect(posTanDiagonal.position, equals(new Offset(5.0, 5.0)));
+    expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
     expect(posTanDiagonal.angle,
         closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 

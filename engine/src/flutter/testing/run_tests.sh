@@ -21,7 +21,7 @@ run_test () {
 }
 
 # Verify that a failing test returns a failure code.
-! run_test flutter/testing/fail_test.dart
+! run_test flutter/testing/smoke_test_failure/fail_test.dart
 
 for TEST_SCRIPT in flutter/testing/dart/*.dart; do
   run_test $TEST_SCRIPT

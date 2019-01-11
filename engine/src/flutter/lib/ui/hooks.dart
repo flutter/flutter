@@ -2,17 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(dnfield): Remove unused_import ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
+
 part of dart.ui;
 
+// ignore: unused_element
 String _decodeUTF8(ByteData message) {
   return message != null ? utf8.decoder.convert(message.buffer.asUint8List()) : null;
 }
 
+// ignore: unused_element
 dynamic _decodeJSON(String message) {
   return message != null ? json.decode(message) : null;
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _updateWindowMetrics(double devicePixelRatio,
                           double width,
                           double height,
@@ -50,9 +55,11 @@ String _localeClosure() {
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _updateLocales(List<String> locales) {
   const int stringsPerLocale = 4;
   final int numLocales = locales.length ~/ stringsPerLocale;
@@ -71,6 +78,7 @@ void _updateLocales(List<String> locales) {
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _updateUserSettingsData(String jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData);
   if (data.isEmpty) {
@@ -90,12 +98,14 @@ void _updateAlwaysUse24HourFormat(bool alwaysUse24HourFormat) {
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _updateSemanticsEnabled(bool enabled) {
   window._semanticsEnabled = enabled;
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _updateAccessibilityFeatures(int values) {
   final AccessibilityFeatures newFeatures = new AccessibilityFeatures._(values);
   if (newFeatures == window._accessibilityFeatures)
@@ -122,12 +132,14 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _dispatchSemanticsAction(int id, int action, ByteData args) {
   _invoke3<int, SemanticsAction, ByteData>(
     window.onSemanticsAction,
@@ -139,11 +151,13 @@ void _dispatchSemanticsAction(int id, int action, ByteData args) {
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _beginFrame(int microseconds) {
   _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, new Duration(microseconds: microseconds));
 }
 
 @pragma('vm:entry-point')
+// ignore: unused_element
 void _drawFrame() {
   _invoke(window.onDrawFrame, window._onDrawFrameZone);
 }
@@ -177,6 +191,7 @@ void _invoke1<A>(void callback(A a), Zone zone, A arg) {
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg1] and [arg2].
+// ignore: unused_element
 void _invoke2<A1, A2>(void callback(A1 a1, A2 a2), Zone zone, A1 arg1, A2 arg2) {
   if (callback == null)
     return;
