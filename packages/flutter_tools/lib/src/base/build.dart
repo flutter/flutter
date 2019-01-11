@@ -3,10 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:analyzer/analyzer.dart';
 import 'package:archive/archive.dart';
+import 'package:bazel_worker/bazel_worker.dart';
+import 'package:bazel_worker/driver.dart';
+import 'package:build_config/build_config.dart';
 import 'package:collection/collection.dart';
+import 'package:glob/glob.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+
+import 'package:build/build.dart' ;
+import 'package:build_vm_compilers/build_vm_compilers.dart';
+import 'package:build_vm_compilers/builders.dart';
+import 'package:build_modules/builders.dart';
+import 'package:build_modules/build_modules.dart';
+import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:pool/pool.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
@@ -20,6 +35,10 @@ import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
 import 'process.dart';
+
+const flutterKernelModuleExtension = '.flutter.dill';
+const flutterKernelEntrypointExtension = '.flutter.app.dill';
+final _buildPool = Pool(16);
 
 GenSnapshot get genSnapshot => context[GenSnapshot];
 
@@ -295,11 +314,77 @@ class AOTSnapshotter {
   }) async {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
-
     printTrace('Compiling Dart to kernel: $mainPath');
-
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-      printTrace('Extra front-end options: $extraFrontEndOptions');
+    final List<core.BuilderApplication> applications = <core.BuilderApplication>[
+      core.apply('build_modules|module_library',
+        <BuilderFactory>[moduleLibraryBuilder],
+        core.toAllPackages(),
+        isOptional: true,
+        hideOutput: true,
+        appliesBuilders: <String>['build_modules|module_cleanup']),
+      core.apply('build_modules|vm', <BuilderFactory>[
+          metaModuleBuilderFactoryForPlatform('flutter'),
+          metaModuleCleanBuilderFactoryForPlatform('flutter'),
+          moduleBuilderFactoryForPlatform('flutter')
+        ],
+        core.toNoneByDefault(),
+        isOptional: true,
+        hideOutput: true,
+        appliesBuilders: <String>['build_modules|module_cleanup']),
+      core.apply('build_vm_compilers|vm', <BuilderFactory>[
+        (BuilderOptions buildOptions) {
+          return KernelBuilder(
+            summaryOnly: false,
+            sdkKernelPath: artifacts.getArtifactPath(Artifact.platformKernelDill),
+            outputExtension: flutterKernelModuleExtension,
+            platform: DartPlatform.flutter,
+          );
+        }
+      ], core.toAllPackages(), isOptional: true, hideOutput: true, appliesBuilders: <String>['build_modules|vm']),
+      core.apply('build_vm_compilers|entrypoint', <BuilderFactory>[
+        (BuilderOptions builderOptions) {
+          return const FlutterEntrypointBuilder();
+        }
+      ], core.toRoot(), hideOutput: true, isOptional: false, defaultGenerateFor: const InputSet(
+        include: <String>['lib/**'],
+      )),
+      core.applyPostProcess('build_modules|module_cleanup', moduleCleanup, defaultGenerateFor: const InputSet())
+    ];
+    final Directory projectRoot = fs.file(packagesPath).parent.absolute;
+    final core.PackageGraph packageGraph = core.PackageGraph.forPath(projectRoot.path);
+    final core.OverrideableEnvironment environment = core.OverrideableEnvironment(
+      core.IOEnvironment(
+        packageGraph,
+        assumeTty: true,
+        outputMap: null,
+        outputSymlinksOnly: false,
+      ),
+      reader: core.FileBasedAssetReader(packageGraph),
+      writer: core.FileBasedAssetWriter(packageGraph),
+      onLog: (LogRecord record) {
+        printTrace(record.toString());
+      },
+    );
+    final core.BuildRunner runner = await core.BuildRunner.create(
+      await core.BuildOptions.create(
+        core.LogSubscription(environment, verbose: true),
+        packageGraph: packageGraph,
+        buildDirs: <String>[
+          '${projectRoot.path}/build',
+        ],
+        skipBuildScriptCheck: true,
+      ),
+      environment,
+      applications,
+      <String, Map<String, Object>>{},
+      isReleaseBuild: buildMode == BuildMode.release,
+    );
+    final core.BuildResult result = await runner.run({});
+    print(result.status);
+    print(result.failureType);
+    print(result.outputs);
+    // if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+    //   printTrace('Extra front-end options: $extraFrontEndOptions');
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
@@ -319,10 +404,15 @@ class AOTSnapshotter {
     );
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+    // final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    // await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
 
-    return compilerOutput?.outputFilename;
+    //return compilerOutput?.outputFilename;
+    final String fileName = result.outputs.firstWhere((AssetId assetId) {
+      return (assetId.path != null && assetId.path.contains('main.dart'));
+    }).path;
+    print(fileName);
+    return fileName;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
@@ -535,4 +625,257 @@ class JITSnapshotter {
       TargetPlatform.android_arm64,
     ].contains(platform);
   }
+}
+
+
+class ToolBuildEnvironment extends core.BuildEnvironment {
+  @override
+  void onLog(LogRecord record) {
+    print(record.toString());
+  }
+
+  @override
+  Future<int> prompt(String message, List<String> choices) async {
+    print(message);
+    print(choices);
+    return 0;
+  }
+
+  @override
+  core.RunnerAssetReader reader;
+
+  @override
+  core.RunnerAssetWriter writer;
+}
+
+/// A builder which combines several [vmKernelModuleExtension] modules into a
+/// single [vmKernelEntrypointExtension] file, which represents an entire
+/// application.
+class FlutterEntrypointBuilder implements Builder {
+  const FlutterEntrypointBuilder();
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.dart': <String>[flutterKernelEntrypointExtension],
+  };
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    await _buildPool.withResource(() async {
+      final AssetId dartEntrypointId = buildStep.inputId;
+      final bool isAppEntrypoint = await _isAppEntryPoint(dartEntrypointId, buildStep);
+      if (!isAppEntrypoint) {
+        return;
+      }
+      final AssetId moduleId = buildStep.inputId.changeExtension(moduleExtension(DartPlatform.flutter));
+      final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+      final List<Module> transitiveModules = await module.computeTransitiveDependencies(buildStep);
+      final Iterable<AssetId> transitiveKernelModules = [
+        module.primarySource.changeExtension(flutterKernelModuleExtension)
+      ].followedBy(transitiveModules.map((m) => m.primarySource.changeExtension(flutterKernelModuleExtension)));
+      final List<int> appContents = <int>[];
+      for (AssetId dependencyId in transitiveKernelModules) {
+        appContents.addAll(await buildStep.readAsBytes(dependencyId));
+      }
+      await buildStep.writeAsBytes(buildStep.inputId.changeExtension(flutterKernelEntrypointExtension), appContents);
+    });
+  }
+}
+
+/// Returns whether or not [dartId] is an app entrypoint (basically, whether
+/// or not it has a `main` function).
+Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
+  assert(dartId.extension == '.dart');
+  // Skip reporting errors here, dartdevc will report them later with nicer
+  // formatting.
+  final CompilationUnit parsed = parseCompilationUnit(await reader.readAsString(dartId), suppressErrors: true);
+  // Allow two or fewer arguments so that entrypoints intended for use with
+  // [spawnUri] get counted.
+  //
+  // TODO: This misses the case where a Dart file doesn't contain main(),
+  // but has a part that does, or it exports a `main` from another library.
+  return parsed.declarations.any((CompilationUnitMember node) {
+    return node is FunctionDeclaration &&
+        node.name.name == 'main' &&
+        node.functionExpression.parameters.parameters.length <= 2;
+  });
+}
+
+
+const multiRootScheme = 'org-dartlang-app';
+
+/// A builder which can output kernel files for a given sdk.
+///
+/// This creates kernel files based on [moduleExtension] files, which are what
+/// determine the module structure of an application.
+class FlutterKernelBuilder implements Builder {
+  FlutterKernelBuilder({
+    @required this.platform,
+    @required this.summaryOnly,
+    @required this.sdkKernelPath,
+    @required this.outputExtension,
+  }) : buildExtensions = {
+    moduleExtension(platform): [outputExtension]
+  };
+
+  @override
+  final Map<String, List<String>> buildExtensions;
+
+  final String outputExtension;
+
+  DartPlatform platform;
+
+  /// Whether this should create summary kernel files or full kernel files.
+  ///
+  /// Summary files only contain the "outline" of the module - you can think of
+  /// this as everything but the method bodies.
+  final bool summaryOnly;
+
+  /// The sdk kernel file for the current platform.
+  final String sdkKernelPath;
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(buildStep.inputId)));
+    try {
+      await _createKernel(
+          module: module,
+          buildStep: buildStep,
+          summaryOnly: summaryOnly,
+          outputExtension: outputExtension,
+          sdkKernelPath: sdkKernelPath);
+    } catch (e, s) {
+      log.severe(
+          'Error creating '
+          '${module.primarySource.changeExtension(outputExtension)}',
+          e,
+          s);
+    }
+  }
+}
+
+/// Creates a kernel file for [module].
+Future<void> _createKernel(
+    {@required Module module,
+    @required BuildStep buildStep,
+    @required bool summaryOnly,
+    @required String outputExtension,
+    @required String sdkKernelPath}) async {
+  final WorkRequest request = WorkRequest();
+  final scratchSpace = await buildStep.fetchResource(scratchSpaceResource);
+  final AssetId outputId = module.primarySource.changeExtension(outputExtension);
+  final File outputFile = scratchSpace.fileFor(outputId);
+
+  File packagesFile;
+  {
+    var transitiveDeps = await module.computeTransitiveDependencies(buildStep);
+    var transitiveKernelDeps = <AssetId>[];
+    var transitiveSourceDeps = <AssetId>[];
+
+    await Future.wait(transitiveDeps.map((dep) => _addModuleDeps(
+        dep,
+        module,
+        transitiveKernelDeps,
+        transitiveSourceDeps,
+        buildStep,
+        outputExtension)));
+
+    var allAssetIds = Set<AssetId>()
+      ..addAll(module.sources)
+      ..addAll(transitiveKernelDeps)
+      ..addAll(transitiveSourceDeps);
+    await scratchSpace.ensureAssets(allAssetIds, buildStep);
+
+    packagesFile = await createPackagesFile(allAssetIds);
+
+    _addRequestArguments(request, module, transitiveKernelDeps, sdkDir,
+        sdkKernelPath, outputFile, packagesFile, summaryOnly);
+  }
+
+  // We need to make sure and clean up the temp dir, even if we fail to compile.
+  try {
+    var analyzer = await buildStep.fetchResource(frontendDriverResource);
+    var response = await analyzer.doWork(request);
+    if (response.exitCode != EXIT_CODE_OK || !await outputFile.exists()) {
+      throw KernelException(
+          outputId, '${request.arguments.join(' ')}\n${response.output}');
+    }
+
+    if (response.output?.isEmpty == false) {
+      log.info(response.output);
+    }
+
+    // Copy the output back using the buildStep.
+    await scratchSpace.copyOutput(outputId, buildStep);
+  } finally {
+    await packagesFile.parent.delete(recursive: true);
+  }
+}
+
+/// Adds the source or kernel dependencies for [dependency] to
+/// [transitiveKernelDeps] or [transitiveSourceDeps].
+Future<void> _addModuleDeps(
+    Module dependency,
+    Module root,
+    List<AssetId> transitiveKernelDeps,
+    List<AssetId> transitiveSourceDeps,
+    BuildStep buildStep,
+    String outputExtension) async {
+  var kernelId = dependency.primarySource.changeExtension(outputExtension);
+  if (await buildStep.canRead(kernelId)) {
+    // If we can read the kernel file, but it depends on any module in this
+    // package, then we need to only provide sources for that file since its
+    // dependencies in this package will only be providing sources as well.
+    if ((await dependency.computeTransitiveDependencies(buildStep))
+        .any((m) => m.primarySource.package == root.primarySource.package)) {
+      transitiveSourceDeps.addAll(dependency.sources);
+    } else {
+      transitiveKernelDeps.add(kernelId);
+    }
+  } else {
+    transitiveSourceDeps.addAll(dependency.sources);
+  }
+}
+
+/// Fills in all the required arguments for [request] in order to compile the
+/// kernel file for [module].
+void _addRequestArguments(
+    WorkRequest request,
+    Module module,
+    Iterable<AssetId> transitiveKernelDeps,
+    String sdkDir,
+    String sdkKernelPath,
+    File outputFile,
+    File packagesFile,
+    bool summaryOnly) {
+  request.arguments.addAll([
+    '--dart-sdk-summary',
+    Uri.file(p.join(sdkDir, sdkKernelPath)).toString(),
+    '--output',
+    outputFile.path,
+    '--packages-file',
+    packagesFile.uri.toString(),
+    '--multi-root-scheme',
+    multiRootScheme,
+    '--exclude-non-sources',
+    summaryOnly ? '--summary-only' : '--no-summary-only',
+  ]);
+
+  // Add all summaries as summary inputs.
+  request.arguments.addAll(transitiveKernelDeps.map((id) {
+    var relativePath = p.url.relative(scratchSpace.fileFor(id).uri.path,
+        from: scratchSpace.tempDir.uri.path);
+    if (summaryOnly) {
+      return '--input-summary=$multiRootScheme:///$relativePath';
+    } else {
+      return '--input-linked=$multiRootScheme:///$relativePath';
+    }
+  }));
+
+  request.arguments.addAll(module.sources.map((id) {
+    var uri = id.path.startsWith('lib')
+        ? canonicalUriFor(id)
+        : '$multiRootScheme:///${id.path}';
+    return '--source=$uri';
+  }));
 }
