@@ -155,7 +155,8 @@ bool RuntimeController::SetLocales(
     window->UpdateLocales(locale_data);
     return true;
   }
-  return true;
+
+  return false;
 }
 
 bool RuntimeController::SetUserSettingsData(const std::string& data) {
