@@ -32,7 +32,10 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
-const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
+// The time it takes for the cursor to fade from fully opaque to fully
+// transparent and vice versa. A full cursor blink, from transparent to opaque
+// to transparent, is twice this duration.
+const Duration _kCursorFadeInAndOutTime = Duration(milliseconds: 500);
 
 // The time the cursor is static in opacity before animating to become
 // transparent.
@@ -996,7 +999,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// state or the "off" state). A complete cursor blink period is twice this
   /// value (half on, half off).
   @visibleForTesting
-  Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
+  Duration get cursorBlinkInterval => _kCursorFadeInAndOutTime;
 
   /// The current status of the text selection handles.
   @visibleForTesting
@@ -1029,9 +1032,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _cursorWaitForStart(Timer timer) {
-    assert(_kCursorBlinkHalfPeriod > _fadeDuration);
+    assert(_kCursorFadeInAndOutTime > _fadeDuration);
     _cursorTimer?.cancel();
-    _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+    _cursorTimer = Timer.periodic(_kCursorFadeInAndOutTime, _cursorTick);
   }
 
   void _startCursorTimer() {
@@ -1040,7 +1043,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cursorBlinkOpacityController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
-      _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+      _cursorTimer = Timer.periodic(_kCursorFadeInAndOutTime, _cursorTick);
     }
   }
 

@@ -1291,6 +1291,9 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  /// On iOS, the cursor is taller than the the cursor on Android. The height
+  /// of the cursor for iOS is approximate and obtained through an eyeball
+  /// comparison.
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:

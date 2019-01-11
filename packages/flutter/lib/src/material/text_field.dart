@@ -649,7 +649,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasDirectionality(context));
     assert(
     !(widget.style != null && widget.style.inherit == false &&
-        (widget.style.fontSize == null || widget.style.textBaseline == null)),
+      (widget.style.fontSize == null || widget.style.textBaseline == null)),
     'inherit false style must supply fontSize and textBaseline',
     );
 
@@ -679,10 +679,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled
-            ? (themeData.platform == TargetPlatform.iOS
+          ? (themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls)
-            : null,
+          : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
