@@ -19,7 +19,9 @@ static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   if ([inputType isEqualToString:@"TextInputType.number"]) {
     if ([type[@"signed"] boolValue])
       return UIKeyboardTypeNumbersAndPunctuation;
-    return UIKeyboardTypeDecimalPad;
+    if ([type[@"decimal"] boolValue])
+      return UIKeyboardTypeDecimalPad;
+    return UIKeyboardTypeNumberPad;
   }
   if ([inputType isEqualToString:@"TextInputType.phone"])
     return UIKeyboardTypePhonePad;
