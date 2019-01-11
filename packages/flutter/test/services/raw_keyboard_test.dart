@@ -14,23 +14,19 @@ class _ModifierCheck {
 void main() {
   group('RawKeyEventDataAndroid', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
-      RawKeyEventDataAndroid.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
       RawKeyEventDataAndroid.modifierAlt | RawKeyEventDataAndroid.modifierLeftAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
       RawKeyEventDataAndroid.modifierAlt | RawKeyEventDataAndroid.modifierRightAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
-      RawKeyEventDataAndroid.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.any),
       RawKeyEventDataAndroid.modifierShift | RawKeyEventDataAndroid.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
       RawKeyEventDataAndroid.modifierShift | RawKeyEventDataAndroid.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
-      RawKeyEventDataAndroid.modifierSym: _ModifierCheck(ModifierKey.symbolModifier, KeyboardSide.any),
-      RawKeyEventDataAndroid.modifierFunction: _ModifierCheck(ModifierKey.functionModifier, KeyboardSide.any),
-      RawKeyEventDataAndroid.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.any),
+      RawKeyEventDataAndroid.modifierSym: _ModifierCheck(ModifierKey.symbolModifier, KeyboardSide.all),
+      RawKeyEventDataAndroid.modifierFunction: _ModifierCheck(ModifierKey.functionModifier, KeyboardSide.all),
       RawKeyEventDataAndroid.modifierControl | RawKeyEventDataAndroid.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
       RawKeyEventDataAndroid.modifierControl | RawKeyEventDataAndroid.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
-      RawKeyEventDataAndroid.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.any),
       RawKeyEventDataAndroid.modifierMeta | RawKeyEventDataAndroid.modifierLeftMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
       RawKeyEventDataAndroid.modifierMeta | RawKeyEventDataAndroid.modifierRightMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
-      RawKeyEventDataAndroid.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.any),
-      RawKeyEventDataAndroid.modifierNumLock: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.any),
-      RawKeyEventDataAndroid.modifierScrollLock: _ModifierCheck(ModifierKey.scrollLockModifier, KeyboardSide.any),
+      RawKeyEventDataAndroid.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
+      RawKeyEventDataAndroid.modifierNumLock: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.all),
+      RawKeyEventDataAndroid.modifierScrollLock: _ModifierCheck(ModifierKey.scrollLockModifier, KeyboardSide.all),
     };
 
     test('modifier keys are recognized individually', () {
@@ -51,6 +47,7 @@ void main() {
               isTrue,
               reason: "$key should be pressed with metaState $modifier, but isn't.",
             );
+            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
           } else {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -84,6 +81,11 @@ void main() {
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${RawKeyEventDataAndroid.modifierFunction}, but isn't.",
             );
+            if (key != ModifierKey.functionModifier) {
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+            } else {
+              expect(data.getModifierSide(key), equals(KeyboardSide.all));
+            }
           } else {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -155,7 +157,6 @@ void main() {
         });
         final RawKeyEventDataFuchsia data = event.data;
         for (ModifierKey key in ModifierKey.values) {
-          print('$data $modifier ${modifierTests[modifier].key}');
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),

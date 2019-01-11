@@ -66,7 +66,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     switch (side) {
       case KeyboardSide.any:
         return true;
-      case KeyboardSide.both:
+      case KeyboardSide.all:
         return modifiers & leftMask != 0 && modifiers & rightMask != 0;
       case KeyboardSide.left:
         return modifiers & leftMask != 0;
@@ -98,6 +98,45 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
         return false;
     }
     return false;
+  }
+
+  @override
+  KeyboardSide getModifierSide(ModifierKey key) {
+    KeyboardSide findSide(int leftMask, int rightMask, int combinedMask) {
+      KeyboardSide side;
+      final int combined = modifiers & combinedMask;
+      if (combined == leftMask) {
+        side = KeyboardSide.left;
+      } else if (combined == rightMask) {
+        side = KeyboardSide.right;
+      } else if (combined == combinedMask) {
+        side = KeyboardSide.all;
+      }
+      // Returns null if not pressed.
+      return side;
+    }
+
+    switch (key) {
+      case ModifierKey.controlModifier:
+        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+      case ModifierKey.shiftModifier:
+        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+      case ModifierKey.altModifier:
+        return findSide(modifierLeftAlt, modifierRightAlt, modifierAlt);
+      case ModifierKey.metaModifier:
+        return findSide(modifierLeftMeta, modifierRightMeta, modifierMeta);
+      case ModifierKey.capsLockModifier:
+        return (modifiers & modifierCapsLock == 0) ? null : KeyboardSide.all;
+      case ModifierKey.numLockModifier:
+      case ModifierKey.scrollLockModifier:
+      case ModifierKey.functionModifier:
+      case ModifierKey.symbolModifier:
+        // Fuchsia doesn't support the modifiers, so they can't be pressed.
+        return null;
+    }
+
+    assert(false, 'Not handling $key type properly.');
+    return null;
   }
 
   // Keyboard modifier masks for Fuschia modifiers.

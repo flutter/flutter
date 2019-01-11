@@ -29,7 +29,7 @@ enum KeyboardSide {
   right,
 
   /// Matches the left and right version of the key pressed simultaneously.
-  both,
+  all,
 }
 
 /// An enum describing the type of modifier key that is being pressed.
@@ -122,6 +122,14 @@ abstract class RawKeyEventData {
   /// the keyboard, then [side] is ignored.
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
 
+  /// Returns a [KeyboardSide] enum value that describes which side or sides of
+  /// the given keyboard modifier key were pressed at the time of this event.
+  ///
+  /// If the modifier key wasn't pressed at the time of this event, returns
+  /// null. If the given key only appears in one place on the keyboard, returns
+  /// [KeyboardSide.all] if pressed.
+  KeyboardSide getModifierSide(ModifierKey key);
+
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
@@ -151,11 +159,11 @@ abstract class RawKeyEventData {
   ///
   /// Use [isModifierPressed] if you need to know which side of the keyboard a
   /// pressed modifier was on.
-  Set<ModifierKey> get modifiersPressed {
-    final Set<ModifierKey> result = Set<ModifierKey>();
+  Map<ModifierKey, KeyboardSide> get modifiersPressed {
+    final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
     for (ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
-        result.add(key);
+        result[key] = getModifierSide(key);
       }
     }
     return result;

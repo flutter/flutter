@@ -94,7 +94,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     switch (side) {
       case KeyboardSide.any:
         return true;
-      case KeyboardSide.both:
+      case KeyboardSide.all:
         return metaState & leftMask != 0 && metaState & rightMask != 0;
       case KeyboardSide.left:
         return metaState & leftMask != 0;
@@ -128,6 +128,44 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
         return metaState & modifierSym != 0;
     }
     return false;
+  }
+
+  @override
+  KeyboardSide getModifierSide(ModifierKey key) {
+    KeyboardSide findSide(int leftMask, int rightMask) {
+      KeyboardSide side;
+      final int combinedMask = leftMask | rightMask;
+      final int combined = metaState & combinedMask;
+      if (combined == leftMask) {
+        side = KeyboardSide.left;
+      } else if (combined == rightMask) {
+        side = KeyboardSide.right;
+      } else if (combined == combinedMask) {
+        side = KeyboardSide.all;
+      }
+      // Returns null if not pressed.
+      return side;
+    }
+
+    switch (key) {
+      case ModifierKey.controlModifier:
+        return findSide(modifierLeftControl, modifierRightControl);
+      case ModifierKey.shiftModifier:
+        return findSide(modifierLeftShift, modifierRightShift);
+      case ModifierKey.altModifier:
+        return findSide(modifierLeftAlt, modifierRightAlt);
+      case ModifierKey.metaModifier:
+        return findSide(modifierLeftMeta, modifierRightMeta);
+      case ModifierKey.capsLockModifier:
+      case ModifierKey.numLockModifier:
+      case ModifierKey.scrollLockModifier:
+      case ModifierKey.functionModifier:
+      case ModifierKey.symbolModifier:
+        return KeyboardSide.all;
+    }
+
+    assert(false, 'Not handling $key type properly.');
+    return null;
   }
 
   // Modifier key masks.
