@@ -12,7 +12,6 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'scroll_physics.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -158,9 +157,6 @@ class Stepper extends StatefulWidget {
   ///
   /// For example, determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view. 
-  ///
-  /// Defaults to [AlwaysScrollableScrollPhysics] but consider changing to 
-  /// [ClampingScrollPhysics] if parent is a scroll view.
   final ScrollPhysics physics;
 
   /// The type of stepper that determines the layout. In the case of
@@ -605,7 +601,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return ListView(
       shrinkWrap: true,
-      physics: widget.physics ?? AlwaysScrollableScrollPhysics(),
+      physics: widget.physics,
       children: children,
     );
   }
