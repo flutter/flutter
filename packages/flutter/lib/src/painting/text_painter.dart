@@ -205,6 +205,11 @@ class TextPainter {
   /// The strut style to use. Strut style defines the strut, which sets minimum
   /// vertical layout metrics.
   ///
+  /// Omitting or providing null will disable strut.
+  ///
+  /// Omitting or providing null for any properties of [StrutStyle] will cause
+  /// the strut to inherit the missing properties from the default text style.
+  ///
   /// See [StrutStyle] for details.
   /// {@endtemplate}
   StrutStyle get strutStyle => _strutStyle;

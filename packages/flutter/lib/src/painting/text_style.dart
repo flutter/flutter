@@ -808,7 +808,6 @@ class TextStyle extends Diagnosticable {
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
-    print(strutStyle);
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,

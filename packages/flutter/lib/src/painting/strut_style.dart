@@ -40,32 +40,34 @@ import 'basic_types.dart';
 /// 
 /// ### Fields
 /// 
+/// If any properties (except [forceStrutHeight]) are omitted or null, it will inherit the
+/// values of the default text style.
+///
 ///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
 /// 
 ///  * [fontSize] the size of the ascent plus descent in logical pixels. This is also
-///    used as the basis of the custom leading caluclation. This must be a positive number
-///    for strut to work.
+///    used as the basis of the custom leading caluclation. This value cannot
+///    be negative.
 ///
 ///  * [lineHeight] the height of the line as a ratio of [fontSize]. This property does
 ///    not affect the leading height, which is controlled separately through [leading].
-///    When negative or null and a custom leading is defined, then a lineHeight of zero
-///    will be used.
+///    This value cannot be negative.
 /// 
 ///  * [leading] the custom leading to apply to the strut as a ratio of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
-///    to the top and the other half to the bottom of the line height. When negative
-///    or null and a [lineHeight] is defined, the font's default leading will be used.
+///    to the top and the other half to the bottom of the line height. This value cannot
+///    be negative.
 ///
 ///  * [fontWeight] the typeface thickness to use when calculating the strut (e.g., bold).
-/// 
-///  * [fontStyle] the typeface variant to use when calculating the strut (e.g., italics).
+///
+///  * [fontStyle] the typeface variant to use when calculating the strut (e.g., italic).
 /// 
 ///  * [forceStrutHeight] when true, all lines will be laid out with the height of the
 ///    strut. All line and run-specific metrics will be ignored/overrided and only strut
 ///    metrics will be used instead. This property guarantees uniform line spacing, however
 ///    text overlap will become possible. This property should be enabled with caution as
-///    it bypasses a large portion of the vertical layout system.
+///    it bypasses a large portion of the vertical layout system. The default value is false.
 /// 
 /// ### Examples
 /// 
@@ -183,7 +185,7 @@ class StrutStyle {
   /// [fontFamily] property.
   const StrutStyle({
     String fontFamily,
-    @required this.fontSize,
+    this.fontSize,
     this.lineHeight,
     this.leading,
     this.fontWeight,
@@ -191,10 +193,9 @@ class StrutStyle {
     this.forceStrutHeight,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
-      // Ensure at least lineHeight or leading is defined. Otherwise, setting StrutStyle
-      // null or omitting is preferred over providing an incomplete StrutStyle that will
-      // do nothing.
-       assert(!((leading == null || leading < 0) && (lineHeight == null || lineHeight < 0)));
+       assert(lineHeight == null || lineHeight > 0),
+       assert(leading == null || leading > 0),
+       assert(fontSize == null || fontSize > 0);
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
