@@ -10,6 +10,8 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   collection: 1.14.11
+  flutter_analysis_options:
+    sdk: flutter
   meta: 1.1.6
   typed_data: 1.1.6
   vector_math: 2.0.8
