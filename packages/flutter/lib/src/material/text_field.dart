@@ -617,6 +617,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   bool get _cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
 
+  Color get _cursorColor {
+    if (widget.cursorColor == null) {
+      if (Theme.of(context).platform == TargetPlatform.iOS)
+        return CupertinoColors.activeBlue;
+      else
+        return Theme.of(context).cursorColor;
+    }
+    return widget.cursorColor;
+  }
+
   @override
   void deactivate() {
     if (_splashes != null) {
@@ -638,9 +648,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null && widget.style.inherit == false &&
-         (widget.style.fontSize == null || widget.style.textBaseline == null)),
-      'inherit false style must supply fontSize and textBaseline',
+    !(widget.style != null && widget.style.inherit == false &&
+        (widget.style.fontSize == null || widget.style.textBaseline == null)),
+    'inherit false style must supply fontSize and textBaseline',
     );
 
     final ThemeData themeData = Theme.of(context);
@@ -669,10 +679,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled
-          ? (themeData.platform == TargetPlatform.iOS
-             ? cupertinoTextSelectionControls
-             : materialTextSelectionControls)
-          : null,
+            ? (themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls)
+            : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
@@ -681,7 +691,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
         cursorRadius: _cursorRadius,
-        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        cursorColor: _cursorColor,
         cursorOpacityAnimates: _cursorOpacityAnimates,
         cursorOffset: const Offset(0, 0),
         paintCursorAboveText: false,
