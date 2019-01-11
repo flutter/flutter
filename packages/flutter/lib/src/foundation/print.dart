@@ -51,7 +51,7 @@ void debugPrintThrottled(String message, { int wrapWidth }) {
     _debugPrintTask();
 }
 int _debugPrintedCharacters = 0;
-const int _kDebugPrintCapacity = 12 * 1024;
+const int _kDebugPrintCapacity = 12000 * 1024;
 const Duration _kDebugPrintPauseTime = Duration(seconds: 1);
 final Queue<String> _debugPrintBuffer = Queue<String>();
 final Stopwatch _debugPrintStopwatch = Stopwatch();

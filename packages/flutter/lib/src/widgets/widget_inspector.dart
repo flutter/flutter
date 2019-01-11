@@ -937,10 +937,13 @@ mixin WidgetInspectorService {
 
   static const String _consoleObjectGroup = 'console-group';
 
+  static const DEBUG_JSON_PROTOCOL = true;
   void _reportError(FlutterErrorDetails details) {
-    print("----- ERROR AS IT WOULD BE DUMPED TO CONSOLE --- XXXX");
-    FlutterError.dumpErrorToConsole(details);
-    print("----- END OF DUMP -----");
+    if (DEBUG_JSON_PROTOCOL) {
+      print("----- ERROR AS IT WOULD BE DUMPED TO CONSOLE --- XXXX");
+      FlutterError.dumpErrorToConsole(details);
+      print("----- END OF DUMP -----");
+    }
     Map<String, Object> json = {
       'exceptionId': toId(details.exception, _consoleObjectGroup),
       'stackId' : toId(details.stack, _consoleObjectGroup),
@@ -981,7 +984,19 @@ mixin WidgetInspectorService {
     if (details is FlutterErrorDetailsForRendering) {
       json['renderObject'] = toId(details.renderObject, _consoleObjectGroup);
     }
+    if (DEBUG_JSON_PROTOCOL) {
+      _debugJson(json);
+    }
     postEvent('Flutter.Error', json);
+  }
+
+  void _debugJson(Object j) {
+    debugPrintSynchronously("---------PRETTY JSON-------");
+    const encoder = JsonEncoder.withIndent('  ');
+    for (var line in encoder.convert(j).split('\n')) {
+      debugPrintSynchronously(line);
+    }
+    debugPrintSynchronously("---------END PRETTY JSON----------");
   }
 
   /// Called to register service extensions.
