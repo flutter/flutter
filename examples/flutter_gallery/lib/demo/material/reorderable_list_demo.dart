@@ -52,7 +52,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _itemType = type;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() { });
+    _bottomSheet?.setState(() {
+      // Trigger a rebuild.
+    });
     // Close the bottom sheet to give the user a clear view of the list.
     _bottomSheet?.close();
   }
@@ -62,7 +64,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _reverse = newValue;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() { });
+    _bottomSheet?.setState(() {
+      // Trigger a rebuild.
+    });
     // Close the bottom sheet to give the user a clear view of the list.
     _bottomSheet?.close();
   }
