@@ -19,7 +19,7 @@ import 'system_channels.dart';
 ///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
 ///    argument.
 enum KeyboardSide {
-  /// Matches either the left or right version of the key.
+  /// Matches if either the left, right or both versions of the key are pressed.
   any,
 
   /// Matches the left version of the key.
@@ -127,7 +127,8 @@ abstract class RawKeyEventData {
   ///
   /// If the modifier key wasn't pressed at the time of this event, returns
   /// null. If the given key only appears in one place on the keyboard, returns
-  /// [KeyboardSide.all] if pressed.
+  /// [KeyboardSide.all] if pressed. Never returns [KeyboardSide.any], because
+  /// that doesn't make sense in this context.
   KeyboardSide getModifierSide(ModifierKey key);
 
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
@@ -154,11 +155,8 @@ abstract class RawKeyEventData {
   /// Use [isModifierPressed] if you need to know which meta key was pressed.
   bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
 
-  /// Returns the set of modifier keys that were pressed at the time of this
-  /// event, regardless of which side of the keyboard they were on.
-  ///
-  /// Use [isModifierPressed] if you need to know which side of the keyboard a
-  /// pressed modifier was on.
+  /// Returns a map of modifier keys that were pressed at the time of this
+  /// event, and the keyboard side or sides that the key was on.
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
     final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
     for (ModifierKey key in ModifierKey.values) {

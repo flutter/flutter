@@ -73,18 +73,13 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   ///
   /// See also:
   ///
-  ///  * [modifiersPressed], an accessor to get a Set of currently pressed
-  ///    modifiers.
-  ///  * [isModifierPressed], a function to query if a specific modifier is
-  ///    pressed.
-  ///  * [isControlPressed], a convenience accessor to see if the CTRL key is
-  ///    pressed.
-  ///  * [isShiftPressed], a convenience accessor to see if the SHIFT key is
-  ///    pressed.
-  ///  * [isAltPressed], a convenience accessor to see if the ALT key is
-  ///    pressed.
-  ///  * [isMetaPressed], a convenience accessor to see if the META key is
-  ///    pressed.
+  ///  * [modifiersPressed], which returns a Map of currently pressed modifiers
+  ///    and their keyboard side.
+  ///  * [isModifierPressed], to see if a specific modifier is pressed.
+  ///  * [isControlPressed], to see if a CTRL key is pressed.
+  ///  * [isShiftPressed], to see if a SHIFT key is pressed.
+  ///  * [isAltPressed], to see if an ALT key is pressed.
+  ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
@@ -133,18 +128,16 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
     KeyboardSide findSide(int leftMask, int rightMask) {
-      KeyboardSide side;
       final int combinedMask = leftMask | rightMask;
       final int combined = metaState & combinedMask;
       if (combined == leftMask) {
-        side = KeyboardSide.left;
+        return KeyboardSide.left;
       } else if (combined == rightMask) {
-        side = KeyboardSide.right;
+        return KeyboardSide.right;
       } else if (combined == combinedMask) {
-        side = KeyboardSide.all;
+        return KeyboardSide.all;
       }
-      // Returns null if not pressed.
-      return side;
+      return null;
     }
 
     switch (key) {
