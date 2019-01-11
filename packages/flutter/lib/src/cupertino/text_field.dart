@@ -452,7 +452,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
-    _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+    _renderEditable.selectWordEdge(cause: SelectionChangedCause.keyboard);
     _requestKeyboard();
   }
 
@@ -462,6 +462,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleDoubleTapDown(TapDownDetails details) {
     _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+  }
+
+  void _handleDoubleTapTimeout() {
+    _renderEditable.selectWordEdge(cause: SelectionChangedCause.doubleTapTimeOut);
   }
 
   @override
@@ -653,6 +657,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,
+              onDoubleTapTimeOut: _handleDoubleTapTimeout;,
               behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable, textStyle),
             ),

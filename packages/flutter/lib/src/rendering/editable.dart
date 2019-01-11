@@ -53,6 +53,9 @@ enum SelectionChangedCause {
   /// Keyboard-triggered selection changes may be caused by the IME as well as
   /// by accessibility tools (e.g. TalkBack on Android).
   keyboard,
+
+  ///
+  doubleTapTimeOut,
 }
 
 /// Signature for the callback that reports when the caret location changes.

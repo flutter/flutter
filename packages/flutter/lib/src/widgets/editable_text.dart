@@ -858,6 +858,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  TextSelection _oldSelection = const TextSelection.collapsed(offset: -1);
+
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
     widget.controller.selection = selection;
 
@@ -881,17 +883,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         dragStartBehavior: widget.dragStartBehavior,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
+      if (cause != SelectionChangedCause.keyboard &&
+          cause != SelectionChangedCause.doubleTapTimeOut &&
+          cause != SelectionChangedCause.tap &&
+          (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
       if ((longPress || cause == SelectionChangedCause.doubleTap) && !toolbarVisible)
         _selectionOverlay.showToolbar();
-      if (widget.showToolbarOnDoubleSlowTap && renderObject.selection.isCollapsed &&
-          renderObject.selection.baseOffset == selection.baseOffset && cause == SelectionChangedCause.tap && !toolbarVisible) {
+      if (cause == SelectionChangedCause.doubleTapTimeOut && _oldSelection == selection)
         _selectionOverlay.showToolbar();
-      }
+
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
+
     }
+    _oldSelection = selection;
   }
 
   bool _textChangedSinceLastCaretUpdate = false;

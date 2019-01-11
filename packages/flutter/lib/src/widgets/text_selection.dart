@@ -641,6 +641,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
     this.onDoubleTapDown,
+    this.onDoubleTapTimeOut,
     this.behavior,
     @required this.child,
   }) : assert(child != null),
@@ -670,6 +671,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
+
+  /// Called when a double tap gesture is not longer possible on the next tap.
+  final GestureTapCallback onDoubleTapTimeOut;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -747,6 +751,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _doubleTapTimeout() {
     _doubleTapTimer = null;
     _lastTapOffset = null;
+    if (widget.onDoubleTapTimeOut != null)
+      widget.onDoubleTapTimeOut();
   }
 
   bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
