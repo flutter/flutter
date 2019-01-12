@@ -87,10 +87,4 @@ class BottomNavigationBarItem {
   /// The default value is true since [BottomNavigationBarItem] as in material design
   /// has its label primarily.
   final bool showLabel;
-
-  /// Used to provide semantic even when showLabel is false
-  ///
-  /// This label is always necessary not to break the support of semantic
-  /// when TextWidget is not rendered when showLabel is false.
-  final String label;
 }
