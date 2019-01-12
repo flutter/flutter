@@ -1,0 +1,28 @@
+#import <XCTest/XCTest.h>
+#import "{{pluginClass}}.h"
+#import "{{pluginClass}}+Internal.h"
+
+@interface {{pluginClass}}UnitTests : XCTestCase
+
+@end
+
+@implementation {{pluginClass}}UnitTests {
+    {{pluginClass}}* p;
+}
+
+- (void)setUp {
+    p = [[{{pluginClass}} alloc] init];
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+}
+
+- (void)testExample {
+    FlutterMethodCall* mcall =  [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:nil];
+    [p handleMethodCall:mcall result:^(id _Nullable result){
+        XCTAssertEqual(result, FlutterMethodNotImplemented);
+    }];
+}
+
+@end
