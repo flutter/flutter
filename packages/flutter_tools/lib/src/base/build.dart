@@ -5,23 +5,17 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
-import 'package:build_config/build_config.dart';
 import 'package:collection/collection.dart';
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-
-import 'package:build/build.dart' ;
-import 'package:build_modules/builders.dart';
-import 'package:build_runner_core/build_runner_core.dart' as core;
-import 'package:watcher/watcher.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
+import '../bundle.dart';
+import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
-import 'builders.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
@@ -302,73 +296,28 @@ class AOTSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
     printTrace('Compiling Dart to kernel: $mainPath');
-    final List<core.BuilderApplication> applications = <core.BuilderApplication>[
-      core.apply('build_modules|module_library',
-        <BuilderFactory>[moduleLibraryBuilder],
-        core.toAllPackages(),
-        isOptional: true,
-        hideOutput: true,
-        appliesBuilders: <String>['build_modules|module_cleanup']),
-      core.apply('build_modules|vm', <BuilderFactory>[
-          metaModuleBuilderFactoryForPlatform('flutter'),
-          metaModuleCleanBuilderFactoryForPlatform('flutter'),
-          moduleBuilderFactoryForPlatform('flutter')
-        ],
-        core.toNoneByDefault(),
-        isOptional: true,
-        hideOutput: true,
-        appliesBuilders: <String>['build_modules|module_cleanup']),
-      core.apply('build_vm_compilers|vm', <BuilderFactory>[
-        (BuilderOptions buildOptions) {
-          return FlutterKernelBuilder(
-            target: mainPath,
-            aot: true,
-            trackWidgetCreation: trackWidgetCreation,
-            extraFrontEndOptions: extraFrontEndOptions,
-            linkPlatformKernelIn: true,
-            targetProductVm:  buildMode == BuildMode.release,
-          );
-        }
-      ], core.toRoot(), isOptional: false, hideOutput: true, appliesBuilders: <String>['build_modules|vm'], defaultGenerateFor: const InputSet(
-        include: <String>['lib/**'],
-      )),
-      core.applyPostProcess('build_modules|module_cleanup', moduleCleanup, defaultGenerateFor: const InputSet())
-    ];
-    final Directory projectRoot = fs.file(packagesPath).parent.absolute;
-    final core.PackageGraph packageGraph = core.PackageGraph.forPath(projectRoot.path);
-    final core.OverrideableEnvironment environment = core.OverrideableEnvironment(
-      core.IOEnvironment(
-        packageGraph,
-        assumeTty: true,
-        outputMap: null,
-        outputSymlinksOnly: false,
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
+      printTrace('Extra front-end options: $extraFrontEndOptions');
+    }
+    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+      packagesPath: packagesPath,
+      outputFilePath: getKernelPathForTransformerOptions(
+        fs.path.join(outputPath, 'app.dill'),
+        trackWidgetCreation: trackWidgetCreation,
       ),
-      reader: core.FileBasedAssetReader(packageGraph),
-      writer: core.FileBasedAssetWriter(packageGraph),
-      onLog: (LogRecord record) {
-        printTrace(record.toString());
-      },
+       depFilePath: depfilePath,
+       extraFrontEndOptions: extraFrontEndOptions,
+       linkPlatformKernelIn: true,
+      aot: true,
+      trackWidgetCreation: trackWidgetCreation,
+       targetProductVm: buildMode == BuildMode.release,
     );
-    final core.BuildRunner runner = await core.BuildRunner.create(
-      await core.BuildOptions.create(
-        core.LogSubscription(environment, verbose: true),
-        packageGraph: packageGraph,
-        buildDirs: <String>[
-          '${projectRoot.path}/build',
-        ],
-        skipBuildScriptCheck: true,
-        trackPerformance: true,
-      ),
-      environment,
-      applications,
-      <String, Map<String, Object>>{},
-      isReleaseBuild: buildMode == BuildMode.release,
-    );
-    final core.BuildResult result = await runner.run(const <AssetId, ChangeType>{});
-    final String fileName = result.outputs.firstWhere((AssetId assetId) {
-      return assetId.path != null && assetId.path.contains('main.app.dill');
-    }, orElse: () => null)?.path;
-    return fileName;
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+    return compilerOutput?.outputFilename;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
@@ -581,25 +530,4 @@ class JITSnapshotter {
       TargetPlatform.android_arm64,
     ].contains(platform);
   }
-}
-
-
-class ToolBuildEnvironment extends core.BuildEnvironment {
-  @override
-  void onLog(LogRecord record) {
-    print(record.toString());
-  }
-
-  @override
-  Future<int> prompt(String message, List<String> choices) async {
-    print(message);
-    print(choices);
-    return 0;
-  }
-
-  @override
-  core.RunnerAssetReader reader;
-
-  @override
-  core.RunnerAssetWriter writer;
 }
