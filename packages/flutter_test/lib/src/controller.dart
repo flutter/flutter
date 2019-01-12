@@ -440,21 +440,22 @@ abstract class WidgetController {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
 
-      const double eps = 1.0;
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
-      if (offset.dx * xSign > touchSlopX + eps) {
-        await gesture.moveBy(Offset(xSign * (touchSlopX + eps), 0));
-        await gesture.moveBy(Offset(offset.dx - (xSign * (touchSlopX - eps)), 0));
+      final bool separateX = offset.dx * xSign > touchSlopX;
+      final bool separateY = offset.dy * ySign > touchSlopY;
+
+      if (separateX || separateY) {
+        final double firstX = separateX ? xSign * touchSlopX : offset.dx;
+        final double firstY = separateY ? ySign * touchSlopY : offset.dy;
+        final double secondX = separateX ? offset.dx - (xSign * touchSlopX) : 0;
+        final double secondY = separateY ? offset.dy - (ySign * touchSlopY) : 0;
+
+        await gesture.moveBy(Offset(firstX, firstY));
+        await gesture.moveBy(Offset(secondX, secondY));
       } else {
-        await gesture.moveBy(Offset(offset.dx, 0));
-      }
-      if (offset.dy * ySign > touchSlopY + eps) {
-        await gesture.moveBy(Offset(0, ySign * (touchSlopY + eps)));
-        await gesture.moveBy(Offset(0, offset.dy - (ySign * (touchSlopY - eps))));
-      } else {
-        await gesture.moveBy(Offset(0, offset.dy));
+        await gesture.moveBy(offset);
       }
       await gesture.up();
     });

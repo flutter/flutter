@@ -48,7 +48,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.down,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -63,21 +62,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
 
     expect(value, isFalse);
   });
