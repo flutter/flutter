@@ -148,6 +148,7 @@ class BottomNavigationBar extends StatefulWidget {
     BottomNavigationBarType type,
     this.fixedColor,
     this.iconSize = 24.0,
+    this.heightFactor = 1.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -191,6 +192,9 @@ class BottomNavigationBar extends StatefulWidget {
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
+  /// Expose heightFactor in order to control the spaces between icon and text.
+  final double heightFactor;
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -208,6 +212,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.flex,
     this.selected = false,
     this.indexLabel,
+    this.heightFactor = 1.0,
   }) : assert(selected != null);
 
   final BottomNavigationBarType type;
@@ -219,6 +224,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final double flex;
   final bool selected;
   final String indexLabel;
+  final double heightFactor;
 
   @override
   Widget build(BuildContext context) {
@@ -312,7 +318,7 @@ class _TileIcon extends StatelessWidget {
     }
     return Align(
       alignment: Alignment.topCenter,
-      heightFactor: 1.0,
+      heightFactor: this.heightFactor,
       child: Container(
         margin: EdgeInsets.only(
           top: Tween<double>(
@@ -348,7 +354,7 @@ class _FixedLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
-      heightFactor: 1.0,
+      heightFactor: this.heightFactor,
       child: Container(
         margin: item.showLabel ? const EdgeInsets.only(bottom: _kBottomMargin) : const EdgeInsets.all(0.0),
         child: DefaultTextStyle.merge(
@@ -391,7 +397,7 @@ class _ShiftingLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
-      heightFactor: 1.0,
+      heightFactor: this.heightFactor,
       child: Container(
         margin: EdgeInsets.only(
           bottom: Tween<double>(
@@ -411,7 +417,7 @@ class _ShiftingLabel extends StatelessWidget {
               fontSize:  item.showLabel ? _kActiveFontSize : 0.0,
               color: Colors.white,
             ),
-            child: item.showLabel ? item.title : Text(item.title.data) ?? ''),
+            child: item.showLabel ? item.title : Text(item.title.data ?? ''),
           ),
         ),
       ),
@@ -617,6 +623,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               colorTween: colorTween,
               selected: i == widget.currentIndex,
               indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+              heightFactor: widget.heightFactor,
             ),
           );
         }
@@ -636,6 +643,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
               indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+              heightFactor: widget.heightFactor,
             ),
           );
         }
