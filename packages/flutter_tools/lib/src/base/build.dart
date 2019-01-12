@@ -295,10 +295,12 @@ class AOTSnapshotter {
   }) async {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
+
     printTrace('Compiling Dart to kernel: $mainPath');
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
+
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
-    }
+
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -308,15 +310,18 @@ class AOTSnapshotter {
         fs.path.join(outputPath, 'app.dill'),
         trackWidgetCreation: trackWidgetCreation,
       ),
-       depFilePath: depfilePath,
-       extraFrontEndOptions: extraFrontEndOptions,
-       linkPlatformKernelIn: true,
+      depFilePath: depfilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      linkPlatformKernelIn: true,
       aot: true,
       trackWidgetCreation: trackWidgetCreation,
-       targetProductVm: buildMode == BuildMode.release,
+      targetProductVm: buildMode == BuildMode.release,
     );
+
+    // Write path to frontend_server, since things need to be re-generated when that changes.
     final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
     await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+
     return compilerOutput?.outputFilename;
   }
 
