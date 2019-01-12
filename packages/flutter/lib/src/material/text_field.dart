@@ -582,6 +582,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableTextKey.currentState?.requestKeyboard();
   }
 
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
+    // iOS cursor doesn't move via a selection handle. The scroll happens
+    // directly from new text selection changes.
+    if (Theme.of(context).platform == TargetPlatform.iOS && selection.isCollapsed) {
+      _editableTextKey.currentState?.bringIntoView(selection.base);
+    }
+  }
+
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -834,6 +842,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
+        onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         inputFormatters: formatters,

@@ -1255,10 +1255,10 @@ class RenderEditable extends RenderBox {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
-      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from));
+      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
       final TextPosition toPosition = to == null
           ? null
-          : _textPainter.getPositionForOffset(globalToLocal(to));
+          : _textPainter.getPositionForOffset(globalToLocal(to + -_paintOffset));
       onSelectionChanged(
         TextSelection(
           baseOffset: fromPosition.offset,

@@ -502,6 +502,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _editableTextKey.currentState.showToolbar();
   }
 
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
+    if (selection.isCollapsed) {
+      _editableTextKey.currentState?.bringIntoView(selection.base);
+    }
+  }
+
   @override
   bool get wantKeepAlive => _controller?.text?.isNotEmpty == true;
 
@@ -655,6 +661,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           selectionColor: _kSelectionHighlightColor,
           selectionControls: cupertinoTextSelectionControls,
           onChanged: widget.onChanged,
+          onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           inputFormatters: formatters,
