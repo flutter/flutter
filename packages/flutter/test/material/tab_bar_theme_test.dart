@@ -54,6 +54,22 @@ void main() {
     expect(iconRenderObject.text.style.color, equals(labelColor));
   });
 
+  testWidgets('Tab bar theme overrides label styles', (WidgetTester tester) async {
+    const TextStyle labelStyle = TextStyle(fontFamily: 'foobar');
+    const TextStyle unselectedLabelStyle = TextStyle(fontFamily: 'baz');
+    const TabBarTheme tabBarTheme = TabBarTheme(
+      labelStyle: labelStyle,
+      unselectedLabelStyle: unselectedLabelStyle,
+    );
+
+    await tester.pumpWidget(_withTheme(tabBarTheme));
+
+    final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
+    final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
+  });
+
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
     const Color unselectedLabelColor = Colors.black;
     const TabBarTheme tabBarTheme = TabBarTheme(unselectedLabelColor: unselectedLabelColor);

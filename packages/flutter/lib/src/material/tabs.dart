@@ -154,8 +154,12 @@ class _TabStyle extends AnimatedWidget {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
-    final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
-    final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultStyle = labelStyle ?? tabBarTheme.labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultUnselectedStyle =
+        unselectedLabelStyle
+        ?? tabBarTheme.unselectedLabelStyle
+        ?? labelStyle
+        ?? themeData.primaryTextTheme.body2;
     final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
