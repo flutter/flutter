@@ -415,12 +415,12 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
-  /// {@template flutter.flutter_test.lib.src.controller}
-  /// By default, if the x or y component of offset is greater than kTouchSlop, the
+  /// {@template flutter.flutter_test.drag}
+  /// By default, if the x or y component of offset is greater than [kTouchSlop], the
   /// gesture is broken up into two separate moves calls. Changing [touchSlopX] or
-  /// [touchSlopY] will change the minimum amount of movement in the respective axis
+  /// `touchSlopY` will change the minimum amount of movement in the respective axis
   /// before the drag will be broken into multiply calls. To always send the
-  /// drag with just a single call to [TestGesture.moveBy], [touchSlopX] and [touchSlopY]
+  /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
   /// {@end template}
   Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
