@@ -1,4 +1,4 @@
-Signature: 82c34939fde067743b8863d6ae94c7de
+Signature: 1ee059058aa8c0f65caebc453568d1c3
 
 UNUSED LICENSES:
 
@@ -5646,7 +5646,6 @@ FILE: ../../../third_party/dart/runtime/vm/heap/sweeper.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/sweeper.h
 FILE: ../../../third_party/dart/runtime/vm/heap/verifier.h
 FILE: ../../../third_party/dart/runtime/vm/longjump.cc
-FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/longjump_test.cc
 FILE: ../../../third_party/dart/runtime/vm/memory_region.cc
 FILE: ../../../third_party/dart/runtime/vm/message.cc
@@ -6370,6 +6369,11 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
+FILE: ../../../third_party/dart/runtime/vm/longjump.h
+FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
+FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
+FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
+FILE: ../../../third_party/dart/runtime/vm/thread_state.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
