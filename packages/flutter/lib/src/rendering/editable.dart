@@ -1194,7 +1194,6 @@ class RenderEditable extends RenderBox {
   void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
       final TextSelection firstWord = _selectWordAtOffset(firstPosition);
