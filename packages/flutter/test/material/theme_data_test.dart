@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -144,6 +145,21 @@ void main() {
   });
 
   test('cursorColor', () {
+    const Color iOSDefaultCursorColor = CupertinoColors.textFieldCaretBlue;
+    const Color otherPlatformsDefaultCursorColor = Color.fromRGBO(66, 133, 244, 1.0);
+
     expect(ThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
+
+    for (TargetPlatform platform in TargetPlatform.values) {
+      final ThemeData theme = ThemeData(platform: platform);
+      switch (platform) {
+        case TargetPlatform.iOS:
+          expect(theme.cursorColor, iOSDefaultCursorColor);
+          break;
+        default:
+          expect(theme.cursorColor, otherPlatformsDefaultCursorColor);
+      }
+      expect(ThemeData(platform: platform, cursorColor: Colors.red).cursorColor, Colors.red);
+    }
   });
 }

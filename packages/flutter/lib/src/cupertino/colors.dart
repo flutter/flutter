@@ -79,4 +79,9 @@ class CupertinoColors {
   ///
   /// This is SystemRed in the iOS palette.
   static const Color destructiveRed = Color(0xFFFF3B30);
+
+  /// iOS default cursor color. Based on UITextField's default cursor color.
+  ///
+  /// Not the same as SystemBlue in the iOS palette.
+  static const Color textFieldCaretBlue = Color(0xFF426BF2);
 }

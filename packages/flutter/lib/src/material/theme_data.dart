@@ -90,6 +90,10 @@ class ThemeData extends Diagnosticable {
   ///
   /// Default values will be derived for arguments that are omitted.
   ///
+  /// If [platform] is [TargetPlatform.iOS], the default value for
+  /// [cursorColor] is [CupertinoColors.textFieldCaretBlue]. For all
+  /// other platforms another default color is defined below.
+  ///
   /// The most useful values to give are, in order of importance:
   ///
   ///  * The desired theme [brightness].
@@ -160,6 +164,7 @@ class ThemeData extends Diagnosticable {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
+    platform ??= defaultTargetPlatform;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -194,8 +199,14 @@ class ThemeData extends Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
-    // todo (sandrasandeep): change to color provided by Material Design team
-    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
+    switch (platform) {
+      case TargetPlatform.iOS:
+        cursorColor ??= CupertinoColors.textFieldCaretBlue;
+        break;
+      default:
+        // todo (sandrasandeep): change to color provided by Material Design team
+        cursorColor ??= const Color.fromRGBO(66, 133, 244, 1.0);
+    }
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
@@ -207,7 +218,6 @@ class ThemeData extends Diagnosticable {
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
-    platform ??= defaultTargetPlatform;
     typography ??= Typography(platform: platform);
     final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     textTheme = defaultTextTheme.merge(textTheme);
