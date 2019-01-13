@@ -127,6 +127,24 @@ class BorderRadiusTween extends Tween<BorderRadius> {
   BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
+/// An interpolation between two [BorderRadiusGeometry]s.
+///
+/// This class specializes the interpolation of [Tween<BorderRadiusGeometry>] to use
+/// [BorderRadiusGeometry.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
+class BorderRadiusGeometryTween extends Tween<BorderRadiusGeometry> {
+  /// Creates a [BorderRadiusGeometry] tween.
+  ///
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as a right angle (no radius).
+  BorderRadiusGeometryTween({ BorderRadiusGeometry begin, BorderRadiusGeometry end }) : super(begin: begin, end: end);
+
+  /// Returns the value this variable has at the given animation clock value.
+  @override
+  BorderRadiusGeometry lerp(double t) => BorderRadiusGeometry.lerp(begin, end, t);
+}
+
 /// An interpolation between two [Border]s.
 ///
 /// This class specializes the interpolation of [Tween<Border>] to use
