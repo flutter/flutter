@@ -356,7 +356,7 @@ class _FixedLabel extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       heightFactor: this.heightFactor,
       child: Container(
-        margin: item.showLabel ? const EdgeInsets.only(bottom: _kBottomMargin) : const EdgeInsets.all(0.0),
+        margin: const EdgeInsets.all(0.0),
         child: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: item.showLabel ? _kActiveFontSize : 0.0,
