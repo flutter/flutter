@@ -119,7 +119,6 @@ void main() {
 
   testWidgets('Floating cursor is painted', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
     final FocusNode focusNode = FocusNode();
