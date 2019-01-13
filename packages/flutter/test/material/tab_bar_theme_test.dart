@@ -20,9 +20,9 @@ const List<Tab> _tabs = <Tab>[
   Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
 ];
 
-Widget _buildTabBar({ List<Tab> tabs = _tabs }) {
-  final TabController _tabController = TabController(length: 3, vsync: const TestVSync());
+final TabController _tabController = TabController(length: 3, vsync: const TestVSync());
 
+Widget _buildTabBar({ List<Tab> tabs = _tabs }) {
   return RepaintBoundary(
     key: _painterKey,
     child: TabBar(tabs: tabs, controller: _tabController),
@@ -68,6 +68,51 @@ void main() {
     expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
     final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
     expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
+  });
+
+  testWidgets('Tab bar label styles preceed theme label styles', (WidgetTester tester) async {
+    const TextStyle labelStyle = TextStyle(fontFamily: '1');
+    const TextStyle unselectedLabelStyle = TextStyle(fontFamily: '2');
+    const TextStyle themeLabelStyle = TextStyle(fontFamily: '3');
+    const TextStyle themeUnselectedLabelStyle = TextStyle(fontFamily: '4');
+    const TabBarTheme tabBarTheme = TabBarTheme(
+      labelStyle: themeLabelStyle,
+      unselectedLabelStyle: themeUnselectedLabelStyle,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+          theme: ThemeData(tabBarTheme: tabBarTheme),
+          home: Scaffold(body: TabBar(
+            tabs: _tabs,
+            controller: _tabController,
+            labelStyle: labelStyle,
+            unselectedLabelStyle: unselectedLabelStyle,
+          ),
+        )
+      ),
+    );
+
+    final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
+    final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
+  });
+
+  testWidgets('Tab bar text style defaults', (WidgetTester tester) async {
+    const TextStyle body2 = TextStyle(fontFamily: 'foo');
+    const TextTheme textTheme = TextTheme(body2: body2);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryTextTheme: textTheme),
+        home: Scaffold(body: _buildTabBar())
+      ),
+    );
+
+    final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    expect(selectedRenderObject.text.style.fontFamily, equals(body2.fontFamily));
+    final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    expect(unselectedRenderObject.text.style.fontFamily, equals(body2.fontFamily));
   });
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
