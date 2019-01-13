@@ -15,9 +15,7 @@ import '../base/process_manager.dart';
 import '../compile.dart';
 import '../globals.dart';
 
-
-const vmKernelModuleExtension = '.vm.dill';
-const vmKernelEntrypointExtension = '.vm.app.dill';
+const String _kVmKernelModuleExtension = '.vm.dill';
 
 /// A builder which creates a kernel file for a flutter app from dart
 /// modules and an entrypoint.
@@ -66,26 +64,26 @@ class FlutterKernelBuilder implements Builder {
     final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
     final AssetId outputId = module.primarySource.changeExtension('.app.dill');
     final File outputFile = scratchSpace.fileFor(outputId);
-    //// QUESTIONABLE
-    var transitiveDeps = await module.computeTransitiveDependencies(buildStep);
-    var transitiveKernelDeps = <AssetId>[];
-    var transitiveSourceDeps = <AssetId>[];
-
-    await Future.wait(transitiveDeps.map((dep) => _addModuleDeps(
-        dep,
+    // This logic is questionable.
+    final List<Module> transitiveDeps = await module.computeTransitiveDependencies(buildStep);
+    final List<AssetId> transitiveKernelDeps = <AssetId>[];
+    final List<AssetId> transitiveSourceDeps = <AssetId>[];
+    for (Module dependency in transitiveDeps) {
+      await _addModuleDeps(
+        dependency,
         module,
         transitiveKernelDeps,
         transitiveSourceDeps,
         buildStep,
-        vmKernelModuleExtension)));
-
-    var allAssetIds = Set<AssetId>()
+        _kVmKernelModuleExtension);
+    }
+    final Set<AssetId> allAssetIds = Set<AssetId>()
       ..addAll(module.sources)
       ..addAll(transitiveKernelDeps)
       ..addAll(transitiveSourceDeps);
     await scratchSpace.ensureAssets(allAssetIds, buildStep);
+    // End questionable logic (ha ha).
 
-    /////
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -139,7 +137,6 @@ class FlutterKernelBuilder implements Builder {
     });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
-
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(printError);
@@ -147,12 +144,9 @@ class FlutterKernelBuilder implements Builder {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(_stdoutHandler.handler);
-    final int exitCode = await server.exitCode;
-    printTrace('exitCode: $exitCode');
-    final CompilerOutput output = await _stdoutHandler.compilerOutput.future;
-    printTrace(output.outputFilename);
+    await server.exitCode;
+    await _stdoutHandler.compilerOutput.future;
     await scratchSpace.copyOutput(outputId, buildStep);
-    //await scratchSpace.copyOutput(outputKernelDepId, buildStep);
   }
 
   Future<void> _addModuleDeps(
@@ -162,7 +156,7 @@ class FlutterKernelBuilder implements Builder {
     List<AssetId> transitiveSourceDeps,
     BuildStep buildStep,
     String outputExtension) async {
-  var kernelId = dependency.primarySource.changeExtension(outputExtension);
+  final AssetId kernelId = dependency.primarySource.changeExtension(outputExtension);
   if (await buildStep.canRead(kernelId)) {
     // If we can read the kernel file, but it depends on any module in this
     // package, then we need to only provide sources for that file since its

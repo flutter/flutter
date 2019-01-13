@@ -17,7 +17,6 @@ import '../globals.dart';
 import 'builders.dart';
 
 /// An implementation of [KernelCompiler] which is implemented with package:build.
-// TODO(jonahwilliams): delegate to different builders based on hot/cold build.
 class BuildKernelCompiler implements KernelCompiler {
   const BuildKernelCompiler();
 
@@ -45,7 +44,7 @@ class BuildKernelCompiler implements KernelCompiler {
     if (dartToolDirectory.existsSync()) {
       dartToolDirectory.deleteSync(recursive: true);
     }
-    print('WARNING: running experimental package:build pipeline');
+    printTrace('WARNING: running experimental package:build pipeline. Opt out by setting ENABLE_PACKAGE_BUILD=false.');
     // The set of builders which define each build step.
     final List<core.BuilderApplication> applications = <core.BuilderApplication>[
         core.apply('build_modules|module_library',
@@ -107,12 +106,14 @@ class BuildKernelCompiler implements KernelCompiler {
       ),
       environment,
       applications,
-      {},
+       // TODO(jonahwilliams): determine how we will read build configurations.
+      const <String, Map<String, Object>>{},
       isReleaseBuild: aot,
     );
     final core.BuildResult result = await runner.run(const <AssetId, ChangeType>{});
     await runner.beforeExit();
     printTrace('build took: ${result.performance.stopTime.difference(result.performance.startTime)}');
+
     // Figure out a nicer way to do this.
     final AssetId output = result.outputs.firstWhere((AssetId assetId) {
       return assetId.path != null && assetId.path.contains('.app.dill');
@@ -121,8 +122,7 @@ class BuildKernelCompiler implements KernelCompiler {
       return const CompilerOutput(null, 1);
     }
     final String fileName = '${projectRoot.path}/.dart_tool/build/generated/${output.package}/${output.path}';
-    // Copy output file back to expected location - can be reversed once all
-    // users are reconfigured.
+    // Copy output file back to expected location.
     File('$outputFilePath')
       ..createSync()
       ..writeAsBytesSync(File(fileName).readAsBytesSync());
