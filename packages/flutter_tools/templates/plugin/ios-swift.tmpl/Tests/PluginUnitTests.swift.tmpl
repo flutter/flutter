@@ -1,0 +1,29 @@
+import Flutter
+import XCTest
+import {{projectName}}
+
+class {{pluginClass}}UnitTests: XCTestCase {
+    private var p: Swift{{pluginClass}}!
+    
+    override func setUp() {
+        p = Swift{{pluginClass}}()
+    }
+    
+    override func tearDown() {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+    
+    func testFlutterMethodNotImplemented() {
+        let mcall = FlutterMethodCall(methodName: "hello", arguments: nil)
+        p.handle(mcall, result: { result in
+            XCTAssertEqual(result as! NSObject, FlutterMethodNotImplemented)
+        })
+    }
+    
+    func testGetPlatformVersion() {
+        let mcall = FlutterMethodCall(methodName: "getPlatformVersion", arguments: nil)
+        p.handle(mcall, result: { result in
+            XCTAssertTrue((result as! String).contains("iOS"))
+        })
+    }
+}
