@@ -16,6 +16,7 @@ import 'base/flags.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/pipeline.dart';
 import 'base/platform.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
@@ -41,6 +42,7 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
+  final bool enablePackageBuild = platform.environment['ENABLE_PACKAGE_BUILD'] == 'true';
   return await context.run<T>(
     name: 'global fallbacks',
     body: runner,
@@ -74,7 +76,7 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompiler: () => const KernelCompiler(),
+      KernelCompiler: () => enablePackageBuild ? const BuildKernelCompiler() : const KernelCompiler(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PlistBuddy: () => const PlistBuddy(),
