@@ -18,8 +18,7 @@ void main() {
     );
 
     expect(a, hasOneLineDescription);
-    expect(a, equals(b));
-    expect(a.hashCode, equals(b.hashCode));
+    expect(a.toString(), equals(b.toString()));
   });
 
   test('MaterialRectArcTween control test', () {
@@ -33,8 +32,7 @@ void main() {
       end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
     );
     expect(a, hasOneLineDescription);
-    expect(a, equals(b));
-    expect(a.hashCode, equals(b.hashCode));
+    expect(a.toString(), equals(b.toString()));
   });
 
   test('on-axis MaterialPointArcTween', () {

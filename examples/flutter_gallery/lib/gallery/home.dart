@@ -8,6 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -256,6 +257,7 @@ class _DemosPage extends StatelessWidget {
         label: category.name,
         explicitChildNodes: true,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           key: PageStorageKey<String>(category.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
           children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
@@ -268,10 +270,6 @@ class _DemosPage extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
-  // In checked mode our MaterialApp will show the default "debug" banner.
-  // Otherwise show the "preview" banner.
-  static bool showPreviewBanner = true;
-
   const GalleryHome({
     Key key,
     this.testMode = false,
@@ -280,6 +278,10 @@ class GalleryHome extends StatefulWidget {
 
   final Widget optionsPage;
   final bool testMode;
+
+  // In checked mode our MaterialApp will show the default "debug" banner.
+  // Otherwise show the "preview" banner.
+  static bool showPreviewBanner = true;
 
   @override
   _GalleryHomeState createState() => _GalleryHomeState();

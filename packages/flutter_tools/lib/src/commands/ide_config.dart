@@ -218,7 +218,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.isNotEmpty) {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
@@ -227,7 +227,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     if (argResults['update-templates']) {
       _handleTemplateUpdate();
-      return;
+      return null;
     }
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
@@ -250,6 +250,8 @@ class IdeConfigCommand extends FlutterCommand {
     printStatus('');
     printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
         'restart IntelliJ, if running.');
+
+    return null;
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {

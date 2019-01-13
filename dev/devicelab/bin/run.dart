@@ -19,7 +19,7 @@ List<String> _taskNames = <String>[];
 ///
 /// The tasks are chosen depending on the command-line options
 /// (see [_argParser]).
-Future<Null> main(List<String> rawArgs) async {
+Future<void> main(List<String> rawArgs) async {
   ArgResults args;
   try {
     args = _argParser.parse(rawArgs);
@@ -28,7 +28,7 @@ Future<Null> main(List<String> rawArgs) async {
     stderr.writeln('Usage:\n');
     stderr.writeln(_argParser.usage);
     exitCode = 1;
-    return null;
+    return;
   }
 
   if (!args.wasParsed('task')) {
@@ -50,7 +50,7 @@ Future<Null> main(List<String> rawArgs) async {
   if (_taskNames.isEmpty) {
     stderr.writeln('Failed to find tasks to run based on supplied options.');
     exitCode = 1;
-    return null;
+    return;
   }
 
   final bool silent = args['silent'];

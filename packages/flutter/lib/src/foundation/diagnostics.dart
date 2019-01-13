@@ -6,6 +6,11 @@ import 'package:meta/meta.dart';
 
 import 'print.dart';
 
+// Examples can assume:
+// int rows, columns;
+// String _name;
+// bool inherit;
+
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
 ///
@@ -469,7 +474,7 @@ final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
 ///   <name>: <description>:
 ///     <properties>
 ///     <children>
-///```
+/// ```
 ///
 /// See also:
 ///
@@ -497,7 +502,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///   * [DiagnosticsTreeStyle.singleLine]
+///  * [DiagnosticsTreeStyle.singleLine]
 final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
@@ -664,7 +669,7 @@ abstract class DiagnosticsNode {
   }) {
     assert(style != null);
     assert(level != null);
-    return DiagnosticsProperty<Null>(
+    return DiagnosticsProperty<void>(
       '',
       null,
       description: message,
@@ -1007,7 +1012,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1015,25 +1020,26 @@ abstract class DiagnosticsNode {
 /// of an actual property of the object:
 ///
 /// ```dart
-/// MessageProperty('table size', '$columns\u00D7$rows')
+/// var table = MessageProperty('table size', '$columns\u00D7$rows');
+/// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
-/// ```dart
-/// MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)')
-/// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
 ///
 /// ```dart
-/// StringProperty('name', _name)
+/// var name = StringProperty('name', _name);
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [DiagnosticsNode.message], which serves the same role for messages
 ///    without a clear property name.
 ///  * [StringProperty], which is a better fit for properties with string values.
-class MessageProperty extends DiagnosticsProperty<Null> {
+class MessageProperty extends DiagnosticsProperty<void> {
   /// Create a diagnostics property that displays a message.
   ///
   /// Messages have no concrete [value] (so [value] will return null). The
@@ -1319,7 +1325,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// FlagProperty(
@@ -1328,6 +1334,8 @@ class PercentProperty extends DoubleProperty {
 ///   ifFalse: 'hidden',
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -1341,6 +1349,7 @@ class PercentProperty extends DoubleProperty {
 ///   ifFalse: '<no style specified>',
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1518,7 +1527,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 /// See also:
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
-///    [DiagnosticsProperty]
+///    [DiagnosticsProperty].
 class EnumProperty<T> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
@@ -2039,7 +2048,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// enum Day {
@@ -2051,6 +2060,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///   assert(describeEnum(Day.monday) == 'monday');
 /// }
 /// ```
+/// {@end-tool}
 String describeEnum(Object enumEntry) {
   final String description = enumEntry.toString();
   final int indexOfDot = description.indexOf('.');
@@ -2209,7 +2219,7 @@ abstract class Diagnosticable {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all
@@ -2338,6 +2348,7 @@ abstract class Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// Used by [toDiagnosticsNode] and [toString].
   @protected
@@ -2355,8 +2366,7 @@ abstract class Diagnosticable {
 ///
 /// See also:
 ///
-///  * [DiagnosticableTreeMixin], which provides a mixin that implements this
-///    class.
+///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [Diagnosticable], which should be used instead of this class to provide
 ///    diagnostics for objects without children.
 abstract class DiagnosticableTree extends Diagnosticable {
@@ -2445,26 +2455,20 @@ abstract class DiagnosticableTree extends Diagnosticable {
   /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
   /// provide.
   ///
+  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
+  ///
   /// See also:
   ///
   ///  * [RenderTable.debugDescribeChildren], which provides high quality custom
   ///    descriptions for its child nodes.
-  ///
-  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
   @protected
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 }
 
-/// A class that can be used as a mixin that helps dump string and
-/// [DiagnosticsNode] representations of trees.
+/// A mixin that helps dump string and [DiagnosticsNode] representations of trees.
 ///
-/// This class is identical to DiagnosticableTree except that it can be used as
-/// a mixin.
-abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory DiagnosticableTreeMixin._() => null;
-
+/// This mixin is identical to class [DiagnosticableTree].
+mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);

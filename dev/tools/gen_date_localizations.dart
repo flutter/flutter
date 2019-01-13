@@ -36,7 +36,7 @@ import 'localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
-Future<Null> main(List<String> rawArgs) async {
+Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
@@ -135,7 +135,7 @@ String _jsonToMap(dynamic json) {
   }
 
   if (json is Iterable)
-    return '<dynamic>[${json.map(_jsonToMap).join(',')}]';
+    return '<dynamic>[${json.map<String>(_jsonToMap).join(',')}]';
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, dynamic>{');

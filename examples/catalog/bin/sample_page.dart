@@ -89,7 +89,7 @@ class SampleInfo {
     final String classNames = commentValues['classes'];
     if (classNames == null)
       return const <String>[];
-    return classNames.split(',').map((String s) => s.trim()).where((String s) => s.isNotEmpty);
+    return classNames.split(',').map<String>((String s) => s.trim()).where((String s) => s.isNotEmpty);
   }
 
   // The relative import path for this sample, like '../lib/foo.dart'.
@@ -163,7 +163,7 @@ void generate(String commit) {
   final String entryTemplate = inputFile('bin', 'entry.md.template').readAsStringSync();
 
   // Write the sample catalog's home page: index.md
-  final Iterable<String> entries = samples.map((SampleInfo sample) {
+  final Iterable<String> entries = samples.map<String>((SampleInfo sample) {
     return expandTemplate(entryTemplate, sample.commentValues);
   });
   writeExpandedTemplate(
@@ -195,7 +195,7 @@ void generate(String commit) {
     }
   }
   for (String className in classToSamples.keys) {
-    final Iterable<String> entries = classToSamples[className].map((SampleInfo sample) {
+    final Iterable<String> entries = classToSamples[className].map<String>((SampleInfo sample) {
       return expandTemplate(entryTemplate, sample.commentValues);
     });
     writeExpandedTemplate(
@@ -215,10 +215,10 @@ void generate(String commit) {
     outputFile('screenshot.dart', driverDirectory),
     inputFile('bin', 'screenshot.dart.template').readAsStringSync(),
     <String, String>{
-      'imports': samples.map((SampleInfo page) {
+      'imports': samples.map<String>((SampleInfo page) {
         return "import '${page.importPath}' show ${page.sampleClass};\n";
       }).toList().join(),
-      'widgets': samples.map((SampleInfo sample) {
+      'widgets': samples.map<String>((SampleInfo sample) {
         return 'new ${sample.sampleClass}(),\n';
       }).toList().join(),
     },
@@ -230,7 +230,7 @@ void generate(String commit) {
     outputFile('screenshot_test.dart', driverDirectory),
     inputFile('bin', 'screenshot_test.dart.template').readAsStringSync(),
     <String, String>{
-      'paths': samples.map((SampleInfo sample) {
+      'paths': samples.map<String>((SampleInfo sample) {
         return "'${outputFile(sample.sourceName + '.png').path}'";
       }).toList().join(',\n'),
     },

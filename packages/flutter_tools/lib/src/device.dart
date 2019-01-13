@@ -11,6 +11,8 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'fuchsia/fuchsia_device.dart';
+
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -27,6 +29,7 @@ class DeviceManager {
     _deviceDiscoverers.add(AndroidDevices());
     _deviceDiscoverers.add(IOSDevices());
     _deviceDiscoverers.add(IOSSimulators());
+    _deviceDiscoverers.add(FuchsiaDevices());
     _deviceDiscoverers.add(FlutterTesterDevices());
   }
 
@@ -181,6 +184,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
+
   Device(this.id);
 
   final String id;
@@ -267,15 +271,24 @@ abstract class Device {
     bool ipv6 = false,
   });
 
-  /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => true;
+  /// Whether this device implements support for hot reload.
+  bool get supportsHotReload => true;
+
+  /// Whether this device implements support for hot restart.
+  bool get supportsHotRestart => true;
+
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
+  bool get supportsStopApp => true;
+
+  /// Whether the device supports taking screenshots of a running flutter
+  /// application.
+  bool get supportsScreenshot => false;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
-  bool get supportsScreenshot => false;
-
-  Future<void> takeScreenshot(File outputFile) => Future<Null>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
@@ -315,18 +328,18 @@ abstract class Device {
 
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map((int i) => 0).toList();
+    List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
     for (List<String> row in table) {
-      yield indices.map((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
     }
   }
 
-  static Future<Null> printDevices(List<Device> devices) async {
+  static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
 }
@@ -405,7 +418,7 @@ abstract class DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
-  Future<Null> unforward(ForwardedPort forwardedPort);
+  Future<void> unforward(ForwardedPort forwardedPort);
 }
 
 /// Read the log for a particular device.

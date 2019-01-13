@@ -1,0 +1,1 @@
+Integration app for testing multiple named isolates.

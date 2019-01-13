@@ -28,7 +28,7 @@ class SectorAppState extends State<SectorApp> {
 
   List<double> wantedSectorSizes = <double>[];
   List<double> actualSectorSizes = <double>[];
-  double get currentTheta => wantedSectorSizes.fold(0.0, (double total, double value) => total + value);
+  double get currentTheta => wantedSectorSizes.fold<double>(0.0, (double total, double value) => total + value);
 
   void addSector() {
     final double currentTheta = this.currentTheta;

@@ -11,11 +11,11 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeFrameInfo implements FrameInfo {
-  final Duration _duration;
-  final Image _image;
-
   FakeFrameInfo(int width, int height, this._duration) :
     _image = FakeImage(width, height);
+
+  final Duration _duration;
+  final Image _image;
 
   @override
   Duration get duration => _duration;
@@ -25,10 +25,10 @@ class FakeFrameInfo implements FrameInfo {
 }
 
 class FakeImage implements Image {
+  FakeImage(this._width, this._height);
+
   final int _width;
   final int _height;
-
-  FakeImage(this._width, this._height);
 
   @override
   int get width => _width;

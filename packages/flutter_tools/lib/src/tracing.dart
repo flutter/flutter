@@ -25,7 +25,7 @@ class Tracing {
 
   final VMService vmService;
 
-  Future<Null> startTracing() async {
+  Future<void> startTracing() async {
     await vmService.vm.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
     await vmService.vm.clearVMTimeline();
   }
@@ -41,7 +41,7 @@ class Tracing {
       await vmService.vm.setVMTimelineFlags(<String>[]);
       timeline = await vmService.vm.getVMTimeline();
     } else {
-      final Completer<Null> whenFirstFrameRendered = Completer<Null>();
+      final Completer<void> whenFirstFrameRendered = Completer<void>();
 
       (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
         final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
@@ -74,7 +74,7 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<Null> downloadStartupTrace(VMService observatory) async {
+Future<void> downloadStartupTrace(VMService observatory) async {
   final String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
   final File traceInfoFile = fs.file(traceInfoFilePath);
 

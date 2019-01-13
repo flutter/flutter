@@ -15,7 +15,7 @@ Future<TaskResult> runEndToEndTests() async {
   await device.unlock();
   final String deviceId = device.deviceId;
   final Directory testDirectory = dir('${flutterDirectory.path}/dev/integration_tests/ui');
-  await inDirectory(testDirectory, () async {
+  await inDirectory<void>(testDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
     if (deviceOperatingSystem == DeviceOperatingSystem.ios)

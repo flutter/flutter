@@ -308,6 +308,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           addAutomaticKeepAlives: false,
+          addSemanticIndexes: false,
           children: <Widget>[
             Container(height: 100.0),
             Container(height: 100.0),

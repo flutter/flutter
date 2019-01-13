@@ -64,4 +64,56 @@ void main() {
     final Finder buttonBar = find.byType(ButtonBar);
     expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 26.0);
   });
+
+  testWidgets('ButtonBar FlatButton inherits Theme accentColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22789
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(accentColor: const Color(1)),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: ButtonTheme.bar(
+                child: ButtonBar(
+                  children: <Widget>[
+                    FlatButton(
+                      child: const Text('button'),
+                      onPressed: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog( // puts its actions in a ButtonBar
+                              actions: <Widget>[
+                                FlatButton(
+                                  onPressed: () { },
+                                  child: const Text('enabled'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).textStyle.color, const Color(1));
+
+    // Show the dialog
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+
+    final Finder dialogButton = find.ancestor(
+      of: find.text('enabled'),
+      matching: find.byType(RawMaterialButton),
+    );
+    expect(tester.widget<RawMaterialButton>(dialogButton).textStyle.color, const Color(1));
+  });
 }

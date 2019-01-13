@@ -427,7 +427,7 @@ void main() {
         TestSemantics.rootChild(
           id: expectedId,
           rect: TestSemantics.fullScreen,
-          actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
+          actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
         ),
       ],
     );
@@ -643,7 +643,7 @@ void main() {
       onTapHint: 'test',
     ));
 
-    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasTapAction: true,
       onTapHint: 'test'
     ));
@@ -654,7 +654,7 @@ void main() {
       onLongPressHint: 'foo',
     ));
 
-    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasLongPressAction: true,
       onLongPressHint: 'foo'
     ));
@@ -671,7 +671,7 @@ void main() {
       },
     ));
 
-    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       customActions: <CustomSemanticsAction>[
         const CustomSemanticsAction(label: 'bar'),
         const CustomSemanticsAction(label: 'foo'),

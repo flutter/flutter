@@ -6,29 +6,29 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_test/flutter_test.dart' as flutter_test show expect;
-import 'package:test/test.dart' as real_test show expect;
+import 'package:test_api/test_api.dart' as real_test show expect;
 
 // We have to use real_test's expect because the flutter_test expect() goes
 // out of its way to check that we're not leaking APIs and the whole point
 // of this test is to see how we handle leaking APIs.
 
 class TestAPI {
-  Future<Null> testGuard1() {
-    return TestAsyncUtils.guard(() async { return null; });
+  Future<Object> testGuard1() {
+    return TestAsyncUtils.guard<Object>(() async { return null; });
   }
-  Future<Null> testGuard2() {
-    return TestAsyncUtils.guard(() async { return null; });
+  Future<Object> testGuard2() {
+    return TestAsyncUtils.guard<Object>(() async { return null; });
   }
 }
 
 class TestAPISubclass extends TestAPI {
-  Future<Null> testGuard3() {
-    return TestAsyncUtils.guard(() async { return null; });
+  Future<Object> testGuard3() {
+    return TestAsyncUtils.guard<Object>(() async { return null; });
   }
 }
 
-Future<Null> _guardedThrower() {
-  return TestAsyncUtils.guard(() async {
+Future<Object> _guardedThrower() {
+  return TestAsyncUtils.guard<Object>(() async {
     throw 'Hello';
   });
 }
@@ -36,7 +36,7 @@ Future<Null> _guardedThrower() {
 void main() {
   test('TestAsyncUtils - one class', () async {
     final TestAPI testAPI = TestAPI();
-    Future<Null> f1, f2;
+    Future<Object> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
@@ -57,7 +57,7 @@ void main() {
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
     final TestAPI testAPI = TestAPISubclass();
-    Future<Null> f1, f2;
+    Future<Object> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
@@ -78,7 +78,7 @@ void main() {
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
     final TestAPISubclass testAPI = TestAPISubclass();
-    Future<Null> f1, f2;
+    Future<Object> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard3();
@@ -99,7 +99,7 @@ void main() {
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
     final TestAPI testAPI = TestAPISubclass();
-    Future<Null> f1;
+    Future<Object> f1;
     f1 = testAPI.testGuard1();
     try {
       flutter_test.expect(0, 0);
@@ -119,7 +119,7 @@ void main() {
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Null> f1, f2;
+    Future<Object> f1, f2;
     try {
       f1 = tester.pump();
       f2 = tester.pump();
@@ -139,7 +139,7 @@ void main() {
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Null> f1;
+    Future<Object> f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();
@@ -155,7 +155,7 @@ void main() {
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Null> f1;
+    Future<Object> f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();

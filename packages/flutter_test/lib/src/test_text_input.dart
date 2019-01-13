@@ -127,7 +127,7 @@ class TestTextInput {
   /// Simulates the user pressing one of the [TextInputAction] buttons.
   /// Does not check that the [TextInputAction] performed is an acceptable one
   /// based on the `inputAction` [setClientArgs].
-  Future<Null> receiveAction(TextInputAction action) async {
+  Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       // Not using the `expect` function because in the case of a FlutterDriver
       // test this code does not run in a package:test test zone.
@@ -135,7 +135,7 @@ class TestTextInput {
         throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
       }
 
-      final Completer<Null> completer = Completer<Null>();
+      final Completer<void> completer = Completer<void>();
 
       BinaryMessages.handlePlatformMessage(
         SystemChannels.textInput.name,

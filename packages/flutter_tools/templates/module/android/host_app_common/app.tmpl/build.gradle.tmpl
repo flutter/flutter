@@ -4,6 +4,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     defaultConfig {
         applicationId "{{androidIdentifier}}.host"
         minSdkVersion 16
@@ -14,6 +20,9 @@ android {
     }
 
     buildTypes {
+        profile {
+            initWith debug
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'semantics_tester.dart';
 
@@ -266,6 +267,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
+        dragStartBehavior: DragStartBehavior.down,
         itemExtent: 20.0,
         itemBuilder: (BuildContext context, int index) {
           return Text('entry $index');
@@ -600,15 +602,15 @@ void main() {
 
 }
 
-Future<Null> flingUp(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
+Future<void> flingUp(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
 
-Future<Null> flingDown(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, 200.0), repetitions);
+Future<void> flingDown(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, 200.0), repetitions);
 
-Future<Null> flingRight(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(200.0, 0.0), repetitions);
+Future<void> flingRight(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(200.0, 0.0), repetitions);
 
-Future<Null> flingLeft(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(-200.0, 0.0), repetitions);
+Future<void> flingLeft(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(-200.0, 0.0), repetitions);
 
-Future<Null> fling(WidgetTester tester, Offset offset, int repetitions) async {
+Future<void> fling(WidgetTester tester, Offset offset, int repetitions) async {
   while (repetitions-- > 0) {
     await tester.fling(find.byType(ListView), offset, 1000.0);
     await tester.pump();

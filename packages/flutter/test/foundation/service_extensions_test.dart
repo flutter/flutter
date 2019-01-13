@@ -43,7 +43,7 @@ class TestServiceExtensionsBinding extends BindingBase
   int reassembled = 0;
   bool pendingReassemble = false;
   @override
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     reassembled += 1;
     pendingReassemble = true;
     return super.performReassemble();
@@ -54,7 +54,7 @@ class TestServiceExtensionsBinding extends BindingBase
   void scheduleFrame() {
     frameScheduled = true;
   }
-  Future<Null> doFrame() async {
+  Future<void> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
       ui.window.onBeginFrame(Duration.zero);
@@ -74,8 +74,8 @@ class TestServiceExtensionsBinding extends BindingBase
     pendingReassemble = false;
   }
 
-  Future<Null> flushMicrotasks() {
-    final Completer<Null> completer = Completer<Null>();
+  Future<void> flushMicrotasks() {
+    final Completer<void> completer = Completer<void>();
     Timer.run(completer.complete);
     return completer.future;
   }
@@ -104,7 +104,20 @@ void main() {
   test('Service extensions - pretest', () async {
     binding = TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
+
+    // We need to test this service extension here because the result is true
+    // after the first binding.doFrame() call.
+    Map<String, dynamic> firstFrameResult;
+    expect(binding.debugDidSendFirstFrameEvent, isFalse);
+    firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
+    expect(firstFrameResult, <String, String>{ 'enabled': 'false' });
+
     await binding.doFrame(); // initial frame scheduled by creating the binding
+
+    expect(binding.debugDidSendFirstFrameEvent, isTrue);
+    firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
+    expect(firstFrameResult, <String, String>{ 'enabled': 'true' });
+
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
@@ -298,6 +311,35 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - profileWidgetBuilds', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, dynamic> result;
     bool completed;
@@ -328,13 +370,6 @@ void main() {
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
     expect(binding.extensions.containsKey('exit'), isTrue);
-  });
-
-  test('Service extensions - frameworkPresent', () async {
-    Map<String, dynamic> result;
-
-    result = await binding.testExtension('frameworkPresent', <String, String>{});
-    expect(result, <String, String>{});
   });
 
   test('Service extensions - platformOverride', () async {
@@ -462,7 +497,6 @@ void main() {
 
   test('Service extensions - debugWidgetInspector', () async {
     Map<String, dynamic> result;
-
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
     result = await binding.testExtension('debugWidgetInspector', <String, String>{});
@@ -506,13 +540,28 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - saveCompilationTrace', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('saveCompilationTrace', <String, String>{});
+    final String trace = String.fromCharCodes(result['value']);
+    expect(trace, contains('dart:core,Object,Object.\n'));
+    expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
+    expect(trace, contains('service_extensions_test.dart,::,main\n'));
+  });
+
   test('Service extensions - posttest', () async {
-    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
+    int widgetInspectorExtensionCount = 15;
+    if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+      // Some inspector extensions are only exposed if widget creation locations
+      // are tracked.
+      widgetInspectorExtensionCount += 2;
+    }
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 37);
+    expect(binding.extensions.length, 25 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

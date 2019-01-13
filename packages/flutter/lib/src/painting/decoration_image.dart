@@ -261,6 +261,7 @@ class DecorationImagePainter {
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
+      filterQuality: FilterQuality.low
     );
 
     if (clipPath != null)
@@ -347,7 +348,12 @@ class DecorationImagePainter {
 ///    invert will be applied after it. This is primarily used for implementing
 ///    smart invert on iOS.
 ///
-/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
+///  * `filterQuality`: Use this to change the quality when scaling an image.
+///     Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
+///     bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+///     to nearest-neighbor.
+///
+/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, `flipHorizontally` and `filterQuality`
 /// arguments must not be null.
 ///
 /// See also:
@@ -367,6 +373,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
+  FilterQuality filterQuality = FilterQuality.low
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -407,10 +414,7 @@ void paintImage({
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {
-    // Use the "low" quality setting to scale the image, which corresponds to
-    // bilinear interpolation, rather than the default "none" which corresponds
-    // to nearest-neighbor.
-    paint.filterQuality = FilterQuality.low;
+    paint.filterQuality = filterQuality;
   }
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;

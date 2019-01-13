@@ -20,12 +20,13 @@ import 'theme.dart';
 // Examples can assume:
 // int _dollars = 0;
 // int _duelCommandment = 1;
+// void setState(VoidCallback fn) { }
 
 /// A callback that formats a numeric value from a [Slider] widget.
 ///
 /// See also:
 ///
-///   * [Slider.semanticFormatterCallback], which shows an example use case.
+///  * [Slider.semanticFormatterCallback], which shows an example use case.
 typedef SemanticFormatterCallback = String Function(double value);
 
 /// A Material Design slider.
@@ -145,7 +146,7 @@ class Slider extends StatefulWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Slider(
@@ -161,6 +162,7 @@ class Slider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -179,7 +181,7 @@ class Slider extends StatefulWidget {
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Slider(
@@ -198,6 +200,7 @@ class Slider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -211,7 +214,7 @@ class Slider extends StatefulWidget {
   /// [onChanged] for that), but rather to know when the user has completed
   /// selecting a new [value] by ending a drag or a click.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// Slider(
@@ -230,6 +233,7 @@ class Slider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -304,7 +308,7 @@ class Slider extends StatefulWidget {
   /// This is used by accessibility frameworks like TalkBack on Android to
   /// inform users what the currently selected value is with more context.
   ///
-  /// ## Sample code:
+  /// {@tool sample}
   ///
   /// In the example below, a slider for currency values is configured to
   /// announce a value with a currency label.
@@ -325,6 +329,7 @@ class Slider extends StatefulWidget {
   ///   }
   ///  )
   /// ```
+  /// {@end-tool}
   final SemanticFormatterCallback semanticFormatterCallback;
 
   @override
@@ -587,7 +592,7 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
-  static final Tween<double> _overlayRadiusTween = Tween<double>(begin: 0.0, end: _overlayRadius);
+  static final Animatable<double> _overlayRadiusTween = Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
   Animation<double> _overlayAnimation;
@@ -622,7 +627,7 @@ class _RenderSlider extends RenderBox {
       final double distance = (_value - _state.positionController.value).abs();
       _state.positionController.duration = distance != 0.0
         ? _positionAnimationDuration * (1.0 / distance)
-        : 0.0;
+        : Duration.zero;
       _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;

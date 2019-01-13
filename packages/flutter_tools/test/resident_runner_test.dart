@@ -18,13 +18,13 @@ class TestRunner extends ResidentRunner {
   String receivedCommand;
 
   @override
-  Future<Null> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() async { }
 
   @override
-  Future<Null> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() async { }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
+  Future<void> handleTerminalCommand(String code) async {
     receivedCommand = code;
   }
 
@@ -39,7 +39,7 @@ class TestRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true,
-  }) => null;
+  }) async => null;
 }
 
 void main() {

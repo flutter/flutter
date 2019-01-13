@@ -14,8 +14,8 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 const double _kActiveFontSize = 14.0;
 const double _kInactiveFontSize = 12.0;
@@ -68,6 +68,61 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
+/// ## Sample Code
+///
+/// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
+/// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
+/// widgets and the [currentIndex] is set to index 1. The color of the selected
+/// item is set to  a purple color. A function is called whenever any item is
+/// tapped and the function helps display the appropriate [Text] in the body of
+/// the [Scaffold].
+///
+/// ```dart
+/// class MyHomePage extends StatefulWidget {
+///   MyHomePage({Key key}) : super(key: key);
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> {
+///   int _selectedIndex = 1;
+///   final _widgetOptions = [
+///     Text('Index 0: Home'),
+///     Text('Index 1: Business'),
+///     Text('Index 2: School'),
+///   ];
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text('BottomNavigationBar Sample'),
+///       ),
+///       body: Center(
+///         child: _widgetOptions.elementAt(_selectedIndex),
+///       ),
+///       bottomNavigationBar: BottomNavigationBar(
+///         items: <BottomNavigationBarItem>[
+///           BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
+///           BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
+///           BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
+///         ],
+///         currentIndex: _selectedIndex,
+///         fixedColor: Colors.deepPurple,
+///         onTap: _onItemTapped,
+///       ),
+///     );
+///   }
+///
+///   void _onItemTapped(int index) {
+///     setState(() {
+///       _selectedIndex = index;
+///     });
+///   }
+/// }
+/// ```
+///
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
@@ -77,7 +132,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two.
+  /// The length of [items] must be at least two and each item's icon and title must be not null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
@@ -95,12 +150,16 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(
+        items.every((BottomNavigationBarItem item) => item.title != null) == true,
+        'Every item must have a non-null title',
+       ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
-  /// The interactive items laid out within the bottom navigation bar.
+  /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -149,8 +208,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.flex,
     this.selected = false,
     this.indexLabel,
-    }
-  ): assert(selected != null);
+  }) : assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -316,7 +374,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // animation is complete.
   Color _backgroundColor;
 
-  static final Tween<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
+  static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
     for (AnimationController controller in _controllers)
@@ -335,7 +393,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       return CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
-        reverseCurve: Curves.fastOutSlowIn.flipped
+        reverseCurve: Curves.fastOutSlowIn.flipped,
       );
     });
     _controllers[widget.currentIndex].value = 1.0;
@@ -415,10 +473,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
+    } else {
+      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+        _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
     }
-
-    if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
-      _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
   List<Widget> _createTiles() {
@@ -475,7 +533,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
               indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-            )
+            ),
           );
         }
         break;
@@ -567,7 +625,7 @@ class _Circle {
     );
     animation = CurvedAnimation(
       parent: controller,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
     controller.forward();
   }
@@ -582,7 +640,7 @@ class _Circle {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
-      return animations.map(state._evaluateFlex).fold(0.0, (double sum, double value) => sum + value);
+      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (double sum, double value) => sum + value);
     }
 
     final double allWeights = weightSum(state._animations);
@@ -655,7 +713,7 @@ class _RadialPainter extends CustomPainter {
       );
       canvas.drawCircle(
         center,
-        radiusTween.lerp(circle.animation.value),
+        radiusTween.transform(circle.animation.value),
         paint,
       );
     }

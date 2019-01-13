@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -19,6 +20,7 @@ import 'ticker_provider.dart';
 // class MyPage extends Placeholder { MyPage({String title}); }
 // class MyHomePage extends Placeholder { }
 // NavigatorState navigator;
+// BuildContext context;
 
 /// Creates a route for the given route settings.
 ///
@@ -78,7 +80,7 @@ abstract class Route<T> {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings settings }) : this.settings = settings ?? const RouteSettings();
+  Route({ RouteSettings settings }) : settings = settings ?? const RouteSettings();
 
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
@@ -347,11 +349,18 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) { }
 
-  /// The [Navigator]'s routes are being moved by a user gesture.
+  /// The [Navigator]'s route `route` is being moved by a user gesture.
   ///
-  /// For example, this is called when an iOS back gesture starts, and is used
-  /// to disabled hero animations during such interactions.
-  void didStartUserGesture() { }
+  /// For example, this is called when an iOS back gesture starts.
+  ///
+  /// Paired with a call to [didStopUserGesture] when the route is no longer
+  /// being manipulated via user gesture.
+  ///
+  /// If present, the route immediately below `route` is `previousRoute`.
+  /// Though the gesture may not necessarily conclude at `previousRoute` if
+  /// the gesture is canceled. In that case, [didStopUserGesture] is still
+  /// called but a follow-up [didPop] is not.
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// User gesture is no longer controlling the [Navigator].
   ///
@@ -586,18 +595,18 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///  @override
-///  Widget build(BuildContext context) {
-///    return MaterialApp(
-///      // ...some parameters omitted...
-///      // MaterialApp contains our top-level Navigator
-///      initialRoute: '/',
-///      routes: {
-///        '/': (BuildContext context) => HomePage(),
-///        '/signup': (BuildContext context) => SignUpPage(),
-///      },
-///    );
-///  }
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       // ...some parameters omitted...
+///       // MaterialApp contains our top-level Navigator
+///       initialRoute: '/',
+///       routes: {
+///         '/': (BuildContext context) => HomePage(),
+///         '/signup': (BuildContext context) => SignUpPage(),
+///       },
+///     );
+///   }
 /// }
 ///
 /// class SignUpPage extends StatelessWidget {
@@ -716,7 +725,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -725,6 +734,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushNamed(context, '/nyc/1776');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamed<T extends Object>(BuildContext context, String routeName) {
     return Navigator.of(context).pushNamed<T>(routeName);
@@ -763,7 +773,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -772,6 +782,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushReplacementNamed(context, '/jouett/1781');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
     return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, result: result);
@@ -810,7 +821,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the return value type of the old route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -819,6 +830,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.popAndPushNamed(context, '/nyc/1776');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> popAndPushNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, result: result);
@@ -863,7 +875,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -872,6 +884,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pushNamedAndRemoveUntil(context, '/calendar', ModalRoute.withName('/'));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamedAndRemoveUntil<T extends Object>(BuildContext context, String newRouteName, RoutePredicate predicate) {
     return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate);
@@ -895,7 +908,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -904,6 +917,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> push<T extends Object>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
@@ -937,7 +951,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -947,6 +961,7 @@ class Navigator extends StatefulWidget {
   ///       context, MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushReplacement<T extends Object, TO extends Object>(BuildContext context, Route<T> newRoute, { TO result }) {
     return Navigator.of(context).pushReplacement<T, TO>(newRoute, result: result);
@@ -987,7 +1002,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1000,6 +1015,7 @@ class Navigator extends StatefulWidget {
   ///   );
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushAndRemoveUntil<T extends Object>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
     return Navigator.of(context).pushAndRemoveUntil<T>(newRoute, predicate);
@@ -1108,10 +1124,10 @@ class Navigator extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that enables the form
-  ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
-  ///   to define the route's `willPop` method.
+  ///  * [Form], which provides an `onWillPop` callback that enables the form
+  ///    to veto a [pop] initiated by the app's back button.
+  ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///    to define the route's `willPop` method.
   @optionalTypeArgs
   static Future<bool> maybePop<T extends Object>(BuildContext context, [ T result ]) {
     return Navigator.of(context).maybePop<T>(result);
@@ -1144,7 +1160,7 @@ class Navigator extends StatefulWidget {
   /// false); returns false if there are no further previous routes.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1153,6 +1169,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.pop(context);
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -1181,7 +1198,7 @@ class Navigator extends StatefulWidget {
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1190,6 +1207,7 @@ class Navigator extends StatefulWidget {
   ///   Navigator.popUntil(context, ModalRoute.withName('/login'));
   /// }
   /// ```
+  /// {@end-tool}
   static void popUntil(BuildContext context, RoutePredicate predicate) {
     Navigator.of(context).popUntil(predicate);
   }
@@ -1440,7 +1458,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1449,6 +1467,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushNamed('/nyc/1776');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamed<T extends Object>(String routeName) {
     return push<T>(_routeNamed<T>(routeName));
@@ -1460,7 +1479,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1469,6 +1488,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushReplacementNamed('/jouett/1781');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushReplacementNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
     return pushReplacement<T, TO>(_routeNamed<T>(routeName), result: result);
@@ -1479,7 +1499,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1488,6 +1508,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.popAndPushNamed('/nyc/1776');
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> popAndPushNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
     pop<TO>(result);
@@ -1499,7 +1520,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1508,6 +1529,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pushNamedAndRemoveUntil('/calendar', ModalRoute.withName('/'));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamedAndRemoveUntil<T extends Object>(String newRouteName, RoutePredicate predicate) {
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName), predicate);
@@ -1517,7 +1539,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1526,6 +1548,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.push(MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> push<T extends Object>(Route<T> route) {
     assert(!_debugLocked);
@@ -1545,8 +1568,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return route.popped;
+  }
+
+  void _afterNavigation() {
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      // This event is used by performance tools that show stats for the
+      // time interval since the last navigation event occurred ensuring that
+      // stats only reflect the current page.
+      // These tools do not need to know exactly what the new route is so no
+      // attempt is made to describe the current route as part of the event.
+      developer.postEvent('Flutter.Navigation', <String, dynamic>{});
+    }
+    _cancelActivePointers();
   }
 
   /// Replace the current route of the navigator by pushing the given route and
@@ -1555,7 +1591,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1565,6 +1601,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushReplacement<T extends Object, TO extends Object>(Route<T> newRoute, { TO result }) {
     assert(!_debugLocked);
@@ -1597,7 +1634,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1606,7 +1643,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1618,6 +1655,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   );
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushAndRemoveUntil<T extends Object>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
@@ -1650,7 +1688,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(removedRoute, oldRoute);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return newRoute.popped;
   }
 
@@ -1734,10 +1772,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that enables the form
-  ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
-  ///   to define the route's `willPop` method.
+  ///  * [Form], which provides an `onWillPop` callback that enables the form
+  ///    to veto a [pop] initiated by the app's back button.
+  ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object>([ T result ]) async {
     final Route<T> route = _history.last;
@@ -1755,7 +1793,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pop}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1764,6 +1802,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pop();
   /// }
   /// ```
+  /// {@end-tool}
+  /// {@tool sample}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -1772,6 +1812,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.pop(true); // dialog returns true
   /// }
   /// ```
+  /// {@end-tool}
   @optionalTypeArgs
   bool pop<T extends Object>([ T result ]) {
     assert(!_debugLocked);
@@ -1800,7 +1841,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
     return true;
   }
 
@@ -1808,7 +1849,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Typical usage is as follows:
   ///
@@ -1817,6 +1858,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///   navigator.popUntil(ModalRoute.withName('/login'));
   /// }
   /// ```
+  /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
     while (!predicate(_history.last))
       pop();
@@ -1841,7 +1883,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() { _debugLocked = false; return true; }());
-    _cancelActivePointers();
+    _afterNavigation();
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
@@ -1897,8 +1939,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      final Route<dynamic> route = _history.last;
+      final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
+          ? _history[_history.length - 2]
+          : null;
+      // Don't operate the _history list since the gesture may be cancelled.
+      // In case of a back swipe, the gesture controller will call .pop() itself.
+
       for (NavigatorObserver observer in widget.observers)
-        observer.didStartUserGesture();
+        observer.didStartUserGesture(route, previousRoute);
     }
   }
 

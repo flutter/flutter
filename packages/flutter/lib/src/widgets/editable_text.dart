@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -21,6 +22,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
+import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
@@ -182,8 +184,9 @@ class EditableText extends StatefulWidget {
   /// [TextInputType.text] unless [maxLines] is greater than one, when it will
   /// default to [TextInputType.multiline].
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
-  /// and [rendererIgnoresPointer], arguments must not be null.
+  /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
+  /// [textAlign], [dragStartBehavior] and [rendererIgnoresPointer] arguments
+  /// must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -192,6 +195,7 @@ class EditableText extends StatefulWidget {
     this.autocorrect = true,
     @required this.style,
     @required this.cursorColor,
+    @required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
@@ -213,17 +217,21 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
+       assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
+       assert(dragStartBehavior != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -239,24 +247,34 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
+  /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
-  /// Defaults to false.
+  /// When this is set to true, all the characters in the text field are
+  /// replaced by U+2022 BULLET characters (•).
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
   final bool obscureText;
 
+  /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true.
+  /// Defaults to true. Cannot be null.
+  /// {@endtemplate}
   final bool autocorrect;
 
   /// The text style to use for the editable text.
   final TextStyle style;
 
+  /// {@template flutter.widgets.editableText.textAlign}
   /// How the text should be aligned horizontally.
   ///
-  /// Defaults to [TextAlign.start].
+  /// Defaults to [TextAlign.start] and cannot be null.
+  /// {@endtemplate}
   final TextAlign textAlign;
 
+  /// {@template flutter.widgets.editableText.textDirection}
   /// The directionality of the text.
   ///
   /// This decides how [textAlign] values like [TextAlign.start] and
@@ -270,8 +288,14 @@ class EditableText extends StatefulWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  ///
+  /// See also:
+  ///
+  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  /// {@endtemplate}
   final TextDirection textDirection;
 
+  /// {@template flutter.widgets.editableText.textCapitalization}
   /// Configures how the platform keyboard will select an uppercase or
   /// lowercase keyboard.
   ///
@@ -282,7 +306,8 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
+  /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
   /// Used to select a font when the same Unicode character can
@@ -304,22 +329,44 @@ class EditableText extends StatefulWidget {
   final double textScaleFactor;
 
   /// The color to use when painting the cursor.
+  ///
+  /// Cannot be null.
   final Color cursorColor;
 
+  /// The color to use when painting the background cursor aligned with the text
+  /// while rendering the floating cursor.
+  ///
+  /// Cannot be null. By default it is the disabled grey color from
+  /// CupertinoColors.
+  final Color backgroundCursorColor;
+
+  /// {@template flutter.widgets.editableText.maxLines}
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
   ///
-  /// If this is null, there is no limit to the number of lines. If it is not
-  /// null, the value must be greater than zero.
+  /// If this is null, there is no limit to the number of lines, and the text
+  /// container will start with enough vertical space for one line and
+  /// automatically grow to accomodate additional lines as they are entered.
+  ///
+  /// If it is not null, the value must be greater than zero. If it is greater
+  /// than 1, it will take up enough horizontal space to accomodate that number
+  /// of lines.
+  /// {@endtemplate}
   final int maxLines;
 
-  /// Whether this input field should focus itself if nothing else is already focused.
-  /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
-  /// the keyboard is only shown after the user taps the text field.
+  /// {@template flutter.widgets.editableText.autofocus}
+  /// Whether this text field should focus itself if nothing else is already
+  /// focused.
   ///
-  /// Defaults to false.
+  /// If true, the keyboard will open as soon as this text field obtains focus.
+  /// Otherwise, the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
+  // keyboard behavior.
   final bool autofocus;
 
   /// The color to use when painting the selection.
@@ -328,15 +375,40 @@ class EditableText extends StatefulWidget {
   /// Optional delegate for building the text selection handles and toolbar.
   final TextSelectionControls selectionControls;
 
+  /// {@template flutter.widgets.editableText.keyboardType}
   /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
+  /// {@endtemplate}
   final TextInputType keyboardType;
 
   /// The type of action button to use with the soft keyboard.
   final TextInputAction textInputAction;
 
-  /// Called when the text being edited changes.
+  /// {@template flutter.widgets.editableText.onChanged}
+  /// Called when the user initiates a change to the TextField's
+  /// value: when they have inserted or deleted text.
+  ///
+  /// This callback does run not when the TextField's text is changed
+  /// programmatically, via the TextField's [controller]. Typically it
+  /// isn't necessary to be notified of such changes, since they're
+  /// initiated by the app itself.
+  ///
+  /// To be notified of all changes to the TextField's text, cursor,
+  /// and selection, one can add a listener to its [controller] with
+  /// [TextEditingController.addListener].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [inputFormatters], which are called before [onChanged]
+  ///    runs and can validate and change ("format") the input value.
+  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
+  /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
   /// button on the keyboard).
   ///
@@ -353,17 +425,24 @@ class EditableText extends StatefulWidget {
   ///    another input widget within [onSubmitted].
   ///
   /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  /// {@endtemplate}
   final VoidCallback onEditingComplete;
 
-  /// Called when the user indicates that they are done editing the text in the field.
+  /// {@template flutter.widgets.editableText.onSubmitted}
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
+  /// {@endtemplate}
   final ValueChanged<String> onSubmitted;
 
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
 
-  /// Optional input validation and formatting overrides. Formatters are run
-  /// in the provided order when the text input changes.
+  /// {@template flutter.widgets.editableText.inputFormatters}
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
+  /// {@endtemplate}
   final List<TextInputFormatter> inputFormatters;
 
   /// If true, the [RenderEditable] created by this widget will not handle
@@ -372,14 +451,24 @@ class EditableText extends StatefulWidget {
   /// This property is false by default.
   final bool rendererIgnoresPointer;
 
+  /// {@template flutter.widgets.editableText.cursorWidth}
   /// How thick the cursor will be.
   ///
   /// Defaults to 2.0
+  ///
+  /// The cursor will draw under the text. The cursor width will extend
+  /// to the right of the boundary between characters for left-to-right text
+  /// and to the left for right-to-left text. This corresponds to extending
+  /// downstream relative to the selected position. Negative values may be used
+  /// to reverse this behavior.
+  /// {@endtemplate}
   final double cursorWidth;
 
+  /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
   ///
-  /// By default, the cursor has a Radius of zero.
+  /// By default, the cursor has no radius.
+  /// {@endtemplate}
   final Radius cursorRadius;
 
   /// The appearance of the keyboard.
@@ -389,6 +478,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.widgets.editableText.scrollPadding}
   /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
   ///
   /// When this widget receives focus and is not completely visible (for example scrolled partially
@@ -397,13 +487,33 @@ class EditableText extends StatefulWidget {
   /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInserts.all(20.0).
+  /// {@endtemplate}
   final EdgeInsets scrollPadding;
+
+  /// {@template flutter.widgets.editableText.enableInteractiveSelection}
+  /// If true, then long-pressing this TextField will select text and show the
+  /// cut/copy/paste menu, and tapping will move the text caret.
+  ///
+  /// True by default.
+  ///
+  /// If false, most of the accessibility support for selecting text, copy
+  /// and paste, and moving the caret will be disabled.
+  /// {@endtemplate}
+  final bool enableInteractiveSelection;
 
   /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
   /// This property is most useful for testing purposes.
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.rendering.editable.selectionEnabled}
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -427,7 +537,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
   final GlobalKey _editableKey = GlobalKey();
@@ -438,6 +548,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ScrollController _scrollController = ScrollController();
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
+
+  // The time it takes for the floating cursor to snap to the text aligned
+  // cursor position after the user has finished placing it.
+  static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
+
+  AnimationController _floatingCursorResetController;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -450,6 +566,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
+    _floatingCursorResetController = AnimationController(vsync: this);
+    _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
   }
 
   @override
@@ -511,42 +629,107 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.newline:
-        // Do nothing for a "newline" action: the newline is already inserted.
+        // If this is a multiline EditableText, do nothing for a "newline"
+        // action; The newline is already inserted. Otherwise, finalize
+        // editing.
+        if (widget.maxLines == 1)
+          _finalizeEditing(true);
         break;
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.send:
       case TextInputAction.search:
-        // Take any actions necessary now that the user has completed editing.
-        if (widget.onEditingComplete != null) {
-          widget.onEditingComplete();
-        } else {
-          // Default behavior if the developer did not provide an
-          // onEditingComplete callback: Finalize editing and remove focus.
-          widget.controller.clearComposing();
-          widget.focusNode.unfocus();
-        }
-
-        // Invoke optional callback with the user's submitted content.
-        if (widget.onSubmitted != null)
-          widget.onSubmitted(_value.text);
+        _finalizeEditing(true);
         break;
       default:
-        if (widget.onEditingComplete != null) {
-          widget.onEditingComplete();
-        } else {
-          // Default behavior if the developer did not provide an
-          // onEditingComplete callback: Finalize editing, but don't give up
-          // focus because this keyboard action does not imply the user is done
-          // inputting information.
-          widget.controller.clearComposing();
-        }
-
-        // Invoke optional callback with the user's submitted content.
-        if (widget.onSubmitted != null)
-          widget.onSubmitted(_value.text);
+        // Finalize editing, but don't give up focus because this keyboard
+        //  action does not imply the user is done inputting information.
+        _finalizeEditing(false);
         break;
     }
+  }
+
+  // The original position of the caret on FloatingCursorDragState.start.
+  Rect _startCaretRect;
+
+  // The most recent text position as determined by the location of the floating
+  // cursor.
+  TextPosition _lastTextPosition;
+
+  // The offset of the floating cursor as determined from the first update call.
+  Offset _pointOffsetOrigin;
+
+  // The most recent position of the floating cursor.
+  Offset _lastBoundedOffset;
+
+  // Because the center of the cursor is preferredLineHeight / 2 below the touch
+  // origin, but the touch origin is used to determine which line the cursor is
+  // on, we need this offset to correctly render and move the cursor.
+  Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {
+    switch(point.state){
+      case FloatingCursorDragState.Start:
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
+        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
+        break;
+      case FloatingCursorDragState.Update:
+        // We want to send in points that are centered around a (0,0) origin, so we cache the
+        // position on the first update call.
+        if (_pointOffsetOrigin != null) {
+          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
+          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
+          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
+          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
+        } else {
+          _pointOffsetOrigin = point.offset;
+        }
+        break;
+      case FloatingCursorDragState.End:
+        _floatingCursorResetController.value = 0.0;
+        _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
+      break;
+    }
+  }
+
+  void _onFloatingCursorResetTick() {
+    final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition).center - _floatingCursorOffset;
+    if (_floatingCursorResetController.isCompleted) {
+      renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
+      if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
+        // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
+      _startCaretRect = null;
+      _lastTextPosition = null;
+      _pointOffsetOrigin = null;
+      _lastBoundedOffset = null;
+    } else {
+      final double lerpValue = _floatingCursorResetController.value;
+      final double lerpX = ui.lerpDouble(_lastBoundedOffset.dx, finalPosition.dx, lerpValue);
+      final double lerpY = ui.lerpDouble(_lastBoundedOffset.dy, finalPosition.dy, lerpValue);
+
+      renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition, resetLerpValue: lerpValue);
+    }
+  }
+
+  void _finalizeEditing(bool shouldUnfocus) {
+    // Take any actions necessary now that the user has completed editing.
+    if (widget.onEditingComplete != null) {
+      widget.onEditingComplete();
+    } else {
+      // Default behavior if the developer did not provide an
+      // onEditingComplete callback: Finalize editing and remove focus.
+      widget.controller.clearComposing();
+      if (shouldUnfocus)
+        widget.focusNode.unfocus();
+    }
+
+    // Invoke optional callback with the user's submitted content.
+    if (widget.onSubmitted != null)
+      widget.onSubmitted(_value.text);
   }
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -673,11 +856,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         renderObject: renderObject,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
+        dragStartBehavior: widget.dragStartBehavior,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
-      if (longPress)
+      if (longPress || cause == SelectionChangedCause.doubleTap)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
@@ -747,7 +931,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _formatAndSetValue(TextEditingValue value) {
     final bool textChanged = _value?.text != value?.text;
-    if (widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
@@ -865,29 +1049,49 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.hide();
   }
 
+  VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
+    return widget.selectionEnabled && _hasFocus && controls?.canCopy(this) == true
+      ? () => controls.handleCopy(this)
+      : null;
+  }
+
+  VoidCallback _semanticsOnCut(TextSelectionControls controls) {
+    return widget.selectionEnabled && _hasFocus && controls?.canCut(this) == true
+      ? () => controls.handleCut(this)
+      : null;
+  }
+
+  VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
+    return widget.selectionEnabled &&_hasFocus && controls?.canPaste(this) == true
+      ? () => controls.handlePaste(this)
+      : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
-    final TextSelectionControls controls = widget.selectionControls;
 
+    final TextSelectionControls controls = widget.selectionControls;
     return Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
+      dragStartBehavior: widget.dragStartBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
           link: _layerLink,
           child: Semantics(
-            onCopy: _hasFocus && controls?.canCopy(this) == true ? () => controls.handleCopy(this) : null,
-            onCut: _hasFocus && controls?.canCut(this) == true ? () => controls.handleCut(this) : null,
-            onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
+            onCopy: _semanticsOnCopy(controls),
+            onCut: _semanticsOnCut(controls),
+            onPaste: _semanticsOnPaste(controls),
             child: _Editable(
               key: _editableKey,
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
+              backgroundCursorColor: widget.backgroundCursorColor,
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
@@ -904,6 +1108,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
+              enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
             ),
           ),
@@ -952,6 +1157,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSpan,
     this.value,
     this.cursorColor,
+    this.backgroundCursorColor,
     this.showCursor,
     this.hasFocus,
     this.maxLines,
@@ -968,6 +1174,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
+    this.enableInteractiveSelection,
     this.textSelectionDelegate,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
@@ -976,6 +1183,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSpan textSpan;
   final TextEditingValue value;
   final Color cursorColor;
+  final Color backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
@@ -992,6 +1200,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final Radius cursorRadius;
+  final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
 
   @override
@@ -999,6 +1208,7 @@ class _Editable extends LeafRenderObjectWidget {
     return RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
+      backgroundCursorColor: backgroundCursorColor,
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
@@ -1015,6 +1225,7 @@ class _Editable extends LeafRenderObjectWidget {
       obscureText: obscureText,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
+      enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
     );
   }

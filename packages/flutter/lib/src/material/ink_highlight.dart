@@ -58,10 +58,10 @@ class InkHighlight extends InteractiveInkFeature {
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
       ..forward();
-    _alpha = IntTween(
+    _alpha = _alphaController.drive(IntTween(
       begin: 0,
-      end: color.alpha
-    ).animate(_alphaController);
+      end: color.alpha,
+    ));
 
     controller.addInkFeature(this);
   }

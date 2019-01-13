@@ -161,6 +161,8 @@ class PaintingContext extends ClipContext {
     assert(() {
       if (debugProfilePaintsEnabled)
         Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+      if (debugOnProfilePaint != null)
+        debugOnProfilePaint(child);
       return true;
     }());
 
@@ -198,6 +200,7 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
+    assert(child._layer != null);
     child._layer.offset = offset;
     appendLayer(child._layer);
   }
@@ -488,7 +491,7 @@ class PaintingContext extends ClipContext {
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(OpacityLayer(alpha: alpha), painter, offset);
+    pushLayer(OpacityLayer(alpha: alpha, offset: offset), painter, Offset.zero);
   }
 
   @override
@@ -1086,7 +1089,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// See also:
   ///
-  /// * [BindingBase.reassembleApplication].
+  ///  * [BindingBase.reassembleApplication]
   void reassemble() {
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
@@ -1135,10 +1138,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(_debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
-    super.adoptChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
     markNeedsSemanticsUpdate();
+    super.adoptChild(child);
   }
 
   /// Called by subclasses when they decide a render object is no longer a child.
@@ -1526,18 +1529,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// required to obey the given constraints.
   ///
   /// If the parent reads information computed during the child's layout, the
-  /// parent must pass true for parentUsesSize. In that case, the parent will be
-  /// marked as needing layout whenever the child is marked as needing layout
+  /// parent must pass true for `parentUsesSize`. In that case, the parent will
+  /// be marked as needing layout whenever the child is marked as needing layout
   /// because the parent's layout information depends on the child's layout
   /// information. If the parent uses the default value (false) for
-  /// parentUsesSize, the child can change its layout information (subject to
+  /// `parentUsesSize`, the child can change its layout information (subject to
   /// the given constraints) without informing the parent.
   ///
   /// Subclasses should not override [layout] directly. Instead, they should
   /// override [performResize] and/or [performLayout]. The [layout] method
   /// delegates the actual work to [performResize] and [performLayout].
   ///
-  /// The parent's performLayout method should call the [layout] of all its
+  /// The parent's [performLayout] method should call the [layout] of all its
   /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
@@ -1827,6 +1830,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsCompositingBitsUpdate = false; // set to true when a child is added
   /// Mark the compositing state for this render object as dirty.
   ///
+  /// This is called to indicate that the value for [needsCompositing] needs to
+  /// be recomputed during the next [flushCompositingBits] engine phase.
+  ///
   /// When the subtree is mutated, we need to recompute our
   /// [needsCompositing] bit, and some of our ancestors need to do the
   /// same (in case ours changed in a way that will change theirs). To
@@ -1863,6 +1869,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   bool _needsCompositing; // initialised in the constructor
   /// Whether we or one of our descendants has a compositing layer.
+  ///
+  /// If this node needs compositing as indicated by this bit, then all ancestor
+  /// nodes will also need compositing.
   ///
   /// Only legal to call after [PipelineOwner.flushLayout] and
   /// [PipelineOwner.flushCompositingBits] have been called.
@@ -2229,7 +2238,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// asynchronous computation) will at best have no useful effect and at worse
   /// will cause crashes as the data will be in an inconsistent state.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following snippet will describe the node as a button that responds to
   /// tap actions.
@@ -2250,6 +2259,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
@@ -2383,6 +2393,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Updates the semantic information of the render object.
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
+    if (_needsLayout) {
+      // There's not enough information in this subtree to compute semantics.
+      // The subtree is probably being kept alive by a viewport but not laid out.
+      return;
+    }
     final _SemanticsFragment fragment = _getSemanticsForParent(
       mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
     );
@@ -2401,6 +2416,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     @required bool mergeIntoParent,
   }) {
     assert(mergeIntoParent != null);
+    assert(!_needsLayout, 'Updated layout information required for $this to calculate semantics.');
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
@@ -2410,18 +2426,33 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = Set<_InterestingSemanticsFragment>();
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
+    // When set to true there's currently not enough information in this subtree
+    // to compute semantics. In this case the walk needs to be aborted and no
+    // SemanticsNodes in the subtree should be updated.
+    // This will be true for subtrees that are currently kept alive by a
+    // viewport but not laid out.
+    bool abortWalk = false;
+
     visitChildrenForSemantics((RenderObject renderChild) {
-      final _SemanticsFragment fragment = renderChild._getSemanticsForParent(
+      if (abortWalk || _needsLayout) {
+        abortWalk = true;
+        return;
+      }
+      final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
         mergeIntoParent: childrenMergeIntoParent,
       );
-      if (fragment.dropsSemanticsOfPreviousSiblings) {
+      if (parentFragment.abortsWalk) {
+        abortWalk = true;
+        return;
+      }
+      if (parentFragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
         toBeMarkedExplicit.clear();
         if (!config.isSemanticBoundary)
           dropSemanticsOfPreviousSiblings = true;
       }
       // Figure out which child fragments are to be made explicit.
-      for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
+      for (_InterestingSemanticsFragment fragment in parentFragment.interestingFragments) {
         fragments.add(fragment);
         fragment.addAncestor(this);
         fragment.addTags(config.tagsForChildren);
@@ -2441,6 +2472,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
       }
     });
+
+    if (abortWalk) {
+      return _AbortingSemanticsFragment(owner: this);
+    }
 
     for (_InterestingSemanticsFragment fragment in toBeMarkedExplicit)
       fragment.markAsExplicit();
@@ -2670,10 +2705,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 /// Generic mixin for render objects with one child.
 ///
 /// Provides a child model for a render object subclass that has a unique child.
-abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderObjectWithChildMixin._() => null;
+mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
 
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
@@ -2749,11 +2781,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extend
 }
 
 /// Parent data to support a doubly-linked list of children.
-abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends ParentData {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory ContainerParentDataMixin._() => null;
-
+mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
   /// The previous sibling in the parent's child list.
   ChildType previousSibling;
   /// The next sibling in the parent's child list.
@@ -2784,11 +2812,7 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends 
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
-abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory ContainerRenderObjectMixin._() => null;
-
+mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData;
     while (childParentData.previousSibling != null) {
@@ -3116,6 +3140,17 @@ abstract class _SemanticsFragment {
   /// Returns [_InterestingSemanticsFragment] describing the actual semantic
   /// information that this fragment wants to add to the parent.
   Iterable<_InterestingSemanticsFragment> get interestingFragments;
+
+  /// Whether this fragment wants to abort the semantics walk because the
+  /// information in the tree are not sufficient to calculate semantics.
+  ///
+  /// This happens for subtrees that are currently kept alive by a viewport but
+  /// not laid out.
+  ///
+  /// See also:
+  ///
+  ///  * [_AbortingSemanticsFragment], which sets this to true.
+  bool get abortsWalk => false;
 }
 
 /// A container used when a [RenderObject] wants to add multiple independent
@@ -3397,6 +3432,39 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   bool get _needsGeometryUpdate => _ancestorChain.length > 1;
+}
+
+
+/// [_SemanticsFragment] used to indicate that the current information in this
+/// subtree is not sufficient to update semantics.
+///
+/// Anybody processing this [_SemanticsFragment] should abort the walk of the
+/// current subtree without updating any [SemanticsNode]s as there is no semantic
+/// information to compute. As a result, this fragment also doesn't carry any
+/// semantics information either.
+class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
+  _AbortingSemanticsFragment({@required RenderObject owner}) : super(owner: owner, dropsSemanticsOfPreviousSiblings: false);
+
+  @override
+  bool get abortsWalk => true;
+
+  @override
+  SemanticsConfiguration get config => null;
+
+  @override
+  void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
+    assert(false);
+  }
+
+  @override
+  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect}) sync* {
+    yield owner._semantics;
+  }
+
+  @override
+  void markAsExplicit() {
+    // Is never explicit.
+  }
 }
 
 /// Helper class that keeps track of the geometry of a [SemanticsNode].

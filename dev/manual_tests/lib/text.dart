@@ -189,7 +189,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
-          return pickFromList(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
+          return pickFromList<MaterialColor>(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
         switch (_random.nextInt(4)) {
           case 0:
             return value.withAlpha(value.alpha + _random.nextInt(10) - 5);
@@ -240,7 +240,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, TextDecorationStyle.values);
+        return pickFromList<TextDecorationStyle>(_random, TextDecorationStyle.values);
     }
     return value;
   }
@@ -250,7 +250,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, FontWeight.values);
+        return pickFromList<FontWeight>(_random, FontWeight.values);
     }
     return value;
   }
@@ -260,7 +260,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, FontStyle.values);
+        return pickFromList<FontStyle>(_random, FontStyle.values);
     }
     return value;
   }
@@ -938,7 +938,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       if (mounted && intrinsicKey.currentContext.size.height != controlKey.currentContext.size.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text.runes.map((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
+        debugPrint(_text.runes.map<String>((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
         setState(() {
           _ticker.stop();
         });
@@ -1045,7 +1045,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                     FlatButton(
                       onPressed: _ticker.isActive ? null : () {
                         print('The currently visible text is: $_text');
-                        print(_text.runes.map((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                        print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
                       },
                       child: const Text('DUMP TEXT TO LOGS'),
                     ),
@@ -2109,7 +2109,7 @@ int randomCharacter(math.Random random) {
     Range(0x2ceb0, 0x2ebe0),
     Range(0x2f800, 0x2fa1d),
   ];
-  final Range range = pickFromList(random, characterRanges);
+  final Range range = pickFromList<Range>(random, characterRanges);
   if (range.start == range.end)
     return range.start;
   return range.start + random.nextInt(range.end - range.start);

@@ -25,7 +25,7 @@ dynamic _loadYamlFile(String path) {
 
 /// Loads all services specified in `pubspec.yaml`. Parses each service config file,
 /// storing meta data in [services] and the list of jar files in [jars].
-Future<Null> parseServiceConfigs(
+Future<void> parseServiceConfigs(
   List<Map<String, String>> services, { List<File> jars }
 ) async {
   Map<String, Uri> packageMap;
@@ -98,7 +98,7 @@ File generateServiceDefinitions(
   String dir, List<Map<String, String>> servicesIn
 ) {
   final List<Map<String, String>> services =
-      servicesIn.map((Map<String, String> service) => <String, String>{
+      servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
         'name': service['name'],
         'class': service['android-class']
       }).toList();

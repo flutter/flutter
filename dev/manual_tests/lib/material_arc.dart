@@ -438,7 +438,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
     ];
   }
 
-  Future<Null> _play(_ArcDemo demo) async {
+  Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
     if (demo.key.currentState != null && demo.key.currentState.mounted)
       demo.controller.reverse();
@@ -452,7 +452,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
         appBar: AppBar(
           title: const Text('Animation'),
           bottom: TabBar(
-            tabs: _allDemos.map((_ArcDemo demo) => Tab(text: demo.title)).toList(),
+            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
           ),
         ),
         floatingActionButton: Builder(
@@ -466,7 +466,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
           },
         ),
         body: TabBarView(
-          children: _allDemos.map((_ArcDemo demo) => demo.builder(demo)).toList()
+          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList()
         )
       )
     );
@@ -474,7 +474,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: const AnimationDemo(),
+  runApp(const MaterialApp(
+    home: AnimationDemo(),
   ));
 }

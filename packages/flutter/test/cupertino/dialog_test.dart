@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(home: const Material(
+    await tester.pumpWidget(const MaterialApp(home: Material(
       child: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),
@@ -92,12 +92,18 @@ void main() {
                     label: 'Alert',
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(label: 'The Title'),
                           TestSemantics(label: 'Content'),
                         ],
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(
                             flags: <SemanticsFlag>[SemanticsFlag.isButton],

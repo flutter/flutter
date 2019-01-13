@@ -11,23 +11,26 @@ import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
+// Examples can assume:
+// class MyDataObject { }
+
 /// The callback used by [ReorderableListView] to move an item to a new
 /// position in a list.
 ///
 /// Implementations should remove the corresponding list item at [oldIndex]
 /// and reinsert it at [newIndex].
 ///
-/// Note that if [oldIndex] is before [newIndex], removing the item at [oldIndex]
-/// from the list will reduce the list's length by one. Implementations used
-/// by [ReorderableListView] will need to account for this when inserting before
+/// If [oldIndex] is before [newIndex], removing the item at [oldIndex] from the
+/// list will reduce the list's length by one. Implementations used by
+/// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
-/// Example implementation:
+/// {@tool sample}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
 ///
-/// void onReorder(int oldIndex, int newIndex) {
+/// void handleReorder(int oldIndex, int newIndex) {
 ///   if (oldIndex < newIndex) {
 ///     // removing the item at oldIndex will shorten the list by 1.
 ///     newIndex -= 1;
@@ -36,7 +39,8 @@ import 'material_localizations.dart';
 ///   backingList.insert(newIndex, element);
 /// }
 /// ```
-typedef OnReorderCallback = void Function(int oldIndex, int newIndex);
+/// {@end-tool}
+typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
 ///
@@ -84,7 +88,7 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// This [ReorderableListView] calls [onReorder] after a list child is dropped
   /// into a new position.
-  final OnReorderCallback onReorder;
+  final ReorderCallback onReorder;
 
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
@@ -148,13 +152,13 @@ class _ReorderableListContent extends StatefulWidget {
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
-  final OnReorderCallback onReorder;
+  final ReorderCallback onReorder;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
 }
 
-class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin<_ReorderableListContent> {
 
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
@@ -296,7 +300,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
         duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
-      ).then((Null none) {
+      ).then((void value) {
         setState(() {
           _scrolling = false;
         });

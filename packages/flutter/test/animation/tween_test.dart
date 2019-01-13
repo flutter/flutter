@@ -21,12 +21,24 @@ void main() {
     expect(chain, hasOneLineDescription);
   });
 
-  test('Can animated tweens', () {
+  test('Can animate tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
     final Animation<double> animation = tween.animate(controller);
+    controller.value = 0.50;
+    expect(animation.value, 0.40);
+    expect(animation, hasOneLineDescription);
+    expect(animation.toStringDetails(), hasOneLineDescription);
+  });
+
+  test('Can drive tweens', () {
+    final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+    final Animation<double> animation = controller.drive(tween);
     controller.value = 0.50;
     expect(animation.value, 0.40);
     expect(animation, hasOneLineDescription);

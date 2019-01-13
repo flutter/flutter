@@ -49,4 +49,50 @@ void main() {
       'maxHeight: 4.0',
     ]);
   });
+
+  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: Center(
+        child: SizedOverflowBox(
+          size: const Size(100.0, 100.0),
+          alignment: Alignment.topRight,
+          child: Container(height: 50.0, width: 50.0, key: inner),
+        ),
+      ),
+    ));
+    final RenderBox box = inner.currentContext.findRenderObject();
+    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(
+      box.localToGlobal(box.size.center(Offset.zero)),
+      equals(const Offset(
+        (800.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+        (600.0 - 100.0) / 2.0 + 0.0 + 50.0 / 2.0,
+      )),
+    );
+  });
+
+  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: Center(
+        child: SizedOverflowBox(
+          size: const Size(100.0, 100.0),
+          alignment: AlignmentDirectional.bottomStart,
+          child: Container(height: 50.0, width: 50.0, key: inner),
+        ),
+      ),
+    ));
+    final RenderBox box = inner.currentContext.findRenderObject();
+    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(
+      box.localToGlobal(box.size.center(Offset.zero)),
+      equals(const Offset(
+        (800.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+        (600.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+      )),
+    );
+  });
 }

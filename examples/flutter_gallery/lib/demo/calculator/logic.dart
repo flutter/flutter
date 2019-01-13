@@ -112,11 +112,11 @@ enum ExpressionState {
 
 /// An expression that can be displayed in a calculator. It is the result
 /// of a sequence of user entries. It is represented by a sequence of tokens.
-/// Note that the tokens are not in one to one correspondence with the
-/// key taps because we use one token per number, not one token per digit.
-/// A CalcExpression is immutable. The append* methods return a new
-/// CalcExpression that represents the appropriate expression when one
-/// additional key tap occurs.
+///
+/// The tokens are not in one to one correspondence with the key taps because we
+/// use one token per number, not one token per digit. A [CalcExpression] is
+/// immutable. The `append*` methods return a new [CalcExpression] that
+/// represents the appropriate expression when one additional key tap occurs.
 class CalcExpression {
   CalcExpression(this._list, this.state);
 

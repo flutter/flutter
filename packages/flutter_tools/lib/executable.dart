@@ -18,12 +18,11 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
-import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/materialize.dart';
+import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -39,7 +38,7 @@ import 'src/runner/flutter_command.dart';
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
@@ -63,12 +62,11 @@ Future<Null> main(List<String> args) async {
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
-    FuchsiaReloadCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
     LogsCommand(),
-    MaterializeCommand(),
+    MakeHostAppEditableCommand(),
     PackagesCommand(),
     PrecacheCommand(),
     RunCommand(verboseHelp: verboseHelp),

@@ -28,10 +28,10 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-/// * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
-///   for how to create and manage backend textures on Android.
-/// * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
-///   for how to create and manage backend textures on iOS.
+///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///    for how to create and manage backend textures on Android.
+///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///    for how to create and manage backend textures on iOS.
 class Texture extends LeafRenderObjectWidget {
   /// Creates a widget backed by the texture identified by [textureId].
   const Texture({ Key key, @required this.textureId }): assert(textureId != null), super(key: key);

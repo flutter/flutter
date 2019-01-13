@@ -28,7 +28,7 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<Null> runCommand() async { }
+  Future<FlutterCommandResult> runCommand() async => null;
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -65,7 +65,7 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
@@ -89,6 +89,8 @@ class PackagesGetCommand extends FlutterCommand {
       await _runPubGet(exampleProject.directory.path);
       await exampleProject.ensureReadyForPlatformSpecificTooling();
     }
+
+    return null;
   }
 }
 
@@ -103,10 +105,10 @@ class PackagesTestCommand extends FlutterCommand {
   @override
   String get description {
     return 'Run the "test" package.\n'
-           'This is similar to "flutter test", but instead of hosting the tests in the\n'
-           'flutter environment it hosts the tests in a pure Dart environment. The main\n'
-           'differences are that the "dart:ui" library is not available and that tests\n'
-           'run faster. This is helpful for testing libraries that do not depend on any\n'
+           'This is similar to "flutter test", but instead of hosting the tests in the '
+           'flutter environment it hosts the tests in a pure Dart environment. The main '
+           'differences are that the "dart:ui" library is not available and that tests '
+           'run faster. This is helpful for testing libraries that do not depend on any '
            'packages from the Flutter SDK. It is equivalent to "pub run test".';
   }
 
@@ -116,7 +118,10 @@ class PackagesTestCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
+  Future<FlutterCommandResult> runCommand() async {
+    await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
+    return null;
+  }
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
@@ -139,5 +144,8 @@ class PackagesPassthroughCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pubInteractively(argResults.rest);
+  Future<FlutterCommandResult> runCommand() async {
+    await pubInteractively(argResults.rest);
+    return null;
+  }
 }

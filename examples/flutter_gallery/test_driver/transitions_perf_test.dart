@@ -35,6 +35,14 @@ const List<String> kProfiledDemos = <String>[
   'Pickers@Material',
 ];
 
+// There are 3 places where the Gallery demos are traversed.
+// 1- In widget tests such as examples/flutter_gallery/test/smoke_test.dart
+// 2- In driver tests such as examples/flutter_gallery/test_driver/transitions_perf_test.dart
+// 3- In on-device instrumentation tests such as examples/flutter_gallery/test/live_smoketest.dart
+//
+// If you change navigation behavior in the Gallery or in the framework, make
+// sure all 3 are covered.
+
 // Demos that will be backed out of within FlutterDriver.runUnsynchronized();
 //
 // These names must match GalleryItem titles from kAllGalleryDemos
@@ -45,9 +53,7 @@ const List<String> kUnsynchronizedDemos = <String>[
   'Video@Media',
 ];
 
-const List<String> kSkippedDemos = <String>[
-  'Pull to refresh@Cupertino', // The back button lacks a tooltip.
-];
+const List<String> kSkippedDemos = <String>[];
 
 // All of the gallery demos, identified as "title@category".
 //
@@ -57,7 +63,7 @@ List<String> _allDemos = <String>[];
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
-Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
+Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
 
@@ -123,7 +129,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
+Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String currentDemoCategory;
 
@@ -157,10 +163,10 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
 
       if (kUnsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<void>(() async {
-          await driver.tap(find.byTooltip('Back'));
+          await driver.tap(find.pageBack());
         });
       } else {
-        await driver.tap(find.byTooltip('Back'));
+        await driver.tap(find.pageBack());
       }
     }
 

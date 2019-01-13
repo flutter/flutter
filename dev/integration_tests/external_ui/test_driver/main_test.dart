@@ -11,7 +11,7 @@ final RegExp calibrationRegExp = RegExp('Flutter frame rate is (.*)fps');
 final RegExp statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
 const Duration samplingTime = Duration(seconds: 8);
 
-Future<Null> main() async {
+Future<void> main() async {
   group('texture suite', () {
     FlutterDriver driver;
 
@@ -38,7 +38,7 @@ Future<Null> main() async {
 
       // Texture frame stats at 0.5x Flutter frame rate
       await driver.tap(fab);
-      await Future<Null>.delayed(samplingTime);
+      await Future<void>.delayed(samplingTime);
       await driver.tap(fab);
 
       final String statsSlow = await driver.getText(summary);
@@ -50,7 +50,7 @@ Future<Null> main() async {
 
       // Texture frame stats at 2.0x Flutter frame rate
       await driver.tap(fab);
-      await Future<Null>.delayed(samplingTime);
+      await Future<void>.delayed(samplingTime);
       await driver.tap(fab);
 
       final String statsFast = await driver.getText(summary);

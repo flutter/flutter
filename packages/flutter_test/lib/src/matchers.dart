@@ -4,13 +4,14 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -194,7 +195,7 @@ final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -275,9 +276,11 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [matchesReferenceImage], which should be used instead if you want to
+///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-Matcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
     return _MatchesGoldenFile(key);
   } else if (key is String) {
@@ -286,13 +289,49 @@ Matcher matchesGoldenFile(dynamic key) {
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
-/// Asserts that a [SemanticsData] contains the specified information.
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
+/// reference image identified by [image].
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget.
+///
+/// This is an asynchronous matcher, meaning that callers should use
+/// [expectLater] when using this matcher and await the future returned by
+/// [expectLater].
+///
+/// ## Sample code
+///
+/// ```dart
+/// final ui.Paint paint = ui.Paint()
+///   ..style = ui.PaintingStyle.stroke
+///   ..strokeWidth = 1.0;
+/// final ui.PictureRecorder recorder = ui.PictureRecorder();
+/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+/// final ui.Picture picture = recorder.endRecording();
+/// ui.Image referenceImage = picture.toImage(50, 50);
+///
+/// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
+/// await expectLater(image, matchesReferenceImage(referenceImage);
+/// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+/// ```
+///
+/// See also:
+///
+///  * [matchesGoldenFile], which should be used instead if you need to verify
+///    that a [Finder] or [ui.Image] matches a golden image.
+AsyncMatcher matchesReferenceImage(ui.Image image) {
+  return _MatchesReferenceImage(image);
+}
+
+/// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// To retrieve the semantics data of a widget, use [tester.getSemantics]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -300,15 +339,14 @@ Matcher matchesGoldenFile(dynamic key) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
-/// expect(data, matchesSemanticsData(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
-Matcher matchesSemanticsData({
+///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+Matcher matchesSemantics({
   String label,
   String hint,
   String value,
@@ -362,6 +400,7 @@ Matcher matchesSemanticsData({
   String onTapHint,
   String onLongPressHint,
   List<CustomSemanticsAction> customActions,
+  List<Matcher> children,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -466,6 +505,7 @@ Matcher matchesSemanticsData({
     size: size,
     customActions: customActions,
     hintOverrides: hintOverrides,
+    children: children,
   );
 }
 
@@ -1303,7 +1343,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 }
 
-class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Null> {
+class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, RenderPhysicalModel> {
   const _RendersOnPhysicalShape({
     this.shape,
     this.elevation,
@@ -1404,7 +1444,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
 }
 
-class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
+class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
   const _ClipsWithShapeBorder({@required this.shape});
 
   final ShapeBorder shape;
@@ -1513,6 +1553,76 @@ Future<ui.Image> _captureImage(Element element) {
   return layer.toImage(renderObject.paintBounds);
 }
 
+int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+  assert(imageA.length == imageB.length);
+  int delta = 0;
+  for (int i = 0; i < imageA.length; i+=4) {
+    if (imageA[i] != imageB[i] ||
+      imageA[i+1] != imageB[i+1] ||
+      imageA[i+2] != imageB[i+2] ||
+      imageA[i+3] != imageB[i+3]) {
+      delta++;
+    }
+  }
+  return delta;
+}
+
+class _MatchesReferenceImage extends AsyncMatcher {
+  const _MatchesReferenceImage(this.referenceImage);
+
+  final ui.Image referenceImage;
+
+  @override
+  Future<String> matchAsync(dynamic item) async {
+    Future<ui.Image> imageFuture;
+    if (item is Future<ui.Image>) {
+      imageFuture = item;
+    } else if (item is ui.Image) {
+      imageFuture = Future<ui.Image>.value(item);
+    } else {
+      final Finder finder = item;
+      final Iterable<Element> elements = finder.evaluate();
+      if (elements.isEmpty) {
+        return 'could not be rendered because no widget was found';
+      } else if (elements.length > 1) {
+        return 'matched too many widgets';
+      }
+      imageFuture = _captureImage(elements.single);
+    }
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    return binding.runAsync<String>(() async {
+      final ui.Image image = await imageFuture;
+      final ByteData bytes = await image.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      final ByteData referenceBytes = await referenceImage.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (referenceBytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+        return 'does not match as width or height do not match. $image != $referenceImage';
+      }
+
+      final int countDifferentPixels = _countDifferentPixels(
+        Uint8List.view(bytes.buffer),
+        Uint8List.view(referenceBytes.buffer),
+      );
+      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+    }, additionalTime: const Duration(seconds: 21));
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('rasterized image matches that of a $referenceImage reference image');
+  }
+}
+
 class _MatchesGoldenFile extends AsyncMatcher {
   const _MatchesGoldenFile(this.key);
 
@@ -1577,6 +1687,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.customActions,
     this.hintOverrides,
+    this.children,
   });
 
   final String label;
@@ -1591,43 +1702,51 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final List<Matcher> children;
 
   @override
   Description describe(Description description) {
     description.add('has semantics');
     if (label != null)
-      description.add('with label: $label ');
+      description.add(' with label: $label');
     if (value != null)
-      description.add('with value: $value ');
+      description.add(' with value: $value');
     if (hint != null)
-      description.add('with hint: $hint ');
+      description.add(' with hint: $hint');
     if (increasedValue != null)
-      description.add('with increasedValue: $increasedValue');
+      description.add(' with increasedValue: $increasedValue ');
     if (decreasedValue != null)
-      description.add('with decreasedValue: $decreasedValue');
+      description.add(' with decreasedValue: $decreasedValue ');
     if (actions != null)
-      description.add('with actions:').addDescriptionOf(actions);
+      description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
-      description.add('with flags:').addDescriptionOf(flags);
+      description.add(' with flags: ').addDescriptionOf(flags);
     if (textDirection != null)
-      description.add('with textDirection: $textDirection ');
+      description.add(' with textDirection: $textDirection ');
     if (rect != null)
-      description.add('with rect: $rect');
+      description.add(' with rect: $rect');
     if (size != null)
-      description.add('with size: $size');
+      description.add(' with size: $size');
     if (customActions != null)
-      description.add('with custom actions: $customActions');
+      description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
-      description.add('with custom hints: $hintOverrides');
+      description.add(' with custom hints: $hintOverrides');
+    if (children != null) {
+      description.add(' with children:\n');
+      for (_MatchesSemanticsData child in children)
+        child.describe(description);
+    }
     return description;
   }
 
 
   @override
-  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
-    if (data == null)
+  bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
+    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
+    if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
-        'Maybe you forgot to enabled semantics?');
+        'Maybe you forgot to enable semantics?');
+    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : node;
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
@@ -1691,7 +1810,16 @@ class _MatchesSemanticsData extends Matcher {
         return failWithDescription(matchState, 'flags were: $flagSummary');
       }
     }
-    return true;
+    bool allMatched = true;
+    if (children != null) {
+      int i = 0;
+      node.visitChildren((SemanticsNode child) {
+        allMatched = children[i].matches(child, matchState) && allMatched;
+        i += 1;
+        return allMatched;
+      });
+    }
+    return allMatched;
   }
 
   bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {

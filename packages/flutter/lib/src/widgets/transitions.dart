@@ -254,6 +254,7 @@ class RotationTransition extends AnimatedWidget {
   const RotationTransition({
     Key key,
     @required Animation<double> turns,
+    this.alignment = Alignment.center,
     this.child,
   }) : super(key: key, listenable: turns);
 
@@ -262,6 +263,13 @@ class RotationTransition extends AnimatedWidget {
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
   Animation<double> get turns => listenable;
+
+  /// The alignment of the origin of the coordinate system around which the
+  /// rotation occurs, relative to the size of the box.
+  ///
+  /// For example, to set the origin of the rotation to top right corner, use
+  /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
+  final Alignment alignment;
 
   /// The widget below this widget in the tree.
   ///
@@ -274,7 +282,7 @@ class RotationTransition extends AnimatedWidget {
     final Matrix4 transform = Matrix4.rotationZ(turnsValue * math.pi * 2.0);
     return Transform(
       transform: transform,
-      alignment: Alignment.center,
+      alignment: alignment,
       child: child,
     );
   }
@@ -573,9 +581,9 @@ class RelativePositionedTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DecoratedBox], which also draws a [Decoration] but is not animated.
-/// * [AnimatedContainer], a more full-featured container that also animates on
-///   decoration using an internal animation.
+///  * [DecoratedBox], which also draws a [Decoration] but is not animated.
+///  * [AnimatedContainer], a more full-featured container that also animates on
+///    decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
@@ -584,7 +592,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new DecoratedBox].
+  ///  * [new DecoratedBox]
   const DecoratedBoxTransition({
     Key key,
     @required this.decoration,
@@ -638,7 +646,7 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new Align].
+  ///  * [new Align].
   const AlignTransition({
     Key key,
     @required Animation<AlignmentGeometry> alignment,
@@ -677,8 +685,8 @@ class AlignTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
-///   but is not animated.
+///  * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
+///    but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
   /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
   /// the widget.
@@ -752,7 +760,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
@@ -797,6 +805,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

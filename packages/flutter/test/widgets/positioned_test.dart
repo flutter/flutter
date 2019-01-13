@@ -104,7 +104,7 @@ void main() {
       ),
     ); // t=0
     recordMetrics();
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again

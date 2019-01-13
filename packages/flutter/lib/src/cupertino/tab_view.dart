@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'app.dart' show CupertinoApp;
 import 'route.dart';
 
 /// A single tab view with its own [Navigator] state and history.
@@ -42,6 +43,7 @@ class CupertinoTabView extends StatefulWidget {
   const CupertinoTabView({
     Key key,
     this.builder,
+    this.navigatorKey,
     this.defaultTitle,
     this.routes,
     this.onGenerateRoute,
@@ -56,6 +58,19 @@ class CupertinoTabView extends StatefulWidget {
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   final WidgetBuilder builder;
+
+  /// A key to use when building this widget's [Navigator].
+  ///
+  /// If a [navigatorKey] is specified, the [Navigator] can be directly
+  /// manipulated without first obtaining it from a [BuildContext] via
+  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
+  /// getter.
+  ///
+  /// If this is changed, a new [Navigator] will be created, losing all the
+  /// tab's state in the process; in that case, the [navigatorObservers]
+  /// must also be changed, since the previous observers will be attached to the
+  /// previous navigator.
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// The title of the default route.
   final String defaultTitle;
@@ -114,14 +129,17 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void initState() {
     super.initState();
-    _heroController = HeroController(); // Linear tweening.
+    _heroController = CupertinoApp.createCupertinoHeroController();
     _updateObservers();
   }
 
   @override
-   void didUpdateWidget(CupertinoTabView oldWidget) {
-     super.didUpdateWidget(oldWidget);
-     _updateObservers();
+  void didUpdateWidget(CupertinoTabView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey
+        || widget.navigatorObservers != oldWidget.navigatorObservers) {
+      _updateObservers();
+    }
   }
 
   void _updateObservers() {
@@ -133,6 +151,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
+      key: widget.navigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,

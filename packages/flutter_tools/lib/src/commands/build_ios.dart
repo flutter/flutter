@@ -10,6 +10,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
@@ -48,7 +49,7 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
@@ -69,7 +70,7 @@ class BuildIOSCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = getBuildInfo();
     if (forSimulator && !buildInfo.supportsSimulator)
-      throwToolExit('${toTitleCase(buildInfo.modeName)} mode is not supported for simulators.');
+      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
@@ -90,5 +91,7 @@ class BuildIOSCommand extends BuildSubCommand {
 
     if (result.output != null)
       printStatus('Built ${result.output}.');
+
+    return null;
   }
 }

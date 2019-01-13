@@ -30,7 +30,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   IconData _icon;
   double _flutterFrameRate;
 
-  Future<Null> _summarizeStats() async {
+  Future<void> _summarizeStats() async {
     final double framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
@@ -39,7 +39,7 @@ Consumed: ${framesConsumed.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
   }
 
-  Future<Null> _nextState() async {
+  Future<void> _nextState() async {
     switch (_state) {
       case FrameState.initial:
         debugPrint('Starting .5x speed test...');
@@ -47,11 +47,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod('start', _flutterFrameRate ~/ 2);
+        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
         break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _icon = Icons.fast_forward;
         _state = FrameState.afterSlow;
@@ -62,11 +62,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod('start', (_flutterFrameRate * 2).toInt());
+        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
         break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _state = FrameState.afterFast;
         _icon = Icons.replay;
@@ -90,9 +90,9 @@ Widget builds: $_widgetBuilds''';
   static const int calibrationTickCount = 600;
 
   /// Measures Flutter's frame rate.
-  Future<Null> _calibrate() async {
+  Future<void> _calibrate() async {
     debugPrint('Awaiting calm (3 second pause)...');
-    await Future<Null>.delayed(const Duration(milliseconds: 3000));
+    await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     DateTime startTime;
     int tickCount = 0;

@@ -158,7 +158,7 @@ class FlutterProject {
 
   static Future<FlutterProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>[name]);
+      await flutter('create', options: <String>['--template=app', name]);
     });
     return FlutterProject(directory, name);
   }
@@ -166,7 +166,7 @@ class FlutterProject {
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
 
-  Future<Null> addCustomBuildType(String name, {String initWith}) async {
+  Future<void> addCustomBuildType(String name, {String initWith}) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
@@ -183,7 +183,7 @@ android {
     ''');
   }
 
-  Future<Null> addProductFlavor(String name) async {
+  Future<void> addProductFlavor(String name) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
@@ -202,14 +202,14 @@ android {
     ''');
   }
 
-  Future<Null> introduceError() async {
+  Future<void> introduceError() async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
-  Future<Null> runGradleTask(String task, {List<String> options}) async {
+  Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: androidPath, task: task, options: options);
   }
 
@@ -234,7 +234,7 @@ class FlutterPluginProject {
 
   static Future<FlutterPluginProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['-t', 'plugin', name]);
+      await flutter('create', options: <String>['--template=plugin', name]);
     });
     return FlutterPluginProject(directory, name);
   }
@@ -244,14 +244,14 @@ class FlutterPluginProject {
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
-  Future<Null> runGradleTask(String task, {List<String> options}) async {
+  Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
   bool get hasDebugApk => File(debugApkPath).existsSync();
 }
 
-Future<Null> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
+Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
   final ProcessResult result = await _resultOfGradleTask(
       workingDirectory: workingDirectory,
       task: task,
@@ -281,8 +281,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 }
 
 class _Dependencies {
-  String target;
-  Set<String> dependencies;
   _Dependencies(String depfilePath) {
     final RegExp _separatorExpr = RegExp(r'([^\\]) ');
     final RegExp _escapeExpr = RegExp(r'\\(.)');
@@ -297,10 +295,13 @@ class _Dependencies {
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
         // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
+
+  String target;
+  Set<String> dependencies;
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.

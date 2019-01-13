@@ -29,6 +29,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
     android: AndroidApk(
       id: 'io.flutter.android.mock',
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
+      versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
     iOS: BuildableIOSApp(MockIosProject())
@@ -173,7 +174,7 @@ class MockProcess extends Mock implements Process {
 /// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
-  Future<Null> showPrompt(String prompt, List<String> outputLines) async {
+  Future<void> showPrompt(String prompt, List<String> outputLines) async {
     _stdoutController.add(utf8.encode(prompt));
     final List<int> bytesOnStdin = await _stdin.future;
     // Echo stdin to stdout.
@@ -234,11 +235,11 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  Future<Null> addStream(Stream<List<int>> stream) {
-    final Completer<Null> completer = Completer<Null>();
+  Future<void> addStream(Stream<List<int>> stream) {
+    final Completer<void> completer = Completer<void>();
     stream.listen((List<int> data) {
       add(data);
-    }).onDone(() => completer.complete(null));
+    }).onDone(() => completer.complete());
     return completer.future;
   }
 
@@ -275,22 +276,26 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  Future<Null> get done => close();
+  Future<void> get done => close();
 
   @override
-  Future<Null> close() async => null;
+  Future<void> close() async { }
 
   @override
-  Future<Null> flush() async => null;
+  Future<void> flush() async { }
 }
 
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
   final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
   IOSink get stdout => _stdout;
+
+  @override
+  IOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
@@ -299,15 +304,16 @@ class MockStdio extends Stdio {
     _stdin.add(utf8.encode('$line\n'));
   }
 
-  List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
+  List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
+  List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  MockPollingDeviceDiscovery() : super('mock');
+
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
-
-  MockPollingDeviceDiscovery() : super('mock');
 
   @override
   Future<List<Device>> pollingGetDevices() async => _devices;
@@ -422,7 +428,11 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
 
   @override
   Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    messages.add('writeFile $fsName $deviceUri');
+    String message = 'writeFile $fsName $deviceUri';
+    if (content is DevFSFileContent) {
+      message += ' ${content.file.path}';
+    }
+    messages.add(message);
     devicePathToContent[deviceUri] = content;
   }
 

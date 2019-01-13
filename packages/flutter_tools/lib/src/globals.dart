@@ -6,6 +6,7 @@ import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
+import 'base/terminal.dart';
 import 'cache.dart';
 
 Logger get logger => context[Logger];
@@ -16,9 +17,27 @@ Artifacts get artifacts => Artifacts.instance;
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
 ///
-/// Set `emphasis` to true to make the output bold if it's supported.
-void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
-  logger.printError(message, stackTrace: stackTrace, emphasis: emphasis);
+/// Set [emphasis] to true to make the output bold if it's supported.
+/// Set [color] to a [TerminalColor] to color the output, if the logger
+/// supports it. The [color] defaults to [TerminalColor.red].
+void printError(
+  String message, {
+  StackTrace stackTrace,
+  bool emphasis,
+  TerminalColor color,
+  int indent,
+  int hangingIndent,
+  bool wrap,
+}) {
+  logger.printError(
+    message,
+    stackTrace: stackTrace,
+    emphasis: emphasis ?? false,
+    color: color,
+    indent: indent,
+    hangingIndent: hangingIndent,
+    wrap: wrap,
+  );
 }
 
 /// Display normal output of the command. This should be used for things like
@@ -28,20 +47,25 @@ void printError(String message, { StackTrace stackTrace, bool emphasis = false }
 ///
 /// Set `newline` to false to skip the trailing linefeed.
 ///
-/// If `ansiAlternative` is provided, and the terminal supports color, that
-/// string will be printed instead of the message.
-///
-/// If `indent` is provided, each line of the message will be prepended by the specified number of
-/// whitespaces.
+/// If `indent` is provided, each line of the message will be prepended by the
+/// specified number of whitespaces.
 void printStatus(
-  String message,
-  { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }) {
+  String message, {
+  bool emphasis,
+  bool newline,
+  TerminalColor color,
+  int indent,
+  int hangingIndent,
+  bool wrap,
+}) {
   logger.printStatus(
     message,
-    emphasis: emphasis,
-    newline: newline,
-    ansiAlternative: ansiAlternative,
-    indent: indent
+    emphasis: emphasis ?? false,
+    color: color,
+    newline: newline ?? true,
+    indent: indent,
+    hangingIndent: hangingIndent,
+    wrap: wrap,
   );
 }
 

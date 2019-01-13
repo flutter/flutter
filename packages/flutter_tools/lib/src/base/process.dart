@@ -74,7 +74,7 @@ void addShutdownHook(
 /// hooks within a given stage will be started in parallel and will be
 /// guaranteed to run to completion before shutdown hooks in the next stage are
 /// started.
-Future<Null> runShutdownHooks() async {
+Future<void> runShutdownHooks() async {
   printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
@@ -137,8 +137,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -148,28 +148,28 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
         if (trace)
           printTrace(message);
         else
-          printStatus(message);
+          printStatus(message, wrap: false);
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null)
-        printError('$prefix$line');
+        printError('$prefix$line', wrap: false);
     });
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await waitGroup<Null>(<Future<Null>>[
-    stdoutSubscription.asFuture<Null>(),
-    stderrSubscription.asFuture<Null>(),
+  await waitGroup<void>(<Future<void>>[
+    stdoutSubscription.asFuture<void>(),
+    stderrSubscription.asFuture<void>(),
   ]);
 
-  await waitGroup<Null>(<Future<Null>>[
+  await waitGroup<void>(<Future<void>>[
     stdoutSubscription.cancel(),
     stderrSubscription.cancel(),
   ]);
@@ -203,9 +203,9 @@ Future<int> runInteractively(List<String> command, {
   return await process.exitCode;
 }
 
-Future<Null> runAndKill(List<String> cmd, Duration timeout) {
+Future<void> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
-  return Future<Null>.delayed(timeout, () async {
+  return Future<void>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
   });
@@ -247,8 +247,10 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
+  if (result.exitCode != 0) {
+    throw ProcessException(cmd[0], cmd.sublist(1),
+      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+  }
   return result;
 }
 

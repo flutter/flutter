@@ -97,7 +97,7 @@ class Fingerprinter {
 /// See [Fingerprinter].
 class Fingerprint {
   Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
-    final Iterable<File> files = inputPaths.map(fs.file);
+    final Iterable<File> files = inputPaths.map<File>(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
       throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
@@ -179,7 +179,7 @@ Future<Set<String>> readDepfile(String depfilePath) async {
   return dependencies
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
-      .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+      .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }

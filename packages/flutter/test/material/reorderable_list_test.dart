@@ -39,7 +39,7 @@ void main() {
             width: itemHeight * 10,
             child: ReorderableListView(
               header: header,
-              children: listItems.map(listItemToWidget).toList(),
+              children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
             ),
@@ -462,10 +462,10 @@ void main() {
           ));
 
           // Get the switch tile's semantics:
-          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+          final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
           // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
-          expect(semanticsData, matchesSemanticsData(
+          expect(semanticsNode, matchesSemantics(
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
@@ -914,7 +914,6 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
 
 class _Stateful extends StatefulWidget {
   // Ignoring the preference for const constructors because we want to test with regular non-const instances.
-  // ignore:prefer_const_constructors
   // ignore:prefer_const_constructors_in_immutables
   _Stateful({Key key}) : super(key: key);
 

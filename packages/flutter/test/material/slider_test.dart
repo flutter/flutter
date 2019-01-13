@@ -1013,7 +1013,7 @@ void main() {
       );
     }
 
-    Future<Null> testReparenting(bool reparent) async {
+    Future<void> testReparenting(bool reparent) async {
       final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
       final Offset center = tester.getCenter(find.byType(Slider));
       // Move to 0.0.
@@ -1276,7 +1276,7 @@ void main() {
       );
     }
 
-    Future<Null> expectValueIndicator({
+    Future<void> expectValueIndicator({
       bool isVisible,
       SliderThemeData theme,
       int divisions,

@@ -43,6 +43,25 @@ class TestPointer {
   Offset get location => _location;
   Offset _location;
 
+  /// If a custom event is created outside of this class, this function is used
+  /// to set the [isDown].
+  bool setDownInfo(PointerEvent event, Offset newLocation) {
+    _location = newLocation;
+    switch (event.runtimeType) {
+      case PointerDownEvent:
+        assert(!isDown);
+        _isDown = true;
+        break;
+      case PointerUpEvent:
+      case PointerCancelEvent:
+        assert(isDown);
+        _isDown = false;
+        break;
+      default: break;
+    }
+    return isDown;
+  }
+
   /// Create a [PointerDownEvent] at the given location.
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You
@@ -113,7 +132,7 @@ class TestPointer {
 
 /// Signature for a callback that can dispatch events and returns a future that
 /// completes when the event dispatch is complete.
-typedef EventDispatcher = Future<Null> Function(PointerEvent event, HitTestResult result);
+typedef EventDispatcher = Future<void> Function(PointerEvent event, HitTestResult result);
 
 /// Signature for callbacks that perform hit-testing at a given location.
 typedef HitTester = HitTestResult Function(Offset location);
@@ -142,7 +161,7 @@ class TestGesture {
     assert(hitTester != null);
     assert(dispatcher != null);
     TestGesture result;
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<void>(() async {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = TestPointer(pointer);
@@ -150,8 +169,39 @@ class TestGesture {
 
       // create a TestGesture
       result = TestGesture._(dispatcher, hitTestResult, testPointer);
-      return null;
-    }).then<TestGesture>((Null value) {
+    }).then<TestGesture>((void value) {
+      return result;
+    }, onError: (dynamic error, StackTrace stack) {
+      return Future<TestGesture>.error(error, stack);
+    });
+  }
+
+  /// Create a [TestGesture] by starting with a custom [PointerDownEvent] at the
+  /// given point.
+  ///
+  /// By default, the pointer identifier used is 1. This can be overridden by
+  /// providing the `pointer` argument.
+  ///
+  /// A function to use for hit testing should be provided via the `hitTester`
+  /// argument, and a function to use for dispatching events should be provided
+  /// via the `dispatcher` argument.
+  static Future<TestGesture> downWithCustomEvent(Offset downLocation, PointerDownEvent downEvent, {
+    int pointer = 1,
+    @required HitTester hitTester,
+    @required EventDispatcher dispatcher,
+  }) async {
+    assert(hitTester != null);
+    assert(dispatcher != null);
+    TestGesture result;
+    return TestAsyncUtils.guard<void>(() async {
+      // dispatch down event
+      final HitTestResult hitTestResult = hitTester(downLocation);
+      final TestPointer testPointer = TestPointer(pointer);
+      testPointer.setDownInfo(downEvent, downLocation);
+      await dispatcher(downEvent, hitTestResult);
+      // create a TestGesture
+      result = TestGesture._(dispatcher, hitTestResult, testPointer);
+    }).then<TestGesture>((void value) {
       return result;
     }, onError: (dynamic error, StackTrace stack) {
       return Future<TestGesture>.error(error, stack);
@@ -163,14 +213,22 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<Null> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
+  Future<void> updateWithCustomEvent(PointerEvent event, { Duration timeStamp = Duration.zero }) {
+    _pointer.setDownInfo(event, event.position);
+    return TestAsyncUtils.guard<void>(() {
+      return _dispatcher(event, _result);
+    });
+  }
+
+  /// Send a move event moving the pointer by the given offset.
+  Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
     assert(_pointer._isDown);
     return moveTo(_pointer.location + offset, timeStamp: timeStamp);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
-    return TestAsyncUtils.guard(() {
+  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
+    return TestAsyncUtils.guard<void>(() {
       assert(_pointer._isDown);
       return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
     });
@@ -179,12 +237,11 @@ class TestGesture {
   /// End the gesture by releasing the pointer.
   ///
   /// The object is no longer usable after this method has been called.
-  Future<Null> up() {
-    return TestAsyncUtils.guard(() async {
+  Future<void> up() {
+    return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.up(), _result);
       assert(!_pointer._isDown);
-      return null;
     });
   }
 
@@ -193,12 +250,11 @@ class TestGesture {
   /// for instance).
   ///
   /// The object is no longer usable after this method has been called.
-  Future<Null> cancel() {
-    return TestAsyncUtils.guard(() async {
+  Future<void> cancel() {
+    return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(), _result);
       assert(!_pointer._isDown);
-      return null;
     });
   }
 }

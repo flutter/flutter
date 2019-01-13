@@ -2,18 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('TextTheme control test', () {
-    final Typography typography = Typography(platform: TargetPlatform.android);
-    expect(typography.black, equals(typography.black.copyWith()));
-    expect(typography.black, equals(typography.black.apply()));
-    expect(typography.black.hashCode, equals(typography.black.copyWith().hashCode));
-    expect(typography.black, isNot(equals(typography.white)));
-  });
-
   test('Typography is defined for all target platforms', () {
     for (TargetPlatform platform in TargetPlatform.values) {
       final Typography typography = Typography(platform: platform);
@@ -21,29 +14,6 @@ void main() {
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
     }
-  });
-
-  test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(title: TextStyle(color: Color(0xcafefeed)));
-    final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.title.color, equals(partialTheme.title.color));
-
-    const TextTheme onlyHeadlineAndTitle = TextTheme(
-      headline: TextStyle(color: Color(0xcafefeed)),
-      title: TextStyle(color: Color(0xbeefcafe)),
-    );
-    const TextTheme onlyBody1AndTitle = TextTheme(
-      body1: TextStyle(color: Color(0xfeedfeed)),
-      title: TextStyle(color: Color(0xdeadcafe)),
-    );
-    TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
-    expect(merged.body2, isNull);
-    expect(merged.body1.color, equals(onlyBody1AndTitle.body1.color));
-    expect(merged.headline.color, equals(onlyHeadlineAndTitle.headline.color));
-    expect(merged.title.color, equals(onlyBody1AndTitle.title.color));
-
-    merged = onlyHeadlineAndTitle.merge(null);
-    expect(merged, equals(onlyHeadlineAndTitle));
   });
 
   test('Typography on Android, Fuchsia defaults to Roboto', () {
@@ -74,6 +44,26 @@ void main() {
       expect(textTheme.body1, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
+      expect(textTheme.subtitle, isTextFont);
+      expect(textTheme.overline, isTextFont);
     }
+  });
+
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    Typography(
+      platform: TargetPlatform.android,
+      black: Typography.blackCupertino,
+      white: Typography.whiteCupertino,
+      englishLike: Typography.englishLike2018,
+      dense: Typography.dense2018,
+      tall: Typography.tall2018,
+    ).debugFillProperties(builder);
+
+    final List<String> nonDefaultPropertyNames = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.name).toList();
+
+    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 }

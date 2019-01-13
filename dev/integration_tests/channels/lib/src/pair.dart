@@ -4,10 +4,10 @@
 
 /// A pair of values. Used for testing custom codecs.
 class Pair {
+  Pair(this.left, this.right);
+
   final dynamic left;
   final dynamic right;
-
-  Pair(this.left, this.right);
 
   @override
   String toString() => 'Pair[$left, $right]';

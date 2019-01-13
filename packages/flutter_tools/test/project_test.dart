@@ -89,22 +89,22 @@ void main() {
       });
     });
 
-    group('materialize Android', () {
+    group('editable Android host app', () {
       testInMemory('fails on non-module', () async {
         final FlutterProject project = await someProject();
         await expectLater(
-          project.android.materialize(),
+          project.android.makeHostAppEditable(),
           throwsA(isInstanceOf<AssertionError>()),
         );
       });
-      testInMemory('exits on already materialized module', () async {
+      testInMemory('exits on already editable module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
-        return expectToolExitLater(project.android.materialize(), contains('already materialized'));
+        await project.android.makeHostAppEditable();
+        return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
       });
       testInMemory('creates android/app folder in place of .android/app', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
         expect(
           project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
@@ -119,7 +119,7 @@ void main() {
       });
       testInMemory('retains .android/Flutter folder and references it', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
@@ -128,9 +128,9 @@ void main() {
       });
       testInMemory('can be redone after deletion', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         project.directory.childDirectory('android').deleteSync(recursive: true);
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('android').childDirectory('app'));
       });
     });
@@ -148,20 +148,20 @@ void main() {
       testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectNotExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectNotExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
         expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
-        expectNotExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
       });
       testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
       });
       testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
@@ -183,7 +183,7 @@ void main() {
       testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        final Directory flutter = project.ios.directory.childDirectory('Flutter');
+        final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
@@ -201,7 +201,7 @@ void main() {
         expect(project.android.isModule, isTrue);
         expect(project.ios.isModule, isTrue);
         expect(project.android.hostAppGradleRoot.basename, '.android');
-        expect(project.ios.directory.basename, '.ios');
+        expect(project.ios.hostAppRoot.basename, '.ios');
       });
       testInMemory('is known for non-module', () async {
         final FlutterProject project = await someProject();
@@ -209,7 +209,7 @@ void main() {
         expect(project.android.isModule, isFalse);
         expect(project.ios.isModule, isFalse);
         expect(project.android.hostAppGradleRoot.basename, 'android');
-        expect(project.ios.directory.basename, 'ios');
+        expect(project.ios.hostAppRoot.basename, 'ios');
       });
     });
 
@@ -234,7 +234,7 @@ void main() {
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 
-      void testWithMocks(String description, Future<Null> testMethod()) {
+      void testWithMocks(String description, Future<void> testMethod()) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
           IOSWorkflow: () => mockIOSWorkflow,
@@ -365,7 +365,7 @@ flutter:
 
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
-void testInMemory(String description, Future<Null> testMethod()) {
+void testInMemory(String description, Future<void> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(
     style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -406,7 +406,7 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   }
 }
 
-Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');

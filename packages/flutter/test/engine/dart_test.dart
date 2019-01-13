@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 /// Verifies Dart semantics governed by flags set by Flutter tooling.
 void main() {

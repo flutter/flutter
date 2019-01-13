@@ -63,7 +63,7 @@ void main() {
     expect(integers.first, equals(1));
     expect(yieldCount, equals(2));
 
-    expect(evens.map((int i) => i + 1), equals(<int>[3, 5]));
+    expect(evens.map<int>((int i) => i + 1), equals(<int>[3, 5]));
     expect(yieldCount, equals(5));
 
     expect(evens, equals(<int>[2, 4]));
@@ -95,13 +95,13 @@ void main() {
     final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
-    final Iterable<int> expanded1 = integers.expand((int i) => <int>[i, i]);
+    final Iterable<int> expanded1 = integers.expand<int>((int i) => <int>[i, i]);
 
     expect(yieldCount, equals(0));
     expect(expanded1, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));
     expect(yieldCount, equals(5));
 
-    final Iterable<int> expanded2 = integers.expand((int i) => <int>[i, i]);
+    final Iterable<int> expanded2 = integers.expand<int>((int i) => <int>[i, i]);
 
     expect(yieldCount, equals(5));
     expect(expanded2, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));

@@ -10,6 +10,7 @@ import 'dart:ui' show window;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -92,9 +93,10 @@ class ScaffoldPrelayoutGeometry {
   /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
   /// or the keyboard.
   ///
-  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonLocation] does not need to factor
-  /// in [minInsets.bottom] when aligning a [FloatingActionButton] to [contentBottom].
+  /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
+  /// means that a [FloatingActionButtonLocation] does not need to factor in
+  /// [minInsets.bottom] when aligning a [FloatingActionButton] to
+  /// [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
@@ -104,9 +106,9 @@ class ScaffoldPrelayoutGeometry {
   /// place the [FloatingActionButton] at the top of the screen, while
   /// keeping it below the [Scaffold.appBar].
   ///
-  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonLocation] does not need to factor
-  /// in [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
+  /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
+  /// means that a [FloatingActionButtonLocation] does not need to factor in
+  /// [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
   final double contentTop;
 
   /// The minimum padding to inset the [FloatingActionButton] by for it
@@ -558,6 +560,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     }
   }
 
+  static final Animatable<double> _entranceTurnTween = Tween<double>(
+    begin: 1.0 - kFloatingActionButtonTurnInterval,
+    end: 1.0,
+  ).chain(CurveTween(curve: Curves.easeIn));
+
   void _updateAnimations() {
     // Get the animations for exit and entrance.
     final CurvedAnimation previousExitScaleAnimation = CurvedAnimation(
@@ -575,15 +582,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: widget.currentController,
       curve: Curves.easeIn,
     );
-    final Animation<double> currentEntranceRotationAnimation = Tween<double>(
-      begin: 1.0 - kFloatingActionButtonTurnInterval,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: widget.currentController,
-        curve: Curves.easeIn,
-      ),
-    );
+    final Animation<double> currentEntranceRotationAnimation = _currentController.drive(_entranceTurnTween);
 
     // Get the animations for when the FAB is moving.
     final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
@@ -592,10 +591,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     // Aggregate the animations.
     _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
     _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
-    _extendedCurrentScaleAnimation = CurvedAnimation(
-      parent: _currentScaleAnimation,
-      curve: const Interval(0.0, 0.1),
-    );
+    _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
 
     _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
     _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
@@ -685,6 +681,42 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
+/// {@tool snippet --template=stateful_widget}
+///
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
+/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
+/// to center the text within the [Scaffold] and the [FloatingActionButton] is
+/// centered and docked within the [BottomAppBar] using
+/// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
+/// connected to a callback that increments a counter.
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.'),
+///     ),
+///     bottomNavigationBar: BottomAppBar(
+///       child: Container(height: 50.0,),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() {
+///         _count++;
+///       }),
+///       tooltip: 'Increment Counter',
+///       child: Icon(Icons.add),
+///     ),
+///     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app
@@ -693,11 +725,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
-///  * [FloatingActionButtonLocation], which is used to place the
-///    [floatingActionButton] within the [Scaffold]'s layout.
-///  * [FloatingActionButtonAnimator], which is used to animate the
-///    [floatingActionButton] from one [floatingActionButtonLocation] to
-///    another.
 ///  * [Drawer], which is a vertical panel that is typically displayed to the
 ///    left of the body (and often hidden on phones) using the [drawer]
 ///    property.
@@ -711,7 +738,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    using the [ScaffoldState.showBottomSheet] method, or modal, in which case
 ///    it is shown using the [showModalBottomSheet] function.
 ///  * [ScaffoldState], which is the state associated with this widget.
-///  * <https://material.google.com/layout/structure.html>
+///  * <https://material.io/design/layout/responsive-layout-grid.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
@@ -729,7 +756,10 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
-  }) : assert(primary != null), super(key: key);
+    this.drawerDragStartBehavior = DragStartBehavior.start,
+  }) : assert(primary != null),
+       assert(drawerDragStartBehavior != null),
+       super(key: key);
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -776,10 +806,6 @@ class Scaffold extends StatefulWidget {
   ///
   /// The [persistentFooterButtons] are rendered above the
   /// [bottomNavigationBar] but below the [body].
-  ///
-  /// See also:
-  ///
-  ///  * <https://material.google.com/components/buttons.html#buttons-persistent-footer-buttons>
   final List<Widget> persistentFooterButtons;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
@@ -865,6 +891,9 @@ class Scaffold extends StatefulWidget {
   /// The default value of this property, like the default value of
   /// [AppBar.primary], is true.
   final bool primary;
+
+  /// {@macro flutter.material.drawer.dragStartBehavior}
+  final DragStartBehavior drawerDragStartBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1008,6 +1037,7 @@ class Scaffold extends StatefulWidget {
   /// value changes.
   ///
   /// See also:
+  ///
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show snackbars, bottom sheets, and so forth.
   static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
@@ -1051,6 +1081,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   double get appBarMaxHeight => _appBarMaxHeight;
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
+
+  /// Whether the [Scaffold.drawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///  * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
+  ///    [Scaffold].
+  bool get isDrawerOpen => _drawerOpened;
+
+  /// Whether the [Scaffold.endDrawer] is opened.
+  ///
+  /// See also:
+  ///
+  ///  * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
+  ///    a [Scaffold].
+  bool get isEndDrawerOpen => _endDrawerOpened;
 
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
@@ -1199,7 +1245,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _snackBarController.value = 0.0;
       completer.complete(reason);
     } else {
-      _snackBarController.reverse().then<void>((Null _) {
+      _snackBarController.reverse().then<void>((void value) {
         assert(mounted);
         if (!completer.isCompleted)
           completer.complete(reason);
@@ -1387,7 +1433,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
   StandardBottomSheetController<T> showBottomSheet<T>(
       WidgetBuilder builder, {
       double initialTop,
@@ -1595,6 +1641,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.end,
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
+          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1616,6 +1663,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           alignment: DrawerAlignment.start,
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
+          dragStartBehavior: widget.drawerDragStartBehavior,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -1896,7 +1944,7 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
-  Future<Null> close() {
+  Future<void> close() {
     return widget.scrollController.dismiss();
   }
 

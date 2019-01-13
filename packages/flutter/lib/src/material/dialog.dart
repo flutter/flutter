@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -12,6 +11,7 @@ import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -19,6 +19,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
+// BuildContext context;
 
 /// A material design dialog.
 ///
@@ -39,15 +40,31 @@ class Dialog extends StatelessWidget {
   /// Typically used in conjunction with [showDialog].
   const Dialog({
     Key key,
-    this.child,
+    this.backgroundColor,
+    this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.shape,
+    this.child,
   }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// {@template flutter.material.dialog.backgroundColor}
+  /// The background color of the surface of this [Dialog].
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// This sets the [Material.color] on this [Dialog]'s [Material].
+  ///
+  /// If `null`, [ThemeData.cardColor] is used.
+  /// {@endtemplate}
+  final Color backgroundColor;
+
+  /// {@template flutter.material.dialog.elevation}
+  /// The z-coordinate of this [Dialog].
+  ///
+  /// If null then [DialogTheme.elevation] is used, and if that's null then the
+  /// dialog's elevation is 24.0.
+  /// {@endtemplate}
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
 
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the dialog is placed in.
@@ -61,12 +78,28 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
-  Color _getColor(BuildContext context) {
-    return Theme.of(context).dialogBackgroundColor;
-  }
+  /// {@template flutter.material.dialog.shape}
+  /// The shape of this dialog's border.
+  ///
+  /// Defines the dialog's [Material.shape].
+  ///
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// {@endtemplate}
+  final ShapeBorder shape;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
+  static const RoundedRectangleBorder _defaultDialogShape =
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+  static const double _defaultElevation = 24.0;
 
   @override
   Widget build(BuildContext context) {
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -81,8 +114,9 @@ class Dialog extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
             child: Material(
-              elevation: 24.0,
-              color: _getColor(context),
+              color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+              elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
+              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
               child: child,
             ),
@@ -101,9 +135,13 @@ class Dialog extends StatelessWidget {
 /// displayed below the content.
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow. Consider
-/// using a scrolling widget, such as [ListView], for [content] to avoid
-/// overflow.
+/// display the title and the actions and let the content overflow, which is
+/// rarely desired. Consider using a scrolling widget for [content], such as
+/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
+/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
+/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
+/// which use lazy viewports, will not work. If this is a problem, consider
+/// using [Dialog] directly.)
 ///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
@@ -111,14 +149,14 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// Future<Null> _neverSatisfied() async {
-///   return showDialog<Null>(
+/// Future<void> _neverSatisfied() async {
+///   return showDialog<void>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
@@ -145,6 +183,7 @@ class Dialog extends StatelessWidget {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -164,10 +203,15 @@ class AlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.titlePadding,
+    this.titleTextStyle,
     this.content,
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.contentTextStyle,
     this.actions,
+    this.backgroundColor,
+    this.elevation,
     this.semanticLabel,
+    this.shape,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -189,6 +233,12 @@ class AlertDialog extends StatelessWidget {
   /// [actions].
   final EdgeInsetsGeometry titlePadding;
 
+  /// Style for the text in the [title] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// [ThemeData.textTheme.title].
+  final TextStyle titleTextStyle;
+
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
@@ -205,6 +255,12 @@ class AlertDialog extends StatelessWidget {
   /// to separate the content from the other edges of the dialog.
   final EdgeInsetsGeometry contentPadding;
 
+  /// Style for the text in the [content] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
+  /// to [ThemeData.textTheme.subhead].
+  final TextStyle contentTextStyle;
+
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
@@ -217,6 +273,13 @@ class AlertDialog extends StatelessWidget {
   /// pixels of padding is added above the [ButtonBar] to separate the [title]
   /// from the [actions].
   final List<Widget> actions;
+
+  /// {@macro flutter.material.dialog.backgroundColor}
+  final Color backgroundColor;
+
+  /// {@macro flutter.material.dialog.elevation}
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -231,9 +294,14 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    final ThemeData theme = Theme.of(context);
+    final DialogTheme dialogTheme = DialogTheme.of(context);
     final List<Widget> children = <Widget>[];
     String label = semanticLabel;
 
@@ -241,7 +309,7 @@ class AlertDialog extends StatelessWidget {
       children.add(Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.title,
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
           child: Semantics(child: title, namesRoute: true),
         ),
       ));
@@ -261,7 +329,7 @@ class AlertDialog extends StatelessWidget {
         child: Padding(
           padding: contentPadding,
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.subhead,
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
             child: content,
           ),
         ),
@@ -291,7 +359,12 @@ class AlertDialog extends StatelessWidget {
         child: dialogChild
       );
 
-    return Dialog(child: dialogChild);
+    return Dialog(
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      child: dialogChild,
+    );
   }
 }
 
@@ -308,7 +381,7 @@ class AlertDialog extends StatelessWidget {
 /// title and the first option, and 24 pixels of spacing between the last option
 /// and the bottom of the dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// SimpleDialogOption(
@@ -316,6 +389,7 @@ class AlertDialog extends StatelessWidget {
 ///   child: const Text('Treasury department'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -372,7 +446,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// In this example, the user is asked to select between two options. These
 /// options are represented as an enum. The [showDialog] method here returns
@@ -386,7 +460,7 @@ class SimpleDialogOption extends StatelessWidget {
 /// that doesn't mention every value in the enum.
 ///
 /// ```dart
-/// Future<Null> _askedToLead() async {
+/// Future<void> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
 ///     builder: (BuildContext context) {
@@ -415,6 +489,7 @@ class SimpleDialogOption extends StatelessWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -435,7 +510,10 @@ class SimpleDialog extends StatelessWidget {
     this.titlePadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.backgroundColor,
+    this.elevation,
     this.semanticLabel,
+    this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -477,6 +555,13 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
+  /// {@macro flutter.material.dialog.backgroundColor}
+  final Color backgroundColor;
+
+  /// {@macro flutter.material.dialog.elevation}
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
+
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
@@ -489,6 +574,9 @@ class SimpleDialog extends StatelessWidget {
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;
+
+  /// {@macro flutter.material.dialog.shape}
+  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -542,7 +630,12 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
-    return Dialog(child: dialogChild);
+    return Dialog(
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      child: dialogChild,
+    );
   }
 }
 
@@ -581,6 +674,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
+///
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
 ///    not show buttons below its body.

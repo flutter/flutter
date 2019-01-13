@@ -205,7 +205,7 @@ class AnimatedList extends StatefulWidget {
 ///
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
 /// with the static [AnimatedList.of] method.
-class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin {
+class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
@@ -297,7 +297,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       _itemsCount += 1;
     });
 
-    controller.forward().then<void>((Null value) {
+    controller.forward().then<void>((_) {
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
     });
   }
@@ -332,7 +332,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    controller.reverse().then<void>((Null value) {
+    controller.reverse().then<void>((void value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account

@@ -50,15 +50,16 @@ class _DefaultHeroTag {
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * <https://material.google.com/components/buttons-floating-action-button.html>
+///  * [Scaffold], in which floating action buttons typically live.
+///  * [RaisedButton], another kind of button that appears to float above the
+///    content.
+///  * <https://material.io/design/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   /// Creates a circular floating action button.
   ///
   /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
-  /// arguments must not be null.
+  /// arguments must not be null. Additionally, [elevation] and
+  /// [highlightElevation] must be non-negative.
   const FloatingActionButton({
     Key key,
     this.child,
@@ -74,8 +75,8 @@ class FloatingActionButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) :  assert(elevation != null),
-        assert(highlightElevation != null),
+  }) :  assert(elevation != null && elevation >= 0.0),
+        assert(highlightElevation != null && highlightElevation >= 0.0),
         assert(mini != null),
         assert(shape != null),
         assert(isExtended != null),
@@ -86,7 +87,8 @@ class FloatingActionButton extends StatefulWidget {
   /// an [icon] and a [label].
   ///
   /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior]
-  /// and [shape] arguments must not be null.
+  /// and [shape] arguments must not be null. Additionally, [elevation] and
+  //  [highlightElevation] must be non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
@@ -102,8 +104,8 @@ class FloatingActionButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
-  }) :  assert(elevation != null),
-        assert(highlightElevation != null),
+  }) :  assert(elevation != null && elevation >= 0.0),
+        assert(highlightElevation != null && highlightElevation >= 0.0),
         assert(shape != null),
         assert(isExtended != null),
         assert(clipBehavior != null),
@@ -163,18 +165,22 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the floating action button.
+  /// The z-coordinate at which to place this button releative to its parent.
   ///
-  /// Defaults to 6, the appropriate elevation for floating action buttons.
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to 6, the appropriate elevation for floating action buttons. The
+  /// value is always non-negative.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when the user is touching
-  /// the button. This controls the size of the shadow below the floating action
-  /// button.
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the user is touching the button.
+  ///
+  /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
-  /// while they are being touched.
+  /// while they are being touched. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -186,7 +192,9 @@ class FloatingActionButton extends StatefulWidget {
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
   /// and width of 40.0 logical pixels with a layout width and height of 48.0
-  /// logical pixels.
+  /// logical pixels. (The extra 4 pixels of padding on each side are added as a
+  /// result of the floating action button having [MaterialTapTargetSize.padded]
+  /// set on the underlying [RawMaterialButton.materialTapTargetSize].)
   final bool mini;
 
   /// The shape of the button's [Material].
@@ -216,7 +224,7 @@ class FloatingActionButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   final BoxConstraints _sizeConstraints;

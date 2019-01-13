@@ -48,6 +48,8 @@ class TestSemantics {
     this.transform,
     this.textSelection,
     this.children = const <TestSemantics>[],
+    this.scrollIndex,
+    this.scrollChildren,
     Iterable<SemanticsTag> tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -73,6 +75,8 @@ class TestSemantics {
     this.transform,
     this.textSelection,
     this.children = const <TestSemantics>[],
+    this.scrollIndex,
+    this.scrollChildren,
     Iterable<SemanticsTag> tags,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
@@ -109,6 +113,8 @@ class TestSemantics {
     Matrix4 transform,
     this.textSelection,
     this.children = const <TestSemantics>[],
+    this.scrollIndex,
+    this.scrollChildren,
     Iterable<SemanticsTag> tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -200,6 +206,12 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
+  /// The index of the first visible semantic node within a scrollable.
+  final int scrollIndex;
+
+  /// The total number of semantic nodes within a scrollable.
+  final int scrollChildren;
+
   final TextSelection textSelection;
 
   static Matrix4 _applyRootChildScale(Matrix4 transform) {
@@ -270,6 +282,12 @@ class TestSemantics {
     if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
       return fail('expected node id $id to have textSelection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
     }
+    if (scrollIndex != null && scrollIndex != nodeData.scrollIndex) {
+      return fail('expected node id $id to have scrollIndex $scrollIndex but found scrollIndex ${nodeData.scrollIndex}.');
+    }
+    if (scrollChildren != null && scrollChildren != nodeData.scrollChildCount) {
+      return fail('expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.');
+    }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)
       return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
@@ -278,10 +296,10 @@ class TestSemantics {
       return true;
     bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
-    for (final SemanticsNode node in node.debugListChildrenInOrder(childOrder)) {
+    for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
       it.moveNext();
       final bool childMatches = it.current._matches(
-        node,
+        child,
         matchState,
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,
@@ -322,10 +340,12 @@ class TestSemantics {
       buf.writeln('$indent  textDirection: $textDirection,');
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
+    if (scrollIndex != null)
+      buf.writeln('$indent scrollIndex: $scrollIndex,');
     if (rect != null)
       buf.writeln('$indent  rect: $rect,');
     if (transform != null)
-      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')},');
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},');
     buf.writeln('$indent  children: <TestSemantics>[');
     for (TestSemantics child in children) {
       buf.writeln('${child.toString(indentAmount + 2)},');
@@ -403,13 +423,13 @@ class SemanticsTester {
       if (textDirection != null && node.textDirection != textDirection)
         return false;
       if (actions != null) {
-        final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
+        final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
         if (expectedActions != actualActions)
           return false;
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
+        final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags)
           return false;
@@ -475,6 +495,7 @@ class SemanticsTester {
   ///   ));
   ///   semantics.dispose();
   /// });
+  /// ```
   ///
   /// At this point the unit test should automatically pass because it was
   /// generated from the actual [SemanticsNode]s. Next time the semantics tree
@@ -503,7 +524,7 @@ class SemanticsTester {
   }
 
   static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
-    return '<SemanticsTag>[${tags.map((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
+    return '<SemanticsTag>[${tags.map<String>((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
   }
 
   static String _actionsToSemanticsActionExpression(dynamic actions) {
@@ -565,7 +586,7 @@ class SemanticsTester {
     }
 
     buf.write(')');
-    return buf.toString().split('\n').map((String l) => '$indent$l').join('\n');
+    return buf.toString().split('\n').map<String>((String l) => '$indent$l').join('\n');
   }
 }
 
@@ -614,7 +635,7 @@ class _HasSemantics extends Matcher {
   }
 
   String _indent(String text) {
-    return text.toString().trimRight().split('\n').map((String line) => '  $line').join('\n');
+    return text.toString().trimRight().split('\n').map<String>((String line) => '  $line').join('\n');
   }
 
   @override

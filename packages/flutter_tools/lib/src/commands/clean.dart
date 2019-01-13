@@ -22,17 +22,19 @@ class CleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ directory.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final Directory buildDir = fs.directory(getBuildDirectory());
     printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
 
     if (!buildDir.existsSync())
-      return;
+      return null;
 
     try {
       buildDir.deleteSync(recursive: true);
     } catch (error) {
       throwToolExit(error.toString());
     }
+
+    return null;
   }
 }

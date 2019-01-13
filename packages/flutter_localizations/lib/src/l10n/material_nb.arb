@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Vis",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 tegn gjenstår",
-  "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår"
+  "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår",
+  "refreshIndicatorSemanticLabel": "Laster inn på nytt"
 }

@@ -199,9 +199,9 @@ String regenerateIconsFile(String iconData, String codepointData) {
 
 String generateIconDeclarations(String codepointData) {
   return LineSplitter.split(codepointData)
-      .map((String l) => l.trim())
+      .map<String>((String l) => l.trim())
       .where((String l) => l.isNotEmpty)
-      .map(getIconDeclaration)
+      .map<String>(getIconDeclaration)
       .join();
 }
 

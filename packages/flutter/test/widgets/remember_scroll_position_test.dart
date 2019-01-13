@@ -28,7 +28,7 @@ class ThePositiveNumbers extends StatelessWidget {
   }
 }
 
-Future<Null> performTest(WidgetTester tester, bool maintainState) async {
+Future<void> performTest(WidgetTester tester, bool maintainState) async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
     Directionality(

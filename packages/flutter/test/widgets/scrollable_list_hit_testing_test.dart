@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
@@ -18,13 +19,15 @@ void main() {
           child: Container(
             height: 50.0,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
-              children: items.map((int item) {
+              children: items.map<Widget>((int item) {
                 return Container(
                   child: GestureDetector(
                     onTap: () { tapped.add(item); },
                     child: Text('$item'),
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),
@@ -60,13 +63,15 @@ void main() {
           child: Container(
             width: 50.0,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.vertical,
-              children: items.map((int item) {
+              children: items.map<Widget>((int item) {
                 return Container(
                   child: GestureDetector(
                     onTap: () { tapped.add(item); },
                     child: Text('$item'),
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),
@@ -104,7 +109,7 @@ void main() {
         child: ListView(
           itemExtent: 290.0,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map((int item) {
+          children: items.map<Widget>((int item) {
             return Container(
               child: GestureDetector(
                 onTap: () { tapped.add(item); },
@@ -139,7 +144,7 @@ void main() {
           itemExtent: 290.0,
           reverse: true,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map((int item) {
+          children: items.map<Widget>((int item) {
             return Container(
               child: GestureDetector(
                 onTap: () { tapped.add(item); },
@@ -173,7 +178,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           itemExtent: 200.0,
-          children: items.map((int item) {
+          children: items.map<Widget>((int item) {
             return Container(
               child: GestureDetector(
                 onTap: () { tapped.add(item); },

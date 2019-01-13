@@ -21,6 +21,7 @@ import 'android_studio.dart' as android_studio;
 AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String kAndroidHome = 'ANDROID_HOME';
+const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 
 // Android SDK layout:
 
@@ -243,6 +244,8 @@ class AndroidSdk {
         androidHomeDir = config.getValue('android-sdk');
       } else if (platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = platform.environment[kAndroidHome];
+      } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = platform.environment[kAndroidSdkRoot];
       } else if (platform.isLinux) {
         if (homeDirPath != null)
           androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');
@@ -317,14 +320,36 @@ class AndroidSdk {
 
   String get avdManagerPath => getAvdManagerPath();
 
+  Directory get _platformsDir => fs.directory(fs.path.join(directory, 'platforms'));
+
+  Iterable<Directory> get _platforms {
+    Iterable<Directory> platforms = <Directory>[];
+    if (_platformsDir.existsSync()) {
+      platforms = _platformsDir
+        .listSync()
+        .whereType<Directory>();
+    }
+    return platforms;
+  }
+
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
-    if (sdkVersions.isEmpty || latestVersion == null)
-      return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
+    if (sdkVersions.isEmpty || latestVersion == null) {
+      final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
+      if (_platforms.isEmpty) {
+        msg.write(' Directory was empty.');
+      } else {
+        msg.write(' Candidates were:\n');
+        msg.write(_platforms
+          .map((Directory dir) => '  - ${dir.basename}')
+          .join('\n'));
+      }
+      return <String>[msg.toString()];
+    }
 
     return latestVersion.validateSdkWellFormed();
   }
@@ -355,15 +380,6 @@ class AndroidSdk {
   }
 
   void _init() {
-    Iterable<Directory> platforms = <Directory>[]; // android-22, ...
-
-    final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
-    if (platformsDir.existsSync()) {
-      platforms = platformsDir
-        .listSync()
-        .whereType<Directory>();
-    }
-
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
@@ -382,7 +398,7 @@ class AndroidSdk {
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = platforms.map((Directory platformDir) {
+    _sdkVersions = _platforms.map<AndroidSdkVersion>((Directory platformDir) {
       final String platformName = platformDir.basename;
       int platformVersion;
 
@@ -394,7 +410,7 @@ class AndroidSdk {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
           final String versionString = const LineSplitter()
               .convert(buildProps)
-              .map(_sdkVersionRe.firstMatch)
+              .map<Match>(_sdkVersionRe.firstMatch)
               .firstWhere((Match match) => match != null)
               .group(1);
           platformVersion = int.parse(versionString);

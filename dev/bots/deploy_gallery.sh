@@ -28,7 +28,13 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
   version="$(<version)"
   if [[ "$OS" == "linux" ]]; then
     echo "Building Flutter Gallery $version for Android..."
-    # ANDROID_HOME must be set in the env.
+    set +x # Don't echo back the below.
+    if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
+      echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /root/.android/debug.keystore
+    fi
+    set -x
+
+    # ANDROID_SDK_ROOT must be set in the env.
     (
       cd examples/flutter_gallery
       flutter build apk --release -t lib/main_publish.dart
@@ -44,7 +50,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
     else
       echo "Not deployed: Flutter Gallery is only deployed to the Play Store on merged and tagged dev branch commits"
     fi
-  elif [[ "$OS" == "macos" ]]; then
+  elif [[ "$OS" == "darwin" ]]; then
     echo "Building Flutter Gallery $version for iOS..."
     (
       cd examples/flutter_gallery

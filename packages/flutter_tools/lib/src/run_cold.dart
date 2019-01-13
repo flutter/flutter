@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 
+// TODO(mklim): Test this, flutter/flutter#23031.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
@@ -20,12 +21,14 @@ class ColdRunner extends ResidentRunner {
     bool usesTerminalUI = true,
     this.traceStartup = false,
     this.applicationBinary,
+    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
+             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -109,16 +112,16 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async => null;
+  Future<void> handleTerminalCommand(String code) async { }
 
   @override
-  Future<Null> cleanupAfterSignal() async {
+  Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await stopApp();
   }
 
   @override
-  Future<Null> cleanupAtFinish() async {
+  Future<void> cleanupAtFinish() async {
     await stopEchoingDeviceLog();
   }
 
@@ -143,6 +146,9 @@ class ColdRunner extends ResidentRunner {
       }
     }
     if (haveDetails && !details) {
+      if (saveCompilationTrace) {
+        printStatus('Compilation training data will be saved when flutter run quits...');
+      }
       printStatus('For a more detailed help message, press "h". To quit, press "q".');
     } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". To quit, press "q".');
@@ -152,7 +158,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<Null> preStop() async {
+  Future<void> preStop() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

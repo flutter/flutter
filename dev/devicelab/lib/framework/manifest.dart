@@ -83,7 +83,7 @@ Manifest _validateAndParseManifest(Map<dynamic, dynamic> manifestYaml) {
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is Map, tasksYaml, 'Value of "tasks"', 'dictionary');
   final List<dynamic> sortedKeys = tasksYaml.keys.toList()..sort();
-  return sortedKeys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  return sortedKeys.map<ManifestTask>((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
 ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
