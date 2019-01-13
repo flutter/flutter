@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
@@ -118,6 +119,7 @@ void main() {
 
   testWidgets('Floating cursor is painted', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
     final FocusNode focusNode = FocusNode();
@@ -145,7 +147,8 @@ void main() {
     await tester.pump();
 
     expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, 0, 467.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, 0, 467.5, 16.0), const Radius.circular(1.0)),
+        color: CupertinoColors.textFieldCaretBlue)
     );
 
     // Moves the cursor right a few characters.
@@ -153,7 +156,8 @@ void main() {
       offset: const Offset(-250, 20)));
 
     expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, 0, 197.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, 0, 197.5, 16.0), const Radius.circular(1.0)),
+        color: CupertinoColors.textFieldCaretBlue)
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
