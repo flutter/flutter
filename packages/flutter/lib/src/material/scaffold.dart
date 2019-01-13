@@ -278,6 +278,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
+    @required this.allowFloatingBottomNavigation,
   }) : assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
@@ -289,6 +290,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
+  final bool allowFloatingBottomNavigation;
 
   @override
   void performLayout(Size size) {
@@ -300,7 +302,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = size.height;
+    final double bottom = allowFloatingBottomNavigation
+      ? math.max(0.0, size.height - minInsets.bottom)
+      : size.height;
     double contentTop = 0.0;
     double bottomWidgetsHeight = 0.0;
 
@@ -330,7 +334,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // Set the content bottom to account for the greater of the height of any
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
-    final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
+    final double offset = allowFloatingBottomNavigation ? 0.0 : minInsets.bottom;
+    final double contentBottom = math.max(0.0, bottom - math.max(offset, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = BoxConstraints(
@@ -732,6 +737,7 @@ class Scaffold extends StatefulWidget {
     this.bottomSheet,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
+    this.allowFloatingBottomNavigation = true,
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
   }) : assert(primary != null),
@@ -859,6 +865,16 @@ class Scaffold extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool resizeToAvoidBottomPadding;
+
+  /// Whether to allow the [bottomNavigaton] to float above the keyboard when
+  /// it's open.
+  ///
+  /// For example, this could be useful if you need to have a persistent
+  /// [bottomAppBar] in order to still access buttons whilst the keyboard
+  /// is open.
+  ///
+  /// Defaults to false.
+  final bool allowFloatingBottomNavigation;
 
   /// Whether this scaffold is being displayed at the top of the screen.
   ///
@@ -1743,6 +1759,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
+                allowFloatingBottomNavigation: widget.allowFloatingBottomNavigation,
               ),
             );
           }),
