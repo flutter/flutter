@@ -508,6 +508,7 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.dropDownIcon,
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
@@ -566,6 +567,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// If [isExpanded] is true, the inner width is expanded to fill its
   /// surrounding container.
   final bool isExpanded;
+
+  /// Set the dropdown's icon
+  ///
+  /// By default this icon is set to arrow_drop_down
+  /// If dropDownIcon is used , then it overrides the default icon and set the icon as per the user request.
+  final Icon dropDownIcon;
 
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
@@ -724,11 +731,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              color: _downArrowColor,
-            ),
+            widget.isExpanded
+                ? Expanded(child: innerItemsWidget)
+                : innerItemsWidget,
+            widget.dropDownIcon == null
+                ? Icon(
+                    Icons.arrow_drop_down,
+                    size: widget.iconSize,
+                    color: _downArrowColor,
+                  )
+                : widget.dropDownIcon,
           ],
         ),
       ),
