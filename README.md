@@ -1,7 +1,8 @@
 # <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
-[![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
+[![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
+
+[![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
 # Build beautiful native apps in record time
 
@@ -10,11 +11,12 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 ### Documentation
 
 **Main site: [flutter.io][]**
-* [Install](https://flutter.io/get-started/install/)
-* [Get started](https://flutter.io/get-started/)
-* [API documentation](https://docs.flutter.io/)
-* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
-* [How to contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+
+- [Install](https://flutter.io/get-started/install/)
+- [Get started](https://flutter.io/get-started/)
+- [API documentation](https://docs.flutter.io/)
+- [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
+- [How to contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
 For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
@@ -32,6 +34,7 @@ and Android.
 <img src="https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive and flexible UI
+
 Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
@@ -42,7 +45,7 @@ Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">](https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation)
-[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">](https://github.com/flutter/posse_gallery)
+<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
 
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter/)
