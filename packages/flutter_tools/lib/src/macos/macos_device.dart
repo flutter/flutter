@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../application_package.dart';
-import '../base/io.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../desktop.dart';
 import '../device.dart';
 import 'macos_workflow.dart';
 
-/// A device which represents a desktop MacOS target.
+/// A device that represents a desktop MacOS target.
 class MacOSDevice extends Device {
   MacOSDevice() : super('MacOS');
 
@@ -51,13 +48,7 @@ class MacOSDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async {
-    final ProcessResult result = await processManager.run(<String>['sw_vers']);
-    if (result.exitCode != 0) {
-      return 'unknown';
-    }
-    return parseSoftwareVersions(result.stdout);
-  }
+  Future<String> get sdkNameAndVersion async => os.name;
 
   @override
   Future<LaunchResult> startApp(ApplicationPackage package, {
@@ -85,24 +76,6 @@ class MacOSDevice extends Device {
   Future<bool> uninstallApp(ApplicationPackage app) {
     throw UnimplementedError();
   }
-}
-
-/// Parses the output from `sw_vers` on MacOS.
-///
-/// Example output:
-///     $ sw_vers
-///     > ProductName:	Mac OS X
-///       ProductVersion:	11.00.00
-///       BuildVersion:	16G3000
-@visibleForTesting
-String parseSoftwareVersions(String input) {
-  final List<String> lines = input.split('\n');
-  if (lines.length < 2) {
-    return '';
-  }
-  final String name = lines[0].replaceFirst(RegExp(r'ProductName:\s*'), '');
-  final String version = lines[1].replaceFirst(RegExp(r'ProductVersion:\s*'), '');
-  return '$name $version';
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {

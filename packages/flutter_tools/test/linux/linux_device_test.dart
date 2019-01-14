@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
@@ -21,7 +22,7 @@ void main() {
     test('defaults', () async {
       expect(await device.targetPlatform, TargetPlatform.linux_x64);
       expect(device.name, 'Linux');
-      expect(await device.sdkNameAndVersion, '');
+      expect(await device.sdkNameAndVersion, os.name);
     });
 
     test('unimplemented methods', () {

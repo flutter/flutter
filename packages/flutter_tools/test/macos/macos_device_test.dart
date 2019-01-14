@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -17,26 +16,13 @@ void main() {
   group(MacOSDevice, () {
     final MockPlatform notMac = MockPlatform();
     final MacOSDevice device = MacOSDevice();
-    final MockProcessManager processManager = MockProcessManager();
-    final MockProcessResult processResult = MockProcessResult();
     when(notMac.isMacOS).thenReturn(false);
     when(notMac.environment).thenReturn(const <String, String>{});
-    when(processResult.exitCode).thenReturn(0);
-    when<String>(processResult.stdout).thenReturn(r'''
-ProductName:	Mac OS X
-ProductVersion:	10.10.0
-BuildVersion:	16G0000
-''');
-    when(processManager.run(<String>['sw_vers'])).thenAnswer((Invocation invocation) async {
-      return processResult;
-    });
 
-    testUsingContext('defaults', () async {
+    test('defaults', () async {
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'MacOS');
-      expect(await device.sdkNameAndVersion, 'Mac OS X 10.10.0');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
+      expect(await device.sdkNameAndVersion, os.name);
     });
 
     test('unimplemented methods', () {
@@ -64,9 +50,5 @@ BuildVersion:	16G0000
     });
   });
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}
-
-class MockProcessResult extends Mock implements ProcessResult {}
 
 class MockPlatform extends Mock implements Platform {}

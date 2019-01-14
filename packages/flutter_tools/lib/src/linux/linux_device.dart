@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop.dart';
 import '../device.dart';
 import 'linux_workflow.dart';
 
-/// A device which represents a desktop linux target.
+/// A device that represents a desktop Linux target.
 class LinuxDevice extends Device {
   LinuxDevice() : super('Linux');
 
@@ -47,7 +48,7 @@ class LinuxDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => '';
+  Future<String> get sdkNameAndVersion async => os.name;
 
   @override
   Future<LaunchResult> startApp(ApplicationPackage package, {
