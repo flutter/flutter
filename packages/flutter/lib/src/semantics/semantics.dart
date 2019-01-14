@@ -1573,9 +1573,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// );
   /// ```
   ///
-  /// [PhysicalModel] C is located 10.0 above [PhysicalModel] B, which in turn
-  /// is located 5.0 above [PhysicalModel] A. The side view of this constellation
-  /// looks as follows:
+  /// [PhysicalModel] C is elevated 10.0 above [PhysicalModel] B, which in turn
+  /// is elevated 5.0 above [PhysicalModel] A. The side view of this
+  /// constellation looks as follows:
   ///
   /// ![A diagram illustrating the elevations of three PhysicalModels and their
   /// corresponding SemanticsNodes.](https://flutter.github.io/assets-for-api-docs/assets/semantics/SemanticsNode.thickness.png)
