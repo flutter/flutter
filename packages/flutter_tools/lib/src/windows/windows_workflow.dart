@@ -7,17 +7,18 @@ import '../base/platform.dart';
 import '../desktop.dart';
 import '../doctor.dart';
 
-/// The [MacOSWorkflow] instance.
-MacOSWorkflow get macOSWorkflow => context[MacOSWorkflow];
-/// The macos-specific implementation of a [Workflow].
+/// The [WindowsWorkflow] instance.
+WindowsWorkflow get windowsWorkflow => context[WindowsWorkflow];
+
+/// The windows-specific implementation of a [Workflow].
 ///
 /// This workflow requires the flutter-desktop-embedding as a sibling
 /// repository to the flutter repo.
-class MacOSWorkflow implements Workflow {
-  const MacOSWorkflow();
+class WindowsWorkflow implements Workflow {
+  const WindowsWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isMacOS;
+  bool get appliesToHostPlatform => platform.isWindows;
 
   @override
   bool get canLaunchDevices => hasFlutterDesktopRepository;

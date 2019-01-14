@@ -9,17 +9,17 @@ import 'package:flutter_tools/src/build_info.dart';
 import '../base/platform.dart';
 import '../desktop.dart';
 import '../device.dart';
-import 'macos_workflow.dart';
+import 'windows_workflow.dart';
 
-/// A device which represents a desktop MacOS target.
-class MacOSDevice extends Device {
-  MacOSDevice() : super('macos_device');
+/// A device which represents a desktop Windows target.
+class WindowsDevice extends Device {
+  WindowsDevice() : super('windows_device');
 
   @override
   void clearLogs() {}
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('macos');
+  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('windows');
 
   @override
   Future<bool> installApp(ApplicationPackage app) {
@@ -43,7 +43,7 @@ class MacOSDevice extends Device {
   bool isSupported() => true;
 
   @override
-  String get name => 'macos';
+  String get name => 'windows';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -79,19 +79,19 @@ class MacOSDevice extends Device {
   }
 }
 
-class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices() : super('macos devices');
+class WindowsDevices extends PollingDeviceDiscovery {
+  WindowsDevices() : super('windows devices');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => platform.isWindows;
 
   @override
-  bool get canListAnything => macOSWorkflow.canListDevices;
+  bool get canListAnything => windowsWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices() async {
     return <Device>[
-      MacOSDevice()
+      WindowsDevice()
     ];
   }
 

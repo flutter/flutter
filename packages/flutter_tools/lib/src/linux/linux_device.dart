@@ -9,17 +9,17 @@ import 'package:flutter_tools/src/build_info.dart';
 import '../base/platform.dart';
 import '../desktop.dart';
 import '../device.dart';
-import 'macos_workflow.dart';
+import 'linux_workflow.dart';
 
-/// A device which represents a desktop MacOS target.
-class MacOSDevice extends Device {
-  MacOSDevice() : super('macos_device');
+/// A device which represents a desktop linux target.
+class LinuxDevice extends Device {
+  LinuxDevice() : super('linux_device');
 
   @override
   void clearLogs() {}
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('macos');
+  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('linux');
 
   @override
   Future<bool> installApp(ApplicationPackage app) {
@@ -43,7 +43,7 @@ class MacOSDevice extends Device {
   bool isSupported() => true;
 
   @override
-  String get name => 'macos';
+  String get name => 'linux';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -79,19 +79,19 @@ class MacOSDevice extends Device {
   }
 }
 
-class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices() : super('macos devices');
+class LinuxDevices extends PollingDeviceDiscovery {
+  LinuxDevices() : super('linux devices');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => platform.isLinux;
 
   @override
-  bool get canListAnything => macOSWorkflow.canListDevices;
+  bool get canListAnything => linuxWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices() async {
     return <Device>[
-      MacOSDevice()
+      LinuxDevice()
     ];
   }
 

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/macos/macos_device.dart';
 
 import '../src/common.dart';
 
 void main() {
-  group(MacOSDevice, () {
+  group(LinuxDevice, () {
     test('unimplemented methods', () {
-      final MacOSDevice device = MacOSDevice();
+      final LinuxDevice device = LinuxDevice();
       expect(() => device.installApp(null), throwsA(isInstanceOf<UnimplementedError>()));
       expect(() => device.uninstallApp(null), throwsA(isInstanceOf<UnimplementedError>()));
       expect(() => device.isLatestBuildInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('noop port forwarding', () async {
-      final MacOSDevice device = MacOSDevice();
+      final LinuxDevice device = LinuxDevice();
       final DevicePortForwarder portForwarder = device.portForwarder;
       final int result = await portForwarder.forward(2);
       expect(result, 2);

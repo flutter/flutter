@@ -3,31 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:mockito/mockito.dart';
-
+import 'package:flutter_tools/src/linux/linux_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/macos/macos_workflow.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(MacOSWorkflow, () {
-    final MockPlatform mac = MockPlatform();
-    final MockPlatform notMac = MockPlatform();
-    when(mac.isMacOS).thenReturn(true);
-    when(notMac.isMacOS).thenReturn(false);
+  group(LinuxWorkflow, () {
+    final MockPlatform linux = MockPlatform();
+    final MockPlatform notLinux = MockPlatform();
+    when(linux.isLinux).thenReturn(true);
+    when(notLinux.isLinux).thenReturn(false);
 
-    testUsingContext('Applies to mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, true);
+    testUsingContext('Applies to linux platform', () {
+      expect(linuxWorkflow.appliesToHostPlatform, true);
     }, overrides: <Type, Generator>{
-      Platform: () => mac,
+      Platform: () => linux,
     });
-    testUsingContext('Does not apply to non-mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, false);
+    testUsingContext('Does not apply to non-linux platform', () {
+      expect(linuxWorkflow.appliesToHostPlatform, false);
     }, overrides: <Type, Generator>{
-      Platform: () => notMac,
+      Platform: () => notLinux,
     });
 
     final MockFileSystem fileSystem = MockFileSystem();
@@ -39,11 +38,11 @@ void main() {
     when(directory.existsSync()).thenReturn(true);
 
     testUsingContext('defaults', () {
-      expect(macOSWorkflow.canListEmulators, false);
-      expect(macOSWorkflow.canLaunchDevices, true);
-      expect(macOSWorkflow.canListDevices, true);
+      expect(linuxWorkflow.canListEmulators, false);
+      expect(linuxWorkflow.canLaunchDevices, true);
+      expect(linuxWorkflow.canListDevices, true);
     }, overrides: <Type, Generator>{
-      Platform: () => mac,
+      Platform: () => linux,
       FileSystem: () => fileSystem,
     });
   });

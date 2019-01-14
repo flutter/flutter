@@ -7,27 +7,27 @@ import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/macos/macos_workflow.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(MacOSWorkflow, () {
-    final MockPlatform mac = MockPlatform();
-    final MockPlatform notMac = MockPlatform();
-    when(mac.isMacOS).thenReturn(true);
-    when(notMac.isMacOS).thenReturn(false);
+  group(WindowsWorkflow, () {
+    final MockPlatform windows = MockPlatform();
+    final MockPlatform notWindows = MockPlatform();
+    when(windows.isWindows).thenReturn(true);
+    when(notWindows.isWindows).thenReturn(false);
 
-    testUsingContext('Applies to mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, true);
+    testUsingContext('Applies to windows platform', () {
+      expect(windowsWorkflow.appliesToHostPlatform, true);
     }, overrides: <Type, Generator>{
-      Platform: () => mac,
+      Platform: () => windows,
     });
-    testUsingContext('Does not apply to non-mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, false);
+    testUsingContext('Does not apply to non-windows platform', () {
+      expect(windowsWorkflow.appliesToHostPlatform, false);
     }, overrides: <Type, Generator>{
-      Platform: () => notMac,
+      Platform: () => notWindows,
     });
 
     final MockFileSystem fileSystem = MockFileSystem();
@@ -39,11 +39,11 @@ void main() {
     when(directory.existsSync()).thenReturn(true);
 
     testUsingContext('defaults', () {
-      expect(macOSWorkflow.canListEmulators, false);
-      expect(macOSWorkflow.canLaunchDevices, true);
-      expect(macOSWorkflow.canListDevices, true);
+      expect(windowsWorkflow.canListEmulators, false);
+      expect(windowsWorkflow.canLaunchDevices, true);
+      expect(windowsWorkflow.canListDevices, true);
     }, overrides: <Type, Generator>{
-      Platform: () => mac,
+      Platform: () => windows,
       FileSystem: () => fileSystem,
     });
   });
