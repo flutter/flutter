@@ -120,6 +120,11 @@ class MediaQueryData {
   /// measured from the edges of the [MediaQuery] widget's bounds. The
   /// bounds of the top level MediaQuery created by [WidgetsApp] are the
   /// same as the window (often the mobile device screen) that contains the app.
+  ///
+  /// See also:
+  ///
+  /// * [MediaQueryData], which provides some additional detail about this
+  ///   property and how it differs from [padding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -133,6 +138,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
+  ///  * [MediaQueryData], which provides some additional detail about this
+  ///    property and how it differs from [viewInsets].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;

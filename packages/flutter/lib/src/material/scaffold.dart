@@ -25,6 +25,13 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// TabController tabController
+// void setState(VoidCallback fn) { }
+// String appBarTitle
+// int tabCount
+// TickerProvider tickerProvider
+
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
@@ -727,10 +734,15 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [bottomNavigationBar] is a [TabBar] and the body is a
 /// [TabBarView], you might be tempted to make each tab bar view a
 /// scaffold with a differently titled AppBar. It would be better to add a
-/// listener to the [TabController] that updates the AppBar:
+/// listener to the [TabController] that updates the AppBar.
+///
+/// ## Sample Code
+///
+/// Add a listener to the app's tab controller so that the [AppBar] title of the
+/// app's one and only scaffold is reset each time a new tab is selected.
 ///
 /// ```dart
-/// tabController = TabController(vsync this, length tabCount)..addListener(() {
+/// tabController = TabController(vsync tickerProvider, length tabCount)..addListener(() {
 ///   if (!tabController.indexIsChanging) {
 ///     setState(() {
 ///       // Rebuild the enclosing scaffold with a new AppBar title
@@ -903,7 +915,7 @@ class Scaffold extends StatefulWidget {
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget bottomSheet;
 
-  /// This flag is deprecated, please use resizeToAvoidBottomInset
+  /// This flag is deprecated, please use [resizeToAvoidBottomInset]
   /// instead.
   ///
   /// Originally the name referred [MediaQueryData.padding]. Now it refers

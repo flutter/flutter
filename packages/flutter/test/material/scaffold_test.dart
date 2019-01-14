@@ -78,7 +78,6 @@ void main() {
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
-
   });
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
@@ -1286,7 +1285,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
   _GeometryCachePainter cache;
 
   @override
-   void didChangeDependencies() {
+  void didChangeDependencies() {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
     if (geometryListenable == newListenable)
