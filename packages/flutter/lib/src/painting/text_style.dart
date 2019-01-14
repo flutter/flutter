@@ -814,7 +814,6 @@ class TextStyle extends Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      // Use zero fontSize if strut is not defined to have no effect on layout.
       fontSize: (fontSize ?? this.fontSize) * textScaleFactor,
       strutStyle: strutStyle != null ? ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,

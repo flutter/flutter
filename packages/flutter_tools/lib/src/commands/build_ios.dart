@@ -70,7 +70,7 @@ class BuildIOSCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = getBuildInfo();
     if (forSimulator && !buildInfo.supportsSimulator)
-      throwToolExit('${toTitleCase(buildInfo.modeName)} mode is not supported for simulators.');
+      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
