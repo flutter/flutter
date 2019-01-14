@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "펼치기",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1자 남음",
-  "remainingTextFieldCharacterCountOther": "$remainingCount자 남음"
+  "remainingTextFieldCharacterCountOther": "$remainingCount자 남음",
+  "refreshIndicatorSemanticLabel": "새로고침"
 }

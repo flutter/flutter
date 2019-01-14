@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
@@ -71,6 +72,12 @@ abstract class FlutterCommand extends Command<void> {
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand get current => context[FlutterCommand];
 
+  /// The option name for a custom observatory port.
+  static const String observatoryPortOption = 'observatory-port';
+
+  /// The flag name for whether or not to use ipv6.
+  static const String ipv6Flag = 'ipv6';
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
@@ -84,6 +91,10 @@ abstract class FlutterCommand extends Command<void> {
   bool _usesTargetOption = false;
 
   bool _usesPubOption = false;
+
+  bool _usesPortOption = false;
+
+  bool _usesIpv6Flag = false;
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
@@ -147,6 +158,43 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
+  /// Adds options for connecting to the Dart VM observatory port.
+  void usesPortOptions() {
+    argParser.addOption(observatoryPortOption,
+        help: 'Listen to the given port for an observatory debugger connection.\n'
+              'Specifying port 0 (the default) will find a random free port.'
+    );
+    _usesPortOption = true;
+  }
+
+  /// Gets the observatory port provided to in the 'observatory-port' option.
+  ///
+  /// If no port is set, returns null.
+  int get observatoryPort {
+    if (!_usesPortOption || argResults['observatory-port'] == null) {
+      return null;
+    }
+    try {
+      return int.parse(argResults['observatory-port']);
+    } catch (error) {
+      throwToolExit('Invalid port for `--observatory-port`: $error');
+    }
+    return null;
+  }
+
+  void usesIpv6Flag() {
+    argParser.addFlag(ipv6Flag,
+      hide: true,
+      negatable: false,
+      help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
+            'forwards the host port to a device port. Not used when the '
+            '--debug-port flag is not set.',
+    );
+    _usesIpv6Flag = true;
+  }
+
+  bool get ipv6 => _usesIpv6Flag ? argResults['ipv6'] : null;
+
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
         help: 'An integer used as an internal version number.\n'
@@ -189,8 +237,83 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('dynamic',
       hide: !verboseHelp,
       negatable: false,
-      help: 'Enable dynamic code. This flag is intended for use with\n'
-            '--release or --profile; --debug always has this enabled.');
+      help: 'Enable dynamic code. Only allowed with --release or --profile.');
+  }
+
+  void addDynamicModeFlags({bool verboseHelp = false}) {
+    argParser.addOption('compilation-trace-file',
+        defaultsTo: 'compilation.txt',
+        hide: !verboseHelp,
+        help: 'Filename of Dart compilation trace file. This file will be produced\n'
+              'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
+              '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
+              'some code by the offline compiler.'
+    );
+    argParser.addFlag('patch',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Generate dynamic patch for current changes from baseline.\n'
+              'Dynamic patch is generated relative to baseline package.\n'
+              'This flag is only allowed when using --dynamic.\n'
+    );
+  }
+
+  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+    argParser.addOption('patch-number',
+        hide: !verboseHelp,
+        help: 'An integer used as an internal version number for dynamic patch.\n'
+              'Each update may have a unique number to differentiate from previous\n'
+              'patches for same \'versionCode\' on Android or \'CFBundleVersion\' on iOS.\n'
+              'This optional setting allows several dynamic patches to coexist\n'
+              'for same baseline build, and is useful for canary and A-B testing\n'
+              'of dynamic patches.\n'
+              'This flag is only used when --dynamic --patch is specified.\n'
+    );
+    argParser.addOption('patch-dir',
+        defaultsTo: 'public',
+        hide: !verboseHelp,
+        help: 'The directory where to store generated dynamic patches.\n'
+              'This directory can be deployed to a CDN such as Firebase Hosting.\n'
+              'It is recommended to store this directory in version control.\n'
+              'This flag is only used when --dynamic --patch is specified.\n'
+    );
+    argParser.addFlag('baseline',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Save built package as baseline for future dynamic patching.\n'
+            'Built package, such as APK file on Android, is saved and '
+            'can be used to generate dynamic patches in later builds.\n'
+            'This flag is only allowed when using --dynamic.\n'
+    );
+
+    addDynamicBaselineFlags(verboseHelp: verboseHelp);
+  }
+
+  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+    argParser.addOption('baseline-dir',
+        defaultsTo: '.baseline',
+        hide: !verboseHelp,
+        help: 'The directory where to store and find generated baseline packages.\n'
+              'It is recommended to store this directory in version control.\n'
+              'This flag is only used when --dynamic --baseline is specified.\n'
+    );
+  }
+
+  void usesFuchsiaOptions({bool hide = false}) {
+    argParser.addOption(
+      'target-model',
+      help: 'Target model that determines what core libraries are available',
+      defaultsTo: 'flutter',
+      hide: hide,
+      allowed: const <String>['flutter', 'flutter_runner'],
+    );
+    argParser.addOption(
+      'module',
+      abbr: 'm',
+      hide: hide,
+      help: 'The name of the module (required if attaching to a fuchsia device)',
+      valueHelp: 'module-name',
+    );
   }
 
   set defaultBuildMode(BuildMode value) {
@@ -204,12 +327,24 @@ abstract class FlutterCommand extends Command<void> {
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
-    if (argResults['debug'])
+
+    if (argResults['debug']) {
+      if (dynamicFlag)
+        throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
+    }
     if (argResults['profile'])
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
     if (argResults['release'])
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
+
+    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
+      throw ToolExit('Error: --dynamic requires --release or --profile.');
+    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
+      return BuildMode.dynamicRelease;
+    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
+      return BuildMode.dynamicProfile;
+
     return _defaultBuildMode;
   }
 
@@ -243,17 +378,37 @@ abstract class FlutterCommand extends Command<void> {
           '--build-number (${argResults['build-number']}) must be an int.', null);
     }
 
+    int patchNumber;
+    try {
+      patchNumber = argParser.options.containsKey('patch-number') && argResults['patch-number'] != null
+          ? int.parse(argResults['patch-number'])
+          : null;
+    } catch (e) {
+      throw UsageException(
+          '--patch-number (${argResults['patch-number']}) must be an int.', null);
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      compilationTraceFilePath: argParser.options.containsKey('precompile')
-          ? argResults['precompile']
+      compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
+          ? argResults['compilation-trace-file']
           : null,
-      buildHotUpdate: argParser.options.containsKey('hotupdate')
-          ? argResults['hotupdate']
+      createBaseline: argParser.options.containsKey('baseline')
+          ? argResults['baseline']
           : false,
+      createPatch: argParser.options.containsKey('patch')
+          ? argResults['patch']
+          : false,
+      patchNumber: patchNumber,
+      patchDir: argParser.options.containsKey('patch-dir')
+          ? argResults['patch-dir']
+          : null,
+      baselineDir: argParser.options.containsKey('baseline-dir')
+          ? argResults['baseline-dir']
+          : null,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -303,7 +458,7 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = clock.now();
+    final DateTime startTime = systemClock.now();
 
     return context.run<void>(
       name: 'command',
@@ -319,7 +474,7 @@ abstract class FlutterCommand extends Command<void> {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
-          final DateTime endTime = clock.now();
+          final DateTime endTime = systemClock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
           // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
@@ -504,17 +659,23 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic'] : false;
-    final String compilationTraceFilePath = argParser.options.containsKey('precompile')
-        ? argResults['precompile'] : null;
-    final bool buildHotUpdate = argParser.options.containsKey('hotupdate')
-        ? argResults['hotupdate'] : false;
+    final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
+        ? argResults['compilation-trace-file'] : null;
+    final bool createBaseline = argParser.options.containsKey('baseline')
+        ? argResults['baseline'] : false;
+    final bool createPatch = argParser.options.containsKey('patch')
+        ? argResults['patch'] : false;
 
-    if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
-    if (compilationTraceFilePath != null && !dynamicFlag)
-      throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
-    if (buildHotUpdate && compilationTraceFilePath == null)
-      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
+    if (createBaseline && createPatch)
+      throw ToolExit('Error: Only one of --baseline, --patch is allowed.');
+    if (createBaseline && !dynamicFlag)
+      throw ToolExit('Error: --baseline is allowed only when --dynamic is specified.');
+    if (createBaseline && compilationTraceFilePath == null)
+      throw ToolExit('Error: --baseline requires --compilation-trace-file to be specified.');
+    if (createPatch && !dynamicFlag)
+      throw ToolExit('Error: --patch is allowed only when --dynamic is specified.');
+    if (createPatch && compilationTraceFilePath == null)
+      throw ToolExit('Error: --patch requires --compilation-trace-file to be specified.');
   }
 
   ApplicationPackageStore applicationPackages;

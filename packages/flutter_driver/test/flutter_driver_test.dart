@@ -17,6 +17,7 @@ import 'common.dart';
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
+const Duration _kDefaultCommandTimeout = Duration(seconds: 5);
 
 void main() {
   group('FlutterDriver.connect', () {
@@ -384,6 +385,43 @@ void main() {
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
+    });
+  });
+
+  group('FlutterDriver with custom timeout', () {
+    const double kTestMultiplier = 3.0;
+    MockVMServiceClient mockClient;
+    MockPeer mockPeer;
+    MockIsolate mockIsolate;
+    FlutterDriver driver;
+
+    setUp(() {
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate, timeoutMultiplier: kTestMultiplier);
+    });
+
+    test('multiplies the timeout', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+          'timeout': '${(_kDefaultCommandTimeout * kTestMultiplier).inMilliseconds}',
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth();
+    });
+
+    test('does not multiply explicit timeouts', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+          'timeout': _kSerializedTestTimeout,
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth(timeout: _kTestTimeout);
     });
   });
 }

@@ -213,6 +213,9 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
 
   @override
   bool shouldReload(_CupertinoLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
 }
 
 /// US English strings for the cupertino widgets.

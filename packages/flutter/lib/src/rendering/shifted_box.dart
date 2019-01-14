@@ -715,6 +715,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
 /// the child is aligned according to the [alignment] property.
 ///
 /// See also:
+///
 ///  * [RenderUnconstrainedBox] for a render object that allows its children
 ///    to render themselves unconstrained, expands to fit them, and considers
 ///    overflow to be an error.

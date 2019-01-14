@@ -30,6 +30,14 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createCullOpacityPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cull_opacity_perf.dart',
+    'cull_opacity_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -357,6 +365,7 @@ class CompileTest {
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
     final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
     final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
       'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
@@ -371,6 +380,8 @@ class CompileTest {
           isolateSnapshotInstr.compressedSize +
           vmSnapshotData.compressedSize +
           vmSnapshotInstr.compressedSize,
+      'license_uncompressed_bytes': license.uncompressedSize,
+      'license_compressed_bytes': license.compressedSize,
     };
   }
 }

@@ -4,8 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'tabs.dart';
+import 'theme.dart';
 
 /// Defines a theme for [TabBar] widgets.
 ///
@@ -13,9 +15,8 @@ import 'tabs.dart';
 /// the [TabBar.indicator].
 ///
 /// Descendant widgets obtain the current theme's [TabBarTheme] object using
-/// `Theme.of(context).tabBarTheme`.
-/// [ThemeData.tabBarTheme] can be customized by copying it (using
-/// [TabBarTheme.copyWith]).
+/// `TabBarTheme.of(context)`. Instances of [TabBarTheme] can be customized with
+/// [TabBarTheme.copyWith].
 ///
 /// See also:
 ///
@@ -57,6 +58,11 @@ class TabBarTheme extends Diagnosticable {
         labelColor: labelColor ?? this.labelColor,
         unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor
     );
+  }
+
+  /// The data from the closest [TabBarTheme] instance given the build context.
+  static TabBarTheme of(BuildContext context) {
+    return Theme.of(context).tabBarTheme;
   }
 
   /// Linearly interpolate between two tab bar themes.

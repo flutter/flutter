@@ -109,7 +109,7 @@ abstract class ChipAttributes {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   MaterialTapTargetSize get materialTapTargetSize;
 }
 
@@ -287,10 +287,12 @@ abstract class SelectableChipAttributes {
   /// {@end-tool}
   ValueChanged<bool> get onSelected;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Color to be used for the chip's background, indicating that it is
@@ -302,6 +304,14 @@ abstract class SelectableChipAttributes {
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
   String get tooltip;
+
+  /// The shape of the translucent highlight painted over the avatar when the
+  /// [selected] property is true.
+  ///
+  /// Only the outer path of the shape is used.
+  ///
+  /// Defaults to [CircleBorder].
+  ShapeBorder get avatarBorder;
 }
 
 /// An interface for material design chips that can be enabled and disabled.
@@ -377,7 +387,7 @@ abstract class TappableChipAttributes {
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
@@ -394,12 +404,15 @@ abstract class TappableChipAttributes {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   VoidCallback get onPressed;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Tooltip string to be used for the body area (where the label and avatar
@@ -418,7 +431,7 @@ abstract class TappableChipAttributes {
 /// Requires one of its ancestors to be a [Material] widget. The [label]
 /// and [clipBehavior] arguments must not be null.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Chip(
@@ -429,6 +442,7 @@ abstract class TappableChipAttributes {
 ///   label: Text('Aaron Burr'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -534,7 +548,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// InputChip(
@@ -548,6 +562,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///   }
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -597,6 +612,7 @@ class InputChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
@@ -645,6 +661,8 @@ class InputChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -672,6 +690,7 @@ class InputChip extends StatelessWidget
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -684,7 +703,7 @@ class InputChip extends StatelessWidget
 /// Requires one of its ancestors to be a [Material] widget. The [selected] and
 /// [label] arguments must not be null.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
@@ -716,6 +735,7 @@ class InputChip extends StatelessWidget
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -754,6 +774,7 @@ class ChoiceChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -789,6 +810,8 @@ class ChoiceChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -816,6 +839,7 @@ class ChoiceChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -830,7 +854,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class ActorFilterEntry {
@@ -891,6 +915,7 @@ class ChoiceChip extends StatelessWidget
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -930,6 +955,7 @@ class FilterChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
+    this.avatarBorder = const CircleBorder(),
   })  : assert(selected != null),
         assert(label != null),
         assert(clipBehavior != null),
@@ -965,6 +991,8 @@ class FilterChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -989,6 +1017,7 @@ class FilterChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1012,7 +1041,7 @@ class FilterChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// ActionChip(
@@ -1026,6 +1055,7 @@ class FilterChip extends StatelessWidget
 ///   }
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1153,7 +1183,8 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
+  /// The [label], [pressElevation], [isEnabled], and [clipBehavior] arguments
+  /// must not be null. Additionally, [pressElevation] must be non-negative.
   const RawChip({
     Key key,
     this.avatar,
@@ -1179,9 +1210,11 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
+    this.avatarBorder = const CircleBorder(),
   })  : assert(label != null),
         assert(isEnabled != null),
         assert(clipBehavior != null),
+        assert(pressElevation != null && pressElevation >= 0.0),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
         super(key: key);
 
@@ -1227,6 +1260,8 @@ class RawChip extends StatefulWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final CircleBorder avatarBorder;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1532,6 +1567,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
               avatarDrawerAnimation: avatarDrawerAnimation,
               deleteDrawerAnimation: deleteDrawerAnimation,
               isEnabled: widget.isEnabled,
+              avatarBorder: widget.avatarBorder,
             ),
           ),
         ),
@@ -1612,6 +1648,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
+    this.avatarBorder,
   })  : assert(theme != null),
         super(key: key);
 
@@ -1622,6 +1659,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
   final Animation<double> avatarDrawerAnimation;
   final Animation<double> deleteDrawerAnimation;
   final Animation<double> enableAnimation;
+  final ShapeBorder avatarBorder;
 
   @override
   _RenderChipElement createElement() => _RenderChipElement(this);
@@ -1636,7 +1674,8 @@ class _ChipRenderWidget extends RenderObjectWidget {
       ..checkmarkAnimation = checkmarkAnimation
       ..avatarDrawerAnimation = avatarDrawerAnimation
       ..deleteDrawerAnimation = deleteDrawerAnimation
-      ..enableAnimation = enableAnimation;
+      ..enableAnimation = enableAnimation
+      ..avatarBorder = avatarBorder;
   }
 
   @override
@@ -1650,6 +1689,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       avatarDrawerAnimation: avatarDrawerAnimation,
       deleteDrawerAnimation: deleteDrawerAnimation,
       enableAnimation: enableAnimation,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1837,6 +1877,7 @@ class _RenderChip extends RenderBox {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
+    this.avatarBorder,
   })  : assert(theme != null),
         assert(textDirection != null),
         _theme = theme,
@@ -1858,6 +1899,7 @@ class _RenderChip extends RenderBox {
   Animation<double> avatarDrawerAnimation;
   Animation<double> deleteDrawerAnimation;
   Animation<double> enableAnimation;
+  ShapeBorder avatarBorder;
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
@@ -2345,7 +2387,8 @@ class _RenderChip extends RenderBox {
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)
           ..blendMode = BlendMode.srcATop;
-        context.canvas.drawRect(avatarRect, darkenPaint);
+        final Path path =  avatarBorder.getOuterPath(avatarRect);
+        context.canvas.drawPath(path, darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;

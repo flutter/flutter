@@ -598,9 +598,18 @@ class HeroController extends NavigatorObserver {
       final PageRoute<dynamic> to = toRoute;
       final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation : from.animation;
 
-      // A user gesture may have already completed the pop.
-      if (flightType == HeroFlightDirection.pop && animation.status == AnimationStatus.dismissed) {
-        return;
+      // A user gesture may have already completed the pop, or we might be the initial route
+      switch (flightType) {
+        case HeroFlightDirection.pop:
+          if (animation.value == 0.0) {
+            return;
+          }
+          break;
+        case HeroFlightDirection.push:
+          if (animation.value == 1.0) {
+            return;
+          }
+          break;
       }
 
       // For pop transitions driven by a user gesture: if the "to" page has

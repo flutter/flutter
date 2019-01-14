@@ -14,6 +14,8 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+final Generator _kNoAnsiPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+
 void main() {
   final String red = RegExp.escape(AnsiTerminal.red);
   final String bold = RegExp.escape(AnsiTerminal.bold);
@@ -35,7 +37,7 @@ void main() {
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
     }, overrides: <Type, Generator> {
       OutputPreferences: () => OutputPreferences(showColor: false),
-      Platform: () => FakePlatform()..stdoutSupportsAnsi = false,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('ANSI colored errors', () async {
@@ -227,6 +229,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped and can be indented.', () async {
@@ -245,6 +248,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped and can have hanging indent.', () async {
@@ -263,6 +267,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
@@ -281,6 +286,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped', () async {
@@ -296,6 +302,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped and can be indented.', () async {
@@ -314,6 +321,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped and can have hanging indent.', () async {
@@ -332,6 +340,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
@@ -350,6 +359,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Error logs are red', () async {
@@ -399,6 +409,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout startProgress handle null inputs on regular terminal', () async {
@@ -416,6 +427,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('SummaryStatus works when cancelled', () async {
@@ -438,7 +450,7 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
 
     testUsingContext('SummaryStatus works when stopped', () async {
       summaryStatus.start();
@@ -461,7 +473,7 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       context[Logger].startProgress('AAA')..stop();
@@ -473,6 +485,7 @@ void main() {
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(showColor: false),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
@@ -488,6 +501,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => VerboseLogger(StdoutLogger()),
       Stdio: () => mockStdio,
+      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
@@ -497,6 +511,7 @@ void main() {
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),
+      Platform: _kNoAnsiPlatform,
     });
   });
 }

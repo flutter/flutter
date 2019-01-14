@@ -1,0 +1,104 @@
+{
+  "name": "flutter",
+  "package": "flutter",
+  "author": {
+    "name": "The Flutter Team",
+    "link": "https://flutter.io"
+  },
+  "index": "index.html",
+  "icon32x32": "flutter/static-assets/favicon.png",
+  "allowJS": true,
+  "ExternalURL": "https://docs.flutter.io",
+  "selectors": {
+
+    "#exceptions span.name a": {
+      "type": "Exception"
+    },
+
+    "body > main > div.col-xs-12.col-sm-9.col-md-8.main-content > h1": {
+      "requiretext": " library",
+      "type": "Library",
+      "regexp": " library",
+      "replacement": ""
+    },
+
+    "body > main > div.col-xs-12.col-sm-9.main-content > h1": {
+      "requiretext": " class",
+      "type": "Class",
+      "regexp": " class",
+      "replacement": ""
+    },
+
+    "body > main > div.col-xs-12.col-md-8.main-content > h1": {
+      "requiretext": " function",
+      "type": "Function",
+      "regexp": " function",
+      "replacement": ""
+    },
+
+    "body > main > div.col-sm-9.col-md-8.main-content > h1": {
+      "requiretext": " typedef",
+      "type": "Type",
+      "regexp": " typedef",
+      "replacement": ""
+    },
+
+    "body > main > .col-xs-12.col-sm-9.col-md-8.main-content > h1": {
+      "requiretext": " enum",
+      "type": "Enum",
+      "regexp": " enum",
+      "replacement": ""
+    },
+
+    "body > main > .col-md-8.main-content > h1": {
+      "requiretext": " constant",
+      "type": "Constant",
+      "regexp": " constant",
+      "replacement": ""
+    },
+
+    "body > main > div.col-xs-12.col-sm-9 > h1": {
+      "requiretext": " method",
+      "type": "Method",
+      "regexp": " method",
+      "replacement": ""
+    },
+
+    ".callables .callable .name a": {
+      "type": "Method"
+    },
+
+    "body > main > .col-xs-12.col-sm-9.col-md-8 > h1": {
+      "requiretext": " property",
+      "type": "Property",
+      "regexp": " property",
+      "replacement": ""
+    },
+
+    "body > main > .col-xs-12.col-md-8 > h1": {
+      "requiretext": " constructor",
+      "type": "Constructor",
+      "regexp": " constructor",
+      "replacement": ""
+    },
+
+    "body > main > .col-xs-12.col-sm-9.main-content > h1": {
+      "requiretext": "operator ",
+      "type": "Operator",
+      "regexp": "operator ",
+      "replacement": ""
+    },
+
+    ".callables .callable": {
+      "requiretext": "operator ",
+      "type": "Operator",
+      "regexp": "operator ",
+      "replacement": ""
+    }
+
+
+  },
+  "ignore": [
+    "ABOUT"
+  ]
+}

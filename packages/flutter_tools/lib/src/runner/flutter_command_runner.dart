@@ -253,9 +253,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides[Logger] = VerboseLogger(logger);
     }
 
-    final int terminalColumns = io.stdio.terminalColumns;
-    int wrapColumn = terminalColumns ?? kDefaultTerminalColumns;
-    if (topLevelResults['wrap-column'] != null) {
+    // Don't set wrapColumns unless the user said to: if it's set, then all
+    // wrapping will occur at this width explicitly, and won't adapt if the
+    // terminal size changes during a run.
+    int wrapColumn;
+    if (topLevelResults.wasParsed('wrap-column')) {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column']);
         if (wrapColumn < 0) {
@@ -272,7 +274,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // anything, unless the user explicitly said to.
     final bool useWrapping = topLevelResults.wasParsed('wrap')
         ? topLevelResults['wrap']
-        : terminalColumns == null ? false : topLevelResults['wrap'];
+        : io.stdio.terminalColumns == null ? false : topLevelResults['wrap'];
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
       showColor: topLevelResults['color'],

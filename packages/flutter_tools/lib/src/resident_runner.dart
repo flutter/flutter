@@ -35,12 +35,15 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
+    TargetModel targetModel = TargetModel.flutter,
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+         fileSystemRoots: fileSystemRoots,
+         fileSystemScheme: fileSystemScheme,
+         targetModel: targetModel,
        );
 
   final Device device;
@@ -81,9 +84,11 @@ class FlutterDevice {
 
   Future<void> refreshViews() async {
     if (vmServices == null || vmServices.isEmpty)
-      return;
+      return Future<void>.value(null);
+    final List<Future<void>> futures = <Future<void>>[];
     for (VMService service in vmServices)
-      await service.vm.refreshViews();
+      futures.add(service.vm.refreshViews(waitForViews: true));
+    await Future.wait(futures);
   }
 
   List<FlutterView> get views {
@@ -104,6 +109,9 @@ class FlutterDevice {
   }
 
   Future<void> stopApps() async {
+    if (!device.supportsStopApp) {
+      return;
+    }
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
       return;
@@ -236,7 +244,7 @@ class FlutterDevice {
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http'))
-        printStatus(line);
+        printStatus(line, wrap: false);
     });
   }
 
@@ -257,7 +265,7 @@ class FlutterDevice {
     bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -316,7 +324,7 @@ class FlutterDevice {
       applicationBinary: coldRunner.applicationBinary
     );
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
@@ -363,7 +371,7 @@ class FlutterDevice {
     return 0;
   }
 
-  Future<bool> updateDevFS({
+  Future<UpdateFSReport> updateDevFS({
     String mainPath,
     String target,
     AssetBundle bundle,
@@ -379,9 +387,9 @@ class FlutterDevice {
       'Syncing files to device ${device.name}...',
       expectSlowOperation: true,
     );
-    int bytes = 0;
+    UpdateFSReport report;
     try {
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: mainPath,
         target: target,
         bundle: bundle,
@@ -398,11 +406,11 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return false;
+      return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
-    printTrace('Synced ${getSizeAsMB(bytes)}.');
-    return true;
+    printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    return report;
   }
 
   void updateReloadStatus(bool wasReloadSuccessful) {
@@ -421,6 +429,7 @@ abstract class ResidentRunner {
     this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
+    this.saveCompilationTrace,
     this.stayResident,
     this.ipv6,
   }) {
@@ -435,6 +444,7 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
+  final bool saveCompilationTrace;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
@@ -455,6 +465,17 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
+  /// Whether this runner can hot restart.
+  ///
+  /// To prevent scenarios where only a subset of devices are hot restarted,
+  /// the runner requires that all attached devices can support hot restart
+  /// before enabling it.
+  bool get canHotRestart {
+    return flutterDevices.every((FlutterDevice device) {
+      return device.device.supportsHotRestart;
+    });
+  }
+
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
@@ -471,6 +492,8 @@ abstract class ResidentRunner {
 
   Future<void> stop() async {
     _stopped = true;
+    if (saveCompilationTrace)
+      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -483,8 +506,10 @@ abstract class ResidentRunner {
   }
 
   Future<void> refreshViews() async {
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      await device.refreshViews();
+      futures.add(device.refreshViews());
+    await Future.wait(futures);
   }
 
   Future<void> _debugDumpApp() async {
@@ -570,6 +595,35 @@ abstract class ResidentRunner {
     } catch (error) {
       status.cancel();
       printError('Error taking screenshot: $error');
+    }
+  }
+
+  Future<void> _debugSaveCompilationTrace() async {
+    if (!supportsServiceProtocol)
+      return;
+
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        final int index = device.views.indexOf(view);
+        final File outputFile = fs.currentDirectory
+            .childFile('compilation${index == 0 ? '' : index}.txt');
+
+        printStatus('Saving compilation training data '
+            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
+            'to ${fs.path.relative(outputFile.path)}...');
+
+        List<int> buffer;
+        try {
+          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
+          assert(buffer != null);
+        } catch (error) {
+          printError('Error communicating with Flutter on the device: $error');
+          continue;
+        }
+
+        outputFile.parent.createSync(recursive: true);
+        outputFile.writeAsBytesSync(buffer);
+      }
     }
   }
 

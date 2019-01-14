@@ -41,6 +41,7 @@ class ScrollPhysics {
   /// ScrollPhysics that has [ancestor] as its parent.
   ///
   /// This method is typically used to define [applyTo] methods like:
+  ///
   /// ```dart
   /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
   ///   return FooScrollPhysics(parent: buildParent(ancestor));
@@ -61,8 +62,8 @@ class ScrollPhysics {
   ///
   /// See also:
   ///
-  ///   * [buildParent], a utility method that's often used to define [applyTo]
-  ///     methods for ScrollPhysics subclasses.
+  ///  * [buildParent], a utility method that's often used to define [applyTo]
+  ///    methods for ScrollPhysics subclasses.
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }

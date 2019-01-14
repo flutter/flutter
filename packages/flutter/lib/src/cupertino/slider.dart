@@ -9,11 +9,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
+import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
+// void setState(VoidCallback fn) { }
 
 /// An iOS-style slider.
 ///
@@ -113,7 +114,7 @@ class CupertinoSlider extends StatefulWidget {
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -131,6 +132,7 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -144,7 +146,7 @@ class CupertinoSlider extends StatefulWidget {
   /// [onChanged] for that), but rather to know when the user has completed
   /// selecting a new [value] by ending a drag.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -162,6 +164,7 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -186,7 +189,7 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The color to use for the portion of the slider that has been selected.
   ///
-  /// Defaults to [CupertinoColors.activeBlue].
+  /// Defaults to the [CupertinoTheme]'s primary color if null.
   final Color activeColor;
 
   @override
@@ -225,7 +228,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor ?? CupertinoColors.activeBlue,
+      activeColor: widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -482,15 +485,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final double trackActive = offset.dx + _thumbCenter;
 
     final Canvas canvas = context.canvas;
-    final Paint paint = Paint();
 
     if (visualPosition > 0.0) {
-      paint.color = rightColor;
+      final Paint paint = Paint()..color = rightColor;
       canvas.drawRRect(RRect.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0), paint);
     }
 
     if (visualPosition < 1.0) {
-      paint.color = leftColor;
+      final Paint paint = Paint()..color = leftColor;
       canvas.drawRRect(RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 

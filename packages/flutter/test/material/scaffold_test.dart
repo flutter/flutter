@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 
@@ -201,6 +202,7 @@ void main() {
           drawer: Drawer(
             key: drawerKey,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               controller: scrollOffset,
               children: List<Widget>.generate(10,
                 (int index) => SizedBox(height: 100.0, child: Text('D$index'))
@@ -630,6 +632,7 @@ void main() {
               viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
             child: Scaffold(
+              drawerDragStartBehavior: DragStartBehavior.down,
               appBar: PreferredSize(
                 preferredSize: const Size(11.0, 13.0),
                 child: Container(
@@ -1009,8 +1012,60 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
+    testWidgets('Drawer state query correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SafeArea(
+            left: false,
+            top: true,
+            right: false,
+            bottom: false,
+            child: Scaffold(
+              endDrawer: const Drawer(
+                child: Text('endDrawer'),
+              ),
+              drawer: const Drawer(
+                child: Text('drawer'),
+              ),
+              body: const Text('scaffold body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title')
+              ),
+            ),
+          ),
+        ),
+      );
 
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      final Finder drawerOpenButton = find.byType(IconButton).first;
+      final Finder endDrawerOpenButton = find.byType(IconButton).last;
+
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isDrawerOpen);
+
+      await tester.tap(endDrawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(true, scaffoldState.isEndDrawerOpen);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(false, scaffoldState.isEndDrawerOpen);
+
+      scaffoldState.openDrawer();
+      expect(true, scaffoldState.isDrawerOpen);
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+
+      scaffoldState.openEndDrawer();
+      expect(true, scaffoldState.isEndDrawerOpen);
+    });
+
+    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SafeArea(
@@ -1061,6 +1116,99 @@ void main() {
 
       expect(find.text('endDrawer'), findsNothing);
       expect(find.text('drawer'), findsOneWidget);
+    });
+
+    testWidgets('Drawer opens correctly with padding from MediaQuery', (WidgetTester tester) async {
+      // The padding described by MediaQuery is larger than the default
+      // drawer drag zone width which is 20.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('drawer'),
+            ),
+            body: const Text('scaffold body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title')
+            ),
+          ),
+        ),
+      );
+
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.fromLTRB(40, 0, 0, 0)
+            ),
+            child: Scaffold(
+              drawer: const Drawer(
+                child: Text('drawer'),
+              ),
+              body: const Text('scaffold body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title')
+              ),
+            ),
+          ),
+        ),
+      );
+
+      scaffoldState = tester.state(find.byType(Scaffold));
+
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+
+      expect(scaffoldState.isDrawerOpen, true);
+    });
+
+    testWidgets('Drawer opens correctly with padding from MediaQuer (RTL)', (WidgetTester tester) async {
+      // The padding described by MediaQuery is larger than the default
+      // drawer drag zone width which is 20.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.fromLTRB(0, 0, 40, 0)
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(
+                drawer: const Drawer(
+                  child: Text('drawer'),
+                ),
+                body: const Text('scaffold body'),
+                appBar: AppBar(
+                  centerTitle: true,
+                  title: const Text('Title')
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(765, 100), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(scaffoldState.isDrawerOpen, true);
     });
   });
 }

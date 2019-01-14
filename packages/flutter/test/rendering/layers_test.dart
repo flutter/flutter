@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -108,5 +110,133 @@ void main() {
     followerLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
+  });
+
+  void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
+    layer.debugMarkClean();
+    layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    expect(layer.debugSubtreeNeedsAddToScene, false);
+    mutateCallback();
+    layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    expect(layer.debugSubtreeNeedsAddToScene, true);
+  }
+
+  test('mutating PictureLayer fields triggers needsAddToScene', () {
+    final PictureLayer pictureLayer = PictureLayer(Rect.zero);
+    checkNeedsAddToScene(pictureLayer, () {
+      final PictureRecorder recorder = PictureRecorder();
+      pictureLayer.picture = recorder.endRecording();
+    });
+
+    pictureLayer.isComplexHint = false;
+    checkNeedsAddToScene(pictureLayer, () {
+      pictureLayer.isComplexHint = true;
+    });
+
+    pictureLayer.willChangeHint = false;
+    checkNeedsAddToScene(pictureLayer, () {
+      pictureLayer.willChangeHint = true;
+    });
+  });
+
+  final Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
+
+  test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
+    final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
+        overlayRect: Rect.zero, optionsMask: 0, rasterizerThreshold: 0,
+        checkerboardRasterCacheImages: false, checkerboardOffscreenLayers: false);
+    checkNeedsAddToScene(layer, () {
+      layer.overlayRect = unitRect;
+    });
+  });
+
+  test('mutating OffsetLayer fields triggers needsAddToScene', () {
+    final OffsetLayer layer = OffsetLayer();
+    checkNeedsAddToScene(layer, () {
+      layer.offset = const Offset(1, 1);
+    });
+  });
+
+  test('mutating ClipRectLayer fields triggers needsAddToScene', () {
+    final ClipRectLayer layer = ClipRectLayer(clipRect: Rect.zero);
+    checkNeedsAddToScene(layer, () {
+      layer.clipRect = unitRect;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
+  test('mutating ClipRRectLayer fields triggers needsAddToScene', () {
+    final ClipRRectLayer layer = ClipRRectLayer(clipRRect: RRect.zero);
+    checkNeedsAddToScene(layer, () {
+      layer.clipRRect = RRect.fromRectAndRadius(unitRect, const Radius.circular(0));
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
+  test('mutating ClipPath fields triggers needsAddToScene', () {
+    final ClipPathLayer layer = ClipPathLayer(clipPath: Path());
+    checkNeedsAddToScene(layer, () {
+      final Path newPath = Path();
+      newPath.addRect(unitRect);
+      layer.clipPath = newPath;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
+  test('mutating OpacityLayer fields triggers needsAddToScene', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 0);
+    checkNeedsAddToScene(layer, () {
+      layer.alpha = 1;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.offset = const Offset(1, 1);
+    });
+  });
+
+  test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
+    const Gradient gradient = RadialGradient(colors: <Color>[Color(0), Color(1)]);
+    final Shader shader = gradient.createShader(Rect.zero);
+    final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
+    checkNeedsAddToScene(layer, () {
+      layer.maskRect = unitRect;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.blendMode = BlendMode.color;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.shader = gradient.createShader(unitRect);
+    });
+  });
+
+  test('mutating BackdropFilterLayer fields triggers needsAddToScene', () {
+    final BackdropFilterLayer layer = BackdropFilterLayer(filter: ImageFilter.blur());
+    checkNeedsAddToScene(layer, () {
+      layer.filter = ImageFilter.blur(sigmaX: 1.0);
+    });
+  });
+
+  test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
+    final PhysicalModelLayer layer = PhysicalModelLayer(
+        clipPath: Path(), elevation: 0, color: const Color(0), shadowColor: const Color(0));
+    checkNeedsAddToScene(layer, () {
+      final Path newPath = Path();
+      newPath.addRect(unitRect);
+      layer.clipPath = newPath;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.elevation = 1;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.color = const Color(1);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.shadowColor = const Color(1);
+    });
   });
 }

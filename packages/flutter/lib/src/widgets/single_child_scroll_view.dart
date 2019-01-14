@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -177,14 +178,13 @@ import 'scrollable.dart';
 ///
 /// See also:
 ///
-/// * [ListView], which handles multiple children in a scrolling list.
-/// * [GridView], which handles multiple children in a scrolling grid.
-/// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable], which handles arbitrary scrolling effects.
+///  * [ListView], which handles multiple children in a scrolling list.
+///  * [GridView], which handles multiple children in a scrolling grid.
+///  * [PageView], for a scrollable that works page by page.
+///  * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
-  SingleChildScrollView({ // ignore: prefer_const_constructors_in_immutables
-                          // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+  const SingleChildScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -193,12 +193,14 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
+       assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'
        ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);
 
   /// The axis along which the scroll view scrolls.
@@ -260,6 +262,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -274,6 +279,7 @@ class SingleChildScrollView extends StatelessWidget {
         ? PrimaryScrollController.of(context)
         : controller;
     final Scrollable scrollable = Scrollable(
+      dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,

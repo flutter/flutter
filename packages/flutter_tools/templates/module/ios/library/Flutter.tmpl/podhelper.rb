@@ -23,7 +23,7 @@ end
 def flutter_root(f)
     generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Flutter', 'Generated.xcconfig')))
     if generated_xcode_build_settings.empty?
-        puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in ${f}."
+        puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in #{f}."
         exit
     end
     generated_xcode_build_settings.map { |p|
@@ -68,7 +68,7 @@ post_install do |installer|
             config.build_settings['ENABLE_BITCODE'] = 'NO'
             xcconfig_path = config.base_configuration_reference.real_path
             File.open(xcconfig_path, 'a+') do |file|
-                file.puts "#include \"#{File.join(framework_dir, 'Generated.xcconfig')}\""
+                file.puts "#include \"#{File.realpath(File.join(framework_dir, 'Generated.xcconfig'))}\""
             end
         end
     end

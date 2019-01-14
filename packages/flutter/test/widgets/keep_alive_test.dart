@@ -464,7 +464,7 @@ void main() {
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'
       '                     ╎\n'
-      '                     ╎╌child with index 0 (kept alive offstage): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being offstage
+      '                     ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being kept alive but not laid out
       '                     ╎ │ parentData: index=0; keepAlive; layoutOffset=0.0\n'
       '                     ╎ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎ │ size: Size(800.0, 400.0)\n'
@@ -476,7 +476,7 @@ void main() {
       '                     ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                     ╎     size: Size(800.0, 400.0)\n'
       '                     ╎\n'                                                                                  // <----- dashed line ends here
-      '                     └╌child with index 3 (kept alive offstage): RenderLimitedBox#00000\n'
+      '                     └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000\n'
       '                       │ parentData: index=3; keepAlive; layoutOffset=1200.0\n'
       '                       │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │ size: Size(800.0, 400.0)\n'

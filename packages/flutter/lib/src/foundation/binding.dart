@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
+import 'dart:ui' show saveCompilationTrace;
 
 import 'package:meta/meta.dart';
 
@@ -116,6 +117,14 @@ abstract class BindingBase {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,
+      );
+      registerServiceExtension(
+        name: 'saveCompilationTrace',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic> {
+            'value': saveCompilationTrace(),
+          };
+        }
       );
     }
 
@@ -400,7 +409,7 @@ abstract class BindingBase {
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.
-  /// {@endTemplate}
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,

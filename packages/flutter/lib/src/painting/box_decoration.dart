@@ -32,7 +32,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
@@ -52,6 +52,14 @@ import 'image_provider.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// {@template flutter.painting.boxDecoration.clip}
+/// The [shape] or the [borderRadius] won't clip the children of the
+/// decorated [Container]. If the clip is required, insert a clip widget
+/// (e.g., [ClipRect], [ClipRRect], [ClipPath]) as the child of the [Container].
+/// Be aware that clipping may be costly in terms of performance.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -129,6 +137,8 @@ class BoxDecoration extends Decoration {
   ///
   /// Applies only to boxes with rectangular shapes; ignored if [shape] is not
   /// [BoxShape.rectangle].
+  ///
+  /// {@macro flutter.painting.boxDecoration.clip}
   final BorderRadiusGeometry borderRadius;
 
   /// A list of shadows cast by this box behind the box.
@@ -162,6 +172,8 @@ class BoxDecoration extends Decoration {
   /// different [ShapeBorder]s; in particular, [CircleBorder] instead of
   /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
   /// [BoxShape.rectangle].
+  ///
+  /// {@macro flutter.painting.boxDecoration.clip}
   final BoxShape shape;
 
   @override

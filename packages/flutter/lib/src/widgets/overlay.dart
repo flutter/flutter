@@ -48,10 +48,10 @@ import 'ticker_provider.dart';
 ///
 /// See also:
 ///
-///  * [Overlay].
-///  * [OverlayState].
-///  * [WidgetsApp].
-///  * [MaterialApp].
+///  * [Overlay]
+///  * [OverlayState]
+///  * [WidgetsApp]
+///  * [MaterialApp]
 class OverlayEntry {
   /// Creates an overlay entry.
   ///

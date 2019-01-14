@@ -12,7 +12,9 @@ import 'build.dart';
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({bool verboseHelp = false}) {
     usesTargetOption();
-    addBuildModeFlags();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();

@@ -1373,8 +1373,11 @@ void main() {
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
 
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
-    await gesture.moveBy(const Offset(200.0, 0.0));
+    final TestGesture  gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(180.0, 0.0));
+    await gesture.up();
+    await tester.pump();
 
     await tester.pump();
 
@@ -1436,5 +1439,13 @@ void main() {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      initialRoute: '/two',
+    ));
+    expect(find.text('two'), findsOneWidget);
   });
 }

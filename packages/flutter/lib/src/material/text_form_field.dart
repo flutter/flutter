@@ -31,6 +31,28 @@ import 'theme.dart';
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
+/// {@tool sample}
+///
+/// Creates a [TextFormField] with an [InputDecoration] and validator function.
+///
+/// ```dart
+/// TextFormField(
+///   decoration: const InputDecoration(
+///     icon: Icon(Icons.person),
+///     hintText: 'What do people call you?',
+///     labelText: 'Name *',
+///   ),
+///   onSaved: (String value) {
+///     // This optional block of code can be used to run
+///     // code when the user saves the form.
+///   },
+///   validator: (String value) {
+///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.google.com/components/text-fields.html>
@@ -58,6 +80,7 @@ class TextFormField extends FormField<String> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     TextInputAction textInputAction,
     TextStyle style,
+    TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     bool autofocus = false,
     bool obscureText = false,
@@ -72,6 +95,9 @@ class TextFormField extends FormField<String> {
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
     bool enabled = true,
+    double cursorWidth = 2.0,
+    Radius cursorRadius,
+    Color cursorColor,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
@@ -105,6 +131,7 @@ class TextFormField extends FormField<String> {
         textInputAction: textInputAction,
         style: style,
         textAlign: textAlign,
+        textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,
         obscureText: obscureText,
@@ -117,6 +144,9 @@ class TextFormField extends FormField<String> {
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
         enabled: enabled,
+        cursorWidth: cursorWidth,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,

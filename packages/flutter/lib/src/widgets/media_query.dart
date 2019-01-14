@@ -154,7 +154,6 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Window.AccessibilityFeatures], where the setting originates.
-  ///
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font

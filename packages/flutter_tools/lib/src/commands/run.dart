@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -18,25 +19,33 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import 'daemon.dart';
 
-// TODO(flutter/flutter#23031): Test this.
+// TODO(mklim): Test this, flutter/flutter#23031.
 abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,
         help: 'Start tracing during startup.',
       )
-      ..addFlag('ipv6',
-        hide: true,
-        negatable: false,
-        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-              'forwards the host port to a device port.',
-      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
+      )
+      ..addFlag('train',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Save Dart runtime compilation trace to a file. '
+              'Compilation trace will be saved to a file specified by --compilation-trace-file '
+              'when \'flutter run --dynamic --profile --train\' exits. '
+              'This file contains a list of Dart symbols that were compiled by the runtime JIT '
+              'compiler up to that point. This file can be used in subsequent --dynamic builds '
+              'to precompile some code by the offline compiler. '
+              'This flag is only allowed when running as --dynamic --profile (recommended) or '
+              '--debug (may include unwanted debug symbols).'
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
@@ -45,31 +54,13 @@ abstract class RunCommandBase extends FlutterCommand {
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
+    usesIpv6Flag();
     usesPubOption();
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => argResults['trace-startup'];
-  bool get ipv6 => argResults['ipv6'];
   String get route => argResults['route'];
-
-  void usesPortOptions() {
-    argParser.addOption('observatory-port',
-        help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.'
-    );
-  }
-
-  int get observatoryPort {
-    if (argResults['observatory-port'] != null) {
-      try {
-        return int.parse(argResults['observatory-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-    return null;
-  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -114,23 +105,6 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
-      )
-      ..addOption('precompile',
-        hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only '
-              'allowed when using --dynamic. It takes a Dart compilation trace '
-              'file produced by the training run of the application. With this '
-              'flag, instead of using default Dart VM snapshot provided by the '
-              'engine, the application will use its own snapshot that includes '
-              'additional functions.'
-      )
-      ..addFlag('hotupdate',
-        hide: !verboseHelp,
-        help: 'Build differential snapshot based on the last state of the build '
-              'tree and any changes to the application source code since then. '
-              'This flag is only allowed when using --dynamic. With this flag, '
-              'a partial VM snapshot is generated that is loaded on top of the '
-              'original VM snapshot that contains precompiled code.'
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -300,7 +274,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = clock.now();
+      final DateTime appStartedTime = systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
@@ -329,17 +303,22 @@ class RunCommand extends RunCommandBase {
         }
 
         if (!isEmulatorBuildMode(getBuildMode())) {
-          throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+          throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
         }
       }
     }
 
     if (hotMode) {
       for (Device device in devices) {
-        if (!device.supportsHotMode)
-          throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
+        if (!device.supportsHotReload)
+          throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
     }
+
+    if (argResults['train'] &&
+        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
+      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
+          '(recommended) or --debug (may include unwanted debug symbols).');
 
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
@@ -366,6 +345,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -378,6 +358,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
+        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -391,7 +372,7 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
-      (_) { appStartedTime = clock.now(); }
+      (_) { appStartedTime = systemClock.now(); }
     );
 
     final int result = await runner.run(

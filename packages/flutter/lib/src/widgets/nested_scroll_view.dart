@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -51,7 +52,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// in the opposite direction (e.g. allowing the user to swipe horizontally
 /// between the pages represented by the tabs, while the list scrolls
 /// vertically), then any list inside that [TabBarView] would not interact with
-/// the outer [ScrollView]. For example, flinging the inner list to scroll to
+/// the outer [ScrollView]. For example, flinginsg the inner list to scroll to
 /// the top would not cause a collapsed [SliverAppBar] in the outer [ScrollView]
 /// to expand.
 ///
@@ -60,7 +61,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -174,6 +175,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 class NestedScrollView extends StatefulWidget {
   /// Creates a nested scroll view.
   ///
@@ -187,6 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -250,6 +253,9 @@ class NestedScrollView extends StatefulWidget {
   /// given an explicit [ScrollController], instead allowing it to default to
   /// the [PrimaryScrollController] provided by the [NestedScrollView].
   final Widget body;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -337,6 +343,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
         builder: (BuildContext context) {
           _lastHasScrolledBody = _coordinator.hasScrolledBody;
           return _NestedScrollViewCustomScrollView(
+            dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
             physics: widget.physics != null
@@ -357,19 +364,21 @@ class _NestedScrollViewState extends State<NestedScrollView> {
 }
 
 class _NestedScrollViewCustomScrollView extends CustomScrollView {
-  _NestedScrollViewCustomScrollView({
+  const _NestedScrollViewCustomScrollView({
     @required Axis scrollDirection,
     @required bool reverse,
     @required ScrollPhysics physics,
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
          physics: physics,
          controller: controller,
          slivers: slivers,
+         dragStartBehavior: dragStartBehavior,
        );
 
   final SliverOverlapAbsorberHandle handle;

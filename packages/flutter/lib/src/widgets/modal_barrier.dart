@@ -55,6 +55,7 @@ class ModalBarrier extends StatelessWidget {
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [ModalRoute.semanticsDismissible], which controls this property for
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool barrierSemanticsDismissible;
@@ -83,7 +84,7 @@ class ModalBarrier extends StatelessWidget {
         child: GestureDetector(
           onTapDown: (TapDownDetails details) {
             if (dismissible)
-              Navigator.pop(context);
+              Navigator.maybePop(context);
           },
           behavior: HitTestBehavior.opaque,
           child: Semantics(
@@ -159,6 +160,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [ModalRoute.semanticsDismissible], which controls this property for
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool barrierSemanticsDismissible;

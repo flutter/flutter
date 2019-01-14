@@ -16,22 +16,23 @@ void main() {
   group('flutter_run', () {
     Directory tempDir;
     final BasicProject _project = BasicProject();
-    FlutterTestDriver _flutter;
+    FlutterRunTestDriver _flutter;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync();
       await _project.setUpIn(tempDir);
-      _flutter = FlutterTestDriver(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {
+      await _flutter.stop();
       tryToDelete(tempDir);
     });
 
     test('reports an error if an invalid device is supplied', () async {
       // This test forces flutter to check for all possible devices to catch issues
       // like https://github.com/flutter/flutter/issues/21418 which were skipped
-      // over because other integration tesst run using flutter-tester which short-cuts
+      // over because other integration tests run using flutter-tester which short-cuts
       // some of the checks for devices.
       final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
 

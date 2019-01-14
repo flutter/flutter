@@ -165,7 +165,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
@@ -182,7 +182,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layers, say A. That means the child structure of A has
+    // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
     // _subtreeNeedsAddToScene being false.
     if (!_subtreeNeedsAddToScene && _engineLayer != null) {
@@ -311,10 +311,10 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-/// * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
-///   for how to create and manage backend textures on Android.
-/// * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
-///   for how to create and manage backend textures on iOS.
+///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///    for how to create and manage backend textures on Android.
+///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be
@@ -351,6 +351,41 @@ class TextureLayer extends Layer {
       freeze: freeze,
     );
     return null; // this does not return an engine layer yet.
+  }
+
+  @override
+  S find<S>(Offset regionOffset) => null;
+}
+
+/// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
+/// on iOS.
+class PlatformViewLayer extends Layer {
+  /// Creates a platform view layer.
+  ///
+  /// The `rect` and `viewId` parameters must not be null.
+  PlatformViewLayer({
+    @required this.rect,
+    @required this.viewId,
+  }): assert(rect != null), assert(viewId != null);
+
+  /// Bounding rectangle of this layer in the global coordinate space.
+  final Rect rect;
+
+  /// The unique identifier of the UIView displayed on this layer.
+  ///
+  /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
+  final int viewId;
+
+  @override
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    final Rect shiftedRect = rect.shift(layerOffset);
+    builder.addPlatformView(
+      viewId,
+      offset: shiftedRect.topLeft,
+      width: shiftedRect.width,
+      height: shiftedRect.height,
+    );
+    return null;
   }
 
   @override
@@ -1107,6 +1142,7 @@ class OpacityLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('alpha', alpha));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
 

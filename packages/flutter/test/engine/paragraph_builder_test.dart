@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Should be able to build and layout a paragraph', () {
@@ -13,6 +13,8 @@ void main() {
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
 
+    // TODO(cbracken): use const constructor. https://github.com/flutter/flutter/issues/26390
+    // ignore:prefer_const_constructors
     paragraph.layout(ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);

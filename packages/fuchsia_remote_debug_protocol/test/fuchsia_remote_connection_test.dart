@@ -21,7 +21,9 @@ void main() {
     setUp(() {
       mockRunner = MockSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(any)).thenAnswer((_) =>
+      when(mockRunner.run(argThat(startsWith('find')))).thenAnswer((_) =>
+          Future<List<String>>.value(<String>['/hub/blah/blah/blah/vmservice-port\n']));
+      when(mockRunner.run(argThat(startsWith('ls')))).thenAnswer((_) =>
           Future<List<String>>.value(<String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';

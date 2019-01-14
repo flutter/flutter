@@ -287,10 +287,14 @@ class FuchsiaRemoteConnection {
   /// If there are no live Dart VM's or the Isolate cannot be found, waits until
   /// either `timeout` is reached, or a Dart VM starts up with a name that
   /// matches `pattern`.
+  ///
+  /// `includeNonFlutterIsolates` can be set to true to include all isolates
+  /// found instead of just Flutter Isolates.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, {
     Duration timeout = _kIsolateFindTimeout,
     Duration vmConnectionTimeout = _kDartVmConnectionTimeout,
+    bool includeNonFlutterIsolates = false,
   }) async {
     // If for some reason there are no Dart VM's that are alive, wait for one to
     // start with the Isolate in question.
@@ -309,7 +313,10 @@ class FuchsiaRemoteConnection {
       if (vmService == null) {
         continue;
       }
-      isolates.add(vmService.getMainIsolatesByPattern(pattern));
+      isolates.add(vmService.getMainIsolatesByPattern(
+        pattern,
+        includeNonFlutterIsolates: includeNonFlutterIsolates,
+      ));
     }
     final List<IsolateRef> result =
         await Future.wait<List<IsolateRef>>(isolates)
@@ -516,24 +523,21 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    // TODO(awdavies): This is using a temporary workaround rather than a
-    // well-defined service, and will be deprecated in the near future.
-    final List<String> lsOutput =
-        await _sshCommandRunner.run('ls /tmp/dart.services');
+    final List<String> portPaths =
+        await _sshCommandRunner.run('find /hub -name vmservice-port');
     final List<int> ports = <int>[];
-
-    // The output of lsOutput is a list of available ports as the Fuchsia dart
-    // service advertises. An example lsOutput would look like:
-    //
-    // [ '31782\n', '1234\n', '11967' ]
-    for (String s in lsOutput) {
-      final String trimmed = s.trim();
-      final int lastSpace = trimmed.lastIndexOf(' ');
-      final String lastWord = trimmed.substring(lastSpace + 1);
-      if ((lastWord != '.') && (lastWord != '..')) {
-        final int value = int.tryParse(lastWord);
-        if (value != null) {
-          ports.add(value);
+    for (String path in portPaths) {
+      if (path == '') {
+        continue;
+      }
+      final List<String> lsOutput = await _sshCommandRunner.run('ls $path');
+      for (String line in lsOutput) {
+        if (line == '') {
+          continue;
+        }
+        final int port = int.tryParse(line);
+        if (port != null) {
+          ports.add(port);
         }
       }
     }

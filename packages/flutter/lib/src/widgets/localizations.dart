@@ -181,16 +181,19 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultWidgetsLocalizations.delegate(en_US)';
 }
 
 /// US English localizations for the widgets library.
 ///
 /// See also:
 ///
-/// * [GlobalWidgetsLocalizations], which provides widgets localizations for
-///   many languages.
-/// * [WidgetsApp.delegates], which automatically includes
-///   [DefaultWidgetsLocalizations.delegate] by default.
+///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
+///    many languages.
+///  * [WidgetsApp.delegates], which automatically includes
+///    [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for US English (only).
@@ -294,7 +297,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This following class is defined in terms of the
 /// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
@@ -321,6 +324,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   // ... more Intl.message() methods like title()
 /// }
 /// ```
+/// {@end-tool}
 /// A class based on the `intl` package imports a generated message catalog that provides
 /// the `initializeMessages()` function and the per-locale backing store for `Intl.message()`.
 /// The message catalog is produced by an `intl` tool that analyzes the source code for

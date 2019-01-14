@@ -107,6 +107,7 @@ void main() {
     Widget buildLocaleFrame(Locale locale) {
       return buildFrame(
         locale: locale,
+        supportedLocales: <Locale>[locale],
         buildContent: (BuildContext context) {
           return Localizations.override(
             context: context,
@@ -176,9 +177,9 @@ void main() {
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
         ],
         supportedLocales: const <Locale>[
-          Locale('en', ''),
-          Locale('fr', ''),
-          Locale('de', ''),
+          Locale('en'),
+          Locale('fr'),
+          Locale('de'),
         ],
         buildContent: (BuildContext context) {
           return Text(

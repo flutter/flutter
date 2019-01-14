@@ -83,6 +83,17 @@ class PropertyList {
   }
 }
 
+/// Specialized exception for expected situations where the ideviceinfo
+/// tool responds with exit code 255 / 'No device found' message
+class IOSDeviceNotFoundError implements Exception {
+  IOSDeviceNotFoundError(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class IMobileDevice {
   const IMobileDevice();
 
@@ -94,6 +105,12 @@ class IMobileDevice {
   Future<bool> get isWorking async {
     if (!isInstalled)
       return false;
+    // If usage info is printed in a hyphenated id, we need to update.
+    const String fakeIphoneId = '00008020-001C2D903C42002E';
+    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+      return false;
+    }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
@@ -118,16 +135,18 @@ class IMobileDevice {
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
@@ -284,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion())
     return XcodeBuildResult(success: false);
 
-  // TODO(cbracken) remove when https://github.com/flutter/flutter/issues/20685 is fixed.
+  // TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
   await setXcodeWorkspaceBuildSystem(
     workspaceDirectory: app.project.xcodeWorkspace,
     workspaceSettings: app.project.xcodeWorkspaceSharedSettings,
@@ -317,6 +336,23 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
+    printError('1. Click on "Runner" in the project navigator.');
+    printError('2. Ensure the Runner PROJECT is selected, not the Runner TARGET.');
+    if (buildInfo.isDebug) {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Debug" Configuration.');
+    } else {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.');
+    }
+    printError('');
+    printError('   If this option is disabled, it is likely you have the target selected instead');
+    printError('   of the project; see:');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('');
+    printError('   If you have created a completely custom set of build configurations,');
+    printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   in the .xcconfig file for that configuration and run from Xcode.');
+    printError('');
+    printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
 
@@ -413,17 +449,23 @@ Future<XcodeBuildResult> buildXcodeProject({
   Status initialBuildStatus;
   Directory tempDir;
 
+  File scriptOutputPipeFile;
   if (logger.hasTerminal) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
-    final File scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
     os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
       for (String line in lines) {
-        if (line == 'done') {
+        if (line == 'done' || line == 'all done') {
           buildSubStatus?.stop();
           buildSubStatus = null;
+          if (line == 'all done') {
+            // Free pipe file.
+            tempDir?.deleteSync(recursive: true);
+            return;
+          }
         } else {
           initialBuildStatus.cancel();
           buildSubStatus = logger.startProgress(
@@ -433,7 +475,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           );
         }
       }
-      return listenToScriptOutputLine();
+      await listenToScriptOutputLine();
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
@@ -449,11 +491,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true
   );
+  // Notifies listener that no more output is coming.
+  scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
-  // Free pipe file.
-  tempDir?.deleteSync(recursive: true);
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',

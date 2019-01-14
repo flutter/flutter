@@ -73,8 +73,20 @@ Future<int> countDependencies() async {
   return count;
 }
 
+Future<int> countConsumerDependencies() async {
+  final List<String> lines = (await evalFlutter(
+    'update-packages',
+    options: <String>['--transitive-closure', '--consumer-only'],
+  )).split('\n');
+  final int count = lines.where((String line) => line.contains('->')).length;
+  if (count < 2) // we'll always have flutter and flutter_test, at least...
+    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  return count;
+}
+
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
+const String _kNumberOfConsumerDependenciesKey = 'consumer_dependencies_count';
 
 Future<void> main() async {
   await task(() async {
@@ -82,10 +94,12 @@ Future<void> main() async {
       <String, dynamic>{
         _kCostBenchmarkKey: await findCostsForRepo(),
         _kNumberOfDependenciesKey: await countDependencies(),
+        _kNumberOfConsumerDependenciesKey: await countConsumerDependencies(),
       },
       benchmarkScoreKeys: <String>[
         _kCostBenchmarkKey,
         _kNumberOfDependenciesKey,
+        _kNumberOfConsumerDependenciesKey,
       ],
     );
   });

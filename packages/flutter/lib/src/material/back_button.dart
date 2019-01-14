@@ -116,6 +116,7 @@ class CloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: const Icon(Icons.close),
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,

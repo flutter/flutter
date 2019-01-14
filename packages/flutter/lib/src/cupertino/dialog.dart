@@ -305,6 +305,7 @@ class CupertinoDialog extends StatelessWidget {
 /// rectangle without any color (similar to iOS's volume control popup).
 ///
 /// See also:
+///
 ///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
 ///    actions.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
@@ -1023,7 +1024,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
-///    that require acknowledgement
+///    that require acknowledgement.
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({

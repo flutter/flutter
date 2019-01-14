@@ -93,7 +93,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => ShrineDemo(),
+      buildRoute: (BuildContext context) => const ShrineDemo(),
     ),
     GalleryDemo(
       title: 'Contact profile',
@@ -243,9 +243,9 @@ List<GalleryDemo> _buildGalleryDemos() {
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
       category: _kMaterialComponents,
-      routeName: TwoLevelListDemo.routeName,
+      routeName: ExpansionTileListDemo.routeName,
       documentationUrl: 'https://docs.flutter.io/flutter/material/ExpansionTile-class.html',
-      buildRoute: (BuildContext context) => TwoLevelListDemo(),
+      buildRoute: (BuildContext context) => ExpansionTileListDemo(),
     ),
     GalleryDemo(
       title: 'Expansion panels',
