@@ -22,7 +22,6 @@ void main() {
     test('defaults', () async {
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'MacOS');
-      expect(await device.sdkNameAndVersion, os.name);
     });
 
     test('unimplemented methods', () {
@@ -40,7 +39,6 @@ void main() {
       final int result = await portForwarder.forward(2);
       expect(result, 2);
       expect(portForwarder.forwardedPorts.isEmpty, true);
-      expect(() => portForwarder.forward(1, hostPort: 23), throwsA(isInstanceOf<UnimplementedError>()));
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {

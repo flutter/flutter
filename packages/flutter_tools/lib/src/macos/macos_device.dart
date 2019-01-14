@@ -6,7 +6,6 @@ import '../application_package.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../desktop.dart';
 import '../device.dart';
 import 'macos_workflow.dart';
 

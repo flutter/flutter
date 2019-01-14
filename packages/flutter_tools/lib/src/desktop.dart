@@ -5,7 +5,6 @@
 import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'cache.dart';
-import 'device.dart';
 
 // Only launch or display desktop embedding devices if there is a sibling
 // FDE repository or a `FLUTTER_DESKTOP_EMBEDDING` environment variable which
@@ -26,36 +25,3 @@ bool get hasFlutterDesktopRepository {
   return _hasFlutterDesktopRepository;
 }
 bool _hasFlutterDesktopRepository;
-
-// An empty device log reader
-class NoOpDeviceLogReader implements DeviceLogReader {
-  NoOpDeviceLogReader(this.name);
-
-  @override
-  final String name;
-
-  @override
-  int appPid;
-
-  @override
-  Stream<String> get logLines => const Stream<String>.empty();
-}
-
-// A portforwarder which does not support forwarding ports.
-class NoOpDevicePortForwarder implements DevicePortForwarder {
-  const NoOpDevicePortForwarder();
-
-  @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
-    if (hostPort != null) {
-      throw UnimplementedError();
-    }
-    return devicePort;
-  }
-
-  @override
-  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
-
-  @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {}
-}

@@ -447,3 +447,31 @@ class DiscoveredApp {
   final String id;
   final int observatoryPort;
 }
+
+// An empty device log reader
+class NoOpDeviceLogReader implements DeviceLogReader {
+  NoOpDeviceLogReader(this.name);
+
+  @override
+  final String name;
+
+  @override
+  int appPid;
+
+  @override
+  Stream<String> get logLines => const Stream<String>.empty();
+}
+
+// A portforwarder which does not support forwarding ports.
+class NoOpDevicePortForwarder implements DevicePortForwarder {
+  const NoOpDevicePortForwarder();
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
+}
