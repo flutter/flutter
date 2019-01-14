@@ -63,6 +63,14 @@ fml::TimeDelta Stopwatch::MaxDelta() const {
   return max_delta;
 }
 
+fml::TimeDelta Stopwatch::AverageDelta() const {
+  fml::TimeDelta sum;  // default to 0
+  for (size_t i = 0; i < kMaxSamples; i++) {
+    sum = sum + laps_[i];
+  }
+  return sum / kMaxSamples;
+}
+
 // Initialize the SkSurface for drawing into. Draws the base background and any
 // timing data from before the initial Visualize() call.
 void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {

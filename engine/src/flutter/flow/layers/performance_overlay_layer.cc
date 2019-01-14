@@ -43,19 +43,14 @@ void VisualizeStopWatch(SkCanvas& canvas,
   }
 
   if (show_labels) {
-    double ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
-    double fps;
-    if (ms_per_frame < kOneFrameMS) {
-      fps = 1e3 / kOneFrameMS;
-    } else {
-      fps = 1e3 / ms_per_frame;
-    }
-
+    double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
+    double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
     std::stringstream stream;
     stream.setf(std::ios::fixed | std::ios::showpoint);
     stream << std::setprecision(1);
-    stream << label_prefix << "  " << fps << " fps  " << ms_per_frame
-           << "ms/frame";
+    stream << label_prefix << "  "
+           << "max " << max_ms_per_frame << " ms/frame, "
+           << "avg " << average_ms_per_frame << " ms/frame";
     DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y);
   }
 }
