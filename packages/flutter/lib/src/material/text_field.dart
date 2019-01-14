@@ -393,9 +393,9 @@ class TextField extends StatefulWidget {
   /// arguments.  The returned widget will be placed below the line in place of
   /// the default widget built when [counterText] is specified.
   ///
-  /// The returned widget should be accessible, just as the widget generated for
-  /// [counterText] is. For example, wrap the returned widget in a [Semantics]
-  /// widget and use the given [isFocused] value.
+  /// The returned widget will be wrapped in a [Semantics] widget for
+  /// accessibility, but it also needs to be accessible itself.  For example,
+  /// if returning a Text widget, set the [semanticsLabel] property.
   ///
   /// {@tool sample}
   /// ```dart
@@ -407,13 +407,9 @@ class TextField extends StatefulWidget {
   ///     bool isFocused,
   ///   }
   /// ) {
-  ///   return Semantics(
-  ///     container: true,
-  ///     liveRegion: isFocused,
-  ///     child: Text(
-  ///       '$currentLength of $maxLength characters',
-  ///       semanticsLabel: 'character count',
-  ///     ),
+  ///   return Text(
+  ///     '$currentLength of $maxLength characters',
+  ///     semanticsLabel: 'character count',
   ///   );
   /// }
   /// ```
@@ -478,11 +474,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (effectiveDecoration.counter == null
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
-      counter = widget.buildCounter(
-        context,
-        currentLength: currentLength,
-        maxLength: widget.maxLength,
-        isFocused: _effectiveFocusNode.hasFocus,
+      final bool isFocused = _effectiveFocusNode.hasFocus;
+      counter = Semantics(
+        container: true,
+        liveRegion: isFocused,
+        child: widget.buildCounter(
+          context,
+          currentLength: currentLength,
+          maxLength: widget.maxLength,
+          isFocused: isFocused,
+        ),
       );
       return effectiveDecoration.copyWith(counter: counter);
     }
