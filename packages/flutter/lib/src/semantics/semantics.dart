@@ -1570,7 +1570,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///       ),
   ///     ),
   ///   ),
-  ///  );
+  /// );
   /// ```
   ///
   /// [PhysicalModel] C is located 10.0 above [PhysicalModel] B, which in turn
