@@ -84,8 +84,8 @@ Future<void> main(List<String> rawArgs) async {
 '''
 );
   buffer.writeln('''
-/// The subset of date symbols supported by the intl package supported by
-/// flutter_localizations.''');
+/// The subset of date symbols supported by the intl package which are also
+/// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale))
@@ -96,8 +96,8 @@ Future<void> main(List<String> rawArgs) async {
   // Code that uses datePatterns expects it to contain values of type
   // Map<String, String> not Map<String, dynamic>.
   buffer.writeln('''
-/// The subset of date patterns supported by the intl package supported by
-/// flutter_localizations.''');
+/// The subset of date patterns supported by the intl package which are also
+/// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale)) {

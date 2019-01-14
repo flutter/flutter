@@ -24,7 +24,7 @@ import '../runner/flutter_command.dart';
 /// Example:
 ///
 /// ```
-///   'linter': '0.1.35',
+///   'linter': '0.1.35', // See https://github.com/dart-lang/linter/issues/824
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
