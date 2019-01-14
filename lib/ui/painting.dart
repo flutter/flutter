@@ -1082,7 +1082,8 @@ class Paint {
   // Binary format must match the deserialization code in paint.cc.
   List<dynamic> _objects;
   static const int _kShaderIndex = 0;
-  static const int _kObjectCount = 1; // Must be one larger than the largest index.
+  static const int _kColorFilterMatrixIndex = 1;
+  static const int _kObjectCount = 2; // Must be one larger than the largest index.
 
   /// Whether to apply anti-aliasing to lines and images drawn on the
   /// canvas.
@@ -1336,25 +1337,49 @@ class Paint {
   ///
   /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
   ColorFilter get colorFilter {
-    final bool isNull = _data.getInt32(_kColorFilterOffset, _kFakeHostEndian) == 0;
-    if (isNull)
-      return null;
-    return new ColorFilter.mode(
-      new Color(_data.getInt32(_kColorFilterColorOffset, _kFakeHostEndian)),
-      BlendMode.values[_data.getInt32(_kColorFilterBlendModeOffset, _kFakeHostEndian)]
-    );
+    switch (_data.getInt32(_kColorFilterOffset, _kFakeHostEndian)) {
+      case ColorFilter._TypeNone:
+        return null;
+      case ColorFilter._TypeMode:
+        return new ColorFilter.mode(
+          new Color(_data.getInt32(_kColorFilterColorOffset, _kFakeHostEndian)),
+          BlendMode.values[_data.getInt32(_kColorFilterBlendModeOffset, _kFakeHostEndian)],
+        );
+      case ColorFilter._TypeMatrix:
+        return new ColorFilter.matrix(_objects[_kColorFilterMatrixIndex]);
+      case ColorFilter._TypeLinearToSrgbGamma:
+        return const ColorFilter.linearToSrgbGamma();
+      case ColorFilter._TypeSrgbToLinearGamma:
+        return const ColorFilter.srgbToLinearGamma();
+    }
+
+    return null;
   }
+
   set colorFilter(ColorFilter value) {
     if (value == null) {
-      _data.setInt32(_kColorFilterOffset, 0, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterOffset, ColorFilter._TypeNone, _kFakeHostEndian);
       _data.setInt32(_kColorFilterColorOffset, 0, _kFakeHostEndian);
       _data.setInt32(_kColorFilterBlendModeOffset, 0, _kFakeHostEndian);
+
+      if (_objects != null) {
+        _objects[_kColorFilterMatrixIndex] = null;
+      }
     } else {
-      assert(value._color != null);
-      assert(value._blendMode != null);
-      _data.setInt32(_kColorFilterOffset, 1, _kFakeHostEndian);
-      _data.setInt32(_kColorFilterColorOffset, value._color.value, _kFakeHostEndian);
-      _data.setInt32(_kColorFilterBlendModeOffset, value._blendMode.index, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterOffset, value._type, _kFakeHostEndian);
+
+      if (value._type == ColorFilter._TypeMode) {
+        assert(value._color != null);
+        assert(value._blendMode != null);
+
+        _data.setInt32(_kColorFilterColorOffset, value._color.value, _kFakeHostEndian);
+        _data.setInt32(_kColorFilterBlendModeOffset, value._blendMode.index, _kFakeHostEndian);
+      } else if (value._type == ColorFilter._TypeMatrix) {
+        assert(value._matrix != null);
+
+        _objects ??= new List<dynamic>(_kObjectCount);
+        _objects[_kColorFilterMatrixIndex] = Float32List.fromList(value._matrix);
+      }
     }
   }
 
@@ -2378,25 +2403,84 @@ class ColorFilter {
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
   const ColorFilter.mode(Color color, BlendMode blendMode)
-    : _color = color, _blendMode = blendMode;
+      : _color = color,
+        _blendMode = blendMode,
+        _matrix = null,
+        _type = _TypeMode;
+
+  /// Construct a color filter that transforms a color by a 4x5 matrix. The
+  /// matrix is in row-major order and the translation column is specified in
+  /// unnormalized, 0...255, space.
+  const ColorFilter.matrix(List<double> matrix)
+      : _color = null,
+        _blendMode = null,
+        _matrix = matrix,
+        _type = _TypeMatrix;
+
+  /// Construct a color filter that applies the srgb gamma curve to the RGB
+  /// channels.
+  const ColorFilter.linearToSrgbGamma()
+      : _color = null,
+        _blendMode = null,
+        _matrix = null,
+        _type = _TypeLinearToSrgbGamma;
+
+  /// Creates a color filter that applies the inverse of the srgb gamma curve
+  /// to the RGB channels.
+  const ColorFilter.srgbToLinearGamma()
+      : _color = null,
+        _blendMode = null,
+        _matrix = null,
+        _type = _TypeSrgbToLinearGamma;
 
   final Color _color;
   final BlendMode _blendMode;
+  final List<double> _matrix;
+  final int _type;
+
+  // The type of SkColorFilter class to create for Skia.
+  // These constants must be kept in sync with ColorFilterType in paint.cc.
+  static const int _TypeNone = 0; // null
+  static const int _TypeMode = 1; // MakeModeFilter
+  static const int _TypeMatrix = 2; // MakeMatrixFilterRowMajor255
+  static const int _TypeLinearToSrgbGamma = 3; // MakeLinearToSRGBGamma
+  static const int _TypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! ColorFilter)
+    if (other is! ColorFilter) {
       return false;
+    }
     final ColorFilter typedOther = other;
-    return _color == typedOther._color &&
-           _blendMode == typedOther._blendMode;
+
+    if (_type != typedOther._type) {
+      return false;
+    }
+    if (!_listEquals<double>(_matrix, typedOther._matrix)) {
+      return false;
+    }
+
+    return _color == typedOther._color && _blendMode == typedOther._blendMode;
   }
 
   @override
-  int get hashCode => hashValues(_color, _blendMode);
+  int get hashCode => hashValues(_color, _blendMode, hashList(_matrix), _type);
 
   @override
-  String toString() => 'ColorFilter($_color, $_blendMode)';
+  String toString() {
+    switch (_type) {
+      case _TypeMode:
+        return 'ColorFilter.mode($_color, $_blendMode)';
+      case _TypeMatrix:
+        return 'ColorFilter.matrix($_matrix)';
+      case _TypeLinearToSrgbGamma:
+        return 'ColorFilter.linearToSrgbGamma()';
+      case _TypeSrgbToLinearGamma:
+        return 'ColorFilter.srgbToLinearGamma()';
+      default:
+        return 'Unknown ColorFilter type. This is an error. If you\'re seeing this, please file an issue at https://github.com/flutter/flutter/issues/new.';
+    }
+  }
 }
 
 /// A filter operation to apply to a raster image.
