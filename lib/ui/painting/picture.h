@@ -27,13 +27,20 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   sk_sp<SkPicture> picture() const { return picture_.get(); }
 
-  fml::RefPtr<CanvasImage> toImage(int width, int height);
+  Dart_Handle toImage(uint32_t width,
+                      uint32_t height,
+                      Dart_Handle raw_image_callback);
 
   void dispose();
 
   size_t GetAllocationSize() override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
+
+  static Dart_Handle RasterizeToImage(sk_sp<SkPicture> picture,
+                                      uint32_t width,
+                                      uint32_t height,
+                                      Dart_Handle raw_image_callback);
 
  private:
   explicit Picture(flow::SkiaGPUObject<SkPicture> picture);
