@@ -8,10 +8,10 @@ class InertialMotion {
 
   static const double FRICTIONAL_ACCELERATION = 0.01; // How quickly to stop
   Velocity _initialVelocity;
-  Point<double> _initialPosition;
+  Offset _initialPosition;
 
   // The position when the motion stops.
-  Point<double> get finalPosition {
+  Offset get finalPosition {
     return _getPositionAt(Duration(milliseconds: duration.toInt()));
   }
 
@@ -34,20 +34,20 @@ class InertialMotion {
   }
 
   // The position at a given time
-  Point<double> _getPositionAt(Duration time) {
+  Offset _getPositionAt(Duration time) {
     final double xf = _getPosition(
-      r0: _initialPosition.x,
+      r0: _initialPosition.dx,
       v0: _initialVelocity.pixelsPerSecond.dx / 1000,
       t: time.inMilliseconds,
       a: _acceleration.x,
     );
     final double yf = _getPosition(
-      r0: _initialPosition.y,
+      r0: _initialPosition.dy,
       v0: _initialVelocity.pixelsPerSecond.dy / 1000,
       t: time.inMilliseconds,
       a: _acceleration.y,
     );
-    return Point<double>(xf, yf);
+    return Offset(xf, yf);
   }
 
   // Physics equation of motion.

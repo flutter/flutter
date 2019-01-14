@@ -54,14 +54,33 @@ class MapInteraction extends StatefulWidget {
   @override _MapInteractionState createState() => _MapInteractionState();
 }
 class _MapInteractionState extends State<MapInteraction> with SingleTickerProviderStateMixin {
-  Animation<Point<double>> _animation;
+  Animation<Offset> _animation;
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
-  static const double MIN_SCALE = 0.25;
-  Point<double> _offset; // Offset from origin of viewport when scale is 1.0
-  Point<double> _translateFrom; // Point where a single translation began
+  static const double MIN_SCALE = 0.8;
+  static const Size _PANNABLE_SIZE = Size(1000, 1000);
+  static Offset __offset;
+  Offset _translateFrom; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
   double _scale = 1.0;
+
+  Offset get _offset => __offset;
+  set _offset(Offset offset) {
+    // Keep _offset between the bounds defined by _PANNABLE_SIZE
+    final Size screenSizeScene = widget.screenSize / _scale;
+    print('justin set offsetoff ${offset.toString()} ${screenSizeScene.toString()}');
+    __offset = Offset(
+      offset.dx.clamp(
+        -_PANNABLE_SIZE.width / 2 + screenSizeScene.width,
+        _PANNABLE_SIZE.width / 2,
+      ),
+      offset.dy.clamp(
+        -_PANNABLE_SIZE.height / 2 + screenSizeScene.height,
+        _PANNABLE_SIZE.height / 2,
+      ),
+    );
+    print('justin setted offsetoff ${__offset.toString()}');
+  }
 
   @override
   void initState() {
@@ -70,7 +89,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     // Start out looking at the center
     // A positive x offset moves the scene right, viewport left.
     // A positive y offset moves the scene down, viewport up.
-    _offset = Point<double>(
+    _offset = Offset(
       widget.screenSize.width / 2,
       widget.screenSize.height / 2,
     );
@@ -107,20 +126,20 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     );
 
     // Original center of the screen with no transformations applied.
-    final Point<double> originalCenterOfScreen = Point<double>(
+    final Offset originalCenterOfScreen = Offset(
       widget.screenSize.width / 2,
       widget.screenSize.height / 2,
     );
     // Center after scale has been applied.
     // Imagine the scene scaling underneath the viewport while the viewport
     // stays fixed, then this is the new point under the center of the viewport.
-    final Point<double> scaledCenterOfScreen = originalCenterOfScreen * (1 / _scale);
+    final Offset scaledCenterOfScreen = originalCenterOfScreen * (1 / _scale);
     // Center after scale and offset have been applied.
-    final Point<double> finalCenterOfScreen = scaledCenterOfScreen + _offset;
+    final Offset finalCenterOfScreen = scaledCenterOfScreen + _offset;
     // Translate the original center of the screen to the final center.
     final Vector2 translationVector = Vector2(
-      finalCenterOfScreen.x - originalCenterOfScreen.x,
-      finalCenterOfScreen.y - originalCenterOfScreen.y,
+      finalCenterOfScreen.dx - originalCenterOfScreen.dx,
+      finalCenterOfScreen.dy - originalCenterOfScreen.dy,
     );
     final Matrix4 translate = Matrix4(
       1, 0, 0, 0,
@@ -134,11 +153,11 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
 
   // Given a point in screen coordinates, return the point in the scene.
   // Scene coordinates are independent of scale, just like _offset.
-  Offset _fromScreen(Offset screenPoint, Point<double> offset, double scale) {
+  Offset _fromScreen(Offset screenPoint, Offset offset, double scale) {
     // Locate the center of the screen in scene coordinates at a scale of 1.0.
     final Offset centerOfScreenSceneCoords = Offset(
-      widget.screenSize.width / 2 - offset.x,
-      widget.screenSize.height / 2 - offset.y,
+      widget.screenSize.width / 2 - offset.dx,
+      widget.screenSize.height / 2 - offset.dy,
     );
     // After scaling, the center of the screen is still the same scene coords.
     // Find the distance from the center of the screen to the given screenPoint.
@@ -156,7 +175,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     _controller.stop();
     setState(() {
       _scaleStart = _scale;
-      _translateFrom = Point<double>(details.focalPoint.dx, details.focalPoint.dy);
+      _translateFrom = Offset(details.focalPoint.dx, details.focalPoint.dy);
     });
   }
   void onScaleUpdate(ScaleUpdateDetails details) {
@@ -178,10 +197,10 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
           // scale.
           final Offset focalPointSceneNext = _fromScreen(details.focalPoint, _offset, _scale);
           final Offset nextOffset = Offset(
-            _offset.x + focalPointSceneNext.dx - focalPointScene.dx,
-            _offset.y + focalPointSceneNext.dy - focalPointScene.dy,
+            _offset.dx + focalPointSceneNext.dx - focalPointScene.dx,
+            _offset.dy + focalPointSceneNext.dy - focalPointScene.dy,
           );
-          _offset = Point<double>(
+          _offset = Offset(
             nextOffset.dx,
             nextOffset.dy,
           );
@@ -192,11 +211,11 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
         // that are not affected by _scale. So, dividing by scale here properly
         // gives us more distance when zoomed out and less when zoomed in so
         // that the point under the user's finger stays constant during a drag.
-        _offset = Point<double>(
-          _offset.x + (details.focalPoint.dx - _translateFrom.x) / _scale,
-          _offset.y + (details.focalPoint.dy - _translateFrom.y) / _scale,
+        _offset = Offset(
+          _offset.dx + (details.focalPoint.dx - _translateFrom.dx) / _scale,
+          _offset.dy + (details.focalPoint.dy - _translateFrom.dy) / _scale,
         );
-        _translateFrom = Point<double>(
+        _translateFrom = Offset(
           details.focalPoint.dx,
           details.focalPoint.dy,
         );
@@ -220,7 +239,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     }
 
     final InertialMotion inertialMotion = InertialMotion(details.velocity, _offset);
-    _animation = Tween<Point<double>>(begin: _offset, end: inertialMotion.finalPosition).animate(_controller);
+    _animation = Tween<Offset>(begin: _offset, end: inertialMotion.finalPosition).animate(_controller);
     _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
     _animation.addListener(_onAnimate);
     _controller.fling();
