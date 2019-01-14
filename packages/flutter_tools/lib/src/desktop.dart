@@ -9,9 +9,13 @@ import 'device.dart';
 // Only launch or display desktop embedding devices if there is a sibling
 // FDE repository.
 bool get hasFlutterDesktopRepository {
-  final Directory parent = fs.directory(Cache.flutterRoot).parent;
-  return parent.childDirectory('flutter-desktop-embedding').existsSync();
+  if (_hasFlutterDesktopRepository == null) {
+    final Directory parent = fs.directory(Cache.flutterRoot).parent;
+    _hasFlutterDesktopRepository = parent.childDirectory('flutter-desktop-embedding').existsSync();
+  }
+  return _hasFlutterDesktopRepository;
 }
+bool _hasFlutterDesktopRepository;
 
 // An empty device log reader
 class NoOpDeviceLogReader implements DeviceLogReader {

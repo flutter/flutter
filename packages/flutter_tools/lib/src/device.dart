@@ -16,8 +16,10 @@ import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'tester/flutter_tester.dart';
+import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
@@ -33,6 +35,8 @@ class DeviceManager {
     _deviceDiscoverers.add(FuchsiaDevices());
     _deviceDiscoverers.add(FlutterTesterDevices());
     _deviceDiscoverers.add(MacOSDevices());
+    _deviceDiscoverers.add(LinuxDevices());
+    _deviceDiscoverers.add(WindowsDevices());
   }
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
