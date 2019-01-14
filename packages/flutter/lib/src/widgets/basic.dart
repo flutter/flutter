@@ -3780,8 +3780,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// warning box on the edge that is overflowing. If there is room on the outside
 /// of the row, the amount of overflow is printed in red lettering.
 ///
-/// {@tool sample}
-///
 /// #### Story time
 ///
 /// Suppose, for instance, that you had this code:
@@ -3795,7 +3793,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
@@ -3809,7 +3806,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// have no more room available for my other children!", and gets angry and
 /// sprouts a yellow and black strip.
 ///
-/// {@tool sample}
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
 ///
@@ -3824,7 +3820,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// Now, the row first asks the logo to lay out, and then asks the _icon_ to lay
 /// out. The [Icon], like the logo, is happy to take on a reasonable size (also

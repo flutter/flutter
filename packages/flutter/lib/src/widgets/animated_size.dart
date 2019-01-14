@@ -10,6 +10,10 @@ import 'framework.dart';
 
 /// Animated widget that automatically transitions its size over a given
 /// duration whenever the given child's size changes.
+///
+/// See also:
+///
+///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends SingleChildRenderObjectWidget {
   /// Creates a widget that animates its size to match that of its child.
   ///

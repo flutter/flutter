@@ -118,6 +118,9 @@ class MergeableMaterial extends StatefulWidget {
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 2, the appropriate elevation for cards.
+  ///
+  /// This uses [kElevationToShadow] to simulate shadows, it does not use
+  /// [Material]'s arbitrary elevation feature.
   final int elevation;
 
   /// Whether connected pieces of [MaterialSlice] have dividers between them.
