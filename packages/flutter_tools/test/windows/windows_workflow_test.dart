@@ -53,4 +53,7 @@ class MockFileSystem extends Mock implements FileSystem {}
 
 class MockDirectory extends Mock implements Directory {}
 
-class MockPlatform extends Mock implements Platform {}
+class MockPlatform extends Mock implements Platform {
+  @override
+  Map<String, String> get environment => const <String, String>{};
+}

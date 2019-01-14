@@ -11,7 +11,7 @@ import 'windows_workflow.dart';
 
 /// A device which represents a desktop Windows target.
 class WindowsDevice extends Device {
-  WindowsDevice() : super('windows_device');
+  WindowsDevice() : super('Windows');
 
   @override
   void clearLogs() {}
@@ -41,7 +41,7 @@ class WindowsDevice extends Device {
   bool isSupported() => true;
 
   @override
-  String get name => 'windows';
+  String get name => 'Windows';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -69,7 +69,7 @@ class WindowsDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) {
@@ -88,6 +88,9 @@ class WindowsDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices() async {
+    if (!canListAnything) {
+      return const <Device>[];
+    }
     return <Device>[
       WindowsDevice()
     ];

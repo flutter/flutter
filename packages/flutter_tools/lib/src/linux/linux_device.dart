@@ -11,7 +11,7 @@ import 'linux_workflow.dart';
 
 /// A device which represents a desktop linux target.
 class LinuxDevice extends Device {
-  LinuxDevice() : super('linux_device');
+  LinuxDevice() : super('Linux');
 
   @override
   void clearLogs() {}
@@ -41,7 +41,7 @@ class LinuxDevice extends Device {
   bool isSupported() => true;
 
   @override
-  String get name => 'linux';
+  String get name => 'Linux';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -69,7 +69,7 @@ class LinuxDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) {
@@ -88,6 +88,9 @@ class LinuxDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices() async {
+    if (!canListAnything) {
+      return const <Device>[];
+    }
     return <Device>[
       LinuxDevice()
     ];

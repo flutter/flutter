@@ -3,15 +3,26 @@
 // found in the LICENSE file.
 
 import 'base/file_system.dart';
+import 'base/platform.dart';
 import 'cache.dart';
 import 'device.dart';
 
 // Only launch or display desktop embedding devices if there is a sibling
-// FDE repository.
+// FDE repository or a `FLUTTER_DESKTOP_EMBEDDING` environment variable which
+// contains a path to a FDE repo.
 bool get hasFlutterDesktopRepository {
   if (_hasFlutterDesktopRepository == null) {
-    final Directory parent = fs.directory(Cache.flutterRoot).parent;
-    _hasFlutterDesktopRepository = parent.childDirectory('flutter-desktop-embedding').existsSync();
+    final String desktopLocation = platform.environment['FLUTTER_DESKTOP_EMBEDDING'];
+    if (desktopLocation != null && desktopLocation.isNotEmpty) {
+      _hasFlutterDesktopRepository = fs.directory(desktopLocation)
+        .childDirectory('flutter-desktop-embedding')
+        .existsSync();
+    } else {
+      final Directory parent = fs.directory(Cache.flutterRoot).parent;
+      _hasFlutterDesktopRepository = parent
+        .childDirectory('flutter-desktop-embedding')
+        .existsSync();
+    }
   }
   return _hasFlutterDesktopRepository;
 }

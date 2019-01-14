@@ -2,15 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   group(LinuxDevice, () {
+    final LinuxDevice device = LinuxDevice();
+    final MockPlatform notLinux = MockPlatform();
+    when(notLinux.isLinux).thenReturn(false);
+    when(notLinux.environment).thenReturn(const <String, String>{});
+
+    test('defaults', () async {
+      expect(await device.targetPlatform, TargetPlatform.linux_x64);
+      expect(device.name, 'Linux');
+      expect(await device.sdkNameAndVersion, '');
+    });
+
     test('unimplemented methods', () {
-      final LinuxDevice device = LinuxDevice();
       expect(() => device.installApp(null), throwsA(isInstanceOf<UnimplementedError>()));
       expect(() => device.uninstallApp(null), throwsA(isInstanceOf<UnimplementedError>()));
       expect(() => device.isLatestBuildInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
@@ -27,5 +41,13 @@ void main() {
       expect(portForwarder.forwardedPorts.isEmpty, true);
       expect(() => portForwarder.forward(1, hostPort: 23), throwsA(isInstanceOf<UnimplementedError>()));
     });
+
+    testUsingContext('No devices listed if platform unsupported', () async {
+      expect(await LinuxDevices().devices, <Device>[]);
+    }, overrides: <Type, Generator>{
+      Platform: () => notLinux,
+    });
   });
 }
+
+class MockPlatform extends Mock implements Platform {}
