@@ -3593,7 +3593,15 @@ class Picture extends NativeFieldWrapperClass2 {
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
-  Image toImage(int width, int height) native 'Picture_toImage';
+  Future<Image> toImage(int width, int height) {
+    if (width <= 0 || height <= 0)
+      throw new Exception('Invalid image dimensions.');
+    return _futurize(
+      (_Callback<Image> callback) => _toImage(width, height, callback)
+    );
+  }
+
+  String _toImage(int width, int height, _Callback<Image> callback) native 'Picture_toImage';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
