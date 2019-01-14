@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
+#include "third_party/tonic/typed_data/float32_list.h"
 
 namespace blink {
 
@@ -35,7 +36,8 @@ constexpr size_t kDataByteCount = 75;  // 4 * (last index + 1)
 
 // Indices for objects.
 constexpr int kShaderIndex = 0;
-constexpr int kObjectCount = 1;  // One larger than largest object index.
+constexpr int kColorFilterMatrixIndex = 1;
+constexpr int kObjectCount = 2;  // One larger than largest object index.
 
 // Must be kept in sync with the default in painting.dart.
 constexpr uint32_t kColorDefault = 0xFF000000;
@@ -61,18 +63,63 @@ constexpr SkScalar invert_colors[20] = {
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
 enum MaskFilterType { Null, Blur };
 
+// Must be kept in sync with the ColorFilter private constants in painting.dart.
+enum ColorFilterType {
+  None,
+  Mode,
+  Matrix,
+  LinearToSRGBGamma,
+  SRGBToLinearGamma
+};
+
+sk_sp<SkColorFilter> ExtractColorFilter(const uint32_t* uint_data,
+                                        Dart_Handle* values) {
+  switch (uint_data[kColorFilterIndex]) {
+    case Mode: {
+      SkColor color = uint_data[kColorFilterColorIndex];
+      SkBlendMode blend_mode =
+          static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
+
+      return SkColorFilter::MakeModeFilter(color, blend_mode);
+    }
+    case Matrix: {
+      Dart_Handle matrixHandle = values[kColorFilterMatrixIndex];
+      if (!Dart_IsNull(matrixHandle)) {
+        FML_DCHECK(Dart_IsList(matrixHandle));
+        intptr_t length = 0;
+        Dart_ListLength(matrixHandle, &length);
+
+        FML_CHECK(length == 20);
+
+        tonic::Float32List decoded(matrixHandle);
+        return SkColorFilter::MakeMatrixFilterRowMajor255(decoded.data());
+      }
+      return nullptr;
+    }
+    case LinearToSRGBGamma: {
+      return SkColorFilter::MakeLinearToSRGBGamma();
+    }
+    case SRGBToLinearGamma: {
+      return SkColorFilter::MakeSRGBToLinearGamma();
+    }
+    default:
+      FML_DLOG(ERROR) << "Out of range value received for kColorFilterIndex.";
+      return nullptr;
+  }
+}
+
 Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   is_null_ = Dart_IsNull(paint_data);
   if (is_null_)
     return;
 
+  Dart_Handle values[kObjectCount];
   if (!Dart_IsNull(paint_objects)) {
     FML_DCHECK(Dart_IsList(paint_objects));
     intptr_t length = 0;
     Dart_ListLength(paint_objects, &length);
 
     FML_CHECK(length == kObjectCount);
-    Dart_Handle values[kObjectCount];
     if (Dart_IsError(Dart_ListGetRange(paint_objects, 0, kObjectCount, values)))
       return;
 
@@ -128,22 +175,20 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
     paint_.setFilterQuality(static_cast<SkFilterQuality>(filter_quality));
 
   if (uint_data[kColorFilterIndex] && uint_data[kInvertColorIndex]) {
-    SkColor color = uint_data[kColorFilterColorIndex];
-    SkBlendMode blend_mode =
-        static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
-    sk_sp<SkColorFilter> color_filter =
-        SkColorFilter::MakeModeFilter(color, blend_mode);
-    sk_sp<SkColorFilter> invert_filter =
-        SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors);
-    paint_.setColorFilter(invert_filter->makeComposed(color_filter));
+    sk_sp<SkColorFilter> color_filter = ExtractColorFilter(uint_data, values);
+    if (color_filter) {
+      sk_sp<SkColorFilter> invert_filter =
+          SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors);
+      paint_.setColorFilter(invert_filter->makeComposed(color_filter));
+    }
   } else if (uint_data[kInvertColorIndex]) {
     paint_.setColorFilter(
         SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors));
   } else if (uint_data[kColorFilterIndex]) {
-    SkColor color = uint_data[kColorFilterColorIndex];
-    SkBlendMode blend_mode =
-        static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
-    paint_.setColorFilter(SkColorFilter::MakeModeFilter(color, blend_mode));
+    sk_sp<SkColorFilter> color_filter = ExtractColorFilter(uint_data, values);
+    if (color_filter) {
+      paint_.setColorFilter(color_filter);
+    }
   }
 
   switch (uint_data[kMaskFilterIndex]) {
