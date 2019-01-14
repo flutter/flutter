@@ -726,7 +726,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// scaffolds. For example in a tabbed UI, where the
 /// [bottomNavigationBar] is a [TabBar] and the body is a
 /// [TabBarView], you might be tempted to make each tab bar view a
-/// scaffold with a differently titled AppBar. Better to add a
+/// scaffold with a differently titled AppBar. It would be better to add a
 /// listener to the [TabController] that updates the AppBar:
 ///
 /// ```dart
