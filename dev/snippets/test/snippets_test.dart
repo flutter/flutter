@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' hide Platform;
 import 'package:path/path.dart' as path;
 
@@ -110,6 +111,41 @@ void main() {
           '{@end-inject-html}A description of the snippet.\n\n'
           'On several lines.{@inject-html}</div>\n'));
       expect(html, contains('main() {'));
+    });
+
+    test('generates snippet application metadata', () async {
+      final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+A description of the snippet.
+
+On several lines.
+
+```code
+void main() {
+  print('The actual \$name.');
+}
+```
+''');
+
+      final File outputFile = File(path.join(tmpDir.absolute.path, 'snippet_out.dart'));
+      final File expectedMetadataFile = File(path.join(tmpDir.absolute.path, 'snippet_out.json'));
+
+      generator.generate(
+        inputFile,
+        SnippetType.application,
+        template: 'template',
+        id: 'id',
+        output: outputFile,
+        metadata: <String, Object>{'sourcePath': 'some/path.dart'},
+      );
+      expect(expectedMetadataFile.existsSync(), isTrue);
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
+      expect(json['id'], equals('id'));
+      expect(json['file'], equals('snippet_out.dart'));
+      expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));
+      // Ensure any passed metadata is included in the output JSON too.
+      expect(json['sourcePath'], equals('some/path.dart'));
     });
   });
 }

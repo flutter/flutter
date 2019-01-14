@@ -55,6 +55,7 @@ abstract class FlutterTestDriver {
 
   Future<void> _setupProcess(
     List<String> args, {
+    String script,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     File pidFile,
@@ -65,6 +66,9 @@ abstract class FlutterTestDriver {
     }
     if (pidFile != null) {
         args.addAll(<String>['--pid-file', pidFile.path]);
+    }
+    if (script != null) {
+      args.add(script);
     }
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
@@ -91,6 +95,32 @@ abstract class FlutterTestDriver {
     // This is just debug printing to aid running/debugging tests locally.
     _stdout.stream.listen(_debugPrint);
     _stderr.stream.listen(_debugPrint);
+  }
+
+  Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
+    _vmService = await vmServiceConnectUri(_vmServiceWsUri.toString());
+      _vmService.onSend.listen((String s) => _debugPrint('==> $s'));
+      _vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
+      await Future.wait(<Future<Success>>[
+        _vmService.streamListen('Isolate'),
+        _vmService.streamListen('Debug'),
+      ]);
+
+      // On hot restarts, the isolate ID we have for the Flutter thread will
+      // exit so we need to invalidate our cached ID.
+      _vmService.onIsolateEvent.listen((Event event) {
+        if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
+          _flutterIsolateId = null;
+        }
+      });
+
+      // Because we start paused, resume so the app is in a "running" state as
+      // expected by tests. Tests will reload/restart as required if they need
+      // to hit breakpoints, etc.
+      await waitForPause();
+      if (pauseOnExceptions) {
+        await _vmService.setExceptionPauseMode(await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
+      }
   }
 
   Future<int> quit() => _killGracefully();
@@ -326,12 +356,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   @override
   Future<void> _setupProcess(
     List<String> args, {
+    String script,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     File pidFile,
   }) async {
     await super._setupProcess(
       args,
+      script: script,
       withDebugger: withDebugger,
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
@@ -353,30 +385,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
-      _vmService =
-          await vmServiceConnectUri(_vmServiceWsUri.toString());
-      _vmService.onSend.listen((String s) => _debugPrint('==> $s'));
-      _vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
-      await Future.wait(<Future<Success>>[
-        _vmService.streamListen('Isolate'),
-        _vmService.streamListen('Debug'),
-      ]);
-
-      // On hot restarts, the isolate ID we have for the Flutter thread will
-      // exit so we need to invalidate our cached ID.
-      _vmService.onIsolateEvent.listen((Event event) {
-        if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
-          _flutterIsolateId = null;
-        }
-      });
-
-      // Because we start paused, resume so the app is in a "running" state as
-      // expected by tests. Tests will reload/restart as required if they need
-      // to hit breakpoints, etc.
-      await waitForPause();
-      if (pauseOnExceptions) {
-        await _vmService.setExceptionPauseMode(await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
-      }
+      await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       await resume(wait: false);
     }
 
@@ -493,6 +502,81 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   void _throwErrorResponse(String msg) {
     throw '$msg\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+  }
+}
+
+class FlutterTestTestDriver extends FlutterTestDriver {
+  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix}):
+    super(_projectFolder, logPrefix: logPrefix);
+
+  Future<void> test({
+    String testFile = 'test/test.dart',
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+    Future<void> Function() beforeStart,
+  }) async {
+    await _setupProcess(<String>[
+        'test',
+        '--machine',
+        '-d',
+        'flutter-tester'
+    ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+  }
+
+  @override
+  Future<void> _setupProcess(
+    List<String> args, {
+    String script,
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    File pidFile,
+    Future<void> Function() beforeStart,
+  }) async {
+    await super._setupProcess(
+      args,
+      script: script,
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      pidFile: pidFile,
+    );
+
+    // Stash the PID so that we can terminate the VM more reliably than using
+    // _proc.kill() (because _proc is a shell, because `flutter` is a shell
+    // script).
+    final Map<String, dynamic> version = await _waitForJson();
+    _procPid = version['pid'];
+
+    if (withDebugger) {
+      final Map<String, dynamic> startedProcess = await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout);
+      final String vmServiceHttpString = startedProcess['params']['observatoryUri'];
+      _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
+      await connectToVmService(pauseOnExceptions: pauseOnExceptions);
+      // Allow us to run code before we start, eg. to set up breakpoints.
+      if (beforeStart != null) {
+        await beforeStart();
+      }
+      await resume(wait: false);
+    }
+  }
+
+  Future<Map<String, dynamic>> _waitForJson({
+    Duration timeout,
+  }) async {
+    return _timeoutWithMessages<Map<String, dynamic>>(
+      () => _stdout.stream.map<Map<String, dynamic>>(_parseJsonResponse).first,
+      timeout: timeout,
+      message: 'Did not receive any JSON.',
+    );
+  }
+
+  Map<String, dynamic> _parseJsonResponse(String line) {
+    try {
+      return json.decode(line);
+    } catch (e) {
+      // Not valid JSON, so likely some other output.
+      return null;
+    }
   }
 }
 

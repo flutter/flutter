@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
@@ -127,6 +128,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
     this.onTap,
   }) : assert(textAlign != null),
@@ -135,6 +137,7 @@ class TextField extends StatefulWidget {
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
+       assert(dragStartBehavior != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
@@ -346,6 +349,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
@@ -537,6 +543,21 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _startSplash(details);
   }
 
+  void _handleForcePressStarted(ForcePressDetails details) {
+    if (widget.selectionEnabled) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          // The cause is not technically double tap, but we would like to show
+          // the toolbar.
+          _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          break;
+      }
+    }
+  }
+
   void _handleSingleTapUp(TapUpDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
@@ -669,6 +690,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
+        dragStartBehavior: widget.dragStartBehavior,
       ),
     );
 
@@ -699,6 +721,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
+          onForcePressStart: _handleForcePressStarted,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,
