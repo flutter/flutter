@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/application_package.dart';
-
-import 'package:flutter_tools/src/build_info.dart';
-
+import '../application_package.dart';
 import '../base/platform.dart';
+import '../build_info.dart';
 import '../desktop.dart';
 import '../device.dart';
 import 'macos_workflow.dart';
