@@ -230,6 +230,7 @@ FILE: ../../../flutter/lib/ui/dart_wrapper.h
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
 FILE: ../../../flutter/lib/ui/hooks.dart
+FILE: ../../../flutter/lib/ui/io_manager.h
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.h

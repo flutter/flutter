@@ -36,8 +36,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // snapshot delegate
-      {},                        // resource context
-      nullptr,                   // unref qeueue
+      {},                        // io manager
       "main.dart",               // advisory uri
       "main"                     // advisory entrypoint
   );
@@ -66,8 +65,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       std::move(task_runners),   // task runners
       nullptr,                   // window
       {},                        // snapshot delegate
-      {},                        // resource context
-      nullptr,                   // unref qeueue
+      {},                        // io manager
       "main.dart",               // advisory uri
       "main"                     // advisory entrypoint
   );

@@ -16,7 +16,7 @@ void testCanvas(CanvasCallback callback) {
 }
 
 void main() {
-  test('canvas APIs should not crash', () {
+  test('canvas APIs should not crash', () async {
     final Paint paint = Paint();
     final Rect rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
     final RRect rrect = RRect.fromRectAndCorners(rect);
@@ -29,7 +29,7 @@ void main() {
     final Canvas recorderCanvas = Canvas(recorder);
     recorderCanvas.scale(1.0, 1.0);
     final Picture picture = recorder.endRecording();
-    final Image image = picture.toImage(1, 1);
+    final Image image = await picture.toImage(1, 1);
 
     try { Canvas(null, null); } catch (error) { } // ignore: empty_catches
     try { Canvas(null, rect); } catch (error) { } // ignore: empty_catches

@@ -15,6 +15,7 @@ source_set("ui") {
     "dart_ui.cc",
     "dart_ui.h",
     "dart_wrapper.h",
+    "io_manager.h",
     "isolate_name_server/isolate_name_server.cc",
     "isolate_name_server/isolate_name_server.h",
     "isolate_name_server/isolate_name_server_natives.cc",

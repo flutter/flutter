@@ -20,7 +20,8 @@ void main() {
   group('Image.toByteData', () {
     group('RGBA format', () {
       test('works with simple image', () async {
-        final ByteData data = await Square4x4Image.image.toByteData();
+        final Image image = await Square4x4Image.image;
+        final ByteData data = await image.toByteData();
         expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
       });
 
@@ -35,7 +36,7 @@ void main() {
 
     group('Unmodified format', () {
       test('works with simple image', () async {
-        final Image image = Square4x4Image.image;
+        final Image image = await Square4x4Image.image;
         final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
         expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
       });
@@ -51,7 +52,7 @@ void main() {
 
     group('PNG format', () {
       test('works with simple image', () async {
-        final Image image = Square4x4Image.image;
+        final Image image = await Square4x4Image.image;
         final ByteData data = await image.toByteData(format: ImageByteFormat.png);
         final List<int> expected = await readFile('square.png');
         expect(Uint8List.view(data.buffer), expected);
@@ -63,7 +64,7 @@ void main() {
 class Square4x4Image {
   Square4x4Image._();
 
-  static Image get image {
+  static Future<Image> get image async {
     final double width = _kWidth.toDouble();
     final double radius = _kRadius.toDouble();
     final double innerWidth = (_kWidth - 2 * _kRadius).toDouble();
@@ -82,7 +83,7 @@ class Square4x4Image {
     canvas.drawRect(Rect.fromLTWH(0.0, 0.0, width, width), black);
     canvas.drawRect(
         Rect.fromLTWH(radius, radius, innerWidth, innerWidth), green);
-    return recorder.endRecording().toImage(_kWidth, _kWidth);
+    return await recorder.endRecording().toImage(_kWidth, _kWidth);
   }
 
   static List<int> get bytes {
