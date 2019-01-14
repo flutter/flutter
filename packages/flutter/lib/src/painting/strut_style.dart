@@ -41,7 +41,7 @@ import 'basic_types.dart';
 /// ### Fields
 /// 
 /// If any properties (except [forceStrutHeight]) are omitted or null, it will inherit the
-/// values of the default text style.
+/// values of the default strut style.
 ///
 ///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
@@ -195,8 +195,11 @@ class StrutStyle extends Diagnosticable {
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
+    this.debugLabel,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+       _fontFamilyFallback = fontFamilyFallback,
+       _package = package,
        assert(fontSize == null || fontSize > 0);
 
   //////////////////////////////////////////////////////////////////////////////
@@ -236,7 +239,12 @@ class StrutStyle extends Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  final List<String> fontFamilyFallback;
+  List<String> get fontFamilyFallback => _package != null && _fontFamilyFallback != null ? _fontFamilyFallback.map((String str) => 'packages/$_package/$str').toList() : _fontFamilyFallback;
+  final List<String> _fontFamilyFallback;
+
+  // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
+  // in the [fontFamilyFallback] getter.
+  final String _package;
 
   /// The minimum size of glyphs (in logical pixels) to use when painting the text.
   ///
@@ -283,6 +291,14 @@ class StrutStyle extends Diagnosticable {
   ///
   /// This defaults to false.
   final bool forceStrutHeight;
+
+  /// A human-readable description of this strut style.
+  ///
+  /// This property is maintained only in debug builds.
+  ///
+  /// This property is not considered when comparing strut styles using `==` or
+  /// [compareTo], and it does not affect [hashCode].
+  final String debugLabel;
 
   /// Describe the difference between this style and another, in terms of how
   /// much damage it will make to the rendering.
@@ -386,13 +402,12 @@ class StrutStyle extends Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', lineHeight, unit: 'x', defaultValue: null));
-    styles.add(BoolProperty('${prefix}height', lineHeight, unit: 'x', defaultValue: null));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
-    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 
     if (!styleSpecified)
-      properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+      properties.add(FlagProperty('forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
   }
 }
