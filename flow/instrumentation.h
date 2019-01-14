@@ -14,6 +14,8 @@
 
 namespace flow {
 
+// DEPRECATED
+// The frame per second FPS could be different than 60 (e.g., 120).
 static const double kOneFrameMS = 1e3 / 60.0;
 
 class Stopwatch {
@@ -27,6 +29,8 @@ class Stopwatch {
   fml::TimeDelta CurrentLap() const { return fml::TimePoint::Now() - start_; }
 
   fml::TimeDelta MaxDelta() const;
+
+  fml::TimeDelta AverageDelta() const;
 
   void InitVisualizeSurface(const SkRect& rect) const;
 
