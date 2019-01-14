@@ -383,8 +383,8 @@ bool _matches<T>(List<T> a, List<T> b) {
   return true;
 }
 
-final RegExp _importPattern = RegExp(r"import 'package:flutter/([^.]+)\.dart'");
-final RegExp _importMetaPattern = RegExp(r"import 'package:meta/meta.dart'");
+final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
+final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta.dart\1''');
 
 Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
   return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
@@ -395,7 +395,7 @@ Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkF
     for (String line in file.readAsLinesSync()) {
       Match match = _importPattern.firstMatch(line);
       if (match != null)
-        result.add(match.group(1));
+        result.add(match.group(2));
       if (checkForMeta) {
         match = _importMetaPattern.firstMatch(line);
         if (match != null) {
