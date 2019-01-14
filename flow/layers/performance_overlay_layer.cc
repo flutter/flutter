@@ -7,6 +7,7 @@
 #include <string>
 
 #include "flutter/flow/layers/performance_overlay_layer.h"
+#include "third_party/skia/include/core/SkFont.h"
 
 namespace flow {
 namespace {
@@ -15,12 +16,13 @@ void DrawStatisticsText(SkCanvas& canvas,
                         const std::string& string,
                         int x,
                         int y) {
+  SkFont font;
+  font.setSize(15);
+  font.setLinearMetrics(false);
   SkPaint paint;
-  paint.setTextSize(15);
-  paint.setLinearText(false);
   paint.setColor(SK_ColorGRAY);
-  paint.setAntiAlias(true);
-  canvas.drawText(string.c_str(), string.size(), x, y, paint);
+  canvas.drawSimpleText(string.c_str(), string.size(), kUTF8_SkTextEncoding, x,
+                        y, font, paint);
 }
 
 void VisualizeStopWatch(SkCanvas& canvas,
