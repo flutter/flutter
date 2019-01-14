@@ -71,8 +71,19 @@ fml::WeakPtr<GrContext> IOManager::GetResourceContext() const {
              : fml::WeakPtr<GrContext>();
 }
 
+void IOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
+  resource_context_ = std::move(resource_context);
+  resource_context_weak_factory_ =
+      resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
+                              resource_context_.get())
+                        : nullptr;
+}
+
 fml::RefPtr<flow::SkiaUnrefQueue> IOManager::GetSkiaUnrefQueue() const {
   return unref_queue_;
 }
 
+fml::WeakPtr<IOManager> IOManager::GetWeakPtr() {
+  return weak_factory_.GetWeakPtr();
+}
 }  // namespace shell

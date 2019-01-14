@@ -67,22 +67,16 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // other subsystems.
   fml::AutoResetWaitableEvent io_latch;
   std::unique_ptr<IOManager> io_manager;
-  fml::WeakPtr<GrContext> resource_context;
-  fml::RefPtr<flow::SkiaUnrefQueue> unref_queue;
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
-      [&io_latch,          //
-       &io_manager,        //
-       &resource_context,  //
-       &unref_queue,       //
-       &platform_view,     //
-       io_task_runner      //
+      [&io_latch,       //
+       &io_manager,     //
+       &platform_view,  //
+       io_task_runner   //
   ]() {
         io_manager = std::make_unique<IOManager>(
             platform_view->CreateResourceContext(), io_task_runner);
-        resource_context = io_manager->GetResourceContext();
-        unref_queue = io_manager->GetSkiaUnrefQueue();
         io_latch.Signal();
       });
   io_latch.Wait();
@@ -119,8 +113,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          shared_snapshot = std::move(shared_snapshot),      //
                          vsync_waiter = std::move(vsync_waiter),            //
                          snapshot_delegate = std::move(snapshot_delegate),  //
-                         resource_context = std::move(resource_context),    //
-                         unref_queue = std::move(unref_queue)               //
+                         io_manager = io_manager->GetWeakPtr()              //
   ]() mutable {
         const auto& task_runners = shell->GetTaskRunners();
 
@@ -137,8 +130,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                           shell->GetSettings(),          //
                                           std::move(animator),           //
                                           std::move(snapshot_delegate),  //
-                                          std::move(resource_context),   //
-                                          std::move(unref_queue)         //
+                                          std::move(io_manager)          //
         );
         ui_latch.Signal();
       }));
@@ -433,7 +425,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     if (rasterizer) {
       rasterizer->Setup(std::move(surface));
     }
-    // Step 2: All done. Signal the latch that the platform thread is waiting
+    // Step 3: All done. Signal the latch that the platform thread is waiting
     // on.
     latch.Signal();
   });
@@ -445,14 +437,26 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     if (engine) {
       engine->OnOutputSurfaceCreated();
     }
-    // Step 1: Next, tell the GPU thread that it should create a surface for its
+    // Step 2: Next, tell the GPU thread that it should create a surface for its
     // rasterizer.
     fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
   };
 
-  // Step 0: Post a task onto the UI thread to tell the engine that it has an
-  // output surface.
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(), ui_task);
+  auto io_task = [io_manager = io_manager_->GetWeakPtr(),
+                  platform_view = platform_view_->GetWeakPtr(),
+                  ui_task_runner = task_runners_.GetUITaskRunner(), ui_task] {
+    if (io_manager) {
+      io_manager->UpdateResourceContext(
+          platform_view ? platform_view->CreateResourceContext() : nullptr);
+    }
+    // Step 1: Next, post a task on the UI thread to tell the engine that it has
+    // an output surface.
+    fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
+  };
+
+  // Step 0: Tell the IO thread that the PlatformView has a GLContext that can
+  // be used to create a resource context.
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetIOTaskRunner(), io_task);
   latch.Wait();
 }
 

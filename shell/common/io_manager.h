@@ -10,11 +10,12 @@
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/lib/ui/io_manager.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace shell {
 
-class IOManager {
+class IOManager : public blink::IOManager {
  public:
   // Convenience methods for platforms to create a GrContext used to supply to
   // the IOManager. The platforms may create the context themselves if they so
@@ -25,11 +26,15 @@ class IOManager {
   IOManager(sk_sp<GrContext> resource_context,
             fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
 
-  ~IOManager();
+  virtual ~IOManager();
 
-  fml::WeakPtr<GrContext> GetResourceContext() const;
+  fml::WeakPtr<GrContext> GetResourceContext() const override;
 
-  fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
+  void UpdateResourceContext(sk_sp<GrContext> resource_context);
+
+  fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
+
+  fml::WeakPtr<IOManager> GetWeakPtr();
 
  private:
   // Resource context management.

@@ -12,6 +12,7 @@
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
@@ -46,8 +47,7 @@ class DartIsolate : public UIDartState {
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::WeakPtr<GrContext> resource_context,
-      fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+      fml::WeakPtr<IOManager> io_manager,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       Dart_IsolateFlags* flags = nullptr);
@@ -57,8 +57,7 @@ class DartIsolate : public UIDartState {
               fml::RefPtr<DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-              fml::WeakPtr<GrContext> resource_context,
-              fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+              fml::WeakPtr<IOManager> io_manager,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
               ChildIsolatePreparer child_isolate_preparer);
