@@ -896,9 +896,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (_oldSelections.last == selection) {
           if (_showingToolbarFromTimeOut)
             _selectionOverlay.showToolbar();
-
           _showingToolbarFromTimeOut = !_showingToolbarFromTimeOut;
-          print('double tap show');
         } else {
           _showingToolbarFromTimeOut = true;
         }

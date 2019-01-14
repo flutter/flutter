@@ -238,7 +238,7 @@ class TextSelectionOverlay {
       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
-    print('created controller');
+
     _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);
     _toolbarController = AnimationController(duration: _fadeDuration, vsync: overlay);
   }
@@ -747,7 +747,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _doubleTapTimeout() {
-    print('calling here');
     _resetTimer();
     if (widget.onDoubleTapTimeOut != null)
       widget.onDoubleTapTimeOut();
