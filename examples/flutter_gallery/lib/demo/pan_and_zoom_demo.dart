@@ -1,6 +1,4 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math.dart' show Vector2;
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_inertial_motion.dart';
 
@@ -58,18 +56,20 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.8;
-  static const Size _PANNABLE_SIZE = Size(1000, 1000);
-  static Offset __offset;
+  static const Size _PANNABLE_SIZE = Size(2000, 2000);
+  // Start out looking at the center
+  // A positive x offset moves the scene right, viewport left.
+  // A positive y offset moves the scene down, viewport up.
+  static Offset __translation = const Offset(0, 0);
   Offset _translateFrom; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
-  double _scale = 1.0;
+  double _scale = 0.8;
 
-  Offset get _offset => __offset;
-  set _offset(Offset offset) {
-    // Keep _offset between the bounds defined by _PANNABLE_SIZE
+  Offset get _translation => __translation;
+  set _translation(Offset offset) {
+    // Clamp _translation such that viewport can't see beyond _PANNABLE_SIZE
     final Size screenSizeScene = widget.screenSize / _scale;
-    print('justin set offsetoff ${offset.toString()} ${screenSizeScene.toString()}');
-    __offset = Offset(
+    __translation = Offset(
       offset.dx.clamp(
         -_PANNABLE_SIZE.width / 2 + screenSizeScene.width,
         _PANNABLE_SIZE.width / 2,
@@ -79,21 +79,11 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
         _PANNABLE_SIZE.height / 2,
       ),
     );
-    print('justin setted offsetoff ${__offset.toString()}');
   }
 
   @override
   void initState() {
     super.initState();
-
-    // Start out looking at the center
-    // A positive x offset moves the scene right, viewport left.
-    // A positive y offset moves the scene down, viewport up.
-    _offset = Offset(
-      widget.screenSize.width / 2,
-      widget.screenSize.height / 2,
-    );
-
     _controller = AnimationController(
       vsync: this,
     );
@@ -125,40 +115,26 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       0, 0, 0, 1,
     );
 
-    // Original center of the screen with no transformations applied.
+    // Translate the scene to put _translation under the center of the viewport
     final Offset originalCenterOfScreen = Offset(
       widget.screenSize.width / 2,
       widget.screenSize.height / 2,
     );
-    // Center after scale has been applied.
-    // Imagine the scene scaling underneath the viewport while the viewport
-    // stays fixed, then this is the new point under the center of the viewport.
     final Offset scaledCenterOfScreen = originalCenterOfScreen * (1 / _scale);
-    // Center after scale and offset have been applied.
-    final Offset finalCenterOfScreen = scaledCenterOfScreen + _offset;
-    // Translate the original center of the screen to the final center.
-    final Vector2 translationVector = Vector2(
-      finalCenterOfScreen.dx - originalCenterOfScreen.dx,
-      finalCenterOfScreen.dy - originalCenterOfScreen.dy,
-    );
+    final Offset offsetUnderCenter = _translation + scaledCenterOfScreen;
     final Matrix4 translate = Matrix4(
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
-      translationVector.x, translationVector.y, 0, 1,
+      offsetUnderCenter.dx, offsetUnderCenter.dy, 0, 1,
     );
 
     return scale * translate;
   }
 
   // Given a point in screen coordinates, return the point in the scene.
-  // Scene coordinates are independent of scale, just like _offset.
+  // Scene coordinates are independent of scale, just like _translation.
   Offset _fromScreen(Offset screenPoint, Offset offset, double scale) {
-    // Locate the center of the screen in scene coordinates at a scale of 1.0.
-    final Offset centerOfScreenSceneCoords = Offset(
-      widget.screenSize.width / 2 - offset.dx,
-      widget.screenSize.height / 2 - offset.dy,
-    );
     // After scaling, the center of the screen is still the same scene coords.
     // Find the distance from the center of the screen to the given screenPoint.
     final Offset fromCenterOfScreen = Offset(
@@ -167,7 +143,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     );
     final Offset fromCenterOfScreenSceneCoords = fromCenterOfScreen / scale;
     // The absolute location of screenPoint in scene coords is the sum.
-    return centerOfScreenSceneCoords + fromCenterOfScreenSceneCoords;
+    return offset + fromCenterOfScreenSceneCoords;
   }
 
   // Handle panning and pinch zooming events
@@ -175,13 +151,13 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     _controller.stop();
     setState(() {
       _scaleStart = _scale;
-      _translateFrom = Offset(details.focalPoint.dx, details.focalPoint.dy);
+      _translateFrom = details.focalPoint;
     });
   }
   void onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
       if (_scaleStart != null) {
-        final Offset focalPointScene = _fromScreen(details.focalPoint, _offset, _scale);
+        final Offset focalPointScene = _fromScreen(details.focalPoint, _translation, _scale);
         _scale = _scaleStart * details.scale;
         if (_scale > MAX_SCALE) {
           _scale = MAX_SCALE;
@@ -195,15 +171,8 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
           // same place in the scene. That means that the focal point of the
           // scale should be on the same place in the scene before and after the
           // scale.
-          final Offset focalPointSceneNext = _fromScreen(details.focalPoint, _offset, _scale);
-          final Offset nextOffset = Offset(
-            _offset.dx + focalPointSceneNext.dx - focalPointScene.dx,
-            _offset.dy + focalPointSceneNext.dy - focalPointScene.dy,
-          );
-          _offset = Offset(
-            nextOffset.dx,
-            nextOffset.dy,
-          );
+          final Offset focalPointSceneNext = _fromScreen(details.focalPoint, _translation, _scale);
+          _translation = _translation + focalPointSceneNext - focalPointScene;
         }
       }
       if (_translateFrom != null && details.scale == 1.0) {
@@ -211,14 +180,8 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
         // that are not affected by _scale. So, dividing by scale here properly
         // gives us more distance when zoomed out and less when zoomed in so
         // that the point under the user's finger stays constant during a drag.
-        _offset = Offset(
-          _offset.dx + (details.focalPoint.dx - _translateFrom.dx) / _scale,
-          _offset.dy + (details.focalPoint.dy - _translateFrom.dy) / _scale,
-        );
-        _translateFrom = Offset(
-          details.focalPoint.dx,
-          details.focalPoint.dy,
-        );
+        _translation = _translation + (details.focalPoint - _translateFrom) / _scale;
+        _translateFrom = details.focalPoint;
       }
     });
   }
@@ -238,8 +201,8 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       return;
     }
 
-    final InertialMotion inertialMotion = InertialMotion(details.velocity, _offset);
-    _animation = Tween<Offset>(begin: _offset, end: inertialMotion.finalPosition).animate(_controller);
+    final InertialMotion inertialMotion = InertialMotion(details.velocity, _translation);
+    _animation = Tween<Offset>(begin: _translation, end: inertialMotion.finalPosition).animate(_controller);
     _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
     _animation.addListener(_onAnimate);
     _controller.fling();
@@ -247,7 +210,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
 
   void _onAnimate() {
     setState(() {
-      _offset = _animation.value;
+      _translation = _animation.value;
     });
   }
 
@@ -263,6 +226,7 @@ class BoardPainter extends CustomPainter {
     this.board,
   });
 
+  static const Size _PANNABLE_SIZE = Size(2000, 2000);
   Board board;
 
   @override
@@ -277,6 +241,14 @@ class BoardPainter extends CustomPainter {
     }
 
     board.forEach(drawBoardPoint);
+
+    // TODO remove
+    canvas.drawRect(
+      Rect.fromLTWH(-_PANNABLE_SIZE.width / 2, -_PANNABLE_SIZE.height / 2, _PANNABLE_SIZE.width, _PANNABLE_SIZE.height),
+      Paint()
+        ..color = Colors.pink
+        ..style = PaintingStyle.stroke,
+    );
   }
 
   @override
