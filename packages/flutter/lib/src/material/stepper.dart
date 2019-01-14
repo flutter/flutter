@@ -64,7 +64,8 @@ const Color _kCircleActiveDark = Colors.black87;
 const Color _kDisabledLight = Colors.black38;
 const Color _kDisabledDark = Colors.white30;
 const double _kStepSize = 24.0;
-const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(3.0) / 2.0
+const double _kTriangleHeight =
+    _kStepSize * 0.866025; // Triangle height. sqrt(3.0) / 2.0
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -85,9 +86,9 @@ class Step {
     @required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
-  }) : assert(title != null),
-       assert(content != null),
-       assert(state != null);
+  })  : assert(title != null),
+        assert(content != null),
+        assert(state != null);
 
   /// The title of the step that typically describes it.
   final Widget title;
@@ -142,21 +143,21 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
-  }) : assert(steps != null),
-       assert(type != null),
-       assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length),
-       super(key: key);
+  })  : assert(steps != null),
+        assert(type != null),
+        assert(currentStep != null),
+        assert(0 <= currentStep && currentStep < steps.length),
+        super(key: key);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
   /// The length of [steps] must not change.
   final List<Step> steps;
-  
+
   /// How the Stepper's scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view. 
+  /// user stops dragging the scroll view.
   final ScrollPhysics physics;
 
   /// The type of stepper that determines the layout. In the case of
@@ -283,7 +284,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildCircleChild(int index, bool oldState) {
-    final StepState state = oldState ? _oldStates[index] : widget.steps[index].state;
+    final StepState state =
+        oldState ? _oldStates[index] : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
     assert(state != null);
     switch (state) {
@@ -291,7 +293,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.disabled:
         return Text(
           '${index + 1}',
-          style: isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle,
+          style: isDarkActive
+              ? _kStepStyle.copyWith(color: Colors.black87)
+              : _kStepStyle,
         );
       case StepState.editing:
         return Icon(
@@ -314,9 +318,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Color _circleColor(int index) {
     final ThemeData themeData = Theme.of(context);
     if (!_isDark()) {
-      return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
+      return widget.steps[index].isActive
+          ? themeData.primaryColor
+          : Colors.black38;
     } else {
-      return widget.steps[index].isActive ? themeData.accentColor : themeData.backgroundColor;
+      return widget.steps[index].isActive
+          ? themeData.accentColor
+          : themeData.backgroundColor;
     }
   }
 
@@ -333,7 +341,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           shape: BoxShape.circle,
         ),
         child: Center(
-          child: _buildCircleChild(index, oldState && widget.steps[index].state == StepState.error),
+          child: _buildCircleChild(
+              index, oldState && widget.steps[index].state == StepState.error),
         ),
       ),
     );
@@ -347,14 +356,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       child: Center(
         child: SizedBox(
           width: _kStepSize,
-          height: _kTriangleHeight, // Height of 24dp-long-sided equilateral triangle.
+          height:
+              _kTriangleHeight, // Height of 24dp-long-sided equilateral triangle.
           child: CustomPaint(
             painter: _TrianglePainter(
               color: _isDark() ? _kErrorDark : _kErrorLight,
             ),
             child: Align(
-              alignment: const Alignment(0.0, 0.8), // 0.8 looks better than the geometrical 0.33.
-              child: _buildCircleChild(index, oldState && widget.steps[index].state != StepState.error),
+              alignment: const Alignment(
+                  0.0, 0.8), // 0.8 looks better than the geometrical 0.33.
+              child: _buildCircleChild(index,
+                  oldState && widget.steps[index].state != StepState.error),
             ),
           ),
         ),
@@ -370,7 +382,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
         secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
         sizeCurve: Curves.fastOutSlowIn,
-        crossFadeState: widget.steps[index].state == StepState.error ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        crossFadeState: widget.steps[index].state == StepState.error
+            ? CrossFadeState.showSecond
+            : CrossFadeState.showFirst,
         duration: kThemeAnimationDuration,
       );
     } else {
@@ -383,7 +397,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildVerticalControls() {
     if (widget.controlsBuilder != null)
-      return widget.controlsBuilder(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+      return widget.controlsBuilder(context,
+          onStepContinue: widget.onStepContinue,
+          onStepCancel: widget.onStepCancel);
 
     Color cancelColor;
 
@@ -399,7 +415,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(cancelColor != null);
 
     final ThemeData themeData = Theme.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(top: 16.0),
@@ -409,7 +426,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           children: <Widget>[
             FlatButton(
               onPressed: widget.onStepContinue,
-              color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
+              color: _isDark()
+                  ? themeData.backgroundColor
+                  : themeData.primaryColor,
               textColor: Colors.white,
               textTheme: ButtonTextTheme.normal,
               child: Text(localizations.continueButtonLabel),
@@ -440,13 +459,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.complete:
         return textTheme.body2;
       case StepState.disabled:
-        return textTheme.body2.copyWith(
-          color: _isDark() ? _kDisabledDark : _kDisabledLight
-        );
+        return textTheme.body2
+            .copyWith(color: _isDark() ? _kDisabledDark : _kDisabledLight);
       case StepState.error:
-        return textTheme.body2.copyWith(
-          color: _isDark() ? _kErrorDark : _kErrorLight
-        );
+        return textTheme.body2
+            .copyWith(color: _isDark() ? _kErrorDark : _kErrorLight);
     }
     return null;
   }
@@ -462,13 +479,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.complete:
         return textTheme.caption;
       case StepState.disabled:
-        return textTheme.caption.copyWith(
-          color: _isDark() ? _kDisabledDark : _kDisabledLight
-        );
+        return textTheme.caption
+            .copyWith(color: _isDark() ? _kDisabledDark : _kDisabledLight);
       case StepState.error:
-        return textTheme.caption.copyWith(
-          color: _isDark() ? _kErrorDark : _kErrorLight
-        );
+        return textTheme.caption
+            .copyWith(color: _isDark() ? _kErrorDark : _kErrorLight);
     }
     return null;
   }
@@ -497,33 +512,26 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       );
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: children
-    );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: children);
   }
 
   Widget _buildVerticalHeader(int index) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Row(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              // Line parts are always added in order for the ink splash to
-              // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index)),
-              _buildIcon(index),
-              _buildLine(!_isLast(index)),
-            ]
-          ),
+        margin: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Row(children: <Widget>[
+          Column(children: <Widget>[
+            // Line parts are always added in order for the ink splash to
+            // flood the tips of the connector lines.
+            _buildLine(!_isFirst(index)),
+            _buildIcon(index),
+            _buildLine(!_isLast(index)),
+          ]),
           Container(
-            margin: const EdgeInsetsDirectional.only(start: 12.0),
-            child: _buildHeaderText(index)
-          )
-        ]
-      )
-    );
+              margin: const EdgeInsetsDirectional.only(start: 12.0),
+              child: _buildHeaderText(index))
+        ]));
   }
 
   Widget _buildVerticalBody(int index) {
@@ -563,7 +571,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
           secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
           sizeCurve: Curves.fastOutSlowIn,
-          crossFadeState: _isCurrent(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: _isCurrent(index)
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           duration: kThemeAnimationDuration,
         ),
       ],
@@ -574,29 +584,24 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
-        Column(
-          key: _keys[i],
-          children: <Widget>[
-            InkWell(
-              onTap: widget.steps[i].state != StepState.disabled ? () {
-                // In the vertical case we need to scroll to the newly tapped
-                // step.
-                Scrollable.ensureVisible(
-                  _keys[i].currentContext,
-                  curve: Curves.fastOutSlowIn,
-                  duration: kThemeAnimationDuration,
-                );
+      children.add(Column(key: _keys[i], children: <Widget>[
+        InkWell(
+            onTap: widget.steps[i].state != StepState.disabled
+                ? () {
+                    // In the vertical case we need to scroll to the newly tapped
+                    // step.
+                    Scrollable.ensureVisible(
+                      _keys[i].currentContext,
+                      curve: Curves.fastOutSlowIn,
+                      duration: kThemeAnimationDuration,
+                    );
 
-                if (widget.onStepTapped != null)
-                  widget.onStepTapped(i);
-              } : null,
-              child: _buildVerticalHeader(i)
-            ),
-            _buildVerticalBody(i)
-          ]
-        )
-      );
+                    if (widget.onStepTapped != null) widget.onStepTapped(i);
+                  }
+                : null,
+            child: _buildVerticalHeader(i)),
+        _buildVerticalBody(i)
+      ]));
     }
 
     return ListView(
@@ -612,10 +617,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     for (int i = 0; i < widget.steps.length; i += 1) {
       children.add(
         InkResponse(
-          onTap: widget.steps[i].state != StepState.disabled ? () {
-            if (widget.onStepTapped != null)
-              widget.onStepTapped(i);
-          } : null,
+          onTap: widget.steps[i].state != StepState.disabled
+              ? () {
+                  if (widget.onStepTapped != null) widget.onStepTapped(i);
+                }
+              : null,
           child: Row(
             children: <Widget>[
               Container(
@@ -682,10 +688,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
         throw FlutterError(
-          'Steppers must not be nested. The material specification advises '
-          'that one should avoid embedding steppers within steppers. '
-          'https://material.google.com/components/steppers.html#steppers-usage\n'
-        );
+            'Steppers must not be nested. The material specification advises '
+            'that one should avoid embedding steppers within steppers. '
+            'https://material.google.com/components/steppers.html#steppers-usage\n');
       return true;
     }());
     assert(widget.type != null);
@@ -702,9 +707,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 // Paints a triangle whose base is the bottom of the bounding rectangle and its
 // top vertex the middle of its top.
 class _TrianglePainter extends CustomPainter {
-  _TrianglePainter({
-    this.color
-  });
+  _TrianglePainter({this.color});
 
   final Color color;
 
