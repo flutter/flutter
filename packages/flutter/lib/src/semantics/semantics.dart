@@ -10,7 +10,6 @@ import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
