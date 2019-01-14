@@ -46,6 +46,9 @@ import 'basic_types.dart';
 ///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
 /// 
+///  * [fontFamilyFallback] an ordered list of font family names that will be searched for when
+///    the font in [fontFamily] cannot be found.
+///
 ///  * [fontSize] the size of the ascent plus descent in logical pixels. This is also
 ///    used as the basis of the custom leading caluclation. This value cannot
 ///    be negative.
@@ -177,7 +180,7 @@ import 'basic_types.dart';
 /// {@end-tool}
 /// 
 @immutable
-class StrutStyle {
+class StrutStyle extends Diagnosticable {
   /// Creates a strut style.
   ///
   /// The `package` argument must be non-null if the font family is defined in a
@@ -185,6 +188,7 @@ class StrutStyle {
   /// [fontFamily] property.
   const StrutStyle({
     String fontFamily,
+    List<String> fontFamilyFallback,
     this.fontSize,
     this.lineHeight,
     this.leading,
@@ -193,9 +197,15 @@ class StrutStyle {
     this.forceStrutHeight,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
-       assert(lineHeight == null || lineHeight > 0),
-       assert(leading == null || leading > 0),
        assert(fontSize == null || fontSize > 0);
+
+  //////////////////////////////////////////////////////////////////////////////
+  // The defaults are noted here for convenience. The actual place where they //
+  // are defined is in the engine paragraph_style.h in LibTxt. This should be //
+  // updated should it change in the engine. The engine specifies the defaults//
+  // in order to reduce the amount of data we pass to native as strut will    //
+  // usually be unspecified.                                                  //
+  //////////////////////////////////////////////////////////////////////////////
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
@@ -203,9 +213,30 @@ class StrutStyle {
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
   ///
-  /// When no fontFamily is provided, then the default platform font will
-  /// be used.
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that will be searched for, followed in order by the font families
+  /// in [fontFamilyFallback]. If all font families are exhausted and no match
+  /// was found, the default platform font family will be used instead.
   final String fontFamily;
+
+  /// The ordered list of font families to fall back on when a higher priority
+  /// font family cannot be found.
+  ///
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that will be searched for, followed in order by the font families
+  /// in [fontFamilyFallback]. If all font families are exhausted and no match
+  /// was found, the default platform font family will be used instead.
+  ///
+  /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
+  /// acts as the preferred/first font family. When neither is provided, then
+  /// the default platform font will be used. Providing and empty list or null
+  /// for this property is the same as omitting it.
+  ///
+  /// If the font is defined in a package, each font family in the list will be
+  /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
+  /// The package name should be provided by the `package` argument in the
+  /// constructor.
+  final List<String> fontFamilyFallback;
 
   /// The minimum size of glyphs (in logical pixels) to use when painting the text.
   ///
@@ -213,27 +244,33 @@ class StrutStyle {
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
   ///
-  /// [getParagraphStyle] will default to 0 logical pixels if the font size
-  /// isn't specified here.
+  /// The default fontSize is `14` logical pixels.
   final double fontSize;
-
-  // The default font size if none is specified.
-  static const double _defaultFontSize = 0.0;
 
   /// The height of the line as a ratio of fontSize. This property does
   /// not affect the leading height, which is controlled separately through
   /// [leading].
+  ///
+  /// The default lineHeight is `1.0`.
   final double lineHeight;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
+  ///
+  /// The default fontWeight is `w400`.
   final FontWeight fontWeight;
 
   /// The typeface variant to use when calculating the strut (e.g., italics).
+  ///
+  /// The default fontStyle is `normal`.
   final FontStyle fontStyle;
 
   /// The custom strut leading as a ratio of [fontSize].
   ///
-  /// If this is null or negative, the font's leading will be used.
+  /// If this is null or negative, the font's leading will be used. Positive
+  /// values and zero specifies a custom leading, half of which will be applied
+  /// to the top of the line box and the other half to the bottom.
+  ///
+  /// The default leading is `-1`, which will use the font-specified leading.
   final double leading;
 
   /// Whether the strut height should be forced.
@@ -243,6 +280,8 @@ class StrutStyle {
   /// metrics will be used instead. This property guarantees uniform line spacing, however
   /// text overlap will become possible. This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
+  ///
+  /// This defaults to false.
   final bool forceStrutHeight;
 
   /// Describe the difference between this style and another, in terms of how
@@ -292,5 +331,68 @@ class StrutStyle {
       leading,
       forceStrutHeight,
     );
+  }
+
+  /// Adds all properties prefixing property names with the optional `prefix`.
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+    super.debugFillProperties(properties);
+    if (debugLabel != null)
+      properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
+    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    String weightDescription;
+    if (fontWeight != null) {
+      switch (fontWeight) {
+        case FontWeight.w100:
+          weightDescription = '100';
+          break;
+        case FontWeight.w200:
+          weightDescription = '200';
+          break;
+        case FontWeight.w300:
+          weightDescription = '300';
+          break;
+        case FontWeight.w400:
+          weightDescription = '400';
+          break;
+        case FontWeight.w500:
+          weightDescription = '500';
+          break;
+        case FontWeight.w600:
+          weightDescription = '600';
+          break;
+        case FontWeight.w700:
+          weightDescription = '700';
+          break;
+        case FontWeight.w800:
+          weightDescription = '800';
+          break;
+        case FontWeight.w900:
+          weightDescription = '900';
+          break;
+      }
+    }
+    // TODO(jacobr): switch this to use enumProperty which will either cause the
+    // weight description to change to w600 from 600 or require existing
+    // enumProperty to handle this special case.
+    styles.add(DiagnosticsProperty<FontWeight>(
+      '${prefix}weight',
+      fontWeight,
+      description: weightDescription,
+      defaultValue: null,
+    ));
+    styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}height', lineHeight, unit: 'x', defaultValue: null));
+    styles.add(BoolProperty('${prefix}height', lineHeight, unit: 'x', defaultValue: null));
+
+    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
+    styles.forEach(properties.add);
+
+    if (!styleSpecified)
+      properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
 }

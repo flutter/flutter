@@ -207,8 +207,9 @@ class TextPainter {
   ///
   /// Omitting or providing null will disable strut.
   ///
-  /// Omitting or providing null for any properties of [StrutStyle] will cause
-  /// the strut to inherit the missing properties from the default text style.
+  /// Omitting or providing null for any properties of [StrutStyle] will result in
+  /// default values being used. It is highly recommended to at least specify a
+  /// [fontSize].
   ///
   /// See [StrutStyle] for details.
   /// {@endtemplate}
