@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: flutter_style_todos
-
 import 'dart:async';
 import 'dart:collection';
 
@@ -26,7 +24,7 @@ import '../runner/flutter_command.dart';
 /// Example:
 ///
 /// ```
-///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
+///   'linter': '0.1.35',
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
