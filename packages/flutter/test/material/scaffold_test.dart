@@ -901,7 +901,7 @@ void main() {
 
       ScaffoldGeometry geometry = listenerState.cache.value;
       final Rect transitioningFabRect = geometry.floatingActionButtonArea;
-      
+
       final double transitioningRotation = tester.widget<RotationTransition>(
         find.byType(RotationTransition),
       ).turns.value;
