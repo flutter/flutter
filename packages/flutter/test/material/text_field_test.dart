@@ -1936,6 +1936,29 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
+  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextField(
+              buildCounter: (BuildContext context, {int currentLength, int maxLength, bool isFocused}) {
+                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+              },
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0 of 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 of 10'), findsOneWidget);
+  });
+
   testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
