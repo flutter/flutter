@@ -1721,7 +1721,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     scrollableState = tester.firstState(find.byType(Scrollable));
-    expect(scrollableState.position.pixels, isNot(equals(0.0)));
+    expect(scrollableState.position.pixels, equals(222.0));
   });
 
   testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
