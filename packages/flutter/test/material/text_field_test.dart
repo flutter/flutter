@@ -1721,6 +1721,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     scrollableState = tester.firstState(find.byType(Scrollable));
+    // For a horizontal input, scrolls to the exact position of the caret.
     expect(scrollableState.position.pixels, equals(222.0));
   });
 
