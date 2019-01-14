@@ -612,6 +612,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   const TextSelectionGestureDetector({
     Key key,
     this.onTapDown,
+    this.onForcePressStart,
+    this.onForcePressEnd,
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapDown,
@@ -625,6 +627,14 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
+
+  /// Called when a pointer has tapped down and the force of the pointer has
+  /// just become greater than [ForcePressGestureDetector.startPressure].
+  final GestureForcePressStartCallback onForcePressStart;
+
+  /// Called when a pointer that had previously triggered [onForcePressStart] is
+  /// lifted off the screen.
+  final GestureForcePressEndCallback onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured [onSingleTapDown] and
@@ -712,6 +722,18 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
+  void _forcePressStarted(ForcePressDetails details) {
+    _doubleTapTimer?.cancel();
+    _doubleTapTimer = null;
+   if (widget.onForcePressStart != null)
+     widget.onForcePressStart(details);
+  }
+
+  void _forcePressEnded(ForcePressDetails details) {
+    if (widget.onForcePressEnd != null)
+      widget.onForcePressEnd(details);
+  }
+
   void _handleLongPress() {
     if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
       widget.onSingleLongTapDown();
@@ -739,6 +761,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
+      onForcePressStart: _forcePressStarted,
+      onForcePressEnd: _forcePressEnded,
       onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
