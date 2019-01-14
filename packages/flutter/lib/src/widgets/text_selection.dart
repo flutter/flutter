@@ -320,7 +320,6 @@ class TextSelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar() {
     assert(_toolbar == null);
-    print(_toolbar);
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
     _toolbarController.forward(from: 0.0);
@@ -394,7 +393,6 @@ class TextSelectionOverlay {
     hide(instant: true);
     _handleController.dispose();
     _toolbarController.dispose();
-    print('disposed');
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
@@ -719,7 +717,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       }
 
       _doubleTapTimer.cancel();
-      _doubleTapTimeout();
+      _resetTimer();
       _isDoubleTap = true;
     }
   }
@@ -749,10 +747,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _doubleTapTimeout() {
-    _doubleTapTimer = null;
-    _lastTapOffset = null;
+    print('calling here');
+    _resetTimer();
     if (widget.onDoubleTapTimeOut != null)
       widget.onDoubleTapTimeOut();
+  }
+
+  void _resetTimer() {
+    _doubleTapTimer = null;
+    _lastTapOffset = null;
   }
 
   bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {

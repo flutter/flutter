@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -858,7 +859,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  TextSelection _oldSelection = const TextSelection.collapsed(offset: -1);
+  final Queue<TextSelection> _oldSelections = Queue<TextSelection>();
+  bool _showingToolbarFromTimeOut = true;
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
     widget.controller.selection = selection;
@@ -890,14 +892,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _selectionOverlay.showHandles();
       if ((longPress || cause == SelectionChangedCause.doubleTap) && !toolbarVisible)
         _selectionOverlay.showToolbar();
-      if (cause == SelectionChangedCause.doubleTapTimeOut && _oldSelection == selection)
-        _selectionOverlay.showToolbar();
+      if (cause == SelectionChangedCause.doubleTapTimeOut) {
+        if (_oldSelections.last == selection) {
+          if (_showingToolbarFromTimeOut)
+            _selectionOverlay.showToolbar();
 
+          _showingToolbarFromTimeOut = !_showingToolbarFromTimeOut;
+          print('double tap show');
+        } else {
+          _showingToolbarFromTimeOut = true;
+        }
+      }
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
 
     }
-    _oldSelection = selection;
+    if (_oldSelections.length < 2) {
+      _oldSelections.addFirst(selection);
+    } else {
+      _oldSelections.addFirst(selection);
+      _oldSelections.removeLast();
+    }
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
