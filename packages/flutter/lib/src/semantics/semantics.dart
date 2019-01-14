@@ -1544,10 +1544,46 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// A [SemanticsNode] represents multiple [RenderObject]s, which can be
   /// located at various elevations in 3D. The [thickness] is the difference
-  /// between the elevations of the lowest and highest [RenderObject]
+  /// between the absolute elevations of the lowest and highest [RenderObject]
   /// represented by this [SemanticsNode]. In other words, the thickness
   /// describes how high the box is that this [SemanticsNode] occupies in three
   /// dimensional space. The two other dimensions are defined by [rect].
+  ///
+  /// ## Sample Code
+  ///
+  /// The following code stacks three [PhysicalModel]s on top of each other
+  /// separated by none-zero elevations:
+  ///
+  /// ```dart
+  /// PhysicalModel( // A
+  ///   color: Colors.amber,
+  ///   elevation: 0.0,
+  ///   child: Semantics(
+  ///     explicitChildNodes: true,
+  ///     child: PhysicalModel( // B
+  ///       color: Colors.brown,
+  ///       elevation: 5.0,
+  ///       child: PhysicalModel( // C
+  ///         color: Colors.cyan,
+  ///         elevation: 10.0,
+  ///         child: Placeholder(),
+  ///       ),
+  ///     ),
+  ///   ),
+  ///  );
+  /// ```
+  ///
+  /// [PhysicalModel] C is located 10.0 above [PhysicalModel] B, which in turn
+  /// is located 5.0 above [PhysicalModel] A. The side view of this constellation
+  /// looks as follows:
+  ///
+  /// ![A diagram illustrating the elevations of three PhysicalModels and their
+  /// corresponding SemanticsNodes.](https://flutter.github.io/assets-for-api-docs/assets/semantics/SemanticsNode.thickness.png)
+  ///
+  /// In this example the [RenderObject]s for [PhysicalModel] C and B share one
+  /// [SemanticsNode] Y. Given the elevations of those [RenderObject]s, this
+  /// [SemanticsNode] has a [thickness] of 10.0 and an elevation of 5.0 over
+  /// its parent [SemanticsNode] X.
   ///
   /// See also:
   ///
