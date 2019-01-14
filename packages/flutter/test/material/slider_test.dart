@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
+
 // A thumb shape that also logs its repaint center.
 class LoggingThumbShape extends SliderComponentShape {
   LoggingThumbShape(this.log);
@@ -26,17 +27,19 @@ class LoggingThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isEnabled,
+        bool isDiscrete,
+        bool onActiveTrack,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+      }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
@@ -556,8 +559,8 @@ void main() {
       final ValueChanged<double> onChanged = !enabled
           ? null
           : (double d) {
-              value = d;
-            };
+        value = d;
+      };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -720,14 +723,15 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(color: customColor1)
-        ..rect(color: customColor2)
-        ..circle(color: customColor1.withAlpha(0x29))
-        ..circle(color: customColor2)
-        ..circle(color: customColor2)
-        ..circle(color: customColor1)
-        ..path(color: customColor1)
-        ..circle(color: customColor1),
+        ..rect(color: customColor1) // active track
+        ..rect(color: customColor2) // inactive track
+        ..circle(color: customColor1.withAlpha(0x29)) // overlay
+        ..circle(color: customColor2) // 1st tick mark
+        ..circle(color: customColor2) // 2nd tick mark
+        ..circle(color: customColor2) // 3rd tick mark
+        ..circle(color: customColor1) // 4th tick mark
+        ..path(color: customColor1) // indicator
+        ..circle(color: customColor1), // thumb
     );
     await gesture.up();
   });
@@ -896,8 +900,8 @@ void main() {
               child: Material(
                 child: Theme(
                   data: Theme.of(context).copyWith(
-                        sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
-                      ),
+                    sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
+                  ),
                   child: Center(
                     child: OverflowBox(
                       maxWidth: double.infinity,
@@ -1025,6 +1029,7 @@ void main() {
       expect(
         sliderBox,
         paints
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
@@ -1077,6 +1082,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 16.0)
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
@@ -1089,6 +1095,7 @@ void main() {
         paints
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
