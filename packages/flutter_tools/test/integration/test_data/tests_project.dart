@@ -51,5 +51,5 @@ class TestsProject extends Project {
   Uri get breakpointUri => Uri.file(testFilePath);
 
   @override
-  int get breakpointLine => lineContaining(main, '// BREAKPOINT');
+  int get breakpointLine => lineContaining(testContent, '// BREAKPOINT');
 }

@@ -521,7 +521,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
         '--machine',
         '-d',
         'flutter-tester'
-    ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile);
+    ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 
   @override
