@@ -488,6 +488,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   Offset _dragPosition;
 
   void _handleDragStart(DragStartDetails details) {
+    print('grabbed the handle');
     _dragPosition = details.globalPosition + Offset(0.0, -widget.selectionControls.handleSize.height);
   }
 
@@ -551,6 +552,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       showWhenUnlinked: false,
       child: GestureDetector(
         dragStartBehavior: widget.dragStartBehavior,
+        onTapDown: (TapDownDetails _) { print('was at least touched'); },
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,

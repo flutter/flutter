@@ -1006,10 +1006,6 @@ void main() {
     await tester.pump();
     await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 1));
-    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
-    // (No idea why this is necessary, but the bug wouldn't repro without it.)
-    await gesture.moveBy(const Offset(0.0, -1000.0));
-    await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -1034,6 +1030,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    print('should have selected. Selection is ${controller.selection}');
 
     expect(controller.selection.base.offset, 91);
     expect(controller.selection.extent.offset, 94);
@@ -1043,13 +1040,20 @@ void main() {
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
     );
+    print('render editable is at ${tester.getRect(find.byType(EditableText))}');
+    print('handles are at ${tester.getRect(find.byType(Transform).first)}');
+    print('globalizes into ${endpoints[0].point}');
+    print(tester.hitTestOnBinding(selectedWordPos));
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
     final Offset handlePos = endpoints[0].point + const Offset(-1, 1);
     final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
+    print('trying to grad the handle');
+    debugDumpApp();
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
+    print('held for 1s');
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
