@@ -568,6 +568,5 @@ class RenderParagraph extends RenderBox {
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
-    properties.add(ObjectFlagProperty('strutStyle', strutStyle, ifNull: 'unspecified'));
   }
 }

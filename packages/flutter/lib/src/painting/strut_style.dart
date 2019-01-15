@@ -55,12 +55,11 @@ import 'basic_types.dart';
 ///
 ///  * [lineHeight] the height of the line as a ratio of [fontSize]. This property does
 ///    not affect the leading height, which is controlled separately through [leading].
-///    This value cannot be negative.
 /// 
 ///  * [leading] the custom leading to apply to the strut as a ratio of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
-///    to the top and the other half to the bottom of the line height. This value cannot
-///    be negative.
+///    to the top and the other half to the bottom of the line height. Negative values
+///    indicate using the font's original leading.
 ///
 ///  * [fontWeight] the typeface thickness to use when calculating the strut (e.g., bold).
 ///
@@ -219,7 +218,9 @@ class StrutStyle extends Diagnosticable {
   /// The value provided in [fontFamily] will act as the preferred/first font
   /// family that will be searched for, followed in order by the font families
   /// in [fontFamilyFallback]. If all font families are exhausted and no match
-  /// was found, the default platform font family will be used instead.
+  /// was found, the default platform font family will be used instead. Unlike
+  /// [TextStyle.fontFamilyFallback], the font does not need to contain the
+  /// desired glyphs to match.
   final String fontFamily;
 
   /// The ordered list of font families to fall back on when a higher priority
@@ -228,7 +229,9 @@ class StrutStyle extends Diagnosticable {
   /// The value provided in [fontFamily] will act as the preferred/first font
   /// family that will be searched for, followed in order by the font families
   /// in [fontFamilyFallback]. If all font families are exhausted and no match
-  /// was found, the default platform font family will be used instead.
+  /// was found, the default platform font family will be used instead. Unlike
+  /// [TextStyle.fontFamilyFallback], the font does not need to contain the
+  /// desired glyphs to match.
   ///
   /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
   /// acts as the preferred/first font family. When neither is provided, then
@@ -315,7 +318,8 @@ class StrutStyle extends Diagnosticable {
         fontStyle != other.fontStyle ||
         lineHeight != other.lineHeight ||
         leading != other.leading ||
-        forceStrutHeight != other.forceStrutHeight)
+        forceStrutHeight != other.forceStrutHeight ||
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
       return RenderComparison.layout;
     return RenderComparison.identical;
   }
