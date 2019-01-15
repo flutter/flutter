@@ -34,6 +34,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     ui.window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
@@ -163,6 +164,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   /// See [Window.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
+  
+  /// Called when the platform brightness changes.
+  /// 
+  /// See [Window.onPlatformBrightnessChanged].
+  @protected
+  void handlePlatformBrightnessChanged() { }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.

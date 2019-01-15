@@ -40,6 +40,7 @@ class MediaQueryData {
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
     this.textScaleFactor = 1.0,
+    this.platformBrightness = ui.PlatformBrightness.no_preference,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
@@ -59,6 +60,7 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
+      platformBrightness = window.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
@@ -90,6 +92,15 @@ class MediaQueryData {
   ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
   ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
+  
+  /// The current brightness mode of the host platform.
+  /// 
+  /// For example, starting in Android Pie, battery saver mode asks all apps to
+  /// render in a "dark mode". That change is reflected in this property.
+  /// 
+  /// Not all platforms necessarily support a concept of brightness mode. Those
+  /// platforms will report [PlatformBrightness.no_preference] in this property.
+  final ui.PlatformBrightness platformBrightness;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but over which the operating system
@@ -187,6 +198,7 @@ class MediaQueryData {
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      platformBrightness: platformBrightness ?? this.platformBrightness,
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
@@ -223,6 +235,7 @@ class MediaQueryData {
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
+      platformBrightness: platformBrightness,
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
@@ -262,6 +275,7 @@ class MediaQueryData {
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
+      platformBrightness: platformBrightness,
       padding: padding,
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -285,6 +299,7 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
+        && typedOther.platformBrightness == platformBrightness
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
@@ -300,6 +315,7 @@ class MediaQueryData {
       size,
       devicePixelRatio,
       textScaleFactor,
+      platformBrightness,
       padding,
       viewInsets,
       alwaysUse24HourFormat,
@@ -316,6 +332,7 @@ class MediaQueryData {
              'size: $size, '
              'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
              'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
+             'platformBrightness: $platformBrightness, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
@@ -492,6 +509,12 @@ class MediaQuery extends InheritedWidget {
   /// no such ancestor exists.
   static double textScaleFactorOf(BuildContext context) {
     return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+  }
+
+  /// Returns platformBrightness for the nearest MediaQuery ancestor or
+  /// [PlatformBrightness.no_preference], if no such ancestor exists.
+  static ui.PlatformBrightness platformBrightnessOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? ui.PlatformBrightness.no_preference;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -96,6 +98,7 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateTitle,
     this.color,
     this.theme,
+    this.darkTheme,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -165,6 +168,17 @@ class MaterialApp extends StatefulWidget {
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
+
+  /// The colors to use for the application's widgets when the host platform has
+  /// specifically requested a dark UI.
+  ///
+  /// For example, starting with Android Pie, turning on battery saver causes
+  /// apps to go into "dark mode".
+  ///
+  /// See also
+  ///  - [MediaQueryData.platformBrightness], which is used to toggle between
+  ///    [theme] and [darkTheme] within [MaterialApp].
+  final ThemeData darkTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
@@ -403,47 +417,65 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = widget.theme ?? ThemeData.fallback();
-    Widget result = AnimatedTheme(
-      data: theme,
-      isMaterialAppTheme: true,
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          MaterialPageRoute<dynamic>(settings: settings, builder: builder),
-        home: widget.home,
-        routes: widget.routes,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
-        builder: widget.builder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _errorTextStyle,
-        // blue is the primary color of the default theme
-        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        localeListResolutionCallback: widget.localeListResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return FloatingActionButton(
-            child: const Icon(Icons.search),
-            onPressed: onPressed,
-            mini: true,
-          );
-        },
-      ),
+    Widget result = WidgetsApp(
+      key: GlobalObjectKey(this),
+      navigatorKey: widget.navigatorKey,
+      navigatorObservers: _navigatorObservers,
+      // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
+      // this can use type arguments again
+      pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
+        MaterialPageRoute<dynamic>(settings: settings, builder: builder),
+      home: widget.home,
+      routes: widget.routes,
+      initialRoute: widget.initialRoute,
+      onGenerateRoute: widget.onGenerateRoute,
+      onUnknownRoute: widget.onUnknownRoute,
+      builder: (BuildContext context, Widget child) {
+        // Use a light theme, dark theme, or fallback theme.
+        ThemeData theme;
+        final ui.PlatformBrightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+        if (platformBrightness == ui.PlatformBrightness.dark && widget.darkTheme != null) {
+          theme = widget.darkTheme;
+        } else if (widget.theme != null) {
+          theme = widget.theme;
+        } else {
+          theme = ThemeData.fallback();
+        }
+
+        return AnimatedTheme(
+          data: theme,
+          isMaterialAppTheme: true,
+          child: widget.builder != null ? widget.builder(context, child) : child,
+        );
+      },
+      title: widget.title,
+      onGenerateTitle: widget.onGenerateTitle,
+      textStyle: _errorTextStyle,
+      // The color property is always pulled from the light theme, even if dark
+      // mode is activated. This was done to simplify the technical details
+      // of switching themes and it was deemed acceptable because this color
+      // property is only used on old Android OSes to color the app bar in
+      // Android's switcher UI.
+      //
+      // blue is the primary color of the default theme
+      color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
+      locale: widget.locale,
+      localizationsDelegates: _localizationsDelegates,
+      localeResolutionCallback: widget.localeResolutionCallback,
+      localeListResolutionCallback: widget.localeListResolutionCallback,
+      supportedLocales: widget.supportedLocales,
+      showPerformanceOverlay: widget.showPerformanceOverlay,
+      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      showSemanticsDebugger: widget.showSemanticsDebugger,
+      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+      inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+        return FloatingActionButton(
+          child: const Icon(Icons.search),
+          onPressed: onPressed,
+          mini: true,
+        );
+      },
     );
 
     assert(() {
