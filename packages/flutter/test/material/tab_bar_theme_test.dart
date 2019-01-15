@@ -20,19 +20,18 @@ const List<Tab> _tabs = <Tab>[
   Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
 ];
 
-TabController get _tabController => TabController(length: 3, vsync: const TestVSync());
-
-Widget _buildTabBar({ List<Tab> tabs = _tabs }) {
-  return RepaintBoundary(
-    key: _painterKey,
-    child: TabBar(tabs: tabs, controller: _tabController),
-  );
-}
-
 Widget _withTheme(TabBarTheme theme) {
   return MaterialApp(
     theme: ThemeData(tabBarTheme: theme),
-    home: Scaffold(body: _buildTabBar()),
+    home: Scaffold(
+      body: RepaintBoundary(
+        key: _painterKey,
+        child: TabBar(
+          tabs: _tabs,
+          controller: TabController(length: 3, vsync: const TestVSync()),
+        ),
+      ),
+    ),
   );
 }
 
@@ -98,7 +97,7 @@ void main() {
           theme: ThemeData(tabBarTheme: tabBarTheme),
           home: Scaffold(body: TabBar(
             tabs: _tabs,
-            controller: _tabController,
+            controller: TabController(length: 3, vsync: const TestVSync()),
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
           ),
