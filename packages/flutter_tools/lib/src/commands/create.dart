@@ -25,6 +25,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
+import 'flutter_wrapper.dart';
 
 enum _ProjectType {
   /// This is the default project with the user-managed host code.
@@ -402,6 +403,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         : 'A new flutter module project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
+    generatedCount += await generateFlutterWrapper(directory, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.create,
@@ -421,6 +423,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
+    generatedCount += await generateFlutterWrapper(directory, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPackage,
@@ -438,6 +441,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
+    generatedCount += await generateFlutterWrapper(directory, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPlugin,
@@ -468,6 +472,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
+    generatedCount += await generateFlutterWrapper(directory, overwrite: overwrite);
 
     if (argResults['with-driver-test']) {
       final Directory testDirectory = directory.childDirectory('test_driver');

@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+##############################################################################
+##
+##  Flutter start up script for UN*X
+##
+##############################################################################
+
+set -e
+
+FLUTTER_APP_HOME="`pwd -P`"
+
+FLUTTER_WRAPPER_PROPERTIES=$FLUTTER_APP_HOME/flutter/wrapper/flutter-wrapper.properties
+FLUTTER_SDK_PATH=$HOME/Library/Flutter
+
+if [[ ! -f "$FLUTTER_WRAPPER_PROPERTIES" ]]; then
+	echo ""
+	echo "ERROR: The ${FLUTTER_WRAPPER_PROPERTIES} file can not be found."
+	echo ""
+	echo "Please execute the 'flutter wrapper' command to generate it."
+	echo ""
+	exit 1
+fi
+
+PROPERTIES=(`cat $FLUTTER_WRAPPER_PROPERTIES | tr "\n" " "`)
+
+distributionUrl=""
+flutterVersion=""
+
+for i in "${PROPERTIES[@]}"; do
+	if [[ "$i" =~ "distributionUrl" ]]; then
+		distributionUrl=${i##*=}
+	fi
+	if [[ "$i" =~ "flutterVersion" ]]; then
+		flutterVersion=${i##*=}
+	fi
+done
+
+if [[ ! -n "$distributionUrl" || ! -n "$flutterVersion" ]]; then
+	echo ""
+	echo "ERROR: The distributionUrl and flutterVersion values can not be empty in the 'flutter-wrapper.properties' file. Please specify a value, such as:"
+	echo ""
+	echo "distributionUrl=https://github.com/flutter/flutter.git"
+	echo "flutterVersion=v1.0.0"
+	echo ""
+	exit 1
+fi
+
+FLUTTER_SDK_HOME=""
+
+function download() {
+	if [[ ! -x "$(command -v git)" ]]; then
+		echo ""
+ 		echo "ERROR: Git is not installed in your system."
+ 		echo ""
+  		exit 1
+	fi
+	if [[ -d "$1" ]]; then
+		rm -rf $1 > /dev/null	
+	fi
+	local target_dir=$2
+	if [[ ! -d "$target_dir" ]]; then
+		mkdir -p $target_dir > /dev/null
+	fi
+	git clone -b $flutterVersion $distributionUrl $target_dir
+}
+
+function verify_flutter() {
+	if [[ ! -d "$FLUTTER_SDK_PATH" ]]; then
+		mkdir -p $FLUTTER_SDK_PATH > /dev/null
+	fi
+
+	local flutter_executable=$FLUTTER_SDK_PATH/$flutterVersion/flutter/bin/flutter
+	local flutter_version=$FLUTTER_SDK_PATH/$flutterVersion/flutter/version
+	local flutter_cache=$FLUTTER_SDK_PATH/$flutterVersion/flutter/bin/cache
+	local flutter_home_dir=$FLUTTER_SDK_PATH/$flutterVersion
+	local flutter_home=$flutter_home_dir/flutter
+
+	FLUTTER_SDK_HOME=$flutter_home
+	if [[ ! -f "$flutter_version" ]]; then
+		download $flutter_home_dir $flutter_home
+	fi
+	
+	if [[ ! -f "$flutter_executable" ]]; then
+		download $flutter_home_dir $flutter_home
+	fi
+
+	if [[ ! -e "$flutter_cache" ]]; then
+		$flutter_executable doctor
+	fi
+}
+
+function main() {
+	verify_flutter 
+	$FLUTTER_SDK_HOME/bin/flutter "$@"
+}
+
+main "$@"

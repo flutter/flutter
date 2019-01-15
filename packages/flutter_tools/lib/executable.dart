@@ -17,6 +17,7 @@ import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
+import 'src/commands/flutter_wrapper.dart';
 import 'src/commands/format.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
@@ -61,6 +62,7 @@ Future<void> main(List<String> args) async {
     DoctorCommand(verbose: verbose),
     DriveCommand(),
     EmulatorsCommand(),
+    FlutterWrapperCommand(),
     FormatCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
