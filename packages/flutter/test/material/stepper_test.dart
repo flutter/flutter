@@ -509,7 +509,6 @@ void main() {
   });
   
   testWidgets('Stepper physics null error test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -527,38 +526,7 @@ void main() {
               Step(title: Text('Step 9'), content: Text('Text 9')),
               Step(title: Text('Step 10'), content: Text('Text 10')),
             ]),
-            Text('Text After Stepper'),
-          ],
-        )),
-      ),
-    );
-    await tester.fling(find.byType(Stepper), const Offset(0.0, -100.0), 1000.0);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Text After Stepper'), findsOneWidget);
-  });
-  
-  testWidgets('Stepper physics scroll test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-            child: ListView(
-          children: <Widget>[
-            Stepper(steps: const <Step>[
-              physics: const ClampingScrollPhysics(),
-              Step(title: Text('Step 1'), content: Text('Text 1')),
-              Step(title: Text('Step 2'), content: Text('Text 2')),
-              Step(title: Text('Step 3'), content: Text('Text 3')),
-              Step(title: Text('Step 4'), content: Text('Text 4')),
-              Step(title: Text('Step 5'), content: Text('Text 5')),
-              Step(title: Text('Step 6'), content: Text('Text 6')),
-              Step(title: Text('Step 7'), content: Text('Text 7')),
-              Step(title: Text('Step 8'), content: Text('Text 8')),
-              Step(title: Text('Step 9'), content: Text('Text 9')),
-              Step(title: Text('Step 10'), content: Text('Text 10')),
-            ]),
-            Text('Text After Stepper'),
+            const Text('Text After Stepper'),
           ],
         )),
       ),
