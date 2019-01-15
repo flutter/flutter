@@ -585,6 +585,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
+  void _handleDoubleTapTimeout() {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+        _renderEditable.selectWordEdge(cause: SelectionChangedCause.doubleTapTimeOut);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        break;
+    }
+  }
+
   void _startSplash(TapDownDetails details) {
     if (_effectiveFocusNode.hasFocus)
       return;
@@ -719,6 +730,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,
           onDoubleTapDown: _handleDoubleTapDown,
+          onDoubleTapTimeOut: _handleDoubleTapTimeout,
           behavior: HitTestBehavior.translucent,
           child: child,
         ),

@@ -79,7 +79,7 @@ abstract class TextSelectionControls {
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate);
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate, bool activating);
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -375,7 +375,7 @@ class TextSelectionOverlay {
       _handles = null;
     }
     if (!instant && toolbarIsVisible && fadeOutSelectionControls)
-      _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){_hideToolbar();});
+      _toolbarController.reverse(from: _toolbarController.upperBound).whenCompleteOrCancel ((){ _hideToolbar(); });
     else {
       _hideToolbar();
       _toolbarController.stop();
@@ -417,6 +417,7 @@ class TextSelectionOverlay {
   List<TextSelectionPoint> _toolbarCreationEndpoints;
 
   Widget _buildToolbar(BuildContext context) {
+    debugPrintStack();
     if (selectionControls == null)
       return Container();
 
@@ -427,7 +428,7 @@ class TextSelectionOverlay {
     // not the ones from the new selection.
     if (_toolbarController.isAnimatingForward())
       _toolbarCreationEndpoints = endpoints;
-    else if (_toolbarCreationEndpoints != null)
+    else if(_toolbarCreationEndpoints != null)
       endpoints = _toolbarCreationEndpoints;
 
     final Offset midpoint = Offset(
@@ -448,7 +449,7 @@ class TextSelectionOverlay {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate),
+        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate, _toolbarController.isAnimatingForward()),
       ),
     );
   }

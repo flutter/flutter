@@ -90,12 +90,41 @@ void main() {
     await tester.tap(textFinder);
     await tester.pumpAndSettle();
     await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 400));
 
     // The text selection controls should appear.
     expect(state.selectionOverlay.toolbarIsVisible, true);
 
     await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // After another tap it should be invisible.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+    widget = CupertinoApp(
+      home: CupertinoTextField(
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    state = tester.firstState(find.byType(EditableText));
+
+    expect(state.selectionOverlay, null);
+    textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
     await tester.pumpAndSettle();
+    await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The text selection controls should appear.
+    expect(state.selectionOverlay.toolbarIsVisible, false);
+
+    await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 200));
 
     // After another tap it should be invisible.
     expect(state.selectionOverlay.toolbarIsVisible, false);

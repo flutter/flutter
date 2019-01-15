@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 

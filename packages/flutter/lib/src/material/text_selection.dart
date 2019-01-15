@@ -130,7 +130,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate, bool enabling) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     return ConstrainedBox(

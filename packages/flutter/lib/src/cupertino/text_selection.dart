@@ -226,11 +226,21 @@ class _TextSelectionHandlePainter extends CustomPainter {
 class _CupertinoTextSelectionControls extends TextSelectionControls {
   @override
   Size handleSize = _kSelectionOffset; // Used for drag selection offset.
+  bool enabledCanCut = false;
+  bool enabledCanPaste = false;
+  bool enabledCanCopy = false;
+  bool enabledCanSelectAll = false;
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate, bool enabling) {
     assert(debugCheckHasMediaQuery(context));
+    if (enabling) {
+      enabledCanCut = canCut(delegate);
+      enabledCanCopy = canCopy(delegate);
+      enabledCanPaste = canPaste(delegate);
+      enabledCanSelectAll = canSelectAll(delegate);
+    }
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
@@ -240,10 +250,10 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: _TextSelectionToolbar(
-          handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-          handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-          handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          handleCut: enabledCanCut ? () => handleCut(delegate) : null,
+          handleCopy: enabledCanCopy ? () => handleCopy(delegate) : null,
+          handlePaste: enabledCanPaste ? () => handlePaste(delegate) : null,
+          handleSelectAll: enabledCanSelectAll ? () => handleSelectAll(delegate) : null,
         ),
       )
     );
