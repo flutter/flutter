@@ -742,7 +742,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// app's one and only scaffold is reset each time a new tab is selected.
 ///
 /// ```dart
-/// tabController = TabController(vsync tickerProvider, length tabCount)..addListener(() {
+/// tabController = TabController(vsync: tickerProvider, length: tabCount)..addListener(() {
 ///   if (!tabController.indexIsChanging) {
 ///     setState(() {
 ///       // Rebuild the enclosing scaffold with a new AppBar title
