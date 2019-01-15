@@ -227,9 +227,19 @@ void main() {
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.rect, Rect.fromLTWH(22.0, 0.0, 300.0 - 22.0 - 22.0, 100.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.rect, Rect.fromLTWH(22.0, 100.0, 300.0 - 22.0 - 22.0, 100.0));
+
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 + 40.0);
+    expect(revealed.rect, Rect.fromLTWH(62.0, 0.0, 10.0, 10.0));
+
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 + 40.0 - (200.0 - 10.0));
+    expect(revealed.rect, Rect.fromLTWH(62.0, 190.0, 10.0, 10.0));
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {

@@ -647,8 +647,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       descendant = pivot;
     } else if (target is RenderSliver) {
       final RenderSliver targetSliver = target;
-      leadingScrollOffset = 0.0;
-      targetMainAxisExtent = targetSliver.geometry.scrollExtent;
+      leadingScrollOffset = rect.top; // TODO(goderbauer): for other orientations
+      targetMainAxisExtent = rect.height; // TODO(goderbauer): for other orientations
       descendant = targetSliver;
     } else {
       return RevealedOffset(offset: offset.pixels, rect: rect);

@@ -247,7 +247,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
         childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.left), _resolvedPadding.top);
         break;
       case AxisDirection.down:
-        childParentData.paintOffset = Offset(_resolvedPadding.left, calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.top));
+        childParentData.paintOffset = Offset(_resolvedPadding.left, _resolvedPadding.top);
         break;
       case AxisDirection.left:
         childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: _resolvedPadding.right + childLayoutGeometry.scrollExtent, to: _resolvedPadding.right + childLayoutGeometry.scrollExtent + _resolvedPadding.left), _resolvedPadding.top);
