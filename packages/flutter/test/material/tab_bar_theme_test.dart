@@ -28,7 +28,7 @@ Widget _withTheme(TabBarTheme theme) {
         key: _painterKey,
         child: TabBar(
           tabs: _tabs,
-          controller: TabController(length: 3, vsync: const TestVSync()),
+          controller: TabController(length: _tabs.length, vsync: const TestVSync()),
         ),
       ),
     ),
@@ -97,7 +97,7 @@ void main() {
           theme: ThemeData(tabBarTheme: tabBarTheme),
           home: Scaffold(body: TabBar(
             tabs: _tabs,
-            controller: TabController(length: 3, vsync: const TestVSync()),
+            controller: TabController(length: _tabs.length, vsync: const TestVSync()),
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
           ),
