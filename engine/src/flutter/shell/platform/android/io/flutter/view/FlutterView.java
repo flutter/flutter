@@ -338,7 +338,6 @@ public class FlutterView extends SurfaceView
         Locale locale = config.locale;
         // getScript() is gated because it is added in API 21.
         mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), Build.VERSION.SDK_INT >= 21 ? locale.getScript() : "", locale.getVariant()));
-
     }
 
     @Override
@@ -400,6 +399,10 @@ public class FlutterView extends SurfaceView
     private static final int kPointerDeviceKindInvertedStylus = 3;
     private static final int kPointerDeviceKindUnknown = 4;
 
+    // These values must match the unpacking code in hooks.dart.
+    private static final int kPointerDataFieldCount = 21;
+    private static final int kPointerBytesPerField = 8;
+
     private int getPointerChangeForAction(int maskedAction) {
         // Primary pointer:
         if (maskedAction == MotionEvent.ACTION_DOWN) {
@@ -418,6 +421,9 @@ public class FlutterView extends SurfaceView
         // All pointers:
         if (maskedAction == MotionEvent.ACTION_MOVE) {
             return kPointerChangeMove;
+        }
+        if (maskedAction == MotionEvent.ACTION_HOVER_MOVE) {
+            return kPointerChangeHover;
         }
         if (maskedAction == MotionEvent.ACTION_CANCEL) {
             return kPointerChangeCancel;
@@ -516,17 +522,13 @@ public class FlutterView extends SurfaceView
             requestUnbufferedDispatch(event);
         }
 
-        // These values must match the unpacking code in hooks.dart.
-        final int kPointerDataFieldCount = 21;
-        final int kBytePerField = 8;
-
         // This value must match the value in framework's platform_view.dart.
         // This flag indicates whether the original Android pointer events were batched together.
         final int kPointerDataFlagBatched = 1;
 
         int pointerCount = event.getPointerCount();
 
-        ByteBuffer packet = ByteBuffer.allocateDirect(pointerCount * kPointerDataFieldCount * kBytePerField);
+        ByteBuffer packet = ByteBuffer.allocateDirect(pointerCount * kPointerDataFieldCount * kPointerBytesPerField);
         packet.order(ByteOrder.LITTLE_ENDIAN);
 
         int maskedAction = event.getActionMasked();
@@ -558,7 +560,9 @@ public class FlutterView extends SurfaceView
             }
         }
 
-        assert packet.position() % (kPointerDataFieldCount * kBytePerField) == 0;
+        if (packet.position() % (kPointerDataFieldCount * kPointerBytesPerField) != 0) {
+          throw new AssertionError("Packet position is not on field boundary");
+        }
         mNativeView.getFlutterJNI().dispatchPointerDataPacket(packet, packet.position());
         return true;
     }
@@ -575,6 +579,28 @@ public class FlutterView extends SurfaceView
             // implementing ADD, REMOVE, etc.
         }
         return handled;
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (!event.isFromSource(InputDevice.SOURCE_CLASS_POINTER) ||
+            event.getActionMasked() != MotionEvent.ACTION_HOVER_MOVE ||
+            !isAttached()) {
+            return super.onGenericMotionEvent(event);
+        }
+
+        int pointerChange = getPointerChangeForAction(event.getActionMasked());
+        ByteBuffer packet = ByteBuffer.allocateDirect(
+            event.getPointerCount() * kPointerDataFieldCount * kPointerBytesPerField);
+        packet.order(ByteOrder.LITTLE_ENDIAN);
+
+        // ACTION_HOVER_MOVE always applies to a single pointer only.
+        addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, packet);
+        if (packet.position() % (kPointerDataFieldCount * kPointerBytesPerField) != 0) {
+          throw new AssertionError("Packet position is not on field boundary");
+        }
+        mNativeView.getFlutterJNI().dispatchPointerDataPacket(packet, packet.position());
+        return true;
     }
 
     @Override
