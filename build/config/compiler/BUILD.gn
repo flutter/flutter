@@ -25,6 +25,10 @@ declare_args() {
   # Normally, Android builds are lightly optimized, even for debug builds, to
   # keep binary size down. Setting this flag to true disables such optimization
   android_full_debug = false
+
+  # Set this flag when linking with custom allocators that don't satisfy
+  # default ::operator new(size_t) alignment guarantees.
+  operator_new_alignment = "default"
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -309,6 +313,13 @@ config("compiler") {
         "_LARGEFILE64_SOURCE",
       ]
     }
+  }
+
+  if (operator_new_alignment != "default" && is_clang) {
+    cflags += [
+      "-faligned-allocation",
+      "-fnew-alignment=$operator_new_alignment",
+    ]
   }
 
   if (enable_profiling && !is_debug) {
