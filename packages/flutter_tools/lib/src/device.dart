@@ -16,7 +16,10 @@ import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'linux/linux_device.dart';
+import 'macos/macos_device.dart';
 import 'tester/flutter_tester.dart';
+import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
@@ -31,6 +34,9 @@ class DeviceManager {
     _deviceDiscoverers.add(IOSSimulators());
     _deviceDiscoverers.add(FuchsiaDevices());
     _deviceDiscoverers.add(FlutterTesterDevices());
+    _deviceDiscoverers.add(MacOSDevices());
+    _deviceDiscoverers.add(LinuxDevices());
+    _deviceDiscoverers.add(WindowsDevices());
   }
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
@@ -440,4 +446,32 @@ class DiscoveredApp {
   DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
+}
+
+// An empty device log reader
+class NoOpDeviceLogReader implements DeviceLogReader {
+  NoOpDeviceLogReader(this.name);
+
+  @override
+  final String name;
+
+  @override
+  int appPid;
+
+  @override
+  Stream<String> get logLines => const Stream<String>.empty();
+}
+
+// A portforwarder which does not support forwarding ports.
+class NoOpDevicePortForwarder implements DevicePortForwarder {
+  const NoOpDevicePortForwarder();
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
 }
