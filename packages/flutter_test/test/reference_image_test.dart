@@ -48,19 +48,24 @@ void main() {
 
   group('fails', () {
     testWidgets('when image sizes do not match', (WidgetTester tester) async {
+      final ui.Image red50 = await createTestImage(50, 50, red);
+      final ui.Image red100 = await createTestImage(100, 100, red);
       expect(
-        await matchesReferenceImage(await createTestImage(50, 50, red)).matchAsync(await createTestImage(100, 100, red)),
+        await matchesReferenceImage(red50).matchAsync(red100),
         equals('does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
+      final ui.Image red100 = await createTestImage(100, 100, red);
+      final ui.Image transparentRed100 = await createTestImage(100, 100, transparentRed);
       expect(
-        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(await createTestImage(100, 100, transparentRed)),
+        await matchesReferenceImage(red100).matchAsync(transparentRed100),
         equals('does not match on 57 pixels'),
       );
+      final ui.Image green100 = await createTestImage(100, 100, green);
       expect(
-        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(await createTestImage(100, 100, green)),
+        await matchesReferenceImage(red100).matchAsync(green100),
         equals('does not match on 57 pixels'),
       );
     });
