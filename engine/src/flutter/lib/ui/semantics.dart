@@ -607,14 +607,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   ///
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
-  ///
-  /// The `elevation` describes the distance in z-direction between this node
-  /// and the `elevation` of the parent.
-  ///
-  /// The `thickness` describes how much space this node occupies in the
-  /// z-direction starting at `elevation`. Basically, in the z-direction the
-  /// node starts at `elevation` above the parent and ends at `elevation` +
-  /// `thickness` above the parent.
   void updateNode({
     int id,
     int flags,
@@ -626,8 +618,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
-    double elevation,
-    double thickness,
     Rect rect,
     String label,
     String hint,
@@ -657,8 +647,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
       rect.top,
       rect.right,
       rect.bottom,
-      elevation,
-      thickness,
       label,
       hint,
       value,
@@ -686,8 +674,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     String label,
     String hint,
     String value,
