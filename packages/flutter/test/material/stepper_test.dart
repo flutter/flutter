@@ -526,7 +526,7 @@ void main() {
               Step(title: Text('Step 9'), content: Text('Text 9')),
               Step(title: Text('Step 10'), content: Text('Text 10')),
             ]),
-            Text('Text After Stepper'),
+            const Text('Text After Stepper'),
           ],
         )),
       ),
@@ -545,7 +545,7 @@ void main() {
             child: ListView(
           children: <Widget>[
             Stepper(
-              physics: ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               steps: const <Step>[
               Step(title: Text('Step 1'), content: Text('Text 1')),
               Step(title: Text('Step 2'), content: Text('Text 2')),
@@ -558,7 +558,7 @@ void main() {
               Step(title: Text('Step 9'), content: Text('Text 9')),
               Step(title: Text('Step 10'), content: Text('Text 10')),
             ]),
-            Text('Text After Stepper'),
+            const Text('Text After Stepper'),
           ],
         )),
       ),
