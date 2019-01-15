@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
-ui.Image createTestImage(int width, int height, ui.Color color) {
+Future<ui.Image> createTestImage(int width, int height, ui.Color color) {
   final ui.Paint paint = ui.Paint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.0
@@ -27,21 +27,21 @@ void main() {
     testWidgets('when images have the same content', (WidgetTester tester) async {
       await expectLater(
         createTestImage(100, 100, red),
-        matchesReferenceImage(createTestImage(100, 100, red)),
+        matchesReferenceImage(await createTestImage(100, 100, red)),
       );
       await expectLater(
         createTestImage(100, 100, green),
-        matchesReferenceImage(createTestImage(100, 100, green)),
+        matchesReferenceImage(await createTestImage(100, 100, green)),
       );
 
       await expectLater(
         createTestImage(100, 100, transparentRed),
-        matchesReferenceImage(createTestImage(100, 100, transparentRed)),
+        matchesReferenceImage(await createTestImage(100, 100, transparentRed)),
       );
     });
 
     testWidgets('when images are identical', (WidgetTester tester) async {
-      final ui.Image image = createTestImage(100, 100, red);
+      final ui.Image image = await createTestImage(100, 100, red);
       await expectLater(image, matchesReferenceImage(image));
     });
   });
@@ -49,18 +49,18 @@ void main() {
   group('fails', () {
     testWidgets('when image sizes do not match', (WidgetTester tester) async {
       expect(
-        await matchesReferenceImage(createTestImage(50, 50, red)).matchAsync(createTestImage(100, 100, red)),
+        await matchesReferenceImage(await createTestImage(50, 50, red)).matchAsync(createTestImage(100, 100, red)),
         equals('does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
       expect(
-        await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, transparentRed)),
+        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, transparentRed)),
         equals('does not match on 57 pixels'),
       );
       expect(
-        await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, green)),
+        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, green)),
         equals('does not match on 57 pixels'),
       );
     });
