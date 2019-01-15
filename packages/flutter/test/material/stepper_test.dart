@@ -294,7 +294,8 @@ void main() {
       ),
     );
 
-    final ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
+    final ScrollableState scrollableState =
+        tester.firstState(find.byType(Scrollable));
     expect(scrollableState.position.pixels, 0.0);
 
     await tester.tap(find.text('Step 3'));
@@ -379,35 +380,35 @@ void main() {
       canceledPressed = true;
     }
 
-    final ControlsWidgetBuilder builder =
-      (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-        return Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.tightFor(height: 48.0),
-            child: Row(
-              children: <Widget>[
-                FlatButton(
-                  onPressed: onStepContinue,
-                  color: Colors.blue,
-                  textColor: Colors.white,
+    final ControlsWidgetBuilder builder = (BuildContext context,
+        {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              FlatButton(
+                onPressed: onStepContinue,
+                color: Colors.blue,
+                textColor: Colors.white,
+                textTheme: ButtonTextTheme.normal,
+                child: const Text('Let us continue!'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: FlatButton(
+                  onPressed: onStepCancel,
+                  textColor: Colors.red,
                   textTheme: ButtonTextTheme.normal,
-                  child: const Text('Let us continue!'),
+                  child: const Text('Cancel This!'),
                 ),
-                Container(
-                  margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: FlatButton(
-                    onPressed: onStepCancel,
-                    textColor: Colors.red,
-                    textTheme: ButtonTextTheme.normal,
-                    child: const Text('Cancel This!'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      };
+        ),
+      );
+    };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -507,7 +508,7 @@ void main() {
     renderObject = tester.renderObject(find.byIcon(Icons.check));
     expect(renderObject.size, equals(const Size.square(18.0)));
   });
-  
+
   testWidgets('Stepper physics scroll error test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
