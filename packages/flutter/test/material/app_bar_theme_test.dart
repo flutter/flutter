@@ -8,6 +8,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('AppBar theme does not affect defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(appBar: AppBar()),
+    ));
+
+    final Material widget = _getAppBarMaterial(tester);
+
+    expect(widget.color, Colors.blue);
+    expect(widget.elevation, equals(4.0));
+  });
+
   testWidgets('AppBar theme overrides color', (WidgetTester tester) async {
     const Color themedColor = Colors.lightBlue;
     const AppBarTheme theme = AppBarTheme(color: themedColor);
@@ -82,17 +93,6 @@ void main() {
     ));
 
     expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.light);
-  });
-
-  testWidgets('AppBar theme does not affect defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(appBar: AppBar()),
-    ));
-
-    final Material widget = _getAppBarMaterial(tester);
-
-    expect(widget.color, Colors.blue);
-    expect(widget.elevation, equals(4.0));
   });
 }
 

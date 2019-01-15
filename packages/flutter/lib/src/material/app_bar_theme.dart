@@ -116,11 +116,11 @@ class AppBarTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final AppBarTheme typedOther = other;
-    return typedOther.color == color &&
-        typedOther.elevation == elevation &&
-        typedOther.brightness == brightness &&
-        typedOther.iconTheme == iconTheme &&
-        typedOther.textTheme == textTheme;
+    return typedOther.color == color
+        && typedOther.elevation == elevation
+        && typedOther.brightness == brightness
+        && typedOther.iconTheme == iconTheme
+        && typedOther.textTheme == textTheme;
   }
 
   @override

@@ -398,14 +398,14 @@ class _AppBarState extends State<AppBar> {
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme
-        ?? appBarTheme.iconTheme
-        ?? themeData.primaryIconTheme;
+      ?? appBarTheme.iconTheme
+      ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title
-        ?? appBarTheme.textTheme?.title
-        ?? themeData.primaryTextTheme.title;
+      ?? appBarTheme.textTheme?.title
+      ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1
-        ?? appBarTheme.textTheme?.body1
-        ?? themeData.primaryTextTheme.body1;
+      ?? appBarTheme.textTheme?.body1
+      ?? themeData.primaryTextTheme.body1;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -539,11 +539,11 @@ class _AppBarState extends State<AppBar> {
       );
     }
     final Brightness brightness = widget.brightness
-        ?? appBarTheme.brightness
-        ?? themeData.primaryColorBrightness;
+      ?? appBarTheme.brightness
+      ?? themeData.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark;
 
     return Semantics(
       container: true,
@@ -552,11 +552,11 @@ class _AppBarState extends State<AppBar> {
         value: overlayStyle,
         child: Material(
           color: widget.backgroundColor
-              ?? appBarTheme.color
-              ?? themeData.primaryColor,
+            ?? appBarTheme.color
+            ?? themeData.primaryColor,
           elevation: widget.elevation
-              ?? appBarTheme.elevation
-              ?? _defaultElevation,
+            ?? appBarTheme.elevation
+            ?? _defaultElevation,
           child: appBar,
         ),
       ),
