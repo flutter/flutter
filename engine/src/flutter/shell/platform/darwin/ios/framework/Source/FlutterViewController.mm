@@ -67,7 +67,9 @@
   if (self) {
     _viewOpaque = YES;
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
-    _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter" project:projectOrNil]);
+    _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter"
+                                              project:projectOrNil
+                               allowHeadlessExecution:NO]);
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
     [_engine.get() createShell:nil libraryURI:nil];
     _engineNeedsLaunch = YES;
@@ -116,8 +118,8 @@
   [self setupNotificationCenterObservers];
 }
 
-- (fml::scoped_nsobject<FlutterEngine>)engine {
-  return _engine;
+- (FlutterEngine*)engine {
+  return _engine.get();
 }
 
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr {
@@ -389,9 +391,9 @@
 
   if (_engineNeedsLaunch) {
     [_engine.get() launchEngine:nil libraryURI:nil];
-    [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }
+  [_engine.get() setViewController:self];
 
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
@@ -423,7 +425,7 @@
   TRACE_EVENT0("flutter", "viewDidDisappear");
   [self surfaceUpdated:NO];
   [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
-
+  [_engine.get() setViewController:nil];
   [super viewDidDisappear:animated];
 }
 

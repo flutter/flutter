@@ -28,7 +28,17 @@
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil {
-  return [super initWithName:labelPrefix project:projectOrNil];
+  return [self initWithName:labelPrefix project:projectOrNil allowHeadlessExecution:YES];
+}
+
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)projectOrNil
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
+  NSAssert(allowHeadlessExecution == YES,
+           @"Cannot initialize a FlutterHeadlessDartRunner without headless execution.");
+  return [super initWithName:labelPrefix
+                     project:projectOrNil
+      allowHeadlessExecution:allowHeadlessExecution];
 }
 - (instancetype)init {
   return [self initWithName:@"io.flutter.headless" project:nil];

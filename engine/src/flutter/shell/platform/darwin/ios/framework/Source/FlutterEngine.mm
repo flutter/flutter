@@ -60,12 +60,22 @@
   fml::scoped_nsobject<FlutterBasicMessageChannel> _settingsChannel;
 
   int64_t _nextTextureId;
+
+  BOOL _allowHeadlessExecution;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil {
+  return [self initWithName:labelPrefix project:projectOrNil allowHeadlessExecution:YES];
+}
+
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)projectOrNil
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
+
+  _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
 
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(self);
@@ -76,7 +86,6 @@
     _dartProject.reset([projectOrNil retain]);
 
   _pluginPublications = [NSMutableDictionary new];
-  _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
   _platformViewsController.reset(new shell::FlutterPlatformViewsController());
 
   [self setupChannels];
@@ -135,7 +144,14 @@
   FML_DCHECK(self.iosPlatformView);
   _viewController = [viewController getWeakPtr];
   self.iosPlatformView->SetOwnerViewController(_viewController);
-  [self maybeSetupPlatformViewChannels];
+  if (!viewController && !_allowHeadlessExecution) {
+    [self resetChannels];
+
+    _shell.reset();
+    _threadHost.Reset();
+  } else {
+    [self maybeSetupPlatformViewChannels];
+  }
 }
 
 - (FlutterViewController*)viewController {
@@ -176,6 +192,20 @@
   return _settingsChannel.get();
 }
 
+- (void)resetChannels {
+  _localizationChannel.reset();
+  _navigationChannel.reset();
+  _platformChannel.reset();
+  _platformViewsChannel.reset();
+  _textInputChannel.reset();
+  _lifecycleChannel.reset();
+  _systemChannel.reset();
+  _settingsChannel.reset();
+}
+
+// If you add a channel, be sure to also update `resetChannels`.
+// Channels get a reference to the engine, and therefore need manual
+// cleanup for proper collection.
 - (void)setupChannels {
   _localizationChannel.reset([[FlutterMethodChannel alloc]
          initWithName:@"flutter/localization"
@@ -221,8 +251,6 @@
   _textInputPlugin.get().textInputDelegate = self;
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] initWithEngine:[self getWeakPtr]]);
-
-  [self maybeSetupPlatformViewChannels];
 }
 
 - (void)maybeSetupPlatformViewChannels {
@@ -348,6 +376,11 @@
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
+    [self setupChannels];
+    if (!_platformViewsController) {
+      _platformViewsController.reset(new shell::FlutterPlatformViewsController());
+    }
+    _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
     [self maybeSetupPlatformViewChannels];
   }
 
