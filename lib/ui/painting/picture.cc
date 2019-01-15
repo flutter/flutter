@@ -84,41 +84,43 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
 
   auto picture_bounds = SkISize::Make(width, height);
 
-  auto ui_task = fml::MakeCopyable([ui_task_runner,
-                                    image_callback = std::move(image_callback),
-                                    unref_queue](
-                                       sk_sp<SkImage> raster_image) mutable {
-    // Send the raster image back to the UI thread for submission to the
-    // framework.
-    ui_task_runner->PostTask(fml::MakeCopyable([raster_image,
-                                                image_callback =
-                                                    std::move(image_callback),
-                                                unref_queue]() mutable {
-      auto dart_state = image_callback->dart_state().lock();
-      if (!dart_state) {
-        // The root isolate could have died in the meantime.
-        return;
-      }
-      tonic::DartState::Scope scope(dart_state);
+  auto ui_task = fml::MakeCopyable(
+      [ui_task_runner, image_callback = std::move(image_callback),
+       unref_queue](sk_sp<SkImage> raster_image) mutable {
+        // Send the raster image back to the UI thread for submission to the
+        // framework.
+        fml::TaskRunner::RunNowOrPostTask(
+            ui_task_runner,
+            fml::MakeCopyable([raster_image,
+                               image_callback = std::move(image_callback),
+                               unref_queue]() mutable {
+              auto dart_state = image_callback->dart_state().lock();
+              if (!dart_state) {
+                // The root isolate could have died in the meantime.
+                return;
+              }
+              tonic::DartState::Scope scope(dart_state);
 
-      if (!raster_image) {
-        tonic::DartInvoke(image_callback->Get(), {Dart_Null()});
-        return;
-      }
+              if (!raster_image) {
+                tonic::DartInvoke(image_callback->Get(), {Dart_Null()});
+                return;
+              }
 
-      auto dart_image = CanvasImage::Create();
-      dart_image->set_image({std::move(raster_image), std::move(unref_queue)});
-      auto* raw_dart_image = tonic::ToDart(std::move(dart_image));
+              auto dart_image = CanvasImage::Create();
+              dart_image->set_image(
+                  {std::move(raster_image), std::move(unref_queue)});
+              auto* raw_dart_image = tonic::ToDart(std::move(dart_image));
 
-      // All done!
-      tonic::DartInvoke(image_callback->Get(), {raw_dart_image});
-    }));
-  });
+              // All done!
+              tonic::DartInvoke(image_callback->Get(), {raw_dart_image});
+            }));
+      });
 
   auto gpu_task = fml::MakeCopyable([gpu_task_runner, picture, picture_bounds,
                                      snapshot_delegate, ui_task]() {
-    gpu_task_runner->PostTask([snapshot_delegate, picture, picture_bounds,
-                               ui_task]() {
+    fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, [snapshot_delegate,
+                                                        picture, picture_bounds,
+                                                        ui_task]() {
       // Snapshot the picture on the GPU thread. This thread has access to the
       // GPU contexts that may contain the sole references to texture backed
       // images in the picture.
