@@ -21,7 +21,6 @@
 #include "third_party/tonic/dart_class_provider.h"
 #include "third_party/tonic/dart_message_handler.h"
 #include "third_party/tonic/dart_state.h"
-#include "third_party/tonic/dart_sticky_error.h"
 #include "third_party/tonic/file_loader/file_loader.h"
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
@@ -700,19 +699,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
 
 // |Dart_IsolateShutdownCallback|
 void DartIsolate::DartIsolateShutdownCallback(
-    std::shared_ptr<DartIsolate>* embedder_isolate) {
-  if (!tonic::DartStickyError::IsSet()) {
-    return;
-  }
-
-  tonic::DartApiScope api_scope;
-  Dart_Handle sticky_error = Dart_GetStickyError();
-  if (!Dart_IsFatalError(sticky_error)) {
-    FML_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
-                   << " exited with an error";
-    FML_CHECK(tonic::LogIfError(sticky_error));
-  }
-}
+    std::shared_ptr<DartIsolate>* embedder_isolate) {}
 
 // |Dart_IsolateCleanupCallback|
 void DartIsolate::DartIsolateCleanupCallback(
