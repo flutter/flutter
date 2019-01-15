@@ -111,8 +111,10 @@ class AppBarTheme extends Diagnosticable {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     final AppBarTheme typedOther = other;
     return typedOther.color == color &&
         typedOther.elevation == elevation &&
