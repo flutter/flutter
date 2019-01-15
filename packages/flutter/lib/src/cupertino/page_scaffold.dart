@@ -57,7 +57,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
-  /// Defaults to true.
+  /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
   @override
@@ -78,6 +78,12 @@ class CupertinoPageScaffold extends StatelessWidget {
           ? existingMediaQuery.viewInsets.bottom
           : 0.0;
 
+      final EdgeInsets newViewInsets = resizeToAvoidBottomInset
+          // The insets are consumed by the scaffolds and no longer exposed to
+          // the descendant subtree.
+          ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
+          : existingMediaQuery.viewInsets;
+
       final bool fullObstruction =
         navigationBar.fullObstruction ?? CupertinoTheme.of(context).barBackgroundColor.alpha == 0xFF;
 
@@ -85,9 +91,14 @@ class CupertinoPageScaffold extends StatelessWidget {
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
       if (fullObstruction) {
-        paddedContent = Padding(
-          padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-          child: child,
+        paddedContent = MediaQuery(
+          data: existingMediaQuery.copyWith(
+            viewInsets: newViewInsets,
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+            child: child,
+          ),
         );
       } else {
         paddedContent = MediaQuery(
@@ -95,6 +106,7 @@ class CupertinoPageScaffold extends StatelessWidget {
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
             ),
+            viewInsets: newViewInsets,
           ),
           child: Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),

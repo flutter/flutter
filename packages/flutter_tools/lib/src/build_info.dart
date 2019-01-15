@@ -54,7 +54,7 @@ class BuildInfo {
   final bool createPatch;
 
   /// Internal version number of dynamic patch (not displayed to users).
-  /// Each patch should have a unique number to differentiate from previous
+  /// Each patch may have a unique number to differentiate from previous
   /// patches for the same versionCode on Android or CFBundleVersion on iOS.
   final int patchNumber;
 
@@ -119,6 +119,7 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+  String get friendlyModeName => getFriendlyModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       BuildInfo(mode, flavor,
@@ -141,6 +142,10 @@ enum BuildMode {
 }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
+
+String getFriendlyModeName(BuildMode mode) {
+  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+}
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {

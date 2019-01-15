@@ -151,7 +151,7 @@ class IconButton extends StatelessWidget {
   ///   color: Colors.blue,
   ///   onPressed: _handleTap,
   ///   icon: Icons.widgets,
-  /// ),
+  /// )
   /// ```
   final Color color;
 

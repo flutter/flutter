@@ -137,6 +137,14 @@ Future<void> main(List<String> arguments) async {
     '--header', 'snippets.html',
     '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
+    '--allow-warnings-in-packages', <String>[
+      'Flutter',
+      'flutter',
+      'platform_integration',
+      'flutter_test',
+      'flutter_driver',
+      'flutter_localizations',
+    ].join(','),
     '--exclude-packages',
     <String>[
       'analyzer',
@@ -353,6 +361,7 @@ void createIndexAndCleanup() {
   addHtmlBaseToIndex();
   changePackageToSdkInTitlebar();
   putRedirectInOldIndexLocation();
+  writeSnippetsIndexFile();
   print('\nDocs ready to go!');
 }
 
@@ -405,6 +414,23 @@ void addHtmlBaseToIndex() {
 void putRedirectInOldIndexLocation() {
   const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
+}
+
+
+void writeSnippetsIndexFile() {
+  final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
+  if (snippetsDir.existsSync()) {
+    const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
+    final Iterable<File> files = snippetsDir
+        .listSync()
+        .whereType<File>()
+        .where((File file) => path.extension(file.path) == '.json');
+        // Combine all the metadata into a single JSON array.
+    final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
+    final List<dynamic> metadataObjects = fileContents.map<dynamic>(json.decode).toList();
+    final String jsonArray = jsonEncoder.convert(metadataObjects);
+    File('$kPublishRoot/snippets/index.json').writeAsStringSync(jsonArray);
+  }
 }
 
 List<String> findPackageNames() {

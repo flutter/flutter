@@ -18,10 +18,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 
 /// An immutable style in which paint text.
 ///
-/// {@tool sample}
-///
 /// ### Bold
 ///
+/// {@tool sample}
 /// Here, a single line of text in a [Text] widget is given a specific style
 /// override. The style is mixed with the ambient [DefaultTextStyle] by the
 /// [Text] widget.
@@ -33,10 +32,10 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
 ///
 /// ### Italics
 ///
+/// {@tool sample}
 /// As in the previous example, the [Text] widget is given a specific style
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
 ///
@@ -84,6 +83,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// ### Size
 ///
+/// {@tool sample}
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
 /// obtain a [TextStyle] that doubles the default font size.
 ///
@@ -93,21 +93,25 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Line height
 ///
+/// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
-/// height is set to 100 logical pixels, so that the text is very spaced out.
+/// height is set to 5 times the font size, so that the text is very spaced out.
 ///
 /// ```dart
 /// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(height: 100.0),
+///   style: TextStyle(height: 5.0),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Wavy red underline with black text
 ///
+/// {@tool sample}
 /// Styles can be combined. In this example, the misspelt word is drawn in black
 /// text and underlined with a wavy red line to indicate a spelling error. (The
 /// remainder is styled according to the Flutter default text styles, not the
@@ -135,6 +139,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ### Custom Fonts
 ///
@@ -169,9 +174,11 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// To select a custom font, create [TextStyle] using the [fontFamily]
 /// argument as shown in the example below:
 ///
+/// {@tool sample}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
+/// {@end-tool}
 ///
 /// To use a font family defined in a package, the [package] argument must be
 /// provided. For instance, suppose the font declaration above is in the
@@ -212,9 +219,48 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// In this case, since the app locally defines the font, the TextStyle is
 /// created without the `package` argument:
 ///
+/// {@tool sample}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
+/// {@end-tool}
+///
+/// ### Custom Font Fallback
+///
+/// A custom [fontFamilyFallback] list can be provided. The list should be an
+/// ordered list of strings of font family names in the order they will be attempted.
+///
+/// The fonts in [fontFamilyFallback] will be used only if the requested glyph is
+/// not present in the [fontFamily].
+///
+/// The fallback order is:
+///
+///  * [fontFamily]
+///  * [fontFamilyFallback] in order of first to last.
+///
+/// The glyph used will always be the first matching version in fallback order.
+///
+/// The [fontFamilyFallback] property is commonly used to specify different font
+/// families for multilingual text spans as well as separate fonts for glyphs such
+/// as emojis.
+///
+/// {@tool sample}
+/// In the following example, any glyphs not present in the font `Raleway` will be attempted
+/// to be resolved with `Noto Sans CJK SC`, and then with `Noto Color Emoji`:
+///
+/// ```dart
+/// const TextStyle(
+///   fontFamily: 'Raleway',
+///   fontFamilyFallback: <String>[
+///     'Noto Sans CJK SC',
+///     'Noto Color Emoji',
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// If all custom fallback font families are exhausted and no match was found
+/// or no custom fallback was provided, the platform font fallback will be used.
 ///
 /// See also:
 ///
@@ -250,8 +296,11 @@ class TextStyle extends Diagnosticable {
     this.decorationStyle,
     this.debugLabel,
     String fontFamily,
+    List<String> fontFamilyFallback,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+       _fontFamilyFallback = fontFamilyFallback,
+       _package = package,
        assert(inherit != null),
        assert(color == null || foreground == null, _kColorForegroundWarning);
 
@@ -279,7 +328,42 @@ class TextStyle extends Diagnosticable {
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
+  ///
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that glyphs are looked for in, followed in order by the font families
+  /// in [fontFamilyFallback]. When [fontFamily] is null or not provided, the
+  /// first value in [fontFamilyFallback] acts as the preferred/first font
+  /// family. When neither is provided, then the default platform font will
+  /// be used.
   final String fontFamily;
+
+  /// The ordered list of font families to fall back on when a glyph cannot be
+  /// found in a higher priority font family.
+  ///
+  /// The value provided in [fontFamily] will act as the preferred/first font
+  /// family that glyphs are looked for in, followed in order by the font families
+  /// in [fontFamilyFallback]. If all font families are exhausted and no match
+  /// was found, the default platform font family will be used instead.
+  ///
+  /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
+  /// acts as the preferred/first font family. When neither is provided, then
+  /// the default platform font will be used. Providing and empty list or null
+  /// for this property is the same as omitting it.
+  ///
+  /// For example, if a glyph is not found in [fontFamily], then each font family
+  /// in [fontFamilyFallback] will be searched in order until it is found. If it
+  /// is not found, then a box will be drawn in its place.
+  ///
+  /// If the font is defined in a package, each font family in the list will be
+  /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
+  /// The package name should be provided by the `package` argument in the
+  /// constructor.
+  List<String> get fontFamilyFallback => _package != null && _fontFamilyFallback != null ? _fontFamilyFallback.map((String str) => 'packages/$_package/$str').toList() : _fontFamilyFallback;
+  final List<String> _fontFamilyFallback;
+
+  // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
+  // in the [fontFamilyFallback] getter.
+  final String _package;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
   ///
@@ -392,6 +476,7 @@ class TextStyle extends Diagnosticable {
   TextStyle copyWith({
     Color color,
     String fontFamily,
+    List<String> fontFamilyFallback,
     double fontSize,
     FontWeight fontWeight,
     FontStyle fontStyle,
@@ -419,6 +504,7 @@ class TextStyle extends Diagnosticable {
       inherit: inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize ?? this.fontSize,
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
@@ -469,6 +555,7 @@ class TextStyle extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     String fontFamily,
+    List<String> fontFamilyFallback,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
@@ -505,6 +592,7 @@ class TextStyle extends Diagnosticable {
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle,
@@ -556,6 +644,7 @@ class TextStyle extends Diagnosticable {
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
+      fontFamilyFallback: other.fontFamilyFallback,
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
       fontStyle: other.fontStyle,
@@ -601,6 +690,7 @@ class TextStyle extends Diagnosticable {
         inherit: b.inherit,
         color: Color.lerp(null, b.color, t),
         fontFamily: t < 0.5 ? null : b.fontFamily,
+        fontFamilyFallback: t < 0.5 ? null : b.fontFamilyFallback,
         fontSize: t < 0.5 ? null : b.fontSize,
         fontWeight: FontWeight.lerp(null, b.fontWeight, t),
         fontStyle: t < 0.5 ? null : b.fontStyle,
@@ -624,6 +714,7 @@ class TextStyle extends Diagnosticable {
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
+        fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
         fontSize: t < 0.5 ? a.fontSize : null,
         fontWeight: FontWeight.lerp(a.fontWeight, null, t),
         fontStyle: t < 0.5 ? a.fontStyle : null,
@@ -646,6 +737,7 @@ class TextStyle extends Diagnosticable {
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
+      fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
       fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t),
       fontStyle: t < 0.5 ? a.fontStyle : b.fontStyle,
@@ -679,6 +771,7 @@ class TextStyle extends Diagnosticable {
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -743,7 +836,8 @@ class TextStyle extends Diagnosticable {
         locale != other.locale ||
         foreground != other.foreground ||
         background != other.background ||
-        !listEquals(shadows, other.shadows))
+        !listEquals(shadows, other.shadows) ||
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -776,7 +870,8 @@ class TextStyle extends Diagnosticable {
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
-           listEquals(shadows, typedOther.shadows);
+           listEquals(shadows, typedOther.shadows) &&
+           listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
   }
 
   @override
@@ -785,6 +880,7 @@ class TextStyle extends Diagnosticable {
       inherit,
       color,
       fontFamily,
+      fontFamilyFallback,
       fontSize,
       fontWeight,
       fontStyle,
@@ -814,6 +910,7 @@ class TextStyle extends Diagnosticable {
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {

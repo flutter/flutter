@@ -221,9 +221,9 @@ class Cache {
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
         printError(
-          'Failed to retrieve Flutter tool depedencies: ${e.message}.\n'
-          "If you're in China, please follow "
-          'https://github.com/flutter/flutter/wiki/Using-Flutter-in-China',
+          'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
+          'If you\'re in China, please see this page: '
+          'https://flutter.io/community/china',
           emphasis: true,
         );
       }
@@ -400,6 +400,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
     <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
     <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
+    <String>['android-arm-dynamic-profile/darwin-x64', 'android-arm-dynamic-profile/darwin-x64.zip'],
+    <String>['android-arm-dynamic-release/darwin-x64', 'android-arm-dynamic-release/darwin-x64.zip'],
+    <String>['android-arm64-dynamic-profile/darwin-x64', 'android-arm64-dynamic-profile/darwin-x64.zip'],
+    <String>['android-arm64-dynamic-release/darwin-x64', 'android-arm64-dynamic-release/darwin-x64.zip'],
   ];
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
@@ -420,6 +424,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
     <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
     <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
+    <String>['android-arm-dynamic-profile/windows-x64', 'android-arm-dynamic-profile/windows-x64.zip'],
+    <String>['android-arm-dynamic-release/windows-x64', 'android-arm-dynamic-release/windows-x64.zip'],
+    <String>['android-arm64-dynamic-profile/windows-x64', 'android-arm64-dynamic-profile/windows-x64.zip'],
+    <String>['android-arm64-dynamic-release/windows-x64', 'android-arm64-dynamic-release/windows-x64.zip'],
   ];
 
   List<List<String>> get _androidBinaryDirs => <List<String>>[
@@ -568,6 +576,10 @@ class FlutterEngine extends CachedArtifact {
 class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
+  List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
+
+  String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
+
   @override
   Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
@@ -577,6 +589,22 @@ class GradleWrapper extends CachedArtifact {
       // Remove NOTICE file. Should not be part of the template.
       fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
     });
+  }
+
+  @override
+  bool isUpToDateInner() {
+    final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
+    if (!fs.directory(wrapperDir).existsSync())
+      return false;
+    for (String scriptName in _gradleScripts) {
+      final File scriptFile = fs.file(fs.path.join(wrapperDir.path, scriptName));
+      if (!scriptFile.existsSync())
+        return false;
+    }
+    final File gradleWrapperJar = fs.file(fs.path.join(wrapperDir.path, _gradleWrapper));
+    if (!gradleWrapperJar.existsSync())
+      return false;
+    return true;
   }
 }
 

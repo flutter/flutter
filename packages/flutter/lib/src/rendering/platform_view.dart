@@ -412,11 +412,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    // Currently the engine rejects the gesture when the sequence is done.
-    // This doesn't work well with gesture recognizers that recognize after the sequence
-    // has ended.
-    // TODO(amirh): trigger an engine gesture reject here.
-    // https://github.com/flutter/flutter/issues/24076
+    controller.rejectGesture();
   }
 
   void reset() {

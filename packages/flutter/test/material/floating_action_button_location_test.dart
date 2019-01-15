@@ -171,6 +171,85 @@ void main() {
     );
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
   });
+
+  testWidgets('Mini-start-top floating action button location', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
+          floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+          body: Column(
+            children: const <Widget>[
+              ListTile(
+                leading: CircleAvatar(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getCenter(find.byType(FloatingActionButton)).dx, tester.getCenter(find.byType(CircleAvatar)).dx);
+    expect(tester.getCenter(find.byType(FloatingActionButton)).dy, kToolbarHeight);
+  });
+
+  testWidgets('Start-top floating action button location LTR', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: const FloatingActionButton(onPressed: null),
+          floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(16.0, 28.0, 56.0, 56.0));
+  });
+
+  testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            appBar: AppBar(),
+            floatingActionButton: const FloatingActionButton(onPressed: null),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(16.0, 28.0, 56.0, 56.0));
+  });
+
+  testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            appBar: AppBar(),
+            floatingActionButton: const FloatingActionButton(onPressed: null),
+            floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0));
+  });
+
+  testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: const FloatingActionButton(onPressed: null),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0));
+  });
 }
 
 

@@ -42,6 +42,7 @@ void main() {
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
 
+    BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -50,12 +51,20 @@ void main() {
           navigationBar: const CupertinoNavigationBar(
             middle: Text('Transparent'),
           ),
-          child: Container(),
+          child: Builder(
+            builder: (BuildContext context) {
+              childContext = context;
+              return Container();
+            },
+          ),
         ),
       ),
     ));
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 100.0);
+    // The shouldn't see a media query view inset because it was consumed by
+    // the scaffold.
+    expect(MediaQuery.of(childContext).viewInsets.bottom, 0);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,

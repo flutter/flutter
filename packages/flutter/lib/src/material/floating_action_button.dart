@@ -50,10 +50,10 @@ class _DefaultHeroTag {
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * <https://material.google.com/components/buttons-floating-action-button.html>
+///  * [Scaffold], in which floating action buttons typically live.
+///  * [RaisedButton], another kind of button that appears to float above the
+///    content.
+///  * <https://material.io/design/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   /// Creates a circular floating action button.
   ///
@@ -192,7 +192,9 @@ class FloatingActionButton extends StatefulWidget {
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
   /// and width of 40.0 logical pixels with a layout width and height of 48.0
-  /// logical pixels.
+  /// logical pixels. (The extra 4 pixels of padding on each side are added as a
+  /// result of the floating action button having [MaterialTapTargetSize.padded]
+  /// set on the underlying [RawMaterialButton.materialTapTargetSize].)
   final bool mini;
 
   /// The shape of the button's [Material].

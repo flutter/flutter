@@ -160,10 +160,9 @@ enum ListTileControlAffinity {
 /// is true then the overall height of this tile and the size of the
 /// [DefaultTextStyle]s that wrap the [title] and [subtitle] widget are reduced.
 ///
-/// List tiles are always a fixed height (which height depends on how
-/// [isThreeLine], [dense], and [subtitle] are configured); they do not grow in
-/// height based on their contents. If you are looking for a widget that allows
-/// for arbitrary layout in a row, consider [Row].
+/// It is the responsibility of the caller to ensure that [title] does not wrap,
+/// and to ensure that [subtitle] doesn't wrap (if [isThreeLine] is false) or
+/// wraps to two lines (if it is true).
 ///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
@@ -246,19 +245,35 @@ class ListTile extends StatelessWidget {
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
+  ///
+  /// This should not wrap.
   final Widget title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
+  ///
+  /// If [isThreeLine] is false, this should not wrap.
+  ///
+  /// If [isThreeLine] is true, this should be configured to take a maximum of
+  /// two lines.
   final Widget subtitle;
 
   /// A widget to display after the title.
   ///
   /// Typically an [Icon] widget.
+  ///
+  /// To show right-aligned metadata (assuming left-to-right reading order;
+  /// left-aligned for right-to-left reading order), consider using a [Row] with
+  /// [MainAxisAlign.baseline] alignment whose first item is [Expanded] and
+  /// whose second child is the metadata text, instead of using the [trailing]
+  /// property.
   final Widget trailing;
 
   /// Whether this list tile is intended to display three lines of text.
+  ///
+  /// If true, then [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
   ///
   /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
@@ -267,6 +282,8 @@ class ListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
+  ///
+  /// Dense list tiles default to a smaller height.
   final bool dense;
 
   /// The tile's internal padding.
@@ -934,17 +951,19 @@ class _RenderListTile extends RenderBox {
       assert(isOneLine);
     }
 
+    final double defaultTileHeight = _defaultTileHeight;
+
     double tileHeight;
     double titleY;
     double subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(_defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline - _boxBaseline(title, titleBaselineType);
       subtitleY = subtitleBaseline - _boxBaseline(subtitle, subtitleBaselineType);
-      tileHeight = _defaultTileHeight;
+      tileHeight = defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
       // the overlap and the subtitle down by the same amount, and adjust
@@ -966,8 +985,30 @@ class _RenderListTile extends RenderBox {
       }
     }
 
-    final double leadingY = (tileHeight - leadingSize.height) / 2.0;
-    final double trailingY = (tileHeight - trailingSize.height) / 2.0;
+    // This attempts to implement the redlines for the vertical position of the
+    // leading and trailing icons on the spec page:
+    //   https://material.io/design/components/lists.html#specs
+    // Some liberties have been taken to handle cases that aren't covered by
+    // that specification, such as leading and trailing widgets with weird
+    // sizes, "one-line" list tiles with title widgets that span multiple lines,
+    // etc.
+    double leadingY;
+    double trailingY;
+    if (isOneLine) {
+      leadingY = (defaultTileHeight - leadingSize.height) / 2.0;
+      trailingY = (defaultTileHeight - trailingSize.height) / 2.0;
+    } else if (isTwoLine) {
+      if (isDense) {
+        leadingY = 12.0; // by extrapolation
+        trailingY = 20.0; // by extrapolation
+      } else {
+        leadingY = leadingSize.height <= 40.0 ? 16.0 : 8.0;
+        trailingY = 24.0;
+      }
+    } else {
+      leadingY = 16.0;
+      trailingY = 16.0;
+    }
 
     switch (textDirection) {
       case TextDirection.rtl: {

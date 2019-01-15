@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 
@@ -58,7 +59,20 @@ void main() {
       child: Scaffold(
         appBar: AppBar(title: const Text('Title')),
         body: Container(key: bodyKey),
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
+      ),
+    )));
+
+    bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
+
+    // Backwards compatiblity: deprecated resizeToAvoidBottomPadding flag
+    await tester.pumpWidget(boilerplate(MediaQuery(
+      data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Title')),
+        body: Container(key: bodyKey),
+        resizeToAvoidBottomPadding: false, // ignore: deprecated_member_use
       ),
     )));
 
@@ -201,6 +215,7 @@ void main() {
           drawer: Drawer(
             key: drawerKey,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               controller: scrollOffset,
               children: List<Widget>.generate(10,
                 (int index) => SizedBox(height: 100.0, child: Text('D$index'))
@@ -630,6 +645,7 @@ void main() {
               viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
             child: Scaffold(
+              drawerDragStartBehavior: DragStartBehavior.down,
               appBar: PreferredSize(
                 preferredSize: const Size(11.0, 13.0),
                 child: Container(
@@ -1196,6 +1212,58 @@ void main() {
 
       expect(scaffoldState.isDrawerOpen, true);
     });
+  });
+
+  testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20295
+
+    final Key bodyKey = UniqueKey();
+
+    Widget buildFrame(bool innerResizeToAvoidBottomInset, bool outerResizeToAvoidBottomInset) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+          child: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                resizeToAvoidBottomInset: outerResizeToAvoidBottomInset,
+                body: Builder(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      resizeToAvoidBottomInset: innerResizeToAvoidBottomInset,
+                      body: Container(key: bodyKey),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(true, true));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+
+    await tester.pumpWidget(buildFrame(false, true));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+
+    await tester.pumpWidget(buildFrame(true, false));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+
+    // This is the only case where the body is not bottom inset.
+    await tester.pumpWidget(buildFrame(false, false));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+
+    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default  is true
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+
+    await tester.pumpWidget(buildFrame(null, false));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+
+    await tester.pumpWidget(buildFrame(false, null));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
   });
 }
 

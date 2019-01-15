@@ -357,8 +357,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
     final ShapeBorder shape = _getShape();
 
-    if (widget.type == MaterialType.transparency)
-      return _transparentInterior(shape: shape, clipBehavior: widget.clipBehavior, contents: contents);
+    if (widget.type == MaterialType.transparency) {
+      return _transparentInterior(
+        context: context,
+        shape: shape,
+        clipBehavior: widget.clipBehavior,
+        contents: contents,
+      );
+    }
 
     return _MaterialInterior(
       curve: Curves.fastOutSlowIn,
@@ -372,7 +378,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     );
   }
 
-  static Widget _transparentInterior({ShapeBorder shape, Clip clipBehavior, Widget contents}) {
+  static Widget _transparentInterior({
+    @required BuildContext context,
+    @required ShapeBorder shape,
+    @required Clip clipBehavior,
+    @required Widget contents,
+  }) {
     final _ShapeBorderPaint child = _ShapeBorderPaint(
       child: contents,
       shape: shape,
@@ -382,7 +393,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     return ClipPath(
       child: child,
-      clipper: ShapeBorderClipper(shape: shape),
+      clipper: ShapeBorderClipper(
+        shape: shape,
+        textDirection: Directionality.of(context),
+      ),
       clipBehavior: clipBehavior,
     );
   }

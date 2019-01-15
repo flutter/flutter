@@ -199,6 +199,9 @@ class FlutterDriver {
     // If the user has already supplied an isolate number/URL to the Dart VM
     // service, then this won't be run as it is unnecessary.
     if (Platform.isFuchsia && isolateNumber == null) {
+      // TODO(awdavies): Use something other than print. On fuchsia
+      // `stderr`/`stdout` appear to have issues working correctly.
+      flutterDriverLog.listen(print);
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
         throw DriverError('No Fuchsia module target has been specified.\n'
@@ -215,10 +218,6 @@ class FlutterDriver {
       dartVmServiceUrl = ref.dartVm.uri.toString();
       await fuchsiaConnection.stop();
       FuchsiaCompat.cleanup();
-
-      // TODO(awdavies): Use something other than print. On fuchsia
-      // `stderr`/`stdout` appear to have issues working correctly.
-      flutterDriverLog.listen(print);
     }
 
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -601,12 +600,12 @@ class FlutterDriver {
   ///
   /// ```dart
   /// test('enters text in a text field', () async {
-  ///  var textField = find.byValueKey('enter-text-field');
-  ///  await driver.tap(textField);  // acquire focus
-  ///  await driver.enterText('Hello!');  // enter text
-  ///  await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
-  ///  await driver.enterText('World!');  // enter another piece of text
-  ///  await driver.waitFor(find.text('World!'));  // verify new text appears
+  ///   var textField = find.byValueKey('enter-text-field');
+  ///   await driver.tap(textField);  // acquire focus
+  ///   await driver.enterText('Hello!');  // enter text
+  ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
+  ///   await driver.enterText('World!');  // enter another piece of text
+  ///   await driver.waitFor(find.text('World!'));  // verify new text appears
   /// });
   /// ```
   Future<void> enterText(String text, { Duration timeout }) async {

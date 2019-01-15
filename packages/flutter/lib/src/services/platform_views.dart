@@ -129,7 +129,7 @@ class PlatformViewsService {
         paramsByteData.lengthInBytes,
       );
     }
-    await SystemChannels.platform_views.invokeMethod('create', args);
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
     return UiKitViewController._(id, layoutDirection);
   }
 }
@@ -485,7 +485,7 @@ class AndroidViewController {
   /// disposed.
   Future<void> dispose() async {
     if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
-      await SystemChannels.platform_views.invokeMethod('dispose', id);
+      await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     _state = _AndroidViewState.disposed;
   }
 
@@ -504,7 +504,7 @@ class AndroidViewController {
     if (_state == _AndroidViewState.waitingForSize)
       return _create(size);
 
-    await SystemChannels.platform_views.invokeMethod('resize', <String, dynamic> {
+    await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic> {
       'id': id,
       'width': size.width,
       'height': size.height,
@@ -526,7 +526,7 @@ class AndroidViewController {
     if (_state == _AndroidViewState.waitingForSize)
       return;
 
-    await SystemChannels.platform_views.invokeMethod('setDirection', <String, dynamic> {
+    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic> {
       'id': id,
       'direction': _getAndroidDirection(layoutDirection),
     });
@@ -550,7 +550,7 @@ class AndroidViewController {
   /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
   /// for description of the parameters.
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
-    await SystemChannels.platform_views.invokeMethod(
+    await SystemChannels.platform_views.invokeMethod<dynamic>(
         'touch',
         event._asList(id),
     );
@@ -630,6 +630,18 @@ class UiKitViewController {
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
+  /// Rejects an active gesture.
+  ///
+  /// When a touch sequence is happening on the embedded UIView all touch events are delayed.
+  /// Calling this method drops the buffered touch events and prevents any future touch events for
+  /// the pointers that are part of the active touch sequence from arriving to the embedded view.
+  Future<void> rejectGesture() {
+    final Map<String, dynamic> args = <String, dynamic> {
+      'id': id,
+    };
+    return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
+  }
+
   /// Disposes the view.
   ///
   /// The [UiKitViewController] object is unusable after calling this.
@@ -637,6 +649,6 @@ class UiKitViewController {
   /// disposed.
   Future<void> dispose() async {
     _debugDisposed = true;
-    await SystemChannels.platform_views.invokeMethod('dispose', id);
+    await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
 }

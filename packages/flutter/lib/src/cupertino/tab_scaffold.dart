@@ -97,6 +97,8 @@ class CupertinoTabScaffold extends StatefulWidget {
     Key key,
     @required this.tabBar,
     @required this.tabBuilder,
+    this.backgroundColor,
+    this.resizeToAvoidBottomInset = true,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
        super(key: key);
@@ -138,6 +140,20 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
 
+  /// The color of the widget that underlies the entire scaffold.
+  ///
+  /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
+  final Color backgroundColor;
+
+  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
+  /// prevents widgets inside the body from being obscured by the keyboard.
+  ///
+  /// Defaults to true and cannot be null.
+  final bool resizeToAvoidBottomInset;
+
   @override
   _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
@@ -163,15 +179,30 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    MediaQueryData newMediaQuery = MediaQuery.of(context);
+
     Widget content = _TabSwitchingView(
       currentTabIndex: _currentPage,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
 
-    if (widget.tabBar != null) {
-      final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    if (widget.resizeToAvoidBottomInset) {
+      // Remove the view inset and add it back as a padding in the inner content.
+      newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
+      content = Padding(
+        padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
+        child: content,
+      );
+    }
 
+    if (widget.tabBar != null &&
+        // Only pad the content with the height of the tab bar if the tab
+        // isn't already entirely obstructed by a keyboard or other view insets.
+        // Don't double pad.
+        (!widget.resizeToAvoidBottomInset ||
+            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding =
@@ -186,16 +217,18 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
           child: content,
         );
       } else {
-        content = MediaQuery(
-          data: existingMediaQuery.copyWith(
-            padding: existingMediaQuery.padding.copyWith(
-              bottom: bottomPadding,
-            ),
+        newMediaQuery = newMediaQuery.copyWith(
+          padding: newMediaQuery.padding.copyWith(
+            bottom: bottomPadding,
           ),
-          child: content,
         );
       }
     }
+
+    content = MediaQuery(
+      data: newMediaQuery,
+      child: content,
+    );
 
     // The main content being at the bottom is added to the stack first.
     stacked.add(content);
@@ -222,7 +255,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoTheme.of(context).scaffoldBackgroundColor
+        color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
         children: stacked,

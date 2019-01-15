@@ -7,7 +7,6 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
@@ -138,34 +137,18 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
         }
-        usesIpv6 = _isIpv6(device.id);
-        final List<int> ports = await device.servicePorts();
-        if (ports.isEmpty) {
-          throwToolExit('No active service ports on ${device.name}');
-        }
-        final List<int> localPorts = <int>[];
-        for (int port in ports) {
-          localPorts.add(await device.portForwarder.forward(port));
-        }
-        final Status status = logger.startProgress(
-          'Waiting for a connection from Flutter on ${device.name}...',
-          expectSlowOperation: true,
-        );
+        usesIpv6 = device.ipv6;
+        FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
-          final int localPort = await device.findIsolatePort(module, localPorts);
-          if (localPort == null) {
-            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
-          }
-          observatoryUri = usesIpv6
-            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-            : Uri.parse('http://$ipv4Loopback:$localPort/');
-          status.stop();
+          isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
+          observatoryUri = await isolateDiscoveryProtocol.uri;
+          printStatus('Done.');
         } catch (_) {
+          isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
-          status.cancel();
           rethrow;
         }
       } else {
@@ -241,17 +224,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async {}
-
-  bool _isIpv6(String address) {
-    // Workaround for https://github.com/dart-lang/sdk/issues/29456
-    final String fragment = address.split('%').first;
-    try {
-      Uri.parseIPv6Address(fragment);
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
 }
 
 class HotRunnerFactory {

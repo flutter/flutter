@@ -94,7 +94,7 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['precompile'],
+      compilationTraceFilePath: argResults['compilation-trace-file'],
       createPatch: argResults['patch'],
       buildNumber: buildNumber,
       baselineDir: argResults['baseline-dir'],

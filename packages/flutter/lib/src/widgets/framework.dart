@@ -1047,7 +1047,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [BindingBase.reassembleApplication].
+  ///  * [BindingBase.reassembleApplication]
   ///  * [Image], which uses this to reload images.
   @protected
   @mustCallSuper

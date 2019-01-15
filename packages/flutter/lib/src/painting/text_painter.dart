@@ -242,6 +242,8 @@ class TextPainter {
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
+        // TODO(cbracken): use const constructor. https://github.com/flutter/flutter/issues/26390
+        // ignore:prefer_const_constructors
         ..layout(ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;

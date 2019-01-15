@@ -112,7 +112,8 @@ void main() {
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
-    )).thenAnswer((Invocation _) => Future<int>.value(1000));
+    )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
+        UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
     when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
 

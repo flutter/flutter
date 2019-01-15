@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' show dumpCompilationTrace;
+import 'dart:ui' show saveCompilationTrace;
 
 import 'package:meta/meta.dart';
 
@@ -119,10 +119,10 @@ abstract class BindingBase {
         callback: _exitApplication,
       );
       registerServiceExtension(
-        name: 'dumpCompilationTrace',
+        name: 'saveCompilationTrace',
         callback: (Map<String, String> parameters) async {
           return <String, dynamic> {
-            'value': dumpCompilationTrace(),
+            'value': saveCompilationTrace(),
           };
         }
       );
