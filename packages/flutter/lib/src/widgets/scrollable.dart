@@ -496,24 +496,44 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _drag = null;
   }
 
-
   // SCROLL WHEEL
 
-  bool _handlePointerScroll(PointerScrollEvent event) {
+  PointerGestureArenaMember _pointerScrollArenaMember;
+
+  // Returns the offset that should result from applying [event] to the current
+  // position, taking min/max scroll extent into account.
+  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
+        position.maxScrollExtent);
+  }
+
+  void _receivedPointerScroll(PointerScrollEvent event) {
     if (position != null) {
-      final double currentScrollOffset = position.pixels;
-      final double targetScrollOffset = math.min(
-          math.max(currentScrollOffset + delta, position.minScrollExtent),
-          position.maxScrollExtent);
-      if (targetScrollOffset != currentScrollOffset) {
-        position.jumpTo(targetScrollOffset);
-        return true;
+      final double targetScrollOffset =
+          _targetScrollOffsetForPointerScroll(event);
+      // Only claim the event if it would actually result in a scroll.
+      if (targetScrollOffset != position.pixels) {
+        _pointerScrollArenaMember = PointerGestureArenaMember(
+            event, _handlePointerScroll, _cancelPointerScroll);
       }
     }
-    return false;
+  }
+
+  void _handlePointerScroll(PointerEvent event) {
+    assert(event is PointerScrollEvent);
+    final double targetScrollOffset =
+        _targetScrollOffsetForPointerScroll(event);
+    if (targetScrollOffset != position.pixels) {
+      position.jumpTo(targetScrollOffset);
+    }
+    _pointerScrollArenaMember = null;
+  }
+
+  void _cancelPointerScroll() {
+    _pointerScrollArenaMember = null;
   }
 
   // DESCRIPTION
@@ -523,7 +543,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
     Widget result = Listener(
-      onPointerScroll: _handlePointerScroll,
+      onPointerScroll: _receivedPointerScroll,
       child: RawGestureDetector(
         key: _gestureDetectorKey,
         gestures: _gestureRecognizers,

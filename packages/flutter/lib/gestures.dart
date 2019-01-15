@@ -23,6 +23,7 @@ export 'src/gestures/lsq_solver.dart';
 export 'src/gestures/monodrag.dart';
 export 'src/gestures/multidrag.dart';
 export 'src/gestures/multitap.dart';
+export 'src/gestures/pointer_gesture.dart';
 export 'src/gestures/pointer_router.dart';
 export 'src/gestures/recognizer.dart';
 export 'src/gestures/scale.dart';
