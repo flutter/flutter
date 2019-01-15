@@ -424,6 +424,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/ActivityL
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessenger.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/ErrorLogResult.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/EventChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterException.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMessageCodec.java
