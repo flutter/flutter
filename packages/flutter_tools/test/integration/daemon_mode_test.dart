@@ -22,7 +22,7 @@ void main() {
     Process process;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('flutter_daemon_mode_test.');
+      tempDir = createResolvedTempDirectorySync('daemon_mode_test.');
       await _project.setUpIn(tempDir);
     });
 
