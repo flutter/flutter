@@ -135,7 +135,7 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
-	  this.physics,
+	this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
     this.onStepTapped,
@@ -601,7 +601,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return ListView(
       shrinkWrap: true,
-	    physics: widget.physics,
+	  physics: widget.physics,
       children: children,
     );
   }
