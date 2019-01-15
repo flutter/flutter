@@ -592,10 +592,10 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _reloadSources({ bool pause = false, String reason }) async {
-    final Map<String, String> analyticsParameters =
-      reason == null
-        ? null
-        : <String, String>{ kEventReloadReasonParameterName: reason };
+    final Map<String, String> analyticsParameters = <String, String> {};
+    if (reason != null) {
+      analyticsParameters[kEventReloadReasonParameterName] = reason;
+    }
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)
@@ -663,7 +663,19 @@ class HotRunner extends ResidentRunner {
           flutterUsage.sendEvent('hot', 'reload-reject');
           return OperationResult(1, 'Reload rejected');
         } else {
-          flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
+          // Collect stats that help understand scale of update for this hot reload request.
+          // For example, [syncedLibraryCount]/[finalLibraryCount] indicates how
+          // many libraries were affected by the hot reload request.
+          // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
+          // understand sync/transfer "overhead" of updating this number of source files.
+          final Map<String, dynamic> details = reloadReport['details'];
+          analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
+          analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
+          analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
+          analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
+          analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
+          analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
+          analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
           final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
           final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
           printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
@@ -758,17 +770,22 @@ class HotRunner extends ResidentRunner {
         reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
-    printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
+    final Duration reloadDuration = reloadTimer.elapsed;
+    final int reloadInMs = reloadDuration.inMilliseconds;
+
+    analyticsParameters[kEventReloadOverallTimeInMs] = '$reloadInMs';
+    flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
+
+    printTrace('Hot reload performed in $reloadInMs.');
     // Record complete time it took for the reload.
-    _addBenchmarkData('hotReloadMillisecondsToFrame',
-        reloadTimer.elapsed.inMilliseconds);
+    _addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
     // Only report timings if we reloaded a single view without any
     // errors or timeouts.
     if ((reassembleViews.length == 1) &&
         !reassembleAndScheduleErrors &&
         !reassembleTimedOut &&
         shouldReportReloadTime)
-      flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
+      flutterUsage.sendTiming('hot', 'reload', reloadDuration);
 
     return OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,

@@ -109,6 +109,9 @@ class FlutterDevice {
   }
 
   Future<void> stopApps() async {
+    if (!device.supportsStopApp) {
+      return;
+    }
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
       return;
@@ -262,7 +265,7 @@ class FlutterDevice {
     bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -321,7 +324,7 @@ class FlutterDevice {
       applicationBinary: coldRunner.applicationBinary
     );
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
@@ -602,8 +605,12 @@ abstract class ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         final int index = device.views.indexOf(view);
-        printStatus('Saving compilation trace for '
-            '${device.device.name}${index == 0 ? '' :'/Isolate$index'}...');
+        final File outputFile = fs.currentDirectory
+            .childFile('compilation${index == 0 ? '' : index}.txt');
+
+        printStatus('Saving compilation training data '
+            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
+            'to ${fs.path.relative(outputFile.path)}...');
 
         List<int> buffer;
         try {
@@ -614,12 +621,8 @@ abstract class ResidentRunner {
           continue;
         }
 
-        final File outputFile = fs.currentDirectory
-          .childFile('compilation${index == 0 ? '' : index}.txt');
-
         outputFile.parent.createSync(recursive: true);
         outputFile.writeAsBytesSync(buffer);
-        printStatus('Compilation trace written to ${fs.path.relative(outputFile.path)}.');
       }
     }
   }

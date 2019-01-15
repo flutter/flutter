@@ -396,7 +396,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
-/// duration. Properties that are null are not animated.
+/// duration. Properties that are null are not animated. Its child and
+/// descendants are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container] with its internal [AnimationController].
@@ -418,6 +419,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///    position changes.
 ///  * [AnimatedAlign], which automatically transitions its child's
 ///    position over a given duration whenever the given [alignment] changes.
+///  * [AnimatedSwitcher], which switches out a child for a new one with a customizable transition.
+///  * [AnimatedCrossFade], which fades between two children and interpolates their sizes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///

@@ -495,6 +495,7 @@ class SemanticsTester {
   ///   ));
   ///   semantics.dispose();
   /// });
+  /// ```
   ///
   /// At this point the unit test should automatically pass because it was
   /// generated from the actual [SemanticsNode]s. Next time the semantics tree
