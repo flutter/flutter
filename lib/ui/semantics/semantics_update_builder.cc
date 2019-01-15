@@ -50,8 +50,6 @@ void SemanticsUpdateBuilder::updateNode(
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     std::string label,
     std::string hint,
     std::string value,
@@ -74,8 +72,6 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(left, top, right, bottom);
-  node.elevation = elevation;
-  node.thickness = thickness;
   node.label = label;
   node.hint = hint;
   node.value = value;
