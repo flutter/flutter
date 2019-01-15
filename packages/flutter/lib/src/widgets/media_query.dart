@@ -30,6 +30,25 @@ enum Orientation {
 /// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
 /// exception, unless the `nullOk` argument is set to true, in which case it
 /// returns null.
+///
+/// MediaQueryData includes two [EdgeInsets] values:
+/// [padding] and [viewInsets]. These
+/// values reflect the configuration of the device and are used by
+/// many top level widgets, like [SafeArea] and the Cupertino and
+/// Material scaffold widgets. The padding value defines areas that
+/// might not be completely visible, like the display "notch" on the
+/// iPhone X. The viewInsets value defines areas that aren't visible at
+/// all, typically because they're obscured by the device's keyboard.
+///
+/// The viewInsets and padding values are independent, they're both
+/// measured from the edges of the MediaQuery widget's bounds. The
+/// bounds of the top level MediaQuery created by [WidgetsApp] are the
+/// same as the window that contains the app.
+///
+/// Widgets whose layouts consume space defined by [viewInsets] or
+/// [padding] shoud enclose their children in secondary MediaQuery
+/// widgets that reduce those properties by the same amount.
+/// The [removePadding] and [removeInsets] methods are useful for this.
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -67,7 +86,7 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
-  /// The size of the media in logical pixel (e.g, the size of the screen).
+  /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
   /// Logical pixels are roughly the same visual size across devices. Physical
   /// pixels are the size of the actual hardware pixels on the device. The
@@ -91,17 +110,25 @@ class MediaQueryData {
   ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
-  /// The number of physical pixels on each side of the display rectangle into
-  /// which the application can render, but over which the operating system
-  /// will likely place system UI, such as the keyboard, that fully obscures
-  /// any content.
+  /// The parts of the display that are completely obscured by system UI,
+  /// typically by the device's keyboard.
+  ///
+  /// When a mobile device's keyboard is visible `viewInsets.bottom`
+  /// corresponds to the top of the keyboard.
+  ///
+  /// This value is independent of the [padding]: both values are
+  /// measured from the edges of the [MediaQuery] widget's bounds. The
+  /// bounds of the top level MediaQuery created by [WidgetsApp] are the
+  /// same as the window (often the mobile device screen) that contains the app.
+  ///
+  /// See also:
+  ///
+  /// * [MediaQueryData], which provides some additional detail about this
+  ///   property and how it differs from [padding].
   final EdgeInsets viewInsets;
 
-  /// The number of physical pixels on each side of the display rectangle into
-  /// which the application can render, but which may be partially obscured by
-  /// system UI (such as the system notification area), or or physical
-  /// intrusions in the display (e.g. overscan regions on television screens or
-  /// phone sensor housings).
+  /// The parts of the display that are partially obscured by system UI,
+  /// typically by the hardware display "notches" or the system status bar.
   ///
   /// If you consumed this padding (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
@@ -111,6 +138,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
+  ///  * [MediaQueryData], which provides some additional detail about this
+  ///    property and how it differs from [viewInsets].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
