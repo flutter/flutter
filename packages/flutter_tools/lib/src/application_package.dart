@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -18,6 +17,7 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 
