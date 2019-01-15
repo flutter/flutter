@@ -5,8 +5,6 @@
 import 'dart:convert';
 
 import '../application_package.dart';
-import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -20,7 +18,7 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends Device {
-  MacOSDevice() : super('MacOS');
+  MacOSDevice() : super('macOS');
 
   @override
   void clearLogs() {}
@@ -44,7 +42,7 @@ class MacOSDevice extends Device {
   bool isSupported() => true;
 
   @override
-  String get name => 'MacOS';
+  String get name => 'macOS';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -66,13 +64,7 @@ class MacOSDevice extends Device {
     if (!prebuiltApplication) {
       return LaunchResult.failed();
     }
-    // The location of these files is based on the examples in the flutter
-    // desktop embedding repo and may not be final.
-    final String location = fs.path.join(package.deviceBundlePath, 'Contents', 'MacOS', package.name.replaceFirst('.app', ''));
-    if (!await fs.file(location).exists()) {
-      throwToolExit('Could not find MacOS binary at $location');
-    }
-    final Process process = await processManager.start(<String>[location]);
+    final Process process = await processManager.start(<String>[package.executable]);
     final MacOSLogReader logReader = MacOSLogReader(package, process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
     try {
@@ -97,7 +89,7 @@ class MacOSDevice extends Device {
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices() : super('macos devices');
+  MacOSDevices() : super('macOS devices');
 
   @override
   bool get supportsPlatform => platform.isMacOS;

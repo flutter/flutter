@@ -28,7 +28,7 @@ void main() {
 
     test('defaults', () async {
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
-      expect(device.name, 'MacOS');
+      expect(device.name, 'macOS');
       expect(await device.installApp(null), true);
       expect(await device.uninstallApp(null), true);
       expect(await device.isLatestBuildInstalled(null), true);
@@ -44,10 +44,9 @@ void main() {
       final MockFile mockFile = MockFile();
       final MockProcess mockProcess = MockProcess();
       final String location = fs.path.join('testy','Contents', 'MacOS', 'test');
-      when(macOSApp.deviceBundlePath).thenReturn('testy');
       when(macOSApp.name).thenReturn('test.app');
       when(mockFileSystem.file(location)).thenReturn(mockFile);
-      when(mockFile.exists()).thenAnswer((Invocation invocation) async => true);
+      when(mockFile.existsSync()).thenReturn(true);
       when(mockFileSystem.path).thenReturn(fs.path);
       when(mockProcessManager.start(<String>[location])).thenAnswer((Invocation invocation) async {
         return mockProcess;

@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
 
- /// Tests whether a [FileSystemEntity] is an iOS bundle directory
+ /// Tests whether a [FileSystemEntity] is an macOS bundle directory
 bool _isBundleDirectory(FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 
@@ -37,25 +37,32 @@ abstract class MacOSApp extends ApplicationPackage {
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
     if (!fs.file(plistPath).existsSync()) {
-      printError('Invalid prebuilt MacOS app. Does not contain Info.plist.');
+      printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
     final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    final String executableName = plist.getValueFromFile(plistPath, plist.kCFBundleExecutable);
     if (id == null) {
-      printError('Invalid prebuilt MacOS app. Info.plist does not contain bundle identifier');
+      printError('Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
+      return null;
+    }
+    final String executable = fs.path.join(bundleDir.path, 'Contents', 'MacOS', executableName);
+    if (!fs.file(executable).existsSync()) {
+      printError('Could not find macOS binary at $executable');
       return null;
     }
     return PrebuiltMacOSApp(
       bundleDir: bundleDir,
       bundleName: fs.path.basename(bundleDir.path),
       projectBundleId: id,
+      executable: executable,
     );
   }
 
   @override
   String get displayName => id;
 
-  String get deviceBundlePath;
+  String get executable;
 }
 
  class PrebuiltMacOSApp extends MacOSApp {
@@ -63,6 +70,7 @@ abstract class MacOSApp extends ApplicationPackage {
     @required this.bundleDir,
     @required this.bundleName,
     @required this.projectBundleId,
+    @required this.executable,
   }) : super(projectBundleId: projectBundleId);
 
   final Directory bundleDir;
@@ -70,7 +78,7 @@ abstract class MacOSApp extends ApplicationPackage {
   final String projectBundleId;
 
   @override
-  String get deviceBundlePath => bundleDir.path;
+  final String executable;
 
   @override
   String get name => bundleName;
