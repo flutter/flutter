@@ -135,7 +135,7 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
-	this.physics,
+    this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
     this.onStepTapped,
@@ -152,7 +152,7 @@ class Stepper extends StatefulWidget {
   ///
   /// The length of [steps] must not change.
   final List<Step> steps;
-  
+	
   /// How the Stepper's scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
@@ -601,7 +601,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return ListView(
       shrinkWrap: true,
-	  physics: widget.physics,
+      physics: widget.physics,
       children: children,
     );
   }
