@@ -85,10 +85,13 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
                                  bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge
     NS_DESIGNATED_INITIALIZER;
+
+@property(nonatomic, weak) SemanticsObject* semanticsObject;
+
 @end
 
 @implementation SemanticsObject {
-  SemanticsObjectContainer* _container;
+  fml::scoped_nsobject<SemanticsObjectContainer> _container;
 }
 
 #pragma mark - Override base class designated initializers
@@ -123,8 +126,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   [_children removeAllObjects];
   [_children release];
   _parent = nil;
-  [_container release];
-  _container = nil;
+  _container.get().semanticsObject = nil;
   [super dealloc];
 }
 
@@ -268,9 +270,9 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 - (id)accessibilityContainer {
   if ([self hasChildren] || [self uid] == kRootNodeId) {
     if (_container == nil)
-      _container = [[SemanticsObjectContainer alloc] initWithSemanticsObject:self
-                                                                      bridge:[self bridge]];
-    return _container;
+      _container.reset([[SemanticsObjectContainer alloc] initWithSemanticsObject:self
+                                                                          bridge:[self bridge]]);
+    return _container.get();
   }
   if ([self parent] == nil) {
     // This can happen when we have released the accessibility tree but iOS is
@@ -410,22 +412,15 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
                                  bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge {
-  FML_DCHECK(semanticsObject != nil) << "semanticsObject must be set";
+  FML_DCHECK(semanticsObject) << "semanticsObject must be set";
   self = [super init];
 
   if (self) {
     _semanticsObject = semanticsObject;
-    // The pointer is managed manually.
-    [_semanticsObject retain];
     _bridge = bridge;
   }
 
   return self;
-}
-
-- (void)dealloc {
-  [_semanticsObject release];
-  [super dealloc];
 }
 
 #pragma mark - UIAccessibilityContainer overrides
@@ -437,8 +432,9 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
   if (index < 0 || index >= [self accessibilityElementCount])
     return nil;
-  if (index == 0)
+  if (index == 0) {
     return _semanticsObject;
+  }
   SemanticsObject* child = [_semanticsObject children][index - 1];
   if ([child hasChildren])
     return [child accessibilityContainer];
@@ -506,6 +502,7 @@ AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform
 }
 
 AccessibilityBridge::~AccessibilityBridge() {
+  clearState();
   view_.accessibilityElements = nil;
   [accessibility_channel_.get() setMessageHandler:nil];
 }
