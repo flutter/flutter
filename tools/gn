@@ -93,6 +93,9 @@ def to_gn_args(args):
 
     gn_args['embedder_for_target'] = args.embedder_for_target
 
+    if args.operator_new_alignment is not None:
+      gn_args['operator_new_alignment'] = args.operator_new_alignment
+
     enable_lto = args.lto
     if args.unoptimized:
       # There is no point in enabling LTO in unoptimized builds.
@@ -252,6 +255,7 @@ def parse_args(args):
   parser.add_argument('--target-toolchain', type=str)
   parser.add_argument('--target-triple', type=str)
   parser.add_argument('--toolchain-prefix', type=str)
+  parser.add_argument('--operator-new-alignment', dest='operator_new_alignment', type=str, default=None)
 
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
 
