@@ -111,7 +111,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// The gesture arena used for determining which widget handles a pointer
   /// gesture event. Unlike [gestureArena], this arena is opened and closed on
   /// every pointer gesture event, since they are discrete.
-  final GestureArenaManager pointerGestureArena = GestureArenaManager();
+  final PointerGestureArenaManager pointerGestureArena =
+      PointerGestureArenaManager();
 
   /// State for all pointers which are currently down.
   ///
@@ -134,11 +135,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
-    } else if (event is PointerScrollEvent) {
-      result = HitTestResult();
-      hitTest(result, event.position);
     } else if (event.down) {
       result = _hitTests[event.pointer];
+    } else if (event is PointerGestureEvent) {
+      result = HitTestResult();
+      hitTest(result, event.position);
     } else {
       return; // We currently ignore add, remove, and hover move events.
     }
@@ -190,7 +191,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       gestureArena.close(event.pointer);
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
-    } else if (event is PointerScrollEvent) {
+    } else if (event is PointerGestureEvent) {
       pointerGestureArena.close(event.pointer);
       pointerGestureArena.sweep(event.pointer);
     }

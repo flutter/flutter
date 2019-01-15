@@ -619,10 +619,33 @@ class PointerUpEvent extends PointerEvent {
   );
 }
 
+/// A base type for events that correspond to a discrete pointer gesture.
+///
+/// There are events that originate from the pointer but don't change the state
+/// of the pointer itself, and are discrete rather than needing to be
+/// interpreted in the context of a series of events.
+abstract class PointerGestureEvent extends PointerEvent {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const PointerGestureEvent({
+    Duration timeStamp = Duration.zero,
+    int pointer = 0,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+  }) : super(
+    timeStamp: timeStamp,
+    pointer: pointer,
+    kind: kind,
+    device: device,
+    position: position,
+  );
+}
+
 /// The pointer issued a scroll event.
 ///
 /// For example, the scroll wheel on a mouse was scrolled.
-class PointerScrollEvent extends PointerEvent {
+class PointerScrollEvent extends PointerGestureEvent {
   /// Creates a pointer scroll event.
   ///
   /// All of the argument must be non-null.

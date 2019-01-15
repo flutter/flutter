@@ -498,7 +498,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // SCROLL WHEEL
 
-  PointerGestureArenaMember _pointerScrollArenaMember;
+  PointerGestureArenaMember _pointerGestureArenaMember;
 
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
@@ -510,13 +510,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         position.maxScrollExtent);
   }
 
-  void _receivedPointerScroll(PointerScrollEvent event) {
-    if (position != null) {
+  void _receivedPointerGesture(PointerGestureEvent event) {
+    if (event is PointerScrollEvent && position != null) {
       final double targetScrollOffset =
           _targetScrollOffsetForPointerScroll(event);
       // Only claim the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
-        _pointerScrollArenaMember = PointerGestureArenaMember(
+        _pointerGestureArenaMember = PointerGestureArenaMember(
             event, _handlePointerScroll, _cancelPointerScroll);
       }
     }
@@ -529,11 +529,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }
-    _pointerScrollArenaMember = null;
+    _pointerGestureArenaMember = null;
   }
 
   void _cancelPointerScroll() {
-    _pointerScrollArenaMember = null;
+    _pointerGestureArenaMember = null;
   }
 
   // DESCRIPTION
@@ -543,7 +543,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
     Widget result = Listener(
-      onPointerScroll: _receivedPointerScroll,
+      onPointerGesture: _receivedPointerGesture,
       child: RawGestureDetector(
         key: _gestureDetectorKey,
         gestures: _gestureRecognizers,

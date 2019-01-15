@@ -4938,7 +4938,7 @@ class Listener extends SingleChildRenderObjectWidget {
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel,
-    this.onPointerScroll,
+    this.onPointerGesture,
     this.behavior = HitTestBehavior.deferToChild,
     Widget child
   }) : assert(behavior != null),
@@ -4956,8 +4956,8 @@ class Listener extends SingleChildRenderObjectWidget {
   /// Called when the input from a pointer that triggered an [onPointerDown] is no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
-  /// Called when a pointer scrolls while over this object.
-  final PointerScrollEventListener onPointerScroll;
+  /// Called when a pointer gesture over this object.
+  final PointerGestureEventListener onPointerGesture;
 
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
@@ -4969,7 +4969,7 @@ class Listener extends SingleChildRenderObjectWidget {
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
-      onPointerScroll: onPointerScroll,
+      onPointerGesture: onPointerGesture,
       behavior: behavior
     );
   }
@@ -4981,7 +4981,7 @@ class Listener extends SingleChildRenderObjectWidget {
       ..onPointerMove = onPointerMove
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
-      ..onPointerScroll = onPointerScroll
+      ..onPointerGesture = onPointerGesture
       ..behavior = behavior;
   }
 
@@ -4997,8 +4997,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
-    if (onPointerScroll != null)
-      listeners.add('scroll');
+    if (onPointerGesture != null)
+      listeners.add('gesture');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
   }
