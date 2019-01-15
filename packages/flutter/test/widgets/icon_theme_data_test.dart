@@ -18,4 +18,13 @@ void main() {
     expect(lerped.opacity, equals(0.625));
     expect(lerped.size, equals(18.0));
   });
+
+  test('IconThemeData lerp with null', () {
+    const IconThemeData data = IconThemeData(color: Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
+
+    final IconThemeData lerped = IconThemeData.lerp(data, null, 0.25);
+    expect(lerped.color, equals(Color.lerp(const Color(0xAAAAAAAA), null, 0.25)));
+    expect(lerped.opacity, equals(0.375));
+    expect(lerped.size, equals(12.0));
+  });
 }
