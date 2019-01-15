@@ -535,6 +535,6 @@ void main() {
     await tester.fling(find.byType(Stepper), const Offset(0.0, -100.0), 1000.0);
     await tester.pumpAndSettle();
 
-    expect(find.text('Text After Stepper'), findsOneWidget);
+    expect(find.text('Text After Stepper'), findsNothing);
   });
 }
