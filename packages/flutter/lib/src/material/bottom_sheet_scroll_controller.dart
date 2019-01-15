@@ -3,17 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show window;
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-/// Conrolls a scrollable widget that is not fully visible on screen yet. While
+import 'debug.dart';
+import 'scaffold.dart';
+
+const double _kBottomSheetMinHeight = 56.0;
+
+/// Controls a scrollable widget that is not fully visible on screen yet. While
 /// the [top] value is between [minTop] and [maxTop], scroll events will drive
 /// [top]. Once it has reached [minTop] or [maxTop], scroll events will drive
-/// [offset]. The [top] value is guaranteed not to be [clamp]ed between
+/// [offset]. The [top] value is guaranteed not to be clamped between
 /// [minTop] and [maxTop].
 ///
 /// This controller would typically be created and listened to by a parent
@@ -32,22 +37,25 @@ class BottomSheetScrollController extends ScrollController {
   /// Creates a new [BottomSheetScrollController].
   ///
   /// The [top] and [minTop] parameters must not be null. If [maxTop]
-  /// is provided as null, it will be defaulted to the [ui.window] height.
+  /// is provided as null, it will be defaulted to the
+  /// [MediaQueryData.size.height].
   BottomSheetScrollController({
     double initialScrollOffset = 0.0,
-    double top = 0.0,
+    double initialHeightPercentage = 0.5,
     this.minTop = 0.0,
-    this.maxTop = double.maxFinite,
     String debugLabel,
     this.isPersistent = false,
-  })  : assert(top != null),
+    @required BuildContext context,
+    bool forFullScreen = false,
+  })  : assert(initialHeightPercentage != null),
+        assert(context != null),
         assert(minTop != null),
-        assert(maxTop != null),
         assert(isPersistent != null),
-        _initialTop = top,
+        _initialTop = _topFromInitialHeightPercentage(initialHeightPercentage, context, forFullScreen),
+        maxTop = _calculateMaxTop(initialHeightPercentage, context, isPersistent),
         super(
-        debugLabel: debugLabel,
-        initialScrollOffset: initialScrollOffset,
+          debugLabel: debugLabel,
+          initialScrollOffset: initialScrollOffset,
       ) {
     // If the BottomSheet's child doesn't have a Scrollable widget in it that
     // inherits our PrimaryScrollController, it will never become visible.
@@ -56,7 +64,7 @@ class BottomSheetScrollController extends ScrollController {
         assert(_position != null,
           'BottomSheets must be created with a scrollable widget that has primary set to true.\n\n'
           'If you have content that you do not wish to have scrolled beyond its viewable '
-          'area, you should consider using a SingleChildScrollView and seeting freeze to true. '
+          'area, you should consider using a SingleChildScrollView and setting freeze to true. '
           'Otherwise, consider using a ListView or GridView.',
         );
       });
@@ -64,10 +72,56 @@ class BottomSheetScrollController extends ScrollController {
     }());
   }
 
+  /// Calculates a top value based on a percentage of screen height defined by the
+  /// [MediaQuery] associated with the provided [context].
+  static double _topFromInitialHeightPercentage(
+    double initialHeightPercentage,
+    BuildContext context,
+    bool forFullScreen,
+  ) {
+    assert(initialHeightPercentage != null);
+    assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
+    assert(forFullScreen != null);
+    assert(debugCheckHasMediaQuery(context));
+    assert(forFullScreen || debugCheckHasScaffold(context));
+
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double initialTop = screenHeight * (1.0 - initialHeightPercentage);
+
+    double extraAppBarHeight = 0.0;
+    if (!forFullScreen) {
+      // Scaffold.of(context) won't work if the context is the Scaffold itself.
+      final ScaffoldState scaffold = context is StatefulElement && context.state is ScaffoldState
+          ? context.state
+          : Scaffold.of(context);
+      extraAppBarHeight = scaffold.appBarMaxHeight ?? 0.0;
+    }
+
+    return math.min(initialTop, screenHeight - _kBottomSheetMinHeight - extraAppBarHeight);
+  }
+
+  static double _calculateMaxTop(
+      double initialHeightPercentage,
+      BuildContext context,
+      bool isPersistent,
+  ) {
+    if (isPersistent) {
+      return _topFromInitialHeightPercentage(initialHeightPercentage, context, false);
+    }
+
+    assert(debugCheckHasMediaQuery(context));
+
+    return MediaQuery.of(context).size.height;
+  }
+
+
   BottomSheetScrollPosition _position;
 
-  /// The current value of [top].  This controller will
-  double get top => _position?.top ?? maxTop;
+  /// The position at which the top of the controlled widget should be displayed.
+  ///
+  /// When this value reaches [minTop], the controller will allow the content of
+  /// the child to scroll.
+  double get top => _position?.top ?? math.max(_initialTop, maxTop);
   final double _initialTop;
 
   /// The minimum allowable value for [top].
@@ -87,14 +141,6 @@ class BottomSheetScrollController extends ScrollController {
     if (!isPersistent)
       return _position?.dismiss();
     return null;
-  }
-
-  /// Animate the [top] value to [newTop].
-  Future<Null> animateTopTo(double newTop, {
-    @required Duration duration,
-    @required Curve curve,
-  }) {
-    return _position?.animateTopTo(newTop, duration: duration, curve: curve);
   }
 
   @override
@@ -145,7 +191,8 @@ class BottomSheetScrollController extends ScrollController {
   /// listener on two separate objects which are both forwarding all
   /// registrations to a common upstream object.
   void removeTopListener(VoidCallback callback) {
-    _topListeners.remove(callback);
+    // if we're disposed, this might already be null.
+    _topListeners?.remove(callback);
   }
 
   /// Call all the registered listeners to [top] changes.
@@ -165,8 +212,7 @@ class BottomSheetScrollController extends ScrollController {
   /// See the discussion at [removeTopListener].
   void notifyTopListeners() {
     if (_topListeners != null) {
-      final List<VoidCallback> localListeners =
-      List<VoidCallback>.from(_topListeners);
+      final List<VoidCallback> localListeners = List<VoidCallback>.from(_topListeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_topListeners.contains(listener)) {
@@ -238,6 +284,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
         assert(notifier != null),
         assert(minTop != null),
         assert(maxTop != null),
+        assert(minTop > 0 || maxTop > 0),
         assert(context != null),
         assert(animateIn != null),
         super(
@@ -292,24 +339,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     return _topAnimationController.forward();
   }
 
-  /// Animate the top value to [newTop], which will be clamped
-  /// between [minTop]..[maxTop].
-  ///
-  /// The [newTop] parameter must not be null.
-  Future<Null> animateTopTo(double newTop, {
-    Duration duration = const Duration(milliseconds: 200),
-    Curve curve = Curves.linear,
-  }) {
-    assert(newTop != null);
-    assert(duration != null);
-    assert(curve != null);
-    newTop = newTop.clamp(minTop, maxTop);
-    return _topAnimationController.animateTo(
-      newTop / maxTop,
-      duration: duration,
-      curve: curve,
-    );
-  }
   @override
   void absorb(ScrollPosition other) {
     // Need to make sure these get reset -
@@ -350,7 +379,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     // scroll extent, but we still may want to move it up or down.
     return super.maxScrollExtent != null
       ? super.maxScrollExtent + .01
-      : window.physicalSize.height / window.devicePixelRatio;
+      : MediaQuery.of(context.storageContext).size.height;
   }
 
   @override
@@ -385,8 +414,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     }
 
     _canFlingDown = true;
-    final Simulation simulation =
-    physics.createBallisticSimulation(this, velocity);
+    final Simulation simulation = physics.createBallisticSimulation(this, velocity);
 
     if (simulation != null) {
       _ballisticController

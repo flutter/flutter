@@ -238,7 +238,7 @@ class AnimationController extends Animation<double>
     @required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
-       assert(upperBound >= lowerBound),
+       assert(upperBound >= lowerBound, 'Expected $upperBound >= $lowerBound'),
        assert(vsync != null),
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);

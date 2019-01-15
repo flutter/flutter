@@ -162,6 +162,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.all(50.0),
+            size: Size(400.0, 600.0),
           ),
           child: Navigator(
             onGenerateRoute: (_) {

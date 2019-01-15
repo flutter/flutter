@@ -337,7 +337,7 @@ void main() {
                         ),
                       );
                     },
-                    initialTop: 0.0,
+                    initialHeightPercentage: 1.0,
                   );
                 },
                 child: const Text('X'),
