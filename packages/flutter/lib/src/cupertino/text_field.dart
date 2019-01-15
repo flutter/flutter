@@ -36,8 +36,11 @@ const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
 
 // An eyeballed value that moves the cursor slightly left of where it is
-// rendered by default so it's positioning more accurately matches the native
-// iOS.
+// rendered for text on Android so it's positioning more accurately matches the
+// native iOS text cursor positioning.
+//
+// This value is in device pixels, not logical pixels as is typically used
+// throughout the codebase.
 const int _iOSHorizontalCursorOffsetPixels = -2;
 
 /// Visibility of text field overlays based on the state of the current text entry.
