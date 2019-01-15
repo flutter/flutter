@@ -11,7 +11,6 @@ class PanAndZoomDemo extends StatelessWidget {
   Widget build(BuildContext context) => PanAndZoom();
 }
 
-// TODO Create a maximum size border around the hexagon board
 class PanAndZoom extends StatelessWidget {
   static const double HEXAGON_RADIUS = 32.0;
   static const int BOARD_RADIUS = 8;
@@ -56,29 +55,34 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.8;
-  static const Size _PANNABLE_SIZE = Size(2000, 2000);
+  static const Size _VISIBLE_SIZE = Size(1200, 1200);
   // Start out looking at the center
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
   static Offset __translation = const Offset(0, 0);
   Offset _translateFrom; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
-  double _scale = 0.8;
+  double __scale = 1.0;
 
   Offset get _translation => __translation;
   set _translation(Offset offset) {
-    // Clamp _translation such that viewport can't see beyond _PANNABLE_SIZE
+    // Clamp _translation such that viewport can't see beyond _VISIBLE_SIZE
     final Size screenSizeScene = widget.screenSize / _scale;
     __translation = Offset(
       offset.dx.clamp(
-        -_PANNABLE_SIZE.width / 2 + screenSizeScene.width,
-        _PANNABLE_SIZE.width / 2,
+        -_VISIBLE_SIZE.width / 2 + screenSizeScene.width / 2,
+        _VISIBLE_SIZE.width / 2 - screenSizeScene.width / 2,
       ),
       offset.dy.clamp(
-        -_PANNABLE_SIZE.height / 2 + screenSizeScene.height,
-        _PANNABLE_SIZE.height / 2,
+        -_VISIBLE_SIZE.height / 2 + screenSizeScene.height / 2,
+        _VISIBLE_SIZE.height / 2 - screenSizeScene.height / 2,
       ),
     );
+  }
+
+  double get _scale => __scale;
+  set _scale(double scale) {
+    __scale = scale.clamp(MIN_SCALE, MAX_SCALE);
   }
 
   @override
@@ -93,19 +97,19 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   Widget build (BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onScaleEnd: onScaleEnd,
-      onScaleStart: onScaleStart,
-      onScaleUpdate: onScaleUpdate,
+      onScaleEnd: _onScaleEnd,
+      onScaleStart: _onScaleStart,
+      onScaleUpdate: _onScaleUpdate,
       child: ClipRect(
         child: Transform(
-          transform: getTransformationMatrix(),
+          transform: _getTransformationMatrix(),
           child: widget.child,
         ),
       ),
     );
   }
 
-  Matrix4 getTransformationMatrix() {
+  Matrix4 _getTransformationMatrix() {
     // Scaling happens first in matrix multiplication, centered on the origin,
     // while our canvas is at its original position with zero translation.
     final Matrix4 scale = Matrix4(
@@ -147,24 +151,18 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
   }
 
   // Handle panning and pinch zooming events
-  void onScaleStart(ScaleStartDetails details) {
+  void _onScaleStart(ScaleStartDetails details) {
     _controller.stop();
     setState(() {
       _scaleStart = _scale;
       _translateFrom = details.focalPoint;
     });
   }
-  void onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
       if (_scaleStart != null) {
         final Offset focalPointScene = _fromScreen(details.focalPoint, _translation, _scale);
         _scale = _scaleStart * details.scale;
-        if (_scale > MAX_SCALE) {
-          _scale = MAX_SCALE;
-        }
-        if (_scale < MIN_SCALE) {
-          _scale = MIN_SCALE;
-        }
 
         if (details.scale != 1.0) {
           // While scaling, translate such that the user's fingers stay on the
@@ -185,7 +183,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       }
     });
   }
-  void onScaleEnd(ScaleEndDetails details) {
+  void _onScaleEnd(ScaleEndDetails details) {
     setState(() {
       _scaleStart = null;
       _translateFrom = null;
@@ -208,6 +206,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     _controller.fling();
   }
 
+  // Handle inertia drag animation
   void _onAnimate() {
     setState(() {
       _translation = _animation.value;
@@ -226,7 +225,6 @@ class BoardPainter extends CustomPainter {
     this.board,
   });
 
-  static const Size _PANNABLE_SIZE = Size(2000, 2000);
   Board board;
 
   @override
@@ -241,14 +239,6 @@ class BoardPainter extends CustomPainter {
     }
 
     board.forEach(drawBoardPoint);
-
-    // TODO remove
-    canvas.drawRect(
-      Rect.fromLTWH(-_PANNABLE_SIZE.width / 2, -_PANNABLE_SIZE.height / 2, _PANNABLE_SIZE.width, _PANNABLE_SIZE.height),
-      Paint()
-        ..color = Colors.pink
-        ..style = PaintingStyle.stroke,
-    );
   }
 
   @override
