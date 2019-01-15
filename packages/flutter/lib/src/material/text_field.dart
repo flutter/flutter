@@ -664,7 +664,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
-    print('grabbed the text field instead');
     if (widget.selectionEnabled) {
       // We can't break the API for SelectionChangedCause now.
       // The various SelectionChangedCause.tap below are really meant to imply

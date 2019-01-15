@@ -1072,7 +1072,6 @@ class RenderEditable extends RenderBox {
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
       final Offset start = Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
-      print('start offset for the handle $start');
       final Offset end = Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         TextSelectionPoint(start, boxes.first.direction),

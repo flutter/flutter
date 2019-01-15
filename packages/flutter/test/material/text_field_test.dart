@@ -1030,7 +1030,9 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    print('should have selected. Selection is ${controller.selection}');
+
+    expect(controller.selection.base.offset, 91);
+    expect(controller.selection.extent.offset, 94);
 
     expect(controller.selection.base.offset, 91);
     expect(controller.selection.extent.offset, 94);
@@ -1040,20 +1042,13 @@ void main() {
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
     );
-    print('render editable is at ${tester.getRect(find.byType(EditableText))}');
-    print('handles are at ${tester.getRect(find.byType(Transform).first)}');
-    print('globalizes into ${endpoints[0].point}');
-    print(tester.hitTestOnBinding(selectedWordPos));
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
     final Offset handlePos = endpoints[0].point + const Offset(-1, 1);
     final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
-    print('trying to grad the handle');
-    debugDumpApp();
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
-    print('held for 1s');
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
@@ -4239,6 +4234,96 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(2));
     },
   );
+
+  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: 1,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+
+      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 66), // Last character's position.
+      );
+
+      expect(lastCharEndpoint.length, 1);
+      // Just testing the test and making sure that the last character is off
+      // the right side of the screen.
+      expect(lastCharEndpoint[0].point.dx, 1056);
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      final TestGesture gesture =
+          await tester.startGesture(textfieldStart + const Offset(300, 5));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.moveBy(const Offset(600, 0));
+      // To the edge of the screen basically.
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
+      );
+      // Keep moving out.
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
+      );
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      ); // We're at the edge now.
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.up();
+      await tester.pump();
+
+      // The selection isn't affected by the gesture lift.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      );
+      // The toolbar now shows up.
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
+
+      lastCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 66), // Last character's position.
+      );
+
+      expect(lastCharEndpoint.length, 1);
+      // The last character is now on screen.
+      expect(lastCharEndpoint[0].point.dx, 798);
+
+      lastCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 0), // Last character's position.
+      );
+      expect(lastCharEndpoint.length, 1);
+      // The first character is now offscreen to the left.
+      expect(lastCharEndpoint[0].point.dx, -258);
+  });
 
   testWidgets(
     'long tap after a double tap select is not affected (iOS)',
