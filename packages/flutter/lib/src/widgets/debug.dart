@@ -74,7 +74,7 @@ bool debugPrintBuildScope = false;
 /// To see when the dirty list is flushed, see [debugPrintBuildScope].
 ///
 /// To see when a frame is scheduled, see [debugPrintScheduleFrameStacks].
-bool debugPrintScheduleBuildForStacks = false;
+bool debugPrintScheduleBuildForStacks = true;
 
 /// Log when widgets with global keys are deactivated and log when they are
 /// reactivated (retaken).

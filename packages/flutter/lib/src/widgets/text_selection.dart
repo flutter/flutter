@@ -417,7 +417,6 @@ class TextSelectionOverlay {
   List<TextSelectionPoint> _toolbarCreationEndpoints;
 
   Widget _buildToolbar(BuildContext context) {
-    debugPrintStack();
     if (selectionControls == null)
       return Container();
 
