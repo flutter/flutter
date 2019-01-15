@@ -63,12 +63,12 @@ class TabBarTheme extends Diagnosticable {
     TextStyle unselectedLabelStyle,
   }) {
     return TabBarTheme(
-        indicator: indicator ?? this.indicator,
-        indicatorSize: indicatorSize ?? this.indicatorSize,
-        labelColor: labelColor ?? this.labelColor,
-        labelStyle: labelStyle ?? this.labelStyle,
-        unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor,
-        unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
+      indicator: indicator ?? this.indicator,
+      indicatorSize: indicatorSize ?? this.indicatorSize,
+      labelColor: labelColor ?? this.labelColor,
+      labelStyle: labelStyle ?? this.labelStyle,
+      unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor,
+      unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
     );
   }
 
