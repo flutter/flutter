@@ -2,11 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:mockito/mockito.dart';
+import 'package:path/path.dart';
+import 'package:process/process.dart';
+
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -21,15 +29,49 @@ void main() {
     test('defaults', () async {
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'MacOS');
+      expect(await device.installApp(null), true);
+      expect(await device.uninstallApp(null), true);
+      expect(await device.isLatestBuildInstalled(null), true);
+      expect(await device.isAppInstalled(null), true);
+      expect(await device.stopApp(null), true);
     });
 
-    test('unimplemented methods', () {
-      expect(() => device.installApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.uninstallApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.isLatestBuildInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.startApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.stopApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.isAppInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
+
+    group('startApp', () {
+      final MockMacOSApp macOSApp = MockMacOSApp();
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MockProcessManager mockProcessManager = MockProcessManager();
+      final MockFile mockFile = MockFile();
+      final MockProcess mockProcess = MockProcess();
+      final Context context = Context();
+      final String location = context.join('testy','Contents', 'MacOS', 'test');
+      when(macOSApp.deviceBundlePath).thenReturn('testy');
+      when(macOSApp.name).thenReturn('test.app');
+      when(mockFileSystem.file(location)).thenReturn(mockFile);
+      when(mockFile.exists()).thenAnswer((Invocation invocation) async => true);
+      when(mockFileSystem.path).thenReturn(context);
+      when(mockProcessManager.start(<String>[location])).thenAnswer((Invocation invocation) async {
+        return mockProcess;
+      });
+      when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+        return Stream<List<int>>.fromIterable(<List<int>>[
+          utf8.encode('Observatory listening on http://127.0.0.1/0'),
+        ]);
+      });
+
+      test('fails without a prebuilt application', () async {
+        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: false);
+        expect(result.started, false);
+      });
+
+      testUsingContext('Can run from prebuilt application', () async {
+        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
+        expect(result.started, true);
+        expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+        ProcessManager: () => mockProcessManager,
+      });
     });
 
     test('noop port forwarding', () async {
@@ -49,3 +91,14 @@ void main() {
 }
 
 class MockPlatform extends Mock implements Platform {}
+
+class MockMacOSApp extends Mock implements MacOSApp {}
+
+class MockFileSystem extends Mock implements FileSystem {}
+
+class MockFile extends Mock implements File {}
+
+class MockProcessManager extends Mock implements ProcessManager {}
+
+class MockProcess extends Mock implements Process {}
+

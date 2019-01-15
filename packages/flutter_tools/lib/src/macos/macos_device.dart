@@ -63,13 +63,13 @@ class MacOSDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    if (!prebuiltApplication || !debuggingOptions.buildInfo.isDebug) {
+    if (!prebuiltApplication) {
       return LaunchResult.failed();
     }
     // The location of these files is based on the examples in the flutter
     // desktop embedding repo and may not be final.
     final String location = fs.path.join(package.deviceBundlePath, 'Contents', 'MacOS', package.name.replaceFirst('.app', ''));
-    if (! await fs.file(location).exists()) {
+    if (!await fs.file(location).exists()) {
       throwToolExit('Could not find MacOS binary at $location');
     }
     final Process process = await processManager.start(<String>[location]);
