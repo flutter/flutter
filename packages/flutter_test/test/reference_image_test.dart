@@ -26,16 +26,16 @@ void main() {
   group('succeeds', () {
     testWidgets('when images have the same content', (WidgetTester tester) async {
       await expectLater(
-        createTestImage(100, 100, red),
+        await createTestImage(100, 100, red),
         matchesReferenceImage(await createTestImage(100, 100, red)),
       );
       await expectLater(
-        createTestImage(100, 100, green),
+        await createTestImage(100, 100, green),
         matchesReferenceImage(await createTestImage(100, 100, green)),
       );
 
       await expectLater(
-        createTestImage(100, 100, transparentRed),
+        await createTestImage(100, 100, transparentRed),
         matchesReferenceImage(await createTestImage(100, 100, transparentRed)),
       );
     });
@@ -49,18 +49,18 @@ void main() {
   group('fails', () {
     testWidgets('when image sizes do not match', (WidgetTester tester) async {
       expect(
-        await matchesReferenceImage(await createTestImage(50, 50, red)).matchAsync(createTestImage(100, 100, red)),
+        await matchesReferenceImage(await createTestImage(50, 50, red)).matchAsync(await createTestImage(100, 100, red)),
         equals('does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
       expect(
-        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, transparentRed)),
+        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(await createTestImage(100, 100, transparentRed)),
         equals('does not match on 57 pixels'),
       );
       expect(
-        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, green)),
+        await matchesReferenceImage(await createTestImage(100, 100, red)).matchAsync(await createTestImage(100, 100, green)),
         equals('does not match on 57 pixels'),
       );
     });
