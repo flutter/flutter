@@ -43,12 +43,10 @@ void main() {
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockFile mockFile = MockFile();
       final MockProcess mockProcess = MockProcess();
-      final String location = fs.path.join('testy','Contents', 'MacOS', 'test');
-      when(macOSApp.name).thenReturn('test.app');
-      when(mockFileSystem.file(location)).thenReturn(mockFile);
+      when(macOSApp.executable).thenReturn('test');
+      when(mockFileSystem.file('test')).thenReturn(mockFile);
       when(mockFile.existsSync()).thenReturn(true);
-      when(mockFileSystem.path).thenReturn(fs.path);
-      when(mockProcessManager.start(<String>[location])).thenAnswer((Invocation invocation) async {
+      when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
         return mockProcess;
       });
       when(mockProcess.stdout).thenAnswer((Invocation invocation) {
