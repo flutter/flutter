@@ -38,6 +38,8 @@ class SemanticsUpdateBuilder
                   double top,
                   double right,
                   double bottom,
+                  double elevation,
+                  double thickness,
                   std::string label,
                   std::string hint,
                   std::string value,
