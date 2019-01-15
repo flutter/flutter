@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -43,13 +43,12 @@ void main() {
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockFile mockFile = MockFile();
       final MockProcess mockProcess = MockProcess();
-      final Context context = Context();
-      final String location = context.join('testy','Contents', 'MacOS', 'test');
+      final String location = fs.path.join('testy','Contents', 'MacOS', 'test');
       when(macOSApp.deviceBundlePath).thenReturn('testy');
       when(macOSApp.name).thenReturn('test.app');
       when(mockFileSystem.file(location)).thenReturn(mockFile);
       when(mockFile.exists()).thenAnswer((Invocation invocation) async => true);
-      when(mockFileSystem.path).thenReturn(context);
+      when(mockFileSystem.path).thenReturn(fs.path);
       when(mockProcessManager.start(<String>[location])).thenAnswer((Invocation invocation) async {
         return mockProcess;
       });
