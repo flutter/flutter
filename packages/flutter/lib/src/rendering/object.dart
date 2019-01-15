@@ -2552,13 +2552,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   void handleEvent(PointerEvent event, covariant HitTestEntry entry) { }
 
-  /// Override this method to handle propagating pointer events that hit this
-  /// render object.
-  @override
-  bool handlePropagatingEvent(PointerEvent event, covariant HitTestEntry entry) {
-    return false;
-  }
-
 
   // HIT TESTING
 

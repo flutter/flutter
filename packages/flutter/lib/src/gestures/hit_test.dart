@@ -24,7 +24,7 @@ abstract class HitTestDispatcher { // ignore: one_member_abstracts
   factory HitTestDispatcher._() => null;
 
   /// Override this method to dispatch events.
-  void dispatchEvent(PointerEvent event, HitTestResult result, bool propagating);
+  void dispatchEvent(PointerEvent event, HitTestResult result);
 }
 
 /// An object that can handle events.
@@ -35,9 +35,6 @@ abstract class HitTestTarget { // ignore: one_member_abstracts
 
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry entry);
-
-  /// Override this method to receive events that stop propagating once handled.
-  bool handlePropagatingEvent(PointerEvent event, HitTestEntry entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].

@@ -2481,7 +2481,7 @@ typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 /// not be propagated further.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef bool PointerScrollEventListener(PointerScrollEvent event);
+typedef PointerScrollEventListener = void Function(PointerScrollEvent event);
 
 /// Calls callbacks in response to pointer events.
 ///
@@ -2535,14 +2535,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerUp(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
       return onPointerCancel(event);
-  }
-
-  @override
-  bool handlePropagatingEvent(PointerEvent event, HitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
     if (onPointerScroll != null && event is PointerScrollEvent)
       return onPointerScroll(event);
-    return false;
   }
 
   @override

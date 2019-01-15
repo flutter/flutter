@@ -117,7 +117,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult result;
-    bool propagating = false;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       result = HitTestResult();
@@ -131,10 +130,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
     } else if (event is PointerScrollEvent) {
-      result = new HitTestResult();
-      // Pointer scroll events are instantaneous, not gesture-based, so use
-      // the propagating dispatch model.
-      propagating = true;
+      result = HitTestResult();
       hitTest(result, event.position);
     } else if (event.down) {
       result = _hitTests[event.pointer];
@@ -142,7 +138,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       return; // We currently ignore add, remove, and hover move events.
     }
     if (result != null)
-      dispatchEvent(event, result, propagating);
+      dispatchEvent(event, result);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -154,21 +150,15 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// Dispatch an event to a hit test result's path.
   ///
   /// This sends the given event to every [HitTestTarget] in the entries
-  /// of the given [HitTestResult], stopping early if `propagating` is true and
-  /// a handler retruns `true`, and catches exceptions that any of the handlers
-  /// might throw. The `result` argument must not be null.
+  /// of the given [HitTestResult], and catches exceptions that any of
+  /// the handlers might throw. The `result` argument must not be null.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result, bool propagating) {
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(!locked);
     assert(result != null);
     for (HitTestEntry entry in result.path) {
       try {
-        if (propagating) {
-          if (entry.target.handlePropagatingEvent(event, entry))
-            return;
-        } else {
-          entry.target.handleEvent(event, entry);
-        }
+        entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
@@ -196,11 +186,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
     }
-  }
-
-  @override // from HitTestTarget
-  bool handlePropagatingEvent(PointerEvent event, HitTestEntry entry) {
-    return false;
   }
 }
 
