@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -756,7 +755,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // expanded caret is scrolled into view.
       final double lineHeight = renderEditable.preferredLineHeight;
       final double caretOffset = (lineHeight - caretRect.height) / 2;
-      caretStart = math.max(0.0, caretRect.top - caretOffset);
+      caretStart = caretRect.top - caretOffset;
       caretEnd = caretRect.bottom + caretOffset;
     } else {
       caretStart = caretRect.left;
