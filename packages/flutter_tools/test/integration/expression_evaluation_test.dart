@@ -121,7 +121,7 @@ void main() {
       await evaluateComplexReturningExpressions(_flutter);
     });
     // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(6), skip: true);
+  }, timeout: const Timeout.factor(6));
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
