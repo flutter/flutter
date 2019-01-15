@@ -47,11 +47,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod('start', _flutterFrameRate ~/ 2);
+        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
         break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _icon = Icons.fast_forward;
         _state = FrameState.afterSlow;
@@ -62,11 +62,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod('start', (_flutterFrameRate * 2).toInt());
+        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
         break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _state = FrameState.afterFast;
         _icon = Icons.replay;

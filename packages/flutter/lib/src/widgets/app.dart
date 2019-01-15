@@ -83,9 +83,7 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// The signature of [WidgetsApp.pageRouteBuilder].
 ///
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
-// TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-// this can use type arguments again
-typedef PageRouteFactory = PageRoute<dynamic> Function(RouteSettings settings, WidgetBuilder builder);
+typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
@@ -754,7 +752,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       assert(widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.');
-      final Route<dynamic> route = widget.pageRouteBuilder(
+      final Route<dynamic> route = widget.pageRouteBuilder<dynamic>(
         settings,
         pageContentBuilder,
       );
