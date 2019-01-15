@@ -152,11 +152,11 @@ class Stepper extends StatefulWidget {
   ///
   /// The length of [steps] must not change.
   final List<Step> steps;
-	
+
   /// How the Stepper's scroll view should respond to user input.
   ///
-  /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
+  /// For example, determines how the scroll view continues to
+  /// animate after the user stops dragging the scroll view.
   final ScrollPhysics physics;
 
   /// The type of stepper that determines the layout. In the case of
