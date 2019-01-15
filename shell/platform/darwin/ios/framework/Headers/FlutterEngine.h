@@ -55,8 +55,28 @@ FLUTTER_EXPORT
  *   the threads used by this FlutterEngine.
  * @param projectOrNil The `FlutterDartProject` to run.
  */
+- (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil;
+
+/**
+ * Initialize this FlutterEngine with a `FlutterDartProject`.
+ *
+ * If the FlutterDartProject is not specified, the FlutterEngine will attempt to locate
+ * the project in a default location (the flutter_assets folder in the iOS application
+ * bundle).
+ *
+ * A newly initialized engine will not run the `FlutterDartProject` until either
+ * `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI:` is called.
+ *
+ * @param labelPrefix The label prefix used to identify threads for this instance. Should
+ *   be unique across FlutterEngine instances, and is used in instrumentation to label
+ *   the threads used by this FlutterEngine.
+ * @param projectOrNil The `FlutterDartProject` to run.
+ * @param allowHeadlessExecution Whether or not to allow this instance to continue
+ *   running after passing a nil `FlutterViewController` to `-setViewController:`.
+ */
 - (instancetype)initWithName:(NSString*)labelPrefix
-                     project:(FlutterDartProject*)projectOrNil NS_DESIGNATED_INITIALIZER;
+                     project:(FlutterDartProject*)projectOrNil
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_DESIGNATED_INITIALIZER;
 
 /**
  * The default initializer is not available for this object.

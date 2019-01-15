@@ -17,8 +17,6 @@
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr;
 - (shell::FlutterPlatformViewsController*)platformViewsController;
 
-@property(readonly) fml::scoped_nsobject<FlutterEngine> engine;
-
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
