@@ -15,7 +15,7 @@ import '../src/common.dart';
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
 Directory createResolvedTempDirectorySync(String prefix) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync(prefix);
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
   return fs.directory(tempDir.resolveSymbolicLinksSync());
 }
 

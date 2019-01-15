@@ -20,7 +20,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('flutter_hot_reload_test.');
+      tempDir = createResolvedTempDirectorySync('hot_reload_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });

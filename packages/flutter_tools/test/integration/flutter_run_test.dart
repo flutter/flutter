@@ -19,7 +19,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('flutter_run_test.');
+      tempDir = createResolvedTempDirectorySync('run_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
