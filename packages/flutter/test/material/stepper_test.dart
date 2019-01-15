@@ -508,7 +508,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(18.0)));
   });
   
-  testWidgets('Stepper physics null error test', (WidgetTester tester) async {
+  testWidgets('Stepper physics scroll error test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
