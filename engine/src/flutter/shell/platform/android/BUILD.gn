@@ -111,6 +111,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/common/BasicMessageChannel.java",
     "io/flutter/plugin/common/BinaryCodec.java",
     "io/flutter/plugin/common/BinaryMessenger.java",
+    "io/flutter/plugin/common/ErrorLogResult.java",
     "io/flutter/plugin/common/EventChannel.java",
     "io/flutter/plugin/common/FlutterException.java",
     "io/flutter/plugin/common/JSONMessageCodec.java",
