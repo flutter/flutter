@@ -2856,6 +2856,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// This example shows how Stack can be used to enhance text visibility
 /// by adding gradient backdrops.
 /// 
+/// ```dart
 /// SizedBox(
 ///   height: 250,
 ///   child: Stack(
@@ -2887,6 +2888,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///     ],
 ///   ),
 /// )
+/// ```
+/// 
 /// {@end-tool}
 ///
 /// See also:
