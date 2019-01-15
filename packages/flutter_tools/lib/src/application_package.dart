@@ -24,7 +24,7 @@ import 'tester/flutter_tester.dart';
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
-  Future<ApplicationPackage> getApplicationPackageForPlatform(
+  Future<ApplicationPackage> getPackageForPlatform(
       TargetPlatform platform,
       {File applicationBinary}) async {
     switch (platform) {
