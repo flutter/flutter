@@ -124,15 +124,10 @@ class AppBarTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
   }
 }
