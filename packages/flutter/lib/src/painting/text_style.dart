@@ -799,6 +799,11 @@ class TextStyle extends Diagnosticable {
       String ellipsis,
       int maxLines,
       Locale locale,
+      String fontFamily,
+      double fontSize,
+      FontWeight fontWeight,
+      FontStyle fontStyle,
+      double lineHeight,
       StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
@@ -806,10 +811,13 @@ class TextStyle extends Diagnosticable {
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      fontWeight: this.fontWeight,
-      fontStyle: this.fontStyle,
-      fontFamily: this.fontFamily,
-      fontSize: (this.fontSize ?? _defaultFontSize) * textScaleFactor,
+      // Here, we stablish the contents of this TextStyle as the paragraph's default font
+      // unless an override is passed in.
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
+      lineHeight: lineHeight ?? height,
       strutStyle: strutStyle != null ? ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
