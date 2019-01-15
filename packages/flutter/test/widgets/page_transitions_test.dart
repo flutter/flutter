@@ -28,7 +28,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
   void showBottomSheet() {
     _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      return SingleChildScrollView(primary: true, child: const Text('bottomSheet'));
+      return const SingleChildScrollView(primary: true, child: Text('bottomSheet'));
     })
     .closed.whenComplete(() {
       print('got completion');

@@ -590,7 +590,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: widget.currentController,
       curve: Curves.easeIn,
     );
-    final Animation<double> currentEntranceRotationAnimation = _currentController.drive(_entranceTurnTween);
+    final Animation<double> currentEntranceRotationAnimation = widget.currentController.drive(_entranceTurnTween);
 
     // Get the animations for when the FAB is moving.
     final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
@@ -1414,9 +1414,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       assert(bottomSheetKey.currentState != null);
       showFloatingActionButton();
 
-      final Future<Null> closing = bottomSheetKey.currentState.close();
+      final Future<void> closing = bottomSheetKey.currentState.close();
 
-      void _closed(Null value) {
+      void _closed(void value) {
         setState(() {
           _currentBottomSheet = null;
         });

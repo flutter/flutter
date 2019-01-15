@@ -166,9 +166,9 @@ void main() {
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
-                        builder: (BuildContext context) => SingleChildScrollView(
+                        builder: (BuildContext context) => const SingleChildScrollView(
                           primary: true,
-                          child: const Text('bottomSheet'),
+                          child: Text('bottomSheet'),
                         ),
                       );
                     },

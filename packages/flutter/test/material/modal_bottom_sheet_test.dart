@@ -28,7 +28,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => SingleChildScrollView(primary: true, child: const Text('BottomSheet'))
+      builder: (BuildContext context) => const SingleChildScrollView(primary: true, child: Text('BottomSheet'))
     ).then<void>((void result) {
       showBottomSheetThenCalled = true;
     });
@@ -44,12 +44,12 @@ void main() {
     expect(showBottomSheetThenCalled, isTrue);
     await tester.pump(const Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
     await tester.pump(const Duration(seconds: 1)); // frame after the animation (sheet has been removed)
-    expect(find.text('BottomSheet'), findsNothing);
+  expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => SingleChildScrollView(primary: true, child: const Text('BottomSheet')),
+      builder: (BuildContext context) => const SingleChildScrollView(primary: true, child: Text('BottomSheet')),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });

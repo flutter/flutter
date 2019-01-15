@@ -137,7 +137,7 @@ class BottomSheetScrollController extends ScrollController {
   AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
   /// Animate the [top] value to [maxTop].
-  Future<Null> dismiss() {
+  Future<void> dismiss() {
     if (!isPersistent)
       return _position?.dismiss();
     return null;
@@ -335,7 +335,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   /// Animate the [top] value to [maxTop].
-  Future<Null> dismiss() {
+  Future<void> dismiss() {
     return _topAnimationController.forward();
   }
 
