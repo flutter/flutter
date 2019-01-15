@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -295,6 +296,9 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
     case TargetPlatform.tester:
       return FlutterTesterApp.fromCurrentDirectory();
     case TargetPlatform.darwin_x64:
+      return applicationBinary != null
+        ? MacOSApp.fromPrebuiltApp(applicationBinary)
+        : null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
     case TargetPlatform.fuchsia:
