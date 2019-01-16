@@ -20,7 +20,7 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   void handleBeginFrame(Duration rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
-    Future.microtask(() { handleBeginFrameMicrotaskRun = true; });
+    Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
     super.handleBeginFrame(rawTimeStamp);
   }
 
@@ -55,7 +55,7 @@ Future<void> main() async {
 
       appState.markNeedsBuild();
 
-      await tester.pumpBenchmark(Duration(milliseconds: 16));
+      await tester.pumpBenchmark(const Duration(milliseconds: 16));
 
       final int endFramesBegun = binding.framesBegun;
       final int endFramesDrawn = binding.framesDrawn;
