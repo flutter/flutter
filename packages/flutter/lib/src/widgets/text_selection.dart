@@ -725,8 +725,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
-   if (widget.onForcePressStart != null)
-     widget.onForcePressStart(details);
+    if (widget.onForcePressStart != null)
+      widget.onForcePressStart(details);
   }
 
   void _forcePressEnded(ForcePressDetails details) {
@@ -761,8 +761,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
-      onForcePressStart: _forcePressStarted,
-      onForcePressEnd: _forcePressEnded,
+      onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
+      onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,

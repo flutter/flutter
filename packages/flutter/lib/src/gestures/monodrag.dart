@@ -280,7 +280,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('Start Behavior', dragStartBehavior));
+    properties.add(EnumProperty<DragStartBehavior>('start behavior', dragStartBehavior));
   }
 }
 
