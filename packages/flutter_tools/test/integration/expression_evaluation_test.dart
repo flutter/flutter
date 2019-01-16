@@ -102,6 +102,7 @@ void main() {
         withDebugger: true,
         beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
       );
+      await _flutter.waitForPause();
       await evaluateTrivialExpressions(_flutter);
     });
 
@@ -110,6 +111,7 @@ void main() {
         withDebugger: true,
         beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
       );
+      await _flutter.waitForPause();
       await evaluateComplexExpressions(_flutter);
     });
 
@@ -118,10 +120,11 @@ void main() {
         withDebugger: true,
         beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
       );
+      await _flutter.waitForPause();
       await evaluateComplexReturningExpressions(_flutter);
     });
     // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(6), skip: true);
+  }, timeout: const Timeout.factor(6));
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {

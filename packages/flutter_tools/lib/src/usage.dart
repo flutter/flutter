@@ -23,6 +23,8 @@ const String kEventReloadSyncedClassesCount = 'cd8';
 const String kEventReloadSyncedProceduresCount = 'cd9';
 const String kEventReloadSyncedBytes = 'cd10';
 const String kEventReloadInvalidatedSourcesCount = 'cd11';
+const String kEventReloadTransferTimeInMs = 'cd12';
+const String kEventReloadOverallTimeInMs = 'cd13';
 
 Usage get flutterUsage => Usage.instance;
 
