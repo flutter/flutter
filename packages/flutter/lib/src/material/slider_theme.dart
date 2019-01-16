@@ -583,7 +583,7 @@ class SliderThemeData extends Diagnosticable {
 /// {@endtemplate}
 ///
 /// {@template flutter.material.slider.shape.center}
-/// [center] is the offset of where the center of this shape should be painted.
+/// [center] is the offset of the center where this shape should be painted.
 /// This offset is relative to the origin of the [context] canvas.
 /// {@endtemplate}
 ///
@@ -795,22 +795,22 @@ abstract class SliderComponentShape {
   /// called with the location that the label should appear. If the labelPainter
   /// passed is null, then no label was supplied to the [Slider].
   void paint(
-      PaintingContext context,
-      Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    });
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  });
 }
 
 // The following shapes are the material defaults.
 
-/// This is the default shape to a [Slider]'s track.
+/// This is the default shape of a [Slider]'s track.
 ///
 /// It paints a solid colored rectangle, vertically centered in the
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
@@ -848,7 +848,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
     assert(parentBox.size.width >= overlayWidth);
-    assert(parentBox.size.width >= trackHeight);
+    assert(parentBox.size.height >= trackHeight);
 
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
@@ -921,8 +921,8 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 /// by setting the [Slider.divisions] as non-null.
 ///
 /// It paints a solid circle, centered in the on the track.
-/// The color is determined by the [Slider]'s enabled state and the active state
-/// of the track in which it is on. These colors are defined in:
+/// The color is determined by the [Slider]'s enabled state and track's active
+/// states. These colors are defined in:
 ///   [SliderThemeData.activeTrackColor],
 ///   [SliderThemeData.inactiveTrackColor],
 ///   [SliderThemeData.disabledActiveTrackColor],
@@ -981,7 +981,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
-/// This is the default shape to a [Slider]'s thumb.
+/// This is the default shape of a [Slider]'s thumb.
 ///
 /// See also:
 ///
@@ -1030,7 +1030,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape to a [Slider]'s thumb overlay.
+/// This is the default shape of a [Slider]'s thumb overlay.
 ///
 /// The shape of the overlay is a circle with the same center as the thumb, but
 /// with a larger radius. It animates to full size when the thumb is pressed,
@@ -1088,7 +1088,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape to a [Slider]'s value indicator.
+/// This is the default shape of a [Slider]'s value indicator.
 ///
 /// See also:
 ///
