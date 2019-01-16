@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -14,6 +13,7 @@ import '../base/process_manager.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
@@ -233,12 +233,14 @@ class AndroidLicenseValidator extends DoctorValidator {
     );
     process.stdin.write('n\n');
     final Future<void> output = process.stdout
-      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      // Previously this line specified allowMalformed: true.
+      .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
-      .transform<String>(const Utf8Decoder(allowMalformed: true))
+       // Previously this line specified allowMalformed: true.
+      .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);

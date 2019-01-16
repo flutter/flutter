@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -15,6 +13,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../globals.dart';
 import 'android_studio.dart' as android_studio;
 

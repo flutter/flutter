@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -17,6 +16,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../fuchsia/fuchsia_device.dart';

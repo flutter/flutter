@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show AsciiDecoder;
 
 import 'package:quiver/strings.dart';
 
+import '../convert.dart' show AsciiDecoder;
 import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;

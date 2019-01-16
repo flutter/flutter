@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show base64;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -18,6 +17,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
+import 'convert.dart' show base64;
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
 

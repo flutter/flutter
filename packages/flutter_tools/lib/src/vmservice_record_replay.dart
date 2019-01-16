@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 const String _kManifest = 'MANIFEST.txt';

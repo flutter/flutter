@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -18,6 +17,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -682,7 +682,8 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
-      const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
+      // Previously this line specified allowMalformed: true.
+      const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -11,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../convert.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
