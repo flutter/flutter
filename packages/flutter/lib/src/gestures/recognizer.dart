@@ -262,7 +262,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 /// The possible states of a [PrimaryPointerGestureRecognizer].
 ///
 /// The recognizer advances from [ready] to [possible] when starts tracking a
-/// primary pointer. When the primary pointer is resolve (either accepted or
+/// primary pointer. When the primary pointer is resolved (either accepted or
 /// or rejected), the recognizers advances to [defunct]. Once the recognizer
 /// has stopped tracking any remaining pointers, the recognizer returns to
 /// [ready].
@@ -289,7 +289,7 @@ enum GestureRecognizerState {
 /// Gestures based on this class will reject the gesture if the primary pointer
 /// travels beyond [preAcceptSlopTolerance] pixels from the original contact
 /// point before the gesture is accepted or beyond [postAcceptSlopTolerance]
-/// after the gesture is accepted.
+/// from where the pointer was after the gesture was accepted.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
@@ -311,14 +311,14 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// amount of time has elapsed since starting to track the primary pointer.
   final Duration deadline;
 
-  /// The maximum distance in pixels the gesture is allowed to drift from the
-  /// initial touch down position before the gesture being accepted.
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// from the initial touch down position before the gesture is accepted.
   ///
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   final double preAcceptSlopTolerance;
 
-  /// The maximum distance in pixels the gesture is allowed to drift after the
-  /// gesture has been accepted.
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// after the gesture has been accepted.
   ///
   /// Drifting past the allowed slop amount causes the gesture to be rejected,
   /// even after being accepted.

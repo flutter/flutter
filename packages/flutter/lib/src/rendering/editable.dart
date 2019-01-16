@@ -1191,7 +1191,7 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// down events by calling this method.
   void handleTapDown(TapDownDetails details) {
-    _lastTapDownPosition = details.globalPosition + -_paintOffset;
+    _lastTapDownPosition = details.globalPosition - _paintOffset;
   }
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
@@ -1255,10 +1255,10 @@ class RenderEditable extends RenderBox {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
-      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
+      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
       final TextPosition toPosition = to == null
-          ? null
-          : _textPainter.getPositionForOffset(globalToLocal(to + -_paintOffset));
+        ? null
+        : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
       onSelectionChanged(
         TextSelection(
           baseOffset: fromPosition.offset,
@@ -1288,10 +1288,10 @@ class RenderEditable extends RenderBox {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
-      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
+      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
       final TextSelection firstWord = _selectWordAtOffset(firstPosition);
       final TextSelection lastWord = to == null ?
-        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to + -_paintOffset)));
+        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
 
       onSelectionChanged(
         TextSelection(

@@ -231,7 +231,8 @@ class GestureDetector extends StatelessWidget {
              'Incorrect GestureDetector arguments.\n'
              'Having both a long press and a long press drag recognizer is '
              'redundant as the long press drag is a superset of long press. '
-             'The long press drag allows '
+             'Except long press drag allows for drags after the long press is '
+             'triggered.'
            );
          }
          return true;

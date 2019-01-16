@@ -40,7 +40,7 @@ class GestureLongPressDragStartDetails {
   /// Creates the details for a [GestureLongPressDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  GestureLongPressDragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+  const GestureLongPressDragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// Recorded timestamp of the source pointer event that triggered the press
@@ -64,7 +64,7 @@ class GestureLongPressDragUpdateDetails {
   /// Creates the details for a [GestureLongPressDragUpdateCallback].
   ///
   /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
-  GestureLongPressDragUpdateDetails({
+  const GestureLongPressDragUpdateDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
@@ -97,7 +97,7 @@ class GestureLongPressDragUpDetails {
   /// Creates the details for a [GestureLongPressDragUpCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  GestureLongPressDragUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+  const GestureLongPressDragUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
 
   /// Recorded timestamp of the source pointer event that triggered the press
@@ -159,19 +159,20 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 /// Recognizes long presses that can be subsequently dragged around.
 ///
 /// Similar to a [LongPressGestureRecognizer] where a press has to be held down
-/// at the same location for a long period of time. However, after
-/// [onLongPressStart] is triggered after the hold threshold, drags will not
-/// subsequently cancel the gesture while it's still held. The
-/// [onLongPressDragUpdate] callback will be called as the drag moves.
+/// at the same location for a long period of time. However drag events that
+/// occur after the long-press hold threshold has past will not cancel the
+/// gesture. The [onLongPressDragUpdate] callback will be called until an up
+/// event occurs.
 ///
 /// See also:
 ///
-///  * [LongPressGestureRecognizer], which cannot be dragged during the gesture.
+///  * [LongPressGestureRecognizer], which cancels its gesture if a drag event
+///    occurs at any point during the long-press.
 class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press-drag gesture recognizer.
   ///
-  /// Consider assigning the [onLongPressDragUpdate] callback after creating
-  /// this object.
+  /// Consider assigning the [onLongPressStart], [onLongPressDragUpdate] and
+  /// the [onLongPressUp] callbacks after creating this object.
   LongPressDragGestureRecognizer({ Object debugOwner }) : super(
     deadline: kLongPressTimeout,
     // Since it's a drag gesture, no travel distance will cause it to get
@@ -202,12 +203,12 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
     _longPressAccepted = true;
     super.acceptGesture(primaryPointer);
     if (onLongPressStart != null) {
-      invokeCallback<void>('onLongPressStart', () => onLongPressStart(
-        GestureLongPressDragStartDetails(
+      invokeCallback<void>('onLongPressStart', () {
+        onLongPressStart(GestureLongPressDragStartDetails(
           sourceTimeStamp: _longPressStartTimestamp,
           globalPosition: _longPressOrigin,
-        ),
-      ));
+        ));
+      });
     }
   }
 
@@ -216,28 +217,28 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (event is PointerUpEvent) {
       if (_longPressAccepted == true && onLongPressUp != null) {
         _longPressAccepted = false;
-        invokeCallback<void>('onLongPressUp', () => onLongPressUp(
-          GestureLongPressDragUpDetails(
+        invokeCallback<void>('onLongPressUp', () {
+          onLongPressUp(GestureLongPressDragUpDetails(
             sourceTimeStamp: event.timeStamp,
             globalPosition: event.position,
-          ),
-        ));
+          ));
+        });
       } else {
         resolve(GestureDisposition.rejected);
       }
     } else if (event is PointerDownEvent) {
-      // The first touch, initialize the flag with false.
+      // The first touch.
       _longPressAccepted = false;
       _longPressStartTimestamp = event.timeStamp;
       _longPressOrigin = event.position;
     } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressDragUpdate != null) {
-      invokeCallback<void>('onLongPressDrag', () => onLongPressDragUpdate(
-        GestureLongPressDragUpdateDetails(
+      invokeCallback<void>('onLongPressDrag', () {
+        onLongPressDragUpdate(GestureLongPressDragUpdateDetails(
           sourceTimeStamp: event.timeStamp,
           globalPosition: event.position,
           offsetFromOrigin: event.position - _longPressOrigin,
-        ),
-      ));
+        ));
+      });
     }
   }
 

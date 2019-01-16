@@ -655,11 +655,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
   final GestureLongPressDragStartCallback onSingleLongTapStart;
 
-  /// Called for a single long tap that's dragged while the pointer is still
-  /// down.
+  /// Called after [onSingleLongTapStart] when the pointer is dragged.
   final GestureLongPressDragUpdateCallback onSingleLongTapDragUpdate;
 
-  /// Called for a single long tap that's now lifted.
+  /// Called after [onSingleLongTapStart] when the pointer is lifted.
   final GestureLongPressDragUpCallback onSingleLongTapUp;
 
   /// Called after a momentary hold or a short tap that is close in space and
