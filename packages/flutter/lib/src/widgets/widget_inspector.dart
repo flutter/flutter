@@ -868,9 +868,32 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey('enabled'))
-          await setter(parameters['enabled'] == 'true');
+        if (parameters.containsKey('enabled')) {
+          final bool value = parameters['enabled'] == 'true';
+          await setter(value);
+          _postExtensionStateChangedEvent(name, value);
+        }
         return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
+      },
+    );
+  }
+
+  /// Sends an event when a service extension's state is changed.
+  ///
+  /// Clients should listen for this event to stay aware of the current service
+  /// extension state. Any service extension that manages a state should call
+  /// this method on state change.
+  ///
+  /// `value` reflects the newly updated service extension value.
+  ///
+  /// This will be called automatically for service extensions registered via
+  /// [registerBoolServiceExtension].
+  void _postExtensionStateChangedEvent(String name, dynamic value) {
+    postEvent(
+      'Flutter.ServiceExtensionStateChanged',
+      <String, dynamic>{
+        'extension': 'ext.flutter.inspector.$name',
+        'value': value,
       },
     );
   }
