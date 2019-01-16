@@ -568,6 +568,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 
@@ -620,6 +622,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 
@@ -840,7 +844,7 @@ void main() {
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final Widget widget =
+    const Widget widget =
       MaterialApp(
         home: Material(
           child: TextField(
@@ -887,14 +891,14 @@ void main() {
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
 
-    final Widget widget =
-    MaterialApp(
-      home: Material(
-          child: TextField(
-            maxLines: 3,
-          )
-      ),
-    );
+    const Widget widget =
+      MaterialApp(
+        home: Material(
+            child: TextField(
+              maxLines: 3,
+            )
+        ),
+      );
     await tester.pumpWidget(widget);
 
     await tester.tap(find.byType(TextField));
@@ -923,10 +927,8 @@ void main() {
     expect(renderEditable.cursorColor.alpha, 0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
 
-    expect(renderEditable.cursorColor.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 255);
 
     debugDefaultTargetPlatformOverride = null;
   });
@@ -934,14 +936,14 @@ void main() {
   testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final Widget widget =
-    MaterialApp(
-      home: Material(
-          child: TextField(
-            maxLines: 3,
-          )
-      ),
-    );
+    const Widget widget =
+      MaterialApp(
+        home: Material(
+            child: TextField(
+              maxLines: 3,
+            )
+        ),
+      );
     await tester.pumpWidget(widget);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));

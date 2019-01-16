@@ -149,7 +149,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    bool paintCursorOnTop = false,
+    bool paintCursorAboveText = false,
     Offset cursorOffset,
     double devicePixelRatio = 1.0,
     bool enableInteractiveSelection,
@@ -161,10 +161,11 @@ class RenderEditable extends RenderBox {
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
-       assert(paintCursorOnTop != null),
+       assert(paintCursorAboveText != null),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
+        assert(devicePixelRatio != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -182,7 +183,7 @@ class RenderEditable extends RenderBox {
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
-       _paintCursorOnTop = paintCursorOnTop,
+       _paintCursorOnTop = paintCursorAboveText,
        _cursorOffset = cursorOffset,
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
@@ -215,7 +216,17 @@ class RenderEditable extends RenderBox {
   /// The default value of this property is false.
   bool ignorePointer;
 
+  /// The pixel ratio of the current device.
+  ///
+  /// Should be obtained by querying MediaQuery for the devicePixelRatio.
+  double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio;
+  set devicePixelRatio(double value) {
+    if (devicePixelRatio == value)
+      return;
+    _devicePixelRatio = value;
+    markNeedsTextLayout();
+  }
 
   /// Whether to hide the text being edited (e.g., for passwords).
   bool get obscureText => _obscureText;
@@ -725,12 +736,12 @@ class RenderEditable extends RenderBox {
   ///{@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
-  /// By default, the cursor will be painted on top for iOS platforms and
+  /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
   /// {@end template}
-  bool get paintCursorOnAboveText => _paintCursorOnTop;
+  bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
-  set paintCursorOnAboveText(bool value) {
+  set paintCursorAboveText(bool value) {
     if (_paintCursorOnTop == value)
       return;
     _paintCursorOnTop = value;
@@ -740,9 +751,10 @@ class RenderEditable extends RenderBox {
   /// {@template flutter.rendering.editable.cursorOffset}
   /// The offset that is used, in pixels, when painting the cursor on screen.
   ///
-  /// By default, the cursor will be painted on with an offset of
+  /// By default, the cursor position should be set to an offset of
   /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
-  /// platforms.
+  /// platforms. The origin from where the offset is applied to is the arbitrary
+  /// location where the cursor ends up being rendered from by default.
   /// {@end template}
   Offset get cursorOffset => _cursorOffset;
   Offset _cursorOffset;
@@ -1279,6 +1291,9 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  /// On iOS, the cursor is taller than the the cursor on Android. The height
+  /// of the cursor for iOS is approximate and obtained through an eyeball
+  /// comparison.
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
@@ -1308,9 +1323,20 @@ class RenderEditable extends RenderBox {
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
+  Offset _getPixelPerfectCursorOffset(Rect caretRect) {
+    final Offset caretPosition = localToGlobal(caretRect.topLeft);
+    final double pixelMultiple = 1.0 / _devicePixelRatio;
+    final int quotientX = (caretPosition.dx / pixelMultiple).round();
+    final int quotientY = (caretPosition.dy / pixelMultiple).round();
+    final double pixelPerfectOffsetX = quotientX * pixelMultiple - caretPosition.dx;
+    final double pixelPerfectOffsetY = quotientY * pixelMultiple - caretPosition.dy;
+    return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
+  }
+
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype);
+
     // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
     // the floating cursor's color is _cursorColor;
     final Paint paint = Paint()
@@ -1320,13 +1346,7 @@ class RenderEditable extends RenderBox {
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
 
-    final Offset caretPosition = localToGlobal(caretRect.topLeft);
-    final double pixelMultiple = 1.0 / _devicePixelRatio;
-    final int quotientX = (caretPosition.dx / pixelMultiple).round();
-    final int quotientY = (caretPosition.dy / pixelMultiple).round();
-    final double pixelPerfectOffsetX = quotientX * pixelMultiple - caretPosition.dx;
-    final double pixelPerfectOffsetY = quotientY * pixelMultiple - caretPosition.dy;
-    caretRect = caretRect.shift(Offset(pixelPerfectOffsetX, pixelPerfectOffsetY));
+    caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
@@ -1461,9 +1481,9 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
-    // On iOS, the cursor is painted over the text, on android, it's painted
+    // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
-    if (paintCursorOnAboveText)
+    if (paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_selection != null && !_floatingCursorOn) {
@@ -1475,7 +1495,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    if (!paintCursorOnAboveText)
+    if (!paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_floatingCursorOn) {

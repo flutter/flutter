@@ -632,7 +632,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorColor: widget.cursorColor,
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
-          paintCursorOnTop: true,
+          paintCursorAboveText: true,
           backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: widget.keyboardAppearance,
