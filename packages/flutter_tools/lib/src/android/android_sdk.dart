@@ -159,7 +159,7 @@ class AndroidNdk {
         throw AndroidNdkSearchError('Can not locate GCC binary, tried $ndkCompiler');
       }
 
-      return [toolchainBin, ndkCompiler];
+      return <String>[toolchainBin, ndkCompiler];
     }
 
     List<String> findSysroot(String ndkDirectory) {
@@ -208,19 +208,25 @@ class AndroidNdk {
     int findNdkMajorVersion(String ndkDirectory) {
       final String propertiesFile = fs.path.join(ndkDirectory, 'source.properties');
       if (!fs.isFileSync(propertiesFile)) {
-        throw AndroidNdkSearchError('Can not establish ndk-bundle version: ${propertiesFile} not found');
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile not found');
       }
 
       // Parse source.properties: each line has Key = Value format.
+      final Iterable<String> propertiesFileLines = fs.file(propertiesFile)
+          .readAsStringSync()
+          .split('\n')
+          .map<String>((String line) => line.trim())
+          .where((String line) => line.isNotEmpty);
       final Map<String, String> properties = Map<String, String>.fromIterable(
-          fs.file(propertiesFile).readAsStringSync().split('\n').map((String line) => line.trim()).where((line) => line.isNotEmpty).map((String line) => line.split(' = ')),
+          propertiesFileLines.map<List<String>>((String line) => line.split(' = ')),
           key: (dynamic split) => split[0],
           value: (dynamic split) => split[1]);
 
       if (!properties.containsKey('Pkg.Revision')) {
-        throw AndroidNdkSearchError('Can not establish ndk-bundle version: ${propertiesFile} does not contain Pkg.Revision');
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile does not contain Pkg.Revision');
       }
 
+      // Extract major version from Pkg.Revision property which looks like <ndk-version>.x.y.
       return int.parse(properties['Pkg.Revision'].split('.').first);
     }
 
@@ -235,11 +241,11 @@ class AndroidNdk {
       // system linker instead of using toolchain linker. Force clang to
       // use appropriate linker by passing -fuse-ld=<path-to-ld> command line
       // flag.
-      final ndkLinker = fs.path.join(ndkToolchain, 'arm-linux-androideabi-ld');
+      final String ndkLinker = fs.path.join(ndkToolchain, 'arm-linux-androideabi-ld');
       if (!fs.isFileSync(ndkLinker)) {
         throw AndroidNdkSearchError('Can not locate linker binary, tried $ndkLinker');
       }
-      ndkCompilerArgs.add('-fuse-ld=${ndkLinker}');
+      ndkCompilerArgs.add('-fuse-ld=$ndkLinker');
     }
     return AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
   }

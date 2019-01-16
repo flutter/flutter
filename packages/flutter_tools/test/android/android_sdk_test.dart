@@ -161,7 +161,7 @@ void main() {
           Platform: () => FakePlatform(operatingSystem: os),
         });
 
-        testUsingContext('newer NDK require explicit -fuse-ld on ${os}', () {
+        testUsingContext('newer NDK require explicit -fuse-ld on $os', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(
               withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true, ndkVersion: 18);
           Config.instance.setValue('android-sdk', sdkDir.path);
@@ -189,7 +189,7 @@ void main() {
           expect(sdk.ndk, isNotNull);
           expect(sdk.ndk.directory, realNdkDir);
           expect(sdk.ndk.compiler, realNdkCompiler);
-          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=${realNdkLinker}']);
+          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=$realNdkLinker']);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           Platform: () => FakePlatform(operatingSystem: os),

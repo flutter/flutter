@@ -84,11 +84,11 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       );
       _createSdkFile(dir, ndkCompiler);
       _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: """
-Pkg.Desc = Android NDK
-Pkg.Revision = ${ndkVersion}.1.5063045
+      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
+Pkg.Desc = Android NDK[]
+Pkg.Revision = $ndkVersion.1.5063045
 
-""");
+''');
     }
     if (withNdkSysroot) {
       final String armPlatform = fs.path.join(
