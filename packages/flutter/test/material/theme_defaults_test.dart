@@ -205,8 +205,8 @@ void main() {
       expect(raw.textStyle.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.elevation, 6.0);
-      expect(raw.highlightElevation, 8.0);
-      expect(raw.disabledElevation, 0.0);
+      expect(raw.highlightElevation, 12.0);
+      expect(raw.disabledElevation, 6.0);
       expect(raw.constraints, defaultFABConstraints);
       expect(raw.padding, defaultFABPadding);
       expect(raw.shape, defaultFABShape);
@@ -247,8 +247,8 @@ void main() {
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
       expect(raw.elevation, 6.0);
-      expect(raw.highlightElevation, 8.0);
-      expect(raw.disabledElevation, 0.0);
+      expect(raw.highlightElevation, 12.0);
+      expect(raw.disabledElevation, 6.0);
       expect(raw.constraints, defaultFABConstraints);
       expect(raw.padding, defaultFABPadding);
       expect(raw.shape, defaultFABShape);
@@ -267,7 +267,7 @@ void main() {
       // TODO(willlarche): Remove elevation tests on the Material inside
       // RawMaterialButton. See github.com/flutter/flutter/issues/26317
       final Material underlyingMaterial = tester.widget<Material>(find.byType(Material));
-      expect(underlyingMaterial.elevation, 0.0);
+      expect(underlyingMaterial.elevation, 6.0);
     });
   });
 }
