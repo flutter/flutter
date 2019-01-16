@@ -576,13 +576,42 @@ class SliderThemeData extends Diagnosticable {
   }
 }
 
+// TEMPLATES FOR ALL SHAPES
+
+/// {@template flutter.material.slider.shape.context}
+/// [context] is the same context for the render box of the [Slider].
+/// {@endtemplate}
+///
+/// {@template flutter.material.slider.shape.sliderTheme}
+/// [sliderTheme] is the theme assigned to the [Slider] that this shape
+/// belongs to.
+/// {@endtemplate}
+///
+/// {@template flutter.material.slider.shape.isEnabled}
+/// [isEnabled] has the same value as [Slider.isInteractive]. If true, the
+/// slider will respond to input.
+/// {@endtemplate}
+///
+/// {@template flutter.material.slider.shape.enableAnimation}
+/// [enableAnimation] is an animation triggered when the [Slider] is enabled,
+/// and it reverses when the slider is disabled. Enabled is the
+/// [Slider.isInteractive] state. Use this to paint intermediate frames for
+/// this shape when the slider changes enabled state.
+/// {@endtemplate}
+///
+/// {@template flutter.material.slider.shape.isDiscrete}
+/// [isDiscrete] is true if [Slider.divisions] is non-null. If true, the
+/// slider will render tick marks on top of the track.
+/// {@endtemplate}
+
 /// Base class for slider track shapes.
 ///
 /// The slider's thumb moves along the track and a discrete slider's tick marks
 /// appear below the thumb and aligned to the track.
 ///
-/// The [getPreferredRect] help position the slider thumb and tick marks
+/// The [getPreferredRect] helps position the slider thumb and tick marks
 /// relative to the track.
+///
 /// See also:
 ///
 ///  * [RectangularSliderTrackShape], which is the the default track shape.
@@ -599,23 +628,19 @@ abstract class SliderTrackShape {
   /// It is used to provide horizontal boundaries for the thumb's position, and
   /// to help position the slider thumb and tick marks relative to the track.
   ///
-  /// [parentBox] is the render box within the [Slider] itself. It can be used
-  /// to help determine the preferredRect relative to attributes of the render
-  /// box of the slider itself, such as size.
+  /// [parentBox] can be used to help determine the preferredRect relative to
+  /// attributes of the render box of the slider itself, such as size.
   ///
-  /// [offset] is the offset relative to this the caller's bounding box. It can
-  /// be called to be used relative to the slider's bounding box to calculate
-  /// gesture coordinates, or it can be called to be used relative to the
-  /// painting context's canvas.
+  /// [offset] is relative to this the caller's bounding box. It can be called
+  /// to be used relative to the slider's bounding box to calculate gesture
+  /// coordinates, or it can be called to be used relative to the painting
+  /// context's canvas.
   ///
-  /// [sliderTheme] is the theme assigned to the [Slider] that this track shape
-  /// belongs to.
+  /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
-  /// [isEnabled] is whether or not the [Slider] is enabled. The enabled state
-  /// is the [Slider.isInteractive] state
+  /// {@macro flutter.material.slider.shape.isEnabled}
   ///
-  /// [isDiscrete] is whether or not the [Slider] is discrete. The slider is
-  /// discrete when [Slider.divisions] is non-null.
+  /// {@macro flutter.material.slider.shape.isDiscrete}
   Rect getPreferredRect({
     RenderBox parentBox,
     Offset offset = Offset.zero,
@@ -626,8 +651,7 @@ abstract class SliderTrackShape {
 
   /// Paints the track shape based on the state passed to it.
   ///
-  /// [context] is the context of the render box of the [Slider]. The origin of
-  /// the canvas in this context is what the [offset] is relative to.
+  /// {@macro flutter.material.slider.shape.context}
   ///
   /// [offset] is the offset of the origin of the [parentBox] to the origin of
   /// its [context] canvas. This shape must be painted relative to this
@@ -637,27 +661,25 @@ abstract class SliderTrackShape {
   /// to help determine the preferredRect relative to attributes of the render
   /// box of the slider itself, such as size.
   ///
-  /// [sliderTheme] is the theme assigned to the [Slider] that this track shape
-  ///  belongs to.
+  /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
-  /// [enableAnimation] is an animation triggered when the [Slider] is enabled,
-  /// and it reverses when the slider is disabled. Enabled is the
-  /// [Slider.isInteractive] state. Use this to paint intermediate track frames
-  /// when the slider changes enabled state.
+  /// {@macro flutter.material.slider.shape.enableAnimation}
   ///
   /// [textDirection] is the textDirection of the [Slider]. It can be used
-  /// to determine how the tracks to the left and right of the thumb should
-  /// be painted.
+  /// to determine how the track segments are painted depending on whether
+  /// they are active or not. The track segment between the start of the slider
+  /// and the thumb is the active track segment. The track segment between the
+  /// thumb and the end of the slider is the inactive track segment. In LTR text
+  /// direction, the start of the slider is on the left, and in RTL text
+  /// direction, the start of the slider is on the right.
   ///
-  /// [thumbCenter] is the offset of the center of the thumb to the origin of
-  /// the [PaintingContext.canvas]. It can be used as the point that divides
-  /// the track into 2 segments.
+  /// [thumbCenter] is the offset of the center of the thumb relative to the
+  /// origin of the [PaintingContext.canvas]. It can be used as the point that
+  /// divides the track into 2 segments.
   ///
-  /// [isEnabled] is whether or not the [Slider] is enabled. The enabled state
-  /// is the [Slider.isInteractive] state
+  /// {@macro flutter.material.slider.shape.isEnabled}
   ///
-  /// [isDiscrete] is whether or not the [Slider] is discrete. The slider is
-  /// discrete when [Slider.divisions] is non-null.
+  /// {@macro flutter.material.slider.shape.isDiscrete}
   void paint(
     PaintingContext context,
     Offset offset, {
@@ -691,10 +713,9 @@ abstract class SliderTickMarkShape {
   ///
   /// It is used to help position the tick marks within the slider.
   ///
-  /// [sliderTheme] is the theme assigned to the [Slider] that this track shape
-  /// belongs to.
+  /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
-  /// [isEnabled] is whether or not the [Slider] is enabled.
+  /// {@macro flutter.material.slider.shape.isEnabled}
   Size getPreferredSize({
     SliderThemeData sliderTheme,
     bool isEnabled,
@@ -702,30 +723,28 @@ abstract class SliderTickMarkShape {
 
   /// Paints the shape, taking into account the state passed to it.
   ///
-  /// [context] is the context of the render box of the [Slider]. The origin of
-  /// the canvas in this context is what the [center] is relative to.
+  /// {@macro flutter.material.slider.shape.context}
   ///
-  /// [center] is the offset of the where the center of the thumb should
+  /// [center] is the offset of the where the center of the tick mark should
   /// be painted. This offset is relative to the origin of the [context] canvas.
   ///
   /// [parentBox] is the render box within the [Slider] itself. It can be used
   /// to help determine the preferredRect relative to attributes of the render
   /// box of the slider itself, such as size.
   ///
-  /// [sliderTheme] is the theme assigned to the [Slider] that this track shape
-  ///  belongs to.
+  /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
-  /// [enableAnimation] is an animation triggered when the [Slider] is enabled,
-  /// which is defined by [Slider.isInteractive]. It reverses when the slider
-  /// is disabled.
+  /// {@macro flutter.material.slider.shape.enableAnimation}
   ///
-  /// [isEnabled] is whether or not the [Slider] is enabled. The enabled state
-  /// is the [Slider.isInteractive] state
+  /// [textDirection] is the textDirection of the [Slider]. It can be used
+  /// to determine how the tick marks are painting depending on whether
+  /// they are on an active track segment or not. The track segment between the
+  /// start of the slider and the thumb is the active track segment. The track
+  /// segment between the thumb and the end of the slider is the inactive track
+  /// segment. In LTR text direction, the start of the slider is on the left,
+  /// and in RTL text direction, the start of the slider is on the right.
   ///
-  /// [onActiveTrack] is whether or not this tick mark is on an active part of
-  /// the track. For a single-thumb slider, a track piece is considered active
-  /// if it is between the start of the slider and the center of the thumb,
-  /// and inactive otherwise.
+  /// {@macro flutter.material.slider.shape.isEnabled}
   void paint(
     PaintingContext context,
     Offset center, {
@@ -738,15 +757,18 @@ abstract class SliderTickMarkShape {
   });
 }
 
-/// Base class for slider thumb and value indicator shapes.
+/// Base class for slider thumb, thumb overlay, and value indicator shapes.
 ///
-/// Create a subclass of this if you would like a custom slider thumb or
-/// value indicator shape.
+/// Create a subclass of this if you would like a custom shape.
+///
+/// All shapes are painted to the same canvas and ordering is important.
+/// The overlay is painted first, then the value indicator, then the thumb.
 ///
 /// See also:
 ///
-///  * [RoundSliderThumbShape] for a simple example of a thumb shape.
-///  * [PaddleSliderValueIndicatorShape], for a complex example of a value
+///  * [RoundSliderThumbShape], which is the the default thumb shape.
+///  * [RoundSliderOverlayShape], which is the the default overlay shape.
+///  * [PaddleSliderValueIndicatorShape], which is the the default value
 ///    indicator shape.
 abstract class SliderComponentShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -758,8 +780,7 @@ abstract class SliderComponentShape {
 
   /// Paints the shape, taking into account the state passed to it.
   ///
-  /// [context] is the context of the render box of the [Slider]. The origin of
-  /// the canvas in this context is what the [center] offset is relative to.
+  /// {@macro flutter.material.slider.shape.context}
   ///
   /// [center] is the offset of the where the center of the thumb should
   /// be painted. This offset is relative to the origin of the [context] canvas.
@@ -768,8 +789,11 @@ abstract class SliderComponentShape {
   /// to interact with the slider. It reverses when the user stops interacting
   /// with the slider.
   ///
-  /// [enableAnimation] is an animation triggered when the [Slider] is enabled,
-  /// and it reverses when the slider is disabled.
+  /// [activationAnimation] is an animation triggered when the user beings
+  /// to interact with the slider. It reverses when the user stops interacting
+  /// with the slider.
+  ///
+  /// {@macro flutter.material.slider.shape.enableAnimation}
   ///
   /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
   ///

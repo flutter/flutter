@@ -583,18 +583,20 @@ class _RenderSlider extends RenderBox {
       parent: _state.enableController,
       curve: Curves.easeInOut,
     );
-    // Precompute the min intrinsic sizes.
-    final List<Size> intrinsicSizesAffectingShapes = <Size>[
+    // Precompute the largest width and height needed to paint the shapes that
+    // are on the track, but not the track.
+    final List<Size> shapesOnTrack = <Size>[
       _sliderTheme.overlayShape.getPreferredSize(isInteractive, isDiscrete),
       _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),
       _sliderTheme.tickMarkShape.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
     ];
-    _minWidth = intrinsicSizesAffectingShapes.map((Size size) => size.width).reduce(math.max);
-    _minHeight = intrinsicSizesAffectingShapes.map((Size size) => size.height).reduce(math.max);
+    _minWidth = shapesOnTrack.map((Size size) => size.width).reduce(math.max);
+    _minHeight = shapesOnTrack.map((Size size) => size.height).reduce(math.max);
   }
+  // This value is the touch target, 48, multiplied by 3.
+  static const double _minPreferredTrackWidth = 144.0;
 
   static const Duration _positionAnimationDuration = Duration(milliseconds: 75);
-  static const double _preferredTrackWidth = 144.0;
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
   double _minWidth;
@@ -921,14 +923,10 @@ class _RenderSlider extends RenderBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => _minWidth;
+  double computeMinIntrinsicWidth(double height) => _minPreferredTrackWidth + _minWidth;
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
-    // This doesn't quite match the definition of computeMaxIntrinsicWidth,
-    // but it seems within the spirit...
-    return _preferredTrackWidth + _minWidth;
-  }
+  double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _minWidth;
 
   @override
   double computeMinIntrinsicHeight(double width) => _minHeight;
@@ -942,8 +940,8 @@ class _RenderSlider extends RenderBox {
   @override
   void performResize() {
     size = Size(
-      constraints.hasBoundedWidth ? constraints.maxWidth : computeMaxIntrinsicWidth(0.0),
-      constraints.hasBoundedHeight ? constraints.maxHeight : computeMaxIntrinsicHeight(0.0),
+      constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _minWidth,
+      constraints.hasBoundedHeight ? constraints.maxHeight : _minHeight,
     );
   }
 
@@ -984,6 +982,7 @@ class _RenderSlider extends RenderBox {
       isEnabled: isInteractive
     );
 
+    // TODO(closkmith): Move this to paint after the thumb.
     if (!_overlayAnimation.isDismissed) {
       _sliderTheme.overlayShape.paint(
         context,
