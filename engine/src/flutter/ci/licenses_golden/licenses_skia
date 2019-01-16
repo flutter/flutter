@@ -1,4 +1,4 @@
-Signature: 9bd1ef79bed79d44242686f4a0a903d7
+Signature: 4db145823a455ed92aed3155d02a44cb
 
 UNUSED LICENSES:
 
@@ -3961,8 +3961,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
-FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.h
+FILE: ../../../third_party/skia/src/gpu/text/GrStrikeCache.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrStrikeCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
@@ -5150,8 +5150,6 @@ FILE: ../../../third_party/skia/src/core/SkFDot6.h
 FILE: ../../../third_party/skia/src/core/SkGeometry.cpp
 FILE: ../../../third_party/skia/src/core/SkGeometry.h
 FILE: ../../../third_party/skia/src/core/SkGlyph.h
-FILE: ../../../third_party/skia/src/core/SkGlyphCache.cpp
-FILE: ../../../third_party/skia/src/core/SkGlyphCache.h
 FILE: ../../../third_party/skia/src/core/SkGraphics.cpp
 FILE: ../../../third_party/skia/src/core/SkMask.h
 FILE: ../../../third_party/skia/src/core/SkMaskFilter.cpp
@@ -5177,6 +5175,8 @@ FILE: ../../../third_party/skia/src/core/SkScan_Path.cpp
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter.h
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_ARGB32.cpp
 FILE: ../../../third_party/skia/src/core/SkStream.cpp
+FILE: ../../../third_party/skia/src/core/SkStrike.cpp
+FILE: ../../../third_party/skia/src/core/SkStrike.h
 FILE: ../../../third_party/skia/src/core/SkString.cpp
 FILE: ../../../third_party/skia/src/core/SkStroke.h
 FILE: ../../../third_party/skia/src/core/SkStrokerPriv.cpp
