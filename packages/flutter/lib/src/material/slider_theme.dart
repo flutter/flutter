@@ -608,6 +608,11 @@ class SliderThemeData extends Diagnosticable {
 /// [isDiscrete] is true if [Slider.divisions] is non-null. If true, the
 /// slider will render tick marks on top of the track.
 /// {@endtemplate}
+///
+/// {@template flutter.material.slider.shape.parentBox}
+/// [parentBox] is the [RenderBox] of the [Slider]. Its attributes, such as
+/// size, can be used to assist in painting this shape.
+/// {@endtemplate}
 
 /// Base class for slider track shapes.
 ///
@@ -662,8 +667,7 @@ abstract class SliderTrackShape {
   /// its [context] canvas. This shape must be painted relative to this
   /// offset. See [PaintingContextCallback].
   ///
-  /// [parentBox] can be used to help determine the preferredRect relative to
-  /// attributes of the render box of the slider itself, such as size.
+  /// {@macro flutter.material.slider.shape.parentBox}
   ///
   /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
@@ -677,13 +681,13 @@ abstract class SliderTrackShape {
   ///
   /// {@macro flutter.material.slider.shape.isDiscrete}
   ///
-  /// [textDirection] is the textDirection of the [Slider]. It can be used
-  /// to determine how the track segments are painted depending on whether
-  /// they are active or not. The track segment between the start of the slider
-  /// and the thumb is the active track segment. The track segment between the
-  /// thumb and the end of the slider is the inactive track segment. In LTR text
-  /// direction, the start of the slider is on the left, and in RTL text
-  /// direction, the start of the slider is on the right.
+  /// [textDirection] can be used to determine how the track segments are
+  /// painted depending on whether they are active or not. The track segment
+  /// between the start of the slider and the thumb is the active track segment.
+  /// The track segment between the thumb and the end of the slider is the
+  /// inactive track segment. In LTR text direction, the start of the slider is
+  /// on the left, and in RTL text direction, the start of the slider is on the
+  /// right.
   void paint(
     PaintingContext context,
     Offset offset, {
@@ -731,6 +735,8 @@ abstract class SliderTickMarkShape {
   ///
   /// {@macro flutter.material.slider.shape.center}
   ///
+  /// {@macro flutter.material.slider.shape.parentBox}
+  ///
   /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
   /// {@macro flutter.material.slider.shape.enableAnimation}
@@ -752,7 +758,7 @@ abstract class SliderTickMarkShape {
     Animation<double> enableAnimation,
     Offset thumbCenter,
     bool isEnabled,
-      TextDirection textDirection,
+    TextDirection textDirection,
   });
 }
 
@@ -789,11 +795,21 @@ abstract class SliderComponentShape {
   ///
   /// {@macro flutter.material.slider.shape.enableAnimation}
   ///
-  /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
+  /// {@macro flutter.material.slider.shape.isDiscrete}
   ///
   /// If [labelPainter] is non-null, then [labelPainter.paint] should be
   /// called with the location that the label should appear. If the labelPainter
   /// passed is null, then no label was supplied to the [Slider].
+  ///
+  /// {@macro flutter.material.slider.shape.parentBox}
+  ///
+  /// {@macro flutter.material.slider.shape.sliderTheme}
+  ///
+  /// [textDirection] can be used to determine how any extra text or graphics,
+  /// besides the text painted by the [labelPainter] should be positioned. The
+  /// [labelPainter] already has the [textDirection] set.
+  ///
+  /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
   void paint(
     PaintingContext context,
     Offset center, {
