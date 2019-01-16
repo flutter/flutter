@@ -2445,7 +2445,7 @@ class SemanticsOwner extends ChangeNotifier {
 /// Describes the semantic information associated with the owning
 /// [RenderObject].
 ///
-/// The information provided in the configuration is used to to generate the
+/// The information provided in the configuration is used to generate the
 /// semantics tree.
 class SemanticsConfiguration {
 
