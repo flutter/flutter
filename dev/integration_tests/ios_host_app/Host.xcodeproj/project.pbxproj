@@ -121,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				74F978AC215AD6E8005A0F04 /* App.framework */,
+				74F978AA215AD6DC005A0F04 /* flutter_assets */,
 			);
 			path = Flutter;
 			sourceTree = "<group>";
@@ -195,6 +196,7 @@
 			files = (
 				74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */,
 				74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */,
+				74F978AB215AD6DC005A0F04 /* flutter_assets in Resources */,
 				74F9786C215AB9E8005A0F04 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
