@@ -220,4 +220,180 @@ void main() {
       matchesGoldenFile('text_golden.Fade.1.png'),
     );
   }, skip: !Platform.isLinux);
+
+  testWidgets('Default Strut text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.StrutDefault.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('Strut text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine2\nLine3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                lineHeight: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.1.png'),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                lineHeight: 1.123,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.2.png'),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 150.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text.rich(
+              TextSpan(
+                text: 'Hello\n',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 30
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: "Second line!\n",
+                    style: TextStyle(
+                      fontSize: 5,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "Third line!\n",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(
+                fontSize: 18,
+                lineHeight: 1.1,
+                leading: 0.1,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.3.png'),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text.rich(
+              TextSpan(
+                text: 'Hello\n',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 30
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: "Second line!\n",
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "Third line!\n",
+                    style: TextStyle(
+                      fontSize: 27,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(
+                fontSize: 18,
+                lineHeight: 1.05,
+                forceStrutHeight: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.StrutForce.1.png'),
+    );
+  }, skip: !Platform.isLinux);
 }
