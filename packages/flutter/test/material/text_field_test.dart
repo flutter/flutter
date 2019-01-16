@@ -1722,7 +1722,42 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     scrollableState = tester.firstState(find.byType(Scrollable));
-    expect(scrollableState.position.pixels, isNot(equals(0.0)));
+    // For a horizontal input, scrolls to the exact position of the caret.
+    expect(scrollableState.position.pixels, equals(222.0));
+  });
+
+  testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Container(
+          child: TextField(
+            controller: controller,
+            maxLines: 6,
+          ),
+        ),
+      ),
+    );
+
+    const String tallText = 'a\nb\nc\nd\ne\nf\ng'; // One line over max
+    await tester.enterText(find.byType(TextField), tallText);
+    await skipPastScrollingAnimation(tester);
+
+    ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
+    expect(scrollableState.position.pixels, equals(0.0));
+
+    // Move the caret to the end of the text and check that the text field
+    // scrolls to make the caret visible.
+    controller.selection = const TextSelection.collapsed(offset: tallText.length);
+    await tester.pump();
+    await skipPastScrollingAnimation(tester);
+
+    // Should have scrolled down exactly one line height (7 lines of text in 6
+    // line text field).
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    scrollableState = tester.firstState(find.byType(Scrollable));
+    expect(scrollableState.position.pixels, equals(lineHeight));
   });
 
   testWidgets('haptic feedback', (WidgetTester tester) async {
