@@ -211,6 +211,7 @@ class AndroidNdk {
         throw AndroidNdkSearchError('Can not establish ndk-bundle version: ${propertiesFile} not found');
       }
 
+      // Parse source.properties: each line has Key = Value format.
       final Map<String, String> properties = Map<String, String>.fromIterable(
           fs.file(propertiesFile).readAsStringSync().split('\n').map((String line) => line.trim()).where((line) => line.isNotEmpty).map((String line) => line.split(' = ')),
           key: (dynamic split) => split[0],
