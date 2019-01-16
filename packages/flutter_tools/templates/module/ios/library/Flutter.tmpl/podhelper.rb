@@ -61,7 +61,6 @@ plugin_pods.map { |r|
 
 # Ensure that ENABLE_BITCODE is set to NO, add a #include to Generated.xcconfig, and
 # add a run script to the Build Phases.
-# TODO(dnfield): Figure out a way to deliver the Build Phase scripts without manual user intervention.
 post_install do |installer|
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|

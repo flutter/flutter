@@ -185,4 +185,97 @@ class UserMessages {
   String vsCodeVersion(String version) => 'version $version';
   String vsCodeLocation(String location) => 'VS Code at $location';
   String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
+
+  // Messages used in FlutterCommand
+  String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
+  String get flutterNoDevelopmentDevice =>
+      "Unable to locate a development device; please run 'flutter doctor' "
+      'for information about installing additional components.';
+  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
+      "matching '$deviceId'";
+  String get flutterNoDevicesFound => 'No devices found';
+  String get flutterNoSupportedDevices => 'No supported devices connected.';
+  String flutterFoundSpecifiedDevices(int count, String deviceId) =>
+      'Found $count devices with name or id matching $deviceId:';
+  String get flutterSpecifyDeviceWithAllOption =>
+      'More than one device connected; please specify a device with '
+      "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
+  String get flutterSpecifyDevice =>
+      'More than one device connected; please specify a device with '
+      "the '-d <deviceId>' flag.";
+  String get flutterNoConnectedDevices => 'No connected devices.';
+  String get flutterNoPubspec =>
+      'Error: No pubspec.yaml file found.\n'
+      'This command should be run from the root of your Flutter project.\n'
+      'Do not run this command from the root of your git clone of Flutter.';
+  String get flutterMergeYamlFiles =>
+      'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
+      'We have changed from having separate flutter.yaml and pubspec.yaml\n'
+      'files to having just one pubspec.yaml file. Transitioning is simple:\n'
+      'add a line that just says "flutter:" to your pubspec.yaml file, and\n'
+      'move everything from your current flutter.yaml file into the\n'
+      'pubspec.yaml file, below that line, with everything indented by two\n'
+      'extra spaces compared to how it was in the flutter.yaml file. Then, if\n'
+      'you had a "name:" line, move that to the top of your "pubspec.yaml"\n'
+      'file (you may already have one there), so that there is only one\n'
+      '"name:" line. Finally, delete the flutter.yaml file.\n\n'
+      'For an example of what a new-style pubspec.yaml file might look like,\n'
+      'check out the Flutter Gallery pubspec.yaml:\n'
+      'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
+  String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
+  String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
+  String get flutterBaselineRequiresDynamic => 'Error: --baseline is allowed only when --dynamic is specified.';
+  String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
+  String get flutterPatchRequiresDynamic => 'Error: --patch is allowed only when --dynamic is specified.';
+  String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
+
+  // Messages used in FlutterCommandRunner
+  String runnerNoRoot(String error) => 'Unable to locate flutter root: $error';
+  String runnerWrapColumnInvalid(dynamic value) =>
+      'Argument to --wrap-column must be a positive integer. You supplied $value.';
+  String runnerWrapColumnParseError(dynamic value) =>
+      'Unable to parse argument --wrap-column=$value. Must be a positive integer.';
+  String runnerBugReportFinished(String zipFileName) =>
+      'Bug report written to $zipFileName.\n'
+      'Warning: this bug report contains local paths, device identifiers, and log snippets.';
+  String get runnerNoRecordTo => 'record-to location not specified';
+  String get runnerNoReplayFrom => 'replay-from location not specified';
+  String runnerNoEngineBuildDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine build directory.\n'
+      'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
+      'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
+      'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
+  String runnerNoEngineBuildDirInPath(String engineSourcePath) =>
+      'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
+      'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
+      'you have compiled the engine in that directory, which should produce an \'out\' directory';
+  String get runnerLocalEngineRequired =>
+      'You must specify --local-engine if you are using a locally built engine.';
+  String runnerNoEngineBuild(String engineBuildPath) =>
+      'No Flutter engine build found at $engineBuildPath.';
+  String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
+      'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
+      '  running Flutter  : $flutterRoot\n'
+      '  current directory: $currentDir\n'
+      'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
+      'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+  String runnerRemovedFlutterRepo(String flutterRoot, String flutterPath) =>
+      'Warning! This package referenced a Flutter repository via the .packages file that is '
+      'no longer available. The repository from which the \'flutter\' tool is currently '
+      'executing will be used instead.\n'
+      '  running Flutter tool: $flutterRoot\n'
+      '  previous reference  : $flutterPath\n'
+      'This can happen if you deleted or moved your copy of the Flutter repository, or '
+      'if it was on a volume that is no longer mounted or has been mounted at a '
+      'different location. Please check your system path to verify that you are running '
+      'the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+  String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
+      'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
+      'repository than the one last used by this package. The repository from which the '
+      '\'flutter\' tool is currently executing will be used instead.\n'
+      '  running Flutter tool: $flutterRoot\n'
+      '  previous reference  : $flutterPath\n'
+      'This can happen when you have multiple copies of flutter installed. Please check '
+      'your system path to verify that you are running the expected version (run '
+      '\'flutter --version\' to see which flutter is on your path).\n';
 }
