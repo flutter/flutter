@@ -1904,9 +1904,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
       scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
-// TODO(goderbauer): enable when engine is updated.
-//      elevation: data.elevation,
-//      thickness: data.thickness,
+      elevation: data.elevation,
+      thickness: data.thickness,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
