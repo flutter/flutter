@@ -250,6 +250,17 @@ void main() {
     );
     expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0));
   });
+
+  // Scaffold 800x600, FAB is 56x56, No BAB
+  testWidgets('Center docked floating action button location respects insets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        location: FloatingActionButtonLocation.centerDocked,
+        viewInsets: const EdgeInsets.only(bottom: 100),
+      ),
+    );
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(800.0 / 2.0, 600.0 - 28.0 - 100.0));
+  });
 }
 
 
