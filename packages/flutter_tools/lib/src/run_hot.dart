@@ -143,6 +143,18 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<void> _restartService(String isolateId, { bool pause = false }) async {
+    // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
+    final OperationResult result =
+      await restart(fullRestart: true, pauseAfterRestart: pause);
+    if (!result.isOk) {
+      throw rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
+        'Unable to restart',
+      );
+    }
+  }
+
   Future<String> _compileExpressionService(String isolateId, String expression,
       List<String> definitions, List<String> typeDefinitions,
       String libraryUri, String klass, bool isStatic,
@@ -168,6 +180,7 @@ class HotRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol(
         reloadSources: _reloadSourcesService,
+        restart: _restartService,
         compileExpression: _compileExpressionService,
       );
     } catch (error) {
