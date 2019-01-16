@@ -20,7 +20,8 @@ import 'theme.dart';
 /// [ThemeData.appBarTheme].
 ///
 /// All [AppBarTheme] properties are `null` by default. When null, the [AppBar]
-/// will use the values from [ThemeData].
+/// will use the values from [ThemeData] if they exist, otherwise it will
+/// provide its own defaults.
 ///
 /// See also:
 ///
