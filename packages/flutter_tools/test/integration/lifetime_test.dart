@@ -24,7 +24,7 @@ void main() {
     Directory tempDir;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('lifetime_test.');
+      tempDir = createResolvedTempDirectorySync('expression_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
