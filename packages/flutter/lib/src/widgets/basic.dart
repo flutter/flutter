@@ -2851,20 +2851,47 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
 ///
-/// {@tool sample}
+/// ## Sample Code
+///
+/// Using a stack you can position widgets over one another.
+///
+/// ```dart
+/// Stack(
+///   children: <Widget>[
+///     Container(
+///       width: 100,
+///       height: 100,
+///       color: Colors.red,
+///     ),
+///     Container(
+///       width: 90, 
+///       height: 90, 
+///       color: Colors.green
+///     ),
+///     Container(
+///       width: 80,
+///       height: 80,
+///       color: Colors.blue,
+///     )
+///   ],
+/// )
+///```
+///
+/// ## Sample code: Using a `Stack` to create contrast
 ///
 /// This example shows how Stack can be used to enhance text visibility
 /// by adding gradient backdrops.
 ///
 /// ```dart
 /// SizedBox(
+///   width: 250,
 ///   height: 250,
 ///   child: Stack(
-///     fit: StackFit.expand,
 ///     children: <Widget>[
-///       Image.asset(
-///         "assets/pizza.jpg",
-///         fit: BoxFit.cover,
+///       Container(
+///         width: 250,
+///         height: 250,
+///         color: Colors.white,
 ///       ),
 ///       Container(
 ///         padding: EdgeInsets.all(5.0),
@@ -2881,7 +2908,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///           ),
 ///         ),
 ///         child: Text(
-///           "Yummy Pizza",
+///           "Foreground Text",
 ///           style: TextStyle(color: Colors.white, fontSize: 20.0),
 ///         ),
 ///       ),
@@ -2889,8 +2916,6 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
-///
-/// {@end-tool}
 ///
 /// See also:
 ///
