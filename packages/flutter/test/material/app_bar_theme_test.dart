@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AppBar theme does not affect defaults', (WidgetTester tester) async {
+  testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(appBar: AppBar()),
     ));
@@ -19,7 +19,7 @@ void main() {
     expect(widget.elevation, equals(4.0));
   });
 
-  testWidgets('AppBar theme overrides color', (WidgetTester tester) async {
+  testWidgets('AppBar uses color from AppBarTheme', (WidgetTester tester) async {
     const Color themedColor = Colors.lightBlue;
     const AppBarTheme theme = AppBarTheme(color: themedColor);
 
@@ -32,14 +32,12 @@ void main() {
     expect(widget.color, themedColor);
   });
 
-  testWidgets('AppBar color - Widget', (WidgetTester tester) async {
-    const Color themeColor = Colors.white;
-    const Color appBarThemeColor = Colors.lightBlue;
+  testWidgets('AppBar widget backgroundColor takes priority over theme', (WidgetTester tester) async {
     const Color appBarColor = Colors.orange;
-    const AppBarTheme theme = AppBarTheme(color: appBarThemeColor);
+    const AppBarTheme theme = AppBarTheme(color: Colors.lightBlue);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme, primaryColor: themeColor),
+      theme: ThemeData(appBarTheme: theme, primaryColor: Colors.white),
       home: Scaffold(appBar: AppBar(backgroundColor: appBarColor)),
     ));
 
@@ -47,13 +45,12 @@ void main() {
     expect(widget.color, appBarColor);
   });
 
-  testWidgets('AppBar color - AppBarTheme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white;
+  testWidgets('AppBarTheme color takes priority over ThemeData primaryColor', (WidgetTester tester) async {
     const Color appBarThemeColor = Colors.lightBlue;
     const AppBarTheme theme = AppBarTheme(color: appBarThemeColor);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme, primaryColor: themeColor),
+      theme: ThemeData(appBarTheme: theme, primaryColor: Colors.white),
       home: Scaffold(appBar: AppBar()),
     ));
 
@@ -61,7 +58,7 @@ void main() {
     expect(widget.color, appBarThemeColor);
   });
 
-  testWidgets('AppBar color - Theme', (WidgetTester tester) async {
+  testWidgets('ThemeData primaryColor is used when no AppBarTheme is set', (WidgetTester tester) async {
     const Color themeColor = Colors.white;
 
     await tester.pumpWidget(MaterialApp(
@@ -73,18 +70,7 @@ void main() {
     expect(widget.color, themeColor);
   });
 
-  testWidgets('AppBar color - Default', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(),
-      home: Scaffold(appBar: AppBar()),
-    ));
-
-    final Material widget = _getAppBarMaterial(tester);
-
-    expect(widget.color, Colors.blue);
-  });
-
-  testWidgets('AppBar brightness - AppBarTheme', (WidgetTester tester) async {
+  testWidgets('AppBar uses brightness from AppBarTheme', (WidgetTester tester) async {
     const AppBarTheme theme = AppBarTheme(brightness: Brightness.light);
 
     await tester.pumpWidget(MaterialApp(

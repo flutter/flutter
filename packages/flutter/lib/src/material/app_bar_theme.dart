@@ -20,7 +20,7 @@ import 'theme.dart';
 /// [ThemeData.appBarTheme].
 ///
 /// All [AppBarTheme] properties are `null` by default. When null, the [AppBar]
-/// constructor provides defaults.
+/// will use the values from [ThemeData].
 ///
 /// See also:
 ///
@@ -29,12 +29,17 @@ import 'theme.dart';
 class AppBarTheme extends Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.AppBarTheme].
   const AppBarTheme({
+    this.brightness,
     this.color,
     this.elevation,
-    this.brightness,
     this.iconTheme,
     this.textTheme,
   });
+
+  /// Default value for [AppBar.brightness].
+  ///
+  /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
+  final Brightness brightness;
 
   /// Default value for [AppBar.color].
   ///
@@ -43,11 +48,6 @@ class AppBarTheme extends Diagnosticable {
 
   /// Default value for [AppBar.elevation].
   final double elevation;
-
-  /// Default value for [AppBar.brightness].
-  ///
-  /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
-  final Brightness brightness;
 
   /// Default value for [AppBar.iconTheme].
   ///
@@ -62,16 +62,16 @@ class AppBarTheme extends Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
+    Brightness brightness,
     Color color,
     double elevation,
-    Brightness brightness,
     IconThemeData iconTheme,
     TextTheme textTheme,
   }) {
     return AppBarTheme(
+      brightness: brightness ?? this.brightness,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
-      brightness: brightness ?? this.brightness,
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
     );
@@ -90,9 +90,9 @@ class AppBarTheme extends Diagnosticable {
   static AppBarTheme lerp(AppBarTheme a, AppBarTheme b, double t) {
     assert(t != null);
     return AppBarTheme(
+      brightness: t < 0.5 ? a?.brightness : b?.brightness,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      brightness: t < 0.5 ? a?.brightness : b?.brightness,
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
     );
@@ -101,9 +101,9 @@ class AppBarTheme extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
+      brightness,
       color,
       elevation,
-      brightness,
       iconTheme,
       textTheme,
     );
@@ -116,9 +116,9 @@ class AppBarTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final AppBarTheme typedOther = other;
-    return typedOther.color == color
+    return typedOther.brightness == brightness
+        && typedOther.color == color
         && typedOther.elevation == elevation
-        && typedOther.brightness == brightness
         && typedOther.iconTheme == iconTheme
         && typedOther.textTheme == textTheme;
   }
@@ -126,9 +126,9 @@ class AppBarTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
   }
