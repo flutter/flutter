@@ -1,3 +1,4 @@
+import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_inertial_motion.dart';
@@ -11,11 +12,13 @@ class PanAndZoomDemo extends StatefulWidget {
 }
 class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
   static const double HEXAGON_RADIUS = 32.0;
+  static const double HEXAGON_MARGIN = 1.0;
   static const int BOARD_RADIUS = 8;
 
   Board _board = Board(
     boardRadius: BOARD_RADIUS,
     hexagonRadius: HEXAGON_RADIUS,
+    hexagonMargin: HEXAGON_MARGIN,
   );
 
   @override
@@ -66,7 +69,7 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.8;
-  static const Size _VISIBLE_SIZE = Size(1200, 1200);
+  static const Size _VISIBLE_SIZE = Size(1600, 2400);
   // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
@@ -248,17 +251,14 @@ class BoardPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint hexagonFillPaint = Paint()
-      ..color = Colors.grey[600]
-      ..style = PaintingStyle.fill;
-    final Paint hexagonFillPaintSelected = Paint()
-      ..color = Colors.blue[300]
-      ..style = PaintingStyle.fill;
+    final Color hexagonColor = Colors.grey[600];
+    final Color hexagonColorSelected = Colors.blue[300];
 
     void drawBoardPoint(BoardPoint boardPoint) {
-      final Paint paint = board.selected == boardPoint
-        ? hexagonFillPaintSelected : hexagonFillPaint;
-      canvas.drawPath(board.getPathForBoardPoint(boardPoint), paint);
+      final Color color = board.selected == boardPoint
+        ? hexagonColorSelected : hexagonColor;
+      final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
+      canvas.drawVertices(vertices, BlendMode.color, Paint());
     }
 
     board.forEach(drawBoardPoint);

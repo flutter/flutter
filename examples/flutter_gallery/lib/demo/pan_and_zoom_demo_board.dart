@@ -1,5 +1,6 @@
 import 'dart:collection' show IterableMixin;
 import 'dart:math';
+import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart' hide Gradient;
 
 // An abstraction of the hex board logic
@@ -7,9 +8,31 @@ class Board extends Object with IterableMixin<BoardPoint> {
   Board({
     @required this.boardRadius,
     @required this.hexagonRadius,
+    @required this.hexagonMargin,
   })
     : assert(boardRadius > 0),
-      assert(hexagonRadius > 0);
+      assert(hexagonRadius > 0),
+      assert(hexagonMargin >= 0) {
+    // Set up the positions for the center hexagon.
+    // Start point of hexagon (top vertex).
+    final Point<double> hexStart = Point<double>(
+      0,
+      -hexagonRadius,
+    );
+    final double hexagonRadiusPadded = hexagonRadius - hexagonMargin;
+    final double centerToFlat = sqrt(3) / 2 * hexagonRadiusPadded;
+    positionsForHexagonAtOrigin = <Offset>[
+      Offset(hexStart.x, hexStart.y),
+      Offset(hexStart.x + centerToFlat, hexStart.y + 0.5 * hexagonRadiusPadded),
+      Offset(hexStart.x + centerToFlat, hexStart.y + 1.5 * hexagonRadiusPadded),
+      Offset(hexStart.x + centerToFlat, hexStart.y + 1.5 * hexagonRadiusPadded),
+      Offset(hexStart.x, hexStart.y + 2 * hexagonRadiusPadded),
+      Offset(hexStart.x, hexStart.y + 2 * hexagonRadiusPadded),
+      Offset(hexStart.x - centerToFlat, hexStart.y + 1.5 * hexagonRadiusPadded),
+      Offset(hexStart.x - centerToFlat, hexStart.y + 1.5 * hexagonRadiusPadded),
+      Offset(hexStart.x - centerToFlat, hexStart.y + 0.5 * hexagonRadiusPadded),
+    ];
+  }
 
   @override
   Iterator<BoardPoint> get iterator => BoardIterator(boardRadius, selected);
@@ -17,7 +40,10 @@ class Board extends Object with IterableMixin<BoardPoint> {
   BoardPoint selected;
   int boardRadius; // Number of hexagons from center to edge
   double hexagonRadius; // Pixel radius of a hexagon (center to vertex)
+  double hexagonMargin; // Margin between hexagons
+  List<Offset> positionsForHexagonAtOrigin;
 
+  // Return a q,r BoardPoint for a point in the scene
   BoardPoint pointToBoardPoint(Offset point) {
     return BoardPoint(
       ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
@@ -25,7 +51,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
   }
 
-  // Return a pixel point for a q,r point
+  // Return a scene point for a q,r point
   Point<double> boardPointToPoint(BoardPoint boardPoint) {
     return Point<double>(
       sqrt(3) * hexagonRadius * boardPoint.q + sqrt(3) / 2 * hexagonRadius * boardPoint.r,
@@ -33,33 +59,24 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
   }
 
-  Path getPathForBoardPoint(BoardPoint boardPoint) {
+  // Get Vertices that can be drawn to a Canvas for the given BoardPoint
+  Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
     final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
 
-    // Start point of hexagon (top vertex).
-    // Give one pixel of padding between hexagons.
-    final Point<double> hexStart = Point<double>(
-      centerOfHexZeroCenter.x + 1,
-      centerOfHexZeroCenter.y - hexagonRadius + 1,
+    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
+      return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
+    }).toList();
+
+    return Vertices(VertexMode.triangleFan, positions,
+      colors: List<Color>.filled(positions.length, color),
     );
-
-    final double hexagonRadiusPadded = hexagonRadius - 1;
-
-    final Path hexagon = Path();
-    hexagon.moveTo(hexStart.x, hexStart.y);
-    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 0.5 * hexagonRadiusPadded);
-    hexagon.lineTo(hexStart.x + sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 1.5 * hexagonRadiusPadded);
-    hexagon.lineTo(hexStart.x, hexStart.y + 2 * hexagonRadiusPadded);
-    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 1.5 * hexagonRadiusPadded);
-    hexagon.lineTo(hexStart.x - sqrt(3) / 2 * hexagonRadiusPadded, hexStart.y + 0.5 * hexagonRadiusPadded);
-    hexagon.close();
-    return hexagon;
   }
 
   Board selectBoardPoint(BoardPoint boardPoint) {
     final Board nextBoard = Board(
       boardRadius: boardRadius,
       hexagonRadius: hexagonRadius,
+      hexagonMargin: hexagonMargin,
     );
     nextBoard.selected = boardPoint;
     return nextBoard;
@@ -145,7 +162,7 @@ class BoardPoint {
     if (other is! BoardPoint) {
       return false;
     }
-    BoardPoint boardPoint = other;
+    final BoardPoint boardPoint = other;
     return boardPoint.q == q && boardPoint.r == r;
   }
 
