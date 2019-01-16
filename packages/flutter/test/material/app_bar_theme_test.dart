@@ -8,78 +8,134 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('AppBarTheme copyWith, ==, hashCode basics', () {
+    expect(const AppBarTheme(), const AppBarTheme().copyWith());
+    expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
+  });
+
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(appBar: AppBar()),
     ));
 
     final Material widget = _getAppBarMaterial(tester);
+    final IconTheme iconTheme = _getAppBarIconTheme(tester);
 
+    expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
-    expect(widget.elevation, equals(4.0));
+    expect(widget.elevation, 4.0);
+    expect(iconTheme.data, const IconThemeData(color: Colors.white));
+    // TODO: Test for text theme.
   });
 
-  testWidgets('AppBar uses color from AppBarTheme', (WidgetTester tester) async {
-    const Color themedColor = Colors.lightBlue;
-    const AppBarTheme theme = AppBarTheme(color: themedColor);
+  testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
+    AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme),
+      theme: ThemeData(appBarTheme: appBarTheme),
+      home: Scaffold(appBar: AppBar(title: Text('App Bar Title'),)),
+    ));
+
+    final Material widget = _getAppBarMaterial(tester);
+    final IconTheme iconTheme = _getAppBarIconTheme(tester);
+
+    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(widget.color, appBarTheme.color);
+    expect(widget.elevation, appBarTheme.elevation);
+    expect(iconTheme.data, appBarTheme.iconTheme);
+    // TODO: Test for text theme.
+  });
+
+  testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
+    const Brightness brightness = Brightness.dark;
+    const Color color = Colors.orange;
+    const double elevation = 3.0;
+    const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
+    const TextTheme textTheme = TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink));
+
+    ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(appBar: AppBar(
+        backgroundColor: color,
+        brightness: brightness,
+        elevation: elevation,
+        iconTheme: iconThemeData,
+        textTheme: textTheme,)
+      ),
+    ));
+
+    final Material widget = _getAppBarMaterial(tester);
+    final IconTheme iconTheme = _getAppBarIconTheme(tester);
+
+    expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
+    expect(widget.color, color);
+    expect(widget.elevation, elevation);
+    expect(iconTheme.data, iconThemeData);
+    // TODO: Test for text theme.
+  });
+
+  testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
+    AppBarTheme appBarTheme = _appBarTheme();
+    ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
       home: Scaffold(appBar: AppBar()),
     ));
 
     final Material widget = _getAppBarMaterial(tester);
-    expect(widget.color, themedColor);
+    final IconTheme iconTheme = _getAppBarIconTheme(tester);
+
+    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(widget.color, appBarTheme.color);
+    expect(widget.elevation, appBarTheme.elevation);
+    expect(iconTheme.data, appBarTheme.iconTheme);
+    // TODO: Test for text theme.
   });
 
-  testWidgets('AppBar widget backgroundColor takes priority over theme', (WidgetTester tester) async {
-    const Color appBarColor = Colors.orange;
-    const AppBarTheme theme = AppBarTheme(color: Colors.lightBlue);
+  testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
+    ThemeData themeData = _themeData();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme, primaryColor: Colors.white),
-      home: Scaffold(appBar: AppBar(backgroundColor: appBarColor)),
-    ));
-
-    final Material widget = _getAppBarMaterial(tester);
-    expect(widget.color, appBarColor);
-  });
-
-  testWidgets('AppBarTheme color takes priority over ThemeData primaryColor', (WidgetTester tester) async {
-    const Color appBarThemeColor = Colors.lightBlue;
-    const AppBarTheme theme = AppBarTheme(color: appBarThemeColor);
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme, primaryColor: Colors.white),
+      theme: themeData,
       home: Scaffold(appBar: AppBar()),
     ));
 
     final Material widget = _getAppBarMaterial(tester);
-    expect(widget.color, appBarThemeColor);
+    final IconTheme iconTheme = _getAppBarIconTheme(tester);
+
+    expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
+    expect(widget.color, themeData.primaryColor);
+    expect(widget.elevation, 4.0);
+    expect(iconTheme.data, themeData.primaryIconTheme);
+    // TODO: Test for text theme.
   });
+}
 
-  testWidgets('ThemeData primaryColor is used when no AppBarTheme is set', (WidgetTester tester) async {
-    const Color themeColor = Colors.white;
+AppBarTheme _appBarTheme() {
+  const Brightness brightness = Brightness.light;
+  const Color color = Colors.lightBlue;
+  const double elevation = 6.0;
+  const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
+  const TextTheme textTheme = TextTheme(body1: TextStyle(color: Colors.yellow));
+  return const AppBarTheme(
+    brightness: brightness,
+    color: color,
+    elevation: elevation,
+    iconTheme: iconThemeData,
+    textTheme: textTheme
+  );
+}
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(primaryColor: themeColor),
-      home: Scaffold(appBar: AppBar()),
-    ));
-
-    final Material widget = _getAppBarMaterial(tester);
-    expect(widget.color, themeColor);
-  });
-
-  testWidgets('AppBar uses brightness from AppBarTheme', (WidgetTester tester) async {
-    const AppBarTheme theme = AppBarTheme(brightness: Brightness.light);
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: theme),
-      home: Scaffold(appBar: AppBar()),
-    ));
-
-    expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.light);
-  });
+ThemeData _themeData() {
+  return ThemeData(
+    primaryColor: Colors.purple,
+    brightness: Brightness.dark,
+    primaryIconTheme: IconThemeData(color: Colors.green),
+    primaryTextTheme: TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink))
+  );
 }
 
 Material _getAppBarMaterial(WidgetTester tester) {
@@ -87,6 +143,15 @@ Material _getAppBarMaterial(WidgetTester tester) {
     find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
+    ),
+  );
+}
+
+IconTheme _getAppBarIconTheme(WidgetTester tester) {
+  return tester.widget<IconTheme>(
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(IconTheme),
     ),
   );
 }

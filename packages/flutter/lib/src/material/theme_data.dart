@@ -632,7 +632,7 @@ class ThemeData extends Diagnosticable {
   final PageTransitionsTheme pageTransitionsTheme;
 
   /// A theme for customizing the color, elevation, brightness, iconTheme and
-  /// textTheme of a [AppBar].
+  /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
 
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].

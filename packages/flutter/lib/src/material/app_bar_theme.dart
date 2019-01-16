@@ -48,6 +48,8 @@ class AppBarTheme extends Diagnosticable {
   final Color color;
 
   /// Default value for [AppBar.elevation].
+  ///
+  /// If null, [AppBar] uses a default value of 4.0.
   final double elevation;
 
   /// Default value for [AppBar.iconTheme].
@@ -60,7 +62,7 @@ class AppBarTheme extends Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
 
-  /// Creates a copy of this object but with the given fields replaced with the
+  /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
     Brightness brightness,

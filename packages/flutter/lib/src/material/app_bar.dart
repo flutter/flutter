@@ -132,8 +132,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
   /// The arguments [primary], [toolbarOpacity], [bottomOpacity]
-  /// and [automaticallyImplyLeading] must not be null. Additionally,
-  /// [elevation] must be non-negative.
+  /// and [automaticallyImplyLeading] must not be null. Additionally, if
+  /// [elevation] is specified, it must be non-negative.
   ///
   /// If [backgroundColor], [elevation], [brightness], [iconTheme], or
   /// [textTheme] are null, their [AppBarTheme] values will be used. If the
