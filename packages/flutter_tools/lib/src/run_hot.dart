@@ -143,7 +143,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<void> _restartService(String isolateId, { bool pause = false }) async {
+  Future<void> _restartService({ bool pause = false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result =
       await restart(fullRestart: true, pauseAfterRestart: pause);

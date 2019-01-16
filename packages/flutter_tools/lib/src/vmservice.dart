@@ -43,10 +43,7 @@ typedef ReloadSources = Future<void> Function(
   bool pause,
 });
 
-typedef Restart = Future<void> Function(
-  String isolateId, {
-  bool pause,
-});
+typedef Restart = Future<void> Function({ bool pause });
 
 typedef CompileExpression = Future<String> Function(
   String isolateId,
@@ -160,16 +157,13 @@ class VMService {
 
     if (restart != null) {
       _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
-        final String isolateId = params['isolateId'].value;
         final bool pause = params.asMap['pause'] ?? false;
 
-        if (isolateId is! String || isolateId.isEmpty)
-          throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
         if (pause is! bool)
           throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
 
         try {
-          await restart(isolateId, pause: pause);
+          await restart(pause: pause);
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
