@@ -46,7 +46,11 @@ class GestureLongPressDragStartDetails {
   /// Recorded timestamp of the source pointer event that triggered the press
   /// event.
   ///
-  /// Could be null if triggered from proxied events such as accessibility.
+  /// Could be null if triggered by proxied events such as accessibility.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
   final Duration sourceTimeStamp;
 
   /// The global position at which the pointer contacted the screen.
@@ -74,7 +78,11 @@ class GestureLongPressDragUpdateDetails {
   /// Recorded timestamp of the source pointer event that triggered the press
   /// event.
   ///
-  /// Could be null if triggered from proxied events such as accessibility.
+  /// Could be null if triggered by proxied events such as accessibility.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
   final Duration sourceTimeStamp;
 
   /// The global position of the pointer when it triggered this update.
@@ -103,7 +111,11 @@ class GestureLongPressDragUpDetails {
   /// Recorded timestamp of the source pointer event that triggered the press
   /// event.
   ///
-  /// Could be null if triggered from proxied events such as accessibility.
+  /// Could be null if triggered by proxied events such as accessibility.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
   final Duration sourceTimeStamp;
 
   /// The global position at which the pointer lifted from the screen.
