@@ -524,13 +524,15 @@ class _AppBarState extends State<AppBar> {
 
     return Semantics(
       container: true,
-      explicitChildNodes: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
           color: widget.backgroundColor ?? themeData.primaryColor,
           elevation: widget.elevation,
-          child: appBar,
+          child: Semantics(
+            explicitChildNodes: true,
+            child: appBar,
+          ),
         ),
       ),
     );
