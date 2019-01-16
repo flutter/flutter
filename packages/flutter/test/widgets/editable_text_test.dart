@@ -749,6 +749,7 @@ void main() {
 
     // Select EditableText to give it focus.
     final Finder textFinder = find.byKey(editableTextKey);
+
     await tester.tap(textFinder);
     await tester.pump();
 
