@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' hide utf8;
-import 'dart:convert' as cnv show utf8;
+import 'dart:convert' as cnv show utf8, Utf8Decoder;
 
 import 'base/common.dart';
 export 'dart:convert' hide utf8, Utf8Codec, Utf8Decoder;
@@ -25,14 +25,14 @@ class Utf8Codec extends Encoding {
 
 Encoding get utf8 => const Utf8Codec();
 
-class Utf8Decoder extends Converter<List<int>, String> {
-  const Utf8Decoder({this.reportErrors = true});
+class Utf8Decoder extends cnv.Utf8Decoder {
+  const Utf8Decoder({this.reportErrors = true}) : super(allowMalformed: true);
 
   final bool reportErrors;
 
   @override
-  String convert(List<int> input) {
-    final String result = cnv.utf8.decode(input, allowMalformed: true);
+  String convert(List<int> codeUnits, [int start = 0, int end]) {
+    final String result = super.convert(codeUnits, start, end);
     // Finding a unicode replacement character indicates that the input
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
@@ -40,7 +40,7 @@ class Utf8Decoder extends Converter<List<int>, String> {
         'Bad UTF-8 encoding found while decoding string: $result. '
         'The Flutter team would greatly appreciate if you could file a bug or leave a'
         'comment on the issue https://github.com/flutter/flutter/issues/15646.\n'
-        'The source bytes were:\n$input\n\n');
+        'The source bytes were:\n$codeUnits\n\n');
     }
     return result;
   }
