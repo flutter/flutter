@@ -29,8 +29,6 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = testing::GetFixturesPath();
-  args.main_path = "";
-  args.packages_path = "";
 
   FlutterEngine engine = nullptr;
   FlutterResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config,

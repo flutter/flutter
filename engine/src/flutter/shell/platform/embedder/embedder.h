@@ -185,14 +185,24 @@ typedef struct {
   // string can be collected after the call to |FlutterEngineRun| returns. The
   // string must be NULL terminated.
   const char* assets_path;
-  // The path to the Dart file containing the |main| entry point. The string can
-  // be collected after the call to |FlutterEngineRun| returns. The string must
-  // be NULL terminated.
-  const char* main_path;
+  // The path to the Dart file containing the |main| entry point.
+  // The string can be collected after the call to |FlutterEngineRun| returns.
+  // The string must be NULL terminated.
+  //
+  // \deprecated As of Dart 2, running from Dart source is no longer supported.
+  // Dart code should now be compiled to kernel form and will be loaded by from
+  // |kernel_blob.bin| in the assets directory. This struct member is retained
+  // for ABI stability.
+  const char* main_path__unused__;
   // The path to the |.packages| for the project. The string can be collected
   // after the call to |FlutterEngineRun| returns. The string must be NULL
   // terminated.
-  const char* packages_path;
+  //
+  // \deprecated As of Dart 2, running from Dart source is no longer supported.
+  // Dart code should now be compiled to kernel form and will be loaded by from
+  // |kernel_blob.bin| in the assets directory. This struct member is retained
+  // for ABI stability.
+  const char* packages_path__unused__;
   // The path to the icudtl.dat file for the project. The string can be
   // collected after the call to |FlutterEngineRun| returns. The string must
   // be NULL terminated.
