@@ -1620,8 +1620,6 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
       context.paintChild(child, offset + childParentData.paintOffset);
     }
   }
-
-  // TODO(ianh): semantics - shouldn't walk the invisible children
 }
 
 /// A [RenderSliver] that contains a single [RenderBox].
