@@ -188,7 +188,7 @@ Devices: $devices
       printStatus('Reporting this crash will help improve Flutter.', emphasis: true);
       final String input = (await terminal.promptForCharInput(
         <String>['y', 'n', 'a', 'Y', 'N', 'A'],
-        prompt: 'Would you like to send this Engine crash report to Google?\n([y]es|[N]o|[a]lways)',
+        prompt: 'Would you like to send this Engine crash report to Google? Google will use this data in accordance with our Privacy Policy\n([y]es|[N]o|[a]lways)',
         defaultChoiceIndex: 1,
         displayAcceptedCharacters: false)).toLowerCase().trim();
       if (input == 'a' || input == 'always') {
