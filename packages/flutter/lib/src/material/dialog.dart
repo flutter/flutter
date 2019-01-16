@@ -311,7 +311,11 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-          child: Semantics(child: title, namesRoute: true),
+          child: Semantics(
+            child: title,
+            namesRoute: true,
+            container: true,
+          ),
         ),
       ));
     } else {
