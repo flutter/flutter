@@ -5,9 +5,9 @@
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic_types.dart';
+import 'strut_style.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 

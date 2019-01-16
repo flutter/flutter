@@ -347,6 +347,67 @@ void main() {
       matchesGoldenFile('text_golden.Strut.3.png'),
     );
 
+    // Tests leading and bold/italic
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine2\nLine3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                fontWeight: FontWeight.w900,
+                fontStyle: FontStyle.italic,
+                leading: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.4.png'),
+    );
+
+    // Font Fallback
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                fontFamily: "FakeFont 1",
+                fontFamilyFallback: <String>[
+                  "FakeFont 2",
+                  "EvilFont 3",
+                  "Nice Font 4",
+                  "ahem"
+                ],
+                fontSize: 25.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.5.png'),
+    );
+
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(

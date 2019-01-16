@@ -4592,7 +4592,6 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
-    // properties.add(ObjectFlagProperty('strutStyle', strutStyle, ifNull: 'strutStyle: unspecified'));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }
