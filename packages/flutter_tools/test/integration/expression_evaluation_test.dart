@@ -22,7 +22,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('expression_test.');
+      tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
