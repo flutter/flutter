@@ -582,6 +582,11 @@ class SliderThemeData extends Diagnosticable {
 /// [context] is the same context for the render box of the [Slider].
 /// {@endtemplate}
 ///
+/// {@template flutter.material.slider.shape.center}
+/// [center] is the offset of where the center of this shape should be painted.
+/// This offset is relative to the origin of the [context] canvas.
+/// {@endtemplate}
+///
 /// {@template flutter.material.slider.shape.sliderTheme}
 /// [sliderTheme] is the theme assigned to the [Slider] that this shape
 /// belongs to.
@@ -657,21 +662,12 @@ abstract class SliderTrackShape {
   /// its [context] canvas. This shape must be painted relative to this
   /// offset. See [PaintingContextCallback].
   ///
-  /// [parentBox] is the render box within the [Slider] itself. It can be used
-  /// to help determine the preferredRect relative to attributes of the render
-  /// box of the slider itself, such as size.
+  /// [parentBox] can be used to help determine the preferredRect relative to
+  /// attributes of the render box of the slider itself, such as size.
   ///
   /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
   /// {@macro flutter.material.slider.shape.enableAnimation}
-  ///
-  /// [textDirection] is the textDirection of the [Slider]. It can be used
-  /// to determine how the track segments are painted depending on whether
-  /// they are active or not. The track segment between the start of the slider
-  /// and the thumb is the active track segment. The track segment between the
-  /// thumb and the end of the slider is the inactive track segment. In LTR text
-  /// direction, the start of the slider is on the left, and in RTL text
-  /// direction, the start of the slider is on the right.
   ///
   /// [thumbCenter] is the offset of the center of the thumb relative to the
   /// origin of the [PaintingContext.canvas]. It can be used as the point that
@@ -680,16 +676,24 @@ abstract class SliderTrackShape {
   /// {@macro flutter.material.slider.shape.isEnabled}
   ///
   /// {@macro flutter.material.slider.shape.isDiscrete}
+  ///
+  /// [textDirection] is the textDirection of the [Slider]. It can be used
+  /// to determine how the track segments are painted depending on whether
+  /// they are active or not. The track segment between the start of the slider
+  /// and the thumb is the active track segment. The track segment between the
+  /// thumb and the end of the slider is the inactive track segment. In LTR text
+  /// direction, the start of the slider is on the left, and in RTL text
+  /// direction, the start of the slider is on the right.
   void paint(
     PaintingContext context,
     Offset offset, {
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     Animation<double> enableAnimation,
-    TextDirection textDirection,
     Offset thumbCenter,
     bool isEnabled,
     bool isDiscrete,
+    TextDirection textDirection,
   });
 }
 
@@ -725,35 +729,30 @@ abstract class SliderTickMarkShape {
   ///
   /// {@macro flutter.material.slider.shape.context}
   ///
-  /// [center] is the offset of the where the center of the tick mark should
-  /// be painted. This offset is relative to the origin of the [context] canvas.
-  ///
-  /// [parentBox] is the render box within the [Slider] itself. It can be used
-  /// to help determine the preferredRect relative to attributes of the render
-  /// box of the slider itself, such as size.
+  /// {@macro flutter.material.slider.shape.center}
   ///
   /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
   /// {@macro flutter.material.slider.shape.enableAnimation}
   ///
-  /// [textDirection] is the textDirection of the [Slider]. It can be used
-  /// to determine how the tick marks are painting depending on whether
-  /// they are on an active track segment or not. The track segment between the
-  /// start of the slider and the thumb is the active track segment. The track
-  /// segment between the thumb and the end of the slider is the inactive track
-  /// segment. In LTR text direction, the start of the slider is on the left,
-  /// and in RTL text direction, the start of the slider is on the right.
-  ///
   /// {@macro flutter.material.slider.shape.isEnabled}
+  ///
+  /// [textDirection] can be used to determine how the tick marks are painting
+  /// depending on whether they are on an active track segment or not. The track
+  /// segment between the start of the slider and the thumb is the active track
+  /// segment. The track segment between the thumb and the end of the slider is
+  /// the inactive track segment. In LTR text direction, the start of the slider
+  /// is on the left, and in RTL text direction, the start of the slider is on
+  /// the right.
   void paint(
     PaintingContext context,
     Offset center, {
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     Animation<double> enableAnimation,
-    TextDirection textDirection,
     Offset thumbCenter,
     bool isEnabled,
+      TextDirection textDirection,
   });
 }
 
@@ -782,12 +781,7 @@ abstract class SliderComponentShape {
   ///
   /// {@macro flutter.material.slider.shape.context}
   ///
-  /// [center] is the offset of the where the center of the thumb should
-  /// be painted. This offset is relative to the origin of the [context] canvas.
-  ///
-  /// [activationAnimation] is an animation triggered when the user beings
-  /// to interact with the slider. It reverses when the user stops interacting
-  /// with the slider.
+  /// {@macro flutter.material.slider.shape.center}
   ///
   /// [activationAnimation] is an animation triggered when the user beings
   /// to interact with the slider. It reverses when the user stops interacting
