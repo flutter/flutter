@@ -21,6 +21,11 @@ import 'theme_data.dart';
 /// [SliderTheme.of]. When a widget uses [SliderTheme.of], it is automatically
 /// rebuilt if the theme later changes.
 ///
+/// The slider is as big as the largest of
+/// the [SliderComponentShape.getPreferredSize] of the thumb shape,
+/// the [SliderComponentShape.getPreferredSize] of the overlay shape,
+/// and the [SliderTickMarkShape.getPreferredSize] of the tick mark shape
+///
 /// See also:
 ///
 ///  * [SliderThemeData], which describes the actual configuration of a slider
@@ -376,11 +381,6 @@ class SliderThemeData extends Diagnosticable {
   /// Both the [overlayColor] and a non default [overlayShape] may be specified.
   /// In this case, the [overlayColor] is only used if the [overlayShape]
   /// explicitly does so.
-  ///
-  /// The [SliderComponentShape.getPreferredSize] of this overlay shape, along
-  /// with the [SliderComponentShape.getPreferredSize] of the thumb shape and
-  /// the [SliderTickMarkShape.getPreferredSize] of the tick mark shape, are
-  /// used as one of the upper bounds for the min size of the slider.
   ///
   /// The default value is [RoundSliderOverlayShape].
   final SliderComponentShape overlayShape;
