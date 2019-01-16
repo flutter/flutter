@@ -97,7 +97,6 @@ void main() {
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
     final MockDevFs mockDevFs = MockDevFs();
     MockLocalEngineArtifacts mockArtifacts;
-    TestHotRunnerConfig shutdownTestingConfig = TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false);
 
     when(mockDevFs.update(
       mainPath: anyNamed('mainPath'),
@@ -230,38 +229,45 @@ void main() {
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
     });
 
-    testUsingContext('shutdown hook called after signal', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevice.supportsStopApp).thenReturn(false);
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
-      ];
-      await HotRunner(devices).cleanupAfterSignal();
-      expect(shutdownTestingConfig.shutdownHookCalled, true);
-      // Reset the state for the next test
-      shutdownTestingConfig.shutdownHookCalled = false;
-    }, overrides: <Type, Generator> {
-      Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => shutdownTestingConfig,
-    });
+    group('shutdown hook tests', () {
+      TestHotRunnerConfig shutdownTestingConfig;
 
-    testUsingContext('shutdown hook called after app stop', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevice.supportsStopApp).thenReturn(false);
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
-      ];
-      await HotRunner(devices).preStop();
-      expect(shutdownTestingConfig.shutdownHookCalled, true);
-      // Reset the state for the next test
-      shutdownTestingConfig.shutdownHookCalled = false;
-    }, overrides: <Type, Generator> {
-      Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => shutdownTestingConfig,
+      setUp(() {
+        shutdownTestingConfig = TestHotRunnerConfig(
+          successfulSetup: true,
+          computeDartDependencies: false,
+        );
+      });
+
+      testUsingContext('shutdown hook called after signal', () async {
+        final MockDevice mockDevice = MockDevice();
+        when(mockDevice.supportsHotReload).thenReturn(true);
+        when(mockDevice.supportsHotRestart).thenReturn(true);
+        when(mockDevice.supportsStopApp).thenReturn(false);
+        final List<FlutterDevice> devices = <FlutterDevice>[
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+        ];
+        await HotRunner(devices).cleanupAfterSignal();
+        expect(shutdownTestingConfig.shutdownHookCalled, true);
+      }, overrides: <Type, Generator> {
+        Artifacts: () => mockArtifacts,
+        HotRunnerConfig: () => shutdownTestingConfig,
+      });
+
+      testUsingContext('shutdown hook called after app stop', () async {
+        final MockDevice mockDevice = MockDevice();
+        when(mockDevice.supportsHotReload).thenReturn(true);
+        when(mockDevice.supportsHotRestart).thenReturn(true);
+        when(mockDevice.supportsStopApp).thenReturn(false);
+        final List<FlutterDevice> devices = <FlutterDevice>[
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+        ];
+        await HotRunner(devices).preStop();
+        expect(shutdownTestingConfig.shutdownHookCalled, true);
+      }, overrides: <Type, Generator> {
+        Artifacts: () => mockArtifacts,
+        HotRunnerConfig: () => shutdownTestingConfig,
+      });
     });
   });
 }
