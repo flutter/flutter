@@ -57,6 +57,40 @@ const double _kMinButtonSize = 48.0;
 /// ```
 /// {@end-tool}
 ///
+/// ### Adding a filled background
+///
+/// Icon buttons don't support specifying a background color or other
+/// background decoration because typically the icon is just displayed
+/// on top of the parent widget's background. Icon buttons that appear
+/// in [AppBar.actions] are an example of this.
+///
+/// It's easy enough to create an icon button with a filled background
+/// using the [Ink] widget. The [Ink] widget renders a decoration on
+/// the underlying [Material] along with the splash and highlight
+/// [InkResponse] contributed by descendant widgets.
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// In this sample the icon button's background color is defined with an [Ink]
+/// widget whose child is an [IconButton]. The icon button's filled background
+/// is a light shade of blue, it's a filled circle, and it's as big as the
+/// button is.
+///
+/// ```dart
+/// Ink(
+///   decoration: ShapeDecoration(
+///     color: Colors.purple,
+///     shape: CircleBorder(),
+///   ),
+///   child: IconButton(
+///     icon: Icon(Icons.android),
+///     color: Colors.white,
+///     onPressed: () { print("filled background"); },
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icons], a library of predefined icons.
