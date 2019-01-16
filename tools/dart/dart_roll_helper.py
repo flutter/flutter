@@ -21,6 +21,7 @@
 #   - ENGINE_HOME: the absolute path to the 'engine/src' directory
 #   - DART_SDK_HOME: the absolute path to the root of a Dart SDK project
 
+from dart_roll_utils import *
 import argparse
 import datetime
 import fileinput
@@ -30,29 +31,11 @@ import shutil
 import subprocess
 import sys
 
-def env_var(var):
-  try:
-    return os.environ[var]
-  except KeyError:
-    return ''
-
-
-FLUTTER_HOME  = env_var('FLUTTER_HOME')
-ENGINE_HOME   = env_var('ENGINE_HOME')
-DART_SDK_HOME = env_var('DART_SDK_HOME')
-
-MAX_GCLIENT_RETRIES = 3
-
-ERROR_GCLIENT_SYNC_FAILED    = 1
-ERROR_BUILD_FAILED           = 2
-ERROR_PKG_FLUTTER_FAILED     = 3
-ERROR_FLUTTER_GALLERY_FAILED = 4
-ERROR_MISSING_ROOTS          = 5
-ERROR_LICENSE_SCRIPT_FAILED  = 6
-
 DART_REVISION_ENTRY = 'dart_revision'
 FLUTTER_RUN  = ['flutter', 'run']
-FLUTTER_TEST = ['flutter', 'test', '--coverage']
+FLUTTER_TEST = ['{}/bin/flutter'.format(FLUTTER_HOME), 'test', '--coverage']
+
+MAX_GCLIENT_RETRIES = 3
 
 # Returned when licenses do not require updating.
 LICENSE_SCRIPT_OKAY       = 0
@@ -61,56 +44,6 @@ LICENSE_SCRIPT_UPDATES    = 1
 # Returned when either 'pub' or 'dart' isn't in the path.
 LICENSE_SCRIPT_EXIT_ERROR = 127
 
-def engine_golden_licenses_path():
-  return os.path.join(ENGINE_HOME, 'flutter', 'ci', 'licenses_golden')
-
-
-def engine_license_script_path():
-  return os.path.join(ENGINE_HOME, 'flutter', 'ci', 'licenses.sh')
-
-
-def engine_flutter_path():
-  return os.path.join(ENGINE_HOME, 'flutter')
-
-
-def flutter_deps_path():
-  return os.path.join(ENGINE_HOME, 'flutter', 'DEPS')
-
-
-def flutter_gallery_path():
-  return os.path.join(FLUTTER_HOME, 'examples', 'flutter_gallery')
-
-
-def license_script_output_path():
-  return os.path.join(ENGINE_HOME, 'out', 'license_script_output')
-
-
-def package_flutter_path():
-  return os.path.join(FLUTTER_HOME, 'packages', 'flutter')
-
-
-def update_dart_deps_path():
-  return os.path.join(ENGINE_HOME, 'tools', 'dart', 'create_updated_flutter_deps.py')
-
-
-def print_status(msg):
-  CGREEN = '\033[92m'
-  CEND = '\033[0m'
-  print(CGREEN + '[STATUS] ' + msg + CEND)
-
-
-def print_warning(msg):
-  CYELLOW = '\033[93m'
-  CEND = '\033[0m'
-  print(CYELLOW + '[WARNING] ' + msg + CEND)
-
-
-def print_error(msg):
-  CRED = '\033[91m'
-  CEND = '\033[0m'
-  print(CRED + '[ERROR] ' + msg + CEND)
-
-
 def update_dart_revision(dart_revision):
   original_revision = ''
   print_status('Updating Dart revision to {}'.format(dart_revision))
@@ -118,6 +51,13 @@ def update_dart_revision(dart_revision):
   for idx, line in enumerate(content):
     if DART_REVISION_ENTRY in line:
       original_revision = line.strip().split(' ')[1][1:-2]
+      if not is_ancestor_commit(original_revision,
+                                dart_revision,
+                                DART_SDK_HOME):
+        print_error('Dart revision {} is older than existing revision, {}.' +
+                    ' Aborting roll.'.format(dart_revision, original_revision))
+        sys.exit(ERROR_OLD_COMMIT_PROVIDED)
+
       content[idx] = "  'dart_revision': '" + dart_revision + "',\n"
       break
   write_deps(content)
@@ -131,7 +71,8 @@ def gclient_sync():
   while ((exit_code != 0) and not (num_retries >= MAX_GCLIENT_RETRIES)):
     print_status('Running gclient sync (Attempt {}/{})'
                  .format(num_retries + 1, MAX_GCLIENT_RETRIES))
-    p = subprocess.Popen(['gclient', 'sync'], cwd=ENGINE_HOME)
+    p = subprocess.Popen(['gclient', 'sync', '--delete_unversioned_trees'],
+                         cwd=ENGINE_HOME)
     exit_code = p.wait()
     if exit_code != 0:
       num_retries += 1
@@ -211,7 +152,9 @@ def build():
 
 def run_tests():
   print_status('Running tests in packages/flutter')
-  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt'],
+  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
+                                       engine_src_path],
                        cwd=package_flutter_path())
   result = p.wait()
   if result != 0:
@@ -219,7 +162,8 @@ def run_tests():
     sys.exit(ERROR_PKG_FLUTTER_FAILED)
 
   print_status('Running tests in examples/flutter_gallery')
-  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt'],
+  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
+                                       engine_src_path],
                        cwd=flutter_gallery_path());
   p.wait()
   if result != 0:
@@ -229,11 +173,15 @@ def run_tests():
 
 def run_hot_reload_configurations():
   print_status('Running flutter gallery release')
-  p = subprocess.Popen(FLUTTER_RUN + ['--release', '--local-engine=android_release'],
+  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  p = subprocess.Popen(FLUTTER_RUN + ['--release',
+                                      '--local-engine=android_release',
+                                      engine_src_path],
                        cwd=flutter_gallery_path())
   p.wait()
   print_status('Running flutter gallery debug')
-  p = subprocess.Popen(FLUTTER_RUN + ['--local-engine=android_debug_unopt'],
+  p = subprocess.Popen(FLUTTER_RUN + ['--local-engine=android_debug_unopt',
+                                      engine_src_path],
                        cwd=flutter_gallery_path())
   p.wait()
 
@@ -250,7 +198,8 @@ def update_licenses():
     print_error('Unknown license script error: {}. Aborting roll.'
                 .format(result))
     sys.exit(ERROR_LICENSE_SCRIPT_FAILED)
-  src_files = os.listdir(license_script_output_path())
+  # Ignore 'licenses_skia' as they shouldn't change during a Dart SDK roll.
+  src_files = ['licenses_flutter', 'licenses_third_party', 'tool_signature']
   for f in src_files:
     path = os.path.join(license_script_output_path(), f)
     if os.path.isfile(path):
@@ -258,7 +207,7 @@ def update_licenses():
 
 
 def get_commit_range(start, finish):
-  range_str = '{}...{}'.format(start, finish)
+  range_str = '{}..{}'.format(start, finish)
   command = ['git', 'log', '--oneline', range_str]
   orig_dir = os.getcwd()
   os.chdir(DART_SDK_HOME)
@@ -267,18 +216,31 @@ def get_commit_range(start, finish):
   return result
 
 
+def get_short_rev(rev):
+  command = ['git', 'rev-parse', '--short', rev]
+  orig_dir = os.getcwd()
+  os.chdir(DART_SDK_HOME)
+  result = subprocess.check_output(command)
+  os.chdir(orig_dir)
+  return result.rstrip()
+
+
 def git_commit(original_revision, updated_revision):
   print_status('Committing Dart SDK roll')
   current_date = datetime.date.today()
   sdk_log = get_commit_range(original_revision, updated_revision)
-  commit_msg = 'Dart SDK roll for {}\n\n'.format(current_date)
-  commit_msg += sdk_log
+  num_commits = len(sdk_log.splitlines())
+  commit_msg = ('Roll src/third_party/dart {}..{} ({} commits)'
+                .format(get_short_rev(original_revision),
+                        get_short_rev(updated_revision), num_commits))
+  commit_msg += '\n' + sdk_log
   commit_cmd = ['git', 'commit', '-a', '-m', commit_msg]
   p = subprocess.Popen(commit_cmd, cwd=engine_flutter_path())
   p.wait()
 
 
 def update_roots(args):
+  # These globals are set from environment variables in dart_roll_utils.py
   global FLUTTER_HOME
   global ENGINE_HOME
   global DART_SDK_HOME
@@ -293,17 +255,17 @@ def update_roots(args):
     DART_SDK_HOME = args.dart_sdk_home
 
   if FLUTTER_HOME == '':
-    print_error('Either "--flutter_home" must be provided or FLUTTER_HOME must' +
+    print_error('Either "--flutter-home" must be provided or FLUTTER_HOME must' +
                 ' be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)
 
   if ENGINE_HOME == '':
-    print_error('Either "--engine_home" must be provided or ENGINE_HOME must' +
+    print_error('Either "--engine-home" must be provided or ENGINE_HOME must' +
                 ' be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)
 
   if DART_SDK_HOME == '':
-    print_error('Either "--dart_sdk_home" must be provided or DART_SDK_HOME ' +
+    print_error('Either "--dart-sdk-home" must be provided or DART_SDK_HOME ' +
                 'must be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)
 
