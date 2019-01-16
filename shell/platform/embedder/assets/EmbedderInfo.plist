@@ -7,7 +7,7 @@
   <key>CFBundleExecutable</key>
   <string>FlutterEmbedder</string>
   <key>CFBundleIdentifier</key>
-  <string>io.flutter.flutter_embedder</string>
+  <string>io.flutter.flutter-embedder</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
