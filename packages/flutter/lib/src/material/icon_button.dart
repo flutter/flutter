@@ -76,19 +76,17 @@ const double _kMinButtonSize = 48.0;
 /// circle, and it's as big as the button is.
 ///
 /// ```dart
-/// Widget build(BuildContext) {
-///   return Ink(
-///     decoration: ShapeDecoration(
-///       color: Colors.purple,
-///       shape: CircleBorder(),
-///     ),
-///     child: IconButton(
-///       icon: Icon(Icons.android),
-///       color: Colors.white,
-///       onPressed: () { print("filled background"); },
-///     ),
-///   );
-/// }
+/// Ink(
+///   decoration: ShapeDecoration(
+///     color: Colors.purple,
+///     shape: CircleBorder(),
+///   ),
+///   child: IconButton(
+///     icon: Icon(Icons.android),
+///     color: Colors.white,
+///     onPressed: () { print("filled background"); },
+///   ),
+/// )
 /// ```
 /// {@end-tool}
 ///
