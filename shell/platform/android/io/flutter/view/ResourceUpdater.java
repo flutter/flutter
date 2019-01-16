@@ -7,6 +7,7 @@ package io.flutter.view;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,13 +22,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public final class ResourceUpdater {
     private static final String TAG = "ResourceUpdater";
+
+    private static final int BUFFER_SIZE = 16 * 1024;
 
     // Controls when to check if a new patch is available for download, and start downloading.
     // Note that by default the application will not block to wait for the download to finish.
@@ -111,7 +120,7 @@ public final class ResourceUpdater {
                 Log.i(TAG, "HTTP response code " + responseCode);
 
                 if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                    Log.i(TAG, "Latest update not found");
+                    Log.i(TAG, "Latest update not found on server");
                     return null;
                 }
 
@@ -259,6 +268,76 @@ public final class ResourceUpdater {
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid PatchInstallMode " + patchInstallMode);
             return InstallMode.ON_NEXT_RESTART;
+        }
+    }
+
+    /// Returns manifest JSON from ZIP file, or null if not found.
+    public JSONObject readManifest(File updateFile) {
+        if (!updateFile.exists()) {
+            return null;
+        }
+
+        try {
+            ZipFile zipFile = new ZipFile(updateFile);
+            ZipEntry entry = zipFile.getEntry("manifest.json");
+            if (entry == null) {
+                Log.w(TAG, "Invalid update file: " + updateFile);
+                return null;
+            }
+
+            // Read and parse the entire JSON file as single operation.
+            Scanner scanner = new Scanner(zipFile.getInputStream(entry));
+            return new JSONObject(scanner.useDelimiter("\\A").next());
+
+        } catch (IOException | JSONException e) {
+            Log.w(TAG, "Invalid update file: " + e);
+            return null;
+        }
+    }
+
+    /// Returns true if the patch file was indeed built for this APK.
+    public boolean validateManifest(JSONObject manifest) {
+        if (manifest == null) {
+            return false;
+        }
+
+        String buildNumber = manifest.optString("buildNumber", null);
+        if (buildNumber == null) {
+            Log.w(TAG, "Invalid update manifest: missing buildNumber");
+            return false;
+        }
+
+        if (!buildNumber.equals(getAPKVersion())) {
+            Log.w(TAG, "Outdated update file for build " + getAPKVersion());
+            return false;
+        }
+
+        String baselineChecksum = manifest.optString("baselineChecksum", null);
+        if (baselineChecksum == null) {
+            Log.w(TAG, "Invalid update manifest: missing baselineChecksum");
+            return false;
+        }
+
+        final AssetManager manager = context.getResources().getAssets();
+        try (InputStream is = manager.open("flutter_assets/isolate_snapshot_data")) {
+            CRC32 checksum = new CRC32();
+
+            int count = 0;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                checksum.update(buffer, 0, count);
+            }
+
+            if (!baselineChecksum.equals(String.valueOf(checksum.getValue()))) {
+                Log.w(TAG, "Mismatched update file for APK");
+                return false;
+            }
+
+            return true;
+
+        } catch (IOException e) {
+            Log.w(TAG, "Could not read APK: " + e);
+            return false;
         }
     }
 

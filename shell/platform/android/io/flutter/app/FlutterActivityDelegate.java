@@ -32,6 +32,8 @@ import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
+import io.flutter.view.ResourceUpdater;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -344,9 +346,13 @@ public final class FlutterActivityDelegate
         if (!flutterView.getFlutterNativeView().isApplicationRunning()) {
             FlutterRunArguments args = new FlutterRunArguments();
             ArrayList<String> bundlePaths = new ArrayList<>();
-            if (FlutterMain.getResourceUpdater() != null) {
-                File patchFile = FlutterMain.getResourceUpdater().getInstalledPatch();
-                bundlePaths.add(patchFile.getPath());
+            ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
+            if (resourceUpdater != null) {
+                File patchFile = resourceUpdater.getInstalledPatch();
+                JSONObject manifest = resourceUpdater.readManifest(patchFile);
+                if (resourceUpdater.validateManifest(manifest)) {
+                    bundlePaths.add(patchFile.getPath());
+                }
             }
             bundlePaths.add(appBundlePath);
             args.bundlePaths = bundlePaths.toArray(new String[0]);
