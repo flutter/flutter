@@ -8,9 +8,6 @@
 #include <unordered_map>
 #include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flow {
 
