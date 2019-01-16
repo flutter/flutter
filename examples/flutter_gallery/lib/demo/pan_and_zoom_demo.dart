@@ -2,63 +2,75 @@ import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_inertial_motion.dart';
 
-class PanAndZoomDemo extends StatelessWidget {
+class PanAndZoomDemo extends StatefulWidget {
   const PanAndZoomDemo({Key key}) : super(key: key);
 
   static const String routeName = '/pan_and_zoom';
 
-  @override
-  Widget build(BuildContext context) => PanAndZoom();
+  @override _PanAndZoomDemoState createState() => _PanAndZoomDemoState();
 }
-
-class PanAndZoom extends StatelessWidget {
+class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
   static const double HEXAGON_RADIUS = 32.0;
   static const int BOARD_RADIUS = 8;
 
+  Board _board = Board(
+    boardRadius: BOARD_RADIUS,
+    hexagonRadius: HEXAGON_RADIUS,
+  );
+
   @override
   Widget build (BuildContext context) {
-    final Board board = Board(
-      boardRadius: BOARD_RADIUS,
-      hexagonRadius: HEXAGON_RADIUS,
-    );
     final BoardPainter painter = BoardPainter(
-      board: board,
+      board: _board,
     );
     final Size screenSize = MediaQuery.of(context).size;
 
+    // The scene is drawn by a CustomPaint, but user interaction is handled by
+    // the BoardInteraction parent widget.
     return Scaffold(
-      body: MapInteraction(
+      body: BoardInteraction(
         child: CustomPaint(
           size: Size.infinite,
           painter: painter,
         ),
+        onTapUp: _onTapUp,
         screenSize: screenSize,
       ),
     );
   }
+
+  void _onTapUp(Offset scenePoint) {
+    final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
+    setState(() {
+      _board = _board.selectBoardPoint(boardPoint);
+    });
+  }
 }
 
-// This StatefulWidget handles all user interaction
-class MapInteraction extends StatefulWidget {
-  const MapInteraction({
+// This widget handles all user interaction on the CustomPaint
+class BoardInteraction extends StatefulWidget {
+  const BoardInteraction({
     @required this.child,
     @required this.screenSize,
+    @required this.onTapUp,
   });
 
   final Widget child;
   final Size screenSize;
+  final Function onTapUp;
 
-  @override _MapInteractionState createState() => _MapInteractionState();
+  @override _BoardInteractionState createState() => _BoardInteractionState();
 }
-class _MapInteractionState extends State<MapInteraction> with SingleTickerProviderStateMixin {
+class _BoardInteractionState extends State<BoardInteraction> with SingleTickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
   static const double MIN_SCALE = 0.8;
   static const Size _VISIBLE_SIZE = Size(1200, 1200);
-  // Start out looking at the center
+  // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
+  // Start out looking at the center.
   static Offset __translation = const Offset(0, 0);
   Offset _translateFrom; // Point where a single translation began
   double _scaleStart = 1.0; // Scale value at start of scaling gesture
@@ -100,6 +112,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
       onScaleUpdate: _onScaleUpdate,
+      onTapUp: _onTapUp,
       child: ClipRect(
         child: Transform(
           transform: _getTransformationMatrix(),
@@ -138,7 +151,7 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
 
   // Given a point in screen coordinates, return the point in the scene.
   // Scene coordinates are independent of scale, just like _translation.
-  Offset _fromScreen(Offset screenPoint, Offset offset, double scale) {
+  Offset _fromScreen(Offset screenPoint, Offset translation, double scale) {
     // After scaling, the center of the screen is still the same scene coords.
     // Find the distance from the center of the screen to the given screenPoint.
     final Offset fromCenterOfScreen = Offset(
@@ -146,8 +159,9 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
       screenPoint.dy - widget.screenSize.height / 2,
     );
     final Offset fromCenterOfScreenSceneCoords = fromCenterOfScreen / scale;
-    // The absolute location of screenPoint in scene coords is the sum.
-    return offset + fromCenterOfScreenSceneCoords;
+    // The absolute location of screenPoint in scene coords is the difference,
+    // because translation is the inverse of the center of the screen.
+    return fromCenterOfScreenSceneCoords - translation;
   }
 
   // Handle panning and pinch zooming events
@@ -213,6 +227,11 @@ class _MapInteractionState extends State<MapInteraction> with SingleTickerProvid
     });
   }
 
+  // Handle tapping to select a tile
+  void _onTapUp(TapUpDetails details) {
+    widget.onTapUp(_fromScreen(details.globalPosition, _translation, _scale));
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -231,16 +250,22 @@ class BoardPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint hexagonFillPaint = Paint()
       ..color = Colors.grey[600]
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2.0;
+      ..style = PaintingStyle.fill;
+    final Paint hexagonFillPaintSelected = Paint()
+      ..color = Colors.blue[300]
+      ..style = PaintingStyle.fill;
 
     void drawBoardPoint(BoardPoint boardPoint) {
-      canvas.drawPath(board.getPathForBoardPoint(boardPoint), hexagonFillPaint);
+      final Paint paint = board.selected == boardPoint
+        ? hexagonFillPaintSelected : hexagonFillPaint;
+      canvas.drawPath(board.getPathForBoardPoint(boardPoint), paint);
     }
 
     board.forEach(drawBoardPoint);
   }
 
   @override
-  bool shouldRepaint(BoardPainter oldDelegate) => false;
+  bool shouldRepaint(BoardPainter oldDelegate) {
+    return oldDelegate.board != board;
+  }
 }

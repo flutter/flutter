@@ -12,11 +12,18 @@ class Board extends Object with IterableMixin<BoardPoint> {
       assert(hexagonRadius > 0);
 
   @override
-  Iterator<BoardPoint> get iterator => BoardIterator(boardRadius);
+  Iterator<BoardPoint> get iterator => BoardIterator(boardRadius, selected);
 
-  //BoardPoint _selectedBoardPoint;
+  BoardPoint selected;
   int boardRadius; // Number of hexagons from center to edge
   double hexagonRadius; // Pixel radius of a hexagon (center to vertex)
+
+  BoardPoint pointToBoardPoint(Offset point) {
+    return BoardPoint(
+      ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
+      ((2 / 3 * point.dy) / hexagonRadius).round(),
+    );
+  }
 
   // Return a pixel point for a q,r point
   Point<double> boardPointToPoint(BoardPoint boardPoint) {
@@ -48,13 +55,23 @@ class Board extends Object with IterableMixin<BoardPoint> {
     hexagon.close();
     return hexagon;
   }
+
+  Board selectBoardPoint(BoardPoint boardPoint) {
+    final Board nextBoard = Board(
+      boardRadius: boardRadius,
+      hexagonRadius: hexagonRadius,
+    );
+    nextBoard.selected = boardPoint;
+    return nextBoard;
+  }
 }
 
 class BoardIterator extends Iterator<BoardPoint> {
-  BoardIterator(this.boardRadius)
+  BoardIterator(this.boardRadius, this.selected)
     : assert(boardRadius > 0);
 
   int boardRadius;
+  BoardPoint selected;
 
   @override
   BoardPoint current;
@@ -63,7 +80,7 @@ class BoardIterator extends Iterator<BoardPoint> {
   bool moveNext() {
     // If before the first element
     if (current == null) {
-      current = BoardPoint(-boardRadius, 0, false);
+      current = BoardPoint(-boardRadius, 0);
       return true;
     }
 
@@ -77,12 +94,12 @@ class BoardIterator extends Iterator<BoardPoint> {
 
     // If wrapping from one q to the next
     if (current.r >= rRange.max) {
-      current = BoardPoint(current.q + 1, getRRangeForQ(current.q + 1).min, false);
+      current = BoardPoint(current.q + 1, getRRangeForQ(current.q + 1).min);
       return true;
     }
 
     // Otherwise we're just incrementing r
-    current = BoardPoint(current.q, current.r + 1, false);
+    current = BoardPoint(current.q, current.r + 1);
     return true;
   }
 
@@ -113,9 +130,28 @@ class Range {
 
 // A location on the board in axial coordinates
 class BoardPoint {
-  BoardPoint(this.q, this.r, this.isSelected);
+  BoardPoint(this.q, this.r);
 
   int q;
   int r;
-  bool isSelected;
+
+  @override
+  String toString() {
+    return 'BoardPoint(${q.toString()}, ${r.toString()})';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! BoardPoint) {
+      return false;
+    }
+    BoardPoint boardPoint = other;
+    return boardPoint.q == q && boardPoint.r == r;
+  }
+
+  @override
+  int get hashCode {
+    final String string = q.toString() + r.toString();
+    return int.parse(string);
+  }
 }
