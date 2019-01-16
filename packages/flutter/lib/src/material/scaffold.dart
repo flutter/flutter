@@ -25,6 +25,13 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// TabController tabController
+// void setState(VoidCallback fn) { }
+// String appBarTitle
+// int tabCount
+// TickerProvider tickerProvider
+
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
@@ -110,14 +117,14 @@ class ScaffoldPrelayoutGeometry {
   /// and is useful for insetting the [FloatingActionButton] to avoid features like
   /// the system status bar or the keyboard.
   ///
-  /// If [Scaffold.resizeToAvoidBottomPadding] is set to false, [minInsets.bottom]
-  /// will be 0.0 instead of [MediaQuery.padding.bottom].
+  /// If [Scaffold.resizeToAvoidBottomInset] is set to false, [minInsets.bottom]
+  /// will be 0.0.
   final EdgeInsets minInsets;
 
   /// The [Size] of the whole [Scaffold].
   ///
   /// If the [Size] of the [Scaffold]'s contents is modified by values such as
-  /// [Scaffold.resizeToAvoidBottomPadding] or the keyboard opening, then the
+  /// [Scaffold.resizeToAvoidBottomInset] or the keyboard opening, then the
   /// [scaffoldSize] will not reflect those changes.
   ///
   /// This means that [FloatingActionButtonLocation]s designed to reposition
@@ -278,7 +285,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-  }) : assert(previousFloatingActionButtonLocation != null),
+  }) : assert(minInsets != null),
+       assert(textDirection != null),
+       assert(geometryNotifier != null),
+       assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
   final EdgeInsets minInsets;
@@ -694,6 +704,58 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
+/// ## Scaffold layout, the keyboard, and display "notches"
+///
+/// The scaffold will expand to fill the available space. That usually
+/// means that it will occupy its entire window or device screen. When
+/// the device's keyboard appears the Scaffold's ancestor [MediaQuery]
+/// widget's [MediaQueryData.viewInsets] changes and the Scaffold will
+/// be rebuilt. By default the scaffold's [body] is resized to make
+/// room for the keyboard. To prevent the resize set
+/// [resizeToAvoidBottomInset] to false. In either case the focused
+/// widget will be scrolled into view if it's within a scrollable
+/// container.
+///
+/// The [MediaQueryData.padding] value defines areas that might
+/// not be completely visible, like the display "notch" on the iPhone
+/// X. The scaffold's [body] is not inset by this padding value
+/// although an [appBar] or [bottomNavigationBar] will typically
+/// cause the body to avoid the padding. The [SafeArea]
+/// widget can be used within the scaffold's body to avoid areas
+/// like display notches.
+///
+/// ## Troubleshooting
+///
+/// ### Nested Scaffolds
+///
+/// The Scaffold was designed to be the single top level container for
+/// a [MaterialApp] and it's typically not necessary to nest
+/// scaffolds. For example in a tabbed UI, where the
+/// [bottomNavigationBar] is a [TabBar] and the body is a
+/// [TabBarView], you might be tempted to make each tab bar view a
+/// scaffold with a differently titled AppBar. It would be better to add a
+/// listener to the [TabController] that updates the AppBar.
+///
+/// ## Sample Code
+///
+/// Add a listener to the app's tab controller so that the [AppBar] title of the
+/// app's one and only scaffold is reset each time a new tab is selected.
+///
+/// ```dart
+/// tabController = TabController(vsync: tickerProvider, length: tabCount)..addListener(() {
+///   if (!tabController.indexIsChanging) {
+///     setState(() {
+///       // Rebuild the enclosing scaffold with a new AppBar title
+///       appBarTitle = 'Tab ${tabController.index}';
+///     });
+///   }
+/// });
+/// ```
+///
+/// Although there are some use cases, like a presentation app that
+/// shows embedded flutter content, where nested scaffolds are
+/// appropriate, it's best to avoid nesting scaffolds.
+///
 /// See also:
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app
@@ -731,7 +793,8 @@ class Scaffold extends StatefulWidget {
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding = true,
+    this.resizeToAvoidBottomPadding,
+    this.resizeToAvoidBottomInset,
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
   }) : assert(primary != null),
@@ -743,9 +806,11 @@ class Scaffold extends StatefulWidget {
 
   /// The primary content of the scaffold.
   ///
-  /// Displayed below the app bar and behind the [floatingActionButton] and
-  /// [drawer]. To avoid the body being resized to avoid the window padding
-  /// (e.g., from the onscreen keyboard), see [resizeToAvoidBottomPadding].
+  /// Displayed below the [appBar], above the bottom of the ambient
+  /// [MediaQuery]'s [MediaQueryData.viewInsets], and behind the
+  /// [floatingActionButton] and [drawer]. If [resizeToAvoidBottomInset] is
+  /// false then the body is not resized when the onscreen keyboard appears,
+  /// i.e. it is not inset by `viewInsets.bottom`.
   ///
   /// The widget in the body of the scaffold is positioned at the top-left of
   /// the available space between the app bar and the bottom of the scaffold. To
@@ -850,15 +915,25 @@ class Scaffold extends StatefulWidget {
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget bottomSheet;
 
-  /// Whether the [body] (and other floating widgets) should size themselves to
-  /// avoid the window's bottom padding.
+  /// This flag is deprecated, please use [resizeToAvoidBottomInset]
+  /// instead.
+  ///
+  /// Originally the name referred [MediaQueryData.padding]. Now it refers
+  /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
+  /// should be clearer to readers.
+  @Deprecated('Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears')
+  final bool resizeToAvoidBottomPadding;
+
+  /// If true the [body] and the scaffold's floating widgets should size
+  /// themselves to avoid the onscreen keyboard whose height is defined by the
+  /// ambient [MediaQuery]'s [MediaQueryData.viewInsets] `bottom` property.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
   /// Defaults to true.
-  final bool resizeToAvoidBottomPadding;
+  final bool resizeToAvoidBottomInset;
 
   /// Whether this scaffold is being displayed at the top of the screen.
   ///
@@ -1399,6 +1474,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   _ScaffoldGeometryNotifier _geometryNotifier;
 
+  // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
+  bool get _resizeToAvoidBottomInset {
+    // ignore: deprecated_member_use
+    return widget.resizeToAvoidBottomInset ?? widget.resizeToAvoidBottomPadding ?? true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1479,19 +1560,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     @required bool removeTopPadding,
     @required bool removeRightPadding,
     @required bool removeBottomPadding,
+    bool removeBottomInset = false,
   }) {
+    MediaQueryData data = MediaQuery.of(context).removePadding(
+      removeLeft: removeLeftPadding,
+      removeTop: removeTopPadding,
+      removeRight: removeRightPadding,
+      removeBottom: removeBottomPadding,
+    );
+    if (removeBottomInset)
+      data = data.removeViewInsets(removeBottom: true);
+
     if (child != null) {
       children.add(
         LayoutId(
           id: childId,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeLeft: removeLeftPadding,
-            removeTop: removeTopPadding,
-            removeRight: removeRightPadding,
-            removeBottom: removeBottomPadding,
-            child: child,
-          ),
+          child: MediaQuery(data: data, child: child),
         ),
       );
     }
@@ -1580,8 +1664,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
-      removeBottomPadding: widget.bottomNavigationBar != null ||
-        widget.persistentFooterButtons != null,
+      removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
+      removeBottomInset: _resizeToAvoidBottomInset,
     );
 
     if (widget.appBar != null) {
@@ -1606,8 +1690,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     if (_snackBars.isNotEmpty) {
-      final bool removeBottomPadding = widget.persistentFooterButtons != null ||
-        widget.bottomNavigationBar != null;
       _addIfNonNull(
         children,
         _snackBars.first._widget,
@@ -1615,7 +1697,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: removeBottomPadding,
+        removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
       );
     }
 
@@ -1676,7 +1758,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: widget.resizeToAvoidBottomPadding,
+        removeBottomPadding: _resizeToAvoidBottomInset,
       );
     }
 
@@ -1722,7 +1804,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     // The minimum insets for contents of the Scaffold to keep visible.
     final EdgeInsets minInsets = mediaQuery.padding.copyWith(
-      bottom: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+      bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
     );
 
     return _ScaffoldScope(
