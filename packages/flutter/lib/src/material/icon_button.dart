@@ -71,9 +71,10 @@ const double _kMinButtonSize = 48.0;
 ///
 /// {@tool snippet --template=stateless_widget}
 ///
-/// In this sample the descendant widget is an [IconButton]. The icon
-/// button's filled background is a light shade of blue, it's a filled
-/// circle, and it's as big as the button is.
+/// In this sample the icon button's background color is defined with an [Ink]
+/// widget whose child is an [IconButton]. The icon button's filled background
+/// is a light shade of blue, it's a filled circle, and it's as big as the
+/// button is.
 ///
 /// ```dart
 /// Ink(
