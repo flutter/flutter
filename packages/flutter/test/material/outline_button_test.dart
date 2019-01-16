@@ -43,6 +43,25 @@ void main() {
     expect(pressedCount, 1);
   });
 
+  testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {
+    Widget buildFrame(VoidCallback onPressed) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(),
+          child: Center(
+            child: OutlineButton(onPressed: onPressed),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(() { }));
+    await tester.press(find.byType(OutlineButton));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('OutlineButton shape and border component overrides', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
