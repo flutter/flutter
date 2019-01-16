@@ -42,6 +42,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -67,6 +68,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
+          fadeOutSelectionControls: false,
           controller: controller,
           backgroundCursorColor: Colors.grey,
           focusNode: focusNode,
@@ -89,6 +91,7 @@ void main() {
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
@@ -113,6 +116,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             controller: controller,
             backgroundCursorColor: Colors.grey,
             focusNode: focusNode,
@@ -275,6 +279,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             controller: controller,
             backgroundCursorColor: Colors.grey,
             focusNode: focusNode,
@@ -305,6 +310,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             controller: controller,
             backgroundCursorColor: Colors.grey,
             focusNode: focusNode,
@@ -335,6 +341,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -368,6 +375,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -400,6 +408,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -431,6 +440,7 @@ void main() {
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -461,6 +471,7 @@ void main() {
     String changedValue;
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -505,6 +516,7 @@ void main() {
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
         child: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           key: editableTextKey,
           controller: TextEditingController(),
@@ -556,6 +568,7 @@ void main() {
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
         child: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           key: editableTextKey,
           controller: TextEditingController(),
@@ -607,6 +620,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -642,6 +656,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -684,6 +699,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -729,6 +745,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -774,6 +791,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -819,6 +837,7 @@ testWidgets(
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
@@ -872,6 +891,7 @@ testWidgets(
             child: Center(
               child: Material(
                 child: EditableText(
+                  fadeOutSelectionControls: false,
                   backgroundCursorColor: Colors.grey,
                   key: editableTextKey,
                   controller: currentController,
@@ -932,6 +952,7 @@ testWidgets(
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -973,6 +994,7 @@ testWidgets(
         child: FocusScope(
           node: focusScopeNode,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -1014,6 +1036,7 @@ testWidgets(
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           controller: controller,
           selectionControls: materialTextSelectionControls,
@@ -1057,6 +1080,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
@@ -1133,6 +1157,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
@@ -1223,6 +1248,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
@@ -1323,6 +1349,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
@@ -1422,6 +1449,7 @@ testWidgets(
 
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
@@ -1518,6 +1546,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        fadeOutSelectionControls: false,
         backgroundCursorColor: Colors.grey,
         obscureText: true,
         controller: controller,
@@ -1565,6 +1594,7 @@ testWidgets(
         MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
@@ -1584,7 +1614,7 @@ testWidgets(
 
       controls = MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any))
+      when(controls.buildToolbar(any, any, any, any, any))
           .thenReturn(Container());
     });
 
@@ -1773,6 +1803,7 @@ testWidgets(
         node: focusScopeNode,
         autofocus: true,
         child: EditableText(
+          fadeOutSelectionControls: false,
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
@@ -1817,6 +1848,7 @@ testWidgets(
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -1870,6 +1902,7 @@ testWidgets(
           node: focusScopeNode,
           autofocus: true,
           child: EditableText(
+            fadeOutSelectionControls: false,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -1947,6 +1980,7 @@ testWidgets(
     });
     final TextEditingController controller = TextEditingController();
     final EditableText editableText = EditableText(
+      fadeOutSelectionControls: false,
       controller: controller,
       backgroundCursorColor: Colors.red,
       cursorColor: Colors.red,
@@ -1990,6 +2024,7 @@ class CustomStyleEditableText extends EditableText {
     FocusNode focusNode,
     TextStyle style,
   }) : super(
+          fadeOutSelectionControls: false,
           controller: controller,
           cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,

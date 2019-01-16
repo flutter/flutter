@@ -618,9 +618,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
-  bool get platformIsIOS => defaultTargetPlatform == TargetPlatform.iOS ?
-                                         true : false;
-
   @override
   void deactivate() {
     if (_splashes != null) {

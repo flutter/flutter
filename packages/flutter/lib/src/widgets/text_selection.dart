@@ -231,10 +231,11 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
-    this.fadeOutSelectionControls,
+    @required this.fadeOutSelectionControls,
     this.dragStartBehavior = DragStartBehavior.start,
   }): assert(value != null),
       assert(context != null),
+      assert(fadeOutSelectionControls != null),
       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
