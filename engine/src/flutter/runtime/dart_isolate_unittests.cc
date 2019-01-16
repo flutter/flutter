@@ -9,6 +9,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
+#include "third_party/tonic/scopes/dart_isolate_scope.h"
 
 #define CURRENT_TEST_NAME                                           \
   std::string {                                                     \
@@ -98,6 +99,19 @@ class AutoIsolateShutdown {
   }
 
   bool IsValid() const { return isolate_ != nullptr; }
+
+  FML_WARN_UNUSED_RESULT
+  bool RunInIsolateScope(std::function<bool(void)> closure) {
+    if (!isolate_) {
+      return false;
+    }
+    tonic::DartIsolateScope scope(isolate_->isolate());
+    tonic::DartApiScope api_scope;
+    if (closure) {
+      return closure();
+    }
+    return true;
+  }
 
   blink::DartIsolate* get() {
     FML_CHECK(isolate_);
@@ -208,6 +222,20 @@ TEST_F(DartIsolateTest, IsolateCannotLoadAndRunUnknownDartEntrypoint) {
   auto isolate =
       RunDartCodeInIsolate(GetCurrentTaskRunner(), "thisShouldNotExist");
   ASSERT_FALSE(isolate);
+}
+
+TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
+  auto isolate = RunDartCodeInIsolate(GetCurrentTaskRunner(), "main");
+
+  ASSERT_TRUE(isolate);
+
+  ASSERT_TRUE(isolate->RunInIsolateScope([]() -> bool {
+    if (tonic::LogIfError(::Dart_Invoke(Dart_RootLibrary(),
+                                        tonic::ToDart("sayHi"), 0, nullptr))) {
+      return false;
+    }
+    return true;
+  }));
 }
 
 }  // namespace blink
