@@ -99,8 +99,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
-  /// This value is used to to configure the [IconTheme] for the navigation
-  /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
+  /// This value is used to configure the [IconTheme] for the navigation bar.
+  /// When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
   ///
   /// Must not be null.

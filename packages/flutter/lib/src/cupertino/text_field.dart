@@ -456,6 +456,18 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _renderEditable.handleTapDown(details);
   }
 
+  void _handleForcePressStarted(ForcePressDetails details) {
+    // The cause is not keyboard press but we would still like to just
+    // highlight the word without showing any handles or toolbar.
+    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.keyboard);
+  }
+
+  void _handleForcePressEnded(ForcePressDetails details) {
+    // The cause is not technically double tap, but we would still like to show
+    // the toolbar and handles.
+    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+  }
+
   void _handleSingleTapUp(TapUpDetails details) {
     _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     _requestKeyboard();
@@ -657,6 +669,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                     : CupertinoColors.darkBackgroundGray,
             child: TextSelectionGestureDetector(
               onTapDown: _handleTapDown,
+              onForcePressStart: _handleForcePressStarted,
+              onForcePressEnd: _handleForcePressEnded,
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,

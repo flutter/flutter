@@ -72,9 +72,9 @@ class IconThemeData extends Diagnosticable {
   static IconThemeData lerp(IconThemeData a, IconThemeData b, double t) {
     assert(t != null);
     return IconThemeData(
-      color: Color.lerp(a.color, b.color, t),
-      opacity: ui.lerpDouble(a.opacity, b.opacity, t),
-      size: ui.lerpDouble(a.size, b.size, t),
+      color: Color.lerp(a?.color, b?.color, t),
+      opacity: ui.lerpDouble(a?.opacity, b?.opacity, t),
+      size: ui.lerpDouble(a?.size, b?.size, t),
     );
   }
 

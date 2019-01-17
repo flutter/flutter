@@ -22,6 +22,21 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
+/// Signature for the [TextField.buildCounter] callback.
+typedef InputCounterWidgetBuilder = Widget Function(
+  /// The build context for the TextField
+  BuildContext context,
+  {
+    /// The length of the string currently in the input.
+    @required int currentLength,
+    /// The maximum string length that can be entered into the TextField.
+    @required int maxLength,
+    /// Whether or not the TextField is currently focused.  Mainly provided for
+    /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+    @required bool isFocused,
+  }
+);
+
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -132,6 +147,7 @@ class TextField extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
     this.onTap,
+    this.buildCounter,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -378,6 +394,35 @@ class TextField extends StatefulWidget {
   /// text field's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
+  /// Callback that generates a custom [InputDecorator.counter] widget.
+  ///
+  /// See [InputCounterWidgetBuilder] for an explanation of the passed in
+  /// arguments.  The returned widget will be placed below the line in place of
+  /// the default widget built when [counterText] is specified.
+  ///
+  /// The returned widget will be wrapped in a [Semantics] widget for
+  /// accessibility, but it also needs to be accessible itself.  For example,
+  /// if returning a Text widget, set the [semanticsLabel] property.
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// Widget counter(
+  ///   BuildContext context,
+  ///   {
+  ///     int currentLength,
+  ///     int maxLength,
+  ///     bool isFocused,
+  ///   }
+  /// ) {
+  ///   return Text(
+  ///     '$currentLength of $maxLength characters',
+  ///     semanticsLabel: 'character count',
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final InputCounterWidgetBuilder buildCounter;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -443,10 +488,33 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
       );
 
-    if (!needsCounter)
+    // No need to build anything if counter or counterText were given directly.
+    if (effectiveDecoration.counter != null || effectiveDecoration.counterText != null)
       return effectiveDecoration;
 
+    // If buildCounter was provided, use it to generate a counter widget.
+    Widget counter;
     final int currentLength = _effectiveController.value.text.runes.length;
+    if (effectiveDecoration.counter == null
+        && effectiveDecoration.counterText == null
+        && widget.buildCounter != null) {
+      final bool isFocused = _effectiveFocusNode.hasFocus;
+      counter = Semantics(
+        container: true,
+        liveRegion: isFocused,
+        child: widget.buildCounter(
+          context,
+          currentLength: currentLength,
+          maxLength: widget.maxLength,
+          isFocused: isFocused,
+        ),
+      );
+      return effectiveDecoration.copyWith(counter: counter);
+    }
+
+    if (widget.maxLength == null)
+      return effectiveDecoration; // No counter widget
+
     String counterText = '$currentLength';
     String semanticCounterText = '';
 
@@ -550,6 +618,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     _startSplash(details);
+  }
+
+  void _handleForcePressStarted(ForcePressDetails details) {
+    if (widget.selectionEnabled) {
+      // The cause is not technically double tap, but we would like to show
+      // the toolbar.
+      _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+    }
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
@@ -662,6 +738,20 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
+    bool forcePressEnabled;
+    TextSelectionControls textSelectionControls;
+    switch (themeData.platform) {
+      case TargetPlatform.iOS:
+        forcePressEnabled = true;
+        textSelectionControls = cupertinoTextSelectionControls;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls = materialTextSelectionControls;
+        break;
+    }
+
     Widget child = RepaintBoundary(
       child: EditableText(
         key: _editableTextKey,
@@ -678,11 +768,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.selectionEnabled
-          ? (themeData.platform == TargetPlatform.iOS
-            ? cupertinoTextSelectionControls
-            : materialTextSelectionControls)
-          : null,
+        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
@@ -730,6 +816,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
+          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,

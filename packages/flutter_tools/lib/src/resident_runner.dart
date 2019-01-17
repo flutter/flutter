@@ -68,7 +68,11 @@ class FlutterDevice {
   /// expressions requested during debugging of the application.
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  Future<void> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> _connect({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+  }) async {
     if (vmServices != null)
       return;
     final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
@@ -76,6 +80,7 @@ class FlutterDevice {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       localVmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources,
+          restart: restart,
           compileExpression: compileExpression);
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
@@ -265,11 +270,11 @@ class FlutterDevice {
     bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = await getApplicationPackageForPlatform(
+    package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
       applicationBinary: hotRunner.applicationBinary
     );
@@ -319,12 +324,12 @@ class FlutterDevice {
     bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = await getApplicationPackageForPlatform(
+    package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
       applicationBinary: coldRunner.applicationBinary
     );
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.modeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
@@ -677,14 +682,21 @@ abstract class ResidentRunner {
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<void> connectToServiceProtocol({ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> connectToServiceProtocol({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+  }) async {
     if (!debuggingOptions.debuggingEnabled)
       return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      await device._connect(reloadSources: reloadSources,
-          compileExpression: compileExpression);
+      await device._connect(
+        reloadSources: reloadSources,
+        restart: restart,
+        compileExpression: compileExpression,
+      );
       await device.getVMs();
       await device.refreshViews();
       if (device.views.isEmpty)
