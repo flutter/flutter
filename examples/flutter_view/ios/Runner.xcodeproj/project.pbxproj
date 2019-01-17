@@ -88,6 +88,7 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
+				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,
 				3B3967011E83382E004F5970 /* App.framework */,
 				3B3967041E83383D004F5970 /* AppFrameworkInfo.plist */,
 				9740EEBA1CF902C7004384FC /* Flutter.framework */,
@@ -217,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2DD8945F1E5B87AF0010574F /* ic_add.png in Resources */,
+				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967051E83383D004F5970 /* AppFrameworkInfo.plist in Resources */,
 				9740EEB41CF90195004384FC /* Debug.xcconfig in Resources */,
