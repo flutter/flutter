@@ -567,43 +567,30 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
     return Semantics(
-      container: true,
       explicitChildNodes: true,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Material( // Casts shadow.
-              elevation: 8.0,
-              color: backgroundColor,
+      child: Material(
+        elevation: 8.0,
+        color: backgroundColor,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
+          child: CustomPaint(
+            painter: _RadialPainter(
+              circles: _circles.toList(),
+              textDirection: Directionality.of(context),
+            ),
+            child: Material( // Splashes.
+              type: MaterialType.transparency,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: additionalBottomPadding),
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeBottom: true,
+                  child: _createContainer(_createTiles()),
+                ),
+              ),
             ),
           ),
-          ConstrainedBox(
-            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _RadialPainter(
-                      circles: _circles.toList(),
-                      textDirection: Directionality.of(context),
-                    ),
-                  ),
-                ),
-                Material( // Splashes.
-                  type: MaterialType.transparency,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: additionalBottomPadding),
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeBottom: true,
-                      child: _createContainer(_createTiles()),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

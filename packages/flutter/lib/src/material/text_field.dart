@@ -613,16 +613,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleForcePressStarted(ForcePressDetails details) {
     if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          // The cause is not technically double tap, but we would like to show
-          // the toolbar.
-          _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          break;
-      }
+      // The cause is not technically double tap, but we would like to show
+      // the toolbar.
+      _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
     }
   }
 
@@ -724,6 +717,20 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
+    bool forcePressEnabled;
+    TextSelectionControls textSelectionControls;
+    switch (themeData.platform) {
+      case TargetPlatform.iOS:
+        forcePressEnabled = true;
+        textSelectionControls = cupertinoTextSelectionControls;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls = materialTextSelectionControls;
+        break;
+    }
+
     Widget child = RepaintBoundary(
       child: EditableText(
         key: _editableTextKey,
@@ -740,11 +747,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.selectionEnabled
-          ? (themeData.platform == TargetPlatform.iOS
-             ? cupertinoTextSelectionControls
-             : materialTextSelectionControls)
-          : null,
+        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
@@ -789,7 +792,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
-          onForcePressStart: _handleForcePressStarted,
+          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,

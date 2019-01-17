@@ -1777,21 +1777,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeBottomPadding: true,
     );
 
-    if (themeData.platform == TargetPlatform.iOS) {
-      _addIfNonNull(
-        children,
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _handleStatusBarTap,
-          // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
-          excludeFromSemantics: true,
-        ),
-        _ScaffoldSlot.statusBar,
-        removeLeftPadding: false,
-        removeTopPadding: true,
-        removeRightPadding: false,
-        removeBottomPadding: true,
-      );
+    switch (themeData.platform) {
+      case TargetPlatform.iOS:
+        _addIfNonNull(
+          children,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _handleStatusBarTap,
+            // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
+            excludeFromSemantics: true,
+          ),
+          _ScaffoldSlot.statusBar,
+          removeLeftPadding: false,
+          removeTopPadding: true,
+          removeRightPadding: false,
+          removeBottomPadding: true,
+        );
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        break;
     }
 
     if (_endDrawerOpened) {
