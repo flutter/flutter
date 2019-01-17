@@ -228,7 +228,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
     await tester.pump();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
