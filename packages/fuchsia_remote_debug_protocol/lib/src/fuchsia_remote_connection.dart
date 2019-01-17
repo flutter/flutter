@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 import 'package:glob/glob.dart';
-import 'package:path/path.dart';
 
 import 'common/logging.dart';
 import 'common/network.dart';
