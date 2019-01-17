@@ -13,8 +13,9 @@ import 'colors.dart';
 import 'input_border.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+// eyeballed values from https://material.io
+const Duration _kTransitionDuration = Duration(milliseconds: 180);
+const Curve _kTransitionCurve = Curves.ease;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -1539,6 +1540,7 @@ class InputDecorator extends StatefulWidget {
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   AnimationController _floatingLabelController;
+  CurvedAnimation _floatingLabelAnimation;
   AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
 
@@ -1551,6 +1553,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
+
+    _floatingLabelAnimation = CurvedAnimation(
+      parent: _floatingLabelController,
+      curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
+    );
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -1756,7 +1764,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
+      gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData),
     );
 
@@ -1909,7 +1917,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelAnimation.value,
         border: border,
         borderGap: _borderGap,
         icon: icon,
