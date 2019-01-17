@@ -65,6 +65,27 @@ void SetIsolateDebugName(Dart_NativeArguments args) {
   UIDartState::Current()->SetDebugName(name);
 }
 
+void ReportUnhandledException(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+
+  auto error_name =
+      tonic::DartConverter<std::string>::FromArguments(args, 0, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+
+  auto stack_trace =
+      tonic::DartConverter<std::string>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+
+  UIDartState::Current()->ReportUnhandledException(std::move(error_name),
+                                                   std::move(stack_trace));
+}
+
 Dart_Handle SendPlatformMessage(Dart_Handle window,
                                 const std::string& name,
                                 Dart_Handle callback,
@@ -318,6 +339,7 @@ void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Window_render", Render, 2, true},
       {"Window_updateSemantics", UpdateSemantics, 2, true},
       {"Window_setIsolateDebugName", SetIsolateDebugName, 2, true},
+      {"Window_reportUnhandledException", ReportUnhandledException, 2, true},
   });
 }
 

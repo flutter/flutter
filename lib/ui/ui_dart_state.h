@@ -57,6 +57,9 @@ class UIDartState : public tonic::DartState {
 
   tonic::DartErrorHandleType GetLastError();
 
+  void ReportUnhandledException(const std::string& error,
+                                const std::string& stack_trace);
+
   template <class T>
   static flow::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {
@@ -77,6 +80,7 @@ class UIDartState : public tonic::DartState {
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
               std::string logger_prefix,
+              UnhandledExceptionCallback unhandled_exception_callback,
               IsolateNameServer* isolate_name_server);
 
   ~UIDartState() override;
@@ -102,6 +106,7 @@ class UIDartState : public tonic::DartState {
   std::string debug_name_;
   std::unique_ptr<Window> window_;
   tonic::DartMicrotaskQueue microtask_queue_;
+  UnhandledExceptionCallback unhandled_exception_callback_;
   IsolateNameServer* isolate_name_server_;
 
   void AddOrRemoveTaskObserver(bool add);
