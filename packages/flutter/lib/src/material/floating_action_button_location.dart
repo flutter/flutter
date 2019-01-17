@@ -254,7 +254,7 @@ class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionBut
 
 double _straddleAppBar(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
-  return scaffoldGeometry.contentTop + scaffoldGeometry.minInsets.top - fabHalfHeight;
+  return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
 class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
