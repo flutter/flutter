@@ -195,18 +195,18 @@ void main() {
     expect(crashData.squashBacktrace(startLine: 0, endLine: 1), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n');
     expect(crashData.squashBacktrace(startLine: 0, endLine: 2), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
     expect(crashData.squashBacktrace(endLine: 2), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
-    expect(crashData.squashBacktrace(startLine: 1, endLine: 2), '*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n')
+    expect(crashData.squashBacktrace(startLine: 1, endLine: 2), '*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
     expect(crashData.squashBacktrace(startLine: 22, endLine: 22), '');
     expect(crashData.squashBacktrace(startLine: 22, endLine: 23), '    #09 pc 00000804  <anonymous:d7d80000>');
     expect(crashData.squashBacktrace(startLine: 22), '    #09 pc 00000804  <anonymous:d7d80000>');
     expect(crashData.squashBacktrace(startLine: 35, endLine: 93), '');
     expect(crashData.squashBacktrace(startLine: 17, endLine: 9), '');
-    expect(crashData.lineContaining('backtrace', 12));
-    expect(crashData.lineContaining('Revision:', 3));
-    expect(crashData.lineContaining('#09 pc 00000804', 22));
-    expect(crashData.lineContaining('F/libc', 0));
-    expect(crashData.lineContaining('F', 0));
-    expect(crashData.lineContaining('NOT IN THE DATA', -1));
+    expect(crashData.lineContaining('backtrace'), 12);
+    expect(crashData.lineContaining('Revision:'), 3));
+    expect(crashData.lineContaining('#09 pc 00000804'), 22);
+    expect(crashData.lineContaining('F/libc'), 0);
+    expect(crashData.lineContaining('F'), 0);
+    expect(crashData.lineContaining('NOT IN THE DATA'), -1);
   });
 }
 
