@@ -91,8 +91,8 @@ void main() {
         notification = value;
         return false;
       },
-      child: SingleChildScrollView(
-        child: const SizedBox(height: 1200.0)
+      child: const SingleChildScrollView(
+        child: SizedBox(height: 1200.0)
       )
     ));
 
