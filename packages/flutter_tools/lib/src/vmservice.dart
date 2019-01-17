@@ -43,6 +43,8 @@ typedef ReloadSources = Future<void> Function(
   bool pause,
 });
 
+typedef Restart = Future<void> Function({ bool pause });
+
 typedef CompileExpression = Future<String> Function(
   String isolateId,
   String expression,
@@ -111,6 +113,7 @@ class VMService {
     this.wsAddress,
     this._requestTimeout,
     ReloadSources reloadSources,
+    Restart restart,
     CompileExpression compileExpression,
   ) {
     _vm = VM._empty(this);
@@ -148,7 +151,33 @@ class VMService {
       // have no effect
       _peer.sendNotification('_registerService', <String, String>{
         'service': 'reloadSources',
-        'alias': 'Flutter Tools'
+        'alias': 'Flutter Tools',
+      });
+    }
+
+    if (restart != null) {
+      _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
+        final bool pause = params.asMap['pause'] ?? false;
+
+        if (pause is! bool)
+          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+
+        try {
+          await restart(pause: pause);
+          return <String, String>{'type': 'Success'};
+        } on rpc.RpcException {
+          rethrow;
+        } catch (e, st) {
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Hot Restart: $e\n$st');
+        }
+      });
+
+      // If the Flutter Engine doesn't support service registration this will
+      // have no effect
+      _peer.sendNotification('_registerService', <String, String>{
+        'service': 'hotRestart',
+        'alias': 'Flutter Tools',
       });
     }
 
@@ -231,12 +260,13 @@ class VMService {
     Uri httpUri, {
     Duration requestTimeout = kDefaultRequestTimeout,
     ReloadSources reloadSources,
+    Restart restart,
     CompileExpression compileExpression,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    final VMService service = VMService(peer, httpUri, wsUri, requestTimeout, reloadSources, compileExpression);
+    final VMService service = VMService(peer, httpUri, wsUri, requestTimeout, reloadSources, restart, compileExpression);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
