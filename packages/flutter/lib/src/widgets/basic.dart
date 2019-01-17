@@ -2851,7 +2851,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
 ///
-/// ## Sample Code
+/// {@tool sample}
 ///
 /// Using a stack you can position widgets over one another.
 ///
@@ -2864,20 +2864,23 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///       color: Colors.red,
 ///     ),
 ///     Container(
-///       width: 90, 
-///       height: 90, 
-///       color: Colors.green
+///       width: 90,
+///       height: 90,
+///       color: Colors.green,
 ///     ),
 ///     Container(
 ///       width: 80,
 ///       height: 80,
 ///       color: Colors.blue,
-///     )
+///     ),
 ///   ],
 /// )
-///```
+/// ```
+/// {@end-tool}
 ///
-/// ## Sample code: Using a `Stack` to create contrast
+/// {@tool sample}
+///
+/// Using a `Stack` to create contrast.
 ///
 /// This example shows how Stack can be used to enhance text visibility
 /// by adding gradient backdrops.
@@ -2916,6 +2919,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
