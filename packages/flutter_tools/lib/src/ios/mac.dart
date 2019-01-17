@@ -728,9 +728,9 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
     if (match != null) {
       if (printedStatuses.add(match.group(1)))
         printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
-      continue;
+    } else {
+      buffer.writeln(line);
     }
-    buffer.writeln(line);
   }
   await xcodeProjectFile.writeAsString(buffer.toString());
   return true;
