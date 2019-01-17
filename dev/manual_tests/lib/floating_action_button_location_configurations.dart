@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-const _kTestSnackBar = SnackBar(content: Text('Yay! A SnackBar!'));
+const SnackBar _kTestSnackBar = SnackBar(content: Text('Yay! A SnackBar!'));
 
-const _kFABLocationConfigurations = [
+const List<FloatingActionButtonLocation> _kFABLocationConfigurations =
+    <FloatingActionButtonLocation>[
   FloatingActionButtonLocation.centerDocked,
   FloatingActionButtonLocation.endDocked,
   FloatingActionButtonLocation.centerFloat,
@@ -90,8 +91,8 @@ class _FloatingActionButtonConfigurationsTestRoute extends StatelessWidget {
       return BottomAppBar(
         child: Container(
           height: 100,
-          child: Center(
-            child: const Text('Bottom App Bar'),
+          child: const Center(
+            child: Text('Bottom App Bar'),
           ),
           color: Colors.amber,
         ),
@@ -158,7 +159,8 @@ class _ConfigurationOptionsState extends State<_ConfigurationOptions> {
                     fabLocation, hasBab, resizeToAvoidBottomInset);
             final MaterialPageRoute<
                     _FloatingActionButtonConfigurationsTestRoute> nextRoute =
-                MaterialPageRoute(builder: (context) => preview);
+                MaterialPageRoute<_FloatingActionButtonConfigurationsTestRoute>(
+                    builder: (BuildContext context) => preview);
             Navigator.push(context, nextRoute);
           },
         )
