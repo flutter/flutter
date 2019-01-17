@@ -41,6 +41,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
     bool withAndroidN = false,
     String withNdkDir,
+    int ndkVersion = 16,
     bool withNdkSysroot = false,
     bool withSdkManager = true,
   }) {
@@ -65,16 +66,29 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       _createSdkFile(dir, 'tools/bin/sdkmanager');
 
     if (withNdkDir != null) {
-      final String ndkCompiler = fs.path.join(
+      final String ndkToolchainBin = fs.path.join(
         'ndk-bundle',
         'toolchains',
         'arm-linux-androideabi-4.9',
         'prebuilt',
         withNdkDir,
         'bin',
+      );
+      final String ndkCompiler = fs.path.join(
+        ndkToolchainBin,
         'arm-linux-androideabi-gcc',
       );
+      final String ndkLinker = fs.path.join(
+        ndkToolchainBin,
+        'arm-linux-androideabi-ld',
+      );
       _createSdkFile(dir, ndkCompiler);
+      _createSdkFile(dir, ndkLinker);
+      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
+Pkg.Desc = Android NDK[]
+Pkg.Revision = $ndkVersion.1.5063045
+
+''');
     }
     if (withNdkSysroot) {
       final String armPlatform = fs.path.join(
