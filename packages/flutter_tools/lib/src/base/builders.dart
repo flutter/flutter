@@ -15,7 +15,8 @@ import '../base/process_manager.dart';
 import '../compile.dart';
 import '../globals.dart';
 
-const String _kVmKernelModuleExtension = '.vm.dill';
+const String _kFlutterKernelModuleExtension = '.flutter.dill';
+const String _kFlutterModuleExtension = '.flutter.module';
 
 /// A builder which creates a kernel file for a flutter app from dart
 /// modules and an entrypoint.
@@ -60,11 +61,11 @@ class FlutterKernelBuilder implements Builder {
     if (!buildStep.inputId.path.contains('main.dart')) {
       return;
     }
-    final AssetId moduleId = buildStep.inputId.changeExtension('.vm.module');
+    final AssetId moduleId = buildStep.inputId.changeExtension(_kFlutterModuleExtension);
     final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
     final AssetId outputId = module.primarySource.changeExtension('.app.dill');
     final File outputFile = scratchSpace.fileFor(outputId);
-    // This logic is questionable.
+    // I am unsure if this is actually necessary for anything.
     final List<Module> transitiveDeps = await module.computeTransitiveDependencies(buildStep);
     final List<AssetId> transitiveKernelDeps = <AssetId>[];
     final List<AssetId> transitiveSourceDeps = <AssetId>[];
@@ -75,14 +76,14 @@ class FlutterKernelBuilder implements Builder {
         transitiveKernelDeps,
         transitiveSourceDeps,
         buildStep,
-        _kVmKernelModuleExtension);
+        _kFlutterKernelModuleExtension);
     }
     final Set<AssetId> allAssetIds = Set<AssetId>()
       ..addAll(module.sources)
       ..addAll(transitiveKernelDeps)
       ..addAll(transitiveSourceDeps);
     await scratchSpace.ensureAssets(allAssetIds, buildStep);
-    // End questionable logic (ha ha).
+    // End questionable logic.
 
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -162,7 +163,7 @@ class FlutterKernelBuilder implements Builder {
     // package, then we need to only provide sources for that file since its
     // dependencies in this package will only be providing sources as well.
     if ((await dependency.computeTransitiveDependencies(buildStep))
-        .any((m) => m.primarySource.package == root.primarySource.package)) {
+        .any((Module module) => module.primarySource.package == root.primarySource.package)) {
       transitiveSourceDeps.addAll(dependency.sources);
     } else {
       transitiveKernelDeps.add(kernelId);

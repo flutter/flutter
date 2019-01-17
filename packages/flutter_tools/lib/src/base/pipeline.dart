@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:build/build.dart';
+import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
 import 'package:build_config/build_config.dart';
 import 'package:logging/logging.dart';
@@ -12,6 +13,7 @@ import 'package:build_modules/builders.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
 import 'package:watcher/watcher.dart';
 
+import '../base/file_system.dart';
 import '../compile.dart';
 import '../globals.dart';
 import 'builders.dart';
@@ -37,15 +39,14 @@ class BuildKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     bool targetProductVm = false,
   }) async {
-    // TODO(jonahwilliams): find real project root.
-    final Directory projectRoot = File(packagesPath).parent.absolute;
-    // TODO(jonahwilliams): read exisitng asset from disk if it already exists.
-    final Directory dartToolDirectory = Directory('${projectRoot.path}/.dart_tool/build');
-    if (dartToolDirectory.existsSync()) {
-      dartToolDirectory.deleteSync(recursive: true);
+    printTrace('WARNING: running experimental package:build pipeline. '
+      'Opt out by setting ENABLE_PACKAGE_BUILD=false.');
+    final Directory projectRoot = fs.file(packagesPath).parent.absolute;
+    // We should just handle [BuildScriptChangedException]
+    final File assetGraph = fs.file(assetGraphPath);
+    if (await assetGraph.exists()) {
+      await assetGraph.delete();
     }
-    printTrace('WARNING: running experimental package:build pipeline. Opt out by setting ENABLE_PACKAGE_BUILD=false.');
-    // The set of builders which define each build step.
     final List<core.BuilderApplication> applications = <core.BuilderApplication>[
         core.apply('build_modules|module_library',
           <BuilderFactory>[moduleLibraryBuilder],
@@ -53,34 +54,34 @@ class BuildKernelCompiler implements KernelCompiler {
           isOptional: true,
           hideOutput: true,
           appliesBuilders: <String>['build_modules|module_cleanup']),
-        core.apply('build_modules|vm', <BuilderFactory>[
-            metaModuleBuilderFactoryForPlatform('vm'),
-            metaModuleCleanBuilderFactoryForPlatform('vm'),
-            moduleBuilderFactoryForPlatform('vm')
+        core.apply('build_modules|flutter', <BuilderFactory>[
+            metaModuleBuilderFactoryForPlatform('flutter'),
+            metaModuleCleanBuilderFactoryForPlatform('flutter'),
+            moduleBuilderFactoryForPlatform('flutter')
           ],
           core.toAllPackages(),
           isOptional: true,
           hideOutput: true,
           appliesBuilders: <String>['build_modules|module_cleanup']),
-        core.apply('build_vm_compilers|vm', <BuilderFactory>[
+        core.apply('build_vm_compilers|flutter', <BuilderFactory>[
           (BuilderOptions buildOptions) {
             return FlutterKernelBuilder(
-              target: mainPath,
-              aot: aot,
-              trackWidgetCreation: trackWidgetCreation,
-              extraFrontEndOptions: extraFrontEndOptions,
-              linkPlatformKernelIn: linkPlatformKernelIn,
-              targetProductVm:  targetProductVm,
-              sdkRoot: sdkRoot,
-              incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
-              packagesPath: packagesPath,
+              target: buildOptions.config['target'],
+              aot: buildOptions.config['aot'],
+              trackWidgetCreation: buildOptions.config['trackWidgetCreation'],
+              extraFrontEndOptions: buildOptions.config['extraFrontEndOptions'],
+              linkPlatformKernelIn: buildOptions.config['linkPlatformKernelIn'],
+              targetProductVm: buildOptions.config['targetProductVm'],
+              sdkRoot: buildOptions.config['sdkRoot'],
+              incrementalCompilerByteStorePath: buildOptions.config['incrementalCompilerByteStorePath'],
+              packagesPath: buildOptions.config['packagesPath'],
             );
           }
         ],
         core.toRoot(),
         isOptional: false,
         hideOutput: true,
-        appliesBuilders: <String>['build_modules|vm'],
+        appliesBuilders: <String>['build_modules|flutter'],
         defaultGenerateFor: const InputSet(include: <String>['lib/**'])
       ),
       core.applyPostProcess('build_modules|module_cleanup', moduleCleanup, defaultGenerateFor: const InputSet())
@@ -106,13 +107,30 @@ class BuildKernelCompiler implements KernelCompiler {
       ),
       environment,
       applications,
-       // TODO(jonahwilliams): determine how we will read build configurations.
-      const <String, Map<String, Object>>{},
+      <String, Map<String, Object>>{
+        'build_vm_compilers|flutter': <String, Object>{
+          'target': mainPath,
+          'aot': aot,
+          'trackWidgetCreation': trackWidgetCreation,
+          'extraFrontEndOptions': extraFrontEndOptions,
+          'linkPlatformKernelIn': linkPlatformKernelIn,
+          'targetProductVm': targetProductVm,
+          'sdkRoot': sdkRoot,
+          'incrementalCompilerByteStorePath': incrementalCompilerByteStorePath,
+          'packagesPath': packagesPath,
+        },
+      },
       isReleaseBuild: aot,
     );
     final core.BuildResult result = await runner.run(const <AssetId, ChangeType>{});
     await runner.beforeExit();
-    printTrace('build took: ${result.performance.stopTime.difference(result.performance.startTime)}');
+    final Duration executionTime = result.performance.stopTime.difference(result.performance.startTime);
+    printTrace('build took: $executionTime');
+
+    if (result.status == core.BuildStatus.failure) {
+      printTrace('build failed: ${result.failureType}');
+      return const CompilerOutput(null, 1);
+    }
 
     // Figure out a nicer way to do this.
     final AssetId output = result.outputs.firstWhere((AssetId assetId) {
@@ -123,14 +141,13 @@ class BuildKernelCompiler implements KernelCompiler {
     }
     final String fileName = '${projectRoot.path}/.dart_tool/build/generated/${output.package}/${output.path}';
     // Copy output file back to expected location.
-    File('$outputFilePath')
+    fs.file('$outputFilePath')
       ..createSync()
-      ..writeAsBytesSync(File(fileName).readAsBytesSync());
+      ..writeAsBytesSync(fs.file(fileName).readAsBytesSync());
     return CompilerOutput(fileName, fileName != null ? 0 : 1);
   }
 }
 
-// TODO(jonahwilliams): provide real implementation.
 class ToolBuildEnvironment extends core.BuildEnvironment {
   @override
   void onLog(LogRecord record) {
@@ -139,9 +156,7 @@ class ToolBuildEnvironment extends core.BuildEnvironment {
 
   @override
   Future<int> prompt(String message, List<String> choices) async {
-    print(message);
-    print(choices);
-    return 0;
+    throw UnsupportedError(message);
   }
 
   @override
