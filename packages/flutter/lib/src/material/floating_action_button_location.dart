@@ -165,11 +165,15 @@ double _yAxisOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, bool isDocked) {
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
   final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-  final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - scaffoldGeometry.minInsets.bottom;
 
   double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin;
-  if (isDocked)
+  if (isDocked) {
     fabY = contentBottom - fabHeight / 2.0;
+    final double maxVisibleFabY =
+        scaffoldGeometry.scaffoldSize.height -
+            scaffoldGeometry.minInsets.bottom - fabHeight;
+    fabY = math.min(fabY, maxVisibleFabY);
+  }
 
   // The FAB should sit with a margin between it and the snack bar.
   if (snackBarHeight > 0.0)
@@ -178,7 +182,7 @@ double _yAxisOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, bool isDocked) {
   if (bottomSheetHeight > 0.0)
     fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-  return math.min(fabY, maxFabY);
+  return fabY;
 }
 
 class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {

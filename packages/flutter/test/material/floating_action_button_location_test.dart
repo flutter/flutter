@@ -259,7 +259,8 @@ void main() {
         viewInsets: const EdgeInsets.only(bottom: 100),
       ),
     );
-    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(800.0 / 2.0, 600.0 - 28.0 - 100.0));
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(
+        800.0 / 2.0, 600.0 - 28.0 - 100.0));
   });
 }
 
