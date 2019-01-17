@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 import 'package:glob/glob.dart';
+import 'package:path/path.dart';
 
 import 'common/logging.dart';
 import 'common/network.dart';
@@ -519,7 +520,7 @@ class FuchsiaRemoteConnection {
   /// Util method for finding Dart VM service port directories in /hub.
   List<String> _getVmServicePortDirectories() {
     final Glob vmPortPattern = Glob('/hub/**/vmservice-port');
-    final hubDir = Directory('/hub');
+    final Directory hubDir = Directory('/hub');
     final List<FileSystemEntity> allHubDirs =
         hubDir.listSync(recursive: true, followLinks: true);
     final List<String> matchingDirectories = <String>[];
