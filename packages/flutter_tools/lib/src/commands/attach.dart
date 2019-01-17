@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/run_cold.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -18,6 +16,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
+import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
