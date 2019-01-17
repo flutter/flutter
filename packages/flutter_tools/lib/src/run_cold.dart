@@ -192,7 +192,7 @@ class ColdRunner extends ResidentRunner {
       if (saveCompilationTrace) {
         printStatus('Compilation training data will be saved when flutter run quits...');
       }
-      printStatus('For a more detailed help message, press "h". $quitMessage.');
+      printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". $quitMessage');
     } else {
