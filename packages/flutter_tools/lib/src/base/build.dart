@@ -472,7 +472,7 @@ class JITSnapshotter {
     if (platform == TargetPlatform.android_x86) {
       supportsAppJit = false;
       printStatus('Android x86 dynamic build will use purely interpreted code for now. '
-                  'To optimize performance, consider using --target-platform=android_x64.');
+                  'To optimize performance, consider using --target-platform=android-x64.');
     }
 
     genSnapshotArgs.addAll(<String>[
