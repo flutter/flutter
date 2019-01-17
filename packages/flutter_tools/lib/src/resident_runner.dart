@@ -68,7 +68,11 @@ class FlutterDevice {
   /// expressions requested during debugging of the application.
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  Future<void> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> _connect({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+  }) async {
     if (vmServices != null)
       return;
     final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
@@ -76,6 +80,7 @@ class FlutterDevice {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       localVmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources,
+          restart: restart,
           compileExpression: compileExpression);
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
@@ -677,14 +682,21 @@ abstract class ResidentRunner {
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered
-  Future<void> connectToServiceProtocol({ReloadSources reloadSources, CompileExpression compileExpression}) async {
+  Future<void> connectToServiceProtocol({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+  }) async {
     if (!debuggingOptions.debuggingEnabled)
       return Future<void>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      await device._connect(reloadSources: reloadSources,
-          compileExpression: compileExpression);
+      await device._connect(
+        reloadSources: reloadSources,
+        restart: restart,
+        compileExpression: compileExpression,
+      );
       await device.getVMs();
       await device.refreshViews();
       if (device.views.isEmpty)
