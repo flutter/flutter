@@ -8,21 +8,15 @@ import 'basic_types.dart';
 
 /// [StrutStyle] defines the properties of the strut to use on the entire paragraph.
 ///
-/// To define a strut, a non-negative value must be defined for [fontSize] and at
-/// least one of [lineHeight] and [leading]. Failure to define the minimum properties
-/// will result in a zero strut and it will have no effect on the layout. Negative and
-/// null values are treated the same. Most use cases will prefer [fontSize] and
-/// [lineHeight] to be defined.
-///
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
 /// if a zero width space is laid out at the beginning of each line in the
 /// paragraph. This imaginary space has the dimensions if it were laid out according
 /// to the properties defined in this class.
 ///
-/// No lines will be shorter than the strut. The ascent and descent strut
+/// No lines may be shorter than the strut. The ascent and descent strut
 /// metrics are calculated, and any font that has a shorter ascent or descent will
 /// take the ascent and descent of the strut. Larger ascent or decents will lay out
-/// as normal.
+/// as normal and extend past the strut.
 ///
 /// The vertical components of strut are as follows:
 /// 
@@ -288,11 +282,13 @@ class StrutStyle extends Diagnosticable {
   ///
   /// When true, all lines will be laid out with the height of the
   /// strut. All line and run-specific metrics will be ignored/overrided and only strut
-  /// metrics will be used instead. This property guarantees uniform line spacing, however
-  /// text overlap will become possible. This property should be enabled with caution as
+  /// metrics will be used instead. This will guarantee uniform line spacing, however
+  /// text overlap will become possible.
+  ///
+  /// This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
   ///
-  /// This defaults to false.
+  /// The deault is `false`.
   final bool forceStrutHeight;
 
   /// A human-readable description of this strut style.
