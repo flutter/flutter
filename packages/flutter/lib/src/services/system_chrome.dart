@@ -346,10 +346,12 @@ class SystemChrome {
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
-  /// ```dart
+  /// ```dart imports
+  ///    import 'package:flutter/services.dart';
   ///    import 'dart:math' as math;
-  ///    import 'package:flutter/foundation.dart';
+  /// ```
   ///
+  /// ```dart
   ///    final _random = math.Random();
   ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
   ///
