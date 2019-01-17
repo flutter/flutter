@@ -446,7 +446,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
                   platform_view = platform_view_->GetWeakPtr(),
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task] {
     if (io_manager) {
-      io_manager->UpdateResourceContext(
+      io_manager->NotifyResourceContextAvailable(
           platform_view ? platform_view->CreateResourceContext() : nullptr);
     }
     // Step 1: Next, post a task on the UI thread to tell the engine that it has
@@ -454,9 +454,14 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
   };
 
-  // Step 0: Tell the IO thread that the PlatformView has a GLContext that can
-  // be used to create a resource context.
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetIOTaskRunner(), io_task);
+  // Step 0: If the IOManager doesn't already have a ResourceContext, tell the
+  // IO thread that the PlatformView can make one for it now.
+  // Otherwise, jump right to step 1 on the UI thread.
+  if (!io_manager_->GetResourceContext()) {
+    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetIOTaskRunner(), io_task);
+  } else {
+    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(), ui_task);
+  }
   latch.Wait();
 }
 

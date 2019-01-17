@@ -71,6 +71,16 @@ fml::WeakPtr<GrContext> IOManager::GetResourceContext() const {
              : fml::WeakPtr<GrContext>();
 }
 
+void IOManager::NotifyResourceContextAvailable(
+    sk_sp<GrContext> resource_context) {
+  // The resource context needs to survive as long as we have Dart objects
+  // referencing. We shouldn't ever need to replace it if we have one - unless
+  // we've somehow shut down the Dart VM and started a new one fresh.
+  if (!resource_context_) {
+    UpdateResourceContext(std::move(resource_context));
+  }
+}
+
 void IOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
   resource_context_ = std::move(resource_context);
   resource_context_weak_factory_ =
