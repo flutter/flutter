@@ -143,6 +143,17 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<void> _restartService({ bool pause = false }) async {
+    final OperationResult result =
+      await restart(fullRestart: true, pauseAfterRestart: pause);
+    if (!result.isOk) {
+      throw rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
+        'Unable to restart',
+      );
+    }
+  }
+
   Future<String> _compileExpressionService(String isolateId, String expression,
       List<String> definitions, List<String> typeDefinitions,
       String libraryUri, String klass, bool isStatic,
@@ -168,6 +179,7 @@ class HotRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol(
         reloadSources: _reloadSourcesService,
+        restart: _restartService,
         compileExpression: _compileExpressionService,
       );
     } catch (error) {
@@ -675,7 +687,7 @@ class HotRunner extends ResidentRunner {
           analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
           analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
           analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
-          flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
+          analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
           final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
           final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
           printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
@@ -770,17 +782,22 @@ class HotRunner extends ResidentRunner {
         reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
-    printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
+    final Duration reloadDuration = reloadTimer.elapsed;
+    final int reloadInMs = reloadDuration.inMilliseconds;
+
+    analyticsParameters[kEventReloadOverallTimeInMs] = '$reloadInMs';
+    flutterUsage.sendEvent('hot', 'reload', parameters: analyticsParameters);
+
+    printTrace('Hot reload performed in $reloadInMs.');
     // Record complete time it took for the reload.
-    _addBenchmarkData('hotReloadMillisecondsToFrame',
-        reloadTimer.elapsed.inMilliseconds);
+    _addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
     // Only report timings if we reloaded a single view without any
     // errors or timeouts.
     if ((reassembleViews.length == 1) &&
         !reassembleAndScheduleErrors &&
         !reassembleTimedOut &&
         shouldReportReloadTime)
-      flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
+      flutterUsage.sendTiming('hot', 'reload', reloadDuration);
 
     return OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,

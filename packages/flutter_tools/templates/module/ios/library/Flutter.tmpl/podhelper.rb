@@ -23,7 +23,7 @@ end
 def flutter_root(f)
     generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Flutter', 'Generated.xcconfig')))
     if generated_xcode_build_settings.empty?
-        puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in ${f}."
+        puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in #{f}."
         exit
     end
     generated_xcode_build_settings.map { |p|
@@ -61,7 +61,6 @@ plugin_pods.map { |r|
 
 # Ensure that ENABLE_BITCODE is set to NO, add a #include to Generated.xcconfig, and
 # add a run script to the Build Phases.
-# TODO(dnfield): Figure out a way to deliver the Build Phase scripts without manual user intervention.
 post_install do |installer|
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|

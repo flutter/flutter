@@ -7,6 +7,7 @@ import 'dart:async';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
@@ -34,9 +35,12 @@ import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'linux/linux_workflow.dart';
+import 'macos/macos_workflow.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
+import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
@@ -53,6 +57,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
@@ -77,7 +82,9 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
       KernelCompiler: () => enablePackageBuild ? const BuildKernelCompiler() : const KernelCompiler(),
+      LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      MacOSWorkflow: () => const MacOSWorkflow(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
@@ -85,6 +92,7 @@ Future<T> runInContext<T>(
       Stdio: () => const Stdio(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
+      WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

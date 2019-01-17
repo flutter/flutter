@@ -332,6 +332,9 @@ class ArchiveCreator {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
+        // Run it outside the cloned Flutter repo to not nest git repos, since
+        // they'll be git repos themselves too.
+        workingDirectory: tempDir,
       );
     }
 
@@ -531,7 +534,7 @@ class ArchivePublisher {
     bool failOk = false,
   }) async {
     return _processRunner.runProcess(
-      <String>['gsutil']..addAll(args),
+      <String>['gsutil.py', '--']..addAll(args),
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
@@ -558,7 +561,7 @@ class ArchivePublisher {
       args.addAll(<String>['-h', 'Content-Type:$mimeType']);
     }
     args.addAll(<String>['cp', src, dest]);
-    return _runGsUtil(args);
+    return await _runGsUtil(args);
   }
 }
 

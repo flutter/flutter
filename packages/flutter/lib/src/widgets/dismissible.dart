@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'debug.dart';
@@ -82,8 +84,10 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
+       assert(dragStartBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -141,6 +145,23 @@ class Dismissible extends StatefulWidget {
   /// If non-zero value is given then widget moves in cross direction depending on whether
   /// it is positive or negative.
   final double crossAxisEndOffset;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
+  /// dismissible will begin upon the detection of a drag gesture. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _DismissibleState createState() => _DismissibleState();
@@ -327,8 +348,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       Tween<Offset>(
         begin: Offset.zero,
         end: _directionIsXAxis
-               ? Offset(end, widget.crossAxisEndOffset)
-               : Offset(widget.crossAxisEndOffset, end),
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
       ),
     );
   }
@@ -514,7 +535,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       children.add(content);
       content = Stack(children: children);
     }
-
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
@@ -524,7 +544,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: content
+      child: content,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 }
