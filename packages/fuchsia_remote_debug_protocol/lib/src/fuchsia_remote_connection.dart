@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:process/process.dart';
+import 'package:glob/glob.dart';
+import 'package:path/path.dart';
 
 import 'common/logging.dart';
 import 'common/network.dart';
@@ -515,6 +517,21 @@ class FuchsiaRemoteConnection {
     _pollDartVms = true;
   }
 
+  /// Util method for finding Dart VM service port directories in /hub.
+  List<String> _getVmServicePortDirectories() {
+    final Glob vmPortPattern = Glob('/hub/**/vmservice-port');
+    final hubDir = Directory('/hub');
+    final List<FileSystemEntity> allHubDirs =
+        hubDir.listSync(recursive: true, followLinks: true);
+    final List<String> matchingDirectories = <String>[];
+    for (FileSystemEntity entity in allHubDirs) {
+      if (vmPortPattern.matches(entity.path)) {
+        matchingDirectories.add(entity.path);
+      }
+    }
+    return matchingDirectories;
+  }
+
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
   ///
   /// The method attempts to get service ports through an SSH connection. Upon
@@ -523,19 +540,15 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    final List<String> portPaths =
-        await _sshCommandRunner.run('find /hub -name vmservice-port');
+    final List<String> vmServiceDirectories = _getVmServicePortDirectories();
     final List<int> ports = <int>[];
-    for (String path in portPaths) {
-      if (path == '') {
-        continue;
-      }
-      final List<String> lsOutput = await _sshCommandRunner.run('ls $path');
-      for (String line in lsOutput) {
-        if (line == '') {
-          continue;
-        }
-        final int port = int.tryParse(line);
+    for (String path in vmServiceDirectories) {
+      final Directory vmServiceDir = Directory(path);
+      final List<FileSystemEntity> portPaths =
+          vmServiceDir.listSync(recursive: false, followLinks: false);
+      for (FileSystemEntity entity in portPaths) {
+        final String portBasename = basename(entity.path);
+        final int port = int.tryParse(portBasename);
         if (port != null) {
           ports.add(port);
         }

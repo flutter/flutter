@@ -11,6 +11,7 @@ dependencies:
   json_rpc_2: 2.0.9
   process: 3.0.9
   web_socket_channel: 1.0.9
+  glob: 1.1.7
   flutter_test:
     sdk: flutter
   flutter_driver:
