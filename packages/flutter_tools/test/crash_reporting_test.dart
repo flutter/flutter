@@ -164,41 +164,43 @@ void main() {
 
   // EngineCrash class tests
   test('EngineCrash class', () async {
-    EngineCrash crashData = EngineCrash();
+    final EngineCrash crashData = EngineCrash();
 
-    // Full example backtrace data.
-    crashData.addTraceLine("F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)");
-    crashData.addTraceLine("*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***");
-    crashData.addTraceLine("Build fingerprint: 'google/bullhead/bullhead:8.1.0/OPM2.171019.029/4657601:user/release-keys'");
-    crashData.addTraceLine("Revision: 'rev_1.0'");
-    crashData.addTraceLine("ABI: 'arm'");
-    crashData.addTraceLine("pid: 25429, tid: 25446, name: 1.ui  >>> com.example.helloworld <<<");
-    crashData.addTraceLine("signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------");
-    crashData.addTraceLine("Abort message: '../../flutter/third_party/txt/src/txt/paragraph.cc:430: void txt::Paragraph::Layout(double, bool): assertion \"false\" failed'");
-    crashData.addTraceLine("    r0 00000000  r1 00006366  r2 00000006  r3 00000008");
-    crashData.addTraceLine("    r4 00006355  r5 00006366  r6 d88fbecc  r7 0000010c");
-    crashData.addTraceLine("    r8 00000000  r9 d93edb15  sl da15e600  fp d74ad000");
-    crashData.addTraceLine("    ip d88fe108  sp d88fbeb8  lr f63248b1  pc f631e39a  cpsr 20070030");
-    crashData.addTraceLine("backtrace:");
-    crashData.addTraceLine("    #00 pc 0001a39a  /system/lib/libc.so (abort+63)");
-    crashData.addTraceLine("    #01 pc 0001a5bd  /system/lib/libc.so (__assert2+20)");
-    crashData.addTraceLine("    #02 pc 011fb5b9  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #03 pc 00a2b2e9  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #04 pc 00a28017  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #05 pc 00a03763  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #06 pc 00a036bf  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #07 pc 00a27b33  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #08 pc 013df649  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)");
-    crashData.addTraceLine("    #09 pc 00000804  <anonymous:d7d80000>");
+    // Full example backtrace da');
+    crashData.addTraceLine('F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)');
+    crashData.addTraceLine('*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***');
+    crashData.addTraceLine('Build fingerprint: \'google/bullhead/bullhead:8.1.0/OPM2.171019.029/4657601:user/release-keys\'');
+    crashData.addTraceLine('Revision: \'rev_1.0\'');
+    crashData.addTraceLine('ABI: \'arm\'');
+    crashData.addTraceLine('pid: 25429, tid: 25446, name: 1.ui  >>> com.example.helloworld <<<');
+    crashData.addTraceLine('signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------');
+    crashData.addTraceLine('Abort message: \'../../flutter/third_party/txt/src/txt/paragraph.cc:430: void txt::Paragraph::Layout(double, bool): assertion "false" failed\'');
+    crashData.addTraceLine('    r0 00000000  r1 00006366  r2 00000006  r3 00000008');
+    crashData.addTraceLine('    r4 00006355  r5 00006366  r6 d88fbecc  r7 0000010c');
+    crashData.addTraceLine('    r8 00000000  r9 d93edb15  sl da15e600  fp d74ad000');
+    crashData.addTraceLine('    ip d88fe108  sp d88fbeb8  lr f63248b1  pc f631e39a  cpsr 20070030');
+    crashData.addTraceLine('backtrace:');
+    crashData.addTraceLine('    #00 pc 0001a39a  /system/lib/libc.so (abort+63)');
+    crashData.addTraceLine('    #01 pc 0001a5bd  /system/lib/libc.so (__assert2+20)');
+    crashData.addTraceLine('    #02 pc 011fb5b9  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #03 pc 00a2b2e9  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #04 pc 00a28017  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #05 pc 00a03763  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #06 pc 00a036bf  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #07 pc 00a27b33  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #08 pc 013df649  /data/app/com.example.helloworld-gfUKX_ShbxBIjWuT-44Wjw==/lib/arm/libflutter.so (offset 0x9a7000)');
+    crashData.addTraceLine('    #09 pc 00000804  <anonymous:d7d80000>');
 
     expect(crashData.parseSignature(), "Fatal Abort message: '../../flutter/third_party/txt/src/txt/paragraph.cc:430: void txt::Paragraph::Layout(double, bool): assertion \"false\" failed'");
-    expect(crashData.squashBacktrace(0, 1), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n');
-    expect(crashData.squashBacktrace(0, 2), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
-    expect(crashData.squashBacktrace(1, 2), '*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n')
-    expect(crashData.squashBacktrace(22, 22), '');
-    expect(crashData.squashBacktrace(22, 23), '    #09 pc 00000804  <anonymous:d7d80000>');
-    expect(crashData.squashBacktrace(35, 93), '');
-    expect(crashData.squashBacktrace(17, 9), '');
+    expect(crashData.squashBacktrace(startLine: 0, endLine: 1), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n');
+    expect(crashData.squashBacktrace(startLine: 0, endLine: 2), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
+    expect(crashData.squashBacktrace(endLine: 2), 'F/libc    (25429): Fatal signal 6 (SIGABRT), code -6 in tid 25446 (1.ui), pid 25429 (mple.helloworld)\n*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n');
+    expect(crashData.squashBacktrace(startLine: 1, endLine: 2), '*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n')
+    expect(crashData.squashBacktrace(startLine: 22, endLine: 22), '');
+    expect(crashData.squashBacktrace(startLine: 22, endLine: 23), '    #09 pc 00000804  <anonymous:d7d80000>');
+    expect(crashData.squashBacktrace(startLine: 22), '    #09 pc 00000804  <anonymous:d7d80000>');
+    expect(crashData.squashBacktrace(startLine: 35, endLine: 93), '');
+    expect(crashData.squashBacktrace(startLine: 17, endLine: 9), '');
     expect(crashData.lineContaining('backtrace', 12));
     expect(crashData.lineContaining('Revision:', 3));
     expect(crashData.lineContaining('#09 pc 00000804', 22));
