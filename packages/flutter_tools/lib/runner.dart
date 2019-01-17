@@ -76,9 +76,9 @@ Future<int> _handleToolError(
     String getFlutterVersion(),
     ) async {
   // Wait for any existing engine crash reports to finish.
-  if (CrashReportSender.engineCrash != null && CrashReportSender.engineCrash.reportStatus != null) {
+  if (CrashReportSender.engineCrash != null && CrashReportSender.engineCrash.getReportStatus() != null) {
     // Other functions may exit the program before this Future can complete.
-    await CrashReportSender.engineCrash.reportStatus;
+    await CrashReportSender.engineCrash.getReportStatus();
   }
   await CrashReportSender.instance.checkAndSendEngineReport(
     getFlutterVersion: getFlutterVersion,

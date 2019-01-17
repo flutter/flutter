@@ -161,7 +161,7 @@ class CrashReportSender {
     @required String getFlutterVersion(),
   }) async {
     engineCrash = CrashReportSender.engineCrash;
-    if (engineCrash == null || engineCrash.reportStatus != null) {
+    if (engineCrash == null || engineCrash.getReportStatus() != null) {
       return;
     }
     engineCrash.beginReport();
@@ -248,7 +248,7 @@ If you would like to stop automatically sending engine crash reports, use:
 
       final http.StreamedResponse resp = await _client.send(req);
 
-      if (resp.statusCode == 200) {
+      if (resp.statusCode == HttpStatus.ok) {
         final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
@@ -267,38 +267,49 @@ If you would like to stop automatically sending engine crash reports, use:
   }
 }
 
-// Holds the parsed data (from logs) of an engine crash.
+/// Holds the parsed data (from logs) of an engine crash.
 class EngineCrash {
 
-  EngineCrash() {
-    _backtrace = <String>[];
-  }
-
-  // Lines that make up the backtrace.
-  List<String> _backtrace;
+  /// Lines that make up the backtrace and initial error information.
+  final List<String> _backtrace = <String>[];
 
   // Completes when the report is fully submitted or skipped. Is null when
   // no report attempt has been made.
-  Future<void> reportStatus;
+  Future<void> _reportStatus;
   Completer<void> _completer;
 
   void addTraceLine(String line) {
     _backtrace.add(line);
   }
 
-  // 'Locks' the report so that the program will not end while waiting for
-  // input/server response.
+  /// 'Locks' the report so that the program will not end while waiting for
+  /// input/server response.
+  ///
+  /// See [endReport].
   void beginReport() {
     _completer = Completer<void>();
-    reportStatus = _completer.future;
+    _reportStatus = _completer.future;
   }
 
-  // 'Unlocks' the report and allows the program execution to continue.
+  /// 'Unlocks' the report and allows the program execution to continue. Generally,
+  /// Flutter tool will exit execution after reports are finished.
+  ///
+  /// See [beginReport].
   void endReport() {
     _completer.complete();
   }
 
-  // Converts the bactrace from a list to a single string.
+  /// Returns a void future that will complete when the report is fully submitted
+  /// or skipped.
+  ///
+  /// Returns null when no report attempt has been made.
+  Future<void> getReportStatus() {
+    return _reportStatus;
+  }
+
+  /// Converts the bactrace from a list to a single string with newlines.
+  ///
+  /// The [startLine] and [endLine] properties define a range of lines to include.
   String squashBacktrace({int startLine = 0, int endLine = -1}) {
     if (endLine < 0) {
       endLine = _backtrace.length;
@@ -310,7 +321,7 @@ class EngineCrash {
     return out;
   }
 
-  // Finds the index of the first line that contains [str].
+  /// Finds the index of the first line that contains [str].
   int lineContaining(String str) {
     for (int i = 0; i < _backtrace.length; i++) {
       if (_backtrace[i].contains(str)) {
@@ -320,11 +331,11 @@ class EngineCrash {
     return -1;
   }
 
-  // Attempts to produce a representative signature for deduping.
+  /// Attempts to produce a representative signature for deduping.
   String parseSignature() {
     final int line = lineContaining('backtrace');
     if (line >= 0) {
-      return 'Fatal ' + _backtrace[line - 5];
+      return 'Fatal  ${_backtrace[line - 5]}}';
     }
     // backtrace should always have at least one line.
     return _backtrace[0];
