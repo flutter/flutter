@@ -202,6 +202,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, true);
       expect(raw.textStyle.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.elevation, 6.0);
@@ -212,20 +213,6 @@ void main() {
       expect(raw.shape, defaultFABShape);
       expect(raw.animationDuration, defaultButtonDuration);
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
-
-      // The RawMaterialButton that FloatingActionButton builds handles disabled
-      // elevation internally. FloatingActionButton does not set the elevation
-      // depending on state (unlike OutlineButton, etc, that extend
-      // RawMaterialButton and manipulate the elevation manually for each state).
-      // So, the RawMaterialButton here always returns what's set as the
-      // FloatingActionButton's enabled state .elevation (6.0). To measure the
-      // elevation shown, you have to query the piece of Material that
-      // RawMaterialButton builds. Same as below.
-      //
-      // TODO(willlarche): Remove elevation tests on the Material inside
-      // RawMaterialButton. See github.com/flutter/flutter/issues/26317
-      final Material underlyingMaterial = tester.widget<Material>(find.byType(Material));
-      expect(underlyingMaterial.elevation, 6.0);
     });
 
     testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
@@ -242,6 +229,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, false);
       expect(raw.textStyle.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       // highlightColor, disabled button can't be pressed
@@ -254,20 +242,6 @@ void main() {
       expect(raw.shape, defaultFABShape);
       expect(raw.animationDuration, defaultButtonDuration);
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
-
-      // The RawMaterialButton that FloatingActionButton builds handles disabled
-      // elevation internally. FloatingActionButton does not set the elevation
-      // depending on state (unlike OutlineButton, etc, that extend
-      // RawMaterialButton and manipulate the elevation manually for each state).
-      // So, the RawMaterialButton here always returns what's set as the
-      // FloatingActionButton's enabled state .elevation (6.0). To measure the
-      // elevation shown, you have to query the piece of Material that
-      // RawMaterialButton builds. Same as below.
-      //
-      // TODO(willlarche): Remove elevation tests on the Material inside
-      // RawMaterialButton. See github.com/flutter/flutter/issues/26317
-      final Material underlyingMaterial = tester.widget<Material>(find.byType(Material));
-      expect(underlyingMaterial.elevation, 6.0);
     });
   });
 }
