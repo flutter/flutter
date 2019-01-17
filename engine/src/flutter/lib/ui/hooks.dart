@@ -162,6 +162,20 @@ void _drawFrame() {
   _invoke(window.onDrawFrame, window._onDrawFrameZone);
 }
 
+@pragma('vm:entry-point')
+// ignore: unused_element
+void _runMainZoned(Function startMainIsolateFunction, Function userMainFunction) {
+  startMainIsolateFunction((){
+    runZoned<Future<void>>(() {
+      userMainFunction();
+    }, onError: (Object error, StackTrace stackTrace) {
+      _reportUnhandledException(error.toString(), stackTrace.toString());
+    });
+  }, null);
+}
+
+void _reportUnhandledException(String error, String stackTrace) native 'Window_reportUnhandledException';
+
 /// Invokes [callback] inside the given [zone].
 void _invoke(void callback(), Zone zone) {
   if (callback == null)
