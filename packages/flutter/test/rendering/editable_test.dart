@@ -145,7 +145,7 @@ void main() {
     await tester.pump();
 
     expect(editable, paints
-      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.0, -2.0, 466.0, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
+      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.7, -2.0, 466.7, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
       ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, -4.0, 467.5, 19.0), const Radius.circular(1.0)), color: const Color(0xFF007AFF))
     );
 
