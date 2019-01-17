@@ -35,7 +35,7 @@ typedef SelectionChangedCallback = void Function(TextSelection selection, Select
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
-const Duration _kCursorFadeInAndOutTime = Duration(milliseconds: 500);
+const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
 // The time the cursor is static in opacity before animating to become
 // transparent.
@@ -1012,7 +1012,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// state or the "off" state). A complete cursor blink period is twice this
   /// value (half on, half off).
   @visibleForTesting
-  Duration get cursorBlinkInterval => _kCursorFadeInAndOutTime;
+  Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   /// The current status of the text selection handles.
   @visibleForTesting
@@ -1034,6 +1034,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorBlinkOpacityController.animateTo(toValue, curve: Curves.easeOut);
     } else {
+      print(_showCursor.value);
       _cursorBlinkOpacityController.value = _showCursor.value ? 1.0 : 0.0;
     }
 
@@ -1045,9 +1046,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _cursorWaitForStart(Timer timer) {
-    assert(_kCursorFadeInAndOutTime > _fadeDuration);
+    assert(_kCursorBlinkHalfPeriod > _fadeDuration);
     _cursorTimer?.cancel();
-    _cursorTimer = Timer.periodic(_kCursorFadeInAndOutTime, _cursorTick);
+    _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void _startCursorTimer() {
@@ -1056,7 +1057,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cursorBlinkOpacityController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
-      _cursorTimer = Timer.periodic(_kCursorFadeInAndOutTime, _cursorTick);
+      _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
     }
   }
 

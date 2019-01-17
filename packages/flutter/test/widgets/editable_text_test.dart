@@ -568,6 +568,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 
@@ -620,6 +622,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 

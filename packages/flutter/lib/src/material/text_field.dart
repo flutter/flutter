@@ -37,6 +37,14 @@ typedef InputCounterWidgetBuilder = Widget Function(
   }
 );
 
+// An eyeballed value that moves the cursor slightly left of where it is
+// rendered for text on Android so it's positioning more accurately matches the
+// native iOS text cursor positioning.
+//
+// This value is in device pixels, not logical pixels as is typically used
+// throughout the codebase.
+const int _iOSHorizontalCursorOffsetPixels = 2;
+
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -693,10 +701,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   bool get _cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
 
+  Offset get _getCursorOffset => Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
+
+  bool get _paintCursorAboveText => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
+
   Color get _cursorColor {
     if (widget.cursorColor == null) {
       if (Theme.of(context).platform == TargetPlatform.iOS)
-        return CupertinoColors.activeBlue;
+        return CupertinoTheme.of(context).primaryColor;
       else
         return Theme.of(context).cursorColor;
     }
@@ -779,8 +791,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorRadius: _cursorRadius,
         cursorColor: _cursorColor,
         cursorOpacityAnimates: _cursorOpacityAnimates,
-        cursorOffset: const Offset(0, 0),
-        paintCursorAboveText: false,
+        cursorOffset: _getCursorOffset,
+        paintCursorAboveText: _paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,

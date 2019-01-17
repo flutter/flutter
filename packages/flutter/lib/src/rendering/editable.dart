@@ -742,7 +742,7 @@ class RenderEditable extends RenderBox {
   ///{@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
-  /// By default, the cursor will be painted on top for iOS platforms and
+  /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
   /// {@end template}
   bool get paintCursorAboveText => _paintCursorOnTop;
@@ -757,7 +757,7 @@ class RenderEditable extends RenderBox {
   /// {@template flutter.rendering.editable.cursorOffset}
   /// The offset that is used, in pixels, when painting the cursor on screen.
   ///
-  /// By default, the cursor will be painted on with an offset of
+  /// By default, the cursor position should be set to an offset of
   /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
   /// platforms. The origin from where the offset is applied to is the arbitrary
   /// location where the cursor ends up being rendered from by default.
