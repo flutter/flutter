@@ -30,6 +30,15 @@ class IOManager : public blink::IOManager {
 
   fml::WeakPtr<GrContext> GetResourceContext() const override;
 
+  // This method should be called when a resource_context first becomes
+  // available. It is safe to call multiple times, and will only update
+  // the held resource context if it has not already been set.
+  void NotifyResourceContextAvailable(sk_sp<GrContext> resource_context);
+
+  // This method should be called if you want to force the IOManager to
+  // update its resource context reference. It should not be called
+  // if there are any Dart objects that have a reference to the old
+  // resource context, but may be called if the Dart VM is restarted.
   void UpdateResourceContext(sk_sp<GrContext> resource_context);
 
   fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
