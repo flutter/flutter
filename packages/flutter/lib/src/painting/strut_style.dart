@@ -13,10 +13,13 @@ import 'basic_types.dart';
 /// paragraph. This imaginary space has the dimensions if it were laid out according
 /// to the properties defined in this class.
 ///
-/// No lines may be shorter than the strut. The ascent and descent strut
-/// metrics are calculated, and any font that has a shorter ascent or descent will
-/// take the ascent and descent of the strut. Larger ascent or decents will lay out
-/// as normal and extend past the strut.
+/// No lines may be shorter than the strut. The ascent and descent of the strut
+/// are calculated, and any laid out text that has a shorter ascent or descent than
+/// the strut's ascent or descent will take the ascent and descent of the strut.
+/// Text with ascents or decents larger than the strut's ascent or descent will lay
+/// out as normal and extend past the strut.
+///
+/// Strut is defined independently from any text content or [TextStyle]s.
 ///
 /// The vertical components of strut are as follows:
 /// 
@@ -39,39 +42,43 @@ import 'basic_types.dart';
 ///
 ///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
-/// 
+///
 ///  * [fontFamilyFallback] an ordered list of font family names that will be searched for when
 ///    the font in [fontFamily] cannot be found.
 ///
 ///  * [fontSize] the size of the ascent plus descent in logical pixels. This is also
 ///    used as the basis of the custom leading caluclation. This value cannot
-///    be negative.
+///    be negative. Default is `14` logical pixels.
 ///
 ///  * [lineHeight] the height of the line as a ratio of [fontSize]. This property does
 ///    not affect the leading height, which is controlled separately through [leading].
-/// 
+///    Default is `1.0`.
+///
 ///  * [leading] the custom leading to apply to the strut as a ratio of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
 ///    to the top and the other half to the bottom of the line height. Negative values
-///    indicate using the font's original leading.
+///    indicate using the font's original leading. Default is `-1`, which will use the
+///    font-specified leading.
 ///
 ///  * [fontWeight] the typeface thickness to use when calculating the strut (e.g., bold).
+///    Default is `w400`.
 ///
 ///  * [fontStyle] the typeface variant to use when calculating the strut (e.g., italic).
-/// 
+///    Default is `normal`.
+///
 ///  * [forceStrutHeight] when true, all lines will be laid out with the height of the
 ///    strut. All line and run-specific metrics will be ignored/overrided and only strut
 ///    metrics will be used instead. This property guarantees uniform line spacing, however
 ///    text overlap will become possible. This property should be enabled with caution as
 ///    it bypasses a large portion of the vertical layout system. The default value is false.
-/// 
+///
 /// ### Examples
-/// 
+///
 /// {@tool sample}
 /// In this simple case, the text will be rendered at font size 10, however, the vertical
 /// line height will be the strut height (Roboto in font size 30 * 1.5) as the text
 /// itself is smaller than the strut.
-/// 
+///
 /// ```dart
 /// Text(
 ///   "Hello, world!\nSecond line!",
@@ -87,14 +94,14 @@ import 'basic_types.dart';
 /// ),
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [lineHeight] was defined as 1.5, which caused all lines to be laid out
 /// taller than without strut. This extra space was able to accomodate the larger
 /// font size `Second line!` without causing the line height to change for the second
 /// line only.
-/// 
+///
 /// ```dart
 /// Text.rich(
 ///   TextSpan(
@@ -128,15 +135,15 @@ import 'basic_types.dart';
 /// ),
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool sample}
 /// Here, strut is used to enable strange and overlapping text to achieve unique
 /// effects. The `M`s in lines 2 and 3 are able to extend above their lines and
 /// fill empty space in lines above. The [forceStrutHeight] is enabled and functions
 /// as a 'grid' for the glyphs to draw on.
-/// 
+///
 /// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example.png)
-/// 
+///
 /// ```dart
 /// Text.rich(
 ///   TextSpan(
@@ -171,7 +178,7 @@ import 'basic_types.dart';
 /// ),
 /// ```
 /// {@end-tool}
-/// 
+///
 @immutable
 class StrutStyle extends Diagnosticable {
   /// Creates a strut style.
