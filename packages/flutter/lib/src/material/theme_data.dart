@@ -247,6 +247,7 @@ class ThemeData extends Diagnosticable {
     );
     tabBarTheme ??= const TabBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();
+    cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: brightness,
@@ -295,6 +296,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: tabBarTheme,
+      cardTheme: cardTheme,
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
@@ -357,6 +359,7 @@ class ThemeData extends Diagnosticable {
     @required this.accentIconTheme,
     @required this.sliderTheme,
     @required this.tabBarTheme,
+    @required this.cardTheme,
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
@@ -404,6 +407,7 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(tabBarTheme != null),
+       assert(cardTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
        assert(materialTapTargetSize != null),
@@ -600,6 +604,9 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
+  /// The colors and styles used to render [Card], [
+  final CardTheme cardTheme;
+
   /// The colors and styles used to render [Chip], [
   ///
   /// This is the value returned from [ChipTheme.of].
@@ -700,6 +707,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
@@ -751,6 +759,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      cardTheme: cardTheme ?? this.cardTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
@@ -880,6 +889,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
+      cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
@@ -939,6 +949,7 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.tabBarTheme == tabBarTheme) &&
+           (otherData.cardTheme == cardTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
@@ -998,6 +1009,7 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         hashValues(
           tabBarTheme,
+          cardTheme,
           chipTheme,
           platform,
           materialTapTargetSize,
@@ -1053,6 +1065,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
+    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));

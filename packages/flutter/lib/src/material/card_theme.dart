@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -24,41 +26,48 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 class CardTheme extends Diagnosticable {
+
   /// Creates a theme that can be used for [ThemeData.cardTheme].
   const CardTheme({
+    this.clipBehavior,
     this.color,
     this.elevation,
     this.shape,
   });
 
-  /// Default value for [BottomAppBar.color].
+  /// Default value for [Card.clipBehavior].
+  final Clip clipBehavior;
+
+  /// Default value for [Card.color].
   ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
+  /// If null, [Card] uses [ThemeData.cardColor].
   final Color color;
 
-  /// Default value for [BottomAppBar.elevation].
+  /// Default value for [Card.elevation].
   final double elevation;
 
-  /// Default value for [BottomAppBar.shape].
+  /// Default value for [Card.shape].
   final NotchedShape shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  BottomAppBarTheme copyWith({
+  CardTheme copyWith({
+    Clip clipBehavior,
     Color color,
     double elevation,
     NotchedShape shape,
   }) {
-    return BottomAppBarTheme(
+    return CardTheme(
+      clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
     );
   }
 
-  /// The [ThemeData.bottomAppBarTheme] property of the ambient [Theme].
-  static BottomAppBarTheme of(BuildContext context) {
-    return Theme.of(context).bottomAppBarTheme;
+  /// The [ThemeData.cardTheme] property of the ambient [Theme].
+  static CardTheme of(BuildContext context) {
+    return Theme.of(context).cardTheme;
   }
 
   /// Linearly interpolate between two BAB themes.
@@ -66,9 +75,10 @@ class CardTheme extends Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme a, BottomAppBarTheme b, double t) {
+  static CardTheme lerp(CardTheme a, CardTheme b, double t) {
     assert(t != null);
-    return BottomAppBarTheme(
+    return CardTheme(
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: t < 0.5 ? a?.shape : b?.shape,
@@ -78,6 +88,7 @@ class CardTheme extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
+      clipBehavior,
       color,
       elevation,
       shape,
@@ -90,8 +101,9 @@ class CardTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomAppBarTheme typedOther = other;
-    return typedOther.color == color
+    final CardTheme typedOther = other;
+    return typedOther.clipBehavior == clipBehavior
+        && typedOther.color == color
         && typedOther.elevation == elevation
         && typedOther.shape == shape;
   }
@@ -99,6 +111,7 @@ class CardTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
