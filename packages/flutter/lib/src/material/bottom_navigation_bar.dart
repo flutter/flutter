@@ -359,7 +359,7 @@ class _FixedLabel extends StatelessWidget {
         margin: const EdgeInsets.all(0.0),
         child: DefaultTextStyle.merge(
           style: TextStyle(
-            fontSize: item.showLabel ? _kActiveFontSize : 0.0,
+            fontSize: _kActiveFontSize,
             color: colorTween.evaluate(animation),
           ),
           // The font size should grow here when active, but because of the way
@@ -375,7 +375,7 @@ class _FixedLabel extends StatelessWidget {
               ),
             ),
             alignment: Alignment.bottomCenter,
-            child: item.showLabel ? item.title : Text(item.title.data ?? ''),
+            child: item.title,
           ),
         ),
       ),
@@ -414,10 +414,10 @@ class _ShiftingLabel extends StatelessWidget {
           opacity: animation,
           child: DefaultTextStyle.merge(
             style: TextStyle(
-              fontSize:  item.showLabel ? _kActiveFontSize : 0.0,
+              fontSize:  _kActiveFontSize,
               color: Colors.white,
             ),
-            child: item.showLabel ? item.title : Text(item.title.data ?? ''),
+            child: item.title,
           ),
         ),
       ),
