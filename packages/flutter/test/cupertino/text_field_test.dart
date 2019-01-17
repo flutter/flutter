@@ -1168,4 +1168,52 @@ void main() {
       );
     },
   );
+
+  testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Center(
+          child: CupertinoTextField(),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+  });
+
+  testWidgets('text field can override keyboardAppearance from theme', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Center(
+          child: CupertinoTextField(
+            keyboardAppearance: Brightness.light,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
 }
