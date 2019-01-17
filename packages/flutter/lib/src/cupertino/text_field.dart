@@ -605,7 +605,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
-    final TextStyle textStyle = widget.style ?? CupertinoTheme.of(context).textTheme.textStyle;
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final TextStyle textStyle = widget.style ?? themeData.textTheme.textStyle;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -635,7 +637,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorColor: widget.cursorColor,
           backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
-          keyboardAppearance: widget.keyboardAppearance,
+          keyboardAppearance: keyboardAppearance,
         ),
       ),
     );
