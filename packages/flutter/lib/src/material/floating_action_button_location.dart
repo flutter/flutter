@@ -165,8 +165,7 @@ double _yAxisOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, bool isDocked) {
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
   final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-  final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight
-      - scaffoldGeometry.minInsets.bottom - kFloatingActionButtonMargin;
+  final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - scaffoldGeometry.minInsets.bottom;
 
   double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin;
   if (isDocked)
@@ -255,7 +254,7 @@ class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionBut
 
 double _straddleAppBar(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
-  return scaffoldGeometry.contentTop + scaffoldGeometry.minInsets.top + kFloatingActionButtonMargin - fabHalfHeight;
+  return scaffoldGeometry.contentTop + scaffoldGeometry.minInsets.top - fabHalfHeight;
 }
 
 class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
