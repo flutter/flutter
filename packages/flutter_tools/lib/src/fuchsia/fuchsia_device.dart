@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -23,6 +24,11 @@ import 'fuchsia_workflow.dart';
 
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
+// Enables testing the fuchsia isolate discovery
+Future<VMService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+  return VMService.connect(uri);
+}
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
@@ -108,12 +114,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.netls();
-    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-    for (String name in parseFuchsiaDeviceOutput(text)) {
-      final String id = await fuchsiaSdk.netaddr();
-      devices.add(FuchsiaDevice(id, name: name));
+    final String text = await fuchsiaSdk.listDevices();
+    if (text == null) {
+      return <Device>[];
     }
+    final List<FuchsiaDevice> devices = parseListDevices(text);
     return devices;
   }
 
@@ -121,24 +126,18 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-/// Parses output from the netls tool into fuchsia devices names.
-///
-/// Example output:
-///     $ ./netls
-///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
 @visibleForTesting
-List<String> parseFuchsiaDeviceOutput(String text) {
-  final List<String> names = <String>[];
+List<FuchsiaDevice> parseListDevices(String text) {
+  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
   for (String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
-    if (!line.startsWith('device'))
-      continue;
-    // ['device', 'device name', '(id)']
+    // ['ip', 'device name']
     final List<String> words = line.split(' ');
     final String name = words[1];
-    names.add(name);
+    final String id = words[0];
+    devices.add(FuchsiaDevice(id, name: name));
   }
-  return names;
+  return devices;
 }
 
 class FuchsiaDevice extends Device {
@@ -149,6 +148,9 @@ class FuchsiaDevice extends Device {
 
   @override
   bool get supportsHotRestart => false;
+
+  @override
+  bool get supportsStopApp => false;
 
   @override
   final String name;
@@ -213,6 +215,17 @@ class FuchsiaDevice extends Device {
 
   @override
   bool get supportsScreenshot => false;
+
+  bool get ipv6 {
+    // Workaround for https://github.com/dart-lang/sdk/issues/29456
+    final String fragment = id.split('%').first;
+    try {
+      Uri.parseIPv6Address(fragment);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
@@ -284,6 +297,93 @@ class FuchsiaDevice extends Device {
     }
     throwToolExit('No ports found running $isolateName');
     return null;
+  }
+
+  FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+}
+
+class FuchsiaIsolateDiscoveryProtocol {
+  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
+    this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
+    this._pollOnce = false,
+  ]);
+
+  static const Duration _pollDuration = Duration(seconds: 10);
+  final Map<int, VMService> _ports = <int, VMService>{};
+  final FuchsiaDevice _device;
+  final String _isolateName;
+  final Completer<Uri> _foundUri = Completer<Uri>();
+  final Future<VMService> Function(Uri) _vmServiceConnector;
+  // whether to only poll once.
+  final bool _pollOnce;
+  Timer _pollingTimer;
+  Status _status;
+
+  FutureOr<Uri> get uri {
+    if (_uri != null) {
+      return _uri;
+    }
+    _status ??= logger.startProgress(
+      'Waiting for a connection from $_isolateName on ${_device.name}...',
+      expectSlowOperation: true,
+    );
+    _pollingTimer ??= Timer(_pollDuration, _findIsolate);
+    return _foundUri.future.then((Uri uri) {
+      _uri = uri;
+      return uri;
+    });
+  }
+  Uri _uri;
+
+  void dispose() {
+    if (!_foundUri.isCompleted) {
+      _status?.cancel();
+      _status = null;
+      _pollingTimer?.cancel();
+      _pollingTimer = null;
+      _foundUri.completeError(Exception('Did not complete'));
+    }
+  }
+
+  Future<void> _findIsolate() async {
+    final List<int> ports = await _device.servicePorts();
+    for (int port in ports) {
+      VMService service;
+      if (_ports.containsKey(port)) {
+        service = _ports[port];
+      } else {
+        final int localPort = await _device.portForwarder.forward(port);
+        try {
+          final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
+          service = await _vmServiceConnector(uri);
+          _ports[port] = service;
+        } on SocketException catch (err) {
+          printTrace('Failed to connect to $localPort: $err');
+          continue;
+        }
+      }
+      await service.getVM();
+      await service.refreshViews();
+      for (FlutterView flutterView in service.vm.views) {
+        if (flutterView.uiIsolate == null) {
+          continue;
+        }
+        final Uri address = flutterView.owner.vmService.httpAddress;
+        if (flutterView.uiIsolate.name.contains(_isolateName)) {
+          _foundUri.complete(_device.ipv6
+            ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
+            : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
+          _status.stop();
+          return;
+        }
+      }
+    }
+    if (_pollOnce) {
+      _foundUri.completeError(Exception('Max iterations exceeded'));
+      _status.stop();
+      return;
+    }
+    _pollingTimer = Timer(_pollDuration, _findIsolate);
   }
 }
 

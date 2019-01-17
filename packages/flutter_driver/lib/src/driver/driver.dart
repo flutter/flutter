@@ -199,6 +199,9 @@ class FlutterDriver {
     // If the user has already supplied an isolate number/URL to the Dart VM
     // service, then this won't be run as it is unnecessary.
     if (Platform.isFuchsia && isolateNumber == null) {
+      // TODO(awdavies): Use something other than print. On fuchsia
+      // `stderr`/`stdout` appear to have issues working correctly.
+      flutterDriverLog.listen(print);
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
         throw DriverError('No Fuchsia module target has been specified.\n'
@@ -215,10 +218,6 @@ class FlutterDriver {
       dartVmServiceUrl = ref.dartVm.uri.toString();
       await fuchsiaConnection.stop();
       FuchsiaCompat.cleanup();
-
-      // TODO(awdavies): Use something other than print. On fuchsia
-      // `stderr`/`stdout` appear to have issues working correctly.
-      flutterDriverLog.listen(print);
     }
 
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
