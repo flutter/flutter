@@ -7,7 +7,6 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
@@ -17,6 +16,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
+import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
@@ -138,34 +138,18 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is requried for attaching to a Fuchsia device');
         }
-        usesIpv6 = _isIpv6(device.id);
-        final List<int> ports = await device.servicePorts();
-        if (ports.isEmpty) {
-          throwToolExit('No active service ports on ${device.name}');
-        }
-        final List<int> localPorts = <int>[];
-        for (int port in ports) {
-          localPorts.add(await device.portForwarder.forward(port));
-        }
-        final Status status = logger.startProgress(
-          'Waiting for a connection from Flutter on ${device.name}...',
-          timeout: kSlowOperation,
-        );
+        usesIpv6 = device.ipv6;
+        FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
-          final int localPort = await device.findIsolatePort(module, localPorts);
-          if (localPort == null) {
-            throwToolExit('No active Observatory running module \'$module\' on ${device.name}');
-          }
-          observatoryUri = usesIpv6
-            ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-            : Uri.parse('http://$ipv4Loopback:$localPort/');
-          status.stop();
+          isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
+          observatoryUri = await isolateDiscoveryProtocol.uri;
+          printStatus('Done.');
         } catch (_) {
+          isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
-          status.cancel();
           rethrow;
         }
       } else {
@@ -179,7 +163,7 @@ class AttachCommand extends FlutterCommand {
           observatoryUri = await observatoryDiscovery.uri;
           // Determine ipv6 status from the scanned logs.
           usesIpv6 = observatoryDiscovery.ipv6;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+          printStatus('Done.');
         } finally {
           await observatoryDiscovery?.cancel();
         }
@@ -193,6 +177,7 @@ class AttachCommand extends FlutterCommand {
         : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
+      final bool useHot = getBuildInfo().isDebug;
       final FlutterDevice flutterDevice = FlutterDevice(
         device,
         trackWidgetCreation: false,
@@ -203,43 +188,42 @@ class AttachCommand extends FlutterCommand {
         targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
-      final HotRunner hotRunner = hotRunnerFactory.build(
-        <FlutterDevice>[flutterDevice],
-        target: targetFile,
-        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
-        packagesFilePath: globalResults['packages'],
-        usesTerminalUI: daemon == null,
-        projectRootPath: argResults['project-root'],
-        dillOutputPath: argResults['output-dill'],
-        ipv6: usesIpv6,
-      );
+      final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
+      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+      final ResidentRunner runner = useHot ?
+          hotRunnerFactory.build(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            packagesFilePath: globalResults['packages'],
+            usesTerminalUI: daemon == null,
+            projectRootPath: argResults['project-root'],
+            dillOutputPath: argResults['output-dill'],
+            ipv6: usesIpv6,
+          )
+        : ColdRunner(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            ipv6: usesIpv6,
+          );
       if (attachLogger) {
         flutterDevice.startEchoingDeviceLog();
       }
-
-      int result;
       if (daemon != null) {
         AppInstance app;
         try {
-          app = await daemon.appDomain.launch(
-            hotRunner,
-            hotRunner.attach,
-            device,
-            null,
-            true,
-            fs.currentDirectory,
-          );
+          app = await daemon.appDomain.launch(runner, runner.attach,
+              device, null, true, fs.currentDirectory);
         } catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner.waitForAppToFinish();
-        assert(result != null);
+        final int result = await app.runner.waitForAppToFinish();
+        if (result != 0)
+          throwToolExit(null, exitCode: result);
       } else {
-        result = await hotRunner.attach();
-        assert(result != null);
+        await runner.attach();
       }
-      if (result != 0)
-        throwToolExit(null, exitCode: result);
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (ForwardedPort port in ports) {
@@ -250,17 +234,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async {}
-
-  bool _isIpv6(String address) {
-    // Workaround for https://github.com/dart-lang/sdk/issues/29456
-    final String fragment = address.split('%').first;
-    try {
-      Uri.parseIPv6Address(fragment);
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
 }
 
 class HotRunnerFactory {

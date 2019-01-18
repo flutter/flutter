@@ -30,7 +30,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios']
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -94,7 +94,7 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['precompile'],
+      compilationTraceFilePath: argResults['compilation-trace-file'],
       createPatch: argResults['patch'],
       buildNumber: buildNumber,
       baselineDir: argResults['baseline-dir'],

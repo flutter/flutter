@@ -15,7 +15,9 @@ abstract class Project {
   String get pubspec;
   String get main;
 
-  Uri get mainDart => Uri.parse('package:test/main.dart');
+  // Valid locations for a breakpoint for tests that just need to break somewhere.
+  Uri get breakpointUri => Uri.parse('package:test/main.dart');
+  int get breakpointLine => lineContaining(main, '// BREAKPOINT');
 
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
@@ -30,6 +32,6 @@ abstract class Project {
     final int index = contents.split('\n').indexWhere((String l) => l.contains(search));
     if (index == -1)
       throw Exception("Did not find '$search' inside the file");
-    return index + 1; // first line is line 1, not line 0
+    return index;
   }
 }

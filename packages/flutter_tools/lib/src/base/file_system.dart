@@ -36,7 +36,9 @@ RecordingFileSystem getRecordingFileSystem(String location) {
   final RecordingFileSystem fileSystem = RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
-    await fileSystem.recording.flush();
+    await fileSystem.recording.flush(
+      pendingResultTimeout: const Duration(seconds: 5),
+    );
   }, ShutdownStage.SERIALIZE_RECORDING);
   return fileSystem;
 }

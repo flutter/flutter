@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: flutter_style_todos
-
 import 'dart:async';
 import 'dart:collection';
 
@@ -22,12 +20,6 @@ import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
-///
-/// Example:
-///
-/// ```
-///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
-/// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
@@ -95,7 +87,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      timeout: kSlowOperation,
+      expectSlowOperation: true,
     );
     final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));

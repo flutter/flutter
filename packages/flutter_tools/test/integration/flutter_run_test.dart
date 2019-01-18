@@ -19,7 +19,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync();
+      tempDir = createResolvedTempDirectorySync('run_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
@@ -55,5 +55,5 @@ void main() {
       await _flutter.run(pidFile: pidFile);
       expect(pidFile.existsSync(), isTrue);
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(6));
 }

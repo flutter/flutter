@@ -361,6 +361,10 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
+  Directory get gradleAppBundleOutV1Directory {
+    return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }

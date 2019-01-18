@@ -14,6 +14,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
+import 'build_appbundle.dart';
 import 'build_bundle.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
@@ -21,6 +22,7 @@ import 'build_ios.dart';
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand());
     addSubcommand(BuildIOSCommand());
     addSubcommand(BuildFlxCommand());

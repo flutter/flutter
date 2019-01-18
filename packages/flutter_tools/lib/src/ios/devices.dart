@@ -26,6 +26,8 @@ const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
 
+const Duration kPortForwardTimeout = Duration(seconds: 10);
+
 class IOSDeploy {
   const IOSDeploy();
 
@@ -295,7 +297,7 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...', timeout: kSlowOperation);
+    final Status installStatus = logger.startProgress('Installing and launching...', expectSlowOperation: true);
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.

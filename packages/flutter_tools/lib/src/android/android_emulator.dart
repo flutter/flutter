@@ -51,10 +51,9 @@ class AndroidEmulator extends Emulator {
                 throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
               }
             });
-    // The emulator continues running on a successful launch, so if it hasn't
-    // quit within 3 seconds we assume that's a success and just return. This
-    // means that on a slow machine, a failure that takes more than three
-    // seconds won't be recognized as such... :-/
+    // emulator continues running on a successful launch so if we
+    // haven't quit within 3 seconds we assume that's a success and just
+    // return.
     return Future.any<void>(<Future<void>>[
       launchResult,
       Future<void>.delayed(const Duration(seconds: 3))

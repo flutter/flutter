@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
 import 'button_theme.dart';
@@ -250,10 +251,12 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
        assert(onChanged != null),
        assert(displayedMonth != null),
+       assert(dragStartBehavior != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
        super(key: key);
@@ -280,6 +283,25 @@ class DayPicker extends StatelessWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
+
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
+  /// date picker wheel will begin upon the detection of a drag gesture. If set
+  /// to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.down].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
 
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
@@ -442,6 +464,7 @@ class DayPicker extends StatelessWidget {
               onChanged(dayToBuild);
             },
             child: dayWidget,
+            dragStartBehavior: dragStartBehavior,
           );
         }
 
@@ -502,6 +525,7 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -524,6 +548,9 @@ class MonthPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -609,6 +636,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 
@@ -669,6 +697,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                   return false;
                 },
                 child: PageView.builder(
+                  dragStartBehavior: widget.dragStartBehavior,
                   key: ValueKey<DateTime>(widget.selectedDate),
                   controller: _dayPickerController,
                   scrollDirection: Axis.horizontal,
@@ -759,6 +788,7 @@ class YearPicker extends StatefulWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -777,6 +807,9 @@ class YearPicker extends StatefulWidget {
 
   /// The latest date the user is permitted to pick.
   final DateTime lastDate;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _YearPickerState createState() => _YearPickerState();
@@ -801,6 +834,7 @@ class _YearPickerState extends State<YearPicker> {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = themeData.textTheme.body1;
     return ListView.builder(
+      dragStartBehavior: widget.dragStartBehavior,
       controller: scrollController,
       itemExtent: _itemExtent,
       itemCount: widget.lastDate.year - widget.firstDate.year + 1,
@@ -902,6 +936,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleYearChanged(DateTime value) {
+    if (value.isBefore(widget.firstDate))
+      value = widget.firstDate;
+    else if (value.isAfter(widget.lastDate))
+      value = widget.lastDate;
+    if (value == _selectedDate)
+      return;
+
     _vibrate();
     setState(() {
       _mode = DatePickerMode.day;
@@ -1067,8 +1108,11 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
+/// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
+///
+/// The [context], [initialDate], [firstDate], and [lastDate] parameters must
+/// not be null.
 ///
 /// See also:
 ///
@@ -1090,6 +1134,9 @@ Future<DateTime> showDatePicker({
   Locale locale,
   TextDirection textDirection,
 }) async {
+  assert(initialDate != null);
+  assert(firstDate != null);
+  assert(lastDate != null);
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
   assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');

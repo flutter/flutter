@@ -70,8 +70,8 @@ class BuildAotCommand extends BuildSubCommand {
     if (!argResults['quiet']) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
-        'Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-        timeout: kSlowOperation,
+        'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
+        expectSlowOperation: true,
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();

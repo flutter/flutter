@@ -50,41 +50,32 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator(): super('Android toolchain - develop for Android devices',);
 
-  @override
-  String get slowWarning => '${_task ?? 'This'} is taking a long time...';
-  String _task;
-
   /// Returns false if we cannot determine the Java version or if the version
   /// is not compatible.
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
-    _task = 'Checking Java status';
-    try {
-      if (!processManager.canRun(javaBinary)) {
-        messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
-        return false;
-      }
-      String javaVersion;
-      try {
-        printTrace('java -version');
-        final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
-        if (result.exitCode == 0) {
-          final List<String> versionLines = result.stderr.split('\n');
-          javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        }
-      } catch (error) {
-        printTrace(error.toString());
-      }
-      if (javaVersion == null) {
-        // Could not determine the java version.
-        messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
-        return false;
-      }
-      messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersion)));
-      // TODO(johnmccutchan): Validate version.
-      return true;
-    } finally {
-      _task = null;
+    if (!processManager.canRun(javaBinary)) {
+      messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
+      return false;
     }
+    String javaVersion;
+    try {
+      printTrace('java -version');
+      final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
+      if (result.exitCode == 0) {
+        final List<String> versionLines = result.stderr.split('\n');
+        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+      }
+    } catch (error) {
+      printTrace(error.toString());
+    }
+    if (javaVersion == null) {
+      // Could not determine the java version.
+      messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
+      return false;
+    }
+    messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersion)));
+    // TODO(johnmccutchan): Validate version.
+    return true;
   }
 
   @override
@@ -159,9 +150,6 @@ class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator(): super('Android license subvalidator',);
 
   @override
-  String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
-
-  @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
@@ -220,8 +208,10 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted status;
 
-    void _handleLine(String line) {
-      if (licenseCounts.hasMatch(line)) {
+    void _onLine(String line) {
+      if (status == null && licenseAccepted.hasMatch(line)) {
+        status = LicensesAccepted.all;
+      } else if (licenseCounts.hasMatch(line)) {
         final Match match = licenseCounts.firstMatch(line);
         if (match.group(1) != match.group(2)) {
           status = LicensesAccepted.some;
@@ -229,12 +219,9 @@ class AndroidLicenseValidator extends DoctorValidator {
           status = LicensesAccepted.none;
         }
       } else if (licenseNotAccepted.hasMatch(line)) {
-        // The licenseNotAccepted pattern is trying to match the same line as
-        // licenseCounts, but is more general. In case the format changes, a
-        // more general match may keep doctor mostly working.
+        // In case the format changes, a more general match will keep doctor
+        // mostly working.
         status = LicensesAccepted.none;
-      } else if (licenseAccepted.hasMatch(line)) {
-        status ??= LicensesAccepted.all;
       }
     }
 
@@ -248,14 +235,19 @@ class AndroidLicenseValidator extends DoctorValidator {
     final Future<void> output = process.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .transform<String>(const LineSplitter())
-      .listen(_handleLine)
+      .listen(_onLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .transform<String>(const LineSplitter())
-      .listen(_handleLine)
+      .listen(_onLine)
       .asFuture<void>(null);
-    await Future.wait<void>(<Future<void>>[output, errors]);
+    try {
+      await Future.wait<void>(<Future<void>>[output, errors]).timeout(const Duration(seconds: 30));
+    } catch (TimeoutException) {
+      printTrace(userMessages.androidLicensesTimeout(androidSdk.sdkManagerPath));
+      processManager.killPid(process.pid);
+    }
     return status ?? LicensesAccepted.unknown;
   }
 
@@ -269,10 +261,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     _ensureCanRunSdkManager();
 
     final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
-    if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
+    if (sdkManagerVersion == null || sdkManagerVersion.major < 26)
       // SDK manager is found, but needs to be updated.
       throwToolExit(userMessages.androidSdkOutdated(androidSdk.sdkManagerPath));
-    }
 
     final Process process = await runCommand(
       <String>[androidSdk.sdkManagerPath, '--licenses'],
