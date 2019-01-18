@@ -586,12 +586,12 @@ void main() {
       ),
     );
     //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,          4.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         12.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 177.0,        800.0,  48.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,                  0.0, 800.0, 177.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0, (177.0 - 40.0) / 2.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, (177.0 - 24.0) / 2.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0,                177.0, 800.0,  48.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0,         177.0 +  4.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         177.0 + 12.0,  24.0,  24.0));
 
     // NON-DENSE "ONE"-LINE
     await tester.pumpWidget(
@@ -615,13 +615,13 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,          8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0,        800.0,  56.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 216.0 +  8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
+    //                                                                    LEFT                 TOP                   WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,                  0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0, (216.0 - 40.0) / 2.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, (216.0 - 24.0) / 2.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0,                216.0, 800.0,  56.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0,          216.0 + 8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         216.0 + 16.0,  24.0,  24.0));
 
     // DENSE "TWO"-LINE
     await tester.pumpWidget(

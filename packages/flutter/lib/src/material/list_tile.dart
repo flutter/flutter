@@ -995,8 +995,8 @@ class _RenderListTile extends RenderBox {
     double leadingY;
     double trailingY;
     if (isOneLine) {
-      leadingY = (defaultTileHeight - leadingSize.height) / 2.0;
-      trailingY = (defaultTileHeight - trailingSize.height) / 2.0;
+      leadingY = (tileHeight - leadingSize.height) / 2.0;
+      trailingY = (tileHeight - trailingSize.height) / 2.0;
     } else if (isTwoLine) {
       if (isDense) {
         leadingY = 12.0; // by extrapolation
