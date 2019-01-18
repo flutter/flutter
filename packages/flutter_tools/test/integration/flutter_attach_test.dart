@@ -16,7 +16,7 @@ void main() {
   Directory tempDir;
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync();
+    tempDir = createResolvedTempDirectorySync('attach_test.');
     await _project.setUpIn(tempDir);
     _flutterRun = FlutterRunTestDriver(tempDir, logPrefix: 'RUN');
     _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH');

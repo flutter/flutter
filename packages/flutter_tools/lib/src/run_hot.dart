@@ -36,6 +36,11 @@ class HotRunnerConfig {
   Future<bool> setupHotRestart() async {
     return true;
   }
+  /// A hook for implementations to perform any necessary operations right
+  /// before the runner is about to be shut down.
+  Future<void> runPreShutdownOperations() async {
+    return;
+  }
 }
 
 HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
@@ -143,6 +148,17 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<void> _restartService({ bool pause = false }) async {
+    final OperationResult result =
+      await restart(fullRestart: true, pauseAfterRestart: pause);
+    if (!result.isOk) {
+      throw rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
+        'Unable to restart',
+      );
+    }
+  }
+
   Future<String> _compileExpressionService(String isolateId, String expression,
       List<String> definitions, List<String> typeDefinitions,
       String libraryUri, String klass, bool isStatic,
@@ -168,6 +184,7 @@ class HotRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol(
         reloadSources: _reloadSourcesService,
+        restart: _restartService,
         compileExpression: _compileExpressionService,
       );
     } catch (error) {
@@ -839,6 +856,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
+    await hotRunnerConfig.runPreShutdownOperations();
     if (_didAttach) {
       appFinished();
     } else {
@@ -847,7 +865,10 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> preStop() => _cleanupDevFS();
+  Future<void> preStop() async {
+    await _cleanupDevFS();
+    await hotRunnerConfig.runPreShutdownOperations();
+  }
 
   @override
   Future<void> cleanupAtFinish() async {

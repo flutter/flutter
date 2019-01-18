@@ -242,9 +242,10 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
-  /// Typically, this is a [ListView] containing the contents of the dialog.
-  /// Using a [ListView] ensures that the contents can scroll if they are too
-  /// big to fit on the display.
+  /// Typically this is a [SingleChildScrollView] that contains the dialog's
+  /// message. As noted in the [AlertDialog] documentation, it's important
+  /// to use a [SingleChildScrollView] if there's any risk that the content
+  /// will not fit.
   final Widget content;
 
   /// Padding around the content.
@@ -310,7 +311,11 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-          child: Semantics(child: title, namesRoute: true),
+          child: Semantics(
+            child: title,
+            namesRoute: true,
+            container: true,
+          ),
         ),
       ));
     } else {

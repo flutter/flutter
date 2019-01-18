@@ -115,6 +115,9 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = await fuchsiaSdk.listDevices();
+    if (text == null) {
+      return <Device>[];
+    }
     final List<FuchsiaDevice> devices = parseListDevices(text);
     return devices;
   }

@@ -547,7 +547,6 @@ class _AppBarState extends State<AppBar> {
 
     return Semantics(
       container: true,
-      explicitChildNodes: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
@@ -557,7 +556,10 @@ class _AppBarState extends State<AppBar> {
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
-          child: appBar,
+          child: Semantics(
+            explicitChildNodes: true,
+            child: appBar,
+          ),
         ),
       ),
     );

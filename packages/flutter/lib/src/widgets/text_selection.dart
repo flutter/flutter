@@ -230,7 +230,7 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }): assert(value != null),
       assert(context != null),
       _value = value {
@@ -265,6 +265,7 @@ class TextSelectionOverlay {
   /// text field.
   final TextSelectionDelegate selectionDelegate;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], handle drag behavior will
@@ -275,7 +276,7 @@ class TextSelectionOverlay {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///
@@ -467,7 +468,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
     @required this.selectionControls,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : super(key: key);
 
   final TextSelection selection;
@@ -725,8 +726,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
-   if (widget.onForcePressStart != null)
-     widget.onForcePressStart(details);
+    if (widget.onForcePressStart != null)
+      widget.onForcePressStart(details);
   }
 
   void _forcePressEnded(ForcePressDetails details) {
@@ -761,8 +762,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
-      onForcePressStart: _forcePressStarted,
-      onForcePressEnd: _forcePressEnded,
+      onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
+      onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
