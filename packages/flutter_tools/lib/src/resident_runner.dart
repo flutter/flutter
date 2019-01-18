@@ -489,6 +489,11 @@ abstract class ResidentRunner {
     bool shouldBuild = true
   });
 
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  });
+
   bool get supportsRestart => false;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {

@@ -176,6 +176,7 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
+  @override
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
