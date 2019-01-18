@@ -306,7 +306,7 @@ SceneUpdateContext::Frame::~Frame() {
                         std::move(paint_layers_));
 }
 
-void SceneUpdateContext::Frame::AddPaintedLayer(Layer* layer) {
+void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
   FML_DCHECK(layer->needs_painting());
   paint_layers_.push_back(layer);
   paint_bounds_.join(layer->paint_bounds());

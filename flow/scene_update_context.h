@@ -102,7 +102,7 @@ class SceneUpdateContext {
           float elevation);
     ~Frame();
 
-    void AddPaintedLayer(Layer* layer);
+    void AddPaintLayer(Layer* layer);
 
    private:
     const SkRRect& rrect_;
