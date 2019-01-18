@@ -64,8 +64,6 @@ import 'theme.dart';
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
-  static const double _defaultElevation = 1.0;
-
   /// Creates a material design card.
   ///
   /// The [clipBehavior] and [elevation] arguments must not be null.
@@ -139,9 +137,10 @@ class Card extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  static const double _defaultElevation = 1.0;
+
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(
