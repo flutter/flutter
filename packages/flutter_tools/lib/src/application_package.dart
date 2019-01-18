@@ -10,6 +10,7 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
@@ -19,6 +20,37 @@ import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+
+class ApplicationPackageFactory {
+  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+
+  Future<ApplicationPackage> getPackageForPlatform(
+      TargetPlatform platform,
+      {File applicationBinary}) async {
+    switch (platform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        return applicationBinary == null
+            ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
+            : AndroidApk.fromApk(applicationBinary);
+      case TargetPlatform.ios:
+        return applicationBinary == null
+            ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+            : IOSApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.tester:
+        return FlutterTesterApp.fromCurrentDirectory();
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
+        return null;
+    }
+    assert(platform != null);
+    return null;
+  }
+}
 
 abstract class ApplicationPackage {
   ApplicationPackage({ @required this.id })
@@ -275,33 +307,6 @@ class PrebuiltIOSApp extends IOSApp {
   String get deviceBundlePath => _bundlePath;
 
   String get _bundlePath => bundleDir.path;
-}
-
-Future<ApplicationPackage> getApplicationPackageForPlatform(
-    TargetPlatform platform,
-    {File applicationBinary}) async {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      return applicationBinary == null
-          ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
-          : AndroidApk.fromApk(applicationBinary);
-    case TargetPlatform.ios:
-      return applicationBinary == null
-          ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
-          : IOSApp.fromPrebuiltApp(applicationBinary);
-    case TargetPlatform.tester:
-      return FlutterTesterApp.fromCurrentDirectory();
-    case TargetPlatform.darwin_x64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.fuchsia:
-      return null;
-  }
-  assert(platform != null);
-  return null;
 }
 
 class ApplicationPackageStore {
