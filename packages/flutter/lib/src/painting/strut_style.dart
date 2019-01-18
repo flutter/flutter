@@ -39,29 +39,42 @@ import 'basic_types.dart';
 /// tall as the half leading plus descent.
 /// 
 /// ### Fields and their default values.
-/// 
-/// If any properties (except [forceStrutHeight]) are omitted or null, they will inherit the
-/// values of the default strut style.
+
+// ///////////////////////////////////////////////////////////////////////////
+// The defaults are noted here for convenience. The actual place where they //
+// are defined is in the engine paragraph_style.h of LibTxt. The values here//
+// should be updated should it change in the engine. The engine specifies   //
+// the defaults in order to reduce the amount of data we pass to native as  //
+// strut will usually be unspecified.                                       //
+// ///////////////////////////////////////////////////////////////////////////
+
+///
+/// Omitted or null properties will take the default values specified below:
 ///
 ///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
 ///
 ///  * [fontFamilyFallback] an ordered list of font family names that will be searched for when
-///    the font in [fontFamily] cannot be found.
+///    the font in [fontFamily] cannot be found. When all specified font families have been
+///    exhausted an no match was found, the default platform font will be used.
 ///
 ///  * [fontSize] the size of the ascent plus descent in logical pixels. This is also
 ///    used as the basis of the custom leading caluclation. This value cannot
-///    be negative. Default is `14` logical pixels.
+///    be negative.
+///    Default is `14` logical pixels.
 ///
-///  * [lineHeight] the height of the line as a multiple of [fontSize]. This property does
-///    not affect the leading height, which is controlled separately through [leading].
+///  * [lineHeight] the multiple of [fontSize] to multiply the ascent and descent by.
+///    The [lineHeight] will impact the spacing above and below the baseline differently
+///    depending on the ratios between the font's ascent and descent. This property is
+///    separate from the leading multiplier, which is controlled through [leading].
 ///    Default is `1.0`.
 ///
 ///  * [leading] the custom leading to apply to the strut as a multiple of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
-///    to the top and the other half to the bottom of the line height. Negative values
-///    indicate using the font's original leading. Default is `null`, which will use the
-///    font-specified leading.
+///    to the top and the other half to the bottom of the line height. This differs
+///    from [lineHeight] since the spacing is equally distributed above and below the
+///    baseline.
+///    Default is `null`, which will use the font-specified leading.
 ///
 ///  * [fontWeight] the typeface thickness to use when calculating the strut (e.g., bold).
 ///    Default is `w400`.
@@ -72,8 +85,9 @@ import 'basic_types.dart';
 ///  * [forceStrutHeight] when true, all lines will be laid out with the height of the
 ///    strut. All line and run-specific metrics will be ignored/overrided and only strut
 ///    metrics will be used instead. This property guarantees uniform line spacing, however
-///    text overlap will become possible. This property should be enabled with caution as
-///    it bypasses a large portion of the vertical layout system. The default value is false.
+///    text in adjacent lines may overlap. This property should be enabled with caution as
+///    it bypasses a large portion of the vertical layout system.
+///    The default value is false.
 ///
 /// ### Examples
 ///
@@ -84,15 +98,15 @@ import 'basic_types.dart';
 ///
 /// ```dart
 /// Text(
-///   "Hello, world!\nSecond line!",
-///   strutStyle: StrutStyle(
-///     fontFamily: "Roboto",
-///     fontSize: 30,
-///     lineHeight: 1.5,
-///   ),
+///   'Hello, world!\nSecond line!',
 ///   style: TextStyle(
 ///     fontSize: 10,
-///     fontFamily: "Raleway"
+///     fontFamily: 'Raleway',
+///   ),
+///   strutStyle: StrutStyle(
+///     fontFamily: 'Roboto',
+///     fontSize: 30,
+///     lineHeight: 1.5,
 ///   ),
 /// ),
 /// ```
@@ -100,39 +114,39 @@ import 'basic_types.dart';
 ///
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
-/// The strut [lineHeight] was defined as 1.5, which caused all lines to be laid out
-/// taller than without strut. This extra space was able to accomodate the larger
-/// font size `Second line!` without causing the line height to change for the second
-/// line only.
+/// The strut [lineHeight] was defined as 1.5 (the default font size is 14), which
+/// caused all lines to be laid out taller than without strut. This extra space was
+/// able to accomodate the larger font size of `Second line!` without causing the line
+/// height to change for the second line only. All lines in this example are thus the
+/// same height.
 ///
 /// ```dart
 /// Text.rich(
 ///   TextSpan(
-///     text: "First line!\n",
+///     text: 'First line!\n',
 ///     style: TextStyle(
 ///       fontSize: 14,
-///       fontFamily: "Roboto"
+///       fontFamily: 'Roboto'
 ///     ),
 ///     children: <TextSpan>[
 ///       TextSpan(
-///         text: "Second line!\n",
+///         text: 'Second line!\n',
 ///         style: TextStyle(
 ///           fontSize: 16,
-///           fontFamily: "Roboto"
+///           fontFamily: 'Roboto',
 ///         ),
 ///       ),
 ///       TextSpan(
-///         text: "Third line!\n",
+///         text: 'Third line!\n',
 ///         style: TextStyle(
 ///           fontSize: 14,
-///           fontFamily: "Roboto"
+///           fontFamily: 'Roboto',
 ///         ),
 ///       ),
 ///     ],
 ///   ),
 ///   strutStyle: StrutStyle(
-///     fontFamily: "Roboto",
-///     fontSize: 14,
+///     fontFamily: 'Roboto',
 ///     lineHeight: 1.5,
 ///   ),
 /// ),
@@ -150,30 +164,30 @@ import 'basic_types.dart';
 /// ```dart
 /// Text.rich(
 ///   TextSpan(
-///     text: "---------         ---------\n",
+///     text: '---------         ---------\n',
 ///     style: TextStyle(
 ///       fontSize: 14,
-///       fontFamily: "Roboto"
+///       fontFamily: 'Roboto',
 ///     ),
 ///     children: <TextSpan>[
 ///       TextSpan(
-///         text: "^^^M^^^\n",
+///         text: '^^^M^^^\n',
 ///         style: TextStyle(
 ///           fontSize: 30,
-///           fontFamily: "Roboto"
+///           fontFamily: 'Roboto',
 ///         ),
 ///       ),
 ///       TextSpan(
-///         text: "M------M\n",
+///         text: 'M------M\n',
 ///         style: TextStyle(
 ///           fontSize: 30,
-///           fontFamily: "Roboto"
+///           fontFamily: 'Roboto',
 ///         ),
 ///       ),
 ///     ],
 ///   ),
 ///   strutStyle: StrutStyle(
-///     fontFamily: "Roboto",
+///     fontFamily: 'Roboto',
 ///     fontSize: 14,
 ///     lineHeight: 1,
 ///     forceStrutHeight: true,
@@ -205,14 +219,6 @@ class StrutStyle extends Diagnosticable {
        _package = package,
        assert(fontSize == null || fontSize > 0)
        assert(leading == null || leading >= 0);
-
-  // ///////////////////////////////////////////////////////////////////////////
-  // The defaults are noted here for convenience. The actual place where they //
-  // are defined is in the engine paragraph_style.h in LibTxt. This should be //
-  // updated should it change in the engine. The engine specifies the defaults//
-  // in order to reduce the amount of data we pass to native as strut will    //
-  // usually be unspecified.                                                  //
-  // ///////////////////////////////////////////////////////////////////////////
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
