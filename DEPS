@@ -9,7 +9,7 @@
 # .gclient file (the parent of 'src').
 #
 # Then commit .DEPS.git locally (gclient doesn't like dirty trees) and run
-#   gclient sync
+#   gclient sync..
 # Verify the thing happened you wanted. Then revert your .DEPS.git change
 # DO NOT CHECK IN CHANGES TO .DEPS.git upstream. It will be automatically
 # updated by a bot when you modify this one.
@@ -116,7 +116,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '4a37279db248051cd25bbc93526c3001bdb8d785',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ad6c0a07231e416bb3f96886b50778c70c491778',
 
    # Fuchsia compatibility
    #
@@ -403,13 +403,76 @@ hooks = [
     'action': ['python', 'src/build/vs_toolchain.py', 'update'],
   },
   {
-    'name': 'download_android_tools',
+    # Pull dart sdk if needed
+    # this will be used by android_tools
+    'name': 'dart',
     'pattern': '.',
+    'action': ['python', 'src/tools/dart/update.py'],
+  },
+  {
+    'name': 'prepare_android_downloader',
+    'pattern': '.',
+    'cwd': 'src/tools/android/android_sdk_downloader',
+    'condition': 'host_os == "linux" or host_os == "mac"',
     'action': [
-        'python',
-        'src/tools/android/download_android_tools.py',
+        '../../../third_party/dart/tools/sdks/dart-sdk/bin/pub', # this hook _must_ be run _after_ the dart hook.
+        'get'
     ],
   },
+  # TODO(dnfield): This can be enabled when we actually support building
+  # the android engine on windows.  For now there's no sense in having
+  # windows clients download bits they don't need.
+  # see: https://github.com/flutter/flutter/issues/13841
+  # {
+  #   'name': 'prepare_android_downloader_win',
+  #   'pattern': '.',
+  #   'cwd': 'src\\tools\\android\\android_sdk_downloader',
+  #   'condition': 'host_os == "win"',
+  #   'action': [
+  #       '..\\..\\..\\third_party\\dart\\tools\\sdks\\dart-sdk\\bin\\pub.bat', # this hook _must_ be run _after_ the dart hook.
+  #       'get'
+  #   ],
+  # },
+  {
+    'name': 'download_android_tools',
+    'pattern': '.',
+    'condition': 'host_os == "mac" or host_os == "linux"',
+    'action': [
+        'src/third_party/dart/tools/sdks/dart-sdk/bin/dart', # this hook _must_ be run _after_ the dart hook.
+        '--enable-asserts',
+        'src/tools/android/android_sdk_downloader/lib/main.dart',
+        '-y', # Accept licenses
+        '--out=src/third_party/android_tools',
+        '--platform=28',
+        '--platform-revision=6',
+        '--build-tools-version=28.0.3',
+        '--platform-tools-version=28.0.1',
+        '--tools-version=26.1.1',
+        '--ndk-version=19.0.5232133'
+    ],
+  },
+  # TODO(dnfield): This can be enabled when we actually support building
+  # the android engine on windows.  For now there's no sense in having
+  # windows clients download bits they don't need.
+  # see: https://github.com/flutter/flutter/issues/13841
+  # {
+  #   'name': 'download_android_tools_win',
+  #   'pattern': '.',
+  #   'condition': 'host_os == "win"',
+  #   'action': [
+  #       'src\\third_party\\dart\\tools\\sdks\\dart-sdk\\bin\\dart.exe', # this hook _must_ be run _after_ the dart hook.
+  #       '--enable-asserts',
+  #       'src\\tools\\android\\android_sdk_downloader\\lib\\main.dart',
+  #       '-y', # Accept licenses
+  #       '--out=src\\third_party\\android_tools',
+  #       '--platform=28',
+  #       '--platform-revision=6',
+  #       '--build-tools-version=28.0.3',
+  #       '--platform-tools-version=28.0.1',
+  #       '--tools-version=26.1.1',
+  #       '--ndk-version=19.0.5232133'
+  #   ],
+  # },
   {
     'name': 'download_android_support',
     'pattern': '.',
@@ -425,12 +488,6 @@ hooks = [
       'python',
       'src/tools/buildtools/update.py',
     ],
-  },
-  {
-    # Pull dart sdk if needed
-    'name': 'dart',
-    'pattern': '.',
-    'action': ['python', 'src/tools/dart/update.py'],
   },
   {
     'name': 'generate_package_files',

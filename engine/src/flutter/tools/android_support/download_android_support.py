@@ -8,40 +8,48 @@ import sys
 import urllib2
 import cStringIO
 import zipfile
+import json
 
 # Path constants. (All of these should be absolute paths.)
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 FLUTTER_DIR = os.path.abspath(os.path.join(THIS_DIR, '..', '..', '..'))
 INSTALL_DIR = os.path.join(FLUTTER_DIR, 'third_party', 'android_support')
 
-def GetInstalledVersion(version_stamp):
-  version_file = os.path.join(INSTALL_DIR, version_stamp)
+def GetInstalledVersion(out_file_name):
+  version_file = os.path.join(INSTALL_DIR, out_file_name + '.stamp')
   if not os.path.exists(version_file):
     return None
   with open(version_file) as f:
     return f.read().strip()
 
-def main():
+def getFile(url, out_file_name):
   # Read latest version.
-  version_stamp = 'VERSION_SUPPORT_FRAGMENT'
-  version = ''
-  with open(os.path.join(THIS_DIR, version_stamp)) as f:
-    version = f.read().strip()
-  # Return if installed binaries are up to date.
-  if version == GetInstalledVersion(version_stamp):
+  if url == GetInstalledVersion(out_file_name):
     return
 
-  # Download the AAR and extract the JAR.
-  aar = urllib2.urlopen(version).read()
-  aar_zip = zipfile.ZipFile(cStringIO.StringIO(aar))
+  downloaded_file = urllib2.urlopen(url).read()
   if not os.path.exists(INSTALL_DIR):
-    os.mkdir(INSTALL_DIR)
-  with open(os.path.join(INSTALL_DIR, 'android_support_fragment.jar'), 'w') as f:
-    f.write(aar_zip.read('classes.jar'))
+      os.mkdir(INSTALL_DIR)
+
+  if (url.endswith('.aar')):
+    aar_zip = zipfile.ZipFile(cStringIO.StringIO(downloaded_file))
+    with open(os.path.join(INSTALL_DIR, out_file_name), 'w') as f:
+      f.write(aar_zip.read('classes.jar'))
+  else:
+    with open(os.path.join(INSTALL_DIR, out_file_name), 'w') as f:
+      f.write(downloaded_file)
 
   # Write version as the last step.
-  with open(os.path.join(INSTALL_DIR, version_stamp), 'w') as f:
-    f.write('%s\n' % version)
+  with open(os.path.join(INSTALL_DIR, out_file_name + '.stamp'), 'w') as f:
+    f.write('%s\n' % url)
+
+
+def main():
+  with open (os.path.join(THIS_DIR, 'files.json')) as f:
+    files = json.load(f)
+
+  for file, url in files.items():
+    getFile(url, file)
 
 if __name__ == '__main__':
   sys.exit(main())

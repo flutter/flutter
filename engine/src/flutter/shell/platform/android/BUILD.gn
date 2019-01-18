@@ -154,6 +154,11 @@ java_library("flutter_shell_java") {
 
   deps = [
     ":android_support_v13",
+    ":android_support_annotations",
+    ":android_support_compat",
+    ":android_support_fragment",
+    ":android_arch_lifecycle_common",
+    ":android_arch_lifecycle_viewmodel",
   ]
 
   jar_path = "$root_out_dir/flutter_java.jar"
@@ -162,7 +167,37 @@ java_library("flutter_shell_java") {
 java_prebuilt("android_support_v13") {
   supports_android = true
 
-  jar_path = "//third_party/android_tools/sdk/extras/android/support/v13/android-support-v13.jar"
+  jar_path = "//third_party/android_support/android_support_v13.jar"
+}
+
+java_prebuilt("android_support_compat") {
+  supports_android = true
+
+  jar_path = "//third_party/android_support/android_support_compat.jar"
+}
+
+java_prebuilt("android_support_annotations") {
+  supports_android = true
+
+  jar_path = "//third_party/android_support/android_support_annotations.jar"
+}
+
+java_prebuilt("android_support_fragment") {
+  supports_android = true
+
+  jar_path = "//third_party/android_support/android_support_fragment.jar"
+}
+
+java_prebuilt("android_arch_lifecycle_common") {
+  supports_android = true
+
+  jar_path = "//third_party/android_support/android_arch_lifecycle_common.jar"
+}
+
+java_prebuilt("android_arch_lifecycle_viewmodel") {
+  supports_android = true
+
+  jar_path = "//third_party/android_support/android_arch_lifecycle_viewmodel.jar"
 }
 
 copy("flutter_shell_assets") {

@@ -25,7 +25,12 @@ def main():
 
   classpath = [
     ANDROID_SRC_ROOT,
-    'third_party/android_tools/sdk/extras/android/support/v13/android-support-v13.jar',
+    'third_party/android_support/android_arch_lifecycle_common.jar',
+    'third_party/android_support/android_arch_lifecycle_viewmodel.jar',
+    'third_party/android_support/android_support_annotations.jar',
+    'third_party/android_support/android_support_compat.jar',
+    'third_party/android_support/android_support_fragment.jar',
+    'third_party/android_support/android_support_v13.jar',
     'third_party/android_tools/sdk/platforms/android-28/android.jar',
     'base/android/java/src',
     'third_party/jsr-305/src/ri/src/main/java',
