@@ -28,9 +28,9 @@ class BottomNavigationBarItem {
     this.title,
     Widget activeIcon,
     this.backgroundColor,
-  }) : activeIcon = activeIcon ?? icon,
-       assert(icon != null),
-       assert(title != null);
+  })  : activeIcon = activeIcon ?? icon,
+        assert(icon != null),
+        assert(title != null);
 
   /// The icon of the item.
   ///
