@@ -145,8 +145,8 @@ void main() {
     await tester.pump();
 
     expect(editable, paints
-      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.7, -2.0, 466.7, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
-      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, -4.0, 467.5, 19.0), const Radius.circular(1.0)), color: const Color(0xFF007AFF))
+      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.6666564941406, -2.0, 466.6666564941406, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
+      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, -4.0, 467.5, 19.0), const Radius.circular(1.0)), color: const Color(0xff2196f3))
     );
 
     // Moves the cursor right a few characters.
@@ -154,8 +154,8 @@ void main() {
       offset: const Offset(-250, 20)));
 
     expect(find.byType(EditableText), paints
-      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(192.0, -2.0, 194.0, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
-      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, -4.0, 197.5, 19.0), const Radius.circular(1.0)), color: const Color(0xFF007AFF))
+      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(192.6666717529297, -2.0, 194.6666717529297, 17.0), const Radius.circular(2.0)), color: const Color(0xff8e8e93))
+      ..rrect(rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, -4.0, 197.5, 19.0), const Radius.circular(1.0)), color: const Color(0xff2196f3))
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
