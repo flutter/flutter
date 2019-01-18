@@ -55,7 +55,7 @@ void main() {
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const TextTheme textTheme = TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink));
 
-    ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
+    final ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -80,8 +80,8 @@ void main() {
   });
 
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
-    AppBarTheme appBarTheme = _appBarTheme();
-    ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
+    final AppBarTheme appBarTheme = _appBarTheme();
+    final ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -100,7 +100,7 @@ void main() {
   });
 
   testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
-    ThemeData themeData = _themeData();
+    final ThemeData themeData = _themeData();
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -138,8 +138,8 @@ ThemeData _themeData() {
   return ThemeData(
     primaryColor: Colors.purple,
     brightness: Brightness.dark,
-    primaryIconTheme: IconThemeData(color: Colors.green),
-    primaryTextTheme: TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink))
+    primaryIconTheme: const IconThemeData(color: Colors.green),
+    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink))
   );
 }
 
