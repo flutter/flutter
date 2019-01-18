@@ -116,7 +116,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
     final NotchedShape notchedShape = widget.shape ?? babTheme.shape;
     final CustomClipper<Path> clipper = notchedShape != null
@@ -129,7 +128,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     return PhysicalShape(
       clipper: clipper,
       elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
-      color: widget.color ?? babTheme.color ?? theme.bottomAppBarColor,
+      color: widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,
