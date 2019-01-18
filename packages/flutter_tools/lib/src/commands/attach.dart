@@ -16,6 +16,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
+import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
@@ -176,6 +177,7 @@ class AttachCommand extends FlutterCommand {
         : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
+      final bool useHot = getBuildInfo().isDebug;
       final FlutterDevice flutterDevice = FlutterDevice(
         device,
         trackWidgetCreation: false,
@@ -186,24 +188,32 @@ class AttachCommand extends FlutterCommand {
         targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
-      final HotRunner hotRunner = hotRunnerFactory.build(
-        <FlutterDevice>[flutterDevice],
-        target: targetFile,
-        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
-        packagesFilePath: globalResults['packages'],
-        usesTerminalUI: daemon == null,
-        projectRootPath: argResults['project-root'],
-        dillOutputPath: argResults['output-dill'],
-        ipv6: usesIpv6,
-      );
+      final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
+      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+      final ResidentRunner runner = useHot ?
+          hotRunnerFactory.build(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            packagesFilePath: globalResults['packages'],
+            usesTerminalUI: daemon == null,
+            projectRootPath: argResults['project-root'],
+            dillOutputPath: argResults['output-dill'],
+            ipv6: usesIpv6,
+          )
+        : ColdRunner(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            ipv6: usesIpv6,
+          );
       if (attachLogger) {
         flutterDevice.startEchoingDeviceLog();
       }
-
       if (daemon != null) {
         AppInstance app;
         try {
-          app = await daemon.appDomain.launch(hotRunner, hotRunner.attach,
+          app = await daemon.appDomain.launch(runner, runner.attach,
               device, null, true, fs.currentDirectory);
         } catch (error) {
           throwToolExit(error.toString());
@@ -212,7 +222,7 @@ class AttachCommand extends FlutterCommand {
         if (result != 0)
           throwToolExit(null, exitCode: result);
       } else {
-        await hotRunner.attach();
+        await runner.attach();
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
