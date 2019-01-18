@@ -880,16 +880,16 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      TextDirection textDirection,
-      Offset thumbCenter,
-      bool isDiscrete,
-      bool isEnabled,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    TextDirection textDirection,
+    Offset thumbCenter,
+    bool isDiscrete,
+    bool isEnabled,
+  }) {
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
     final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor , end: sliderTheme.activeTrackColor);
@@ -964,15 +964,15 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset center, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      TextDirection textDirection,
-      Offset thumbCenter,
-      bool isEnabled,
-    }) {
+    PaintingContext context,
+    Offset center, {
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    TextDirection textDirection,
+    Offset thumbCenter,
+    bool isEnabled,
+  }) {
     // The paint color of the tick mark depends on its position relative
     // to the thumb and the text direction.
     Color begin;
@@ -1018,17 +1018,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    }) {
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: _disabledThumbRadius,
@@ -1074,17 +1074,17 @@ class RoundSliderOverlayShape extends SliderComponentShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    }) {
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: 0.0,
