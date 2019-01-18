@@ -310,6 +310,9 @@ enum FadeInImagePhase {
 
   /// Fade-in complete.
   completed,
+
+  /// Fade-in completed with error.
+  error,
 }
 
 typedef _ImageProviderResolverListener = void Function();
@@ -338,12 +341,17 @@ class _ImageProviderResolver {
 
     if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_handleImageChanged);
-      _imageStream.addListener(_handleImageChanged);
+      _imageStream.addListener(_handleImageChanged, onError: _handleImageError);
     }
   }
 
   void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
+    listener();
+  }
+
+  void _handleImageError(dynamic exception, StackTrace stackTrace) {
+    _imageInfo = null;
     listener();
   }
 
@@ -456,7 +464,14 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           }
           break;
         case FadeInImagePhase.completed:
-          // Nothing to do.
+          if(_imageResolver._imageInfo == null){
+            _phase = FadeInImagePhase.error;
+          }
+          break;
+        case FadeInImagePhase.error:
+          if(_imageResolver._imageInfo != null){
+            _phase = FadeInImagePhase.completed;
+          }
           break;
       }
     });
@@ -476,6 +491,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       case FadeInImagePhase.start:
       case FadeInImagePhase.waiting:
       case FadeInImagePhase.fadeOut:
+      case FadeInImagePhase.error:
         return true;
       case FadeInImagePhase.fadeIn:
       case FadeInImagePhase.completed:
