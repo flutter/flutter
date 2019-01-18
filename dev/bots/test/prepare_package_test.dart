@@ -257,11 +257,11 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'gsutil rm $gsArchivePath': null,
-          'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          'gsutil cp $gsJsonPath $jsonPath': null,
-          'gsutil rm $gsJsonPath': null,
-          'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          'gsutil.py -- rm $gsArchivePath': null,
+          'gsutil.py -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          'gsutil.py -- cp $gsJsonPath $jsonPath': null,
+          'gsutil.py -- rm $gsJsonPath': null,
+          'gsutil.py -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
