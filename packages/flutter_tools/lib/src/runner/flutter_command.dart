@@ -63,6 +63,7 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+  static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
 }
@@ -389,6 +390,22 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
+    String extraFrontEndOptions =
+        argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
+            ? argResults[FlutterOptions.kExtraFrontEndOptions]
+            : null;
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        argResults[FlutterOptions.kEnableExperiment] != null) {
+      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+        final String flag = '--enable-experiment=' + expFlag;
+        if (extraFrontEndOptions != null) {
+          extraFrontEndOptions += ',' + flag;
+        } else {
+          extraFrontEndOptions = flag;
+        }
+      }
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
@@ -410,9 +427,7 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-          ? argResults[FlutterOptions.kExtraFrontEndOptions]
-          : null,
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
