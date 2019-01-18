@@ -32,6 +32,7 @@ class CardTheme extends Diagnosticable {
     this.clipBehavior,
     this.color,
     this.elevation,
+    this.margin,
     this.shape,
   });
 
@@ -46,8 +47,11 @@ class CardTheme extends Diagnosticable {
   /// Default value for [Card.elevation].
   final double elevation;
 
+  /// Default value for [Card.margin].
+  final EdgeInsetsGeometry margin;
+
   /// Default value for [Card.shape].
-  final NotchedShape shape;
+  final ShapeBorder shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -55,12 +59,14 @@ class CardTheme extends Diagnosticable {
     Clip clipBehavior,
     Color color,
     double elevation,
+    EdgeInsetsGeometry margin,
     NotchedShape shape,
   }) {
     return CardTheme(
       clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
+      margin: margin ?? this.margin,
       shape: shape ?? this.shape,
     );
   }
@@ -81,7 +87,8 @@ class CardTheme extends Diagnosticable {
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      shape: t < 0.5 ? a?.shape : b?.shape,
+      margin: EdgeInsetsGeometry.lerp(a.margin, b.margin, t),
+      shape: ShapeBorder.lerp(a.shape, b.shape, t),
     );
   }
 
@@ -91,6 +98,7 @@ class CardTheme extends Diagnosticable {
       clipBehavior,
       color,
       elevation,
+      margin,
       shape,
     );
   }
@@ -105,6 +113,7 @@ class CardTheme extends Diagnosticable {
     return typedOther.clipBehavior == clipBehavior
         && typedOther.color == color
         && typedOther.elevation == elevation
+        && typedOther.margin == margin
         && typedOther.shape == shape;
   }
 
@@ -114,6 +123,7 @@ class CardTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
