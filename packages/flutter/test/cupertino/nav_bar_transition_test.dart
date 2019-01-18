@@ -1174,6 +1174,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(655.2055835723877, 13.5),
     );
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 2'))),
+      const Offset(749.6335566043854, 13.5),
+    );
 
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -1221,7 +1226,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(350.0, 13.5),
+      const Offset(350.0011436641216, 13.5),
     );
 
     // Finish the snap back animation.

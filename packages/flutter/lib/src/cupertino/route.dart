@@ -630,10 +630,10 @@ class _CupertinoBackGestureController<T> {
       // to determine it.
       final int droppedPageForwardAnimationTime = min(lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
                                    _kMaxPageBackAnimationTime);
-      controller.animateTo(1.01, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
+      controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
       final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
-      controller.animateBack(-0.01, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
     }
 
     assert(controller.isAnimating);
