@@ -217,7 +217,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
