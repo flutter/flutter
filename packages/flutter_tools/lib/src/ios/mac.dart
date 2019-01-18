@@ -723,7 +723,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
   final StringBuffer buffer = StringBuffer();
   final Set<String> printedStatuses = Set<String>();
 
-  for(final String line in lines) {
+  for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1)))
