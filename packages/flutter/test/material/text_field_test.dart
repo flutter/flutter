@@ -1786,7 +1786,7 @@ void main() {
 
     scrollableState = tester.firstState(find.byType(Scrollable));
     // For a horizontal input, scrolls to the exact position of the caret.
-    expect(scrollableState.position.pixels, equals(222.0));
+    expect(scrollableState.position.pixels, equals(223.0));
   });
 
   testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
