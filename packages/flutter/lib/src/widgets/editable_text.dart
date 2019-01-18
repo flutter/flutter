@@ -1034,7 +1034,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double toValue = _showCursor.value ? 1.0 : 0.0;
       _cursorBlinkOpacityController.animateTo(toValue, curve: Curves.easeOut);
     } else {
-      print(_showCursor.value);
       _cursorBlinkOpacityController.value = _showCursor.value ? 1.0 : 0.0;
     }
 
@@ -1053,8 +1052,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startCursorTimer() {
     _showCursor.value = true;
+    _cursorBlinkOpacityController.value = 1.0;
+    if (EditableText.debugDeterministicCursor)
+      return;
     if (widget.cursorOpacityAnimates) {
-      _cursorBlinkOpacityController.value = 1.0;
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
       _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
@@ -1065,6 +1066,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _showCursor.value = false;
+    _cursorBlinkOpacityController.value = 0.0;
+    if (EditableText.debugDeterministicCursor)
+      return;
     if (resetCharTicks)
       _obscureShowCharTicksPending = 0;
     if (widget.cursorOpacityAnimates) {
