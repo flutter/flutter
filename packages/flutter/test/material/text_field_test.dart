@@ -368,6 +368,7 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -384,9 +385,11 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.0.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -404,6 +407,7 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.1.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
