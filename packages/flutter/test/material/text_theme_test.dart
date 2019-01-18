@@ -153,7 +153,7 @@ void main() {
   });
 
   test('TextTheme lerp with second parameter null', () {
-    final TextTheme theme = Typography(platform: TargetPlatform.android).black;
+    final TextTheme theme = Typography().black;
     final TextTheme lerped = TextTheme.lerp(theme, null, 0.25);
 
     expect(lerped.display4, TextStyle.lerp(theme.display4, null, 0.25));
@@ -172,7 +172,7 @@ void main() {
   });
 
   test('TextTheme lerp with first parameter null', () {
-    final TextTheme theme = Typography(platform: TargetPlatform.android).black;
+    final TextTheme theme = Typography().black;
     final TextTheme lerped = TextTheme.lerp(null, theme, 0.25);
 
     expect(lerped.display4, TextStyle.lerp(null, theme.display4, 0.25));

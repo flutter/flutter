@@ -455,8 +455,6 @@ class TextTheme extends Diagnosticable {
 
   /// Linearly interpolate between two text themes.
   ///
-  /// The arguments must not be null.
-  ///
   /// {@macro flutter.material.themeData.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(t != null);
