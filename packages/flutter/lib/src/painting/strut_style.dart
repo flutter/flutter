@@ -11,7 +11,7 @@ import 'basic_types.dart';
 ///
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
 /// if a zero width space is laid out at the beginning of each line in the
-/// paragraph. This imaginary space is "shaped" according the properties defined
+/// paragraph. This imaginary space is 'shaped' according the properties defined
 /// in this class.
 ///
 /// No lines may be shorter than the strut. The ascent and descent of the strut
@@ -196,6 +196,62 @@ import 'basic_types.dart';
 /// ```
 /// {@end-tool}
 ///
+/// {@tool sample}
+/// This example uses forceStrutHeight to create a 'drop cap' for the 'T' in 'The'.
+/// By locking the line heights to the metrics of the 14pt serif font, we are able
+/// to lay out a large 37pt 'T' on the second line to take up space on both the first
+/// and second lines.
+///
+/// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example_2.png)
+///
+/// ```dart
+/// Text.rich(
+///   TextSpan(
+///     text: '       he candle flickered\n',
+///     style: TextStyle(
+///       fontSize: 14,
+///       fontFamily: 'Serif'
+///     ),
+///     children: <TextSpan>[
+///       TextSpan(
+///         text: 'T',
+///         style: TextStyle(
+///           fontSize: 37,
+///           fontFamily: 'Serif'
+///         ),
+///       ),
+///       TextSpan(
+///         text: 'in the moonlight as\n',
+///         style: TextStyle(
+///           fontSize: 14,
+///           fontFamily: 'Serif'
+///         ),
+///       ),
+///       TextSpan(
+///         text: 'Dash the bird fluttered\n',
+///         style: TextStyle(
+///           fontSize: 14,
+///           fontFamily: 'Serif'
+///         ),
+///       ),
+///       TextSpan(
+///         text: 'off into the distance.',
+///         style: TextStyle(
+///           fontSize: 14,
+///           fontFamily: 'Serif'
+///         ),
+///       ),
+///     ],
+///   ),
+///   strutStyle: StrutStyle(
+///     fontFamily: 'Serif',
+///     fontSize: 14,
+///     forceStrutHeight: true,
+///   ),
+/// ),
+/// ```
+/// {@end-tool}
+///
 @immutable
 class StrutStyle extends Diagnosticable {
   /// Creates a strut style.
@@ -217,7 +273,7 @@ class StrutStyle extends Diagnosticable {
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
-       assert(fontSize == null || fontSize > 0)
+       assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0);
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
