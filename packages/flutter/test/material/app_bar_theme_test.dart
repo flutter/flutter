@@ -20,12 +20,13 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
-    // TODO: Test for text theme.
+    expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1));
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
@@ -38,12 +39,13 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
-    // TODO: Test for text theme.
+    expect(text.style, appBarTheme.textTheme.body1);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -68,12 +70,13 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(iconTheme.data, iconThemeData);
-    // TODO: Test for text theme.
+    expect(text.style, textTheme.body1);
   });
 
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
@@ -87,12 +90,13 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
-    // TODO: Test for text theme.
+    expect(text.style, appBarTheme.textTheme.body1);
   });
 
   testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
@@ -105,12 +109,13 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, themeData.primaryIconTheme);
-    // TODO: Test for text theme.
+    expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1).merge(themeData.primaryTextTheme.body1));
   });
 }
 
@@ -153,5 +158,14 @@ IconTheme _getAppBarIconTheme(WidgetTester tester) {
       of: find.byType(AppBar),
       matching: find.byType(IconTheme),
     ),
+  );
+}
+
+DefaultTextStyle _getAppBarText(WidgetTester tester) {
+  return tester.widget<DefaultTextStyle>(
+    find.descendant(
+      of: find.byType(CustomSingleChildLayout),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
   );
 }
