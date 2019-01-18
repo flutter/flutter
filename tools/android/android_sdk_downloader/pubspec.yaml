@@ -1,0 +1,8 @@
+name: 'android_sdk_downloader'
+publish_to: none
+
+dependencies:
+  args: ^1.5.1
+  meta: ^1.1.6
+  path: ^1.6.2
+  xml: ^3.2.3
