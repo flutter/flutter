@@ -818,7 +818,7 @@ class TextStyle extends Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: lineHeight ?? height,
-      strutStyle: strutStyle != null ? ui.StrutStyle(
+      strutStyle: strutStyle != null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
         fontSize: strutStyle.fontSize,
@@ -827,7 +827,7 @@ class TextStyle extends Diagnosticable {
         fontWeight: strutStyle.fontWeight,
         fontStyle: strutStyle.fontStyle,
         forceStrutHeight: strutStyle.forceStrutHeight,
-      ) : null,
+      ),
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
