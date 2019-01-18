@@ -457,6 +457,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final String basename = fs.path.basename(engineBuildPath);
     final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
+    if (!fs.isDirectorySync(engineHostBuildPath)) {
+      throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+    }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
