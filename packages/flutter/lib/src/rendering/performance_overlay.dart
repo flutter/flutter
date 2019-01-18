@@ -40,6 +40,11 @@ enum PerformanceOverlayOption {
   /// spent by the engine as a fraction of the total frame slice. When the bar
   /// turns red, a frame is lost.
   visualizeEngineStatistics,
+
+  /// Display mocked frame times instead of the real rasterizer and engine
+  /// statistics. This is only for testing the correct rendering of the
+  /// performance overlay.
+  mockStatistics,
 }
 
 /// Displays performance statistics.

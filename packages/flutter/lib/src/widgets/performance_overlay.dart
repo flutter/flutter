@@ -47,6 +47,20 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
         1 << PerformanceOverlayOption.visualizeEngineStatistics.index,
       super(key: key);
 
+  /// Create a performance overlay that displays mocked data. This is only for
+  /// testing the correct rendering of the performance overlay.
+  PerformanceOverlay.mock({ Key key,
+    this.rasterizerThreshold = 0,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false })
+      : optionsMask =
+  1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
+  1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
+  1 << PerformanceOverlayOption.displayEngineStatistics.index |
+  1 << PerformanceOverlayOption.visualizeEngineStatistics.index |
+  1 << PerformanceOverlayOption.mockStatistics.index,
+        super(key: key);
+
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
   final int optionsMask;
