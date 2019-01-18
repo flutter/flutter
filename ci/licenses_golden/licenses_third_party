@@ -1,4 +1,4 @@
-Signature: 5f084aa16f4ecd2ee23584417b88c0fa
+Signature: 58032626656f97f990acd094737b0751
 
 UNUSED LICENSES:
 
@@ -5607,6 +5607,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
+FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
+FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
