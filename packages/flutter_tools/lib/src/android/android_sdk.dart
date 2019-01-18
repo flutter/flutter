@@ -139,7 +139,8 @@ class AndroidNdk {
       return ndkDirectory;
     }
 
-    String findCompiler(String ndkDirectory) {
+    // Returns list that contains toolchain bin folder and compiler binary name.
+    List<String> findToolchainAndCompiler(String ndkDirectory) {
       String directory;
       if (platform.isLinux) {
         directory = 'linux-x86_64';
@@ -149,14 +150,16 @@ class AndroidNdk {
         throw AndroidNdkSearchError('Only Linux and macOS are supported');
       }
 
-      final String ndkCompiler = fs.path.join(ndkDirectory,
+      final String toolchainBin = fs.path.join(ndkDirectory,
           'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
-          'bin', 'arm-linux-androideabi-gcc');
+          'bin');
+      final String ndkCompiler = fs.path.join(toolchainBin,
+          'arm-linux-androideabi-gcc');
       if (!fs.isFileSync(ndkCompiler)) {
         throw AndroidNdkSearchError('Can not locate GCC binary, tried $ndkCompiler');
       }
 
-      return ndkCompiler;
+      return <String>[toolchainBin, ndkCompiler];
     }
 
     List<String> findSysroot(String ndkDirectory) {
@@ -202,9 +205,48 @@ class AndroidNdk {
       return <String>['--sysroot', armPlatform];
     }
 
+    int findNdkMajorVersion(String ndkDirectory) {
+      final String propertiesFile = fs.path.join(ndkDirectory, 'source.properties');
+      if (!fs.isFileSync(propertiesFile)) {
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile not found');
+      }
+
+      // Parse source.properties: each line has Key = Value format.
+      final Iterable<String> propertiesFileLines = fs.file(propertiesFile)
+          .readAsStringSync()
+          .split('\n')
+          .map<String>((String line) => line.trim())
+          .where((String line) => line.isNotEmpty);
+      final Map<String, String> properties = Map<String, String>.fromIterable(
+          propertiesFileLines.map<List<String>>((String line) => line.split(' = ')),
+          key: (dynamic split) => split[0],
+          value: (dynamic split) => split[1]);
+
+      if (!properties.containsKey('Pkg.Revision')) {
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile does not contain Pkg.Revision');
+      }
+
+      // Extract major version from Pkg.Revision property which looks like <ndk-version>.x.y.
+      return int.parse(properties['Pkg.Revision'].split('.').first);
+    }
+
     final String ndkDir = findBundle(androidHomeDir);
-    final String ndkCompiler = findCompiler(ndkDir);
+    final int ndkVersion = findNdkMajorVersion(ndkDir);
+    final List<String> ndkToolchainAndCompiler = findToolchainAndCompiler(ndkDir);
+    final String ndkToolchain = ndkToolchainAndCompiler[0];
+    final String ndkCompiler = ndkToolchainAndCompiler[1];
     final List<String> ndkCompilerArgs = findSysroot(ndkDir);
+    if (ndkVersion >= 18) {
+      // Newer versions of NDK use clang instead of gcc, which falls back to
+      // system linker instead of using toolchain linker. Force clang to
+      // use appropriate linker by passing -fuse-ld=<path-to-ld> command line
+      // flag.
+      final String ndkLinker = fs.path.join(ndkToolchain, 'arm-linux-androideabi-ld');
+      if (!fs.isFileSync(ndkLinker)) {
+        throw AndroidNdkSearchError('Can not locate linker binary, tried $ndkLinker');
+      }
+      ndkCompilerArgs.add('-fuse-ld=$ndkLinker');
+    }
     return AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
   }
 

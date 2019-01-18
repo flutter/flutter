@@ -49,7 +49,7 @@ abstract class RunCommandBase extends FlutterCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
-        allowed: <String>['default', 'android-arm', 'android-arm64'],
+        allowed: <String>['default', 'android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'Specify the target platform when building the app for an '
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
@@ -145,7 +145,11 @@ class RunCommand extends RunCommandBase {
               'intended for use in generating automated flutter benchmarks.',
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
+      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
+      ..addMultiOption(FlutterOptions.kEnableExperiment,
+        splitCommas: true,
+        hide: true,
+      );
   }
 
   @override
