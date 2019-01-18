@@ -13,9 +13,9 @@ import 'colors.dart';
 import 'input_border.dart';
 import 'theme.dart';
 
-// eyeballed values from https://material.io
-const Duration _kTransitionDuration = Duration(milliseconds: 180);
-const Curve _kTransitionCurve = Curves.ease;
+// values taken from Material specification
+const Duration _kTransitionDuration = Duration(milliseconds: 150);
+const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
