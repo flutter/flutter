@@ -1,4 +1,4 @@
-Signature: 6bd4e9a9ef92f56a1631a8f701511ac6
+Signature: 5f084aa16f4ecd2ee23584417b88c0fa
 
 UNUSED LICENSES:
 
@@ -5271,7 +5271,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.h
 FILE: ../../../third_party/dart/runtime/vm/constants.h
 FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
@@ -5607,6 +5606,7 @@ ORIGIN: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h + ../../../thi
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
