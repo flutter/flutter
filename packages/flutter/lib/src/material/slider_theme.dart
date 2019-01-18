@@ -522,25 +522,25 @@ class SliderThemeData extends Diagnosticable {
     }
     final SliderThemeData otherData = other;
     return otherData.trackHeight == trackHeight
-        && otherData.activeTrackColor == activeTrackColor
-        && otherData.inactiveTrackColor == inactiveTrackColor
-        && otherData.disabledActiveTrackColor == disabledActiveTrackColor
-        && otherData.disabledInactiveTrackColor == disabledInactiveTrackColor
-        && otherData.activeTickMarkColor == activeTickMarkColor
-        && otherData.inactiveTickMarkColor == inactiveTickMarkColor
-        && otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor
-        && otherData.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
-        && otherData.thumbColor == thumbColor
-        && otherData.disabledThumbColor == disabledThumbColor
-        && otherData.overlayColor == overlayColor
-        && otherData.valueIndicatorColor == valueIndicatorColor
-        && otherData.trackShape == trackShape
-        && otherData.tickMarkShape == tickMarkShape
-        && otherData.thumbShape == thumbShape
-        && otherData.overlayShape == overlayShape
-        && otherData.valueIndicatorShape == valueIndicatorShape
-        && otherData.showValueIndicator == showValueIndicator
-        && otherData.valueIndicatorTextStyle == valueIndicatorTextStyle;
+      && otherData.activeTrackColor == activeTrackColor
+      && otherData.inactiveTrackColor == inactiveTrackColor
+      && otherData.disabledActiveTrackColor == disabledActiveTrackColor
+      && otherData.disabledInactiveTrackColor == disabledInactiveTrackColor
+      && otherData.activeTickMarkColor == activeTickMarkColor
+      && otherData.inactiveTickMarkColor == inactiveTickMarkColor
+      && otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor
+      && otherData.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
+      && otherData.thumbColor == thumbColor
+      && otherData.disabledThumbColor == disabledThumbColor
+      && otherData.overlayColor == overlayColor
+      && otherData.valueIndicatorColor == valueIndicatorColor
+      && otherData.trackShape == trackShape
+      && otherData.tickMarkShape == tickMarkShape
+      && otherData.thumbShape == thumbShape
+      && otherData.overlayShape == overlayShape
+      && otherData.valueIndicatorShape == valueIndicatorShape
+      && otherData.showValueIndicator == showValueIndicator
+      && otherData.valueIndicatorTextStyle == valueIndicatorTextStyle;
   }
 
   @override
@@ -869,7 +869,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     // TODO(clocksmith): Although this works for a material, perhaps the default
-    // rectangular track should be padded not just  by the overlay, but by the
+    // rectangular track should be padded not just by the overlay, but by the
     // max of the thumb and the overlay, in case there is no overlay.
     final double trackWidth = parentBox.size.width - overlayWidth;
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
@@ -1234,11 +1234,11 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   // Determines the "best" offset to keep the bubble on the screen. The calling
   // code will bound that with the available movement in the paddle shape.
   double _getIdealOffset(
-      RenderBox parentBox,
-      double halfWidthNeeded,
-      double scale,
-      Offset center,
-      ) {
+    RenderBox parentBox,
+    double halfWidthNeeded,
+    double scale,
+    Offset center,
+  ) {
     const double edgeMargin = 4.0;
     final Rect topLobeRect = Rect.fromLTWH(
       -_topLobeRadius - halfWidthNeeded,
@@ -1262,13 +1262,13 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   }
 
   void _drawValueIndicator(
-      RenderBox parentBox,
-      Canvas canvas,
-      Offset center,
-      Paint paint,
-      double scale,
-      TextPainter labelPainter,
-      ) {
+    RenderBox parentBox,
+    Canvas canvas,
+    Offset center,
+    Paint paint,
+    double scale,
+    TextPainter labelPainter,
+  ) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     // The entire value indicator should scale with the size of the label,
@@ -1333,7 +1333,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation ||
-            () {
+        () {
           final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
           final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
           final Rect valueRect = Rect.fromLTRB(
@@ -1391,17 +1391,17 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      }) {
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
