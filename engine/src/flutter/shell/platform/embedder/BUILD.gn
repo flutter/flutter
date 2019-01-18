@@ -2,9 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/testing/testing.gni")
+import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/shell/platform/embedder/embedder.gni")
+import("$flutter_root/testing/testing.gni")
 
 shell_gpu_configuration("embedder_gpu_configuration") {
   enable_software = true
@@ -39,11 +40,16 @@ source_set("embedder") {
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
-    "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
     "//third_party/tonic",
   ]
+
+  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+    deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
+  } else {
+    deps += [ "//third_party/dart/runtime:libdart_jit" ]
+  }
 
   public_configs = [ "$flutter_root:config" ]
 }
