@@ -81,7 +81,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -182,6 +182,7 @@ class Scrollable extends StatefulWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// {@template flutter.widgets.scrollable.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -193,7 +194,7 @@ class Scrollable extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///

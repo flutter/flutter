@@ -84,7 +84,7 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        assert(dragStartBehavior != null),
@@ -146,6 +146,7 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
@@ -156,7 +157,7 @@ class Dismissible extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///
