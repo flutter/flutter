@@ -432,8 +432,7 @@ void main() {
               const Offset(-15.9, -40.0),
             ],
             excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
-          )
-    );
+          ));
 
     await gesture.up();
 
@@ -454,8 +453,7 @@ void main() {
               const Offset(-35.9, -40.0),
             ],
             excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
-          )
-    );
+          ));
     await gesture.up();
 
     // Test that it avoids the left edge of the screen.
@@ -475,8 +473,7 @@ void main() {
               const Offset(-16.0, -40.0),
             ],
             excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
-          )
-    );
+          ));
     await gesture.up();
 
     // Test that it avoids the right edge of the screen.
@@ -496,8 +493,7 @@ void main() {
               const Offset(-98.0, -40.0),
             ],
             excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
-          )
-    );
+          ));
     await gesture.up();
 
     // Test that the neck stretches when the text scale gets smaller.
@@ -522,8 +518,7 @@ void main() {
               const Offset(90.1, -49.0),
               const Offset(-24.1, -49.0),
             ],
-          )
-    );
+          ));
     await gesture.up();
 
     // Test that the neck shrinks when the text scale gets larger.
@@ -548,8 +543,7 @@ void main() {
               const Offset(98.5, -38.8),
               const Offset(-16.1, -38.8),
             ],
-          )
-    );
+          ));
     await gesture.up();
   });
 }

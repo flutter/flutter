@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
-
 // A thumb shape that also logs its repaint center.
 class LoggingThumbShape extends SliderComponentShape {
   LoggingThumbShape(this.log);
@@ -559,8 +558,8 @@ void main() {
       final ValueChanged<double> onChanged = !enabled
           ? null
           : (double d) {
-        value = d;
-      };
+              value = d;
+            };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
