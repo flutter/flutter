@@ -316,14 +316,14 @@ void main() {
                 ),
                 children: <TextSpan>[
                   TextSpan(
-                    text: "Second line!\n",
+                    text: 'Second line!\n',
                     style: TextStyle(
                       fontSize: 5,
                       color: Colors.blue,
                     ),
                   ),
                   TextSpan(
-                    text: "Third line!\n",
+                    text: 'Third line!\n',
                     style: TextStyle(
                       fontSize: 25,
                       color: Colors.white,
@@ -389,12 +389,12 @@ void main() {
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
-                fontFamily: "FakeFont 1",
+                fontFamily: 'FakeFont 1',
                 fontFamilyFallback: <String>[
-                  "FakeFont 2",
-                  "EvilFont 3",
-                  "Nice Font 4",
-                  "ahem"
+                  'FakeFont 2',
+                  'EvilFont 3',
+                  'Nice Font 4',
+                  'ahem'
                 ],
                 fontSize: 25.5,
               ),
@@ -426,14 +426,14 @@ void main() {
                 ),
                 children: <TextSpan>[
                   TextSpan(
-                    text: "Second line!\n",
+                    text: 'Second line!\n',
                     style: TextStyle(
                       fontSize: 9,
                       color: Colors.blue,
                     ),
                   ),
                   TextSpan(
-                    text: "Third line!\n",
+                    text: 'Third line!\n',
                     style: TextStyle(
                       fontSize: 27,
                       color: Colors.white,

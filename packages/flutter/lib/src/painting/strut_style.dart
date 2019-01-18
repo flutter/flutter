@@ -28,9 +28,9 @@ import 'basic_types.dart';
 ///  * `ascent * lineHeight`
 ///  * `descent * lineHeight`
 ///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
-/// 
+///
 /// The sum of these four values is the total height of the line.
-/// 
+///
 /// The `ascent + descent` is equivalent to the [fontSize]. Ascent is the font's
 /// spacing above the baseline without leading and descent is the spacing below the
 /// baseline without leading. Leading is split evenly between the top and bottom.
@@ -87,7 +87,7 @@ import 'basic_types.dart';
 ///    Default is `normal`.
 ///
 ///  * [forceStrutHeight] when true, all lines will be laid out with the height of the
-///    strut. All line and run-specific metrics will be ignored/overrided and only strut
+///    strut. All line and run-specific metrics will be ignored/overridden and only strut
 ///    metrics will be used instead. This property guarantees uniform line spacing, however
 ///    text in adjacent lines may overlap. This property should be enabled with caution as
 ///    it bypasses a large portion of the vertical layout system.
@@ -368,7 +368,7 @@ class StrutStyle extends Diagnosticable {
   /// Whether the strut height should be forced.
   ///
   /// When true, all lines will be laid out with the height of the
-  /// strut. All line and run-specific metrics will be ignored/overrided and only strut
+  /// strut. All line and run-specific metrics will be ignored/overridden and only strut
   /// metrics will be used instead. This property guarantees uniform line spacing, however
   /// text in adjacent lines may overlap.
   ///
