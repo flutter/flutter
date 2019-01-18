@@ -22,10 +22,7 @@ const String _kFlutterModuleExtension = '.flutter.module';
 /// modules and an entrypoint.
 ///
 /// Unlike the package:build kernel builders, this creates a single kernel from
-/// dart source using the frontend server binary. Incremental kernel is not
-/// necessarily beneficial to a hot reload based workflow.
-///
-// TODO(jonahwilliams): figure out what dep file is used for.
+/// dart source using the frontend server binary.
 class FlutterKernelBuilder implements Builder {
   const FlutterKernelBuilder({
     @required this.target,
@@ -149,21 +146,61 @@ class FlutterKernelBuilder implements Builder {
     await _stdoutHandler.compilerOutput.future;
     await scratchSpace.copyOutput(outputId, buildStep);
   }
+}
 
-  Future<void> _addModuleDeps(
+class FlutterIncrementalKernelBuilder implements Builder {
+  const FlutterIncrementalKernelBuilder();
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.dart': <String>['.app.incremental.dill.timestamp'],
+  };
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    if (!buildStep.inputId.path.contains('main.dart')) {
+      return;
+    }
+    final AssetId moduleId = buildStep.inputId.changeExtension(_kFlutterModuleExtension);
+    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+    final AssetId outputId = module.primarySource.changeExtension('.app.incremental.dill.timestamp');
+    final List<Module> transitiveDeps = await module.computeTransitiveDependencies(buildStep);
+    final List<AssetId> transitiveKernelDeps = <AssetId>[];
+    final List<AssetId> transitiveSourceDeps = <AssetId>[];
+    for (Module dependency in transitiveDeps) {
+      await _addModuleDeps(
+        dependency,
+        module,
+        transitiveKernelDeps,
+        transitiveSourceDeps,
+        buildStep,
+        _kFlutterKernelModuleExtension,
+      );
+    }
+    final Set<AssetId> allAssetIds = Set<AssetId>()
+      ..addAll(module.sources)
+      ..addAll(transitiveKernelDeps)
+      ..addAll(transitiveSourceDeps);
+    await scratchSpace.ensureAssets(allAssetIds, buildStep);
+    await buildStep.writeAsString(outputId, DateTime.now().toIso8601String());
+  }
+}
+
+Future<void> _addModuleDeps(
     Module dependency,
     Module root,
     List<AssetId> transitiveKernelDeps,
     List<AssetId> transitiveSourceDeps,
     BuildStep buildStep,
-    String outputExtension) async {
+    String outputExtension,
+  ) async {
   final AssetId kernelId = dependency.primarySource.changeExtension(outputExtension);
   if (await buildStep.canRead(kernelId)) {
     // If we can read the kernel file, but it depends on any module in this
     // package, then we need to only provide sources for that file since its
     // dependencies in this package will only be providing sources as well.
     if ((await dependency.computeTransitiveDependencies(buildStep))
-        .any((Module module) => module.primarySource.package == root.primarySource.package)) {
+      .any((Module module) => module.primarySource.package == root.primarySource.package)) {
       transitiveSourceDeps.addAll(dependency.sources);
     } else {
       transitiveKernelDeps.add(kernelId);
@@ -171,5 +208,4 @@ class FlutterKernelBuilder implements Builder {
   } else {
     transitiveSourceDeps.addAll(dependency.sources);
   }
-}
 }

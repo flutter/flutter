@@ -4,6 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/pipeline.dart';
+import 'package:flutter_tools/src/compile.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
@@ -315,11 +319,17 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
-        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
+    if (argResults['train'] && getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile) {
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
+    }
 
+    final ResidentCompiler generator = await BuildResidentCompiler.create(
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      trackWidgetCreation: argResults['track-widget-creation'],
+      fileSystemRoots: argResults['filesystem-root'],
+      fileSystemScheme: argResults['filesystem-scheme'],
+    );
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -328,6 +338,7 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        generator: generator,
       );
     }).toList();
 
