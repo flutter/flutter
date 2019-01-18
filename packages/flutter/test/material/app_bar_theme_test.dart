@@ -30,11 +30,11 @@ void main() {
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
-    AppBarTheme appBarTheme = _appBarTheme();
+    final AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(appBar: AppBar(title: Text('App Bar Title'),)),
+      home: Scaffold(appBar: AppBar(title: const Text('App Bar Title'),)),
     ));
 
     final Material widget = _getAppBarMaterial(tester);
