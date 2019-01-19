@@ -139,6 +139,7 @@ class Card extends StatelessWidget {
   final Widget child;
 
   static const double _defaultElevation = 1.0;
+  static const Clip _defaultClipBehavior = Clip.none;
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +156,7 @@ class Card extends StatelessWidget {
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
-          clipBehavior: clipBehavior ?? cardTheme.clipBehavior,
+          clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? _defaultClipBehavior,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
             child: child,
