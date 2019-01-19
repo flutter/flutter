@@ -156,7 +156,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
-          printTrace('Device poll timed out.');
+          printTrace('Device poll timed out. Will retry.');
         }
       }, _pollingInterval);
     }
