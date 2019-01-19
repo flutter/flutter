@@ -26,6 +26,7 @@ void main() {
             controller: scrollController,
             children: <Widget>[
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
@@ -68,6 +69,7 @@ void main() {
                 height: 200.0,
               ),
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 scrollPadding: const EdgeInsets.all(50.0),
                 controller: controller,
@@ -114,6 +116,7 @@ void main() {
                 height: 350.0,
               ),
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
@@ -164,6 +167,7 @@ void main() {
                 height: 350.0,
               ),
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
@@ -251,6 +255,7 @@ void main() {
             controller: scrollController,
             children: <Widget>[
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 maxLines: null, // multi-line
                 controller: controller,
@@ -307,6 +312,7 @@ void main() {
                 height: 200.0,
               ),
               EditableText(
+                fadeOutSelectionControls: false,
                 backgroundCursorColor: Colors.grey,
                 scrollPadding: const EdgeInsets.only(bottom: 300.0),
                 controller: controller,

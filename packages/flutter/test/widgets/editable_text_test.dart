@@ -2028,6 +2028,7 @@ testWidgets(
       Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
+          fadeOutSelectionControls: false,
           controller: controller,
           focusNode: FocusNode(),
           style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -2056,6 +2057,7 @@ testWidgets(
       Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
+          fadeOutSelectionControls: false,
           controller: controller,
           focusNode: FocusNode(),
           style: Typography(platform: TargetPlatform.android).black.subhead,
