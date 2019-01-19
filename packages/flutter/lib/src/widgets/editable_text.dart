@@ -217,7 +217,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
-    this.fadeOutSelectionControls,
+    @required this.fadeOutSelectionControls,
     this.showToolbarOnDoubleSlowTap,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
@@ -236,6 +236,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+        assert(fadeOutSelectionControls != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -885,10 +886,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         dragStartBehavior: widget.dragStartBehavior,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard &&
-          cause != SelectionChangedCause.doubleTapTimeOut &&
-          cause != SelectionChangedCause.tap &&
-          (_value.text.isNotEmpty || longPress))
+      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
       if ((longPress || cause == SelectionChangedCause.doubleTap) && !toolbarVisible)
         _selectionOverlay.showToolbar();
