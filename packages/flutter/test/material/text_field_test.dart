@@ -1778,7 +1778,42 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     scrollableState = tester.firstState(find.byType(Scrollable));
-    expect(scrollableState.position.pixels, isNot(equals(0.0)));
+    // For a horizontal input, scrolls to the exact position of the caret.
+    expect(scrollableState.position.pixels, equals(222.0));
+  });
+
+  testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Container(
+          child: TextField(
+            controller: controller,
+            maxLines: 6,
+          ),
+        ),
+      ),
+    );
+
+    const String tallText = 'a\nb\nc\nd\ne\nf\ng'; // One line over max
+    await tester.enterText(find.byType(TextField), tallText);
+    await skipPastScrollingAnimation(tester);
+
+    ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
+    expect(scrollableState.position.pixels, equals(0.0));
+
+    // Move the caret to the end of the text and check that the text field
+    // scrolls to make the caret visible.
+    controller.selection = const TextSelection.collapsed(offset: tallText.length);
+    await tester.pump();
+    await skipPastScrollingAnimation(tester);
+
+    // Should have scrolled down exactly one line height (7 lines of text in 6
+    // line text field).
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    scrollableState = tester.firstState(find.byType(Scrollable));
+    expect(scrollableState.position.pixels, closeTo(lineHeight, 0.1));
   });
 
   testWidgets('haptic feedback', (WidgetTester tester) async {
@@ -1990,6 +2025,29 @@ void main() {
     await tester.pump();
 
     expect(find.text('5'), findsOneWidget);
+  });
+
+  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextField(
+              buildCounter: (BuildContext context, {int currentLength, int maxLength, bool isFocused}) {
+                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+              },
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0 of 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 of 10'), findsOneWidget);
   });
 
   testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
@@ -4260,6 +4318,70 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
+
+  testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+
+    // We don't want this gesture to select any word on Android.
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(FlatButton), findsNothing);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('force press selects word (iOS)', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    // We expect the force press to select a word at the given location.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoButton), findsNWidgets(3));
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

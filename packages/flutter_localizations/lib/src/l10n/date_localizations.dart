@@ -6,8 +6,8 @@
 // To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
-// ignore_for_file: public_member_api_docs
-
+/// The subset of date symbols supported by the intl package which are also
+/// supported by flutter_localizations.
 const Map<String, dynamic> dateSymbols = <String, dynamic>{
   'ar': <String, dynamic>{
     'NAME': r'''ar''',
@@ -11356,6 +11356,9 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
     ],
   },
 };
+
+/// The subset of date patterns supported by the intl package which are also
+/// supported by flutter_localizations.
 const Map<String, Map<String, String>> datePatterns =
     <String, Map<String, String>>{
   'ar': <String, String>{

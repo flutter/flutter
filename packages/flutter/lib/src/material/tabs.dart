@@ -154,20 +154,21 @@ class _TabStyle extends AnimatedWidget {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
-    final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
-    final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultStyle = labelStyle ?? tabBarTheme.labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultUnselectedStyle = unselectedLabelStyle
+      ?? tabBarTheme.unselectedLabelStyle
+      ?? labelStyle
+      ?? themeData.primaryTextTheme.body2;
     final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
-    final Color selectedColor =
-        labelColor
-         ?? tabBarTheme.labelColor
-         ?? themeData.primaryTextTheme.body2.color;
-    final Color unselectedColor =
-        unselectedLabelColor
-        ?? tabBarTheme.unselectedLabelColor
-        ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color selectedColor = labelColor
+       ?? tabBarTheme.labelColor
+       ?? themeData.primaryTextTheme.body2.color;
+    final Color unselectedColor = unselectedLabelColor
+      ?? tabBarTheme.unselectedLabelColor
+      ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -550,7 +551,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -1042,7 +1043,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);

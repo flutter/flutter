@@ -160,6 +160,40 @@ void main() {
           FileSystem: () => fs,
           Platform: () => FakePlatform(operatingSystem: os),
         });
+
+        testUsingContext('newer NDK require explicit -fuse-ld on $os', () {
+          sdkDir = MockAndroidSdk.createSdkDirectory(
+              withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true, ndkVersion: 18);
+          Config.instance.setValue('android-sdk', sdkDir.path);
+
+          final String realSdkDir = sdkDir.path;
+          final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
+          final String realNdkToolchainBin = fs.path.join(
+              realNdkDir,
+              'toolchains',
+              'arm-linux-androideabi-4.9',
+              'prebuilt',
+              osDir,
+              'bin');
+          final String realNdkCompiler = fs.path.join(
+              realNdkToolchainBin,
+              'arm-linux-androideabi-gcc');
+          final String realNdkLinker = fs.path.join(
+              realNdkToolchainBin,
+              'arm-linux-androideabi-ld');
+          final String realNdkSysroot =
+              fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
+
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+          expect(sdk.directory, realSdkDir);
+          expect(sdk.ndk, isNotNull);
+          expect(sdk.ndk.directory, realNdkDir);
+          expect(sdk.ndk.compiler, realNdkCompiler);
+          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=$realNdkLinker']);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          Platform: () => FakePlatform(operatingSystem: os),
+        });
       });
 
       for (String os in <String>['linux', 'macos']) {

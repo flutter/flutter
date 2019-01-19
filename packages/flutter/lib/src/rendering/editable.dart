@@ -259,8 +259,14 @@ class RenderEditable extends RenderBox {
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
-    if (defaultTargetPlatform != TargetPlatform.android)
-      return;
+    // Only handle key events on Android.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        return;
+    }
 
     if (keyEvent is RawKeyUpEvent)
       return;
@@ -1187,12 +1193,29 @@ class RenderEditable extends RenderBox {
 
   /// Select a word around the location of the last tap down.
   void selectWord({@required SelectionChangedCause cause}) {
+    selectWordsInRange(from: _lastTapDownPosition, cause: cause);
+  }
+
+  /// Selects the set words of a paragraph in a given range of global positions.
+  ///
+  /// The first and last endpoints of the selection will always be at the
+  /// beginning and end of a word respectively.
+  void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
-    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, cause);
+      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
+      final TextSelection firstWord = _selectWordAtOffset(firstPosition);
+      final TextSelection lastWord = to == null ?
+        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to + -_paintOffset)));
+
+      onSelectionChanged(
+        TextSelection(
+          baseOffset: firstWord.base.offset,
+          extentOffset: lastWord.extent.offset,
+          affinity: firstWord.affinity,
+        ), this, cause,
+      );
     }
   }
 
