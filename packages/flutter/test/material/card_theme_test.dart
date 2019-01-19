@@ -113,8 +113,8 @@ final Key _painterKey = UniqueKey();
 Widget _withTheme(CardTheme theme) {
   return MaterialApp(
     theme: ThemeData(cardTheme: theme),
-    home: Scaffold(
-      body: Center(child: const Card()),
+    home: const Scaffold(
+      body: Center(child: Card()),
     ),
   );
 }
