@@ -147,6 +147,7 @@ abstract class TextSelectionControls {
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
+    delegate.setLastTextPosition();
   }
 
   /// Copy the current selection of the text field managed by the given
@@ -194,6 +195,7 @@ abstract class TextSelectionControls {
     }
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
+    delegate.setLastTextPosition();
   }
 
   /// Adjust the selection of the text field managed by the given `delegate` so

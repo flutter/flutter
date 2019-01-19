@@ -583,6 +583,9 @@ abstract class TextSelectionDelegate {
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
+
+  ///
+  void setLastTextPosition();
 }
 
 /// An interface to receive information from [TextInput].

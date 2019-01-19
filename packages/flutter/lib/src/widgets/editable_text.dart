@@ -877,6 +877,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final Queue<TextSelection> _oldSelections = Queue<TextSelection>();
   bool _showingToolbarFromTimeOut = true;
 
+  @override
+  void setLastTextPosition() {
+    _oldSelections.addFirst(widget.controller.selection);
+    _oldSelections.removeLast();
+    _showingToolbarFromTimeOut = true;
+  }
+
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
     widget.controller.selection = selection;
 
