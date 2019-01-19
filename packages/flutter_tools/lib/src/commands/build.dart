@@ -50,7 +50,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     final String channel = FlutterVersion.instance.getBranchName();
     if (channel == 'master') {
       printStatus('🐉', newline: false, color: TerminalColor.red);
-      printStatus(' This is the $channel channel. Shipping apps from this channel is not recommended as it has not been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    "flutter channel stable".');
+      printStatus(' This is the $channel channel. Shipping apps from this channel is not recommended as it has not been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    flutter channel stable');
     }
     if (isRunningOnBot) {
       final File dotPackages = fs.file('.packages');
