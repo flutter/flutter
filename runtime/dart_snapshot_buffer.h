@@ -15,6 +15,8 @@
 
 namespace blink {
 
+// TODO(chinmaygarde): Replace this with just |fml::Mapping|.
+// https://github.com/flutter/flutter/issues/26782
 class DartSnapshotBuffer {
  public:
   static std::unique_ptr<DartSnapshotBuffer> CreateWithSymbolInLibrary(
@@ -27,6 +29,9 @@ class DartSnapshotBuffer {
 
   static std::unique_ptr<DartSnapshotBuffer> CreateWithUnmanagedAllocation(
       const uint8_t* allocation);
+
+  static std::unique_ptr<DartSnapshotBuffer> CreateWithMapping(
+      std::unique_ptr<fml::Mapping> mapping);
 
   virtual ~DartSnapshotBuffer();
 
