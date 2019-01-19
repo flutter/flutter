@@ -80,11 +80,12 @@ void main() {
 
     await tester.pumpWidget(_withTheme(theme));
 
-    await expectLater(
-      find.byKey(_painterKey),
-      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
-      skip: !Platform.isLinux,
-    );
+    // TODO(rami-a): Add golden.
+//    await expectLater(
+//      find.byKey(_painterKey),
+//      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
+//      skip: !Platform.isLinux,
+//    );
   });
 
   testWidgets('Card theme does not affect defaults', (WidgetTester tester) async {
