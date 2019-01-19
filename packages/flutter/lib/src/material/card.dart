@@ -101,13 +101,14 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.shape].
   ///
-  /// If this property is null then [ThemeData.cardTheme.shape] is used,
-  /// if that's null then the shape will be a [RoundedRectangleBorder] with a
+  /// If this property is null then [ThemeData.cardTheme.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
-  /// TODO (larche): Add note about theme and default
+  /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
+  /// If that's null then the behavior will be [Clip.none].
   final Clip clipBehavior;
 
   /// The empty space that surrounds the card.
