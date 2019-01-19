@@ -1000,10 +1000,7 @@ class _RenderListTile extends RenderBox {
       leadingY = 16.0;
       trailingY = 16.0;
     } else {
-      leadingY = (tileHeight - leadingSize.height) / 2.0;
-      if (leadingY > 16.0) {
-        leadingY = 16.0;
-      }
+      leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
       trailingY = (tileHeight - trailingSize.height) / 2.0;
     }
 
