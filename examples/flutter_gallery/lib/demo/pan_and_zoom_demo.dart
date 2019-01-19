@@ -1,4 +1,5 @@
 import 'dart:ui' show Vertices;
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_inertial_motion.dart';
@@ -62,9 +63,9 @@ class BoardInteraction extends StatefulWidget {
   final Size screenSize;
   final Function onTapUp;
 
-  @override _BoardInteractionState createState() => _BoardInteractionState();
+  @override BoardInteractionState createState() => BoardInteractionState();
 }
-class _BoardInteractionState extends State<BoardInteraction> with SingleTickerProviderStateMixin {
+class BoardInteractionState extends State<BoardInteraction> with SingleTickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   static const double MAX_SCALE = 2.5;
@@ -75,9 +76,19 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
   // A positive y offset moves the scene down, viewport up.
   // Start out looking at the center.
   static Offset __translation = const Offset(0, 0);
-  Offset _translateFrom; // Point where a single translation began
-  double _scaleStart = 1.0; // Scale value at start of scaling gesture
+  Offset _translateFrom = null; // Point where a single translation began
+  double _scaleStart; // Scale value at start of scaling gesture
   double __scale = 1.0;
+  double _rotationStart;
+  // TODO rotation should be centered at the gesture's focal point.
+  // But that's hard. I can do rotation around an arbitrary center using
+  // matrices, but when I try to do a second rotation about a different center,
+  // it doesn't work (short of keeping track of all rotation points and angles).
+  // Another idea is to convert rotation about a center into a regular rotation
+  // and translation. However, that would mean that my _translation would be
+  // constantly changing during a rotation, and it won't quite mean what it
+  // currently does anymore.
+  double _rotation = 0.0;
 
   Offset get _translation => __translation;
   set _translation(Offset offset) {
@@ -103,6 +114,8 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
   @override
   void initState() {
     super.initState();
+    _translateFrom = Offset(widget.screenSize.width / 2, widget.screenSize.height / 2);
+    //_translateFrom = Offset(widget.screenSize.width / 2 - 200, widget.screenSize.height / 2 - 200);
     _controller = AnimationController(
       vsync: this,
     );
@@ -110,6 +123,15 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
 
   @override
   Widget build (BuildContext context) {
+    // By default, the scene is drawn so that the origin is in the top left
+    // corner of the viewport. Center it instead.
+    final Offset translationCentered = Offset(
+      _translation.dx + widget.screenSize.width / 2 / _scale,
+      _translation.dy + widget.screenSize.height / 2 / _scale,
+    );
+
+    // A GestureDetector allows the detection of panning and zooming gestures on
+    // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
       onScaleEnd: _onScaleEnd,
@@ -117,54 +139,61 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
       onScaleUpdate: _onScaleUpdate,
       onTapUp: _onTapUp,
       child: ClipRect(
+        // The scene is actually panned and zoomed using this Transform widget.
         child: Transform(
-          transform: _getTransformationMatrix(),
+          transform: BoardInteractionState.getTransformationMatrix(translationCentered, _scale, _rotation),
           child: widget.child,
         ),
       ),
     );
   }
 
-  Matrix4 _getTransformationMatrix() {
-    // Scaling happens first in matrix multiplication, centered on the origin,
-    // while our canvas is at its original position with zero translation.
-    final Matrix4 scale = Matrix4(
-      _scale, 0, 0, 0,
-      0, _scale, 0, 0,
+  // Get a matrix that will transform the origin of the scene with the given
+  // translation, scale, and rotation so that it ends up centered under the
+  // viewport.
+  static Matrix4 getTransformationMatrix(Offset translation, double scale, double rotation, [Offset focalPoint = Offset.zero]) {
+    final Matrix4 scaleMatrix = Matrix4(
+      scale, 0, 0, 0,
+      0, scale, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1,
     );
-
-    // Translate the scene to put _translation under the center of the viewport
-    final Offset originalCenterOfScreen = Offset(
-      widget.screenSize.width / 2,
-      widget.screenSize.height / 2,
-    );
-    final Offset scaledCenterOfScreen = originalCenterOfScreen * (1 / _scale);
-    final Offset offsetUnderCenter = _translation + scaledCenterOfScreen;
-    final Matrix4 translate = Matrix4(
+    final Matrix4 translationMatrix = Matrix4(
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
-      offsetUnderCenter.dx, offsetUnderCenter.dy, 0, 1,
+      translation.dx, translation.dy, 0, 1,
     );
-
-    return scale * translate;
+    final Matrix4 rotationMatrix = Matrix4.identity()
+      ..translate(focalPoint.dx, focalPoint.dy)
+      ..rotateZ(-rotation)
+      ..translate(-focalPoint.dx, -focalPoint.dy);
+    return scaleMatrix * translationMatrix * rotationMatrix;
   }
 
-  // Given a point in screen coordinates, return the point in the scene.
-  // Scene coordinates are independent of scale, just like _translation.
-  Offset _fromScreen(Offset screenPoint, Offset translation, double scale) {
-    // After scaling, the center of the screen is still the same scene coords.
-    // Find the distance from the center of the screen to the given screenPoint.
+  // Return the scene point underneath the viewport point given.
+  static Offset fromScreen(Offset screenPoint, Offset translation, double scale, double rotation, Size screenSize, [Offset focalPoint = Offset.zero]) {
+    // Find the offset from the center of the screen to the given screenPoint.
     final Offset fromCenterOfScreen = Offset(
-      screenPoint.dx - widget.screenSize.width / 2,
-      screenPoint.dy - widget.screenSize.height / 2,
+      screenPoint.dx - screenSize.width / 2,
+      screenPoint.dy - screenSize.height / 2,
     );
-    final Offset fromCenterOfScreenSceneCoords = fromCenterOfScreen / scale;
-    // The absolute location of screenPoint in scene coords is the difference,
-    // because translation is the inverse of the center of the screen.
-    return fromCenterOfScreenSceneCoords - translation;
+
+    // On this point, perform the inverse transformation of the scene to get
+    // where the point would be before the transformation.
+    final Matrix4 matrix = BoardInteractionState.getTransformationMatrix(
+      translation,
+      scale,
+      rotation,
+      focalPoint,
+    );
+    final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
+    final Vector3 untransformed = inverseMatrix.transform3(Vector3(
+      fromCenterOfScreen.dx,
+      fromCenterOfScreen.dy,
+      0,
+    ));
+    return Offset(untransformed.x, untransformed.y);
   }
 
   // Handle panning and pinch zooming events
@@ -173,12 +202,13 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
     setState(() {
       _scaleStart = _scale;
       _translateFrom = details.focalPoint;
+      _rotationStart = _rotation;
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
       if (_scaleStart != null) {
-        final Offset focalPointScene = _fromScreen(details.focalPoint, _translation, _scale);
+        final Offset focalPointScene = fromScreen(details.focalPoint, _translation, _scale, _rotation, widget.screenSize);
         _scale = _scaleStart * details.scale;
 
         if (details.scale != 1.0) {
@@ -186,7 +216,7 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
           // same place in the scene. That means that the focal point of the
           // scale should be on the same place in the scene before and after the
           // scale.
-          final Offset focalPointSceneNext = _fromScreen(details.focalPoint, _translation, _scale);
+          final Offset focalPointSceneNext = fromScreen(details.focalPoint, _translation, _scale, _rotation, widget.screenSize);
           _translation = _translation + focalPointSceneNext - focalPointScene;
         }
       }
@@ -198,12 +228,16 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
         _translation = _translation + (details.focalPoint - _translateFrom) / _scale;
         _translateFrom = details.focalPoint;
       }
+      if (_rotationStart != null && details.rotation != 0.0) {
+        _rotation = _rotationStart - details.rotation;
+      }
     });
   }
   void _onScaleEnd(ScaleEndDetails details) {
     setState(() {
       _scaleStart = null;
-      _translateFrom = null;
+      _rotationStart = null;
+      _translateFrom = Offset.zero;
     });
 
     _animation?.removeListener(_onAnimate);
@@ -232,7 +266,7 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
 
   // Handle tapping to select a tile
   void _onTapUp(TapUpDetails details) {
-    widget.onTapUp(_fromScreen(details.globalPosition, _translation, _scale));
+    widget.onTapUp(fromScreen(details.globalPosition, _translation, _scale, _rotation, widget.screenSize));
   }
 
   @override
@@ -242,6 +276,8 @@ class _BoardInteractionState extends State<BoardInteraction> with SingleTickerPr
   }
 }
 
+// CustomPainter is what is passed to CustomPaint and actually draws the scene
+// when its `paint` method is called.
 class BoardPainter extends CustomPainter {
   BoardPainter({
     this.board,
@@ -249,6 +285,7 @@ class BoardPainter extends CustomPainter {
 
   Board board;
 
+  // Draw each hexagon
   @override
   void paint(Canvas canvas, Size size) {
     final Color hexagonColor = Colors.grey[600];
@@ -264,6 +301,7 @@ class BoardPainter extends CustomPainter {
     board.forEach(drawBoardPoint);
   }
 
+  // We should repaint whenever the board changes, such as board.selected.
   @override
   bool shouldRepaint(BoardPainter oldDelegate) {
     return oldDelegate.board != board;

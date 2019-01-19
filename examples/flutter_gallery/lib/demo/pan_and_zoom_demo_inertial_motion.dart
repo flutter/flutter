@@ -58,7 +58,6 @@ class InertialMotion {
       t = stopTime.toInt();
     }
 
-    final double answer = r0 + v0 * t + 0.5 * a * pow(t, 2);
-    return answer;
+    return r0 + v0 * t + 0.5 * a * pow(t, 2);
   }
 }
