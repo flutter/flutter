@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 // the numbers below are odd, so that the totals don't seem round. :-)
@@ -17,11 +18,13 @@ const double pythonCost = 3001.0; // six average SWE days, in dollars
 const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2003.0; // same as ignoring analyzer warning
+const double untestedCoverage5LineCost = 62.0; // roughly 30 SWE minutes per 5 lines, in dollars. Free for <5 lines.
 
 final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = RegExp(r'// *ignore:');
 final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = RegExp(r'as dynamic');
+final RegExp untestedCoveragePattern = RegExp(r'LH:(\d+)');
 
 Future<double> findCostsForFile(File file) async {
   if (path.extension(file.path) == '.py')
@@ -59,6 +62,19 @@ Future<double> findCostsForRepo() async {
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
     throw Exception('git exit with unexpected error code $gitExitCode');
+
+  // Somewhat non-ideal that it's non-hermetic but pragmatically, it's expensive
+  // to re-test on the devicelab and the devicelab runs against (near-)head.
+  final http.Response coverage =
+      await http.get('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info');
+  for (Match untestedLinesInFile in untestedCoveragePattern.allMatches(coverage.body)) {
+    final String untestedLineString = untestedLinesInFile.group(1);
+    final int untestedLines = int.tryParse(untestedLineString);
+    if (untestedLines == null)
+      print('Unexpected lcov.info line format containing non-integer LH value:\n$untestedLinesInFile');
+    else
+      total += (untestedLines ~/ 5) * untestedCoverage5LineCost;
+  }
   return total;
 }
 
