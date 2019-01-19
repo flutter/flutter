@@ -907,28 +907,27 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
     expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
 
     debugDefaultTargetPlatformOverride = null;
   });
