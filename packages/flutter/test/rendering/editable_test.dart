@@ -23,6 +23,9 @@ class FakeEditableTextState extends TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {}
+
+  @override
+  void setLastTextPosition() {}
 }
 
 void main() {
