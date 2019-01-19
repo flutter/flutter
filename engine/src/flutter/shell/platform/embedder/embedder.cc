@@ -248,6 +248,44 @@ struct _FlutterPlatformMessageResponseHandle {
   fml::RefPtr<blink::PlatformMessage> message;
 };
 
+void PopulateSnapshotMappingCallbacks(const FlutterProjectArgs* args,
+                                      blink::Settings& settings) {
+  // There are no ownership concerns here as all mappings are owned by the
+  // embedder and not the engine.
+  auto make_mapping_callback = [](const uint8_t* mapping, size_t size) {
+    return [mapping, size]() {
+      return std::make_unique<fml::NonOwnedMapping>(mapping, size);
+    };
+  };
+
+  if (blink::DartVM::IsRunningPrecompiledCode()) {
+    if (SAFE_ACCESS(args, vm_snapshot_data_size, 0) != 0 &&
+        SAFE_ACCESS(args, vm_snapshot_data, nullptr) != nullptr) {
+      settings.vm_snapshot_data = make_mapping_callback(
+          args->vm_snapshot_data, args->vm_snapshot_data_size);
+    }
+
+    if (SAFE_ACCESS(args, vm_snapshot_instructions_size, 0) != 0 &&
+        SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) != nullptr) {
+      settings.vm_snapshot_instr = make_mapping_callback(
+          args->vm_snapshot_instructions, args->vm_snapshot_instructions_size);
+    }
+
+    if (SAFE_ACCESS(args, isolate_snapshot_data_size, 0) != 0 &&
+        SAFE_ACCESS(args, isolate_snapshot_data, nullptr) != nullptr) {
+      settings.isolate_snapshot_data = make_mapping_callback(
+          args->isolate_snapshot_data, args->isolate_snapshot_data_size);
+    }
+
+    if (SAFE_ACCESS(args, isolate_snapshot_instructions_size, 0) != 0 &&
+        SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr) != nullptr) {
+      settings.isolate_snapshot_instr =
+          make_mapping_callback(args->isolate_snapshot_instructions,
+                                args->isolate_snapshot_instructions_size);
+    }
+  }
+}
+
 FlutterResult FlutterEngineRun(size_t version,
                                const FlutterRendererConfig* config,
                                const FlutterProjectArgs* args,
@@ -298,6 +336,9 @@ FlutterResult FlutterEngineRun(size_t version,
   }
 
   blink::Settings settings = shell::SettingsFromCommandLine(command_line);
+
+  PopulateSnapshotMappingCallbacks(args, settings);
+
   settings.icu_data_path = icu_data_path;
   settings.assets_path = args->assets_path;
 

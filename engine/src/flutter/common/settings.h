@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
 
 namespace blink {
@@ -20,6 +21,11 @@ namespace blink {
 using TaskObserverAdd =
     std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
 using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
+
+// TODO(chinmaygarde): Deprecate all the "path" struct members in favor of the
+// callback that generates the mapping from these paths.
+// https://github.com/flutter/flutter/issues/26783
+using MappingCallback = std::function<std::unique_ptr<fml::Mapping>(void)>;
 
 struct Settings {
   Settings();
@@ -29,10 +35,15 @@ struct Settings {
   ~Settings();
 
   // VM settings
-  std::string vm_snapshot_data_path;
-  std::string vm_snapshot_instr_path;
-  std::string isolate_snapshot_data_path;
-  std::string isolate_snapshot_instr_path;
+  std::string vm_snapshot_data_path;  // deprecated
+  MappingCallback vm_snapshot_data;
+  std::string vm_snapshot_instr_path;  // deprecated
+  MappingCallback vm_snapshot_instr;
+
+  std::string isolate_snapshot_data_path;  // deprecated
+  MappingCallback isolate_snapshot_data;
+  std::string isolate_snapshot_instr_path;  // deprecated
+  MappingCallback isolate_snapshot_instr;
 
   std::string application_library_path;
   std::string application_kernel_asset;

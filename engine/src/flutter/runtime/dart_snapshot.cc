@@ -41,6 +41,10 @@ static const char* kIsolateInstructionsSymbolSo =
     SYMBOL_PREFIX "kDartIsolateSnapshotInstructions";
 
 std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
+  if (settings.vm_snapshot_data) {
+    return DartSnapshotBuffer::CreateWithMapping(settings.vm_snapshot_data());
+  }
+
   if (settings.vm_snapshot_data_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             fml::OpenFile(settings.vm_snapshot_data_path.c_str(), false,
@@ -66,6 +70,10 @@ std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
 
 std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
     const Settings& settings) {
+  if (settings.vm_snapshot_instr) {
+    return DartSnapshotBuffer::CreateWithMapping(settings.vm_snapshot_instr());
+  }
+
   if (settings.vm_snapshot_instr_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             fml::OpenFile(settings.vm_snapshot_instr_path.c_str(), false,
@@ -91,6 +99,11 @@ std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
 
 std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
     const Settings& settings) {
+  if (settings.isolate_snapshot_data) {
+    return DartSnapshotBuffer::CreateWithMapping(
+        settings.isolate_snapshot_data());
+  }
+
   if (settings.isolate_snapshot_data_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             fml::OpenFile(settings.isolate_snapshot_data_path.c_str(), false,
@@ -116,6 +129,11 @@ std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
 
 std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
     const Settings& settings) {
+  if (settings.isolate_snapshot_data) {
+    return DartSnapshotBuffer::CreateWithMapping(
+        settings.isolate_snapshot_instr());
+  }
+
   if (settings.isolate_snapshot_instr_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
             fml::OpenFile(settings.isolate_snapshot_instr_path.c_str(), false,
