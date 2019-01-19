@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
+//import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -109,7 +109,7 @@ PhysicalShape _getCardRenderObject(WidgetTester tester) {
   );
 }
 
-final Key _painterKey = UniqueKey();
+//final Key _painterKey = UniqueKey();
 
 Widget _withTheme(CardTheme theme) {
   return MaterialApp(
