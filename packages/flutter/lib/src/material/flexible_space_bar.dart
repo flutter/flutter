@@ -37,7 +37,7 @@ enum CollapseMode {
 ///
 ///  * [SliverAppBar], which implements the expanding and contracting.
 ///  * [AppBar], which is used by [SliverAppBar].
-///  * <https://material.google.com/patterns/scrolling-techniques.html>
+///  * <https://material.io/design/components/app-bars-top.html#behavior>
 class FlexibleSpaceBar extends StatefulWidget {
   /// Creates a flexible space bar.
   ///

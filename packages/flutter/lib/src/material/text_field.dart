@@ -68,7 +68,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/text-fields.html>
+///  * <https://material.io/design/components/text-fields.html>
 ///  * [TextFormField], which integrates with the [Form] widget.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.

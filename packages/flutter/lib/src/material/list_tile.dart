@@ -211,7 +211,7 @@ enum ListTileControlAffinity {
 ///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
 ///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
 ///    that combine [ListTile] with other controls.
-///  * <https://material.google.com/components/lists.html>
+///  * <https://material.io/design/components/lists.html>
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
