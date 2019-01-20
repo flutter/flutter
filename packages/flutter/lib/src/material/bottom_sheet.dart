@@ -19,6 +19,11 @@ const Curve _kBottomSheetCurve = Curves.easeOutCubic;
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 
+typedef BottomSheetDragStartHandler = void Function(DragStartDetails details);
+typedef BottomSheetDragEndHandler = void Function(DragEndDetails details, {
+  bool isClosing,
+});
+
 /// A material design bottom sheet.
 ///
 /// There are two kinds of bottom sheets in material design:
@@ -57,6 +62,8 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.elevation = 0.0,
+    this.onDragStart,
+    this.onDragEnd,
     @required this.onClosing,
     @required this.builder
   }) : assert(enableDrag != null),
@@ -97,6 +104,12 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to 0. The value is non-negative.
   final double elevation;
 
+  /// Called when the user begins dragging the bottom sheet vertically.
+  final BottomSheetDragStartHandler onDragStart;
+
+  /// Called when the user stops dragging the bottom sheet.
+  final BottomSheetDragEndHandler onDragEnd;
+
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
@@ -121,6 +134,10 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
+  void _handleDragStart(DragStartDetails details) {
+    widget.onDragStart(details);
+  }
+
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
@@ -130,19 +147,27 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragEnd(DragEndDetails details) {
     if (_dismissUnderway)
       return;
+    bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         widget.onClosing();
+        isClosing = true;
     } else if (widget.animationController.value < _kCloseProgressThreshold) {
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: -1.0);
       widget.onClosing();
+      isClosing = true;
     } else {
       widget.animationController.forward();
     }
+
+    widget.onDragEnd(
+      details,
+      isClosing: isClosing,
+    );
   }
 
   @override
@@ -153,6 +178,7 @@ class _BottomSheetState extends State<BottomSheet> {
       child: widget.builder(context),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
+      onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: bottomSheet,
