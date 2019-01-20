@@ -159,23 +159,23 @@ class AndroidApk extends ApplicationPackage {
     String launchActivity;
     for (xml.XmlElement activity in document.findAllElements('activity')) {
       final String enabled = activity.getAttribute('android:enabled');
-      if(enabled!=null && enabled!='true')
+      if (enabled != null && enabled == 'false')
         continue;
-      for(xml.XmlElement element in activity.findElements('intent-filter')){
-        String actionName = '', categoryName = '';
-        for(xml.XmlNode node in element.children){
-          if(!(node is xml.XmlElement))
+      for (xml.XmlElement element in activity.findElements('intent-filter')) {
+        String actionName = '';
+        String categoryName = '';
+        for (xml.XmlNode node in element.children) {
+          if (!(node is xml.XmlElement))
             continue;
           final xml.XmlElement xmlElement = node;
           final String name = xmlElement.getAttribute('android:name');
-          if(name == 'android.intent.action.MAIN'){
+          if (name == 'android.intent.action.MAIN') {
             actionName = name;
-          }
-          else if(name == 'android.intent.category.LAUNCHER'){
+          } else if (name == 'android.intent.category.LAUNCHER') {
             categoryName = name;
           }
         }
-        if(actionName.isNotEmpty && categoryName.isNotEmpty){
+        if (actionName.isNotEmpty && categoryName.isNotEmpty) {
           final String activityName = activity.getAttribute('android:name');
           launchActivity = '$packageId/$activityName';
           break;
@@ -456,7 +456,7 @@ class ApkManifestData {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters =
           activity.allElements('intent-filter').cast<_Element>();
-      if(enabled!=null && !enabled.value.contains('0xffffffff'))
+      if (enabled!=null && !enabled.value.contains('0xffffffff'))
         continue;
       for (_Element element in intentFilters) {
         final _Element action = element.firstElement('action');

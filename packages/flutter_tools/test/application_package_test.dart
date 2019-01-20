@@ -26,20 +26,8 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 
 void main() {
   group('ApkManifestData', () {
-    test('Avoid selecting only enabled, but not launcher&main activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithOnlyEnabledNotLauncherMainActivity);
-      expect(data, isNotNull);
-      expect(data.packageName, 'io.flutter.examples.hello_world');
-      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
-    test('Avoid selecting enabled, launcher, but not main activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithEnabledLauncherNotMainActivity);
-      expect(data, isNotNull);
-      expect(data.packageName, 'io.flutter.examples.hello_world');
-      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
-    test('Avoid selecting enabled, main,but not launcher activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithEnabledMainNotLauncherActivity);
+    test('Select activity which is enabled, MAIN and LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithEnabled_Launcher_MainActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
@@ -207,7 +195,7 @@ void main() {
   });
 }
 
-const String _aaptDataWithOnlyEnabledNotLauncherMainActivity =
+const String _aaptDataWithEnabled_Launcher_MainActivity =
 '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
@@ -240,82 +228,6 @@ const String _aaptDataWithOnlyEnabledNotLauncherMainActivity =
           E: action (line=48)
             A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
           E: category (line=50)
-            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
-
-const String _aaptDataWithEnabledLauncherNotMainActivity =
-'''N: android=http://schemas.android.com/apk/res/android
-  E: manifest (line=7)
-    A: android:versionCode(0x0101021b)=(type 0x10)0x1
-    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
-    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
-    E: uses-sdk (line=12)
-      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
-      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
-    E: uses-permission (line=21)
-      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
-    E: application (line=29)
-      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
-      A: android:icon(0x01010002)=@0x7f010000
-      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
-      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
-      E: activity (line=34)
-        A: android:theme(0x01010000)=@0x1030009
-        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
-        A: android:launchMode(0x0101001d)=(type 0x10)0x1
-        A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
-        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
-        A: android:hardwareAccelerated(0x010102d3)=(type 0x12)0xffffffff
-        E: intent-filter (line=42)
-          E: category (line=43)
-            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
-      E: activity (line=45)
-        A: android:theme(0x01010000)=@0x1030009
-        A: android:label(0x01010001)="app2" (Raw: "app2")
-        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity2" (Raw: "io.flutter.examples.hello_world.MainActivity2")
-        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
-        E: intent-filter (line=50)
-          E: action (line=51)
-            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
-          E: category (line=53)
-            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
-
-const String _aaptDataWithEnabledMainNotLauncherActivity =
-'''N: android=http://schemas.android.com/apk/res/android
-  E: manifest (line=7)
-    A: android:versionCode(0x0101021b)=(type 0x10)0x1
-    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
-    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
-    E: uses-sdk (line=12)
-      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
-      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
-    E: uses-permission (line=21)
-      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
-    E: application (line=29)
-      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
-      A: android:icon(0x01010002)=@0x7f010000
-      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
-      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
-      E: activity (line=34)
-        A: android:theme(0x01010000)=@0x1030009
-        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
-        A: android:launchMode(0x0101001d)=(type 0x10)0x1
-        A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
-        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
-        A: android:hardwareAccelerated(0x010102d3)=(type 0x12)0xffffffff
-        E: intent-filter (line=42)
-          E: action (line=43)
-            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
-      E: activity (line=45)
-        A: android:theme(0x01010000)=@0x1030009
-        A: android:label(0x01010001)="app2" (Raw: "app2")
-        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity2" (Raw: "io.flutter.examples.hello_world.MainActivity2")
-        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
-        E: intent-filter (line=50)
-          E: action (line=51)
-            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
-          E: category (line=53)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
 const String _aaptDataWithExplicitEnabledActivity =
