@@ -915,15 +915,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 enum CupertinoTimerPickerMode {
   /// Mode that shows the timer duration in hour and minute.
   ///
-  /// Examples: [16 hours | 14 min].
+  /// Examples: 16 hours | 14 min.
   hm,
   /// Mode that shows the timer duration in minute and second.
   ///
-  /// Examples: [14 min | 43 sec].
+  /// Examples: 14 min | 43 sec.
   ms,
   /// Mode that shows the timer duration in hour, minute, and second.
   ///
-  /// Examples: [16 hours | 14 min | 43 sec].
+  /// Examples: 16 hours | 14 min | 43 sec.
   hms,
 }
 

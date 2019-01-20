@@ -217,7 +217,7 @@ class EditableText extends StatefulWidget {
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -752,8 +752,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // Calculate the new scroll offset so the cursor remains visible.
   double _getScrollOffsetForCaret(Rect caretRect) {
-    final double caretStart = _isMultiline ? caretRect.top : caretRect.left;
-    final double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
+    double caretStart;
+    double caretEnd;
+    if (_isMultiline) {
+      // The caret is vertically centered within the line. Expand the caret's
+      // height so that it spans the line because we're going to ensure that the entire
+      // expanded caret is scrolled into view.
+      final double lineHeight = renderEditable.preferredLineHeight;
+      final double caretOffset = (lineHeight - caretRect.height) / 2;
+      caretStart = caretRect.top - caretOffset;
+      caretEnd = caretRect.bottom + caretOffset;
+    } else {
+      caretStart = caretRect.left;
+      caretEnd = caretRect.right;
+    }
+
     double scrollOffset = _scrollController.offset;
     final double viewportExtent = _scrollController.position.viewportDimension;
     if (caretStart < 0.0) // cursor before start of bounds
@@ -785,6 +798,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   : TextInputAction.done
               ),
               textCapitalization: widget.textCapitalization,
+              keyboardAppearance: widget.keyboardAppearance,
           )
       )..setEditingState(localValue);
     }

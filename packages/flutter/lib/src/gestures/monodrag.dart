@@ -54,7 +54,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// [dragStartBehavior] must not be null.
   DragGestureRecognizer({
     Object debugOwner,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner);
 
@@ -280,7 +280,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('Start Behavior', dragStartBehavior));
+    properties.add(EnumProperty<DragStartBehavior>('start behavior', dragStartBehavior));
   }
 }
 
