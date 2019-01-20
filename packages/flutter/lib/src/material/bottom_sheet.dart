@@ -277,7 +277,11 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   void handleDragEnd(DragEndDetails details, { bool isClosing }) {
     isDragging = false;
-    if (!isClosing) {
+    if (isClosing) {
+      // shortened curve on exit minimizes risk of a visibly slow linear
+      // animation
+      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
+    } else {
       animationCurve = _SuspendedCurve(
         startingPoint: widget.route.animation.value,
         curve: _kBottomSheetCurve,
