@@ -15,6 +15,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
+const Curve _kBottomSheetCurve = Curves.easeOutCubic;
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 
