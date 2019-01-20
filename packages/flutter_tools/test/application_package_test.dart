@@ -65,20 +65,6 @@ void main() {
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     });
-    testUsingContext('Error on no main activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
-      expect(data, isNull);
-      final BufferLogger logger = context[Logger];
-      expect(
-          logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    });
-    testUsingContext('Error on no launcher activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
-      expect(data, isNull);
-      final BufferLogger logger = context[Logger];
-      expect(
-          logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    });
   });
 
   group('PrebuiltIOSApp', () {
