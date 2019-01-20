@@ -84,6 +84,8 @@ FLUTTER_EXPORT
  */
 - (instancetype)init NS_UNAVAILABLE;
 
++ (instancetype)new NS_UNAVAILABLE;
+
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`).
