@@ -569,6 +569,38 @@ class DropdownButton<T> extends StatefulWidget {
 
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
+
+  static DropdownButton<T> builder<T>({
+    @required value,
+    Widget hint,
+    Widget disableHint,
+    @required ValueChanged<T> onChanged,
+    int elevation = 8,
+    TextStyle style,
+    double iconSize = 24.0,
+    bool isDense = false,
+    bool isExpanded = false,
+    @required DropdownMenuItem<T> Function(int index) builder ,
+    @required int itemSize
+  }) {
+    List<DropdownMenuItem<T>> items = [];
+    for (int i in List<int>.generate(itemSize, (i) => i)) {
+      items.add(builder(i));
+    }
+
+    return DropdownButton(
+      items: items,
+      onChanged: onChanged,
+      value: value,
+      hint: hint,
+      disabledHint: disableHint,
+      elevation: elevation,
+      style: style,
+      iconSize: iconSize,
+      isDense: isDense,
+      isExpanded: isExpanded,
+    );
+  }
 }
 
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
