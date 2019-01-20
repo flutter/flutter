@@ -467,7 +467,8 @@ Future<XcodeBuildResult> buildXcodeProject({
             return;
           }
         } else {
-          initialBuildStatus.cancel();
+          initialBuildStatus?.cancel();
+          initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
             timeout: kSlowOperation,
