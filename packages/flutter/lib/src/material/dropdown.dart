@@ -570,6 +570,18 @@ class DropdownButton<T> extends StatefulWidget {
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 
+  /// Creates a [DropdownButton]
+  ///
+  /// This constructor is appropriate for a Dropdown with the same type of
+  /// [DropdownMenuItem] and to simplify your code
+  ///
+  /// Providing a non-null `itemCount` allow the constructor to generate a
+  /// List of `itemCount` number of [DropdownMenuItem].
+  ///
+  /// The `builder` callback will be called only with indices greater than
+  /// or equal to zero and less than `itemCount`.
+  ///
+  /// The `builder` should actually create the widget instances when called.
   static DropdownButton<T> builder<T>({
     @required T value,
     Widget hint,
@@ -581,10 +593,10 @@ class DropdownButton<T> extends StatefulWidget {
     bool isDense = false,
     bool isExpanded = false,
     @required DropdownMenuItem<T> Function(int index) builder ,
-    @required int itemSize
+    @required int itemCount
   }) {
-    List<DropdownMenuItem<T>> items = [];
-    for (int i in List<int>.generate(itemSize, (i) => i)) {
+    final List<DropdownMenuItem<T>> items = List<DropdownMenuItem<T>>();
+    for (int i in List<int>.generate(itemCount, (int i) => i)) {
       items.add(builder(i));
     }
 
