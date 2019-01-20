@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -229,7 +230,61 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
 
+/// A curve that progresses linearly until a specified [startingPoint], at which
+/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
+/// but will use [startingPoint] as the Y position.
+class _SuspendedCurve implements Curve {
+  _SuspendedCurve({
+    @required this.startingPoint,
+    @required this.curve,
+  });
+
+  /// The prior progress from which the animation curve was swapped to this.
+  final double startingPoint;
+
+  /// The curve to use when [startingPoint] is reached.
+  final Curve curve;
+
+  @override
+  double transform(double t) {
+    if (t < startingPoint) {
+      return t;
+    }
+
+    if (t == 1.0) {
+      return t;
+    }
+
+    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(startingPoint, 1, transformed);
+  }
+
+  @override
+  Curve get flipped => FlippedCurve(this);
+}
+
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
+  Curve animationCurve = _kBottomSheetCurve;
+  bool isDragging = false;
+
+  void handleDragStart(DragStartDetails details) {
+    isDragging = true;
+
+    // allows the bottom sheet to track the user's finger accurately
+    animationCurve = Curves.linear;
+  }
+
+  void handleDragEnd(DragEndDetails details, { bool isClosing }) {
+    isDragging = false;
+    if (!isClosing) {
+      animationCurve = _SuspendedCurve(
+        startingPoint: widget.route.animation.value,
+        curve: _kBottomSheetCurve,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -253,7 +308,14 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         builder: (BuildContext context, Widget child) {
           // Disable the initial animation when accessible navigation is on so
           // that the semantics are added to the tree at the correct time.
-          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+          final BottomSheet bottomSheet = BottomSheet(
+            animationController: widget.route._animationController,
+            onDragStart: handleDragStart,
+            onDragEnd: handleDragEnd,
+            onClosing: () => Navigator.pop(context),
+            builder: widget.route.builder,
+          );
+          final double animationValue = animationCurve.transform(mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value);
           return Semantics(
             scopesRoute: true,
             namesRoute: true,
@@ -262,11 +324,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             child: ClipRect(
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue),
-                child: BottomSheet(
-                  animationController: widget.route._animationController,
-                  onClosing: () => Navigator.pop(context),
-                  builder: widget.route.builder,
-                ),
+                child: bottomSheet,
               ),
             ),
           );
