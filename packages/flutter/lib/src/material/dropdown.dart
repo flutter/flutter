@@ -571,7 +571,7 @@ class DropdownButton<T> extends StatefulWidget {
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 
   static DropdownButton<T> builder<T>({
-    @required value,
+    @required T value,
     Widget hint,
     Widget disableHint,
     @required ValueChanged<T> onChanged,
@@ -588,7 +588,7 @@ class DropdownButton<T> extends StatefulWidget {
       items.add(builder(i));
     }
 
-    return DropdownButton(
+    return DropdownButton<T>(
       items: items,
       onChanged: onChanged,
       value: value,
