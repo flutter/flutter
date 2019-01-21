@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
@@ -465,6 +466,43 @@ class ElasticInOutCurve extends Curve {
   @override
   String toString() {
     return '$runtimeType($period)';
+  }
+}
+
+/// A curve that progresses linearly until a specified [startingPoint], at which
+/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
+/// but will use [startingPoint] as the Y position.
+class SuspendedCurve extends Curve {
+  /// Creates a suspended curve.
+  const SuspendedCurve({
+    @required this.startingPoint,
+    @required this.curve,
+  });
+
+  /// The progress value at which [curve] should begin.
+  final double startingPoint;
+
+  /// The curve to use when [startingPoint] is reached.
+  final Curve curve;
+
+  @override
+  double transform(double t) {
+    if (t < startingPoint) {
+      return t;
+    }
+
+    if (t == 1.0) {
+      return t;
+    }
+
+    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(startingPoint, 1, transformed);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($startingPoint, $curve)';
   }
 }
 
