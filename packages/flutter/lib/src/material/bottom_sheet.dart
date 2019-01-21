@@ -234,40 +234,6 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
 
-/// A curve that progresses linearly until a specified [startingPoint], at which
-/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
-/// but will use [startingPoint] as the Y position.
-class _SuspendedCurve implements Curve {
-  _SuspendedCurve({
-    @required this.startingPoint,
-    @required this.curve,
-  });
-
-  /// The prior progress from which the animation curve was swapped to this.
-  final double startingPoint;
-
-  /// The curve to use when [startingPoint] is reached.
-  final Curve curve;
-
-  @override
-  double transform(double t) {
-    if (t < startingPoint) {
-      return t;
-    }
-
-    if (t == 1.0) {
-      return t;
-    }
-
-    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
-    final double transformed = curve.transform(curveProgress);
-    return lerpDouble(startingPoint, 1, transformed);
-  }
-
-  @override
-  Curve get flipped => FlippedCurve(this);
-}
-
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   Curve animationCurve = _kBottomSheetCurve;
   bool isDragging = false;
@@ -286,8 +252,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       // animation
       animationCurve = const Interval(0.5, 1, curve: Curves.linear);
     } else {
-      animationCurve = _SuspendedCurve(
-        startingPoint: widget.route.animation.value,
+      animationCurve = SuspendedCurve(
+        widget.route.animation.value,
         curve: _kBottomSheetCurve,
       );
     }
