@@ -63,6 +63,7 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+  static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
 }
@@ -389,6 +390,22 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
+    String extraFrontEndOptions =
+        argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
+            ? argResults[FlutterOptions.kExtraFrontEndOptions]
+            : null;
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        argResults[FlutterOptions.kEnableExperiment] != null) {
+      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+        final String flag = '--enable-experiment=' + expFlag;
+        if (extraFrontEndOptions != null) {
+          extraFrontEndOptions += ',' + flag;
+        } else {
+          extraFrontEndOptions = flag;
+        }
+      }
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
@@ -410,9 +427,7 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-          ? argResults[FlutterOptions.kExtraFrontEndOptions]
-          : null,
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
@@ -467,19 +482,18 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
-
+        final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand();
+          commandResult = await verifyThenRunCommand(commandPath);
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
-          // This is checking the result of the call to 'usagePath'
-          // (a Future<String>), and not the result of evaluating the Future.
-          if (usagePath != null) {
+          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          if (commandPath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)
               labels.add(getEnumName(commandResult.exitStatus));
@@ -513,7 +527,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -528,8 +542,6 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     setupApplicationPackages();
-
-    final String commandPath = await usagePath;
 
     if (commandPath != null) {
       final Map<String, String> additionalUsageValues = await usageValues;

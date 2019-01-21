@@ -89,10 +89,7 @@ import 'theme.dart';
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
-  /// The [tabBar], [tabBuilder] and [currentTabIndex] arguments must not be null.
-  ///
-  /// The [currentTabIndex] argument can be used to programmatically change the
-  /// currently selected tab.
+  /// The [tabBar] and [tabBuilder] arguments must not be null.
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,

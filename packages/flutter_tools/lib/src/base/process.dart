@@ -203,14 +203,6 @@ Future<int> runInteractively(List<String> command, {
   return await process.exitCode;
 }
 
-Future<void> runAndKill(List<String> cmd, Duration timeout) {
-  final Future<Process> proc = runDetached(cmd);
-  return Future<void>.delayed(timeout, () async {
-    printTrace('Intentionally killing ${cmd[0]}');
-    processManager.killPid((await proc).pid);
-  });
-}
-
 Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
   final Future<Process> proc = processManager.start(

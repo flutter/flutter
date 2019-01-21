@@ -1979,6 +1979,63 @@ testWidgets(
     ));
     expect(called, 2);
   });
+
+  testWidgets('default keyboardAppearance is resepcted', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('custom keyboardAppearance is resepcted', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          keyboardAppearance: Brightness.dark,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}

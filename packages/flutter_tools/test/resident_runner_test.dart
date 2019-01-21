@@ -40,6 +40,12 @@ class TestRunner extends ResidentRunner {
     String route,
     bool shouldBuild = true,
   }) async => null;
+
+  @override
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async => null;
 }
 
 void main() {

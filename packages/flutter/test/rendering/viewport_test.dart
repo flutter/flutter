@@ -642,6 +642,118 @@ void main() {
     });
   });
 
+  testWidgets('Nested Viewports showOnScreen with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20893.
+
+    List<Widget> slivers;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: ListView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    children: slivers = <Widget>[
+                      Container(
+                        width: 150.0,
+                      ),
+                      Container(
+                        width: 150.0,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(slivers[1])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 50.0);
+  });
+
+  testWidgets('Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    Widget sliver;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: CustomScrollView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    slivers: <Widget>[
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: sliver = SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(sliver)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 25.0);
+  });
+
   testWidgets('Viewport showOnScreen with objects larger than viewport', (WidgetTester tester) async {
     List<Widget> children;
     ScrollController controller;

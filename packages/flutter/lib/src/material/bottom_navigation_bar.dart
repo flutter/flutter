@@ -220,7 +220,84 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool selected;
   final String indexLabel;
 
-  Widget _buildIcon() {
+  @override
+  Widget build(BuildContext context) {
+    // In order to use the flex container to grow the tile during animation, we
+    // need to divide the changes in flex allotment into smaller pieces to
+    // produce smooth animation. We do this by multiplying the flex value
+    // (which is an integer) by a large number.
+    int size;
+    Widget label;
+
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+        label = _FixedLabel(colorTween: colorTween, animation: animation, item: item);
+        break;
+      case BottomNavigationBarType.shifting:
+        size = (flex * 1000.0).round();
+        label = _ShiftingLabel(animation: animation, item: item);
+        break;
+    }
+
+    return Expanded(
+      flex: size,
+      child: Semantics(
+        container: true,
+        header: true,
+        selected: selected,
+        child: Stack(
+          children: <Widget>[
+            InkResponse(
+              onTap: onTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _TileIcon(
+                    type: type,
+                    colorTween: colorTween,
+                    animation: animation,
+                    iconSize: iconSize,
+                    selected: selected,
+                    item: item,
+                  ),
+                  label,
+                ],
+              ),
+            ),
+            Semantics(
+              label: indexLabel,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _TileIcon extends StatelessWidget {
+  const _TileIcon({
+    Key key,
+    @required this.type,
+    @required this.colorTween,
+    @required this.animation,
+    @required this.iconSize,
+    @required this.selected,
+    @required this.item,
+  }) : super(key: key);
+
+  final BottomNavigationBarType type;
+  final ColorTween colorTween;
+  final Animation<double> animation;
+  final double iconSize;
+  final bool selected;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     double tweenStart;
     Color iconColor;
     switch (type) {
@@ -253,8 +330,22 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildFixedLabel() {
+class _FixedLabel extends StatelessWidget {
+  const _FixedLabel({
+    Key key,
+    @required this.colorTween,
+    @required this.animation,
+    @required this.item,
+  }) : super(key: key);
+
+  final ColorTween colorTween;
+  final Animation<double> animation;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
@@ -284,8 +375,20 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildShiftingLabel() {
+class _ShiftingLabel extends StatelessWidget {
+  const _ShiftingLabel({
+    Key key,
+    @required this.animation,
+    @required this.item,
+  }) : super(key: key);
+
+  final Animation<double> animation;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
@@ -310,53 +413,6 @@ class _BottomNavigationTile extends StatelessWidget {
             ),
             child: item.title,
           ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // In order to use the flex container to grow the tile during animation, we
-    // need to divide the changes in flex allotment into smaller pieces to
-    // produce smooth animation. We do this by multiplying the flex value
-    // (which is an integer) by a large number.
-    int size;
-    Widget label;
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        size = 1;
-        label = _buildFixedLabel();
-        break;
-      case BottomNavigationBarType.shifting:
-        size = (flex * 1000.0).round();
-        label = _buildShiftingLabel();
-        break;
-    }
-    return Expanded(
-      flex: size,
-      child: Semantics(
-        container: true,
-        header: true,
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildIcon(),
-                  label,
-                ],
-              ),
-            ),
-            Semantics(
-              label: indexLabel,
-            )
-          ],
         ),
       ),
     );
