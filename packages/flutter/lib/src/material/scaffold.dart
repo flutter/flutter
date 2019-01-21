@@ -35,6 +35,8 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
+const Curve _kBottomSheetCurve = Curves.easeOutCubic;
+
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -1878,6 +1880,9 @@ class _PersistentBottomSheet extends StatefulWidget {
 }
 
 class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
+  Curve animationCurve = _kBottomSheetCurve;
+  bool isDragging = false;
+
   @override
   void initState() {
     super.initState();
@@ -1896,6 +1901,27 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
     widget.animationController.reverse();
   }
 
+  void _handleDragStart(DragStartDetails details) {
+    isDragging = true;
+
+    // allows the bottom sheet to track the user's finger accurately
+    animationCurve = Curves.linear;
+  }
+
+  void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
+    isDragging = false;
+    if (isClosing) {
+      // shortened curve on exit minimizes risk of a visibly slow linear
+      // animation
+      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
+    } else {
+      animationCurve = SuspendedCurve(
+        widget.animationController.value,
+        curve: _kBottomSheetCurve,
+      );
+    }
+  }
+
   void _handleStatusChange(AnimationStatus status) {
     if (status == AnimationStatus.dismissed && widget.onDismissed != null)
       widget.onDismissed();
@@ -1908,7 +1934,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       builder: (BuildContext context, Widget child) {
         return Align(
           alignment: AlignmentDirectional.topStart,
-          heightFactor: widget.animationController.value,
+          heightFactor: animationCurve.transform(widget.animationController.value),
           child: child
         );
       },
@@ -1921,6 +1947,8 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
         child: BottomSheet(
           animationController: widget.animationController,
           enableDrag: widget.enableDrag,
+          onDragStart: _handleDragStart,
+          onDragEnd: _handleDragEnd,
           onClosing: widget.onClosing,
           builder: widget.builder
         )
