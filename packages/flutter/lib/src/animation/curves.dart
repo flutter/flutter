@@ -474,10 +474,9 @@ class ElasticInOutCurve extends Curve {
 /// but will use [startingPoint] as the Y position.
 class SuspendedCurve extends Curve {
   /// Creates a suspended curve.
-  const SuspendedCurve({
-    @required this.startingPoint,
-    @required this.curve,
-  });
+  const SuspendedCurve(this.startingPoint, { this.curve = Curves.linear })
+      : assert(startingPoint != null),
+        assert(curve != null);
 
   /// The progress value at which [curve] should begin.
   final double startingPoint;
@@ -487,6 +486,9 @@ class SuspendedCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
+
     if (t < startingPoint) {
       return t;
     }
