@@ -474,7 +474,7 @@ class ElasticInOutCurve extends Curve {
 /// but will use [startingPoint] as the Y position.
 class SuspendedCurve extends Curve {
   /// Creates a suspended curve.
-  const SuspendedCurve(this.startingPoint, { this.curve = Curves.linear })
+  const SuspendedCurve(this.startingPoint, { this.curve = Curves.easeOutCubic })
       : assert(startingPoint != null),
         assert(curve != null);
 
