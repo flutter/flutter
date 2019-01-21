@@ -335,7 +335,7 @@ class LocalHistoryEntry {
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
-    _owner?.removeLocalHistoryEntry(this);
+    _owner.removeLocalHistoryEntry(this);
     assert(_owner == null);
   }
 
