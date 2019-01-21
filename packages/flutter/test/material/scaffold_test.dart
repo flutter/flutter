@@ -574,6 +574,62 @@ void main() {
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 48.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
+
+    WidgetTesterCallback getBodySizeTesterCallback({bool expanded = false, Size size}) => (WidgetTester tester) async {
+      final Key bodyKey = UniqueKey();
+
+      Widget buildFrame(bool extendedBody) {
+        return MaterialApp(
+          home: Scaffold(
+            extendedBody: extendedBody,
+            body: Container(
+              key: bodyKey,),
+            bottomNavigationBar: BottomAppBar(
+              child: Container(height: 48.0,),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(expanded));
+      expect(tester.getSize(find.byKey(bodyKey)), size);
+    };
+
+    testWidgets('body size with extendedBody = true', getBodySizeTesterCallback(expanded: true, size: const Size(800.0, 600.0)));
+    testWidgets('body size with extendedBody = false', getBodySizeTesterCallback(expanded: false, size: const Size(800.0, 552.0)));
+
+    testWidgets('body size with resizeToAvoidBottomInset and extendedBody', (
+        WidgetTester tester) async {
+      final Key bodyKey = UniqueKey();
+
+      Future<void> buildFrame(bool extendedBody) async {
+        return tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+                data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  extendedBody: extendedBody,
+                  body: Container(
+                    key: bodyKey,
+                  ),
+                  bottomNavigationBar: BottomAppBar(
+                      child: Container(height: 48.0,)
+                  ),
+                )
+            )
+        )
+        );
+      }
+
+      await buildFrame(true);
+      final Size sizeWithExtendedBody = tester.getSize(find.byKey(bodyKey));
+
+      await buildFrame(false);
+      final Size sizeWithoutExtendedBody = tester.getSize(find.byKey(bodyKey));
+
+      expect(sizeWithoutExtendedBody, sizeWithExtendedBody);
+    });
   });
 
   testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
