@@ -182,8 +182,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 + (NSString*)flutterAssetsName:(NSBundle*)bundle {
   NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
   if (flutterAssetsName == nil) {
-    // Default to "flutter_assets"
-    flutterAssetsName = @"flutter_assets";
+    flutterAssetsName = @"Frameworks/App.framework/flutter_assets";
   }
   return flutterAssetsName;
 }
