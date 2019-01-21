@@ -136,7 +136,9 @@ class _BottomSheetState extends State<BottomSheet> {
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
-    widget.onDragStart(details);
+    if (widget.onDragStart != null) {
+      widget.onDragStart(details);
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -165,10 +167,12 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.animationController.forward();
     }
 
-    widget.onDragEnd(
-      details,
-      isClosing: isClosing,
-    );
+    if (widget.onDragEnd != null) {
+      widget.onDragEnd(
+        details,
+        isClosing: isClosing,
+      );
+    }
   }
 
   @override
