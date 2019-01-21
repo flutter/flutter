@@ -595,13 +595,8 @@ class DropdownButton<T> extends StatefulWidget {
     @required DropdownMenuItem<T> Function(int index) builder ,
     @required int itemCount
   }) {
-    final List<DropdownMenuItem<T>> items = <DropdownMenuItem<T>>[];
-    for (int i in List<int>.generate(itemCount, (int i) => i)) {
-      items.add(builder(i));
-    }
-
     return DropdownButton<T>(
-      items: items,
+      items: List<DropdownMenuItem<T>>.generate(itemCount, builder),
       onChanged: onChanged,
       value: value,
       hint: hint,
