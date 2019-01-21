@@ -1442,7 +1442,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isLocalHistoryEntry)
-          entry.remove();
+          _currentBottomSheet = null;
         else
           _removeCurrentBottomSheet();
       },

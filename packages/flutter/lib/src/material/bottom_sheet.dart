@@ -290,7 +290,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this, scrollController: _scrollController,),
+      child: _ModalBottomSheet<T>(
+        route: this,
+        scrollController: _scrollController,
+      ),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
