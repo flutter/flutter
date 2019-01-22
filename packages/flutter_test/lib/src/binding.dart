@@ -985,7 +985,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is intended to be used by benchmarks (hence the name) that drive the
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
-  /// directly (invoking [Window.onBeginFrame] and [Window.onDrawFrame]) to run.
+  /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
+  /// [Window.onBeginFrame] and [Window.onDrawFrame]).
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
@@ -1143,8 +1144,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame.complete(); // unlocks the test API
       _pendingFrame = null;
       _expectingFrame = false;
-    } else {
-      assert(framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark);
+    } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
       ui.window.scheduleFrame();
     }
   }
