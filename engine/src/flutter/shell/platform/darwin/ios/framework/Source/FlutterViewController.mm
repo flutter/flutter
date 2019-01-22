@@ -430,6 +430,7 @@
 }
 
 - (void)dealloc {
+  [_engine.get() notifyViewControllerDeallocated];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }

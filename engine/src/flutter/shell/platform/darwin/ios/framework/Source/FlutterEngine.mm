@@ -144,13 +144,15 @@
   FML_DCHECK(self.iosPlatformView);
   _viewController = [viewController getWeakPtr];
   self.iosPlatformView->SetOwnerViewController(_viewController);
-  if (!viewController && !_allowHeadlessExecution) {
+  [self maybeSetupPlatformViewChannels];
+}
+
+- (void)notifyViewControllerDeallocated {
+  if (!_allowHeadlessExecution) {
     [self resetChannels];
 
     _shell.reset();
     _threadHost.Reset();
-  } else {
-    [self maybeSetupPlatformViewChannels];
   }
 }
 
