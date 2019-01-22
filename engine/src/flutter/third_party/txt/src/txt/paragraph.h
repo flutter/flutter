@@ -29,6 +29,7 @@
 #include "paragraph_style.h"
 #include "styled_runs.h"
 #include "third_party/googletest/googletest/include/gtest/gtest_prod.h"  // nogncheck
+#include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "utils/WindowsUtils.h"
 
