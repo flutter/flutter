@@ -559,25 +559,36 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('11'), const Offset(0.0, -32.0));
+      // scrolling by this offset will increase the hour column by 1
+      const Offset hourOffset = Offset(0.0, -32.0);
+
+      // 11:59 -> 12:59
+
+      await tester.drag(find.text('11'), hourOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 12, 59));
 
-      await tester.drag(find.text('12'), const Offset(0.0, 32.0));
+      // 12:59 -> 11:59
+
+      await tester.drag(find.text('12'), -hourOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
-      await tester.drag(find.text('11'), const Offset(0.0, 64.0));
+      // 11:59 -> 9:59
+
+      await tester.drag(find.text('11'), -hourOffset * 2);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
-      await tester.drag(find.text('9'), const Offset(0.0, -192.0));
+      // 9:59 -> 15:59
+
+      await tester.drag(find.text('9'), hourOffset * 6);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
