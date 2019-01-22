@@ -257,6 +257,34 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard<void>(() => binding.pump(duration, phase));
   }
 
+  /// Triggers a frame after `duration` amount of time, return as soon as the frame is drawn.
+  ///
+  /// This enables driving an artificially high CPU load by rendering frames in
+  /// a tight loop. It must be used with the frame policy set to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmark].
+  ///
+  /// Similarly to [pump], this doesn't actually wait for `duration`, just
+  /// advances the clock.
+  Future<void> pumpBenchmark(Duration duration) async {
+    assert(() {
+        final TestWidgetsFlutterBinding widgetsBinding = binding;
+        return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+               widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+    }());
+
+    dynamic caughtException;
+    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+
+    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await idle();
+    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await idle();
+
+    if (caughtException != null) {
+      throw caughtException;
+    }
+  }
+
   /// Repeatedly calls [pump] with the given `duration` until there are no
   /// longer any frames scheduled. This will call [pump] at least once, even if
   /// no frames are scheduled when the function is called, to flush any pending
