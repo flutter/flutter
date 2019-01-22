@@ -39,7 +39,9 @@ class TestPlatformView : public PlatformView,
 
   // |GPUSurfaceSoftwareDelegate|
   virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override {
-    return SkSurface::MakeRasterN32Premul(size.width(), size.height());
+    SkImageInfo image_info = SkImageInfo::MakeN32Premul(
+        size.width(), size.height(), SkColorSpace::MakeSRGB());
+    return SkSurface::MakeRaster(image_info);
   }
 
   // |GPUSurfaceSoftwareDelegate|
