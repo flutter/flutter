@@ -116,6 +116,9 @@ class Dismissible extends StatefulWidget {
   ///
   /// If the returned Future<bool> completes true, then this widget will be
   /// dismissed, otherwise it will be moved back to its original location.
+  ///
+  /// If the returned Future<bool> completes to false or null the [onResize]
+  /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback confirmDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
