@@ -604,7 +604,9 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
-  /// The colors and styles used to render [Card], [
+  /// The colors and styles used to render [Card].
+  ///
+  /// This is the value returned from [CardTheme.of].
   final CardTheme cardTheme;
 
   /// The colors and styles used to render [Chip], [

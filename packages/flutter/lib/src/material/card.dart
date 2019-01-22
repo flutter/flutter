@@ -66,8 +66,7 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [clipBehavior] and [elevation] arguments must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [elevation] must be non-negative.
   const Card({
     Key key,
     this.color,

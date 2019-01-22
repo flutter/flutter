@@ -18,8 +18,9 @@ import 'theme.dart';
 /// Typically a [CardTheme] is specified as part of the overall [Theme]
 /// with [ThemeData.cardTheme].
 ///
-/// All [CardTheme] properties are `null` by default. When null, the
-/// [Card] constructor provides defaults.
+/// All [CardTheme] properties are `null` by default. When null, the [Card]
+/// will use the values from [ThemeData] if they exist, otherwise it will
+/// provide its own defaults.
 ///
 /// See also:
 ///
@@ -87,8 +88,8 @@ class CardTheme extends Diagnosticable {
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      margin: EdgeInsetsGeometry.lerp(a.margin, b.margin, t),
-      shape: ShapeBorder.lerp(a.shape, b.shape, t),
+      margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
 
