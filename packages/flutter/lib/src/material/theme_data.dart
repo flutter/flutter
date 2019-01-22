@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'app_bar_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
@@ -154,6 +155,7 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
@@ -246,6 +248,7 @@ class ThemeData extends Diagnosticable {
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
     tabBarTheme ??= const TabBarTheme();
+    appBarTheme ??= const AppBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
@@ -301,6 +304,7 @@ class ThemeData extends Diagnosticable {
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
+      appBarTheme: appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
@@ -364,6 +368,7 @@ class ThemeData extends Diagnosticable {
     @required this.platform,
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
+    @required this.appBarTheme,
     @required this.bottomAppBarTheme,
     @required this.colorScheme,
     @required this.dialogTheme,
@@ -412,6 +417,7 @@ class ThemeData extends Diagnosticable {
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
+       assert(appBarTheme != null),
        assert(bottomAppBarTheme != null),
        assert(colorScheme != null),
        assert(dialogTheme != null),
@@ -636,6 +642,10 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
+  /// A theme for customizing the color, elevation, brightness, iconTheme and
+  /// textTheme of [AppBar]s.
+  final AppBarTheme appBarTheme;
+
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
 
@@ -714,6 +724,7 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
@@ -766,6 +777,7 @@ class ThemeData extends Diagnosticable {
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
+      appBarTheme: appBarTheme ?? this.appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
@@ -896,6 +908,7 @@ class ThemeData extends Diagnosticable {
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
+      appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
@@ -956,6 +969,7 @@ class ThemeData extends Diagnosticable {
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
+           (otherData.appBarTheme == appBarTheme) &&
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
            (otherData.colorScheme == colorScheme) &&
            (otherData.dialogTheme == dialogTheme) &&
@@ -1016,6 +1030,7 @@ class ThemeData extends Diagnosticable {
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
+          appBarTheme,
           bottomAppBarTheme,
           colorScheme,
           dialogTheme,
@@ -1071,6 +1086,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
+    properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));

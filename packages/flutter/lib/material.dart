@@ -18,6 +18,7 @@ export 'src/material/about.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
+export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/back_button.dart';
 export 'src/material/bottom_app_bar.dart';
