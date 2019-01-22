@@ -10,15 +10,16 @@ class TransformInteraction extends StatefulWidget {
   const TransformInteraction({
     // The child to perform the transformations on
     @required this.child,
-    // TODO(justinmc): get this internally?
-    @required this.screenSize,
+    // The size of the child
+    @required this.size,
     // A callback for the onTapUp event from GestureDetector. Called with
     // untransformed coordinates in an Offset.
     this.onTapUp,
     // The scale will be clamped to between these values
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    // Panning will be limited so that the screen can not view beyond this size.
+    // Panning will be limited so that the viewport can not view beyond this
+    // size.
     // TODO(justinmc): also limit scaling! If I set minScale to 0.2 I can see beyond
     this.visibleSize = const Size(1600, 2400),
     // Initial values for the transform can be provided
@@ -33,7 +34,7 @@ class TransformInteraction extends StatefulWidget {
   });
 
   final Widget child;
-  final Size screenSize;
+  final Size size;
   final Function onTapUp;
   final double maxScale;
   final double minScale;
@@ -76,15 +77,15 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       return;
     }
     // Clamp _translation such that viewport can't see beyond widget.visibleSize
-    final Size screenSizeScene = widget.screenSize / _scale;
+    final Size sizeScene = widget.size / _scale;
     __translation = Offset(
       offset.dx.clamp(
-        -widget.visibleSize.width / 2 + screenSizeScene.width / 2,
-        widget.visibleSize.width / 2 - screenSizeScene.width / 2,
+        -widget.visibleSize.width / 2 + sizeScene.width / 2,
+        widget.visibleSize.width / 2 - sizeScene.width / 2,
       ),
       offset.dy.clamp(
-        -widget.visibleSize.height / 2 + screenSizeScene.height / 2,
-        widget.visibleSize.height / 2 - screenSizeScene.height / 2,
+        -widget.visibleSize.height / 2 + sizeScene.height / 2,
+        widget.visibleSize.height / 2 - sizeScene.height / 2,
       ),
     );
   }
@@ -127,8 +128,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     // By default, the scene is drawn so that the origin is in the top left
     // corner of the viewport. Center it instead.
     final Offset translationCentered = Offset(
-      _translation.dx + widget.screenSize.width / 2 / _scale,
-      _translation.dy + widget.screenSize.height / 2 / _scale,
+      _translation.dx + widget.size.width / 2 / _scale,
+      _translation.dy + widget.size.height / 2 / _scale,
     );
 
     // A GestureDetector allows the detection of panning and zooming gestures on
@@ -164,11 +165,11 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   }
 
   // Return the scene point underneath the viewport point given.
-  static Offset fromScreen(Offset screenPoint, Offset translation, double scale, double rotation, Size screenSize, [Offset focalPoint = Offset.zero]) {
-    // Find the offset from the center of the screen to the given screenPoint.
-    final Offset fromCenterOfScreen = Offset(
-      screenPoint.dx - screenSize.width / 2,
-      screenPoint.dy - screenSize.height / 2,
+  static Offset fromViewport(Offset viewportPoint, Offset translation, double scale, double rotation, Size size, [Offset focalPoint = Offset.zero]) {
+    // Find the offset from the center of the viewport to the given viewportPoint.
+    final Offset fromCenterOfViewport = Offset(
+      viewportPoint.dx - size.width / 2,
+      viewportPoint.dy - size.height / 2,
     );
 
     // On this point, perform the inverse transformation of the scene to get
@@ -181,8 +182,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     );
     final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
     final Vector3 untransformed = inverseMatrix.transform3(Vector3(
-      fromCenterOfScreen.dx,
-      fromCenterOfScreen.dy,
+      fromCenterOfViewport.dx,
+      fromCenterOfViewport.dy,
       0,
     ));
     return Offset(untransformed.x, untransformed.y);
@@ -200,7 +201,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   void _onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
       if (_scaleStart != null) {
-        final Offset focalPointScene = fromScreen(details.focalPoint, _translation, _scale, _rotation, widget.screenSize);
+        final Offset focalPointScene = fromViewport(details.focalPoint, _translation, _scale, _rotation, widget.size);
         _scale = _scaleStart * details.scale;
 
         if (details.scale != 1.0) {
@@ -208,12 +209,12 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
           // same place in the scene. That means that the focal point of the
           // scale should be on the same place in the scene before and after the
           // scale.
-          final Offset focalPointSceneNext = fromScreen(details.focalPoint, _translation, _scale, _rotation, widget.screenSize);
+          final Offset focalPointSceneNext = fromViewport(details.focalPoint, _translation, _scale, _rotation, widget.size);
           _translation = _translation + focalPointSceneNext - focalPointScene;
         }
       }
       if (_translateFrom != null && details.scale == 1.0) {
-        // The coordinates given by details.focalPoint are screen coordinates
+        // The coordinates given by details.focalPoint are viewport coordinates
         // that are not affected by _scale. So, dividing by scale here properly
         // gives us more distance when zoomed out and less when zoomed in so
         // that the point under the user's finger stays constant during a drag.
@@ -258,7 +259,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
 
   // Handle tapping to select a tile
   void _onTapUp(TapUpDetails details) {
-    widget.onTapUp(fromScreen(details.globalPosition, _translation, _scale, _rotation, widget.screenSize));
+    widget.onTapUp(fromViewport(details.globalPosition, _translation, _scale, _rotation, widget.size));
   }
 
   @override
