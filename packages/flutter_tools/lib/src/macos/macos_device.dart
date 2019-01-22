@@ -26,12 +26,18 @@ class MacOSDevice extends Device {
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('macos');
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to install the application.
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to install the application.
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async => true;
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to install the application.
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
 
@@ -78,12 +84,43 @@ class MacOSDevice extends Device {
     }
   }
 
+  // TODO(jonahwilliams): implement using process manager.
+  // currently we rely on killing the isolate taking down the application.
   @override
-  Future<bool> stopApp(ApplicationPackage app) async => true;
+  Future<bool> stopApp(covariant MacOSApp app) async {
+    final RegExp whitespace = RegExp(r'\w+');
+    bool succeeded = true;
+    try {
+      final ProcessResult result = await processManager.run(<String>[
+        'ps', 'aux', '|', 'grep', '"${app.executable}"',
+      ]);
+      if (result.exitCode != 0) {
+        return false;
+      }
+      final List<String> lines = result.stdout.split('\n');
+      for (String line in lines) {
+        final List<String> values = line.split(whitespace);
+        if (values.length < 2) {
+          continue;
+        }
+        final String pid = values[1];
+        final ProcessResult killResult = await processManager.run(<String>[
+          'kill', pid
+        ]);
+        succeeded &= killResult.exitCode == 0;
+      }
+      return true;
+    } on ArgumentError {
+      succeeded = false;
+    }
+    return succeeded;
+  }
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
 }

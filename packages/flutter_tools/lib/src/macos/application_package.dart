@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,6 +17,10 @@ abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
    /// Creates a new [MacOSApp] from an existing app bundle.
+   ///
+   /// `applicationBinary` isthe path to the framework directory created by an
+   /// Xcode build. By default, this is located under
+   /// "~/Library/Developer/Xcode/DerivedData/"
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
