@@ -12,9 +12,7 @@ group("platform") {
       "android",
     ]
   } else if (is_linux) {
-    deps = [
-      "embedder",
-    ]
+    deps = []
   } else if (is_win || is_fuchsia) {
     # There is no platform target on Windows. Fuchsia has its own runner
     # implementation.
