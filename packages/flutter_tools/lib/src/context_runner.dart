@@ -46,7 +46,7 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
-  final bool enablePackageBuild = platform.environment['ENABLE_PACKAGE_BUILD'] == 'true';
+  final bool enablePackageBuild = true;//platform.environment['ENABLE_PACKAGE_BUILD'] == 'true';
   return await context.run<T>(
     name: 'global fallbacks',
     body: runner,
@@ -76,7 +76,7 @@ Future<T> runInContext<T>(
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       GenSnapshot: () => const GenSnapshot(),
-      HotRunnerConfig: () => HotRunnerConfig(),
+      HotRunnerConfig: () => enablePackageBuild ? (HotRunnerConfig()..computeDartDependencies = false) : HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),

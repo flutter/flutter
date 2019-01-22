@@ -6,10 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+import 'package:analyzer/analyzer.dart';
 import 'package:build/build.dart';
 import 'package:build_modules/build_modules.dart';
 import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../base/process_manager.dart';
 import '../compile.dart';
@@ -25,6 +26,7 @@ const String _kFlutterModuleExtension = '.flutter.module';
 /// dart source using the frontend server binary.
 class FlutterKernelBuilder implements Builder {
   const FlutterKernelBuilder({
+    @required this.disabled,
     @required this.target,
     @required this.aot,
     @required this.trackWidgetCreation,
@@ -42,6 +44,7 @@ class FlutterKernelBuilder implements Builder {
   final String sdkRoot;
   final String incrementalCompilerByteStorePath;
   final bool aot;
+  final bool disabled;
   final bool trackWidgetCreation;
   final bool targetProductVm;
   final bool linkPlatformKernelIn;
@@ -55,6 +58,9 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    if (disabled) {
+      return;
+    }
     if (!buildStep.inputId.path.contains('main.dart')) {
       return;
     }
@@ -80,6 +86,13 @@ class FlutterKernelBuilder implements Builder {
       ..addAll(transitiveKernelDeps)
       ..addAll(transitiveSourceDeps);
     await scratchSpace.ensureAssets(allAssetIds, buildStep);
+    final Directory projectDir = File(packagesPath).parent;
+    final String oldPackagesFile = await File(packagesPath).readAsString();
+    final String newPackagesFile = oldPackagesFile.replaceFirst('hello_world:lib/', 'hello_world:$multiRootScheme:///lib/');
+    final Directory packagesFileDir = await Directory.systemTemp.createTemp('flutter_build_');
+    final File packagesFile = File(path.join(packagesFileDir.path, '.packages'));
+    await packagesFile.create();
+    await packagesFile.writeAsString(newPackagesFile);
     // End questionable logic.
 
     final String frontendServer = artifacts.getArtifactPath(
@@ -110,16 +123,15 @@ class FlutterKernelBuilder implements Builder {
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
     }
-    command.addAll(<String>['--packages', packagesPath]);
-    final Uri mainUri = PackageUriMapper.findUri(target, packagesPath);
+    command.addAll(<String>['--packages', packagesFile.path]);
+    final Uri mainUri = PackageUriMapper.findUri(target, packagesFile.path, multiRootScheme, fileSystemRoots);
     command.addAll(<String>['--output-dill', outputFile.path]);
-    // if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
-    //   command.addAll(<String>['--depfile', depFilePath]);
-    // }
-    if (fileSystemRoots != null) {
-      for (String root in fileSystemRoots) {
-        command.addAll(<String>['--filesystem-root', root]);
-      }
+    for (String root in <String>[
+      path.join(projectDir.absolute.path),
+      path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', 'hello_world'),
+    ]) {
+      printTrace('Adding root: $root');
+      command.addAll(<String>['--filesystem-root', root]);
     }
     command.addAll(<String>['--filesystem-scheme', multiRootScheme]);
     if (extraFrontEndOptions != null) {
@@ -148,23 +160,36 @@ class FlutterKernelBuilder implements Builder {
   }
 }
 
+/// A build for incremental runs which only generates a timestamp.
+///
+/// Forces code generation to run, but allows us to continue delegating
+/// to the frontend server to produce incremental dill files.
 class FlutterIncrementalKernelBuilder implements Builder {
-  const FlutterIncrementalKernelBuilder();
+  const FlutterIncrementalKernelBuilder({
+    this.disabled,
+  });
+
+  final bool disabled;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-    '.dart': <String>['.app.incremental.dill.timestamp'],
+    '.dart': <String>['.app.incremental.dill.timestamp', '.packages'],
   };
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    if (disabled) {
+      return;
+    }
     if (!buildStep.inputId.path.contains('main.dart')) {
       return;
     }
     final AssetId moduleId = buildStep.inputId.changeExtension(_kFlutterModuleExtension);
     final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
     final AssetId outputId = module.primarySource.changeExtension('.app.incremental.dill.timestamp');
+    final AssetId packagesId = module.primarySource.changeExtension('.packages');
     final List<Module> transitiveDeps = await module.computeTransitiveDependencies(buildStep);
+    final String package = buildStep.inputId.package;
     final List<AssetId> transitiveKernelDeps = <AssetId>[];
     final List<AssetId> transitiveSourceDeps = <AssetId>[];
     for (Module dependency in transitiveDeps) {
@@ -182,6 +207,12 @@ class FlutterIncrementalKernelBuilder implements Builder {
       ..addAll(transitiveKernelDeps)
       ..addAll(transitiveSourceDeps);
     await scratchSpace.ensureAssets(allAssetIds, buildStep);
+    // Replace the relative root of the current package in the .packages file with a multiroot-scheme
+    // so that the compiler can resolve both source files and generated files.
+    final String oldPackagesFile = await File('.packages').readAsString();
+    oldPackagesFile.replaceFirst('$package:lib/', '$package:$multiRootScheme///lib');
+    final String newPackagesFile = oldPackagesFile.replaceFirst('$package:lib/', '$package:$multiRootScheme:///lib/');
+    await buildStep.writeAsString(packagesId, newPackagesFile);
     await buildStep.writeAsString(outputId, DateTime.now().toIso8601String());
   }
 }
@@ -207,5 +238,78 @@ Future<void> _addModuleDeps(
     }
   } else {
     transitiveSourceDeps.addAll(dependency.sources);
+  }
+}
+
+class FlutterTestEntrypointBuilder implements Builder {
+  const FlutterTestEntrypointBuilder({
+    this.disabled,
+  });
+
+  final bool disabled;
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.dart': <String>['.test.timestamp'],
+  };
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    if (disabled) {
+      return;
+    }
+    final AssetId dartEntrypointId = buildStep.inputId;
+    final bool isAppEntrypoint = await _isAppEntryPoint(dartEntrypointId, buildStep);
+    if (!isAppEntrypoint) {
+      return;
+    }
+    final AssetId moduleId = buildStep.inputId.changeExtension(moduleExtension(DartPlatform.flutter));
+    final AssetId outputId = buildStep.inputId.changeExtension('.test.timestamp');
+    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+    await module.computeTransitiveDependencies(buildStep);
+    await buildStep.writeAsString(outputId, DateTime.now().toIso8601String());
+  }
+}
+
+/// Returns whether or not [dartId] is an app entrypoint (basically, whether
+/// or not it has a `main` function).
+Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
+  final String source = await reader.readAsString(dartId);
+  final CompilationUnit parsed = parseCompilationUnit(source, suppressErrors: true);
+  // Allow two or fewer arguments so that entrypoints intended for use with
+  // [spawnUri] get counted.
+  return parsed.declarations.any((CompilationUnitMember node) {
+    return node is FunctionDeclaration &&
+        node.name.name == 'main' &&
+        node.functionExpression.parameters.parameters.length <= 2;
+  });
+}
+
+
+class TestSvgBuilder implements Builder {
+  const TestSvgBuilder();
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.svg': <String>['.svg.dart'],
+  };
+
+  @override
+  FutureOr<void> build(BuildStep buildStep) async {
+    final AssetId outputId = buildStep.inputId.changeExtension('.svg.dart');
+    final String svgSource = await buildStep.readAsString(buildStep.inputId);
+    await buildStep.writeAsString(outputId, '''
+import 'package:flutter/widgets.dart';
+
+/**
+$svgSource
+**/
+class SvgPainter extends StatelessWidget {
+  const SvgPainter({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+''');
   }
 }

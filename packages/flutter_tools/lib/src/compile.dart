@@ -110,40 +110,47 @@ class StdoutHandler {
   }
 }
 
-// Converts filesystem paths to package URIs.
-// TODO(jonahwilliams): doesn't work with the new package file that is created.
+/// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath) {
+  PackageUriMapper(String scriptPath, String packagesPath, this.fileSystemScheme, this.fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
+      if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
+        _packageName = packageName;
+        _uriPrefix = fileSystemRoots.map((String name) => Uri.file('$name/lib/', windows: platform.isWindows).toString()).toList();
+        return;
+      }
       if (scriptUri.startsWith(prefix)) {
         _packageName = packageName;
-        _uriPrefix = prefix;
+        _uriPrefix = <String>[prefix];
         return;
       }
     }
   }
 
+  final String fileSystemScheme;
+  final List<String> fileSystemRoots;
+
   String _packageName;
-  String _uriPrefix;
+  List<String> _uriPrefix;
 
   Uri map(String scriptPath) {
-    if (_packageName == null)
+    if (_packageName == null) {
       return null;
-
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    if (scriptUri.startsWith(_uriPrefix)) {
-      return Uri.parse('package:$_packageName/${scriptUri.substring(_uriPrefix.length)}');
     }
-
+    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+    for (String uriPrefix in _uriPrefix) {
+      if (scriptUri.startsWith(uriPrefix)) {
+        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
+      }
+    }
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath) {
-    return PackageUriMapper(scriptPath, packagesPath).map(scriptPath);
+  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
+    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
 }
 
@@ -225,7 +232,7 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-       mainUri = PackageUriMapper.findUri(mainPath, packagesPath);
+       mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
@@ -390,14 +397,15 @@ class ResidentCompiler {
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null) {
-      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath);
+      packageUriMapper = PackageUriMapper(request.mainPath, _packagesPath, _fileSystemScheme, _fileSystemRoots);
     }
 
     if (_server == null) {
+      fs.file(request.outputPath).deleteSync();
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath, /* packageUriMapper= */ null)
+          _mapFilename(_packagesPath, /* packageUriMapper= */ null)
       );
     }
 
@@ -405,8 +413,10 @@ class ResidentCompiler {
     final String mainUri = request.mainPath != null
         ? _mapFilename(request.mainPath, packageUriMapper) + ' '
         : '';
+    printTrace('recompile $mainUri$inputKey');
     _server.stdin.writeln('recompile $mainUri$inputKey');
     for (String fileUri in request.invalidatedFiles) {
+      printTrace('$fileUri');
       _server.stdin.writeln(_mapFileUri(fileUri, packageUriMapper));
     }
     _server.stdin.writeln(inputKey);
@@ -448,14 +458,11 @@ class ResidentCompiler {
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
     }
-    if (packagesFilePath != null) {
-      command.addAll(<String>['--packages', packagesFilePath]);
+    if (_packagesPath != null) {
+      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_trackWidgetCreation) {
       command.add('--track-widget-creation');
-    }
-    if (_packagesPath != null) {
-      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
@@ -471,6 +478,7 @@ class ResidentCompiler {
     if (_unsafePackageSerialization == true) {
       command.add('--unsafe-package-serialization');
     }
+    command.add('--verbose');
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
@@ -491,6 +499,7 @@ class ResidentCompiler {
       .transform<String>(const LineSplitter())
       .listen((String message) { printError(message); });
 
+    printTrace('compile $scriptUri');
     _server.stdin.writeln('compile $scriptUri');
 
     return _stdoutHandler.compilerOutput.future;
@@ -592,3 +601,12 @@ class ResidentCompiler {
     return _server.exitCode;
   }
 }
+
+
+/**
+ ../../bin/cache/dart-sdk/bin/dart ../../bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot --sdk-root ../../bin/cache/artifacts/engine/common/flutter_patched_sdk/ --incremental --strong --target=flutter --output-dill build/app.dill --packages /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world/.dart_tool/build/generated/hello_world/lib/main.packages --filesystem-root /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world --filesystem-root /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world/.dart_tool/build/generated/hello_world --filesystem-scheme org-dartlang-app --verbose
+ */
+
+/**
+ /Users/jonahwilliams/Documents/Flutter/flutter/bin/cache/dart-sdk/bin/dart /Users/jonahwilliams/Documents/Flutter/flutter/bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot --sdk-root /Users/jonahwilliams/Documents/Flutter/flutter/bin/cache/artifacts/engine/common/flutter_patched_sdk/ --incremental --strong --target=flutter --output-dill build/app.dill --packages /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world/.dart_tool/build/generated/hello_world/lib/main.packages --filesystem-root /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world --filesystem-root /Users/jonahwilliams/Documents/Flutter/flutter/examples/hello_world/.dart_tool/build/generated/hello_world --filesystem-schemeorg-dartlang-app --verbose
+ */

@@ -6,13 +6,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:build/build.dart';
+import 'package:build_modules/build_modules.dart';
 import 'package:build_runner_core/build_runner_core.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:build_config/build_config.dart';
 import 'package:logging/logging.dart';
 import 'package:build_modules/builders.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
 import 'package:watcher/watcher.dart';
+import 'package:inject_generator/inject_generator.dart';
 
 import '../base/file_system.dart';
 import '../compile.dart';
@@ -20,11 +23,14 @@ import '../globals.dart';
 import 'builders.dart';
 
 Builder _kFlutterIncrementalBuilder(BuilderOptions builderOptions) {
-  return const FlutterIncrementalKernelBuilder();
+  return FlutterIncrementalKernelBuilder(
+    disabled: builderOptions.config['disabled'],
+  );
 }
 
 Builder _kFlutterBuilder(BuilderOptions builderOptions) {
   return FlutterKernelBuilder(
+    disabled: builderOptions.config['disabled'],
     target: builderOptions.config['target'],
     aot: builderOptions.config['aot'],
     trackWidgetCreation: builderOptions.config['trackWidgetCreation'],
@@ -37,46 +43,30 @@ Builder _kFlutterBuilder(BuilderOptions builderOptions) {
   );
 }
 
-/// The [core.BuilderApplication] to compile kernel from dart source from builds.
-final List<core.BuilderApplication> _kFlutterBuildApplications = <core.BuilderApplication>[
+Builder _kFlutterEntrypointTestBulder(BuilderOptions builderOptions) {
+  return FlutterTestEntrypointBuilder(
+    disabled: builderOptions.config['disabled'],
+  );
+}
+
+/// The [core.BuilderApplication] to compile kernel for all flutter commands.
+final List<core.BuilderApplication> _kFlutterApplications = <core.BuilderApplication>[
+  /// Code generation libraries
   core.apply(
-    'build_modules|module_library',
-    <BuilderFactory>[moduleLibraryBuilder],
-    core.toAllPackages(),
-    isOptional: true,
-    hideOutput: true,
-    appliesBuilders: <String>['build_modules|module_cleanup'],
-  ),
-  core.apply(
-    'build_modules|flutter',
-    <BuilderFactory>[
-      metaModuleBuilderFactoryForPlatform('flutter'),
-      metaModuleCleanBuilderFactoryForPlatform('flutter'),
-      moduleBuilderFactoryForPlatform('flutter')
-    ],
-    core.toAllPackages(),
-    isOptional: true,
-    hideOutput: true,
-    appliesBuilders: <String>['build_modules|module_cleanup'],
-  ),
-  core.apply(
-    'build_vm_compilers|flutter',
-    <BuilderFactory>[_kFlutterBuilder],
+    'flutter_svg|svg',
+    <BuilderFactory>[(BuilderOptions options) => const TestSvgBuilder()],
     core.toRoot(),
     isOptional: false,
     hideOutput: true,
-    appliesBuilders: <String>['build_modules|flutter'],
-    defaultGenerateFor: const InputSet(include: <String>['lib/**']),
   ),
-  core.applyPostProcess(
-    'build_modules|module_cleanup',
-    moduleCleanup,
-    defaultGenerateFor: const InputSet(),
-  )
-];
-
-/// The [core.BuilderApplication] to compile kernel from dart source for runs.
-final List<core.BuilderApplication> _kFlutterRunApplications = <core.BuilderApplication>[
+  core.apply(
+    'inject|inject',
+    <BuilderFactory>[summarizeBuilder, generateBuilder],
+    core.toDependentsOf('inject'),
+    hideOutput: true
+  ),
+  /// package:build provided applications to compute modules for faster incremental
+  /// builds.
   core.apply(
     'build_modules|module_library',
     <BuilderFactory>[moduleLibraryBuilder],
@@ -97,8 +87,9 @@ final List<core.BuilderApplication> _kFlutterRunApplications = <core.BuilderAppl
     hideOutput: true,
     appliesBuilders: <String>['build_modules|module_cleanup'],
   ),
+  /// Step that triggers code generation for all main entrypoint files.
   core.apply(
-    'build_vm_compilers|flutter',
+    'flutter_run|flutter',
     <BuilderFactory>[_kFlutterIncrementalBuilder],
     core.toRoot(),
     isOptional: false,
@@ -106,6 +97,27 @@ final List<core.BuilderApplication> _kFlutterRunApplications = <core.BuilderAppl
     appliesBuilders: <String>['build_modules|flutter'],
     defaultGenerateFor: const InputSet(include: <String>['lib/**']),
   ),
+  /// Step that triggers code generation for all test entrypoint files.
+  core.apply(
+    'flutter_test|flutter',
+    <BuilderFactory>[_kFlutterEntrypointTestBulder],
+    core.toRoot(),
+    isOptional: false,
+    hideOutput: true,
+    appliesBuilders: <String>['build_modules|flutter'],
+    defaultGenerateFor: const InputSet(include: <String>['test/**']),
+  ),
+  /// Step that produces a kernel file for `flutter build`.
+  core.apply(
+    'flutter_build|flutter',
+    <BuilderFactory>[_kFlutterBuilder],
+    core.toRoot(),
+    isOptional: false,
+    hideOutput: true,
+    appliesBuilders: <String>['build_modules|flutter'],
+    defaultGenerateFor: const InputSet(include: <String>['lib/**']),
+  ),
+  /// Step that removes temporary artifacts created by build process.
   core.applyPostProcess(
     'build_modules|module_cleanup',
     moduleCleanup,
@@ -136,27 +148,26 @@ class BuildKernelCompiler implements KernelCompiler {
   }) async {
     printTrace('WARNING: running experimental package:build pipeline. '
       'Opt out by setting ENABLE_PACKAGE_BUILD=false.');
-    final Directory projectRoot = fs.file(packagesPath).parent.absolute;
-    // We should just handle [BuildScriptChangedException]
-    final File assetGraph = fs.file(assetGraphPath);
-    if (await assetGraph.exists()) {
-      await assetGraph.delete();
+    if (await fs.file(assetGraphPath).exists()) {
+      await fs.file(assetGraphPath).delete();
     }
+    final Directory projectRoot = fs.file(packagesPath).parent.absolute;
     final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
     final core.OverrideableEnvironment environment = core.OverrideableEnvironment(
       core.IOEnvironment(packageGraph),
     );
     final core.BuildRunner runner = await core.BuildRunner.create(
       await core.BuildOptions.create(
-        core.LogSubscription(environment, verbose: true),
+        core.LogSubscription(environment, verbose: false),
         packageGraph: packageGraph,
         skipBuildScriptCheck: true,
         trackPerformance: true,
       ),
       environment,
-      _kFlutterBuildApplications,
+      _kFlutterApplications,
       <String, Map<String, Object>>{
-        'build_vm_compilers|flutter': <String, Object>{
+        'flutter_build|flutter': <String, Object>{
+          'disabled': false,
           'target': mainPath,
           'aot': aot,
           'trackWidgetCreation': trackWidgetCreation,
@@ -166,7 +177,15 @@ class BuildKernelCompiler implements KernelCompiler {
           'sdkRoot': sdkRoot,
           'incrementalCompilerByteStorePath': incrementalCompilerByteStorePath,
           'packagesPath': packagesPath,
+          'fileSystemScheme': fileSystemScheme,
+          'fileSystemRoots': fileSystemRoots,
         },
+        'flutter_run|flutter': <String, Object>{
+          'disabled': true,
+        },
+        'flutter_test|flutter': <String, Object>{
+          'disabled': true,
+        }
       },
       isReleaseBuild: aot,
     );
@@ -188,7 +207,7 @@ class BuildKernelCompiler implements KernelCompiler {
       return const CompilerOutput(null, 1);
     }
     final String fileName = '${projectRoot.path}/.dart_tool/build/generated/${output.package}/${output.path}';
-    // Copy output file back to expected location.
+    // Copy output file back to expected location by rest of tools.
     fs.file('$outputFilePath')
       ..createSync()
       ..writeAsBytesSync(fs.file(fileName).readAsBytesSync());
@@ -197,8 +216,8 @@ class BuildKernelCompiler implements KernelCompiler {
 }
 
 class BuildResidentCompiler implements ResidentCompiler {
-  BuildResidentCompiler._(this._residentCompiler, this._buildRunner, this._watcher, this._packageGraph) {
-    final String rootPath = '${_packageGraph.root.path}/lib/';
+  BuildResidentCompiler._(this._residentCompiler, this._buildRunner, this._watcher, this._packageGraph, this.packages, this.fileSystemRoots, this.fileSystemScheme) {
+    final String rootPath = '${_packageGraph.root.path}/';
     _watchSubscription = _watcher.events.listen((WatchEvent watchEvent) {
       final String relativePath =watchEvent.path.replaceFirst(rootPath, '');
       final AssetId assetId = AssetId.parse('${_packageGraph.root.name}|$relativePath');
@@ -209,27 +228,45 @@ class BuildResidentCompiler implements ResidentCompiler {
   static Future<BuildResidentCompiler> create(String sdkRoot, {
     bool trackWidgetCreation = false,
     String packagesPath,
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
     String initializeFromDill,
     TargetModel targetModel = TargetModel.flutter,
   }) async {
     final PackageGraph packageGraph = PackageGraph.forThisPackage();
-    final BuildRunner runner = await createHotRunner();
+    final BuildRunner runner = await createBuildRunner(mode: Mode.run);
+    final BuildResult result = await runner.run(const <AssetId, ChangeType>{});
+    if (result.status != BuildStatus.success) {
+      throwToolExit('Build failure: ${result.failureType}');
+    }
+    final String generatedPath = fs.path.join(fs.currentDirectory.absolute.path, '.dart_tool', 'build', 'generated');
+    final File newPackages = fs.file(fs.path.join(generatedPath, 'hello_world', 'lib', 'main.packages'));
+    String updatedPackagesPath;
+    if (newPackages.existsSync()) {
+      updatedPackagesPath = newPackages.absolute.path;
+    } else {
+      updatedPackagesPath = packagesPath;
+    }
+    final List<String> fileSystemRoots = <String>[
+      fs.path.join(fs.currentDirectory.absolute.path),
+      fs.path.join(generatedPath, 'hello_world'),
+    ];
+    await runner.beforeExit();
     final ResidentCompiler compiler = ResidentCompiler(sdkRoot,
       trackWidgetCreation: trackWidgetCreation,
-      packagesPath: packagesPath,
+      packagesPath: updatedPackagesPath,
       fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme,
+      fileSystemScheme: multiRootScheme,
       initializeFromDill: initializeFromDill,
       targetModel: targetModel,
     );
-    final DirectoryWatcher watcher = Watcher(fs.currentDirectory.childDirectory('lib').path);
-    return BuildResidentCompiler._(compiler, runner, watcher, packageGraph);
+    final DirectoryWatcher watcher = Watcher(fs.path.join(fs.currentDirectory.absolute.path, 'lib'));
+    return BuildResidentCompiler._(compiler, runner, watcher, packageGraph, updatedPackagesPath, fileSystemRoots, multiRootScheme);
   }
 
   final ResidentCompiler _residentCompiler;
   final BuildRunner _buildRunner;
+  final String packages;
+  final List<String> fileSystemRoots;
+  final String fileSystemScheme;
   final Map<AssetId, ChangeType> _pendingInvalidated = <AssetId, ChangeType>{};
   DirectoryWatcher _watcher;
   PackageGraph _packageGraph;
@@ -248,11 +285,13 @@ class BuildResidentCompiler implements ResidentCompiler {
 
   @override
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {@required String outputPath, String packagesFilePath}) async {
-    final List<String> invalidatedFilesCopy = invalidatedFiles.toList();
+    final List<String> invalidatedFilesCopy = invalidatedFiles.where((String file) => !file.contains('.dart_tool')).toList();
     if (!runOnce || _pendingInvalidated.isNotEmpty) {
+      printTrace('$_pendingInvalidated');
       final Map<AssetId, ChangeType> copy = Map<AssetId, ChangeType>.from(_pendingInvalidated);
       _pendingInvalidated.clear();
       final BuildResult result = await _buildRunner.run(copy);
+      await _buildRunner.beforeExit();
       if (result.status == BuildStatus.failure) {
         return const CompilerOutput('', 1);
       }
@@ -263,6 +302,7 @@ class BuildResidentCompiler implements ResidentCompiler {
       }
       runOnce = true;
     }
+    printTrace('INVALIDED: $invalidatedFilesCopy');
     return _residentCompiler.recompile(mainPath, invalidatedFilesCopy, outputPath: outputPath, packagesFilePath: packagesFilePath);
   }
 
@@ -283,12 +323,16 @@ class BuildResidentCompiler implements ResidentCompiler {
   }
 }
 
-Future<BuildRunner> createHotRunner() async{
+enum Mode {
+  run,
+  test,
+}
+
+Future<BuildRunner> createBuildRunner({Mode mode}) async {
   printTrace('WARNING: running experimental package:build pipeline. '
     'Opt out by setting ENABLE_PACKAGE_BUILD=false.');
-  final File assetGraph = fs.file(assetGraphPath);
-  if (await assetGraph.exists()) {
-    await assetGraph.delete();
+  if (await fs.file(assetGraphPath).exists()) {
+    await fs.file(assetGraphPath).delete();
   }
   final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
   final core.OverrideableEnvironment environment = core.OverrideableEnvironment(
@@ -296,15 +340,22 @@ Future<BuildRunner> createHotRunner() async{
   );
   return core.BuildRunner.create(
     await core.BuildOptions.create(
-      core.LogSubscription(environment, verbose: true),
+      core.LogSubscription(environment, verbose: false),
       packageGraph: packageGraph,
       skipBuildScriptCheck: true,
       trackPerformance: true,
     ),
     environment,
-    _kFlutterRunApplications,
-    <String, Map<String, Object>>{
-      'build_vm_compilers|flutter': <String, Object>{},
+    _kFlutterApplications, <String, Map<String, Object>> {
+      'flutter_build|flutter': <String, Object>{
+        'disabled': true,
+      },
+      'flutter_run|flutter': <String, Object>{
+        'disabled': mode != Mode.run
+      },
+      'flutter_test|flutter': <String, Object>{
+        'disabled': mode != Mode.test
+      },
     },
     isReleaseBuild: false,
   );
@@ -313,7 +364,7 @@ Future<BuildRunner> createHotRunner() async{
 class ToolBuildEnvironment extends core.BuildEnvironment {
   @override
   void onLog(LogRecord record) {
-    print(record.toString());
+    printTrace(record.toString());
   }
 
   @override

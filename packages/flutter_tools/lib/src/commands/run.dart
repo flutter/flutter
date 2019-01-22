@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/pipeline.dart';
-import 'package:flutter_tools/src/compile.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -324,19 +323,20 @@ class RunCommand extends RunCommandBase {
           '(recommended) or --debug (may include unwanted debug symbols).');
     }
 
-    final ResidentCompiler generator = await BuildResidentCompiler.create(
+    final BuildResidentCompiler generator = await BuildResidentCompiler.create(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: argResults['track-widget-creation'],
-      fileSystemRoots: argResults['filesystem-root'],
-      fileSystemScheme: argResults['filesystem-scheme'],
     );
+    final String packagesPath = generator.packages;
+    final List<String> fileSystemRoots = generator.fileSystemRoots;
+    final String fileSystemScheme = generator.fileSystemScheme;
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
         viewFilter: argResults['isolate-filter'],
         generator: generator,
       );
@@ -354,7 +354,7 @@ class RunCommand extends RunCommandBase {
             ? null
             : fs.file(applicationBinaryPath),
         projectRootPath: argResults['project-root'],
-        packagesFilePath: globalResults['packages'],
+        packagesFilePath: packagesPath,
         dillOutputPath: argResults['output-dill'],
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,

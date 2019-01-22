@@ -5,8 +5,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:build/build.dart';
+import 'package:build_runner_core/build_runner_core.dart';
+import 'package:watcher/watcher.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/pipeline.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../runner/flutter_command.dart';
@@ -156,6 +161,10 @@ class TestCommand extends FlutterCommand {
     }
 
     Cache.releaseLockEarly();
+
+    final BuildRunner buildRunner = await createBuildRunner(mode: Mode.test);
+    await buildRunner.run(const <AssetId, ChangeType>{});
+    await buildRunner.beforeExit();
 
     final int result = await runTests(
       files,

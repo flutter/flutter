@@ -93,6 +93,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _refreshDartDependencies() async {
+    return true;
     if (!hotRunnerConfig.computeDartDependencies) {
       // Disabled.
       return true;
@@ -332,6 +333,7 @@ class HotRunner extends ResidentRunner {
     final String fsName = fs.path.basename(projectRootPath);
     final List<Uri> devFSUris = <Uri>[];
     for (FlutterDevice device in flutterDevices) {
+      printTrace('packages: $packagesFilePath');
       final Uri uri = await device.setupDevFS(
         fsName,
         fs.directory(projectRootPath),

@@ -4,6 +4,11 @@
 
 import 'dart:async';
 
+import 'package:build/build.dart';
+import 'package:build_runner_core/build_runner_core.dart';
+import 'package:flutter_tools/src/base/pipeline.dart';
+import 'package:watcher/watcher.dart';
+
 import '../base/file_system.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
@@ -81,6 +86,9 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final BuildRunner buildRunner = await createBuildRunner(mode: Mode.run);
+    await buildRunner.run(const <AssetId, ChangeType>{});
+    await buildRunner.beforeExit();
     if (argResults['watch']) {
       await AnalyzeContinuously(
         argResults,
