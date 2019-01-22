@@ -676,9 +676,9 @@ class _AdbLogReader extends DeviceLogReader {
     final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
     final String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
-        _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
+      _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
-        _timeOrigin = null;
+      _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
