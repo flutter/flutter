@@ -360,6 +360,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   /// range from 1-24.
   int selectedHour;
 
+  /// The previous value of [selectedHour].
+  int prevSelectedHour;
+
   /// The current selection of the minute picker. Values range from 0 to 59.
   int selectedMinute;
 
@@ -486,24 +489,27 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
+        prevSelectedHour = selectedHour;
+
         if (widget.use24hFormat) {
           selectedHour = index;
           widget.onDateTimeChanged(_getDateTime());
-        }
-        else {
+        } else {
           selectedHour = index % 12;
 
-          final int currentHourIn24h = selectedHour + selectedAmPm * 12;
           // Automatically scrolls the am/pm column when the hour column value
-          // goes far enough. This behavior is similar to
-          // iOS picker version.
+          // goes far enough.
 
-          if (currentHourIn24h ~/ 12 != index ~/ 12) {
+          if (
+            (prevSelectedHour == 0 && selectedHour == 11) ||
+            (prevSelectedHour == 11 && selectedHour == 0)
+          ) {
+            // Animation values obtained by comparing with iOS version.
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
-              duration: const Duration(milliseconds: 300), // Set by comparing with iOS version.
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-            ); // Set by comparing with iOS version.
+            );
           }
           else {
             widget.onDateTimeChanged(_getDateTime());
