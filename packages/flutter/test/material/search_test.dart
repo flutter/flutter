@@ -575,12 +575,7 @@ void main() {
 
       await tester.tap(find.byTooltip('Search'));
       await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(semantics, hasSemantics(buildExpected(routeName: ''),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
