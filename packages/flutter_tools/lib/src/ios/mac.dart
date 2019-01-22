@@ -467,7 +467,8 @@ Future<XcodeBuildResult> buildXcodeProject({
             return;
           }
         } else {
-          initialBuildStatus.cancel();
+          initialBuildStatus?.cancel();
+          initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
             timeout: kSlowOperation,
@@ -494,7 +495,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
+  buildSubStatus = null;
   initialBuildStatus?.cancel();
+  initialBuildStatus = null;
   buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
