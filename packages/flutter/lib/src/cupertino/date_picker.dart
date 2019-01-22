@@ -360,8 +360,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   /// range from 1-24.
   int selectedHour;
 
-  /// The previous value of [selectedHour].
-  int prevSelectedHour;
+  /// The previous selection index of the hour column
+  int previousHourIndex;
 
   /// The current selection of the minute picker. Values range from 0 to 59.
   int selectedMinute;
@@ -395,6 +395,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
       amPmController = FixedExtentScrollController(initialItem: selectedAmPm);
     }
+
+    previousHourIndex = selectedHour;
   }
 
   @override
@@ -489,8 +491,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
-        prevSelectedHour = selectedHour;
-
         if (widget.use24hFormat) {
           selectedHour = index;
           widget.onDateTimeChanged(_getDateTime());
@@ -501,20 +501,22 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           // goes far enough.
 
           if (
-            (prevSelectedHour == 0 && selectedHour == 11) ||
-            (prevSelectedHour == 11 && selectedHour == 0)
+            ((previousHourIndex >= 0 && previousHourIndex <= 11) && (index >= 12 && index <= 23)) ||
+            ((previousHourIndex >= 12 && previousHourIndex <= 23) && (index >= 0 && index <= 11))
           ) {
-            // Animation values obtained by comparing with iOS version.
-            amPmController.animateToItem(
-              1 - amPmController.selectedItem,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
+              // Animation values obtained by comparing with iOS version.
+              amPmController.animateToItem(
+                1 - amPmController.selectedItem,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
           }
           else {
             widget.onDateTimeChanged(_getDateTime());
           }
         }
+
+        previousHourIndex = index;
       },
       children: List<Widget>.generate(24, (int index) {
         int hour = index;
