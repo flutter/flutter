@@ -117,16 +117,17 @@ void main() {
       theme: ThemeData(cardTheme: cardTheme),
       home: Scaffold(body: RepaintBoundary(
         key: painterKey,
-        child: Center(child: const Card())
+        child: Center(child: Card(
+          child: SizedBox.fromSize(size: const Size(200, 300),),
+        ))
       )),
     ));
 
-    // TODO(rami-a): Add golden.
-//    await expectLater(
-//      find.byKey(painterKey),
-//      matchesGoldenFile('card_theme.custom_shape.png'),
-//      skip: !Platform.isLinux,
-//    );
+    await expectLater(
+      find.byKey(painterKey),
+      matchesGoldenFile('card_theme.custom_shape.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }
 
