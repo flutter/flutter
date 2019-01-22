@@ -74,11 +74,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisStatus?.cancel();
       if (!firstAnalysis)
         printStatus('\n');
-      analysisStatus = logger.startProgress('Analyzing $analysisTarget...');
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: kSlowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
       analysisStatus?.stop();
+      analysisStatus = null;
       analysisTimer.stop();
 
       logger.printStatus(terminal.clearScreen(), newline: false);

@@ -153,7 +153,11 @@ bool isAotBuildMode(BuildMode mode) {
 }
 
 // Returns true if the given build mode can be used on emulators / simulators.
-bool isEmulatorBuildMode(BuildMode mode) => mode == BuildMode.debug;
+bool isEmulatorBuildMode(BuildMode mode) {
+  return mode == BuildMode.debug ||
+    mode == BuildMode.dynamicRelease ||
+    mode == BuildMode.dynamicProfile;
+}
 
 enum HostPlatform {
   darwin_x64,
