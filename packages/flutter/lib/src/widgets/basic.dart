@@ -2853,7 +2853,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///
 /// {@tool sample}
 ///
-/// Using a stack you can position widgets over one another.
+/// Using a [Stack] you can position widgets over one another.
 ///
 /// ```dart
 /// Stack(
@@ -2880,9 +2880,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///
 /// {@tool sample}
 ///
-/// Using a `Stack` to create contrast.
-///
-/// This example shows how Stack can be used to enhance text visibility
+/// This example shows how [Stack] can be used to enhance text visibility
 /// by adding gradient backdrops.
 ///
 /// ```dart
