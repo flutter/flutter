@@ -21,6 +21,10 @@ class TransformInteraction extends StatefulWidget {
     // Panning will be limited so that the screen can not view beyond this size.
     // TODO(justinmc): also limit scaling! If I set minScale to 0.2 I can see beyond
     this.visibleSize = const Size(1600, 2400),
+    // Initial values for the transform can be provided
+    this.initialTranslation,
+    this.initialScale,
+    this.initialRotation,
     // Any and all of the possible transformations can be disabled.
     this.disableTranslation = false,
     this.disableScale = false,
@@ -37,6 +41,9 @@ class TransformInteraction extends StatefulWidget {
   final bool disableTranslation;
   final bool disableScale;
   final bool disableRotation;
+  final Offset initialTranslation;
+  final double initialScale;
+  final double initialRotation;
 
   @override TransformInteractionState createState() => TransformInteractionState();
 }
@@ -48,7 +55,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
   // Start out looking at the center.
-  static Offset __translation = const Offset(0, 0);
+  Offset __translation = const Offset(0, 0);
   Offset _translateFrom; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
   double __scale = 1.0;
@@ -101,7 +108,15 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   @override
   void initState() {
     super.initState();
-    _translateFrom = Offset(widget.screenSize.width / 2, widget.screenSize.height / 2);
+    if (widget.initialTranslation != null) {
+      _translation = widget.initialTranslation;
+    }
+    if (widget.initialScale != null) {
+      _scale = widget.initialScale;
+    }
+    if (widget.initialRotation != null) {
+      _rotation = widget.initialRotation;
+    }
     _controller = AnimationController(
       vsync: this,
     );
@@ -214,7 +229,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     setState(() {
       _scaleStart = null;
       _rotationStart = null;
-      _translateFrom = Offset.zero;
+      _translateFrom = null;
     });
 
     _animation?.removeListener(_onAnimate);
