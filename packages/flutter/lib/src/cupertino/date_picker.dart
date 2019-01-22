@@ -342,25 +342,37 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   int textDirectionFactor;
   CupertinoLocalizations localizations;
 
-  // Alignment based on text direction. The variable name is self descriptive,
-  // however, when text direction is rtl, alignment is reversed.
+  /// Alignment based on text direction. The variable name is self descriptive,
+  /// however, when text direction is rtl, alignment is reversed.
   Alignment alignCenterLeft;
   Alignment alignCenterRight;
 
-  // Read this out when the state is initially created. Changes in initialDateTime
-  // in the widget after first build is ignored.
+  /// Read this out when the state is initially created. Changes in initialDateTime
+  /// in the widget after first build is ignored.
   DateTime initialDateTime;
 
-  // The currently selected values of the date picker.
-  int selectedDayFromInitial; // The difference in days between the initial date and the currently selected date.
-  int selectedHour;
-  int selectedMinute;
-  int selectedAmPm; // 0 means AM, 1 means PM.
+  /// The difference in days between the initial date and the currently selected date.
+  int selectedDayFromInitial;
 
-  // The controller of the AM/PM column.
+  /// The current selection of the hour picker.
+  ///
+  /// If [widget.use24hFormat] is true, values range from 1-12. Otherwise values
+  /// range from 1-24.
+  int selectedHour;
+
+  /// The current selection of the minute picker. Values range from 0 to 59.
+  int selectedMinute;
+
+  /// The current selection of the AM/PM picker.
+  ///
+  /// - 0 means AM
+  /// - 1 means PM
+  int selectedAmPm;
+
+  /// The controller of the AM/PM column.
   FixedExtentScrollController amPmController;
 
-  // Estimated width of columns.
+  /// The estimated width of columns.
   final Map<int, double> estimatedColumnWidths = <int, double>{};
 
   @override
