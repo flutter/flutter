@@ -61,7 +61,7 @@ class CardTheme extends Diagnosticable {
     Color color,
     double elevation,
     EdgeInsetsGeometry margin,
-    NotchedShape shape,
+    ShapeBorder shape,
   }) {
     return CardTheme(
       clipBehavior: clipBehavior ?? this.clipBehavior,
@@ -77,7 +77,7 @@ class CardTheme extends Diagnosticable {
     return Theme.of(context).cardTheme;
   }
 
-  /// Linearly interpolate between two BAB themes.
+  /// Linearly interpolate between two Card themes.
   ///
   /// The argument `t` must not be null.
   ///
