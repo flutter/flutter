@@ -11,7 +11,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -97,8 +96,8 @@ static RasterCacheResult Rasterize(
     std::function<void(SkCanvas*)> draw_function) {
   SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
 
-  const SkImageInfo image_info =
-      SkImageInfo::MakeN32Premul(cache_rect.width(), cache_rect.height());
+  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(
+      cache_rect.width(), cache_rect.height(), sk_ref_sp(dst_color_space));
 
   sk_sp<SkSurface> surface =
       context
@@ -110,15 +109,6 @@ static RasterCacheResult Rasterize(
   }
 
   SkCanvas* canvas = surface->getCanvas();
-  std::unique_ptr<SkCanvas> xformCanvas;
-  if (dst_color_space) {
-    xformCanvas = SkCreateColorSpaceXformCanvas(surface->getCanvas(),
-                                                sk_ref_sp(dst_color_space));
-    if (xformCanvas) {
-      canvas = xformCanvas.get();
-    }
-  }
-
   canvas->clear(SK_ColorTRANSPARENT);
   canvas->translate(-cache_rect.left(), -cache_rect.top());
   canvas->concat(ctm);

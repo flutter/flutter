@@ -5,7 +5,6 @@
 #include "flutter/shell/common/surface.h"
 
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -14,10 +13,6 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
                            SubmitCallback submit_callback)
     : submitted_(false), surface_(surface), submit_callback_(submit_callback) {
   FML_DCHECK(submit_callback_);
-  if (surface_) {
-    xform_canvas_ = SkCreateColorSpaceXformCanvas(surface_->getCanvas(),
-                                                  SkColorSpace::MakeSRGB());
-  }
 }
 
 SurfaceFrame::~SurfaceFrame() {
@@ -38,9 +33,6 @@ bool SurfaceFrame::Submit() {
 }
 
 SkCanvas* SurfaceFrame::SkiaCanvas() {
-  if (xform_canvas_) {
-    return xform_canvas_.get();
-  }
   return surface_ != nullptr ? surface_->getCanvas() : nullptr;
 }
 

@@ -64,7 +64,8 @@ sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
     return sk_surface_;
   }
 
-  SkImageInfo info = SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType);
+  SkImageInfo info = SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType,
+                                          SkColorSpace::MakeSRGB());
   sk_surface_ = SkSurface::MakeRaster(info, nullptr);
   return sk_surface_;
 }
