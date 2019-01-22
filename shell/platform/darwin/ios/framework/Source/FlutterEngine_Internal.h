@@ -43,6 +43,7 @@
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
+- (void)notifyViewControllerDeallocated;
 
 @end
 
