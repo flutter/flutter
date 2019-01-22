@@ -131,15 +131,6 @@ void main() {
   });
 }
 
-PhysicalShape _getCardRenderObject(WidgetTester tester) {
-  return tester.widget<PhysicalShape>(
-    find.descendant(
-      of: find.byType(Card),
-      matching: find.byType(PhysicalShape),
-    ),
-  );
-}
-
 CardTheme _cardTheme() {
   return const CardTheme(
     clipBehavior: Clip.antiAlias,
