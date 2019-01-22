@@ -21,7 +21,6 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
@@ -2467,7 +2466,7 @@ class BuildOwner {
     try {
       assert(root._parent == null);
       assert(root.owner == this);
-      root._reassemble();
+      root.reassemble();
     } finally {
       Timeline.finishSync();
     }
@@ -2595,11 +2594,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   bool _active = false;
 
+  /// Called when a hot-reload is triggered.
   @mustCallSuper
-  void _reassemble() {
+  @protected
+  void reassemble() {
     markNeedsBuild();
     visitChildren((Element child) {
-      child._reassemble();
+      child.reassemble();
     });
   }
 
@@ -3817,9 +3818,9 @@ class StatefulElement extends ComponentElement {
   State<StatefulWidget> _state;
 
   @override
-  void _reassemble() {
+  void reassemble() {
     state.reassemble();
-    super._reassemble();
+    super.reassemble();
   }
 
   @override
