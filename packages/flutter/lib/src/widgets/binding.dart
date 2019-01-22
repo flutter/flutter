@@ -306,14 +306,22 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       registerSignalServiceExtension(
         name: 'lifecycleSuspend',
         callback: () async {
+          // Let the engine know to stop scheduling frames.
           await SystemChannels.lifecycle.send('AppLifecycleState.suspending');
+          // Let the framework know we're suspended (the message doesn't get echoed
+          // back from the engine).
+          handleAppLifecycleStateChanged(AppLifecycleState.suspending);
         }
       );
 
       registerSignalServiceExtension(
         name: 'lifecycleResume',
         callback: () async {
+          // Let the engine know to start scheduling frames.
           await SystemChannels.lifecycle.send('AppLifecycleState.resumed');
+          // Let the framework know we're resumed (the message doesn't get echoed
+          // back from the engine).
+          handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         }
       );
 
