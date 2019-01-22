@@ -303,6 +303,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     });
 
     assert(() {
+      registerSignalServiceExtension(
+        name: 'lifecycleSuspend',
+        callback: () async {
+          await SystemChannels.lifecycle.send('AppLifecycleState.suspending');
+        }
+      );
+
+      registerSignalServiceExtension(
+        name: 'lifecycleResume',
+        callback: () async {
+          await SystemChannels.lifecycle.send('AppLifecycleState.resumed');
+        }
+      );
+
       registerBoolServiceExtension(
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),

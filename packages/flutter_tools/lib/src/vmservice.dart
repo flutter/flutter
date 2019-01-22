@@ -1279,6 +1279,14 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
+  Future<void> flutterLifecycleResume() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.lifecycleResume');
+  }
+
+  Future<void> flutterLifecycleSuspend() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.lifecycleSuspend');
+  }
+
   Future<Map<String, dynamic>> flutterReassemble() {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
   }
