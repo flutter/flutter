@@ -491,12 +491,14 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           widget.onDateTimeChanged(_getDateTime());
         }
         else {
+          selectedHour = index % 12;
+
           final int currentHourIn24h = selectedHour + selectedAmPm * 12;
           // Automatically scrolls the am/pm column when the hour column value
           // goes far enough. This behavior is similar to
           // iOS picker version.
+
           if (currentHourIn24h ~/ 12 != index ~/ 12) {
-            selectedHour = index % 12;
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
               duration: const Duration(milliseconds: 300), // Set by comparing with iOS version.
@@ -504,7 +506,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ); // Set by comparing with iOS version.
           }
           else {
-            selectedHour = index % 12;
             widget.onDateTimeChanged(_getDateTime());
           }
         }
