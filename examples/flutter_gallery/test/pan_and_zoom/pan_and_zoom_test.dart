@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/demo/pan_and_zoom_demo.dart';
+import 'package:flutter_gallery/demo/pan_and_zoom_demo_transform_interaction.dart';
 
 Offset getOffsetNext(Offset offset, Offset focalPointScene, Offset focalPointSceneNext) {
   return Offset(
@@ -16,7 +16,7 @@ void main() {
   test('Origin scale 1.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
       const Offset(0, 0),
       1.0,
@@ -30,7 +30,7 @@ void main() {
   test('Origin scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
       const Offset(0, 0),
       2.0,
@@ -44,7 +44,7 @@ void main() {
   test('Origin scale 0.8', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
       const Offset(0, 0),
       0.8,
@@ -58,7 +58,7 @@ void main() {
   test('SP off origin scale 1.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(0, 0),
       1.0,
@@ -72,7 +72,7 @@ void main() {
   test('SP off origin, scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(0, 0),
       2.0,
@@ -86,7 +86,7 @@ void main() {
   test('SP off origin, translated, scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(-25, -25),
       2.0,
@@ -100,7 +100,7 @@ void main() {
   test('SP off origin, translated, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(-25, -25),
       0.5,
@@ -114,7 +114,7 @@ void main() {
   test('SP off origin unevenly, translated, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 11, SCREEN_SIZE.height / 2 + 6),
       const Offset(-25, -25),
       0.5,
@@ -128,7 +128,7 @@ void main() {
   test('SP on origin, translated unevenly, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
       const Offset(-16, -18),
       0.5,
@@ -142,7 +142,7 @@ void main() {
   test('Slightly off origin unevenly, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 11, SCREEN_SIZE.height / 2 + 6),
       const Offset(5, 6),
       0.5,
@@ -157,7 +157,7 @@ void main() {
   test('Real, no rotation', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 12.6, SCREEN_SIZE.height / 2 - 8.35),
       const Offset(55.6, 76.1), // * 0.8 = -44.48, -60.88
       0.8,
@@ -175,7 +175,7 @@ void main() {
   test('Tapping on the origin with scale and translation', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 - 80, SCREEN_SIZE.height / 2 - 80),
       const Offset(-100, -100),
       0.8,
@@ -190,7 +190,7 @@ void main() {
   test('SP off origin, translated, scale 2.0, rotated 180deg', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(-25, -25),
       2.0,
@@ -205,7 +205,7 @@ void main() {
   test('SP off origin, translated, scale 2.0, rotated 90deg', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi / 2;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
       const Offset(-25, -25),
       2.0,
@@ -220,7 +220,7 @@ void main() {
   test('Origin, rotated 90deg with focalPoint', () {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
       const Offset(0, 0),
       1.0,
@@ -235,7 +235,7 @@ void main() {
   test('SP off origin, rotated 90deg with focalPoint', () {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
-    final Offset sceneOffset = BoardInteractionState.fromScreen(
+    final Offset sceneOffset = TransformInteractionState.fromScreen(
       Offset(SCREEN_SIZE.width / 2 - 10, SCREEN_SIZE.height / 2 - 20),
       const Offset(0, 0),
       1.0,
