@@ -2,101 +2,131 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Card theme overrides color', (WidgetTester tester) async {
-    const Color themedColor = Colors.black87;
-    const CardTheme theme = CardTheme(color: themedColor);
-
-    await tester.pumpWidget(_withTheme(theme));
-
-    final PhysicalShape widget = _getCardRenderObject(tester);
-    expect(widget.color, themedColor);
+  test('CardTheme copyWith, ==, hashCode basics', () {
+    expect(const CardTheme(), const CardTheme().copyWith());
+    expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
   });
 
-  testWidgets('Card color - Widget', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
-    const Color cardThemeColor = Colors.black87;
-    const Color cardColor = Colors.pink;
-    const CardTheme theme = CardTheme(color: cardThemeColor);
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardTheme: theme, bottomAppBarColor: themeColor),
-      home: const Scaffold(body: Card(color: cardColor)),
-    ));
-
-    final PhysicalShape widget = _getCardRenderObject(tester);
-    expect(widget.color, cardColor);
-  });
-
-  testWidgets('Card color - CardTheme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
-    const Color cardThemeColor = Colors.black87;
-    const CardTheme theme = CardTheme(color: cardThemeColor);
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardTheme: theme, bottomAppBarColor: themeColor),
-      home: const Scaffold(body: Card()),
-    ));
-
-    final PhysicalShape widget = _getCardRenderObject(tester);
-    expect(widget.color, cardThemeColor);
-  });
-
-  testWidgets('Card color - Theme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardColor: themeColor),
-      home: const Scaffold(body: Card()),
-    ));
-
-    final PhysicalShape widget = _getCardRenderObject(tester);
-    expect(widget.color, themeColor);
-  });
-
-  testWidgets('Card color - Default', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(),
-      home: const Scaffold(body: Card()),
-    ));
-
-    final PhysicalShape widget = _getCardRenderObject(tester);
-
-    expect(widget.color, Colors.white);
-  });
-
-  testWidgets('Card theme customizes shape', (WidgetTester tester) async {
-    const CardTheme theme = CardTheme(
-      color: Colors.white30,
-      shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
-      elevation: 1.0,
-    );
-
-    await tester.pumpWidget(_withTheme(theme));
-
-    // TODO(rami-a): Add golden.
-//    await expectLater(
-//      find.byKey(_painterKey),
-//      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
-//      skip: !Platform.isLinux,
-//    );
-  });
-
-  testWidgets('Card theme does not affect defaults', (WidgetTester tester) async {
+  testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(body: Card()),
     ));
 
-    final PhysicalShape widget = _getCardRenderObject(tester);
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
 
-    expect(widget.color, Colors.white);
-    expect(widget.elevation, equals(1.0));
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.white);
+    expect(material.elevation, 1.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    ));
+  });
+
+  testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {
+    final CardTheme cardTheme = _cardTheme();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(cardTheme: cardTheme),
+      home: const Scaffold(body: Card()),
+    ));
+
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, cardTheme.clipBehavior);
+    expect(material.color, cardTheme.color);
+    expect(material.elevation, cardTheme.elevation);
+    expect(container.margin, cardTheme.margin);
+    expect(material.shape, cardTheme.shape);
+  });
+
+  testWidgets('Card widget properties take priority over theme', (WidgetTester tester) async {
+    const Clip clip = Clip.hardEdge;
+    const Color color = Colors.orange;
+    const double elevation = 7.0;
+    const EdgeInsets margin = EdgeInsets.all(3.0);
+    const ShapeBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: _themeData().copyWith(cardTheme: _cardTheme()),
+      home: const Scaffold(body: Card(
+        clipBehavior: clip,
+        color: color,
+        elevation: elevation,
+        margin: margin,
+        shape: shape,
+      )),
+    ));
+
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, clip);
+    expect(material.color, color);
+    expect(material.elevation, elevation);
+    expect(container.margin, margin);
+    expect(material.shape, shape);
+  });
+
+  testWidgets('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
+    final CardTheme cardTheme = _cardTheme();
+    final ThemeData themeData = _themeData().copyWith(cardTheme: cardTheme);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(body: Card()),
+    ));
+
+    final Material material = _getCardMaterial(tester);
+    expect(material.color, cardTheme.color);
+  });
+
+  testWidgets('ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
+    final ThemeData themeData = _themeData();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(body: Card()),
+    ));
+
+    final Material material = _getCardMaterial(tester);
+    expect(material.color, themeData.cardColor);
+  });
+
+  testWidgets('CardTheme customizes shape', (WidgetTester tester) async {
+    const CardTheme cardTheme = CardTheme(
+      color: Colors.white,
+      shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
+      elevation: 1.0,
+    );
+
+    final Key painterKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(cardTheme: cardTheme),
+      home: Scaffold(body: RepaintBoundary(
+        key: painterKey,
+        child: Center(child: const Card())
+      )),
+    ));
+
+    // TODO(rami-a): Add golden.
+//    await expectLater(
+//      find.byKey(painterKey),
+//      matchesGoldenFile('card_theme.custom_shape.png'),
+//      skip: !Platform.isLinux,
+//    );
   });
 }
 
@@ -109,13 +139,38 @@ PhysicalShape _getCardRenderObject(WidgetTester tester) {
   );
 }
 
-//final Key _painterKey = UniqueKey();
+CardTheme _cardTheme() {
+  return const CardTheme(
+    clipBehavior: Clip.antiAlias,
+    color: Colors.green,
+    elevation: 6.0,
+    margin: EdgeInsets.all(7.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+    )
+  );
+}
 
-Widget _withTheme(CardTheme theme) {
-  return MaterialApp(
-    theme: ThemeData(cardTheme: theme),
-    home: const Scaffold(
-      body: Center(child: Card()),
+ThemeData _themeData() {
+  return ThemeData(
+    cardColor: Colors.pink,
+  );
+}
+
+Material _getCardMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+Container _getCardContainer(WidgetTester tester) {
+  return tester.widget<Container>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Container),
     ),
   );
 }
