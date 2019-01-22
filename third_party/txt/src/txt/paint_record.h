@@ -20,7 +20,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "text_style.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace txt {
