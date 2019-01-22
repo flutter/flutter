@@ -282,6 +282,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder = buildSimpleRefreshIndicator,
     this.onRefresh,
+    this.inactiveOverscrollColor,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),
        assert(refreshIndicatorExtent != null),
@@ -335,6 +336,12 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// state will be drawn before going immediately to the [RefreshIndicatorMode.done]
   /// where the sliver will start retracting.
   final RefreshCallback onRefresh;
+
+  /// Color that applies to empty [Container] returned from [build] method once
+  /// [refreshState] is set to [RefreshIndicatorMode.inactive].
+  /// 
+  /// If not provided, transparent color will be used instead.
+  final Color inactiveOverscrollColor;
 
   static const double _defaultRefreshTriggerPullDistance = 100.0;
   static const double _defaultRefreshIndicatorExtent = 60.0;
@@ -528,6 +535,13 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               widget.refreshIndicatorExtent,
             );
           }
+
+          if (widget.inactiveOverscrollColor != null) {
+            return Container(
+              color: widget.inactiveOverscrollColor,
+            );
+          }
+
           return Container();
         },
       )
