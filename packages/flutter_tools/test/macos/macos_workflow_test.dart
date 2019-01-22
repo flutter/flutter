@@ -6,7 +6,6 @@ import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 
 import '../src/common.dart';
@@ -15,6 +14,8 @@ import '../src/context.dart';
 void main() {
   group(MacOSWorkflow, () {
     final MockPlatform mac = MockPlatform();
+    final MockPlatform macWithFde = MockPlatform()
+      ..environment['FLUTTER_DESKTOP_EMBEDDING'] = 'true';
     final MockPlatform notMac = MockPlatform();
     when(mac.isMacOS).thenReturn(true);
     when(notMac.isMacOS).thenReturn(false);
@@ -30,21 +31,12 @@ void main() {
       Platform: () => notMac,
     });
 
-    final MockFileSystem fileSystem = MockFileSystem();
-    final MockDirectory directory = MockDirectory();
-    Cache.flutterRoot = '';
-    when(fileSystem.directory(Cache.flutterRoot)).thenReturn(directory);
-    when(directory.parent).thenReturn(directory);
-    when(directory.childDirectory('flutter-desktop-embedding')).thenReturn(directory);
-    when(directory.existsSync()).thenReturn(true);
-
     testUsingContext('defaults', () {
       expect(macOSWorkflow.canListEmulators, false);
       expect(macOSWorkflow.canLaunchDevices, true);
       expect(macOSWorkflow.canListDevices, true);
     }, overrides: <Type, Generator>{
-      Platform: () => mac,
-      FileSystem: () => fileSystem,
+      Platform: () => macWithFde,
     });
   });
 }
@@ -55,5 +47,5 @@ class MockDirectory extends Mock implements Directory {}
 
 class MockPlatform extends Mock implements Platform {
   @override
-  Map<String, String> get environment => const <String, String>{};
+  Map<String, String> environment = <String, String>{};
 }
