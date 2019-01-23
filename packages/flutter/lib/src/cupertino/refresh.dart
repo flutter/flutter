@@ -541,7 +541,6 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               color: widget.inactiveOverscrollColor,
             );
           }
-
           return Container();
         },
       )
