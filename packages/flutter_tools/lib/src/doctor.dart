@@ -68,7 +68,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _validators.add(NoIdeValidator());
 
       if (ProxyValidator.shouldShow)
-      _validators.add(ProxyValidator());
+        _validators.add(ProxyValidator());
 
       if (deviceManager.canListAnything)
         _validators.add(DeviceValidator());
