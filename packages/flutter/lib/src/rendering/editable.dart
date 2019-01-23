@@ -21,7 +21,7 @@ const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
-const Offset _kFloatingCaretSizeIncrease = Offset(0.5, 2.0);
+const Offset _kFloatingCaretSizeIncrease = Offset(0.5, 1.0);
 
 // The corner radius of the floating cursor in pixels.
 const double _kFloatingCaretRadius = 1.0;
@@ -153,7 +153,7 @@ class RenderEditable extends RenderBox {
     Offset cursorOffset,
     double devicePixelRatio = 1.0,
     bool enableInteractiveSelection,
-    EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(3, 6, 3, 6),
+    EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -1107,7 +1107,12 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    // Add additional cursor offset (generally only if on iOS).
+    if (_cursorOffset != null)
+      rect = rect.shift(_cursorOffset);
+
+    return rect.shift(_getPixelPerfectCursorOffset(rect));
   }
 
   @override
@@ -1320,7 +1325,7 @@ class RenderEditable extends RenderBox {
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
-        return Rect.fromLTWH(0.0, -_kCaretHeightOffset, cursorWidth, preferredLineHeight + 3.0);
+        return Rect.fromLTWH(0.0, -_kCaretHeightOffset + .5, cursorWidth, preferredLineHeight + 2);
       default:
         return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
@@ -1413,7 +1418,7 @@ class RenderEditable extends RenderBox {
     assert(_floatingCursorOn);
 
     // We always want the floating cursor to render at full opacity.
-    final Paint paint = Paint()..color = _cursorColor.withAlpha(255);
+    final Paint paint = Paint()..color = _cursorColor.withOpacity(0.75);
 
     double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
     double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
@@ -1430,6 +1435,7 @@ class RenderEditable extends RenderBox {
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
+
     canvas.drawRRect(caretRRect, paint);
   }
 
