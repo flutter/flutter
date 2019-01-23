@@ -77,7 +77,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     if (widget.disableTranslation) {
       return;
     }
-    // Clamp _translation such that viewport can't see beyond widget.visibleSize
     final Size sizeScene = widget.size / _scale;
     __translation = Offset(
       offset.dx.clamp(
