@@ -35,7 +35,8 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-const Curve _kBottomSheetCurve = Curves.easeOutCubic;
+const Curve _kBottomSheetCurve = Curves.fastOutSlowIn;
+const Curve _kBottomSheetFlingCurve = Curves.easeOutCubic;
 
 enum _ScaffoldSlot {
   body,
@@ -1917,7 +1918,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
     } else {
       animationCurve = BottomSheetSuspendedCurve(
         widget.animationController.value,
-        curve: _kBottomSheetCurve,
+        curve: _kBottomSheetFlingCurve,
       );
     }
   }

@@ -15,8 +15,9 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
-const Curve _kBottomSheetCurve = Curves.easeOutCubic;
+const Duration _kBottomSheetDuration = Duration(milliseconds: 250);
+const Curve _kBottomSheetCurve = Curves.fastOutSlowIn;
+const Curve _kBottomSheetFlingCurve = Curves.easeOutCubic;
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 
@@ -254,7 +255,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     } else {
       animationCurve = BottomSheetSuspendedCurve(
         widget.route.animation.value,
-        curve: _kBottomSheetCurve,
+        curve: _kBottomSheetFlingCurve,
       );
     }
   }
