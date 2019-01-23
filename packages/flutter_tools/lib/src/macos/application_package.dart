@@ -18,9 +18,11 @@ abstract class MacOSApp extends ApplicationPackage {
 
    /// Creates a new [MacOSApp] from an existing app bundle.
    ///
-   /// `applicationBinary` isthe path to the framework directory created by an
+   /// `applicationBinary` is the path to the framework directory created by an
    /// Xcode build. By default, this is located under
-   /// "~/Library/Developer/Xcode/DerivedData/"
+   /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
+   /// which is expected to start the application and send the observatory
+   /// port over standard out.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
