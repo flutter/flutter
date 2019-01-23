@@ -393,7 +393,7 @@ class _IndicatorPainter extends CustomPainter {
       else if (value == index + 1.0)
         _currentRect = next ?? middle;
       else if (value == index)
-         _currentRect = middle;
+        _currentRect = middle;
       else if (value < index)
         _currentRect = previous == null ? middle : Rect.lerp(middle, previous, index - value);
       else
@@ -551,7 +551,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -864,7 +864,7 @@ class _TabBarState extends State<TabBar> {
     else if (value == index + 1.0)
       offset = trailingPosition ?? middlePosition;
     else if (value == index)
-       offset = middlePosition;
+      offset = middlePosition;
     else if (value < index)
       offset = leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value);
     else
@@ -1043,7 +1043,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);

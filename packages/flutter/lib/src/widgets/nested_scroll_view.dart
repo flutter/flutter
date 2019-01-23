@@ -189,7 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -371,7 +371,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,

@@ -299,7 +299,7 @@ abstract class CachedArtifact {
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
-        final Status status = logger.startProgress(message, expectSlowOperation: true);
+        final Status status = logger.startProgress(message, timeout: kSlowOperation);
         try {
           await _downloadFile(url, tempFile);
           status.stop();
@@ -648,7 +648,7 @@ Future<void> _downloadFile(Uri url, File location) async {
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = logger.startProgress(message, expectSlowOperation: true);
+  final Status status = logger.startProgress(message, timeout: kSlowOperation);
   final bool exists = await doesRemoteFileExist(url);
   status.stop();
   return exists;
