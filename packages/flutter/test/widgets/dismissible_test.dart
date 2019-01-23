@@ -15,7 +15,11 @@ List<int> dismissedItems = <int>[];
 Widget background;
 const double crossAxisEndOffset = 0.5;
 
-Widget buildTest({ double startToEndThreshold, TextDirection textDirection = TextDirection.ltr }) {
+Widget buildTest({
+  double startToEndThreshold,
+  TextDirection textDirection = TextDirection.ltr,
+  Future<bool> Function(BuildContext context, DismissDirection direction) confirmDismiss,
+}) {
   return Directionality(
     textDirection: textDirection,
     child: StatefulBuilder(
@@ -25,6 +29,9 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
             dragStartBehavior: DragStartBehavior.down,
             key: ValueKey<int>(item),
             direction: dismissDirection,
+            confirmDismiss: confirmDismiss == null ? null : (DismissDirection direction) {
+              return confirmDismiss(context, direction);
+            },
             onDismissed: (DismissDirection direction) {
               setState(() {
                 reportedDismissDirection = direction;
@@ -659,5 +666,64 @@ void main() {
     await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right, mechanism: rollbackElement);
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
+  });
+
+  testWidgets('confirmDismiss returns values: true, false, null', (WidgetTester tester) async {
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
+    DismissDirection confirmDismissDirection;
+
+    Widget buildFrame(bool confirmDismissValue) {
+      return buildTest(
+        confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
+          confirmDismissDirection = dismissDirection;
+          return Future<bool>.value(confirmDismissValue);
+        }
+      );
+    }
+
+    // Dismiss is confirmed IFF confirmDismiss() returns true.
+    await tester.pumpWidget(buildFrame(true));
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals(<int>[0]));
+    expect(reportedDismissDirection, DismissDirection.startToEnd);
+    expect(confirmDismissDirection, DismissDirection.startToEnd);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
+    expect(find.text('1'), findsNothing);
+    expect(dismissedItems, equals(<int>[0, 1]));
+    expect(reportedDismissDirection, DismissDirection.endToStart);
+    expect(confirmDismissDirection, DismissDirection.endToStart);
+
+    // Dismiss is not confirmed if confirmDismiss() returns false
+    dismissedItems = <int>[];
+    await tester.pumpWidget(buildFrame(false));
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+    expect(confirmDismissDirection, DismissDirection.startToEnd);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+    expect(confirmDismissDirection, DismissDirection.endToStart);
+
+    // Dismiss is not confirmed if confirmDismiss() returns null
+    dismissedItems = <int>[];
+    await tester.pumpWidget(buildFrame(null));
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+    expect(confirmDismissDirection, DismissDirection.startToEnd);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+    expect(confirmDismissDirection, DismissDirection.endToStart);
   });
 }

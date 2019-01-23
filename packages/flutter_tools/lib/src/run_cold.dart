@@ -21,6 +21,7 @@ class ColdRunner extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI = true,
     this.traceStartup = false,
+    this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
     bool saveCompilationTrace = false,
     bool stayResident = true,
@@ -34,6 +35,7 @@ class ColdRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool traceStartup;
+  final bool awaitFirstFrameWhenTracing;
   final File applicationBinary;
   bool _didAttach = false;
 
@@ -66,8 +68,14 @@ class ColdRunner extends ResidentRunner {
     }
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled)
-      await connectToServiceProtocol();
+    if (debuggingOptions.debuggingEnabled) {
+      try {
+        await connectToServiceProtocol();
+      } on String catch (message) {
+        printError(message);
+        return 2;
+      }
+    }
 
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
@@ -91,13 +99,11 @@ class ColdRunner extends ResidentRunner {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmServices != null && device.vmServices.isNotEmpty) {
-        printStatus('Downloading startup trace info for ${device.device.name}');
-        try {
-          await downloadStartupTrace(device.vmServices.first);
-        } catch (error) {
-          printError('Error downloading startup trace: $error');
-          return 2;
-        }
+        printStatus('Tracing startup on ${device.device.name}.');
+        await downloadStartupTrace(
+          device.vmServices.first,
+          awaitFirstFrame: awaitFirstFrameWhenTracing,
+        );
       }
       appFinished();
     } else if (stayResident) {
@@ -107,7 +113,7 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (stayResident)
+    if (stayResident && !traceStartup)
       return waitForAppToFinish();
     await cleanupAtFinish();
     return 0;

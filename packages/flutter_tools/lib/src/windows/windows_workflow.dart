@@ -21,10 +21,10 @@ class WindowsWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isWindows;
 
   @override
-  bool get canLaunchDevices => hasFlutterDesktopRepository;
+  bool get canLaunchDevices => flutterDesktopEnabled;
 
   @override
-  bool get canListDevices => hasFlutterDesktopRepository;
+  bool get canListDevices => flutterDesktopEnabled;
 
   @override
   bool get canListEmulators => false;

@@ -12,6 +12,7 @@ import '../base/utils.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+
 import 'build_aot.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
