@@ -237,17 +237,13 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   Curve animationCurve = _kBottomSheetCurve;
-  bool isDragging = false;
 
   void handleDragStart(DragStartDetails details) {
-    isDragging = true;
-
     // allows the bottom sheet to track the user's finger accurately
     animationCurve = Curves.linear;
   }
 
   void handleDragEnd(DragEndDetails details, { bool isClosing }) {
-    isDragging = false;
     if (isClosing) {
       // shortened curve on exit minimizes risk of a visibly slow linear
       // animation
