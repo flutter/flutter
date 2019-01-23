@@ -158,7 +158,7 @@ class KernelCompiler {
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required bool trackWidgetCreation,
-    List<String> experimentalFlags,
+    List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -241,8 +241,8 @@ class KernelCompiler {
       command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
     }
 
-    if (experimentalFlags != null)
-      command.addAll(experimentalFlags);
+    if (extraFrontEndOptions != null)
+      command.addAll(extraFrontEndOptions);
 
     command.add(mainUri?.toString() ?? mainPath);
 
@@ -474,8 +474,8 @@ class ResidentCompiler {
       command.add('--unsafe-package-serialization');
     }
     if (_experimentalFlags != null) {
-      var expFlags = experimentalFlags.join(",");
-      command.addAll('--enable-experiment=${expFlags}');
+      var expFlags = _experimentalFlags.join(",");
+      command.add('--enable-experiment=${expFlags}');
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);

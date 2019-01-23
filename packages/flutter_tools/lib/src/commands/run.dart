@@ -346,7 +346,7 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
-        extraFrontEndOptions: expFlags,
+        experimentalFlags: expFlags,
       );
     }).toList();
 
