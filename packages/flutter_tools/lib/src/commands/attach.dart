@@ -60,7 +60,7 @@ class AttachCommand extends FlutterCommand {
     argParser
       ..addOption(
         'debug-port',
-        help: 'Local port where the observatory is listening.',
+        help: 'Device port where the observatory is listening.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the application. '
