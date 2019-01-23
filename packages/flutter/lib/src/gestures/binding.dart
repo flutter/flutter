@@ -116,34 +116,37 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
-    HitTestResult result;
+    HitTestResult hitTestResult;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      result = HitTestResult();
-      hitTest(result, event.position);
-      _hitTests[event.pointer] = result;
+      hitTestResult = HitTestResult();
+      hitTest(hitTestResult, event.position);
+      _hitTests[event.pointer] = hitTestResult;
       assert(() {
         if (debugPrintHitTestResults)
-          debugPrint('$event: $result');
+          debugPrint('$event: $hitTestResult');
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      result = _hitTests.remove(event.pointer);
+      hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
       // In addition to PointerDownEvents, this block also handles
       // PointerMoveEvents. Because PointerMoveEvents should be dispatched to
       // the same place that their initial PointerDownEvent was, we want to
       // re-use the path we found when the pointer went down, rather than do hit
       // detection each time we get a PointerMoveEvent.
-      result = _hitTests[event.pointer];
+      hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
       if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
         debugPrint('$event');
       return true;
     }());
-    if (result != null || event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent) {
-      dispatchEvent(event, result);
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      dispatchEvent(event, hitTestResult);
     }
   }
 
@@ -155,15 +158,16 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// Dispatch an event to a hit test result's path.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries
-  /// of the given [HitTestResult], and catches exceptions that any of
-  /// the handlers might throw. The `result` argument must not be null.
+  /// This sends the given event to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult], and catches exceptions that any of the handlers
+  /// might throw. The [hitTestResult] argument may only be null for
+  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
     assert(!locked);
     // No hit test information implies that this is a hover or pointer
     // add/remove event.
-    if (result == null) {
+    if (hitTestResult == null) {
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {
@@ -182,7 +186,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       return;
     }
-    for (HitTestEntry entry in result.path) {
+    for (HitTestEntry entry in hitTestResult.path) {
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {

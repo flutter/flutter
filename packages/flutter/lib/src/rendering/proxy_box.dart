@@ -2512,7 +2512,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   PointerMoveEventListener onPointerMove;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position. Typically only triggered for mouse pointers.
+  /// position.
+  ///
+  /// Typically only triggered for mouse pointers.
   PointerHoverEventListener onPointerHover;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in

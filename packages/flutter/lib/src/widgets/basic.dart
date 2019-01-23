@@ -5019,7 +5019,9 @@ class Listener extends SingleChildRenderObjectWidget {
   final PointerMoveEventListener onPointerMove;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position. Typically only fired for mouse pointers.
+  /// position.
+  ///
+  /// Typically only fired for mouse pointers.
   final PointerHoverEventListener onPointerHover;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in

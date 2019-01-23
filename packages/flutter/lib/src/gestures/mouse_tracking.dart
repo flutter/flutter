@@ -11,6 +11,9 @@ import 'events.dart';
 import 'pointer_router.dart';
 
 class _MouseDetails {
+  /// Creates details for mouse event callback arguments.
+  ///
+  /// The [deviceId] argument must be provided, and must not be null.
   _MouseDetails({
     this.sourceTimeStamp,
     this.globalPosition,
@@ -48,9 +51,7 @@ class _MouseDetails {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return sourceTimeStamp == other.sourceTimeStamp
-        && globalPosition == other.globalPosition
-        && deviceId == other.deviceId;
+    return sourceTimeStamp == other.sourceTimeStamp && globalPosition == other.globalPosition && deviceId == other.deviceId;
   }
 
   @override
@@ -62,47 +63,56 @@ class _MouseDetails {
 class MouseEnterDetails extends _MouseDetails {
   /// Creates details for a [MouseMoveCallback] call.
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [deviceId] argument must be provided, and must not be null.
   MouseEnterDetails({
     Duration sourceTimeStamp,
     Offset globalPosition,
-    int deviceId,
+    @required int deviceId,
   }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
 }
 
 /// The `details` object provides the position of the mouse pointer at the
 /// time of entry.
+///
+/// This is used in a [MouseDetectorAnnotation] to specify the callback called
+/// when a mouse enters the bounds of a widget.
 typedef MouseEnterCallback = void Function(MouseEnterDetails details);
 
 /// Details object for callbacks that use [MouseMoveCallback].
 class MouseMoveDetails extends _MouseDetails {
   /// Creates details for a [MouseMoveCallback] call.
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [deviceId] argument must be provided, and must not be null.
   MouseMoveDetails({
     Duration sourceTimeStamp,
     Offset globalPosition,
-    int deviceId,
+    @required int deviceId,
   }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
 }
 
 /// The `details` object provides the global position of the mouse pointer.
+///
+/// This is used in a [MouseDetectorAnnotation] to specify the callback called
+/// when a mouse moves inside of a widget.
 typedef MouseMoveCallback = void Function(MouseMoveDetails details);
 
 /// Details object for callbacks that use [MouseExitCallback].
 class MouseExitDetails extends _MouseDetails {
   /// Creates details for a [MouseMoveCallback] call.
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [deviceId] argument must be provided and must not be null.
   MouseExitDetails({
     Duration sourceTimeStamp,
     Offset globalPosition,
-    int deviceId,
+    @required int deviceId,
   }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
 }
 
 /// The `details` object provides the global position of the mouse pointer at
 /// the time of exit.
+///
+/// This is used in a [MouseDetectorAnnotation] to specify the callback called
+/// when a mouse leaves the bounds of a widget.
 typedef MouseExitCallback = void Function(MouseExitDetails details);
 
 /// The annotation object used to annotate layers that are interested in mouse
@@ -112,8 +122,6 @@ typedef MouseExitCallback = void Function(MouseExitDetails details);
 class MouseDetectorAnnotation {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
-  ///
-  /// At least one of the arguments must be non-null.
   const MouseDetectorAnnotation({this.onEnter, this.onMove, this.onExit});
 
   /// Triggered when a pointer has entered the bounding box of the annotated
@@ -156,6 +164,9 @@ class _TrackedAnnotation {
 
 /// Describes a function that finds an annotation given an offset in logical
 /// coordinates.
+///
+/// It is used by the [MouseTracker] to fetch annotations for the mouse
+/// position.
 typedef MouseDetectorAnnotationFinder = MouseDetectorAnnotation Function(Offset offset);
 
 /// Keeps state about which objects are interested in tracking mouse positions

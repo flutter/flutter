@@ -44,7 +44,7 @@ void main() {
       onExit: (MouseExitDetails details) => exit.add(details),
       onMove: (MouseMoveDetails details) => move.add(details),
     );
-    bool isInHitRegion = true;
+    bool isInHitRegion;
     MouseTracker tracker;
 
     void clear() {
@@ -55,6 +55,7 @@ void main() {
 
     setUp(() {
       clear();
+      isInHitRegion = true;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
         (Offset _) => isInHitRegion ? annotation : null,

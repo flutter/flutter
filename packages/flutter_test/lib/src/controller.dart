@@ -441,8 +441,11 @@ abstract class WidgetController {
     return result;
   }
 
-  /// Creates a gesture and returns the [TestGesture] object which you can use
-  /// to continue the gesture.
+  /// Creates gesture and returns the [TestGesture] object which you can use
+  /// to continue the gesture using calls on the [TestGesture] object.
+  ///
+  /// You can use [startGesture] instead if your gesture begins with a down
+  /// event.
   Future<TestGesture> createGesture({int pointer, PointerDeviceKind kind = PointerDeviceKind.touch}) async {
     return TestGesture(
       hitTester: hitTestOnBinding,
@@ -452,8 +455,9 @@ abstract class WidgetController {
     );
   }
 
-  /// Begins a gesture at a particular point, and returns the
-  /// [TestGesture] object which you can use to continue the gesture.
+  /// Creates a gesture with an initial down gesture at a particular point, and
+  /// returns the [TestGesture] object which you can use to continue the
+  /// gesture.
   Future<TestGesture> startGesture(Offset downLocation, {int pointer}) async {
     final TestGesture result = await createGesture(pointer: pointer);
     await result.down(downLocation);
