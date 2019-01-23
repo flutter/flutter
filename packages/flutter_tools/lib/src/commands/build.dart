@@ -67,7 +67,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   }
 
   void warnIfOnMasterChannel() {
-    String channel = FlutterVersion.instance.channel;
+    final String channel = FlutterVersion.instance.channel;
     if (channel == 'master') {
       printStatus('🐉', newline: false, color: TerminalColor.red);
       printStatus(' This is the $channel channel. Shipping apps from this channel is not recommended as it has not been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    flutter channel stable');

@@ -21,7 +21,7 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit catch(e) {}
+      } on ToolExit {}
       expect(testLogger.statusText, contains('🐉 This is the master channel. Shipping apps from this channel is not recommended as it has not\n been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    flutter channel stable'));
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
@@ -32,7 +32,7 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit catch(e) {}
+      } on ToolExit {}
       expect(testLogger.statusText, '');
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
@@ -43,7 +43,7 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit catch(e) {}
+      } on ToolExit {}
       expect(testLogger.statusText, '');
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
@@ -54,7 +54,7 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit catch(e) {}
+      } on ToolExit {}
       print(testLogger.statusText);
       expect(testLogger.statusText, '');
       Cache.releaseLockEarly();
@@ -73,7 +73,7 @@ class MockVersion extends FlutterVersion {
 }
 
 class MockBuildCommand extends BuildCommand {
-  MockBuildCommand() : super() {
+  MockBuildCommand() {
     addSubcommand(MockBuildTestCommand());
   }
 }
