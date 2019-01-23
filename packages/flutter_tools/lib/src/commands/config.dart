@@ -17,7 +17,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: true,
       help: 'Enable or disable reporting of anonymous tool usage statistics and crash reports.');
     argParser.addOption('engine-crash-reporting',
-      help: 'Enable or disable reporting of anonymous engine crash reports.');
+      help: 'How anonymous engine crash reports are reported. Can be \'ask\', \'always\', or \'never\'.');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
