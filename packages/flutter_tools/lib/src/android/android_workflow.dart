@@ -18,6 +18,9 @@ import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 
+const int kAndroidSdkMinVersion = 28;
+final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
+
 AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
 AndroidValidator get androidValidator => context[AndroidValidator];
 AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator];
@@ -110,11 +113,19 @@ class AndroidValidator extends DoctorValidator {
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
+      if (androidSdk.latestVersion.sdkLevel < 28 || androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+        messages.add(ValidationMessage.error(
+          userMessages.androidSdkBuildToolsOutdated(androidSdk.sdkManagerPath, kAndroidSdkMinVersion, kAndroidSdkBuildToolsMinVersion.toString())),
+        );
+        return ValidationResult(ValidationType.missing, messages);
+      }
       sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
 
       messages.add(ValidationMessage(userMessages.androidSdkPlatformToolsVersion(
         androidSdk.latestVersion.platformName,
         androidSdk.latestVersion.buildToolsVersionName)));
+    } else {
+      messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
     }
 
     if (platform.environment.containsKey(kAndroidHome)) {
@@ -271,7 +282,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
     if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
       // SDK manager is found, but needs to be updated.
-      throwToolExit(userMessages.androidSdkOutdated(androidSdk.sdkManagerPath));
+      throwToolExit(userMessages.androidSdkManagerOutdated(androidSdk.sdkManagerPath));
     }
 
     final Process process = await runCommand(
