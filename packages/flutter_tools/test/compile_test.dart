@@ -21,10 +21,6 @@ import 'src/context.dart';
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
-  group(StdoutHandler, () {
-
-  });
-
   group(PackageUriMapper, () {
     const String packagesContents = r'''
 xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
