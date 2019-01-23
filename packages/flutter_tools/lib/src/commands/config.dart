@@ -16,8 +16,7 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting of anonymous tool usage statistics and crash reports.');
-    argParser.addFlag('engine-crash-reporting',
-      negatable: true,
+    argParser.addOption('engine-crash-reporting',
       help: 'Enable or disable reporting of anonymous engine crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
@@ -77,7 +76,7 @@ class ConfigCommand extends FlutterCommand {
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
     if (argResults.wasParsed('engine-crash-reporting'))
-      _updateConfigBool('engine-crash-reporting', argResults['engine-crash-reporting']);
+      _updateConfigString('engine-crash-reporting', argResults['engine-crash-reporting']);
 
     if (argResults.wasParsed('gradle-dir'))
       _updateConfigString('gradle-dir', argResults['gradle-dir']);

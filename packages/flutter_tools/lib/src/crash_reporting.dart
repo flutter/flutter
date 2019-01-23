@@ -169,12 +169,23 @@ class CrashReportSender {
     final List<Device> devices = await deviceManager.getDevices().toList();
 
     printError('Flutter Engine has crashed!', emphasis: true);
+    String reportConfig = config.getValue('engine-crash-reporting'); // Read this value from disk in flutter settings.
+    if (reportConfig == 'never') {
+      printStatus('''
+Engine crash reporting skipped.
+============================================================================
+If you would like to enable opt-in or always send engine crash reports, use:
+  flutter config --engine-crash-reporting ask
+or
+  flutter config --engine-crash-reporting always
+============================================================================''');
+      return;
+    }
     printStatus('The following error report has been generated:', emphasis: true);
     printStatus('''
 
 ====================================================================
 ${engineCrash.squashBacktrace()}
-ClientID: ${_usage.clientId}
 Flutter Framework Version: ${getFlutterVersion()}
 Flutter Engine Version: ${FlutterVersion.instance.engineRevision}
 OS: ${platform.operatingSystem}
@@ -183,21 +194,23 @@ Devices: $devices
 ====================================================================
 ''');
 
-    bool always = config.getValue('engine-crash-reporting'); // Read this value from disk in flutter settings.
-    if (!always) {
+    if (reportConfig != 'always' && reportConfig != 'never') {
       printStatus('Reporting this crash will help improve Flutter.', emphasis: true);
       final String input = (await terminal.promptForCharInput(
-        <String>['y', 'n', 'a', 'Y', 'N', 'A'],
-        prompt: 'Would you like to send this Engine crash report to Google? Google will use this data in accordance with our Privacy Policy\n([y]es|[N]o|[a]lways)',
+        <String>['y', 'n', 'a', 'e', 'Y', 'N', 'A', 'E'],
+        prompt: 'Would you like to send this Engine crash report to Google? Google will use this data in accordance with our Privacy Policy (https://policies.google.com/privacy)\n([y]es|[N]o|[a]lways|n[e]ver)',
         defaultChoiceIndex: 1,
         displayAcceptedCharacters: false)).toLowerCase().trim();
       if (input == 'a' || input == 'always') {
         // Set flag in settings
-        config.setValueBool('engine-crash-reporting', true);
-        always = true;
+        config.setValue('engine-crash-reporting', 'always');
+        reportConfig = 'always';
+      } else if (input == 'e' || input == 'never') {
+        config.setValue('engine-crash-reporting', 'never')
+        reportConfig = 'never';
       } else if (input == 'y' || input == 'yes') {
         // Nothing to do.
-      } else if (input == 'n' || input == 'no' || input == '') {
+      } else if (input == 'n' || input == 'no') {
         // "No" or no recognized response. Default to not sending report.
         printStatus('Skipped sending engine crash report.');
         engineCrash.endReport();
@@ -208,10 +221,12 @@ Devices: $devices
       printStatus('Sending crash report to Google.');
       if (always) {
         printStatus('''
-===========================================================================
+============================================================================
 If you would like to stop automatically sending engine crash reports, use:
-  flutter config --no-engine-crash-reporting
-===========================================================================''');
+  flutter config --engine-crash-reporting ask
+or
+  flutter config --engine-crash-reporting never
+============================================================================''');
       }
 
       final String flutterVersion = getFlutterVersion();
@@ -223,7 +238,6 @@ If you would like to stop automatically sending engine crash reports, use:
       );
 
       final http.MultipartRequest req = http.MultipartRequest('POST', uri);
-      req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductEngineId;
       req.fields['version'] = flutterVersion + ', ' + FlutterVersion.instance.engineRevision;
       req.fields['osName'] = platform.operatingSystem;
