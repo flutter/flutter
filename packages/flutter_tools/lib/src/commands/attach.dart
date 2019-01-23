@@ -23,11 +23,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 
-final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-const String _kDartObservatoryName = '_dartobservatory._tcp.local';
-
-final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
 ///
@@ -49,7 +44,6 @@ final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
-    requiresPubspecYaml();
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
@@ -132,13 +126,16 @@ class AttachCommand extends FlutterCommand {
 
 
   Future<int> mdnsQueryDartObservatoryPort() async {
+    const String dartObservatoryName = '_dartobservatory._tcp.local';
+
+
     final MDnsClient client = MDnsClient();
     printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
           .lookup<PtrResourceRecord>(
-            ResourceRecordQuery.ptr(_kDartObservatoryName),
+            ResourceRecordQuery.ptr(dartObservatoryName),
           )
           .toList();
       if (pointerRecords.isEmpty) {
@@ -165,7 +162,7 @@ class AttachCommand extends FlutterCommand {
         printStatus('');
         for (int i = 0; i < uniqueDomainNames.length; i++) {
           printStatus(
-            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$_kDartObservatoryName', '')}',
+            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$dartObservatoryName', '')}',
             indent: 2,
           );
         }
@@ -197,6 +194,10 @@ class AttachCommand extends FlutterCommand {
       if (srv.isEmpty) {
         return null;
       }
+      if (srv.length > 1) {
+        printError('Unexpectedly found more than one observatory report for $domainName '
+                   '- using first one (${srv.first.port}).');
+      }
       return srv.first.port;
     } finally {
       client.stop();
@@ -205,6 +206,9 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
     Cache.releaseLockEarly();
 
     await _validateArguments();
