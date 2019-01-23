@@ -4,7 +4,6 @@
 
 import 'package:mockito/mockito.dart';
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 
@@ -18,6 +17,7 @@ void main() {
       ..environment['FLUTTER_DESKTOP_EMBEDDING'] = 'true';
     final MockPlatform notMac = MockPlatform();
     when(mac.isMacOS).thenReturn(true);
+    when(macWithFde.isMacOS).thenReturn(true);
     when(notMac.isMacOS).thenReturn(false);
 
     testUsingContext('Applies to mac platform', () {
@@ -40,10 +40,6 @@ void main() {
     });
   });
 }
-
-class MockFileSystem extends Mock implements FileSystem {}
-
-class MockDirectory extends Mock implements Directory {}
 
 class MockPlatform extends Mock implements Platform {
   @override
