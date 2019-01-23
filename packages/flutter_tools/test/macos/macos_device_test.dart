@@ -57,6 +57,9 @@ void main() {
       when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
         return mockProcess;
       });
+      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+        return ProcessResult(0, 1, '', '');
+      });
       when(mockProcess.stdout).thenAnswer((Invocation invocation) {
         return Stream<List<int>>.fromIterable(<List<int>>[
           utf8.encode('Observatory listening on http://127.0.0.1/0'),
