@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../base/file_system.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -48,30 +46,12 @@ abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
   Future<FlutterCommandResult> runCommand() async {
-    warnIfOnMasterChannel();
-    if (isRunningOnBot) {
-      final File dotPackages = fs.file('.packages');
-      printStatus('Contents of .packages:');
-      if (dotPackages.existsSync())
-        printStatus(dotPackages.readAsStringSync());
-      else
-        printError('File not found: ${dotPackages.absolute.path}');
-
-      final File pubspecLock = fs.file('pubspec.lock');
-      printStatus('Contents of pubspec.lock:');
-      if (pubspecLock.existsSync())
-        printStatus(pubspecLock.readAsStringSync());
-      else
-        printError('File not found: ${pubspecLock.absolute.path}');
-    }
-    return null;
-  }
-
-  void warnIfOnMasterChannel() {
+    // Warn if building a release app on Master channel
     final String channel = FlutterVersion.instance.channel;
     if (channel == 'master') {
       printStatus('🐉', newline: false, color: TerminalColor.red);
       printStatus(' This is the $channel channel. Shipping apps from this channel is not recommended as it has not been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    flutter channel stable');
     }
+    return null;
   }
 }
