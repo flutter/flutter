@@ -568,6 +568,8 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(max >= min);
+    assert(max <= upperBound && min >= lowerBound);
     assert(reverse != null);
     return animateWith(_RepeatingSimulation(_value, min, max, reverse, period));
   }
