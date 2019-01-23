@@ -23,16 +23,25 @@ void main() {
   group(MacOSDevice, () {
     final MockPlatform notMac = MockPlatform();
     final MacOSDevice device = MacOSDevice();
+    final MockProcessManager mockProcessManager = MockProcessManager();
     when(notMac.isMacOS).thenReturn(false);
     when(notMac.environment).thenReturn(const <String, String>{});
+    when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+      return ProcessResult(0, 1, '', '');
+    });
 
-    test('defaults', () async {
+    testUsingContext('defaults', () async {
+      final MockMacOSApp mockMacOSApp = MockMacOSApp();
+      when(mockMacOSApp.executable).thenReturn('foo');
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'macOS');
-      expect(await device.installApp(null), true);
-      expect(await device.uninstallApp(null), true);
-      expect(await device.isLatestBuildInstalled(null), true);
-      expect(await device.isAppInstalled(null), true);
+      expect(await device.installApp(mockMacOSApp), true);
+      expect(await device.uninstallApp(mockMacOSApp), true);
+      expect(await device.isLatestBuildInstalled(mockMacOSApp), true);
+      expect(await device.isAppInstalled(mockMacOSApp), true);
+      expect(await device.stopApp(mockMacOSApp), false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
 
 
@@ -96,4 +105,3 @@ class MockFile extends Mock implements File {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcess extends Mock implements Process {}
-
