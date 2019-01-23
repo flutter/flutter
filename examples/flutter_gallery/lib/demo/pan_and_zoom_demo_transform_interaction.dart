@@ -11,7 +11,7 @@ class TransformInteraction extends StatefulWidget {
   const TransformInteraction({
     // The child to perform the transformations on
     @required this.child,
-    // The size of the child
+    // The desired size of the area that can receive events
     @required this.size,
     // A callback for the onTapUp event from GestureDetector. Called with
     // untransformed coordinates in an Offset.
@@ -142,10 +142,14 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       onScaleUpdate: _onScaleUpdate,
       onTapUp: _onTapUp,
       child: ClipRect(
-        // The scene is actually panned and zoomed using this Transform widget.
+        // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
           transform: TransformInteractionState.getTransformationMatrix(translationCentered, _scale, _rotation),
-          child: widget.child,
+          child: Container(
+            child: widget.child,
+            height: widget.size.height,
+            width: widget.size.width,
+          ),
         ),
       ),
     );

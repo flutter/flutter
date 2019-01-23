@@ -32,7 +32,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     // the TransformInteraction parent widget.
     return Scaffold(
       body: TransformInteraction(
-        //child: Text('omg transformative\nlorem ipsum\nlalalal\noknext'),
         child: CustomPaint(
           size: Size.infinite,
           painter: painter,
