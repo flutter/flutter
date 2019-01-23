@@ -542,10 +542,11 @@ class AnimationController extends Animation<double>
   /// Starts running this animation in the forward direction, and
   /// restarts the animation when it completes.
   ///
-  /// Defaults to repeating between the lower and upper bounds.
+  /// Defaults to repeating between the [lowerBound] and [upperBound] of the
+  /// [AnimationController] when no explicit value is set for [min] and [max].
   ///
-  /// With [reverse] set to true, instead of always starting over at the lower
-  /// bound the value will alternate between the lower and upper bounds on each repeat.
+  /// With [reverse] set to true, instead of always starting over at [min]
+  /// the value will alternate between [min] and [max] values on each repeat.
   ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
