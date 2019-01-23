@@ -127,9 +127,8 @@ class AttachCommand extends FlutterCommand {
 
   Future<int> mdnsQueryDartObservatoryPort() async {
     const String dartObservatoryName = '_dartobservatory._tcp.local';
-
-
     final MDnsClient client = MDnsClient();
+
     printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
