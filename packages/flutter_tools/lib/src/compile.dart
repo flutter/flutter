@@ -224,7 +224,7 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-       mainUri = _PackageUriMapper.findUri(mainPath, packagesPath);
+      mainUri = _PackageUriMapper.findUri(mainPath, packagesPath);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);

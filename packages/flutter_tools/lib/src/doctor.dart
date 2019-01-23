@@ -25,6 +25,7 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -65,6 +66,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _validators.addAll(ideValidators);
       else
         _validators.add(NoIdeValidator());
+
+      if (ProxyValidator.shouldShow)
+        _validators.add(ProxyValidator());
 
       if (deviceManager.canListAnything)
         _validators.add(DeviceValidator());
@@ -184,7 +188,10 @@ class Doctor {
 
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Status status = Status.withSpinner();
+      final Status status = Status.withSpinner(
+        timeout: kFastOperation,
+        slowWarningCallback: () => validator.slowWarning,
+      );
       ValidationResult result;
       try {
         result = await validatorTask.result;
@@ -286,6 +293,8 @@ abstract class DoctorValidator {
 
   final String title;
 
+  String get slowWarning => 'This is taking an unexpectedly long time...';
+
   Future<ValidationResult> validate();
 }
 
@@ -299,6 +308,10 @@ class GroupedValidator extends DoctorValidator {
   final List<DoctorValidator> subValidators;
 
   @override
+  String get slowWarning => _currentSlowWarning;
+  String _currentSlowWarning = 'Initializing...';
+
+  @override
   Future<ValidationResult> validate() async  {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in subValidators) {
@@ -307,8 +320,10 @@ class GroupedValidator extends DoctorValidator {
 
     final List<ValidationResult> results = <ValidationResult>[];
     for (ValidatorTask subValidator in tasks) {
+      _currentSlowWarning = subValidator.validator.slowWarning;
       results.add(await subValidator.result);
     }
+    _currentSlowWarning = 'Merging results...';
     return _mergeValidationResults(results);
   }
 
@@ -670,6 +685,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
 class DeviceValidator extends DoctorValidator {
   DeviceValidator() : super('Connected device');
+
+  @override
+  String get slowWarning => 'Scanning for devices is taking a long time...';
 
   @override
   Future<ValidationResult> validate() async {
