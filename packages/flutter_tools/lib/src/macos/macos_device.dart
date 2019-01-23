@@ -70,6 +70,8 @@ class MacOSDevice extends Device {
     if (!prebuiltApplication) {
       return LaunchResult.failed();
     }
+    // Stop any running applications with the same executable.
+    await stopApp(package);
     final Process process = await processManager.start(<String>[package.executable]);
     final MacOSLogReader logReader = MacOSLogReader(package, process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
@@ -88,17 +90,20 @@ class MacOSDevice extends Device {
   // currently we rely on killing the isolate taking down the application.
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
-    final RegExp whitespace = RegExp(r'\w+');
+    final RegExp whitespace = RegExp(r'\s+');
     bool succeeded = true;
     try {
       final ProcessResult result = await processManager.run(<String>[
-        'ps', 'aux', '|', 'grep', '"${app.executable}"',
+        'ps', 'aux',
       ]);
       if (result.exitCode != 0) {
         return false;
       }
       final List<String> lines = result.stdout.split('\n');
       for (String line in lines) {
+        if (!line.contains(app.executable)) {
+          continue;
+        }
         final List<String> values = line.split(whitespace);
         if (values.length < 2) {
           continue;
