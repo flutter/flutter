@@ -201,6 +201,7 @@ class EditableText extends StatefulWidget {
     this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
+    this.maxLinesIncrementalHeight = false,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,
@@ -228,6 +229,7 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
+       assert(maxLinesIncrementalHeight != null),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -355,6 +357,17 @@ class EditableText extends StatefulWidget {
   /// of lines.
   /// {@endtemplate}
   final int maxLines;
+
+  /// {@template flutter.widgets.editableText.maxLinesIncrementalHeight}
+  /// Whether this text field should increase its height incrementally until
+  /// reach the [maxLines].
+  ///
+  /// If true, the text field will increase its height until reach the max lines.
+  /// Otherwise, the text field will start its height respecting [maxLines] size.
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
+  final bool maxLinesIncrementalHeight;
 
   /// {@template flutter.widgets.editableText.autofocus}
   /// Whether this text field should focus itself if nothing else is already
@@ -531,6 +544,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(DiagnosticsProperty<bool>('maxLinesIncrementalHeight', maxLinesIncrementalHeight, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
@@ -1109,6 +1123,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
+              maxLinesIncrementalHeight: widget.maxLinesIncrementalHeight,
               selectionColor: widget.selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
@@ -1175,6 +1190,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.hasFocus,
     this.maxLines,
+    this.maxLinesIncrementalHeight,
     this.selectionColor,
     this.textScaleFactor,
     this.textAlign,
@@ -1201,6 +1217,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
+  final bool maxLinesIncrementalHeight;
   final Color selectionColor;
   final double textScaleFactor;
   final TextAlign textAlign;
@@ -1226,6 +1243,7 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
+      maxLinesIncrementalHeight: maxLinesIncrementalHeight,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
@@ -1252,6 +1270,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines
+      ..maxLinesIncrementalHeight = maxLinesIncrementalHeight
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign
