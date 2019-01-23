@@ -35,7 +35,7 @@
   "signedInLabel": "Sesión iniciada",
   "hideAccountsLabel": "Ocultar cuentas",
   "showAccountsLabel": "Mostrar cuentas",
-  "modalBarrierDismissLabel": "Ignorar",
+  "modalBarrierDismissLabel": "Cerrar",
   "drawerLabel": "Menú de navegación",
   "popupMenuLabel": "Menú emergente",
   "dialogLabel": "Cuadro de diálogo",
@@ -51,5 +51,6 @@
   "collapsedIconTapHint": "Mostrar",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
-  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres"
+  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
+  "refreshIndicatorSemanticLabel": "Actualizar"
 }

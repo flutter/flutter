@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -358,5 +359,58 @@ void main() {
     ));
 
     handle.dispose();
+  });
+
+  testWidgets('Slider respects themes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            onChanged: (double value) {},
+            value: 0.5,
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.byType(CupertinoSlider),
+      // First line it paints is blue.
+      paints..rrect(color: CupertinoColors.activeBlue),
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoSlider(
+            onChanged: (double value) {},
+            value: 0.5,
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.byType(CupertinoSlider),
+      paints..rrect(color: CupertinoColors.activeOrange),
+    );
+  });
+
+  testWidgets('Themes can be overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoSlider(
+            activeColor: CupertinoColors.activeGreen,
+            onChanged: (double value) {},
+            value: 0.5,
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.byType(CupertinoSlider),
+      paints..rrect(color: CupertinoColors.activeGreen),
+    );
   });
 }

@@ -140,6 +140,7 @@ class Stepper extends StatefulWidget {
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
+    this.controlsBuilder,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -173,6 +174,53 @@ class Stepper extends StatefulWidget {
   ///
   /// If null, the 'cancel' button will be disabled.
   final VoidCallback onStepCancel;
+
+  /// The callback for creating custom controls.
+  ///
+  /// If null, the default controls from the current theme will be used.
+  ///
+  /// This callback which takes in a context and two functions,[onStepContinue]
+  /// and [onStepCancel]. These can be used to control the stepper.
+  ///
+  /// ## Sample Code:
+  /// Creates a stepper control with custom buttons.
+  ///
+  /// ```dart
+  /// Stepper(
+  ///   controlsBuilder:
+  ///     (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+  ///        return Row(
+  ///          children: <Widget>[
+  ///            FlatButton(
+  ///              onPressed: onStepContinue,
+  ///              child: const Text('My Awesome Continue Message!'),
+  ///            ),
+  ///            FlatButton(
+  ///              onPressed: onStepCancel,
+  ///              child: const Text('My Awesome Cancel Message!'),
+  ///            ),
+  ///          ],
+  ///        ),
+  ///     },
+  ///   steps: const <Step>[
+  ///     Step(
+  ///       title: Text('A'),
+  ///       content: SizedBox(
+  ///         width: 100.0,
+  ///         height: 100.0,
+  ///       ),
+  ///     ),
+  ///     Step(
+  ///       title: Text('B'),
+  ///       content: SizedBox(
+  ///         width: 100.0,
+  ///         height: 100.0,
+  ///       ),
+  ///     ),
+  ///   ],
+  /// )
+  /// ```
+  final ControlsWidgetBuilder controlsBuilder;
 
   @override
   _StepperState createState() => _StepperState();
@@ -327,6 +375,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalControls() {
+    if (widget.controlsBuilder != null)
+      return widget.controlsBuilder(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+
     Color cancelColor;
 
     switch (Theme.of(context).brightness) {
@@ -619,6 +670,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
         throw FlutterError(

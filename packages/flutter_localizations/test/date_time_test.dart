@@ -49,19 +49,19 @@ void main() {
       });
 
       testWidgets('formats HH', (WidgetTester tester) async {
-        expect(await formatHour(tester, const Locale('de', ''), const TimeOfDay(hour: 9, minute: 0)), '09');
-        expect(await formatHour(tester, const Locale('de', ''), const TimeOfDay(hour: 20, minute: 0)), '20');
+        expect(await formatHour(tester, const Locale('de'), const TimeOfDay(hour: 9, minute: 0)), '09');
+        expect(await formatHour(tester, const Locale('de'), const TimeOfDay(hour: 20, minute: 0)), '20');
 
         expect(await formatHour(tester, const Locale('en', 'GB'), const TimeOfDay(hour: 9, minute: 0)), '09');
         expect(await formatHour(tester, const Locale('en', 'GB'), const TimeOfDay(hour: 20, minute: 0)), '20');
       });
 
       testWidgets('formats H', (WidgetTester tester) async {
-        expect(await formatHour(tester, const Locale('es', ''), const TimeOfDay(hour: 9, minute: 0)), '9');
-        expect(await formatHour(tester, const Locale('es', ''), const TimeOfDay(hour: 20, minute: 0)), '20');
+        expect(await formatHour(tester, const Locale('es'), const TimeOfDay(hour: 9, minute: 0)), '9');
+        expect(await formatHour(tester, const Locale('es'), const TimeOfDay(hour: 20, minute: 0)), '20');
 
-        expect(await formatHour(tester, const Locale('fa', ''), const TimeOfDay(hour: 9, minute: 0)), '۹');
-        expect(await formatHour(tester, const Locale('fa', ''), const TimeOfDay(hour: 20, minute: 0)), '۲۰');
+        expect(await formatHour(tester, const Locale('fa'), const TimeOfDay(hour: 9, minute: 0)), '۹');
+        expect(await formatHour(tester, const Locale('fa'), const TimeOfDay(hour: 20, minute: 0)), '۲۰');
       });
     });
 
@@ -90,21 +90,21 @@ void main() {
       }
 
       testWidgets('formats ${TimeOfDayFormat.h_colon_mm_space_a}', (WidgetTester tester) async {
-        expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
-        expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 20, minute: 32)), '8:32 PM');
+        expect(await formatTimeOfDay(tester, const Locale('en'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
+        expect(await formatTimeOfDay(tester, const Locale('en'), const TimeOfDay(hour: 20, minute: 32)), '8:32 PM');
       });
 
       testWidgets('formats ${TimeOfDayFormat.HH_colon_mm}', (WidgetTester tester) async {
-        expect(await formatTimeOfDay(tester, const Locale('de', ''), const TimeOfDay(hour: 9, minute: 32)), '09:32');
+        expect(await formatTimeOfDay(tester, const Locale('de'), const TimeOfDay(hour: 9, minute: 32)), '09:32');
         expect(await formatTimeOfDay(tester, const Locale('en', 'ZA'), const TimeOfDay(hour: 9, minute: 32)), '09:32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.H_colon_mm}', (WidgetTester tester) async {
-        expect(await formatTimeOfDay(tester, const Locale('es', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32');
-        expect(await formatTimeOfDay(tester, const Locale('es', ''), const TimeOfDay(hour: 20, minute: 32)), '20:32');
+        expect(await formatTimeOfDay(tester, const Locale('es'), const TimeOfDay(hour: 9, minute: 32)), '9:32');
+        expect(await formatTimeOfDay(tester, const Locale('es'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
 
-        expect(await formatTimeOfDay(tester, const Locale('ja', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32');
-        expect(await formatTimeOfDay(tester, const Locale('ja', ''), const TimeOfDay(hour: 20, minute: 32)), '20:32');
+        expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 9, minute: 32)), '9:32');
+        expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
@@ -112,7 +112,7 @@ void main() {
       });
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
-        expect(await formatTimeOfDay(tester, const Locale('zh', ''), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
+        expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
       });
     });
 
@@ -140,7 +140,7 @@ void main() {
       }
 
       testWidgets('formats dates in English', (WidgetTester tester) async {
-       final Map<DateType, String> formatted = await formatDate(tester, const Locale('en', ''), DateTime(2018, 8, 1));
+       final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8, 1));
        expect(formatted[DateType.year], '2018');
        expect(formatted[DateType.medium], 'Wed, Aug 1');
        expect(formatted[DateType.full], 'Wednesday, August 1, 2018');
@@ -148,7 +148,7 @@ void main() {
       });
 
       testWidgets('formats dates in German', (WidgetTester tester) async {
-        final Map<DateType, String> formatted = await formatDate(tester, const Locale('de', ''), DateTime(2018, 8, 1));
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('de'), DateTime(2018, 8, 1));
         expect(formatted[DateType.year], '2018');
         expect(formatted[DateType.medium], 'Mi., 1. Aug.');
         expect(formatted[DateType.full], 'Mittwoch, 1. August 2018');

@@ -27,9 +27,9 @@ import 'framework.dart';
 ///     MyScrollableTabView(
 ///       key: PageStorageKey<String>(tab.text), // like 'Tab 1'
 ///       tab: tab,
-///    ),
-///  }),
-///)
+///     ),
+///   }),
+/// )
 /// ```
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.

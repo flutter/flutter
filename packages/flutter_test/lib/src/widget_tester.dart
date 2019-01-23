@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -19,12 +19,22 @@ import 'controller.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
+import 'test_compat.dart';
 import 'test_text_input.dart';
 
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
-export 'package:test/test.dart' hide
+/// Hide these imports so that they do not conflict with our own implementations in
+/// test_compat.dart. This handles setting up a declarer when one is not defined, which
+/// can happen when a test is executed via flutter_run.
+export 'package:test_api/test_api.dart' hide
+  test,
+  group,
+  setUpAll,
+  tearDownAll,
+  setUp,
+  tearDown,
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
   isInstanceOf; // we have our own wrapper in matchers.dart
@@ -49,11 +59,11 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// ## Sample code
 ///
 /// ```dart
-///     testWidgets('MyWidget', (WidgetTester tester) async {
-///       await tester.pumpWidget(new MyWidget());
-///       await tester.tap(find.text('Save'));
-///       expect(find.text('Success'), findsOneWidget);
-///     });
+/// testWidgets('MyWidget', (WidgetTester tester) async {
+///   await tester.pumpWidget(new MyWidget());
+///   await tester.tap(find.text('Save'));
+///   expect(find.text('Success'), findsOneWidget);
+/// });
 /// ```
 @isTest
 void testWidgets(String description, WidgetTesterCallback callback, {
@@ -63,7 +73,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
-  test_package.test(
+  test(
     description,
     () {
       tester._recordNumberOfSemanticsHandles();
@@ -245,6 +255,34 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() => binding.pump(duration, phase));
+  }
+
+  /// Triggers a frame after `duration` amount of time, return as soon as the frame is drawn.
+  ///
+  /// This enables driving an artificially high CPU load by rendering frames in
+  /// a tight loop. It must be used with the frame policy set to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmark].
+  ///
+  /// Similarly to [pump], this doesn't actually wait for `duration`, just
+  /// advances the clock.
+  Future<void> pumpBenchmark(Duration duration) async {
+    assert(() {
+        final TestWidgetsFlutterBinding widgetsBinding = binding;
+        return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+               widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+    }());
+
+    dynamic caughtException;
+    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+
+    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await idle();
+    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await idle();
+
+    if (caughtException != null) {
+      throw caughtException;
+    }
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -645,30 +683,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (result == null)
       throw StateError('No Semantics data found.');
     return result;
-  }
-
-  /// DEPRECATED: use [getSemantics] instead.
-  @Deprecated('use getSemantics instead')
-  SemanticsData getSemanticsData(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw StateError('Semantics are not enabled.');
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw StateError('No Semantics data found.');
-    return result.getSemanticsData();
   }
 
   /// Enable semantics in a test by creating a [SemanticsHandle].

@@ -99,8 +99,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  ///   * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
-  ///   * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
+  ///  * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
+  ///  * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
   bool automaticSystemUiAdjustment = true;
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
@@ -192,8 +192,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      layer.addToScene(builder);
-      final ui.Scene scene = builder.build();
+      final ui.Scene scene = layer.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       ui.window.render(scene);

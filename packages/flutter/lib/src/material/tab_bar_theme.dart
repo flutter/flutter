@@ -4,8 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'tabs.dart';
+import 'theme.dart';
 
 /// Defines a theme for [TabBar] widgets.
 ///
@@ -13,9 +15,8 @@ import 'tabs.dart';
 /// the [TabBar.indicator].
 ///
 /// Descendant widgets obtain the current theme's [TabBarTheme] object using
-/// `Theme.of(context).tabBarTheme`.
-/// [ThemeData.tabBarTheme] can be customized by copying it (using
-/// [TabBarTheme.copyWith]).
+/// `TabBarTheme.of(context)`. Instances of [TabBarTheme] can be customized with
+/// [TabBarTheme.copyWith].
 ///
 /// See also:
 ///
@@ -28,7 +29,9 @@ class TabBarTheme extends Diagnosticable {
     this.indicator,
     this.indicatorSize,
     this.labelColor,
+    this.labelStyle,
     this.unselectedLabelColor,
+    this.unselectedLabelStyle,
   });
 
   /// Default value for [TabBar.indicator].
@@ -40,8 +43,14 @@ class TabBarTheme extends Diagnosticable {
   /// Default value for [TabBar.labelColor].
   final Color labelColor;
 
+  /// Default value for [TabBar.labelStyle].
+  final TextStyle labelStyle;
+
   /// Default value for [TabBar.unselectedLabelColor].
   final Color unselectedLabelColor;
+
+  /// Default value for [TabBar.unselectedLabelStyle].
+  final TextStyle unselectedLabelStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -49,14 +58,23 @@ class TabBarTheme extends Diagnosticable {
     Decoration indicator,
     TabBarIndicatorSize indicatorSize,
     Color labelColor,
+    TextStyle labelStyle,
     Color unselectedLabelColor,
+    TextStyle unselectedLabelStyle,
   }) {
     return TabBarTheme(
-        indicator: indicator ?? this.indicator,
-        indicatorSize: indicatorSize ?? this.indicatorSize,
-        labelColor: labelColor ?? this.labelColor,
-        unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor
+      indicator: indicator ?? this.indicator,
+      indicatorSize: indicatorSize ?? this.indicatorSize,
+      labelColor: labelColor ?? this.labelColor,
+      labelStyle: labelStyle ?? this.labelStyle,
+      unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor,
+      unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
     );
+  }
+
+  /// The data from the closest [TabBarTheme] instance given the build context.
+  static TabBarTheme of(BuildContext context) {
+    return Theme.of(context).tabBarTheme;
   }
 
   /// Linearly interpolate between two tab bar themes.
@@ -72,13 +90,22 @@ class TabBarTheme extends Diagnosticable {
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
-      unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t)
+      labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
+      unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
+      unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
     );
   }
 
   @override
   int get hashCode {
-    return hashValues(indicator, indicatorSize, labelColor, unselectedLabelColor);
+    return hashValues(
+      indicator,
+      indicatorSize,
+      labelColor,
+      labelStyle,
+      unselectedLabelColor,
+      unselectedLabelStyle,
+    );
   }
 
   @override
@@ -91,6 +118,8 @@ class TabBarTheme extends Diagnosticable {
     return typedOther.indicator == indicator
         && typedOther.indicatorSize == indicatorSize
         && typedOther.labelColor == labelColor
-        && typedOther.unselectedLabelColor == unselectedLabelColor;
+        && typedOther.labelStyle == labelStyle
+        && typedOther.unselectedLabelColor == unselectedLabelColor
+        && typedOther.unselectedLabelStyle == unselectedLabelStyle;
   }
 }

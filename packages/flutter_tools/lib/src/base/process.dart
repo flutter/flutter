@@ -148,7 +148,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
         if (trace)
           printTrace(message);
         else
-          printStatus(message);
+          printStatus(message, wrap: false);
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
@@ -159,7 +159,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null)
-        printError('$prefix$line');
+        printError('$prefix$line', wrap: false);
     });
 
   // Wait for stdout to be fully processed
@@ -201,14 +201,6 @@ Future<int> runInteractively(List<String> command, {
     stderr.addStream(process.stderr),
   ]);
   return await process.exitCode;
-}
-
-Future<void> runAndKill(List<String> cmd, Duration timeout) {
-  final Future<Process> proc = runDetached(cmd);
-  return Future<void>.delayed(timeout, () async {
-    printTrace('Intentionally killing ${cmd[0]}');
-    processManager.killPid((await proc).pid);
-  });
 }
 
 Future<Process> runDetached(List<String> cmd) {

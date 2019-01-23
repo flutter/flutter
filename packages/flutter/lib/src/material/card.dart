@@ -12,44 +12,48 @@ import 'theme.dart';
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
 ///
-/// ## Sample code
-///
-/// Here is an example of using a [Card] widget.
-///
-/// ```dart
-/// Card(
-///   child: Column(
-///     mainAxisSize: MainAxisSize.min,
-///     children: <Widget>[
-///       const ListTile(
-///         leading: Icon(Icons.album),
-///         title: Text('The Enchanted Nightingale'),
-///         subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-///       ),
-///       ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///         child: ButtonBar(
-///           children: <Widget>[
-///             FlatButton(
-///               child: const Text('BUY TICKETS'),
-///               onPressed: () { /* ... */ },
-///             ),
-///             FlatButton(
-///               child: const Text('LISTEN'),
-///               onPressed: () { /* ... */ },
-///             ),
-///           ],
-///         ),
-///       ),
-///     ],
-///   ),
-/// )
-/// ```
-///
-/// This is what it would look like:
+/// This is what it looks like when run:
 ///
 /// ![A card with a slight shadow, consisting of two rows, one with an icon and
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// This sample shows creation of a [Card] widget that shows album information
+/// and two actions.
+///
+/// ```dart
+/// Center(
+///   child: Card(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         const ListTile(
+///           leading: Icon(Icons.album),
+///           title: Text('The Enchanted Nightingale'),
+///           subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+///         ),
+///         ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///           child: ButtonBar(
+///             children: <Widget>[
+///               FlatButton(
+///                 child: const Text('BUY TICKETS'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///               FlatButton(
+///                 child: const Text('LISTEN'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -61,17 +65,19 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [clipBehavior] argument must not be null.
+  /// The [clipBehavior] and [elevation] arguments must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   const Card({
     Key key,
     this.color,
-    this.elevation,
+    this.elevation = 1.0,
     this.shape,
     this.margin = const EdgeInsets.all(4.0),
     this.clipBehavior = Clip.none,
     this.child,
     this.semanticContainer = true,
-  }) : super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       super(key: key);
 
   /// The card's background color.
   ///
@@ -85,7 +91,7 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// The default elevation is 1.0.
+  /// The default elevation is 1.0. The value is always non-negative.
   final double elevation;
 
   /// The shape of the card's [Material].
@@ -129,18 +135,20 @@ class Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       container: semanticContainer,
-      explicitChildNodes: !semanticContainer,
       child: Container(
         margin: margin ?? const EdgeInsets.all(4.0),
         child: Material(
           type: MaterialType.card,
           color: color ?? Theme.of(context).cardColor,
-          elevation: elevation ?? 1.0,
+          elevation: elevation,
           shape: shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
           clipBehavior: clipBehavior,
-          child: child,
+          child: Semantics(
+            explicitChildNodes: !semanticContainer,
+            child: child,
+          ),
         ),
       ),
     );

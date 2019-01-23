@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
@@ -15,181 +14,193 @@ class CupertinoAlertDemo extends StatefulWidget {
 }
 
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String lastSelectedValue;
 
-  void showDemoDialog<T>({BuildContext context, Widget child}) {
-    showDialog<T>(
+  void showDemoDialog({BuildContext context, Widget child}) {
+    showCupertinoDialog<String>(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) => child,
-    ).then<void>((T value) {
-      // The value passed to Navigator.pop() or null.
+    ).then((String value) {
       if (value != null) {
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            content: Text('You selected: $value'),
-          ),
-        );
+        setState(() { lastSelectedValue = value; });
       }
     });
   }
 
-  void showDemoActionSheet<T>({BuildContext context, Widget child}) {
-    showCupertinoModalPopup<T>(
+  void showDemoActionSheet({BuildContext context, Widget child}) {
+    showCupertinoModalPopup<String>(
       context: context,
       builder: (BuildContext context) => child,
-    ).then<void>((T value) {
+    ).then((String value) {
       if (value != null) {
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            content: Text('You selected: $value'),
-          ),
-        );
+        setState(() { lastSelectedValue = value; });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Cupertino Alerts'),
-        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoAlertDemo.routeName)],
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Alerts'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
+        previousPageTitle: 'Cupertino',
+        trailing: CupertinoDemoDocumentationButton(CupertinoAlertDemo.routeName),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
-        children: <Widget>[
-          CupertinoButton(
-            child: const Text('Alert'),
-            color: CupertinoColors.activeBlue,
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: CupertinoAlertDialog(
-                  title: const Text('Discard draft?'),
-                  actions: <Widget>[
-                    CupertinoDialogAction(
-                      child: const Text('Discard'),
-                      isDestructiveAction: true,
-                      onPressed: () {
-                        Navigator.pop(context, 'Discard');
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Cancel'),
-                      isDefaultAction: true,
-                      onPressed: () {
-                        Navigator.pop(context, 'Cancel');
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(8.0)),
-          CupertinoButton(
-            child: const Text('Alert with Title'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: CupertinoAlertDialog(
-                  title: const Text('Allow "Maps" to access your location while you are using the app?'),
-                  content: const Text('Your current location will be displayed on the map and used '
-                      'for directions, nearby search results, and estimated travel times.'),
-                  actions: <Widget>[
-                    CupertinoDialogAction(
-                      child: const Text('Don\'t Allow'),
-                      onPressed: () {
-                        Navigator.pop(context, 'Disallow');
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Allow'),
-                      onPressed: () {
-                        Navigator.pop(context, 'Allow');
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(8.0)),
-          CupertinoButton(
-            child: const Text('Alert with Buttons'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: const CupertinoDessertDialog(
-                  title: Text('Select Favorite Dessert'),
-                  content: Text('Please select your favorite type of dessert from the '
-                      'list below. Your selection will be used to customize the suggested '
-                      'list of eateries in your area.'),
-                ),
-              );
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(8.0)),
-          CupertinoButton(
-            child: const Text('Alert Buttons Only'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: const CupertinoDessertDialog(),
-              );
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(8.0)),
-          CupertinoButton(
-            child: const Text('Action Sheet'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoActionSheet<String>(
-                context: context,
-                child: CupertinoActionSheet(
-                  title: const Text('Favorite Dessert'),
-                  message: const Text('Please select the best dessert from the options below.'),
-                  actions: <Widget>[
-                    CupertinoActionSheetAction(
-                      child: const Text('Profiteroles'),
-                      onPressed: () {
-                        Navigator.pop(context, 'Profiteroles');
-                      },
-                    ),
-                    CupertinoActionSheetAction(
-                      child: const Text('Cannolis'),
-                      onPressed: () {
-                        Navigator.pop(context, 'Cannolis');
-                      },
-                    ),
-                    CupertinoActionSheetAction(
-                      child: const Text('Trifle'),
-                      onPressed: () {
-                        Navigator.pop(context, 'Trifle');
-                      },
-                    ),
-                  ],
-                  cancelButton: CupertinoActionSheetAction(
-                    child: const Text('Cancel'),
-                    isDefaultAction: true,
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        child: Builder(
+          builder: (BuildContext context) {
+            final List<Widget> stackChildren = <Widget>[
+              ListView(
+                // Add more padding to the normal safe area.
+                padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
+                    + MediaQuery.of(context).padding,
+                children: <Widget>[
+                  CupertinoButton.filled(
+                    child: const Text('Alert'),
                     onPressed: () {
-                      Navigator.pop(context, 'Cancel');
+                      showDemoDialog(
+                        context: context,
+                        child: CupertinoAlertDialog(
+                          title: const Text('Discard draft?'),
+                          actions: <Widget>[
+                            CupertinoDialogAction(
+                              child: const Text('Discard'),
+                              isDestructiveAction: true,
+                              onPressed: () {
+                                Navigator.pop(context, 'Discard');
+                              },
+                            ),
+                            CupertinoDialogAction(
+                              child: const Text('Cancel'),
+                              isDefaultAction: true,
+                              onPressed: () {
+                                Navigator.pop(context, 'Cancel');
+                              },
+                            ),
+                          ],
+                        ),
+                      );
                     },
-                  )
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  CupertinoButton.filled(
+                    child: const Text('Alert with Title'),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    onPressed: () {
+                      showDemoDialog(
+                        context: context,
+                        child: CupertinoAlertDialog(
+                          title: const Text('Allow "Maps" to access your location while you are using the app?'),
+                          content: const Text('Your current location will be displayed on the map and used '
+                            'for directions, nearby search results, and estimated travel times.'),
+                          actions: <Widget>[
+                            CupertinoDialogAction(
+                              child: const Text('Don\'t Allow'),
+                              onPressed: () {
+                                Navigator.pop(context, 'Disallow');
+                              },
+                            ),
+                            CupertinoDialogAction(
+                              child: const Text('Allow'),
+                              onPressed: () {
+                                Navigator.pop(context, 'Allow');
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  CupertinoButton.filled(
+                    child: const Text('Alert with Buttons'),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    onPressed: () {
+                      showDemoDialog(
+                        context: context,
+                        child: const CupertinoDessertDialog(
+                          title: Text('Select Favorite Dessert'),
+                          content: Text('Please select your favorite type of dessert from the '
+                            'list below. Your selection will be used to customize the suggested '
+                            'list of eateries in your area.'),
+                        ),
+                      );
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  CupertinoButton.filled(
+                    child: const Text('Alert Buttons Only'),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    onPressed: () {
+                      showDemoDialog(
+                        context: context,
+                        child: const CupertinoDessertDialog(),
+                      );
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  CupertinoButton.filled(
+                    child: const Text('Action Sheet'),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                    onPressed: () {
+                      showDemoActionSheet(
+                        context: context,
+                        child: CupertinoActionSheet(
+                          title: const Text('Favorite Dessert'),
+                          message: const Text('Please select the best dessert from the options below.'),
+                          actions: <Widget>[
+                            CupertinoActionSheetAction(
+                              child: const Text('Profiteroles'),
+                              onPressed: () {
+                                Navigator.pop(context, 'Profiteroles');
+                              },
+                            ),
+                            CupertinoActionSheetAction(
+                              child: const Text('Cannolis'),
+                              onPressed: () {
+                                Navigator.pop(context, 'Cannolis');
+                              },
+                            ),
+                            CupertinoActionSheetAction(
+                              child: const Text('Trifle'),
+                              onPressed: () {
+                                Navigator.pop(context, 'Trifle');
+                              },
+                            ),
+                          ],
+                          cancelButton: CupertinoActionSheetAction(
+                            child: const Text('Cancel'),
+                            isDefaultAction: true,
+                            onPressed: () {
+                              Navigator.pop(context, 'Cancel');
+                            },
+                          )
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ];
+
+            if (lastSelectedValue != null) {
+              stackChildren.add(
+                Positioned(
+                  bottom: 32.0,
+                  child: Text('You selected: $lastSelectedValue'),
                 ),
               );
-            },
-          ),
-        ],
+            }
+            return Stack(
+              alignment: Alignment.center,
+              children: stackChildren,
+            );
+          },
+        ),
       ),
     );
   }

@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
@@ -225,13 +225,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Duration additionalTime = const Duration(milliseconds: 250),
   });
 
-  /// Artificially calls dispatchLocaleChanged on the Widget binding,
+  /// Artificially calls dispatchLocalesChanged on the Widget binding,
   /// then flushes microtasks.
+  ///
+  /// Passes only one single Locale. Use [setLocales] to pass a full preferred
+  /// locales list.
   Future<void> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      final Locale locale = Locale(languageCode, countryCode);
-      dispatchLocaleChanged(locale);
+      final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
+      dispatchLocalesChanged(<Locale>[locale]);
+    });
+  }
+
+  /// Artificially calls dispatchLocalesChanged on the Widget binding,
+  /// then flushes microtasks.
+  Future<void> setLocales(List<Locale> locales) {
+    return TestAsyncUtils.guard<void>(() async {
+      assert(inTest);
+      dispatchLocalesChanged(locales);
     });
   }
 
@@ -973,7 +985,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is intended to be used by benchmarks (hence the name) that drive the
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
-  /// directly (invoking [Window.onBeginFrame] and [Window.onDrawFrame]) to run.
+  /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
+  /// [Window.onBeginFrame] and [Window.onDrawFrame]).
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
@@ -1131,8 +1144,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame.complete(); // unlocks the test API
       _pendingFrame = null;
       _expectingFrame = false;
-    } else {
-      assert(framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark);
+    } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
       ui.window.scheduleFrame();
     }
   }
@@ -1600,7 +1612,7 @@ class _MockHttpRequest extends HttpClientRequest {
   List<Cookie> get cookies => null;
 
   @override
-  Future<HttpClientResponse> get done => null;
+  Future<HttpClientResponse> get done async => null;
 
   @override
   Future<void> flush() {

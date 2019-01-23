@@ -26,6 +26,7 @@
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
 /dev/docs/doc/
+/dev/docs/flutter.docs.zip
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
 /packages/flutter/coverage/
@@ -52,6 +53,8 @@ unlinked_spec.ds
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
 
 # iOS/XCode related
 **/ios/**/*.mode1v3

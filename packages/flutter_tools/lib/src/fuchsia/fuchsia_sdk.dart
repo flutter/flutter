@@ -2,53 +2,78 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/common.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
+import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
+
+/// The [FuchsiaArtifacts] instance.
+FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
 
 /// The Fuchsia SDK shell commands.
 ///
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaSdk {
+  static const List<String> _syslogCommand = <String>['fx', 'syslog', '--clock', 'Local'];
 
-  /// Invokes the `netaddr` command.
-  ///
-  /// This returns the network address of an attached fuchsia device. Does
-  /// not currently support multiple attached devices.
-  ///
   /// Example output:
-  ///     $ fx netaddr --fuchsia
-  ///     > fe80::9aaa:fcff:fe60:d3af%eth1
-  Future<String> netaddr() async {
+  ///    $ dev_finder list -full
+  ///    > 192.168.42.56 paper-pulp-bush-angel
+  Future<String> listDevices() async {
     try {
-      final RunResult process = await runAsync(<String>['fx', 'netaddr', '--fuchsia', '--nowait']);
-      return process.stdout;
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
+      final String path = fuchsiaArtifacts.devFinder.absolute.path;
+      final RunResult process = await runAsync(<String>[path, 'list', '-full']);
+      return process.stdout.trim();
+    } catch (exception) {
+      printTrace('$exception');
     }
     return null;
   }
 
-  /// Invokes the `netls` command.
+  /// Returns the fuchsia system logs for an attached device.
   ///
-  /// This lists attached fuchsia devices with their name and address. Does
-  /// not currently support multiple attached devices.
-  ///
-  /// Example output:
-  ///     $ fx netls
-  ///     > device liliac-shore-only-last (fe80::82e4:da4d:fe81:227d/3)
-  Future<String> netls() async {
+  /// Does not currently support multiple attached devices.
+  Stream<String> syslogs() {
+    Process process;
     try {
-      final RunResult process = await runAsync(
-        <String>['fx', 'netls', '--nowait']);
-      return process.stdout;
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
+      final StreamController<String> controller = StreamController<String>(onCancel: () {
+        process.kill();
+      });
+      processManager.start(_syslogCommand).then((Process newProcess) {
+        if (controller.isClosed) {
+          return;
+        }
+        process = newProcess;
+        process.exitCode.whenComplete(controller.close);
+        controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
+      });
+      return controller.stream;
+    } catch (exception) {
+      printTrace('$exception');
     }
     return null;
   }
+}
+
+/// Fuchsia-specific artifacts used to interact with a device.
+class FuchsiaArtifacts {
+  /// Creates a new [FuchsiaArtifacts].
+  FuchsiaArtifacts({this.sshConfig, this.devFinder});
+
+  /// The location of the SSH configuration file used to interact with a
+  /// Fuchsia device.
+  final File sshConfig;
+
+  /// The location of the dev finder tool used to locate connected
+  /// Fuchsia devices.
+  final File devFinder;
 }

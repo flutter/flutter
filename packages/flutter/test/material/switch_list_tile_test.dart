@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
@@ -57,5 +58,46 @@ void main() {
         ..circle(color: const Color(0x1f000000))
         ..circle(color: Colors.red[500])
     );
+  });
+
+  testWidgets('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
+    bool value = false;
+
+     Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: SwitchListTile.adaptive(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(SwitchListTile));
+    expect(value, isTrue);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(find.byType(CupertinoSwitch), findsNothing);
+    expect(value, isTrue);
+    await tester.tap(find.byType(SwitchListTile));
+    expect(value, isFalse);
   });
 }

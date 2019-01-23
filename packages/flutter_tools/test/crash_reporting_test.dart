@@ -107,6 +107,7 @@ void main() {
       expect(fields['osVersion'], 'fake OS name and version');
       expect(fields['type'], 'DartError');
       expect(fields['error_runtime_type'], 'StateError');
+      expect(fields['error_message'], 'Bad state: Test bad state error');
 
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'

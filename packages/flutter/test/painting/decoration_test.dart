@@ -62,11 +62,6 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
-    return super.resolve(configuration);
-  }
-
-  @override
   ImageStreamCompleter load(DelayedImageProvider key) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
@@ -76,7 +71,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}}()';
+  String toString() => '${describeIdentity(this)}()';
 }
 
 class TestImage implements ui.Image {

@@ -77,7 +77,7 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
-///  of the iOS-style date picker.
+///    of the iOS-style date picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 enum CupertinoDatePickerMode {
   /// Mode that shows the date in hour, minute, and (optional) an AM/PM designation.
@@ -915,15 +915,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 enum CupertinoTimerPickerMode {
   /// Mode that shows the timer duration in hour and minute.
   ///
-  /// Examples: [16 hours | 14 min].
+  /// Examples: 16 hours | 14 min.
   hm,
   /// Mode that shows the timer duration in minute and second.
   ///
-  /// Examples: [14 min | 43 sec].
+  /// Examples: 14 min | 43 sec.
   ms,
   /// Mode that shows the timer duration in hour, minute, and second.
   ///
-  /// Examples: [16 hours | 14 min | 43 sec].
+  /// Examples: 16 hours | 14 min | 43 sec.
   hms,
 }
 
@@ -937,7 +937,7 @@ enum CupertinoTimerPickerMode {
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
-///  of the iOS-style date picker.
+///    of the iOS-style date picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 class CupertinoTimerPicker extends StatefulWidget {
   /// Constructs an iOS style countdown timer picker.

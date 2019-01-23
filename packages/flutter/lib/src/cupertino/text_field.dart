@@ -1,7 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -9,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'text_selection.dart';
+import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
@@ -28,15 +28,6 @@ const Border _kDefaultRoundedBorder = Border(
 const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
   border: _kDefaultRoundedBorder,
   borderRadius: BorderRadius.all(Radius.circular(4.0)),
-);
-
-// Default iOS style from HIG specs with larger font.
-const TextStyle _kDefaultTextStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
-  fontSize: 17.0,
-  letterSpacing: -0.38,
-  color: CupertinoColors.black,
-  decoration: TextDecoration.none,
 );
 
 // Value extracted via color reader from iOS simulator.
@@ -85,7 +76,7 @@ enum OverlayVisibilityMode {
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
@@ -108,6 +99,7 @@ enum OverlayVisibilityMode {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// The [controller] can also control the selection and composing region (and to
 /// observe changes to the text, selection, and composing region).
@@ -157,7 +149,7 @@ class CupertinoTextField extends StatefulWidget {
     TextInputType keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
-    this.style = _kDefaultTextStyle,
+    this.style,
     this.textAlign = TextAlign.start,
     this.autofocus = false,
     this.obscureText = false,
@@ -268,7 +260,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Also serves as a base for the [placeholder] text's style.
   ///
-  /// Defaults to a standard iOS style and cannot be null.
+  /// Defaults to the standard iOS font style from [CupertinoTheme] if null.
   final TextStyle style;
 
   /// {@macro flutter.widgets.editableText.textAlign}
@@ -301,10 +293,6 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
-  ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// ## Limitations
   ///
@@ -459,13 +447,29 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _renderEditable.handleTapDown(details);
   }
 
-  void _handleTap() {
-    _renderEditable.handleTap();
+  void _handleForcePressStarted(ForcePressDetails details) {
+    // The cause is not keyboard press but we would still like to just
+    // highlight the word without showing any handles or toolbar.
+    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.keyboard);
+  }
+
+  void _handleForcePressEnded(ForcePressDetails details) {
+    // The cause is not technically double tap, but we would still like to show
+    // the toolbar and handles.
+    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+  }
+
+  void _handleSingleTapUp(TapUpDetails details) {
+    _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     _requestKeyboard();
   }
 
-  void _handleLongPress() {
-    _renderEditable.handleLongPress();
+  void _handleSingleLongTapDown() {
+    _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
   }
 
   @override
@@ -510,7 +514,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
-  Widget _addTextDependentAttachments(Widget editableText) {
+  Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle) {
+    assert(editableText != null);
+    assert(textStyle != null);
     // If there are no surrounding widgets, just return the core editable text
     // part.
     if (widget.placeholder == null &&
@@ -545,7 +551,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 widget.placeholder,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: widget.style.merge(
+                style: textStyle.merge(
                   const TextStyle(
                     color: _kInactiveTextColor,
                     fontWeight: FontWeight.w300,
@@ -589,14 +595,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
-    final Brightness keyboardAppearance = widget.keyboardAppearance;
     final TextEditingController controller = _effectiveController;
-    final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final TextStyle textStyle = widget.style ?? themeData.textTheme.textStyle;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -604,11 +611,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         child: EditableText(
           key: _editableTextKey,
           controller: controller,
-          focusNode: focusNode,
+          focusNode: _effectiveFocusNode,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           textCapitalization: widget.textCapitalization,
-          style: widget.style,
+          style: textStyle,
           textAlign: widget.textAlign,
           autofocus: widget.autofocus,
           obscureText: widget.obscureText,
@@ -624,6 +631,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
           cursorColor: widget.cursorColor,
+          backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
         ),
@@ -643,14 +651,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           decoration: widget.decoration,
           // The main decoration and the disabled scrim exists separately.
           child: Container(
-            color: enabled ? null : _kDisabledBackground,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
+            color: enabled
+                ? null
+                : CupertinoTheme.of(context).brightness == Brightness.light
+                    ? _kDisabledBackground
+                    : CupertinoColors.darkBackgroundGray,
+            child: TextSelectionGestureDetector(
               onTapDown: _handleTapDown,
-              onTap: _handleTap,
-              onLongPress: _handleLongPress,
-              excludeFromSemantics: true,
-              child: _addTextDependentAttachments(paddedEditable),
+              onForcePressStart: _handleForcePressStarted,
+              onForcePressEnd: _handleForcePressEnded,
+              onSingleTapUp: _handleSingleTapUp,
+              onSingleLongTapDown: _handleSingleLongTapDown,
+              onDoubleTapDown: _handleDoubleTapDown,
+              behavior: HitTestBehavior.translucent,
+              child: _addTextDependentAttachments(paddedEditable, textStyle),
             ),
           ),
         ),

@@ -94,6 +94,13 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('detects unknown version', () async {
+      pretendPodVersionIs('Plugin loaded.\n1.5.3');
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.unknownVersion);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('detects below minimum version', () async {
       pretendPodVersionIs('0.39.8');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);

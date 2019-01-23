@@ -19,6 +19,7 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 // Examples can assume:
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;
+// void setState(VoidCallback fn) { }
 
 /// The direction in which an animation is running.
 enum _AnimationDirection {
@@ -122,7 +123,7 @@ enum AnimationBehavior {
 /// This can be used to write code such as the `fadeOutAndUpdateState` method
 /// below.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Here is a stateful [Foo] widget. Its [State] uses the
 /// [SingleTickerProviderStateMixin] to implement the necessary
@@ -171,6 +172,8 @@ enum AnimationBehavior {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// The following method (for a [State] subclass) drives two animation
 /// controllers using Dart's asynchronous syntax for awaiting [Future] objects:
@@ -188,6 +191,7 @@ enum AnimationBehavior {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// The assumption in the code above is that the animation controllers are being
 /// disposed in the [State] subclass' override of the [State.dispose] method.
@@ -480,6 +484,23 @@ class AnimationController extends Animation<double>
   /// [AnimationStatus.completed].
   TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear }) {
     _direction = _AnimationDirection.forward;
+    return _animateToInternal(target, duration: duration, curve: curve);
+  }
+
+  /// Drives the animation from its current value to target.
+  ///
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// During the animation, [status] is reported as [AnimationStatus.reverse]
+  /// regardless of whether `target` < [value] or not. At the end of the
+  /// animation, when `target` is reached, [status] is reported as
+  /// [AnimationStatus.dismissed].
+  TickerFuture animateBack(double target, { Duration duration, Curve curve = Curves.linear }) {
+    _direction = _AnimationDirection.reverse;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 

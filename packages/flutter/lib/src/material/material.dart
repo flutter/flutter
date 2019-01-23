@@ -19,7 +19,7 @@ typedef RectCallback = Rect Function();
 ///
 /// See also:
 ///
-///  * [Material], in particular [Material.type]
+///  * [Material], in particular [Material.type].
 ///  * [kMaterialEdges]
 enum MaterialType {
   /// Rectangle using default theme canvas color.
@@ -149,14 +149,14 @@ abstract class MaterialInkController {
 ///
 /// See also:
 ///
-/// * [MergeableMaterial], a piece of material that can split and remerge.
-/// * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
-/// * <https://material.google.com/>
+///  * [MergeableMaterial], a piece of material that can split and remerge.
+///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
+///  * <https://material.google.com/>
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
   /// The [type], [elevation], [shadowColor], and [animationDuration] arguments
-  /// must not be null.
+  /// must not be null. Additionally, [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -176,7 +176,7 @@ class Material extends StatefulWidget {
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
@@ -194,14 +194,19 @@ class Material extends StatefulWidget {
   /// the shape is rectangular, and the default color.
   final MaterialType type;
 
-  /// The z-coordinate at which to place this material. This controls the size
-  /// of the shadow below the material.
+  /// {@template flutter.material.material.elevation}
+  /// The z-coordinate at which to place this material relative to its parent.
+  ///
+  /// This controls the size of the shadow below the material.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
   /// [animationDuration].
+  ///
+  /// The value is non-negative.
+  /// {@endtemplate}
   final double elevation;
 
   /// The color to paint the material.
@@ -352,8 +357,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
     final ShapeBorder shape = _getShape();
 
-    if (widget.type == MaterialType.transparency)
-      return _transparentInterior(shape: shape, clipBehavior: widget.clipBehavior, contents: contents);
+    if (widget.type == MaterialType.transparency) {
+      return _transparentInterior(
+        context: context,
+        shape: shape,
+        clipBehavior: widget.clipBehavior,
+        contents: contents,
+      );
+    }
 
     return _MaterialInterior(
       curve: Curves.fastOutSlowIn,
@@ -367,7 +378,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     );
   }
 
-  static Widget _transparentInterior({ShapeBorder shape, Clip clipBehavior, Widget contents}) {
+  static Widget _transparentInterior({
+    @required BuildContext context,
+    @required ShapeBorder shape,
+    @required Clip clipBehavior,
+    @required Widget contents,
+  }) {
     final _ShapeBorderPaint child = _ShapeBorderPaint(
       child: contents,
       shape: shape,
@@ -377,7 +393,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     return ClipPath(
       child: child,
-      clipper: ShapeBorderClipper(shape: shape),
+      clipper: ShapeBorderClipper(
+        shape: shape,
+        textDirection: Directionality.of(context),
+      ),
       clipBehavior: clipBehavior,
     );
   }
@@ -607,7 +626,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, curve: curve, duration: duration);
@@ -626,7 +645,10 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
 
-  /// The target z-coordinate at which to place this physical object.
+  /// The target z-coordinate at which to place this physical object relative
+  /// to its parent.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
   /// The target background color.

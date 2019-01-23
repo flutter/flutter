@@ -11,6 +11,7 @@ import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:quiver/testing/async.dart';
 
 import 'common.dart';
 
@@ -357,17 +358,19 @@ void main() {
 
     group('sendCommand error conditions', () {
       test('local timeout', () async {
+        final List<String> log = <String>[];
+        final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
-          // completer never competed to trigger timeout
+          // completer never completed to trigger timeout
           return Completer<Map<String, dynamic>>().future;
         });
-        try {
-          await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(milliseconds: 100));
-          fail('expected an exception');
-        } catch (error) {
-          expect(error is DriverError, isTrue);
-          expect(error.message, 'Failed to fulfill WaitFor: Flutter application not responding');
-        }
+        FakeAsync().run((FakeAsync time) {
+          driver.waitFor(find.byTooltip('foo'));
+          expect(log, <String>[]);
+          time.elapse(const Duration(hours: 1));
+        });
+        expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
+        await logSub.cancel();
       });
 
       test('remote error', () async {
@@ -384,6 +387,41 @@ void main() {
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
+    });
+  });
+
+  group('FlutterDriver with custom timeout', () {
+    MockVMServiceClient mockClient;
+    MockPeer mockPeer;
+    MockIsolate mockIsolate;
+    FlutterDriver driver;
+
+    setUp(() {
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+    });
+
+    test('GetHealth has no default timeout', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth();
+    });
+
+    test('does not interfere with explicit timeouts', () async {
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+        expect(i.positionalArguments[1], <String, String>{
+          'command': 'get_health',
+          'timeout': _kSerializedTestTimeout,
+        });
+        return makeMockResponse(<String, dynamic>{'status': 'ok'});
+      });
+      await driver.checkHealth(timeout: _kTestTimeout);
     });
   });
 }

@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -341,7 +342,7 @@ class AppDomain extends Domain {
     String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
+      throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
 
     // We change the current working directory for the duration of the `start` command.
@@ -382,16 +383,22 @@ class AppDomain extends Domain {
     }
 
     return launch(
-        runner,
-        ({ Completer<DebugConnectionInfo> connectionInfoCompleter,
-            Completer<void> appStartedCompleter }) => runner.run(
-                connectionInfoCompleter: connectionInfoCompleter,
-                appStartedCompleter: appStartedCompleter,
-                route: route),
-        device,
-        projectDirectory,
-        enableHotReload,
-        cwd);
+      runner,
+      ({
+        Completer<DebugConnectionInfo> connectionInfoCompleter,
+        Completer<void> appStartedCompleter,
+      }) {
+        return runner.run(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+          route: route,
+        );
+      },
+      device,
+      projectDirectory,
+      enableHotReload,
+      cwd,
+    );
   }
 
   Future<AppInstance> launch(
@@ -427,22 +434,19 @@ class AppDomain extends Domain {
       });
     }
     final Completer<void> appStartedCompleter = Completer<void>();
-    // We don't want to wait for this future to complete and callbacks won't fail.
-    // As it just writes to stdout.
-    appStartedCompleter.future.timeout(const Duration(minutes: 3), onTimeout: () { // ignore: unawaited_futures
-      _sendAppEvent(app, 'log', <String, dynamic>{
-        'log': 'timeout waiting for the application to start',
-        'error': true,
+    // We don't want to wait for this future to complete, and callbacks won't fail,
+    // as it just writes to stdout.
+    appStartedCompleter.future // ignore: unawaited_futures
+      .then<void>((void value) {
+        _sendAppEvent(app, 'started');
       });
-    }).then<void>((_) {
-      _sendAppEvent(app, 'started');
-    });
 
     await app._runInZone<void>(this, () async {
       try {
         await runOrAttach(
-            connectionInfoCompleter: connectionInfoCompleter,
-            appStartedCompleter: appStartedCompleter);
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
         _sendAppEvent(app, 'stop');
       } catch (error, trace) {
         _sendAppEvent(app, 'stop', <String, dynamic>{
@@ -458,7 +462,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotMode;
+      enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -519,14 +523,15 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app.stop().timeout(const Duration(seconds: 5)).then<bool>((_) {
-      return true;
-    }).catchError((dynamic error) {
-      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
-      app.closeLogger();
-      _apps.remove(app);
-      return false;
-    });
+    return app.stop().then<bool>(
+      (void value) => true,
+      onError: (dynamic error, StackTrace stack) {
+        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        app.closeLogger();
+        _apps.remove(app);
+        return false;
+      },
+    );
   }
 
   Future<bool> detach(Map<String, dynamic> args) async {
@@ -536,14 +541,15 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app.detach().timeout(const Duration(seconds: 5)).then<bool>((_) {
-      return true;
-    }).catchError((dynamic error) {
-      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
-      app.closeLogger();
-      _apps.remove(app);
-      return false;
-    });
+    return app.detach().then<bool>(
+      (void value) => true,
+      onError: (dynamic error, StackTrace stack) {
+        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        app.closeLogger();
+        _apps.remove(app);
+        return false;
+      },
+    );
   }
 
   AppInstance _getApp(String id) {
@@ -572,6 +578,7 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
+    addDeviceDiscoverer(FuchsiaDevices());
     addDeviceDiscoverer(AndroidDevices());
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
@@ -581,21 +588,6 @@ class DeviceDomain extends Domain {
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform)
       return;
-
-    if (!discoverer.canListAnything) {
-      // This event will affect the client UI. Coordinate changes here
-      // with the Flutter IntelliJ team.
-      sendEvent(
-        'daemon.showMessage',
-        <String, String>{
-          'level': 'warning',
-          'title': 'Unable to list devices',
-          'message':
-              'Unable to discover ${discoverer.name}. Please run '
-              '"flutter doctor" to diagnose potential issues',
-        },
-      );
-    }
 
     _discoverers.add(discoverer);
 
@@ -615,12 +607,18 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
-    final List<Device> devices = <Device>[];
+  /// Return a list of the current devices, with each device represented as a map
+  /// of properties (id, name, platform, ...).
+  Future<List<Map<String, dynamic>>> getDevices([Map<String, dynamic> args]) async {
+    final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
+
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      devices.addAll(await discoverer.devices);
+      for (Device device in await discoverer.devices) {
+        devicesInfo.add(await _deviceToMap(device));
+      }
     }
-    return devices;
+
+    return devicesInfo;
   }
 
   /// Enable device events.
@@ -758,6 +756,7 @@ class NotifyingLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
@@ -770,6 +769,7 @@ class NotifyingLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     _messageController.add(LogMessage('status', message));
   }
@@ -782,13 +782,14 @@ class NotifyingLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation = false,
     bool multilineOutput,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
+    assert(timeout != null);
     printStatus(message);
-    return Status();
+    return SilentStatus(timeout: timeout);
   }
 
   void dispose() {
@@ -892,6 +893,7 @@ class _AppRunLogger extends Logger {
       TerminalColor color,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printError(
@@ -900,6 +902,7 @@ class _AppRunLogger extends Logger {
         emphasis: emphasis,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       if (stackTrace != null) {
@@ -925,6 +928,7 @@ class _AppRunLogger extends Logger {
       bool newline = true,
       int indent,
       int hangingIndent,
+      bool wrap,
     }) {
     if (parent != null) {
       parent.printStatus(
@@ -934,6 +938,7 @@ class _AppRunLogger extends Logger {
         newline: newline,
         indent: indent,
         hangingIndent: hangingIndent,
+        wrap: wrap,
       );
     } else {
       _sendLogEvent(<String, dynamic>{'log': message});
@@ -954,11 +959,12 @@ class _AppRunLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation = false,
     bool multilineOutput,
     int progressIndicatorPadding = 52,
   }) {
+    assert(timeout != null);
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{
@@ -967,13 +973,16 @@ class _AppRunLogger extends Logger {
       'message': message,
     });
 
-    _status = Status(onFinish: () {
-      _status = null;
-      _sendProgressEvent(<String, dynamic>{
-        'id': id.toString(),
-        'progressId': progressId,
-        'finished': true
-      });
+    _status = SilentStatus(
+      timeout: timeout,
+      onFinish: () {
+        _status = null;
+        _sendProgressEvent(<String, dynamic>{
+          'id': id.toString(),
+          'progressId': progressId,
+          'finished': true,
+        },
+      );
     })..start();
     return _status;
   }

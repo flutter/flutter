@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -286,4 +287,53 @@ void main() {
     SystemChannels.accessibility.setMockMessageHandler(null);
     semanticsTester.dispose();
   });
+
+  testWidgets('CheckBox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+    Widget buildFrame(bool checkboxValue) {
+      return Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Checkbox(
+              tristate: true,
+              value: checkboxValue,
+              onChanged: (bool value) { },
+            );
+          },
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
+    expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
+    expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
+  });
+
 }

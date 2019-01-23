@@ -541,16 +541,26 @@ class RenderAspectRatio extends RenderProxyBox {
 /// depth of the tree.
 class RenderIntrinsicWidth extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic width.
+  ///
+  /// If [stepWidth] is non-null it must be > 0.0. Similarly If [stepHeight] is
+  /// non-null it must be > 0.0.
   RenderIntrinsicWidth({
     double stepWidth,
     double stepHeight,
     RenderBox child
-  }) : _stepWidth = stepWidth, _stepHeight = stepHeight, super(child);
+  }) : assert(stepWidth == null || stepWidth > 0.0),
+       assert(stepHeight == null || stepHeight > 0.0),
+       _stepWidth = stepWidth,
+       _stepHeight = stepHeight,
+       super(child);
 
   /// If non-null, force the child's width to be a multiple of this value.
+  ///
+  /// This value must be null or > 0.0.
   double get stepWidth => _stepWidth;
   double _stepWidth;
   set stepWidth(double value) {
+    assert(value == null || value > 0.0);
     if (value == _stepWidth)
       return;
     _stepWidth = value;
@@ -558,9 +568,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   /// If non-null, force the child's height to be a multiple of this value.
+  ///
+  /// This value must be null or > 0.0.
   double get stepHeight => _stepHeight;
   double _stepHeight;
   set stepHeight(double value) {
+    assert(value == null || value > 0.0);
     if (value == _stepHeight)
       return;
     _stepHeight = value;
@@ -1040,7 +1053,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// information.
 ///
 /// The most efficient way to update the clip provided by this class is to
-/// supply a reclip argument to the constructor of the [CustomClipper]. The
+/// supply a `reclip` argument to the constructor of the [CustomClipper]. The
 /// custom object will listen to this animation and update the clip whenever the
 /// animation ticks, avoiding both the build and layout phases of the pipeline.
 ///
@@ -1050,6 +1063,7 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
 ///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
+///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
@@ -1128,7 +1142,8 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     if (oldClipper.runtimeType != ShapeBorderClipper)
       return true;
     final ShapeBorderClipper typedOldClipper = oldClipper;
-    return typedOldClipper.shape != shape;
+    return typedOldClipper.shape != shape
+        || typedOldClipper.textDirection != textDirection;
   }
 }
 
@@ -1491,6 +1506,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 /// determine the actual shape of the physical model.
 abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   _RenderPhysicalModelBase({
     @required RenderBox child,
     @required double elevation,
@@ -1498,7 +1514,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required Color shadowColor,
     Clip clipBehavior = Clip.none,
     CustomClipper<T> clipper,
-  }) : assert(elevation != null),
+  }) : assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(clipBehavior != null),
@@ -1507,14 +1523,16 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
        _shadowColor = shadowColor,
        super(child: child, clipBehavior: clipBehavior, clipper: clipper);
 
-  /// The z-coordinate at which to place this material.
+  /// The z-coordinate relative to the parent at which to place this material.
+  ///
+  /// The value is non-negative.
   ///
   /// If [debugDisableShadows] is set, this value is ignored and no shadow is
   /// drawn (an outline is rendered instead).
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
-    assert(value != null);
+    assert(value != null && value >= 0.0);
     if (elevation == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
@@ -1554,6 +1572,12 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
 
   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.elevation = elevation;
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('elevation', elevation));
@@ -1572,6 +1596,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// The [color] is required.
   ///
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1582,7 +1607,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
        assert(clipBehavior != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
@@ -1722,15 +1747,15 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 ///
 /// See also:
 ///
-/// * [RenderPhysicalModel], which is optimized for rounded rectangles and
-///   circles.
+///  * [RenderPhysicalModel], which is optimized for rounded rectangles and
+///    circles.
 class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// Creates an arbitrary shape clip.
   ///
   /// The [color] and [shape] parameters are required.
   ///
-  /// The [clipper], [elevation], [color] and [shadowColor] must
-  /// not be null.
+  /// The [clipper], [elevation], [color] and [shadowColor] must not be null.
+  /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
@@ -1739,7 +1764,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
   }) : assert(clipper != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        super(
@@ -2572,7 +2597,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following is an example of how to go from a `GlobalKey` on a
   /// `RepaintBoundary` to a PNG:
@@ -2610,6 +2635,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -3966,8 +3992,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    focus is removed from the node.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback handler) {
@@ -3994,8 +4020,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  ///    accessibility focus.
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback handler) {
@@ -4015,7 +4041,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///   * [CustomSemanticsAction], for an explaination of custom actions.
+  ///  * [CustomSemanticsAction], for an explaination of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
   set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
@@ -4031,7 +4057,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     super.visitChildrenForSemantics(visitor);
   }
-
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -4576,8 +4601,8 @@ class RenderFollowerLayer extends RenderProxyBox {
 ///
 /// See also:
 ///
-///   * [Layer.find], for an example of how this value is retrieved.
-///   * [AnnotatedRegionLayer], the layer this render object creates.
+///  * [Layer.find], for an example of how this value is retrieved.
+///  * [AnnotatedRegionLayer], the layer this render object creates.
 class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   /// Creates a new [RenderAnnotatedRegion] to insert [value] into the

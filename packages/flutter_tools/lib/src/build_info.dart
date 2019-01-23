@@ -13,7 +13,11 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
-    this.buildHotUpdate,
+    this.createBaseline = false,
+    this.createPatch = false,
+    this.patchNumber,
+    this.patchDir,
+    this.baselineDir,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -43,8 +47,24 @@ class BuildInfo {
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
 
+  /// Save baseline package.
+  final bool createBaseline;
+
   /// Build differential snapshot.
-  final bool buildHotUpdate;
+  final bool createPatch;
+
+  /// Internal version number of dynamic patch (not displayed to users).
+  /// Each patch may have a unique number to differentiate from previous
+  /// patches for the same versionCode on Android or CFBundleVersion on iOS.
+  final int patchNumber;
+
+  /// The directory where to store generated dynamic patches.
+  final String patchDir;
+
+  /// The directory where to store generated baseline packages.
+  /// Built packages, such as APK files on Android, are saved and can be used
+  /// to generate dynamic patches in later builds.
+  final String baselineDir;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -92,16 +112,20 @@ class BuildInfo {
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
+  /// Returns whether a dynamic build is requested.
+  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+  String get friendlyModeName => getFriendlyModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
-          buildHotUpdate: buildHotUpdate,
+          createPatch: createPatch,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,
@@ -119,13 +143,21 @@ enum BuildMode {
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
+String getFriendlyModeName(BuildMode mode) {
+  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+}
+
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
   return mode == BuildMode.profile || mode == BuildMode.release;
 }
 
 // Returns true if the given build mode can be used on emulators / simulators.
-bool isEmulatorBuildMode(BuildMode mode) => mode == BuildMode.debug;
+bool isEmulatorBuildMode(BuildMode mode) {
+  return mode == BuildMode.debug ||
+    mode == BuildMode.dynamicRelease ||
+    mode == BuildMode.dynamicProfile;
+}
 
 enum HostPlatform {
   darwin_x64,

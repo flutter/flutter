@@ -137,3 +137,10 @@ footer {
   font-size: 13px;
   padding: 12px 20px;
 }
+/* Override the comment color for highlight.js to make it more
+   prominent/readable */
+.hljs-comment {
+  color: #128c00;
+  font-style: italic;
+  font-weight: bold;
+}

@@ -229,6 +229,9 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// Initializes member variables for subclasses.
   ///
   /// The [alignment] argument must not be null.
+  ///
+  /// The [textDirection] must be non-null if the [alignment] is
+  /// direction-sensitive.
   RenderAligningShiftedBox({
     AlignmentGeometry alignment = Alignment.center,
     @required TextDirection textDirection,
@@ -303,6 +306,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   ///
   /// This method must be called after the child has been laid out and
   /// this object's own size has been set.
+  @protected
   void alignChild() {
     _resolve();
     assert(child != null);
@@ -707,7 +711,11 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
 /// A render object that is a specific size but passes its original constraints
 /// through to its child, which it allows to overflow.
 ///
+/// If the child's resulting size differs from this render object's size, then
+/// the child is aligned according to the [alignment] property.
+///
 /// See also:
+///
 ///  * [RenderUnconstrainedBox] for a render object that allows its children
 ///    to render themselves unconstrained, expands to fit them, and considers
 ///    overflow to be an error.
@@ -717,11 +725,14 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box of a given size that lets its child overflow.
   ///
-  /// The [requestedSize] argument must not be null.
+  /// The [requestedSize] and [alignment] arguments must not be null.
+  ///
+  /// The [textDirection] argument must not be null if the [alignment] is
+  /// direction-sensitive.
   RenderSizedOverflowBox({
     RenderBox child,
     @required Size requestedSize,
-    Alignment alignment = Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : assert(requestedSize != null),
        _requestedSize = requestedSize,
@@ -769,7 +780,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     size = constraints.constrain(_requestedSize);
     if (child != null) {
-      child.layout(constraints);
+      child.layout(constraints, parentUsesSize: true);
       alignChild();
     }
   }
@@ -783,17 +794,24 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 /// for a given axis is null, then the constraints from the parent are just
 /// passed through instead.
 ///
-/// It then tries to size itself to the size of its child.
+/// It then tries to size itself to the size of its child. Where this is not
+/// possible (e.g. if the constraints from the parent are themselves tight), the
+/// child is aligned according to [alignment].
 class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box that sizes its child to a fraction of the total available space.
   ///
   /// If non-null, the [widthFactor] and [heightFactor] arguments must be
   /// non-negative.
+  ///
+  /// The [alignment] must not be null.
+  ///
+  /// The [textDirection] must be non-null if the [alignment] is
+  /// direction-sensitive.
   RenderFractionallySizedOverflowBox({
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    Alignment alignment = Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,

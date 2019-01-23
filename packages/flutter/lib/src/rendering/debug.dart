@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'object.dart';
+
 export 'package:flutter/foundation.dart' show debugPrint;
 
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
@@ -81,10 +83,8 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 ///  * [debugProfilePaintsEnabled], which does something similar for
 ///    painting but using the timeline view.
-///
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugPrintLayouts = false;
 
@@ -115,6 +115,25 @@ bool debugCheckIntrinsicSizes = false;
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
+
+/// Signature for [debugOnProfilePaint] implementations.
+typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+
+/// Callback invoked for every [RenderObject] painted each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar but adds
+///    [dart:developer.Timeline] events instead of invoking a callback.
+///  * [debugOnRebuildDirtyWidget], which does something similar for widgets
+///    being built.
+///  * [WidgetInspectorService], which uses the [debugOnProfilePaint]
+///    callback to generate aggregate profile statistics describing what paints
+///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
+///    extension is enabled.
+ProfilePaintCallback debugOnProfilePaint;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
 /// ignored.
@@ -205,7 +224,8 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
-        debugProfilePaintsEnabled) {
+        debugProfilePaintsEnabled ||
+        debugOnProfilePaint != null) {
       throw FlutterError(reason);
     }
     return true;

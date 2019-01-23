@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed

@@ -494,6 +494,8 @@ void main() {
         hint: 'e',
         textDirection: TextDirection.ltr,
         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -508,6 +510,8 @@ void main() {
       expect(node, matchesSemantics(
          rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
          size: const Size(10.0, 10.0),
+         elevation: 3.0,
+         thickness: 4.0,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,

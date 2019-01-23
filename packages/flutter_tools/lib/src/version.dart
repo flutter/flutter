@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -14,12 +13,13 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
+import 'base/time.dart';
 import 'cache.dart';
 import 'globals.dart';
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion(this._clock) {
+  FlutterVersion([this._clock = const SystemClock()]) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
     final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
     _branch = branch == 'HEAD' ? _channel : branch;
@@ -38,7 +38,7 @@ class FlutterVersion {
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
-  final Clock _clock;
+  final SystemClock _clock;
 
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
@@ -47,7 +47,7 @@ class FlutterVersion {
     'master',
     'dev',
     'beta',
-    'release',
+    'stable',
   ]);
 
   /// This maps old branch names to the names of branches that replaced them.
@@ -63,7 +63,7 @@ class FlutterVersion {
 
   String _channel;
   /// The channel is the upstream branch.
-  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
+  /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
 
   /// The name of the local branch.
@@ -82,7 +82,7 @@ class FlutterVersion {
 
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
+  String get dartSdkVersion => Cache.instance.dartSdkVersion;
 
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
@@ -99,15 +99,16 @@ class FlutterVersion {
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    // Flutter 1.3.922-pre.2 • channel master • https://github.com/flutter/flutter.git
-    // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
-    // Engine • revision fe509b0d96
-    // Tools • Dart 1.19.0-dev.5.0
+    // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
+    // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
+    // Engine • revision 9c46333e14
+    // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }
 
   Map<String, Object> toJson() => <String, Object>{
+        'frameworkVersion': frameworkVersion ?? 'unknown',
         'channel': channel,
         'repositoryUrl': repositoryUrl ?? 'unknown source',
         'frameworkRevision': frameworkRevision,
@@ -206,20 +207,34 @@ class FlutterVersion {
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
-  static const Duration kCheckAgeConsideredUpToDate = Duration(days: 3);
+  static const Duration checkAgeConsideredUpToDate = Duration(days: 3);
 
   /// We warn the user if the age of their Flutter installation is greater than
-  /// this duration.
+  /// this duration. The durations are slightly longer than the expected release
+  /// cadence for each channel, to give the user a grace period before they get
+  /// notified.
   ///
-  /// This is set to 5 weeks because releases are currently around every 4 weeks.
+  /// For example, for the beta channel, this is set to five weeks because
+  /// beta releases happen approximately every month.
   @visibleForTesting
-  static const Duration kVersionAgeConsideredUpToDate = Duration(days: 35);
+  static Duration versionAgeConsideredUpToDate(String channel) {
+    switch (channel) {
+      case 'stable':
+        return const Duration(days: 365 ~/ 2); // Six months
+      case 'beta':
+        return const Duration(days: 7 * 8); // Eight weeks
+      case 'dev':
+        return const Duration(days: 7 * 4); // Four weeks
+      default:
+        return const Duration(days: 7 * 3); // Three weeks
+    }
+  }
 
   /// The amount of time we wait between issuing a warning.
   ///
   /// This is to avoid annoying users who are unable to upgrade right away.
   @visibleForTesting
-  static const Duration kMaxTimeSinceLastWarning = Duration(days: 1);
+  static const Duration maxTimeSinceLastWarning = Duration(days: 1);
 
   /// The amount of time we pause for to let the user read the message about
   /// outdated Flutter installation.
@@ -237,7 +252,7 @@ class FlutterVersion {
   static Future<void> resetFlutterVersionFreshnessCheck() async {
     try {
       await Cache.instance.getStampFileFor(
-        VersionCheckStamp.kFlutterVersionCheckStampFile,
+        VersionCheckStamp.flutterVersionCheckStampFile,
       ).delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
@@ -257,7 +272,7 @@ class FlutterVersion {
 
     final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
     final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
-    final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
+    final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(channel);
 
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen on every
@@ -272,8 +287,8 @@ class FlutterVersion {
 
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
-    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
-    final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
+    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.ago(maxTimeSinceLastWarning * 2);
+    final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
 
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
@@ -326,7 +341,7 @@ class FlutterVersion {
   /// Gets the release date of the latest available Flutter version.
   ///
   /// This method sends a server request if it's been more than
-  /// [kCheckAgeConsideredUpToDate] since the last version check.
+  /// [checkAgeConsideredUpToDate] since the last version check.
   ///
   /// Returns null if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
@@ -338,7 +353,7 @@ class FlutterVersion {
       final Duration timeSinceLastCheck = _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
 
       // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < kCheckAgeConsideredUpToDate)
+      if (timeSinceLastCheck < checkAgeConsideredUpToDate)
         return versionCheckStamp.lastKnownRemoteVersion;
     }
 
@@ -380,10 +395,10 @@ class VersionCheckStamp {
 
   /// The prefix of the stamp file where we cache Flutter version check data.
   @visibleForTesting
-  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
+  static const String flutterVersionCheckStampFile = 'flutter_version_check';
 
   static Future<VersionCheckStamp> load() async {
-    final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);
+    final String versionCheckStamp = Cache.instance.getStampFor(flutterVersionCheckStampFile);
 
     if (versionCheckStamp != null) {
       // Attempt to parse stamp JSON.
@@ -434,8 +449,8 @@ class VersionCheckStamp {
     if (newTimeWarningWasPrinted != null)
       jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
 
-    const JsonEncoder kPrettyJsonEncoder = JsonEncoder.withIndent('  ');
-    Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(jsonData));
+    const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
+    Cache.instance.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
   }
 
   Map<String, String> toJson({

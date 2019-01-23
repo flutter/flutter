@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
+import 'dart:ui' show saveCompilationTrace;
 
 import 'package:meta/meta.dart';
 
@@ -117,11 +118,20 @@ abstract class BindingBase {
         name: 'exit',
         callback: _exitApplication,
       );
+      registerServiceExtension(
+        name: 'saveCompilationTrace',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic> {
+            'value': saveCompilationTrace(),
+          };
+        }
+      );
     }
 
     assert(() {
+      const String platformOverrideExtensionName = 'platformOverride';
       registerServiceExtension(
-        name: 'platformOverride',
+        name: platformOverrideExtensionName,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -138,6 +148,10 @@ abstract class BindingBase {
               default:
                 debugDefaultTargetPlatformOverride = null;
             }
+            _postExtensionStateChangedEvent(
+              platformOverrideExtensionName,
+              defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
+            );
             await reassembleApplication();
           }
           return <String, dynamic>{
@@ -286,8 +300,10 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey('enabled'))
+        if (parameters.containsKey('enabled')) {
           await setter(parameters['enabled'] == 'true');
+          _postExtensionStateChangedEvent(name, await getter() ? 'true' : 'false');
+        }
         return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
       }
     );
@@ -318,11 +334,42 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey(name))
+        if (parameters.containsKey(name)) {
           await setter(double.parse(parameters[name]));
+          _postExtensionStateChangedEvent(name, (await getter()).toString());
+        }
         return <String, dynamic>{ name: (await getter()).toString() };
       }
     );
+  }
+
+  /// Sends an event when a service extension's state is changed.
+  ///
+  /// Clients should listen for this event to stay aware of the current service
+  /// extension state. Any service extension that manages a state should call
+  /// this method on state change.
+  ///
+  /// `value` reflects the newly updated service extension value.
+  ///
+  /// This will be called automatically for service extensions registered via
+  /// [registerBoolServiceExtension], [registerNumericServiceExtension], or
+  /// [registerStringServiceExtension].
+  void _postExtensionStateChangedEvent(String name, dynamic value) {
+    postEvent(
+      'Flutter.ServiceExtensionStateChanged',
+      <String, dynamic>{
+        'extension': 'ext.flutter.$name',
+        'value': value,
+      },
+    );
+  }
+
+  /// All events dispatched by a [BindingBase] use this method instead of
+  /// calling [developer.postEvent] directly so that tests for [BindingBase]
+  /// can track which events were dispatched by overriding this method.
+  @protected
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+    developer.postEvent(eventKind, eventData);
   }
 
   /// Registers a service extension method with the given name (full name
@@ -349,8 +396,10 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey('value'))
+        if (parameters.containsKey('value')) {
           await setter(parameters['value']);
+          _postExtensionStateChangedEvent(name, await getter());
+        }
         return <String, dynamic>{ 'value': await getter() };
       }
     );
@@ -400,7 +449,7 @@ abstract class BindingBase {
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.
-  /// {@endTemplate}
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,

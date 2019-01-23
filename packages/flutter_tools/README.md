@@ -1,6 +1,6 @@
 # Flutter Tools
 
-Tools for building Flutter applications.
+Developer tools for building Flutter applications.
 
 Be sure to follow the instructions on
 [CONTRIBUTING.md](../../CONTRIBUTING.md) to setup.

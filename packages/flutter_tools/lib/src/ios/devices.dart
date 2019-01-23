@@ -26,8 +26,6 @@ const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
 
-const Duration kPortForwardTimeout = Duration(seconds: 10);
-
 class IOSDeploy {
   const IOSDeploy();
 
@@ -124,7 +122,10 @@ class IOSDevice extends Device {
   final String _sdkVersion;
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   final String name;
@@ -149,9 +150,14 @@ class IOSDevice extends Device {
       if (id.isEmpty)
         continue;
 
-      final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
-      final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
-      devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      try {
+        final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
+        final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+        devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      } on IOSDeviceNotFoundError catch (error) {
+        // Unable to find device with given udid. Possibly a network device.
+        printTrace('Error getting attached iOS device: $error');
+      }
     }
     return devices;
   }
@@ -289,7 +295,7 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...', expectSlowOperation: true);
+    final Status installStatus = logger.startProgress('Installing and launching...', timeout: kSlowOperation);
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -475,7 +481,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    iMobileDevice.startLogger().then<void>((Process process) {
+    iMobileDevice.startLogger(device.id).then<void>((Process process) {
       _process = process;
       _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());

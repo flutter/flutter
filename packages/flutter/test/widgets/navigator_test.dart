@@ -96,6 +96,7 @@ class TestObserver extends NavigatorObserver {
   OnObservation onPopped;
   OnObservation onRemoved;
   OnObservation onReplaced;
+  OnObservation onStartUserGesture;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
@@ -121,6 +122,12 @@ class TestObserver extends NavigatorObserver {
   void didReplace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
     if (onReplaced != null)
       onReplaced(newRoute, oldRoute);
+  }
+
+  @override
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onStartUserGesture != null)
+      onStartUserGesture(route, previousRoute);
   }
 }
 
@@ -713,6 +720,38 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(log, <String>['pushed / (previous is <none>)', 'pushed B (previous is /)', 'pushed C (previous is B)', 'replaced B with D']);
+  });
+
+  testWidgets('didStartUserGesture observable',
+      (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+
+    Route<dynamic> observedRoute;
+    Route<dynamic> observedPreviousRoute;
+    final TestObserver observer = TestObserver()
+      ..onStartUserGesture = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observedRoute = route;
+        observedPreviousRoute = previousRoute;
+      };
+
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer],
+    ));
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).didStartUserGesture();
+
+    expect(observedRoute.settings.name, '/A');
+    expect(observedPreviousRoute.settings.name, '/');
   });
 
   testWidgets('ModalRoute.of sets up a route to rebuild if its state changes', (WidgetTester tester) async {

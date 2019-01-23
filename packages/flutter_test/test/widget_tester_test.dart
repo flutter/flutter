@@ -10,8 +10,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
+import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -411,7 +411,7 @@ void main() {
 
       await tester.pageBack();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);

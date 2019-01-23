@@ -35,6 +35,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos7580': _HardwareType.physical,
   'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
@@ -87,15 +88,13 @@ class AndroidDevice extends Device {
           propCommand,
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
-        ).timeout(const Duration(seconds: 5));
+        );
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
           printError('Error retrieving device properties for $name:');
           printError(result.stderr);
         }
-      } on TimeoutException catch (_) {
-        throwToolExit('adb not responding');
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
       }
@@ -278,7 +277,7 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', timeout: kSlowOperation);
     final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -363,7 +362,8 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !debuggingOptions.buildInfo.isDebug) {
+        !(debuggingOptions.buildInfo.isDebug ||
+          debuggingOptions.buildInfo.isDynamic)) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
@@ -440,7 +440,7 @@ class AndroidDevice extends Device {
     final String result = (await runCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
-      printError(result.trim());
+      printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
 
@@ -469,7 +469,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {
@@ -633,7 +636,7 @@ void parseADBDeviceOutput(String text, {
       diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
-        'Please report a bug at https://github.com/flutter/flutter/issues/new');
+        'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
     }
   }
 }

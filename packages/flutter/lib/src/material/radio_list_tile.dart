@@ -9,6 +9,9 @@ import 'radio.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile selects
@@ -37,7 +40,7 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a pair of radio buttons that control the `_character`
 /// field. The field is of the type `SingingCharacter`, an enum.
@@ -67,6 +70,7 @@ import 'theme_data.dart';
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

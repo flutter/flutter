@@ -112,6 +112,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cull_opacity_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of culling opacity widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -288,28 +294,24 @@ tasks:
       Tests naming and attaching to specific isolates.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_create_offline_test_linux:
     description: >
       Tests the `flutter create --offline` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_create_offline_test_windows:
     description: >
       Tests the `flutter create --offline` command.
     stage: devicelab
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   flutter_create_offline_test_mac:
     description: >
       Tests the `flutter create --offline` command.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   # iOS on-device tests
 

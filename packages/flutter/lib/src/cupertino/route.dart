@@ -3,14 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/animation.dart' show Curves;
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
+
+// An eyeballed value for the maximum time it takes for a page to animate forward
+// if the user releases a page mid swipe.
+const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
+
+// The maximum time for a page to get reset to it's original position if the
+// user releases a page mid swipe.
+const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
 // Barrier color for a Cupertino modal barrier.
 const Color _kModalBarrierColor = Color(0x6604040F);
@@ -151,7 +162,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 350);
+  // A relatively rigorous eyeball estimation.
+  Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
   Color get barrierColor => null;
@@ -219,7 +231,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     // with forms, then do not allow the user to dismiss the route with a swipe.
     if (route.hasScopedWillPopCallback)
       return false;
-    // Fullscreen dialogs aren't dismissable by back swipe.
+    // Fullscreen dialogs aren't dismissible by back swipe.
     if (route.fullscreenDialog)
       return false;
     // If we're in an animation already, we cannot be manually swiped.
@@ -253,7 +265,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   }
 
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
-  // gesture is detected. The returned controller handles all of the subsquent
+  // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
     assert(!_popGestureInProgress.contains(route));
@@ -345,20 +357,26 @@ class CupertinoPageTransition extends StatelessWidget {
     @required bool linearTransition,
   }) : assert(linearTransition != null),
        _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
+         // The curves below have been rigorously derived from plots of native
+         // iOS animation frames. Specifically, a video was taken of a page
+         // transition animation and the distance in each frame that the page
+         // moved was measured. A best fit bezier curve was the fitted to the
+         // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
+         // reflection over the origin of linearToEaseIn.
          CurvedAnimation(
            parent: primaryRouteAnimation,
-           curve: Curves.easeOut,
-           reverseCurve: Curves.easeIn,
+           curve: Curves.linearToEaseOut,
+           reverseCurve: Curves.easeInToLinear,
          )
        ).drive(_kRightMiddleTween),
        _secondaryPositionAnimation = CurvedAnimation(
          parent: secondaryRouteAnimation,
-         curve: Curves.easeOut,
-         reverseCurve: Curves.easeIn,
+         curve: Curves.linearToEaseOut,
+         reverseCurve: Curves.easeInToLinear,
        ).drive(_kMiddleLeftTween),
        _primaryShadowAnimation = CurvedAnimation(
          parent: primaryRouteAnimation,
-         curve: Curves.easeOut,
+         curve: Curves.linearToEaseOut,
        ).drive(_kGradientShadowTween),
        super(key: key);
 
@@ -518,13 +536,19 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    // For devices with notches, the drag area needs to be larger on the side
+    // that has the notch.
+    double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
+                           MediaQuery.of(context).padding.left :
+                           MediaQuery.of(context).padding.right;
+    dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
     return Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
         widget.child,
         PositionedDirectional(
           start: 0.0,
-          width: _kBackGestureWidth,
+          width: dragAreaWidth,
           top: 0.0,
           bottom: 0.0,
           child: Listener(
@@ -586,13 +610,32 @@ class _CupertinoBackGestureController<T> {
     // Fling in the appropriate direction.
     // AnimationController.fling is guaranteed to
     // take at least one frame.
-    if (velocity.abs() >= _kMinFlingVelocity) {
-      controller.fling(velocity: -velocity);
-    } else if (controller.value <= 0.5) {
-      controller.fling(velocity: -1.0);
+    //
+    // This curve has been determined through rigorously eyeballing native iOS
+    // animations.
+    const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    bool animateForward;
+
+    // If the user releases the page before mid screen with sufficient velocity,
+    // or after mid screen, we should animate the page out. Otherwise, the page
+    // should be animated back in.
+    if (velocity.abs() >= _kMinFlingVelocity)
+      animateForward = velocity > 0 ? false : true;
+    else
+      animateForward = controller.value > 0.5 ? true : false;
+
+    if (animateForward) {
+      // The closer the panel is to dismissing, the shorter the animation is.
+      // We want to cap the animation time, but we want to use a linear curve
+      // to determine it.
+      final int droppedPageForwardAnimationTime = min(lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
+                                   _kMaxPageBackAnimationTime);
+      controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      controller.fling(velocity: 1.0);
+      final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
+      controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
     }
+
     assert(controller.isAnimating);
     assert(controller.status != AnimationStatus.completed);
     assert(controller.status != AnimationStatus.dismissed);
@@ -886,6 +929,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
+///
 ///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.

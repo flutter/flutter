@@ -226,7 +226,7 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
@@ -243,6 +243,7 @@ abstract class Gradient {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -460,7 +461,7 @@ class LinearGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [RadialGradient] to paint on a canvas directly, see [createShader].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This function draws a gradient that looks like a sun in a blue sky.
 ///
@@ -481,6 +482,7 @@ class LinearGradient extends Gradient {
 ///   canvas.drawRect(rect, paint);
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -718,7 +720,7 @@ class RadialGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [SweepGradient] to paint on a canvas directly, see [createShader].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample draws a different color in each quadrant.
 ///
@@ -741,6 +743,7 @@ class RadialGradient extends Gradient {
 ///   ),
 ///  )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
