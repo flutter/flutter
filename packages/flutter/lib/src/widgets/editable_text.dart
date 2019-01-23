@@ -911,7 +911,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if ((_currentCaretRect == null && _selectionOverlay == null) || !_scrollController.hasClients){
         return;
       }
-      final rectToScrollTo = _currentCaretRect ?? _selectionOverlay.renderObject.getLocalRectForCaret(TextPosition(offset: 0));
+      final Rect rectToScrollTo = _currentCaretRect ?? _selectionOverlay.renderObject.getLocalRectForCaret(const TextPosition(offset: 0));
       final double scrollOffsetForCaret =  _getScrollOffsetForCaret(rectToScrollTo);
       _scrollController.animateTo(
         scrollOffsetForCaret,
