@@ -173,12 +173,12 @@ class CrashReportSender {
     if (reportConfig == 'never') {
       printStatus('''
 Engine crash reporting skipped.
-============================================================================
+===========================================================================
 If you would like to enable opt-in or always send engine crash reports, use:
   flutter config --engine-crash-reporting ask
 or
   flutter config --engine-crash-reporting always
-============================================================================''');
+===========================================================================''');
       return;
     }
     printStatus('The following error report has been generated:', emphasis: true);
@@ -206,7 +206,7 @@ Devices: $devices
         config.setValue('engine-crash-reporting', 'always');
         reportConfig = 'always';
       } else if (input == 'e' || input == 'never') {
-        config.setValue('engine-crash-reporting', 'never')
+        config.setValue('engine-crash-reporting', 'never');
         reportConfig = 'never';
       } else if (input == 'y' || input == 'yes') {
         // Nothing to do.
@@ -219,14 +219,14 @@ Devices: $devices
     }
     try {
       printStatus('Sending crash report to Google.');
-      if (always) {
+      if (reportConfig == 'always') {
         printStatus('''
-============================================================================
+===========================================================================
 If you would like to stop automatically sending engine crash reports, use:
   flutter config --engine-crash-reporting ask
 or
   flutter config --engine-crash-reporting never
-============================================================================''');
+===========================================================================''');
       }
 
       final String flutterVersion = getFlutterVersion();
