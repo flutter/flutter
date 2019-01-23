@@ -2621,8 +2621,8 @@ class SemanticsConfiguration {
   /// is set on the same node, all previously painted siblings and cousins up
   /// until the next ancestor that is a semantic boundary are dropped.
   ///
-  /// Paint order as established by [visitChildrenForSemantics] is used to
-  /// determine if a node is previous to this one.
+  /// Paint order as established by [RenderObject.visitChildrenForSemantics] is
+  /// used to determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS

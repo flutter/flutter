@@ -913,13 +913,24 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       ScaffoldGeometry geometry = listenerState.cache.value;
-
       final Rect transitioningFabRect = geometry.floatingActionButtonArea;
+
+      final double transitioningRotation = tester.widget<RotationTransition>(
+        find.byType(RotationTransition),
+      ).turns.value;
 
       await tester.pump(const Duration(seconds: 3));
       geometry = listenerState.cache.value;
       final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
       final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
+
+      final double completedRotation = tester.widget<RotationTransition>(
+        find.byType(RotationTransition),
+      ).turns.value;
+
+      expect(transitioningRotation, lessThan(1.0));
+
+      expect(completedRotation, equals(1.0));
 
       expect(
         geometry.floatingActionButtonArea,

@@ -33,7 +33,6 @@ void main() {
       expect(await device.uninstallApp(null), true);
       expect(await device.isLatestBuildInstalled(null), true);
       expect(await device.isAppInstalled(null), true);
-      expect(await device.stopApp(null), true);
     });
 
 
