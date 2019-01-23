@@ -24,7 +24,9 @@ dependencies:
   linter: 0.1.74
   meta: 1.1.6
   multicast_dns:
-    path: ../../../flutter_packages/packages/multicast_dns
+    git:
+      url: https://github.com/dnfield/flutter_packages
+      path: packages/multicast_dns
   mustache: 1.0.2
   package_config: 1.0.5
   platform: 2.2.0
