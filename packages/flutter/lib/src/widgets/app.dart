@@ -929,7 +929,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       }
       // Look for language+country match.
       if (userLocale.countryCode != null) {
-      final Locale match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
+        final Locale match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
         if (match != null) {
           return match;
         }

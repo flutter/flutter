@@ -41,8 +41,8 @@ void main() {
       final StringBuffer stdout = StringBuffer();
       final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
       try {
-            await _flutter.hotReload();
-            expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+        await _flutter.hotReload();
+        expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
       } finally {
         await subscription.cancel();
       }

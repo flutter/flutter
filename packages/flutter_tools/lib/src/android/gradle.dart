@@ -448,8 +448,9 @@ Future<void> _buildGradleProjectV2(
 
     if (buildInfo.createPatch) {
       final AndroidApk package = AndroidApk.fromApk(apkFile);
-    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');if (!baselineApkFile.existsSync())
+      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
+      if (!baselineApkFile.existsSync())
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');

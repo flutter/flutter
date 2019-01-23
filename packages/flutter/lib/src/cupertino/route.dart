@@ -231,7 +231,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     // with forms, then do not allow the user to dismiss the route with a swipe.
     if (route.hasScopedWillPopCallback)
       return false;
-    // Fullscreen dialogs aren't dismissable by back swipe.
+    // Fullscreen dialogs aren't dismissible by back swipe.
     if (route.fullscreenDialog)
       return false;
     // If we're in an animation already, we cannot be manually swiped.

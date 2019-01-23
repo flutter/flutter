@@ -82,11 +82,11 @@ abstract class FlutterTestDriver {
   }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger)
-        arguments.add('--start-paused');
+      arguments.add('--start-paused');
     if (_printDebugOutputToStdOut)
-        arguments.add('--verbose');
+      arguments.add('--verbose');
     if (pidFile != null) {
-        arguments.addAll(<String>['--pid-file', pidFile.path]);
+      arguments.addAll(<String>['--pid-file', pidFile.path]);
     }
     if (script != null) {
       arguments.add(script);
