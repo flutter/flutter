@@ -339,7 +339,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
 
   /// Color that applies to empty [Container] returned from [build] method once
   /// [refreshState] is set to [RefreshIndicatorMode.inactive].
-  /// 
+  ///
   /// Can be null, in which case no color will be provided.
   final Color inactiveOverscrollColor;
 
