@@ -59,7 +59,7 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
     root_layer_->UpdateScene(context);
   }
   if (root_layer_->needs_painting()) {
-    frame.AddPaintedLayer(root_layer_.get());
+    frame.AddPaintLayer(root_layer_.get());
   }
   container.AddChild(transform.entity_node());
 }

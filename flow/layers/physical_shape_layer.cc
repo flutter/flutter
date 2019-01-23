@@ -69,7 +69,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
   SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
-      frame.AddPaintedLayer(layer.get());
+      frame.AddPaintLayer(layer.get());
     }
   }
 
