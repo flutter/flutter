@@ -668,7 +668,7 @@ class RenderEditable extends RenderBox {
     assert(value != null);
     if (maxLinesIncrementalHeight == value)
       return;
-    maxLinesIncrementalHeight = value;
+    _maxLinesIncrementalHeight = value;
     markNeedsTextLayout();
   }
 
