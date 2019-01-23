@@ -438,6 +438,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return engineSourcePath;
   }
 
+  String stripCpu(String name) {
+    // Keep in sync with --android-cpu from flutter/tools/gn in flutter engine.
+    const List<String> cpus = ['_arm', '_x64', '_x86', '_arm64'];
+    for (String cpu in cpus) {
+      if (name.endsWith(cpu)) {
+        return name.substring(0, name.length - cpu.length);
+      }
+    }
+    return name;
+  }
+
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
@@ -453,9 +464,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Determine the host engine directory associated with the local engine:
     // * strip '_sim_' since there are no host simulator builds.
+    // * strip the CPU suffix if specified since host never specifies CPU.
     // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    final String hostBasename = 'host_' + stripCpu(basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1));
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
     if (!fs.isDirectorySync(engineHostBuildPath)) {
       throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
