@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -15,8 +14,6 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -1022,28 +1019,5 @@ void main() {
 
     }, overrides: contextOverrides);
 
-  });
-
-  group('Warnings', () {
-    testUsingContext('fails when target not found', () async {
-      final ChannelCommand channelCommand = ChannelCommand();
-      applyMocksToCommand(channelCommand);
-      try {
-        await createTestCommandRunner(channelCommand).run(<String>['channel', 'master']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
-      }
-
-      final BuildCommand buildCommand = BuildCommand();
-      applyMocksToCommand(buildCommand);
-      try {
-        await createTestCommandRunner(buildCommand).run(<String>['build', 'apk']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
-      }
-
-    });
   });
 }
