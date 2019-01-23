@@ -20,7 +20,6 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockAndroidSdk extends Mock implements AndroidSdk {}
