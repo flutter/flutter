@@ -21,9 +21,9 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit {}
-      expect(testLogger.statusText, contains('🐉 This is the master channel. Shipping apps from this channel is not recommended as it has not\n been as heavily tested as the stable channel. To build using the stable channel, consider using:\n    flutter channel stable'));
+      } finally {}
       Cache.releaseLockEarly();
+      expect(testLogger.statusText, contains('🐉 This is the master channel. Shipping apps from this channel is not recommended as it has not'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => MockVersion('master'),
     });
@@ -32,9 +32,9 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit {}
-      expect(testLogger.statusText, '');
+      } finally {}
       Cache.releaseLockEarly();
+      expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
       FlutterVersion: () => MockVersion('stable'),
     });
@@ -43,9 +43,9 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit {}
-      expect(testLogger.statusText, '');
+      } finally {}
       Cache.releaseLockEarly();
+      expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
       FlutterVersion: () => MockVersion('dev'),
     });
@@ -54,10 +54,10 @@ void main() {
       final MockBuildCommand buildCommand = MockBuildCommand();
       try {
         await createTestCommandRunner(buildCommand).run(<String>['build', 'test']);
-      } on ToolExit {}
+      } finally {}
       print(testLogger.statusText);
-      expect(testLogger.statusText, '');
       Cache.releaseLockEarly();
+      expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
       FlutterVersion: () => MockVersion('beta'),
     });
