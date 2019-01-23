@@ -22,7 +22,7 @@ abstract class MacOSApp extends ApplicationPackage {
    /// Xcode build. By default, this is located under
    /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
    /// which is expected to start the application and send the observatory
-   /// port over standard out.
+   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
