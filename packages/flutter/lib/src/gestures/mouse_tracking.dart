@@ -51,9 +51,7 @@ class _MouseDetails {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return sourceTimeStamp == other.sourceTimeStamp
-        && globalPosition == other.globalPosition
-        && deviceId == other.deviceId;
+    return sourceTimeStamp == other.sourceTimeStamp && globalPosition == other.globalPosition && deviceId == other.deviceId;
   }
 
   @override
