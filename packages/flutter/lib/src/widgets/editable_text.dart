@@ -933,7 +933,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     });
   }
-  
+
   double _lastBottomViewInset;
 
   @override
