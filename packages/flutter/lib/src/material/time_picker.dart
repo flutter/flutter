@@ -1669,15 +1669,31 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///    date picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
-  @required TimeOfDay initialTime
+  @required TimeOfDay initialTime,
+  TextDirection textDirection,
+  Locale locale
 }) async {
   assert(context != null);
   assert(initialTime != null);
   assert(debugCheckHasMaterialLocalizations(context));
+  Widget child=_TimePickerDialog(initialTime: initialTime);
 
+  if (textDirection != null) {
+    child = Directionality(
+      textDirection: textDirection,
+      child: child,
+    );
+  }
+  if (locale != null) {
+    child = Localizations.override(
+      context: context,
+      locale: locale,
+      child: child,
+    );
+  }
   return await showDialog<TimeOfDay>(
     context: context,
-    builder: (BuildContext context) => _TimePickerDialog(initialTime: initialTime),
+    builder: (BuildContext context) => ListView(children: <Widget>[child],),
   );
 }
 
