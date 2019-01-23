@@ -95,6 +95,43 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     if (widget.disableScale) {
       return;
     }
+
+    // Don't allow a scale that moves the viewport outside of visibleSize
+    final Offset tl = fromViewport(
+      Offset(0, 0),
+      _translation,
+      _scale,
+      0.0,
+      widget.size,
+    );
+    final Offset tr = fromViewport(
+      Offset(widget.size.width, 0),
+      _translation,
+      _scale,
+      0.0,
+      widget.size,
+    );
+    final Offset bl = fromViewport(
+      Offset(0, widget.size.height),
+      _translation,
+      _scale,
+      0.0,
+      widget.size,
+    );
+    final Offset br = fromViewport(
+      Offset(widget.size.width, widget.size.height),
+      _translation,
+      _scale,
+      0.0,
+      widget.size,
+    );
+    if (!isInside(tl, widget.visibleSize)
+      || !isInside(tr, widget.visibleSize)
+      || !isInside(bl, widget.visibleSize)
+      || !isInside(br, widget.visibleSize)) {
+      return;
+    }
+
     __scale = scale.clamp(widget.minScale, widget.maxScale);
   }
 
@@ -152,6 +189,14 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
         ),
       ),
     );
+  }
+
+  // Returns true iff viewportPoint is inside sceneSize in scene coords.
+  static bool isInside(Offset offset, Size size) {
+    return offset.dx >= -size.width / 2
+      && offset.dx <= size.width / 2
+      && offset.dy >= -size.height / 2
+      && offset.dy <= size.height / 2;
   }
 
   // Get a matrix that will transform the origin of the scene with the given

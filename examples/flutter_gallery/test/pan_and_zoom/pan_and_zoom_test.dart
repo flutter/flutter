@@ -13,7 +13,7 @@ Offset getOffsetNext(Offset offset, Offset focalPointScene, Offset focalPointSce
 void main() {
   const Size SCREEN_SIZE = Size(411.4, 774.9);
 
-  test('Origin scale 1.0', () {
+  test('fromViewport: Origin scale 1.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -27,7 +27,7 @@ void main() {
     expect(sceneOffset, const Offset(0,0));
   });
 
-  test('Origin scale 2.0', () {
+  test('fromViewport: Origin scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -41,7 +41,7 @@ void main() {
     expect(sceneOffset, const Offset(0, 0));
   });
 
-  test('Origin scale 0.8', () {
+  test('fromViewport: Origin scale 0.8', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -55,7 +55,7 @@ void main() {
     expect(sceneOffset, const Offset(0, 0));
   });
 
-  test('SP off origin scale 1.0', () {
+  test('fromViewport: SP off origin scale 1.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -69,7 +69,7 @@ void main() {
     expect(sceneOffset, const Offset(100, 100));
   });
 
-  test('SP off origin, scale 2.0', () {
+  test('fromViewport: SP off origin, scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -83,7 +83,7 @@ void main() {
     expect(sceneOffset, const Offset(50, 50));
   });
 
-  test('SP off origin, translated, scale 2.0', () {
+  test('fromViewport: SP off origin, translated, scale 2.0', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -97,7 +97,7 @@ void main() {
     expect(sceneOffset, const Offset(75, 75));
   });
 
-  test('SP off origin, translated, scale 0.5', () {
+  test('fromViewport: SP off origin, translated, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -111,7 +111,7 @@ void main() {
     expect(sceneOffset, const Offset(225, 225));
   });
 
-  test('SP off origin unevenly, translated, scale 0.5', () {
+  test('fromViewport: SP off origin unevenly, translated, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -125,7 +125,7 @@ void main() {
     expect(sceneOffset, const Offset(47, 37));
   });
 
-  test('SP on origin, translated unevenly, scale 0.5', () {
+  test('fromViewport: SP on origin, translated unevenly, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -139,7 +139,7 @@ void main() {
     expect(sceneOffset, const Offset(16, 18));
   });
 
-  test('Slightly off origin unevenly, scale 0.5', () {
+  test('fromViewport: Slightly off origin unevenly, scale 0.5', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -154,7 +154,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(6, .1));
   });
 
-  test('Real, no rotation', () {
+  test('fromViewport: Real, no rotation', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -172,7 +172,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(-86.5375, .1));
   });
 
-  test('Tapping on the origin with scale and translation', () {
+  test('fromViewport: Tapping on the origin with scale and translation', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -187,7 +187,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(0, .1));
   });
 
-  test('SP off origin, translated, scale 2.0, rotated 180deg', () {
+  test('fromViewport: SP off origin, translated, scale 2.0, rotated 180deg', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -202,7 +202,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(-75, .1));
   });
 
-  test('SP off origin, translated, scale 2.0, rotated 90deg', () {
+  test('fromViewport: SP off origin, translated, scale 2.0, rotated 90deg', () {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -217,7 +217,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(75, .1));
   });
 
-  test('Origin, rotated 90deg with focalPoint', () {
+  test('fromViewport: Origin, rotated 90deg with focalPoint', () {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -232,7 +232,7 @@ void main() {
     expect(sceneOffset.dy, closeTo(0, .1));
   });
 
-  test('SP off origin, rotated 90deg with focalPoint', () {
+  test('fromViewport: SP off origin, rotated 90deg with focalPoint', () {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
@@ -245,5 +245,23 @@ void main() {
     );
     expect(sceneOffset.dx, closeTo(220, .1));
     expect(sceneOffset.dy, closeTo(-10, .1));
+  });
+
+  test('isInside: origin is in center of screen', () {
+    const Offset offset = Offset(0, 0);
+
+    expect(
+      TransformInteractionState.isInside(offset, SCREEN_SIZE),
+      true,
+    );
+  });
+
+  test('isInside: just to left of visible area is not inside', () {
+    final Offset offset = Offset(-SCREEN_SIZE.width / 2 - 1, 0);
+
+    expect(
+      TransformInteractionState.isInside(offset, SCREEN_SIZE),
+      false,
+    );
   });
 }
