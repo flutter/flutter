@@ -1,0 +1,17 @@
+name: flutter_build
+
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  build: 1.1.0
+  build_modules: 1.0.4
+  package_config: 1.0.5
+
+dev_dependencies:
+
+dartdoc:
+  # Exclude this package from the hosted API docs.
+  nodoc: true

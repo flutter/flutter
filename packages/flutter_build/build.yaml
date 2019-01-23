@@ -1,0 +1,16 @@
+# Read about `build.yaml` at https://pub.dartlang.org/packages/build_config
+builders:
+  kernel:
+    import: "package:flutter_build/flutter_build.dart"
+    builder_factories:
+      - "flutterKernelBuilder"
+    build_extensions:
+      ".dart":
+        - ".app.dill"
+        - ".packages"
+    auto_apply: root_package
+    build_to: cache
+    defaults:
+      generate_for:
+        include:
+          - lib/**
