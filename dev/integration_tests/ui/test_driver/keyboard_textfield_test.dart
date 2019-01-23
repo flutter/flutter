@@ -26,6 +26,8 @@ void main() {
 
       final SerializableFinder listViewFinder = find.byValueKey(keys.kListView);
       final SerializableFinder textFieldFinder = find.byValueKey(keys.kDefaultTextField);
+      final SerializableFinder autoSelectTextFieldFinder = find.byValueKey(keys.kAutoSelectTextField);
+      final SerializableFinder dismissButtonFinder = find.byValueKey(keys.kDismissButton);
       final SerializableFinder offsetFinder = find.byValueKey(keys.kOffsetText);
 
       // Align TextField with bottom edge to ensure it would be covered when keyboard comes up.
@@ -49,6 +51,32 @@ void main() {
 
       // Ensure the scroll offset changed appropriately when TextField scrolled back into view.
       expect(scrollOffsetWithKeyboard, greaterThan(scrollOffsetWithoutKeyboard));
+
+      // now do the same for the TextField with auto select
+      await driver.tap(dismissButtonFinder);
+      await Future<void>.delayed(const Duration(seconds: 1));
+
+      await driver.scrollUntilVisible(
+        listViewFinder,
+        autoSelectTextFieldFinder,
+        alignment: 1.0,
+        dyScroll: -20.0,
+      );
+      await driver.waitFor(autoSelectTextFieldFinder);
+      final double autoSelectScrollOffsetWithoutKeyboard = double.parse(await driver.getText(offsetFinder));
+
+      // Bring up keyboard
+      await driver.tap(autoSelectTextFieldFinder);
+      await Future<void>.delayed(const Duration(seconds: 1));
+
+      // Ensure that TextField is visible again
+      await driver.waitFor(autoSelectTextFieldFinder);
+      final double autoSelectScrollOffsetWithKeyboard = double.parse(await driver.getText(offsetFinder));
+
+      // Ensure the scroll offset changed appropriately when TextField scrolled back into view.
+      expect(autoSelectScrollOffsetWithKeyboard, greaterThan(autoSelectScrollOffsetWithoutKeyboard));
+
+
     });
   });
 }

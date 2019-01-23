@@ -908,22 +908,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (_currentCaretRect == null || !_scrollController.hasClients){
+      if ((_currentCaretRect == null && _selectionOverlay == null) || !_scrollController.hasClients){
         return;
       }
-      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(_currentCaretRect);
+      final rectToScrollTo = _currentCaretRect ?? _selectionOverlay.renderObject.getLocalRectForCaret(TextPosition(offset: 0));
+      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(rectToScrollTo);
       _scrollController.animateTo(
         scrollOffsetForCaret,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
       );
-      final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
+      final Rect newCaretRect = _getCaretRectAtScrollOffset(rectToScrollTo, scrollOffsetForCaret);
       // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
       final Rect inflatedRect = Rect.fromLTRB(
-          newCaretRect.left - widget.scrollPadding.left,
-          newCaretRect.top - widget.scrollPadding.top,
-          newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + widget.scrollPadding.bottom
+        newCaretRect.left - widget.scrollPadding.left,
+        newCaretRect.top - widget.scrollPadding.top,
+        newCaretRect.right + widget.scrollPadding.right,
+        newCaretRect.bottom + widget.scrollPadding.bottom
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
@@ -932,7 +933,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     });
   }
-
+  
   double _lastBottomViewInset;
 
   @override

@@ -33,6 +33,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final ScrollController _controller = ScrollController();
   double offset = 0.0;
 
+  TextEditingController _textEditingController;
+  FocusNode _focusNode;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +44,22 @@ class _MyHomePageState extends State<MyHomePage> {
         offset = _controller.offset;
       });
     });
+    _textEditingController = TextEditingController(
+      text: 'initial value',
+    );
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _textEditingController.selection = TextSelection(baseOffset: 0, extentOffset: _textEditingController.text.length);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _textEditingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,8 +78,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   height: MediaQuery.of(context).size.height,
                 ),
+                RaisedButton(
+                  key: const ValueKey<String>(keys.kDismissButton),
+                  child: const Text('Dismiss Keyboard'),
+                  onPressed: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
+                ),
                 const TextField(
                   key: ValueKey<String>(keys.kDefaultTextField),
+                ),
+                TextField(
+                  key: const ValueKey<String>(keys.kAutoSelectTextField),
+                  controller: _textEditingController,
+                  focusNode: _focusNode,
                 ),
               ],
             ),

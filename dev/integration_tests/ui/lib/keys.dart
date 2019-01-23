@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 const String kDefaultTextField = 'default_textfield';
+const String kAutoSelectTextField = 'auto_select_textfield';
+const String kDismissButton = 'dismiss_button';
 const String kHeightText = 'height_text';
 const String kUnfocusButton = 'unfocus_button';
 const String kOffsetText = 'offset_text';
