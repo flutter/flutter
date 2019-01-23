@@ -1915,7 +1915,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       // animation
       animationCurve = const Interval(0.5, 1, curve: Curves.linear);
     } else {
-      animationCurve = SuspendedCurve(
+      animationCurve = BottomSheetSuspendedCurve(
         widget.animationController.value,
         curve: _kBottomSheetCurve,
       );
