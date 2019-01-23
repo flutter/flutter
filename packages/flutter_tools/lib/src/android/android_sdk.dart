@@ -41,7 +41,7 @@ final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
 /// The minimum Android SDK version we support.
-const int minimumAndroidSdkVersion = 25;
+const int minimumAndroidSdkVersion = 28;
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
