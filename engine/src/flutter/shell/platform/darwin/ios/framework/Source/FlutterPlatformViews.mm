@@ -416,7 +416,7 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
   [_flutterView touchesEnded:touches withEvent:event];
-  self.state = UIGestureRecognizerStateEnded;
+  self.state = UIGestureRecognizerStateFailed;
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
