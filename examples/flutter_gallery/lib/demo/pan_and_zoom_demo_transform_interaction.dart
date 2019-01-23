@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'pan_and_zoom_demo_inertial_motion.dart';
@@ -57,7 +58,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // A positive y offset moves the scene down, viewport up.
   // Start out looking at the center.
   Offset __translation = const Offset(0, 0);
-  Offset _translateFrom; // Point where a single translation began
+  Offset _translateFromScene; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
   double __scale = 1.0;
   double _rotationStart;
@@ -194,14 +195,29 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     _controller.stop();
     setState(() {
       _scaleStart = _scale;
-      _translateFrom = details.focalPoint;
+      _translateFromScene = fromViewport(
+        details.focalPoint,
+        _translation,
+        _scale,
+        0.0,
+        widget.size,
+      );
       _rotationStart = _rotation;
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
+      final Offset focalPointScene = fromViewport(
+        details.focalPoint,
+        _translation,
+        _scale,
+        0.0, // rotation is 0 because translation happens before rotation
+        widget.size,
+      );
+      if (_rotationStart != null && details.rotation != 0.0) {
+        _rotation = _rotationStart - details.rotation;
+      }
       if (_scaleStart != null) {
-        final Offset focalPointScene = fromViewport(details.focalPoint, _translation, _scale, _rotation, widget.size);
         _scale = _scaleStart * details.scale;
 
         if (details.scale != 1.0) {
@@ -209,20 +225,27 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
           // same place in the scene. That means that the focal point of the
           // scale should be on the same place in the scene before and after the
           // scale.
-          final Offset focalPointSceneNext = fromViewport(details.focalPoint, _translation, _scale, _rotation, widget.size);
+          final Offset focalPointSceneNext = fromViewport(
+            details.focalPoint,
+            _translation,
+            _scale,
+            0.0,
+            widget.size,
+          );
           _translation = _translation + focalPointSceneNext - focalPointScene;
         }
       }
-      if (_translateFrom != null && details.scale == 1.0) {
-        // The coordinates given by details.focalPoint are viewport coordinates
-        // that are not affected by _scale. So, dividing by scale here properly
-        // gives us more distance when zoomed out and less when zoomed in so
-        // that the point under the user's finger stays constant during a drag.
-        _translation = _translation + (details.focalPoint - _translateFrom) / _scale;
-        _translateFrom = details.focalPoint;
-      }
-      if (_rotationStart != null && details.rotation != 0.0) {
-        _rotation = _rotationStart - details.rotation;
+      if (_translateFromScene != null && details.scale == 1.0) {
+        // Translate so that the same point in the scene is underneath the
+        // focal point before and after the movement.
+        _translation = _translation + (focalPointScene - _translateFromScene);
+        _translateFromScene = fromViewport(
+          details.focalPoint,
+          _translation,
+          _scale,
+          0.0,
+          widget.size,
+        );
       }
     });
   }
@@ -230,7 +253,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     setState(() {
       _scaleStart = null;
       _rotationStart = null;
-      _translateFrom = null;
+      _translateFromScene = null;
     });
 
     _animation?.removeListener(_onAnimate);

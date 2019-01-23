@@ -42,7 +42,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
         maxScale: 2.5,
         minScale: 0.8,
         visibleSize: const Size(1600, 2400),
-        disableRotation: true,
       ),
     );
   }
