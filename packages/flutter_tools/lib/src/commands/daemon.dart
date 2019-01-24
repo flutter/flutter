@@ -99,7 +99,7 @@ class Daemon {
       _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
-            _onExitCompleter.complete(0);
+          _onExitCompleter.complete(0);
       }
     );
   }
