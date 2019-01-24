@@ -485,41 +485,6 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool snippet --template=stateful_widget}
-///
-/// This sample shows a `DropdownButton` whose value is one of
-/// 'One', 'Two', 'Free', or 'Four'.
-///
-/// ```dart preamble
-/// String dropdownValue = 'One';
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: DropdownButton<String>(
-///         value: dropdownValue,
-///         onChanged: (String newValue) {
-///           setState(() {
-///             dropdownValue = newValue;
-///           });
-///         },
-///         items: <String>['One', 'Two', 'Free', 'Four']
-///           .map<DropdownMenuItem<String>>((String value) {
-///             return DropdownMenuItem<String>(
-///               value: value,
-///               child: Text(value),
-///             );
-///           })
-///           .toList(),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
 /// If the [onChanged] callback is null or the list of [items] is null
 /// then the dropdown button will be disabled, i.e. its arrow will be
 /// displayed in grey and it will not respond to input. A disabled button
