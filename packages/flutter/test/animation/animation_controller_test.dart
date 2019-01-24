@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
@@ -657,5 +658,21 @@ void main() {
       expect(controller.value < fastController.value, true);
       debugSemanticsDisableAnimations = null;
     });
+  });
+
+  test('AnimationController methods assert _ticker is not null', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    controller.dispose();
+
+    expect(() => controller.animateBack(0), throwsAssertionError);
+    expect(() => controller.animateTo(0), throwsAssertionError);
+    expect(() => controller.animateWith(GravitySimulation(0, 0, 0, 0)), throwsAssertionError);
+    expect(() => controller.stop(), throwsAssertionError);
+    expect(() => controller.forward(), throwsAssertionError);
+    expect(() => controller.reverse(), throwsAssertionError);
+
   });
 }
