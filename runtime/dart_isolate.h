@@ -88,6 +88,7 @@ class DartIsolate : public UIDartState {
   DartVM* GetDartVM() const;
 
   fml::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
+
   fml::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
   std::weak_ptr<DartIsolate> GetWeakIsolatePtr();
