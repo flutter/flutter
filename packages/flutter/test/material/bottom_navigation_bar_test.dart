@@ -120,8 +120,8 @@ void main() {
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 480.0);
-    expect(actions.elementAt(1).size.width, 320.0);
+    expect(actions.elementAt(0).size.width, 400.0);
+    expect(actions.elementAt(1).size.width, 400.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -148,8 +148,8 @@ void main() {
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 320.0);
-    expect(actions.elementAt(1).size.width, 480.0);
+    expect(actions.elementAt(0).size.width, 400.0);
+    expect(actions.elementAt(1).size.width, 400.0);
   });
 
   testWidgets('BottomNavigationBar multiple taps test', (WidgetTester tester) async {
@@ -393,7 +393,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(68.0));
+    expect(box.size.height, equals(66.0));
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
