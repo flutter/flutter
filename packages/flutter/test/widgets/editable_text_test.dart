@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,13 +14,30 @@ import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
-void main() {
-  final TextEditingController controller = TextEditingController();
-  final FocusNode focusNode = FocusNode();
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
-  const TextStyle textStyle = TextStyle();
-  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+RenderEditable findRenderEditable(WidgetTester tester) {
+  final RenderObject root = tester.renderObject(find.byType(EditableText));
+  expect(root, isNotNull);
 
+  RenderEditable renderEditable;
+  void recursiveFinder(RenderObject child) {
+    if (child is RenderEditable) {
+      renderEditable = child;
+      return;
+    }
+    child.visitChildren(recursiveFinder);
+  }
+  root.visitChildren(recursiveFinder);
+  expect(renderEditable, isNotNull);
+  return renderEditable;
+}
+
+final TextEditingController controller = TextEditingController();
+final FocusNode focusNode = FocusNode();
+final FocusScopeNode focusScopeNode = FocusScopeNode();
+const TextStyle textStyle = TextStyle();
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
   });
@@ -88,6 +104,7 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
+    expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
   });
 
@@ -525,113 +542,6 @@ void main() {
 
     expect(changedValue, clipboardContent);
   });
-
-  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
-    String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          selectionControls: materialTextSelectionControls,
-          keyboardType: TextInputType.text,
-          onChanged: (String value) {
-            changedValue = value;
-          },
-          cursorWidth: 15.0,
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-
-    // Populate a fake clipboard.
-    const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
-
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    await tester.pump();
-
-    await tester.tap(find.text('PASTE'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.0.png'),
-    );
-  }, skip: !Platform.isLinux);
-
-  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
-    String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          selectionControls: materialTextSelectionControls,
-          keyboardType: TextInputType.text,
-          onChanged: (String value) {
-            changedValue = value;
-          },
-          cursorWidth: 15.0,
-          cursorRadius: const Radius.circular(3.0),
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-
-    // Populate a fake clipboard.
-    const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
-
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    await tester.pump();
-
-    await tester.tap(find.text('PASTE'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.0.png'),
-    );
-  }, skip: !Platform.isLinux);
 
   testWidgets('Does not lose focus by default when "next" action is pressed',
       (WidgetTester tester) async {
@@ -1715,6 +1625,98 @@ testWidgets(
     semantics.dispose();
   });
 
+  testWidgets('password fields become obscured with the right semantics when set',
+      (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    const String originalText = 'super-secret-password!!1';
+    controller.text = originalText;
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    const String expectedValue = '••••••••••••••••••••••••';
+
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                          ],
+                          value: originalText,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true,
+            ignoreId: true));
+
+    // Now change it to make it obscure text.
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(findRenderEditable(tester).text.text, expectedValue);
+
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
+                            SemanticsFlag.isFocused,
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true,
+            ignoreId: true));
+
+    semantics.dispose();
+  });
+
   group('a11y copy/cut/paste', () {
     Future<void> _buildApp(
         MockTextSelectionControls controls, WidgetTester tester) {
@@ -1946,163 +1948,6 @@ testWidgets(
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
-  });
-
-  RenderEditable findRenderEditable(WidgetTester tester) {
-    final RenderObject root = tester.renderObject(find.byType(EditableText));
-    expect(root, isNotNull);
-
-    RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditable) {
-        renderEditable = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderEditable, isNotNull);
-    return renderEditable;
-  }
-
-  testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
-    final FocusNode focusNode = FocusNode();
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
-
-    expect(controller.selection.baseOffset, 29);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
-
-    // But we have not yet set the offset because the user is not done placing the cursor.
-    expect(controller.selection.baseOffset, 29);
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-    // The cursor has been set.
-    expect(controller.selection.baseOffset, 10);
-  });
-
-  testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
-    final FocusNode focusNode = FocusNode();
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
-
-    expect(controller.selection.baseOffset, 29);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Moves the cursor super far right
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2100, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
-
-    // After peaking the cursor, we move in the opposite direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(1400, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-    // The cursor has been set.
-    expect(controller.selection.baseOffset, 8);
-
-    // Go in the other direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5010, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
-
-    // Move back in the opposite direction only a few hundred.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-4850, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-
-    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
