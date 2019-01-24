@@ -150,6 +150,9 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   @override
   void initState() {
     super.initState();
+    _visibleRect = widget.visibleRect != null
+      ? widget.visibleRect
+      : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
     if (widget.initialTranslation != null) {
       _translation = widget.initialTranslation;
     }
@@ -159,9 +162,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     if (widget.initialRotation != null) {
       _rotation = widget.initialRotation;
     }
-    _visibleRect = widget.visibleRect != null
-      ? widget.visibleRect
-      : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
     _controller = AnimationController(
       vsync: this,
     );

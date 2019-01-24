@@ -57,6 +57,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           visibleSize.width,
           visibleSize.height,
         ),
+        initialTranslation: Offset(screenSize.width / 2, screenSize.height / 2),
         onTapUp: _onTapUp,
         size: screenSize,
         maxScale: 2.5,
