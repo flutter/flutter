@@ -1434,7 +1434,7 @@ class RenderEditable extends RenderBox {
       _caretPrototype.right + sizeAdjustmentX,
       _caretPrototype.bottom + sizeAdjustmentY
     );
-    
+
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
