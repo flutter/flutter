@@ -58,6 +58,7 @@ class BuildRunner {
     bool trackWidgetCreation,
     bool targetProductVm,
     String mainPath,
+    List<String> extraFrontEndOptions,
   }) async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final String frontendServerPath = artifacts.getArtifactPath(
@@ -72,16 +73,17 @@ class BuildRunner {
       'run',
       'build_runner',
       'build',
-      '--define', '"flutter_build|kernel=disabled=false"',
-      '--define', '"flutter_build|kernel=aot=$aot"',
-      '--define', '"flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn"',
-      '--define', '"flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation"',
-      '--define', '"flutter_build|kernel=targetProductVm=$targetProductVm"',
-      '--define', '"flutter_build|kernel=mainPath=$mainPath"',
-      '--define', '"flutter_build|kernel=packagesPath=$packagesPath"',
-      '--define', '"flutter_build|kernel=sdkRoot=$sdkRoot"',
-      '--define', '"flutter_build|kernel=frontendServerPath=$frontendServerPath"',
-      '--define', '"flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath"',
+      '--define', 'flutter_build|kernel=disabled=false',
+      '--define', 'flutter_build|kernel=aot=$aot',
+      '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
+      '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
+      '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
+      '--define', 'flutter_build|kernel=mainPath=$mainPath',
+      '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
+      '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
+      '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
+      '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
+      '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
     ]);
     process.stdout
       .transform(utf8.decoder)
@@ -93,28 +95,29 @@ class BuildRunner {
       .listen(_handleError);
     final int exitCode = await process.exitCode;
     if (exitCode != 0) {
-      throw Exception('build_runner failed');
+      throw Exception('build_runner exited with non-zero exit code: $exitCode');
     }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
     final Directory dartTool = flutterProject.dartTool;
     final String projectName = flutterProject.manifest.appName;
-    final Directory projectDirectory = dartTool
+    final Directory generatedDirectory = dartTool
       .absolute
       .childDirectory('build')
       .childDirectory('generated')
       .childDirectory(projectName);
-    if (!await projectDirectory.exists()) {
-      throw Exception('build_runner failed');
+    if (!await generatedDirectory.exists()) {
+      throw Exception('build_runner cannot find generated directory');
     }
+    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
     final File packagesFile = fs.file(
-      fs.path.join(projectDirectory.path, 'lib', mainPath, '.packages')
+      fs.path.join(generatedDirectory.path,  fs.path.setExtension(relativeMain, '.packages'))
     );
     final File dillFile = fs.file(
-      fs.path.join(projectDirectory.path, 'lib', mainPath, '.app.dill')
+      fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
     if (!await packagesFile.exists() || !await dillFile.exists()) {
-      throw Exception('build_runner failed');
+      throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
     return BuildResult(packagesFile, dillFile);
   }
