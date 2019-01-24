@@ -436,6 +436,11 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(
+      _ticker != null,
+      'AnimationController.forward() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
@@ -464,6 +469,11 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(
+      _ticker != null,
+      'AnimationController.reverse() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
@@ -483,6 +493,11 @@ class AnimationController extends Animation<double>
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
   TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear }) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateTo() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.forward;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
@@ -500,6 +515,11 @@ class AnimationController extends Animation<double>
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.dismissed].
   TickerFuture animateBack(double target, { Duration duration, Curve curve = Curves.linear }) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateBack() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.reverse;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
@@ -626,6 +646,11 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   TickerFuture animateWith(Simulation simulation) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateWith() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     stop();
     return _startSimulation(simulation);
   }
@@ -662,6 +687,11 @@ class AnimationController extends Animation<double>
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which restart the animation controller.
   void stop({ bool canceled = true }) {
+    assert(
+      _ticker != null,
+      'AnimationController.stop() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _simulation = null;
     _lastElapsedDuration = null;
     _ticker.stop(canceled: canceled);
