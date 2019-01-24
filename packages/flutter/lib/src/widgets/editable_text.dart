@@ -228,7 +228,7 @@ class EditableText extends StatefulWidget {
     this.paintCursorAboveText = false,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -841,6 +841,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   : TextInputAction.done
               ),
               textCapitalization: widget.textCapitalization,
+              keyboardAppearance: widget.keyboardAppearance,
           )
       )..setEditingState(localValue);
     }

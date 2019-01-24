@@ -302,10 +302,6 @@ class CupertinoTextField extends StatefulWidget {
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
-  ///
   /// ## Limitations
   ///
   /// The CupertinoTextField does not currently count Unicode grapheme clusters
@@ -614,7 +610,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
-    final TextStyle textStyle = widget.style ?? CupertinoTheme.of(context).textTheme.textStyle;
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final TextStyle textStyle = widget.style ?? themeData.textTheme.textStyle;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -647,7 +645,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           paintCursorAboveText: true,
           backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
-          keyboardAppearance: widget.keyboardAppearance,
+          keyboardAppearance: keyboardAppearance,
         ),
       ),
     );
