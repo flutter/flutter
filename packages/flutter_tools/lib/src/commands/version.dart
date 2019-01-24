@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
@@ -15,11 +16,20 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
+  VersionCommand(): super() {
+    argParser.addFlag('force',
+      abbr: 'f',
+      help: 'Force to switch to those versions that are not support version command',
+    );
+  }
+
   @override
   final String name = 'version';
 
   @override
   final String description = 'List or switch flutter versions.';
+
+  Version minSupportedVersion = Version.parse('1.1.10');
 
   Future<List<String>> getTags() async {
     final RunResult runResult = await runCheckedAsync(
@@ -36,17 +46,31 @@ class VersionCommand extends FlutterCommand {
       tags.forEach(printStatus);
       return const FlutterCommandResult(ExitStatus.success);
     }
-    String version = argResults.rest[0];
-    if (!version.startsWith('v')) {
-      version = 'v$version';
-    }
-    if (!tags.contains(version)) {
+    final String version = argResults.rest[0].replaceFirst('v', '');
+    if (!tags.contains('v$version')) {
       printError('There is no version: $version');
     }
 
+    // check min supported version
+    final Version targetVersion = Version.parse(version);
+    bool withForce = false;
+    if (targetVersion < minSupportedVersion) {
+      if (!argResults['force']) {
+        printError(
+          'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
+          'which means if you switch to version $minSupportedVersion then you can not use version command.'
+          'If you really want to switch to version $targetVersion, please use `--force` flag: `flutter version --force $targetVersion`.'
+        );
+        return const FlutterCommandResult(ExitStatus.success);
+      }
+      withForce = true;
+    }
+
     try {
-      await runCheckedAsync(<String>['git', 'checkout', version],
-          workingDirectory: Cache.flutterRoot);
+      await runCheckedAsync(
+        <String>['git', 'checkout', 'v$version'],
+        workingDirectory: Cache.flutterRoot
+      );
     } catch (e) {
       throwToolExit('Unable to checkout version branch for version $version.');
     }
@@ -54,7 +78,7 @@ class VersionCommand extends FlutterCommand {
     final FlutterVersion flutterVersion = FlutterVersion();
 
     printStatus(
-        'Switching Flutter to version ${flutterVersion.frameworkVersion}...');
+      'Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}...');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
