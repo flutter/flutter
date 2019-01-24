@@ -303,6 +303,8 @@ class MDnsObservatoryPortDiscovery {
   /// The [MDnsClient] used to do a lookup.
   final MDnsClient client;
 
+  static const String dartObservatoryName = '_dartobservatory._tcp.local';
+
   /// Executes an mDNS query for a Dart Observatory port.
   ///
   /// The [applicationId] parameter may be used to specify which application
@@ -321,8 +323,6 @@ class MDnsObservatoryPortDiscovery {
   /// If it is null and there is only one available port, it will return that
   /// port regardless of what application the port is for.
   Future<int> queryForPort({String applicationId}) async {
-    const String dartObservatoryName = '_dartobservatory._tcp.local';
-
     printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
@@ -349,31 +349,18 @@ class MDnsObservatoryPortDiscovery {
             break;
           }
         }
-        throwToolExit('Did not find a observatory port advertised for $applicationId.');
+        if (domainName == null) {
+          throwToolExit('Did not find a observatory port advertised for $applicationId.');
+        }
       } else if (uniqueDomainNames.length > 1) {
-        printStatus('There are multiple observatory ports available:');
-        printStatus('');
-        for (int i = 0; i < uniqueDomainNames.length; i++) {
-          printStatus(
-            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$dartObservatoryName', '')}',
-            indent: 2,
-          );
+        final StringBuffer buffer = StringBuffer();
+        buffer.writeln('There are multiple observatory ports available.');
+        buffer.writeln('Rerun this command with one of the following passed in as the appId:');
+        buffer.writeln('');
+        for (final String uniqueDomainName in uniqueDomainNames) {
+          buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
-        printStatus('');
-        int selection;
-        while (selection == null) {
-          printStatus('Selection [1-${uniqueDomainNames.length}]: ', newline: false);
-          final String selectionString = io.stdin.readLineSync();
-          selection = int.tryParse(selectionString);
-          if (selection == null ||
-              selection < 1 ||
-              selection > pointerRecords.length) {
-            printStatus('Please enter a valid integer value between '
-                '1 and ${uniqueDomainNames.length}.\n');
-            selection = null;
-          }
-        }
-        domainName = uniqueDomainNames[selection - 1];
+        throwToolExit(buffer.toString());
       } else {
         domainName = pointerRecords[0].domainName;
       }
