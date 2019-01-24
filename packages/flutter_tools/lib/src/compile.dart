@@ -332,8 +332,7 @@ class ResidentCompiler {
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
     TargetModel targetModel = TargetModel.flutter,
-    bool unsafePackageSerialization,
-    List<String> experimentalFlags,
+    bool unsafePackageSerialization
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
@@ -343,8 +342,7 @@ class ResidentCompiler {
        _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
-       _unsafePackageSerialization = unsafePackageSerialization,
-       _experimentalFlags = experimentalFlags {
+       _unsafePackageSerialization = unsafePackageSerialization {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -360,7 +358,6 @@ class ResidentCompiler {
   final _StdoutHandler _stdoutHandler;
   String _initializeFromDill;
   bool _unsafePackageSerialization;
-  final List<String> _experimentalFlags;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -472,10 +469,6 @@ class ResidentCompiler {
     }
     if (_unsafePackageSerialization == true) {
       command.add('--unsafe-package-serialization');
-    }
-    if (_experimentalFlags != null) {
-      var expFlags = _experimentalFlags.join(",");
-      command.add('--enable-experiment=${expFlags}');
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
