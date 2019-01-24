@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -286,20 +287,25 @@ abstract class Route<T> {
 @immutable
 class RouteSettings {
   /// Creates data used to construct routes.
+  ///
+  /// The [arguments] parameter must not be null.
   const RouteSettings({
     this.name,
     this.isInitialRoute = false,
-  });
+    this.arguments = TypedDictionary.empty,
+  }) : assert(arguments != null);
 
   /// Creates a copy of this route settings object with the given fields
   /// replaced with the new values.
   RouteSettings copyWith({
     String name,
     bool isInitialRoute,
+    TypedDictionary arguments,
   }) {
     return RouteSettings(
       name: name ?? this.name,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
+      arguments: arguments ?? this.arguments,
     );
   }
 
@@ -313,8 +319,15 @@ class RouteSettings {
   /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
 
+  /// The arguments passed to this route.
+  ///
+  /// The arguments are key-value pairs, keyed by [Type], with values matching
+  /// the [Type]. For example, a key may be `MyArgumentsObject`, with a value
+  /// corresponding to an instance of `MyArgumentsObject`.
+  final TypedDictionary arguments;
+
   @override
-  String toString() => '"$name"';
+  String toString() => '$runtimeType("$name", $arguments)';
 }
 
 /// An interface for observing the behavior of a [Navigator].
@@ -725,6 +738,15 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
+  /// {@template flutter.widgets.navigator.pushNamed.arguments}
+  /// The provided `arguments` are passed to the pushed route via
+  /// [RouteSettings.arguments]. They are key-value pairs, keyed by [Type], with
+  /// values matching the [Type]. For example, a key may be `MyArgumentsObject`,
+  /// with a value corresponding to an instance of `MyArgumentsObject`.
+  ///
+  /// The `arguments` parameter must not be null.
+  /// {@endtemplate}
+  ///
   /// {@tool sample}
   ///
   /// Typical usage is as follows:
@@ -736,8 +758,13 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushNamed<T extends Object>(BuildContext context, String routeName) {
-    return Navigator.of(context).pushNamed<T>(routeName);
+  static Future<T> pushNamed<T extends Object>(
+    BuildContext context,
+    String routeName, {
+    TypedDictionary arguments = TypedDictionary.empty,
+   }) {
+    assert(arguments != null);
+    return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -773,6 +800,8 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  ///
   /// {@tool sample}
   ///
   /// Typical usage is as follows:
@@ -784,8 +813,14 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
-    return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, result: result);
+  static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
+    BuildContext context,
+    String routeName, {
+    TO result,
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
+    return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Pop the current route off the navigator that most tightly encloses the
@@ -821,6 +856,8 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the return value type of the old route.
   /// {@endtemplate}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  ///
   /// {@tool sample}
   ///
   /// Typical usage is as follows:
@@ -832,8 +869,14 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> popAndPushNamed<T extends Object, TO extends Object>(BuildContext context, String routeName, { TO result }) {
-    return Navigator.of(context).popAndPushNamed<T, TO>(routeName, result: result);
+  static Future<T> popAndPushNamed<T extends Object, TO extends Object>(
+    BuildContext context,
+    String routeName, {
+    TO result,
+    TypedDictionary arguments = TypedDictionary.empty,
+   }) {
+    assert(arguments != null);
+    return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Push the route with the given name onto the navigator that most tightly
@@ -875,6 +918,8 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  ///
   /// {@tool sample}
   ///
   /// Typical usage is as follows:
@@ -886,8 +931,14 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushNamedAndRemoveUntil<T extends Object>(BuildContext context, String newRouteName, RoutePredicate predicate) {
-    return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate);
+  static Future<T> pushNamedAndRemoveUntil<T extends Object>(
+    BuildContext context,
+    String newRouteName,
+    RoutePredicate predicate, {
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
+    return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
   /// Push the given route onto the navigator that most tightly encloses the
@@ -1329,7 +1380,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         Navigator.defaultRouteName,
       ];
       final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
-        _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true),
+        _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: TypedDictionary.empty),
       ];
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
@@ -1337,7 +1388,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         for (String part in routeParts) {
           routeName += '/$part';
           plannedInitialRouteNames.add(routeName);
-          plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true));
+          plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: TypedDictionary.empty));
         }
       }
       if (plannedInitialRoutes.contains(null)) {
@@ -1357,15 +1408,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
           return true;
         }());
-        push(_routeNamed<Object>(Navigator.defaultRouteName));
+        push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: TypedDictionary.empty));
       } else {
         plannedInitialRoutes.forEach(push);
       }
     } else {
       Route<Object> route;
       if (initialRouteName != Navigator.defaultRouteName)
-        route = _routeNamed<Object>(initialRouteName, allowNull: true);
-      route ??= _routeNamed<Object>(Navigator.defaultRouteName);
+        route = _routeNamed<Object>(initialRouteName, allowNull: true, arguments: TypedDictionary.empty);
+      route ??= _routeNamed<Object>(Navigator.defaultRouteName, arguments: TypedDictionary.empty);
       push(route);
     }
     for (Route<dynamic> route in _history)
@@ -1416,12 +1467,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<T> _routeNamed<T>(String name, { bool allowNull = false }) {
+  Route<T> _routeNamed<T>(String name, { @required TypedDictionary arguments, bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
+    assert(arguments != null);
     final RouteSettings settings = RouteSettings(
       name: name,
       isInitialRoute: _history.isEmpty,
+      arguments: arguments,
     );
     Route<T> route = widget.onGenerateRoute(settings);
     if (route == null && !allowNull) {
@@ -1458,6 +1511,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  ///
   /// {@tool sample}
   ///
   /// Typical usage is as follows:
@@ -1469,8 +1524,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushNamed<T extends Object>(String routeName) {
-    return push<T>(_routeNamed<T>(routeName));
+  Future<T> pushNamed<T extends Object>(
+    String routeName, {
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
+    return push<T>(_routeNamed<T>(routeName, arguments: arguments));
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -1478,6 +1537,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// finished animating in.
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
   /// {@tool sample}
   ///
@@ -1490,14 +1551,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushReplacementNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
-    return pushReplacement<T, TO>(_routeNamed<T>(routeName), result: result);
+  Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
+    String routeName, {
+    TO result,
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
+    return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments), result: result);
   }
 
   /// Pop the current route off the navigator and push a named route in its
   /// place.
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
   /// {@tool sample}
   ///
@@ -1510,15 +1578,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> popAndPushNamed<T extends Object, TO extends Object>(String routeName, { TO result }) {
+  Future<T> popAndPushNamed<T extends Object, TO extends Object>(
+    String routeName, {
+    TO result,
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
     pop<TO>(result);
-    return pushNamed<T>(routeName);
+    return pushNamed<T>(routeName, arguments: arguments);
   }
 
   /// Push the route with the given name onto the navigator, and then remove all
   /// the previous routes until the `predicate` returns true.
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
   /// {@tool sample}
   ///
@@ -1531,8 +1606,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushNamedAndRemoveUntil<T extends Object>(String newRouteName, RoutePredicate predicate) {
-    return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName), predicate);
+  Future<T> pushNamedAndRemoveUntil<T extends Object>(
+    String newRouteName,
+    RoutePredicate predicate, {
+    TypedDictionary arguments = TypedDictionary.empty,
+  }) {
+    assert(arguments != null);
+    return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments), predicate);
   }
 
   /// Push the given route onto the navigator.
