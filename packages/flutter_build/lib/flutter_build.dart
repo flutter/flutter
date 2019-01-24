@@ -8,11 +8,11 @@ import 'src/kernel_builder.dart';
 
 Builder flutterKernelBuilder(BuilderOptions builderOptions) {
   final Map<String, Object> config = builderOptions.config;
+  final List<Object> extraFrontEndOptions = config['extraFrontEndOptions'];
   return FlutterKernelBuilder(
     aot: config['aot'],
     disabled: config['disabled'],
     engineDartBinaryPath: config['engineDartBinaryPath'],
-    extraFrontEndOptions: config['extraFrontEndOptions'],
     frontendServerPath: config['frontendServerPath'],
     incrementalCompilerByteStorePath: config['incrementalCompilerByteStorePath'],
     linkPlatformKernelIn: config['linkPlatformKernelIn'],
@@ -21,5 +21,6 @@ Builder flutterKernelBuilder(BuilderOptions builderOptions) {
     sdkRoot: config['sdkRoot'],
     targetProductVm: config['targetProductVm'],
     trackWidgetCreation: config['trackWidgetCreation'],
+    extraFrontEndOptions: extraFrontEndOptions.cast<String>(),
   );
 }
