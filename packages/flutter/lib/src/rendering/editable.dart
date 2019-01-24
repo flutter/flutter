@@ -784,7 +784,7 @@ class RenderEditable extends RenderBox {
   /// The padding applied to text field. Used to determine the bounds when
   /// moving the floating cursor.
   ///
-  /// Defaults to a padding with left, right set to 3 and top, bottom to 6.
+  /// Defaults to a padding with left, top and right set to 4, bottom to 5.
   EdgeInsets get floatingCursorAddedMargin => _floatingCursorAddedMargin;
   EdgeInsets _floatingCursorAddedMargin;
   set floatingCursorAddedMargin(EdgeInsets value) {
@@ -1435,7 +1435,6 @@ class RenderEditable extends RenderBox {
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
-
     canvas.drawRRect(caretRRect, paint);
   }
 
