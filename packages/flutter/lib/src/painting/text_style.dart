@@ -270,7 +270,8 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// A known example of this is that Samsung devices ship with a CJK font that has
 /// smaller line spacing than the Android default. This results in Samsung devices
-/// displaying more tightly spaced text than on Android when no custom font is specified.
+/// displaying more tightly spaced text than on other Android devices when no
+/// custom font is specified.
 ///
 /// To avoid this, a custom font should be specified if absolute font consistency
 /// is required for your application.
