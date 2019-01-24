@@ -921,10 +921,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect newCaretRect = _getCaretRectAtScrollOffset(rectToScrollTo, scrollOffsetForCaret);
       // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
       final Rect inflatedRect = Rect.fromLTRB(
-        newCaretRect.left - widget.scrollPadding.left,
-        newCaretRect.top - widget.scrollPadding.top,
-        newCaretRect.right + widget.scrollPadding.right,
-        newCaretRect.bottom + widget.scrollPadding.bottom
+          newCaretRect.left - widget.scrollPadding.left,
+          newCaretRect.top - widget.scrollPadding.top,
+          newCaretRect.right + widget.scrollPadding.right,
+          newCaretRect.bottom + widget.scrollPadding.bottom
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
