@@ -17,7 +17,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
+      const Offset(0, 0),
       const Offset(0, 0),
       1.0,
       rotation,
@@ -31,7 +31,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
+      const Offset(0, 0),
       const Offset(0, 0),
       2.0,
       rotation,
@@ -45,7 +45,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
+      const Offset(0, 0),
       const Offset(0, 0),
       0.8,
       rotation,
@@ -59,7 +59,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(0, 0),
       1.0,
       rotation,
@@ -73,7 +73,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(0, 0),
       2.0,
       rotation,
@@ -87,7 +87,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(-25, -25),
       2.0,
       rotation,
@@ -101,7 +101,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(-25, -25),
       0.5,
       rotation,
@@ -115,7 +115,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 11, SCREEN_SIZE.height / 2 + 6),
+      const Offset(11, 6),
       const Offset(-25, -25),
       0.5,
       rotation,
@@ -129,7 +129,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
+      const Offset(0, 0),
       const Offset(-16, -18),
       0.5,
       rotation,
@@ -143,7 +143,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 11, SCREEN_SIZE.height / 2 + 6),
+      const Offset(11, 6),
       const Offset(5, 6),
       0.5,
       rotation,
@@ -158,7 +158,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 12.6, SCREEN_SIZE.height / 2 - 8.35),
+      const Offset(12.6, -8.35),
       const Offset(55.6, 76.1), // * 0.8 = -44.48, -60.88
       0.8,
       rotation,
@@ -176,7 +176,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = 0.0;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 - 80, SCREEN_SIZE.height / 2 - 80),
+      const Offset(-80, -80),
       const Offset(-100, -100),
       0.8,
       rotation,
@@ -191,7 +191,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(-25, -25),
       2.0,
       rotation,
@@ -206,7 +206,7 @@ void main() {
     const Offset focalPoint = Offset.zero;
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 + 100, SCREEN_SIZE.height / 2 + 100),
+      const Offset(100, 100),
       const Offset(-25, -25),
       2.0,
       rotation,
@@ -221,7 +221,7 @@ void main() {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2, SCREEN_SIZE.height / 2),
+      const Offset(0, 0),
       const Offset(0, 0),
       1.0,
       rotation,
@@ -236,7 +236,7 @@ void main() {
     const Offset focalPoint = Offset(100, 100);
     const double rotation = math.pi / 2;
     final Offset sceneOffset = TransformInteractionState.fromViewport(
-      Offset(SCREEN_SIZE.width / 2 - 10, SCREEN_SIZE.height / 2 - 20),
+      const Offset(-10, -20),
       const Offset(0, 0),
       1.0,
       rotation,
@@ -245,23 +245,5 @@ void main() {
     );
     expect(sceneOffset.dx, closeTo(220, .1));
     expect(sceneOffset.dy, closeTo(-10, .1));
-  });
-
-  test('isInside: origin is in center of screen', () {
-    const Offset offset = Offset(0, 0);
-
-    expect(
-      TransformInteractionState.isInside(offset, SCREEN_SIZE),
-      true,
-    );
-  });
-
-  test('isInside: just to left of visible area is not inside', () {
-    final Offset offset = Offset(-SCREEN_SIZE.width / 2 - 1, 0);
-
-    expect(
-      TransformInteractionState.isInside(offset, SCREEN_SIZE),
-      false,
-    );
   });
 }

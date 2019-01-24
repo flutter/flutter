@@ -19,10 +19,9 @@ class TransformInteraction extends StatefulWidget {
     // The scale will be clamped to between these values
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    // Panning will be limited so that the viewport can not view beyond this
-    // size.
-    // TODO(justinmc): also limit scaling! If I set minScale to 0.2 I can see beyond
-    this.visibleSize = const Size(1600, 2400),
+    // Transforms will be limited so that the viewport can not view beyond this
+    // Rect.
+    this.visibleRect,
     // Initial values for the transform can be provided
     this.initialTranslation,
     this.initialScale,
@@ -39,7 +38,7 @@ class TransformInteraction extends StatefulWidget {
   final Function onTapUp;
   final double maxScale;
   final double minScale;
-  final Size visibleSize;
+  final Rect visibleRect;
   final bool disableTranslation;
   final bool disableScale;
   final bool disableRotation;
@@ -70,22 +69,27 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // and translation. However, that would mean that my _translation would be
   // constantly changing during a rotation, and it won't quite mean what it
   // currently does anymore.
+  // Idea: instead of keeping track of individual translation, scale, and
+  // rotation, save the current transformation matrix. Then you can apply any
+  // subsequent transformation on top of that without caring about how you got
+  // there.
   double __rotation = 0.0;
+  Rect _visibleRect;
 
   Offset get _translation => __translation;
   set _translation(Offset offset) {
     if (widget.disableTranslation) {
       return;
     }
-    final Size sizeScene = widget.size / _scale;
+    final Size scaledSize = widget.size / _scale;
     __translation = Offset(
       offset.dx.clamp(
-        -widget.visibleSize.width / 2 + sizeScene.width / 2,
-        widget.visibleSize.width / 2 - sizeScene.width / 2,
+        scaledSize.width - _visibleRect.right,
+        -_visibleRect.left,
       ),
       offset.dy.clamp(
-        -widget.visibleSize.height / 2 + sizeScene.height / 2,
-        widget.visibleSize.height / 2 - sizeScene.height / 2,
+         scaledSize.height - _visibleRect.bottom,
+        -_visibleRect.top,
       ),
     );
   }
@@ -96,39 +100,39 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       return;
     }
 
-    // Don't allow a scale that moves the viewport outside of visibleSize
+    // Don't allow a scale that moves the viewport outside of _visibleRect
     final Offset tl = fromViewport(
-      Offset(0, 0),
+      const Offset(0, 0),
       _translation,
-      _scale,
+      scale,
       0.0,
       widget.size,
     );
     final Offset tr = fromViewport(
       Offset(widget.size.width, 0),
       _translation,
-      _scale,
+      scale,
       0.0,
       widget.size,
     );
     final Offset bl = fromViewport(
       Offset(0, widget.size.height),
       _translation,
-      _scale,
+      scale,
       0.0,
       widget.size,
     );
     final Offset br = fromViewport(
       Offset(widget.size.width, widget.size.height),
       _translation,
-      _scale,
+      scale,
       0.0,
       widget.size,
     );
-    if (!isInside(tl, widget.visibleSize)
-      || !isInside(tr, widget.visibleSize)
-      || !isInside(bl, widget.visibleSize)
-      || !isInside(br, widget.visibleSize)) {
+    if (!_visibleRect.contains(tl)
+      || !_visibleRect.contains(tr)
+      || !_visibleRect.contains(bl)
+      || !_visibleRect.contains(br)) {
       return;
     }
 
@@ -155,6 +159,9 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     if (widget.initialRotation != null) {
       _rotation = widget.initialRotation;
     }
+    _visibleRect = widget.visibleRect != null
+      ? widget.visibleRect
+      : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
     _controller = AnimationController(
       vsync: this,
     );
@@ -162,13 +169,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
 
   @override
   Widget build (BuildContext context) {
-    // By default, the scene is drawn so that the origin is in the top left
-    // corner of the viewport. Center it instead.
-    final Offset translationCentered = Offset(
-      _translation.dx + widget.size.width / 2 / _scale,
-      _translation.dy + widget.size.height / 2 / _scale,
-    );
-
     // A GestureDetector allows the detection of panning and zooming gestures on
     // its child, which is the CustomPaint.
     return GestureDetector(
@@ -180,7 +180,11 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       child: ClipRect(
         // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
-          transform: TransformInteractionState.getTransformationMatrix(translationCentered, _scale, _rotation),
+          transform: TransformInteractionState.getTransformationMatrix(
+            _translation,
+            _scale,
+            _rotation,
+          ),
           child: Container(
             child: widget.child,
             height: widget.size.height,
@@ -189,14 +193,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
         ),
       ),
     );
-  }
-
-  // Returns true iff viewportPoint is inside sceneSize in scene coords.
-  static bool isInside(Offset offset, Size size) {
-    return offset.dx >= -size.width / 2
-      && offset.dx <= size.width / 2
-      && offset.dy >= -size.height / 2
-      && offset.dy <= size.height / 2;
   }
 
   // Get a matrix that will transform the origin of the scene with the given
@@ -215,14 +211,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
 
   // Return the scene point underneath the viewport point given.
   static Offset fromViewport(Offset viewportPoint, Offset translation, double scale, double rotation, Size size, [Offset focalPoint = Offset.zero]) {
-    // Find the offset from the center of the viewport to the given viewportPoint.
-    final Offset fromCenterOfViewport = Offset(
-      viewportPoint.dx - size.width / 2,
-      viewportPoint.dy - size.height / 2,
-    );
-
-    // On this point, perform the inverse transformation of the scene to get
-    // where the point would be before the transformation.
+    // On viewportPoint, perform the inverse transformation of the scene to get
+    // where the point would be in the scene before the transformation.
     final Matrix4 matrix = TransformInteractionState.getTransformationMatrix(
       translation,
       scale,
@@ -231,8 +221,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     );
     final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
     final Vector3 untransformed = inverseMatrix.transform3(Vector3(
-      fromCenterOfViewport.dx,
-      fromCenterOfViewport.dy,
+      viewportPoint.dx,
+      viewportPoint.dy,
       0,
     ));
     return Offset(untransformed.x, untransformed.y);

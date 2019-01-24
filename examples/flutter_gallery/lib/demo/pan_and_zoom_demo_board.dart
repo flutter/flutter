@@ -43,7 +43,8 @@ class Board extends Object with IterableMixin<BoardPoint> {
   double hexagonMargin; // Margin between hexagons
   List<Offset> positionsForHexagonAtOrigin;
 
-  // Return a q,r BoardPoint for a point in the scene
+  // Return a q,r BoardPoint for a point in the scene, where the origin is in
+  // the center of the board in both coordinate systems.
   BoardPoint pointToBoardPoint(Offset point) {
     return BoardPoint(
       ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
