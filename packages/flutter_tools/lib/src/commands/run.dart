@@ -333,7 +333,7 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
-    List<String> expFlags = null;
+    List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
       expFlags = argResults[FlutterOptions.kEnableExperiment];

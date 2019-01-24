@@ -474,8 +474,8 @@ class ResidentCompiler {
       command.add('--unsafe-package-serialization');
     }
     if (_experimentalFlags != null) {
-      var expFlags = _experimentalFlags.join(",");
-      command.add('--enable-experiment=${expFlags}');
+      final String expFlags = _experimentalFlags.join(',');
+      command.add('--enable-experiment=$expFlags');
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
