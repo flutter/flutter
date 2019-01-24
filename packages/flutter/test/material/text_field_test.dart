@@ -1532,7 +1532,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1541,7 +1541,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1564,7 +1564,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1573,7 +1573,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
@@ -3193,7 +3193,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
     );
 
-    expect(topLeft.dx, equals(701.0));
+    expect(topLeft.dx, equals(701.6666870117188));
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -3213,7 +3213,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
     );
 
-    expect(topLeft.dx, equals(160.0));
+    expect(topLeft.dx, equals(160.6666717529297));
   });
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
