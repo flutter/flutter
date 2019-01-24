@@ -29,15 +29,19 @@ import 'theme.dart';
 class CardTheme extends Diagnosticable {
 
   /// Creates a theme that can be used for [ThemeData.cardTheme].
+  ///
+  /// The [elevation] must be null or non-negative.
   const CardTheme({
     this.clipBehavior,
     this.color,
     this.elevation,
     this.margin,
     this.shape,
-  });
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// Default value for [Card.clipBehavior].
+  ///
+  /// If null, [Card] uses [Clip.none].
   final Clip clipBehavior;
 
   /// Default value for [Card.color].
@@ -46,15 +50,23 @@ class CardTheme extends Diagnosticable {
   final Color color;
 
   /// Default value for [Card.elevation].
+  ///
+  /// If null, [Card] uses a default of 1.0.
   final double elevation;
 
   /// Default value for [Card.margin].
+  ///
+  /// If null, [Card] uses a default margin of 4.0 logical pixels on all sides:
+  /// `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry margin;
 
   /// Default value for [Card.shape].
+  ///
+  /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
+  /// corner radius of 4.0.
   final ShapeBorder shape;
 
-  /// Creates a copy of this object but with the given fields replaced with the
+  /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   CardTheme copyWith({
     Clip clipBehavior,

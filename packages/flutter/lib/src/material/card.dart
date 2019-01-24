@@ -66,7 +66,7 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [elevation] must be non-negative.
+  /// The [elevation] must be null or non-negative.
   const Card({
     Key key,
     this.color,
@@ -93,7 +93,7 @@ class Card extends StatelessWidget {
   /// Defines the card's [Material.elevation].
   ///
   /// If this property is null then [ThemeData.cardTheme.elevation] is used,
-  /// if that's null, the default value is 1.
+  /// if that's null, the default value is 1.0.
   final double elevation;
 
   /// The shape of the card's [Material].

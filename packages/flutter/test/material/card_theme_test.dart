@@ -16,7 +16,9 @@ void main() {
 
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(body: Card()),
+      home: Scaffold(
+        body: Card()
+      ),
     ));
 
     final Container container = _getCardContainer(tester);
@@ -36,7 +38,9 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(cardTheme: cardTheme),
-      home: const Scaffold(body: Card()),
+      home: const Scaffold(
+        body: Card()
+      ),
     ));
 
     final Container container = _getCardContainer(tester);
@@ -60,13 +64,15 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: _themeData().copyWith(cardTheme: _cardTheme()),
-      home: const Scaffold(body: Card(
-        clipBehavior: clip,
-        color: color,
-        elevation: elevation,
-        margin: margin,
-        shape: shape,
-      )),
+      home: const Scaffold(
+        body: Card(
+          clipBehavior: clip,
+          color: color,
+          elevation: elevation,
+          margin: margin,
+          shape: shape,
+        )
+      ),
     ));
 
     final Container container = _getCardContainer(tester);
@@ -85,7 +91,9 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: const Scaffold(body: Card()),
+      home: const Scaffold(
+        body: Card()
+      ),
     ));
 
     final Material material = _getCardMaterial(tester);
@@ -97,7 +105,9 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: const Scaffold(body: Card()),
+      home: const Scaffold(
+        body: Card()
+      ),
     ));
 
     final Material material = _getCardMaterial(tester);
@@ -115,12 +125,16 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(cardTheme: cardTheme),
-      home: Scaffold(body: RepaintBoundary(
-        key: painterKey,
-        child: Center(child: Card(
-          child: SizedBox.fromSize(size: const Size(200, 300),),
-        ))
-      )),
+      home: Scaffold(
+        body: RepaintBoundary(
+          key: painterKey,
+          child: Center(
+            child: Card(
+              child: SizedBox.fromSize(size: const Size(200, 300),),
+            )
+          )
+        )
+      ),
     ));
 
     await expectLater(
