@@ -135,7 +135,6 @@ class Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       container: semanticContainer,
-      explicitChildNodes: !semanticContainer,
       child: Container(
         margin: margin ?? const EdgeInsets.all(4.0),
         child: Material(
@@ -146,7 +145,10 @@ class Card extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
           clipBehavior: clipBehavior,
-          child: child,
+          child: Semantics(
+            explicitChildNodes: !semanticContainer,
+            child: child,
+          ),
         ),
       ),
     );

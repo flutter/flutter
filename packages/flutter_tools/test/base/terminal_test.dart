@@ -165,7 +165,7 @@ Stream<String> mockStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   @override
-  Stream<String> get onCharInput {
+  Stream<String> get keystrokes {
     return mockStdInStream;
   }
 }

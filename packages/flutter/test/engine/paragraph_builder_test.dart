@@ -13,6 +13,8 @@ void main() {
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
 
+    // TODO(cbracken): use const constructor. https://github.com/flutter/flutter/issues/26390
+    // ignore:prefer_const_constructors
     paragraph.layout(ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);

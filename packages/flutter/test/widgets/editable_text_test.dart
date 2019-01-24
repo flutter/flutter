@@ -1979,6 +1979,111 @@ testWidgets(
     ));
     expect(called, 2);
   });
+
+  testWidgets('default keyboardAppearance is respected', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          keyboardAppearance: Brightness.dark,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+  });
+
+  testWidgets(
+      'Composing text is underlined and underline is cleared when losing focus',
+      (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+    );
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(MaterialApp( // So we can show overlays.
+      home: EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        key: editableTextKey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onEditingComplete: () {
+          // This prevents the default focus change behavior on submission.
+        },
+      ),
+    ));
+
+    assert(focusNode.hasFocus);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    // The actual text span is split into 3 parts with the middle part underlined.
+    expect(renderEditable.text.children.length, 3);
+    expect(renderEditable.text.children[1].text, 'composing');
+    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    expect(renderEditable.text.children, isNull);
+    // Everything's just formated the same way now.
+    expect(renderEditable.text.text, 'text composing text');
+    expect(renderEditable.text.style.decoration, isNull);
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}

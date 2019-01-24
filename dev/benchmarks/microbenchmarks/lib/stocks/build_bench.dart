@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -46,9 +44,7 @@ Future<void> main() async {
       // frames are missed, etc.
       // We use Timer.run to ensure there's a microtask flush in between
       // the two calls below.
-      Timer.run(() { ui.window.onBeginFrame(Duration(milliseconds: iterations * 16)); });
-      Timer.run(() { ui.window.onDrawFrame(); });
-      await tester.idle(); // wait until the frame has run (also uses Timer.run)
+      await tester.pumpBenchmark(Duration(milliseconds: iterations * 16));
       iterations += 1;
     }
     watch.stop();
