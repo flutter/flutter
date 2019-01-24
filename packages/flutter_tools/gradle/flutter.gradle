@@ -22,7 +22,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:3.2.1'
     }
 }
 
@@ -421,10 +421,9 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                     dependsOn copySharedFlutterAssetsTask
                 } else {
-                    Task mergeAssetsTask = variant.mergeAssetsProvider.get()
-                    dependsOn mergeAssetsTask
-                    dependsOn "clean${mergeAssetsTask.name.capitalize()}"
-                    into mergeAssetsTask.outputDir
+                    dependsOn variant.mergeAssets
+                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
+                    into variant.mergeAssets.outputDir
                 }
                 with flutterTask.assets
             }
@@ -436,7 +435,7 @@ class FlutterPlugin implements Plugin<Project> {
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
             } else {
-                variant.outputs[0].processResourcesProvider.get().dependsOn(copyFlutterAssetsTask)
+                variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
             }
         }
         if (project.android.hasProperty("applicationVariants")) {
