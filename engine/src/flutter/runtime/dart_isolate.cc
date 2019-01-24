@@ -22,6 +22,7 @@
 #include "third_party/tonic/dart_message_handler.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/file_loader/file_loader.h"
+#include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
@@ -109,6 +110,7 @@ DartIsolate::DartIsolate(DartVM* vm,
                   advisory_script_uri,
                   advisory_script_entrypoint,
                   vm->GetSettings().log_tag,
+                  vm->GetSettings().unhandled_exception_callback,
                   vm->GetIsolateNameServer()),
       vm_(vm),
       isolate_snapshot_(std::move(isolate_snapshot)),
@@ -391,6 +393,32 @@ bool DartIsolate::MarkIsolateRunnable() {
 }
 
 FML_WARN_UNUSED_RESULT
+static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function) {
+  if (tonic::LogIfError(user_entrypoint_function)) {
+    FML_LOG(ERROR) << "Could not resolve main entrypoint function.";
+    return false;
+  }
+
+  Dart_Handle start_main_isolate_function =
+      tonic::DartInvokeField(Dart_LookupLibrary(tonic::ToDart("dart:isolate")),
+                             "_getStartMainIsolateFunction", {});
+
+  if (tonic::LogIfError(start_main_isolate_function)) {
+    FML_LOG(ERROR) << "Could not resolve main entrypoint trampoline.";
+    return false;
+  }
+
+  if (tonic::LogIfError(tonic::DartInvokeField(
+          Dart_LookupLibrary(tonic::ToDart("dart:ui")), "_runMainZoned",
+          {start_main_isolate_function, user_entrypoint_function}))) {
+    FML_LOG(ERROR) << "Could not invoke the main entrypoint.";
+    return false;
+  }
+
+  return true;
+}
+
+FML_WARN_UNUSED_RESULT
 bool DartIsolate::Run(const std::string& entrypoint_name) {
   TRACE_EVENT0("flutter", "DartIsolate::Run");
   if (phase_ != Phase::Ready) {
@@ -399,25 +427,10 @@ bool DartIsolate::Run(const std::string& entrypoint_name) {
 
   tonic::DartState::Scope scope(this);
 
-  Dart_Handle entrypoint =
+  auto user_entrypoint_function =
       Dart_GetField(Dart_RootLibrary(), tonic::ToDart(entrypoint_name.c_str()));
-  if (tonic::LogIfError(entrypoint)) {
-    return false;
-  }
 
-  Dart_Handle isolate_lib = Dart_LookupLibrary(tonic::ToDart("dart:isolate"));
-  if (tonic::LogIfError(isolate_lib)) {
-    return false;
-  }
-
-  Dart_Handle isolate_args[] = {
-      entrypoint,
-      Dart_Null(),
-  };
-
-  if (tonic::LogIfError(Dart_Invoke(
-          isolate_lib, tonic::ToDart("_startMainIsolate"),
-          sizeof(isolate_args) / sizeof(isolate_args[0]), isolate_args))) {
+  if (!InvokeMainEntrypoint(user_entrypoint_function)) {
     return false;
   }
 
@@ -436,30 +449,11 @@ bool DartIsolate::RunFromLibrary(const std::string& library_name,
 
   tonic::DartState::Scope scope(this);
 
-  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart(library_name.c_str()));
-  if (tonic::LogIfError(library)) {
-    return false;
-  }
+  auto user_entrypoint_function =
+      Dart_GetField(Dart_LookupLibrary(tonic::ToDart(library_name.c_str())),
+                    tonic::ToDart(entrypoint_name.c_str()));
 
-  Dart_Handle entrypoint =
-      Dart_GetField(library, tonic::ToDart(entrypoint_name.c_str()));
-  if (tonic::LogIfError(entrypoint)) {
-    return false;
-  }
-
-  Dart_Handle isolate_lib = Dart_LookupLibrary(tonic::ToDart("dart:isolate"));
-  if (tonic::LogIfError(isolate_lib)) {
-    return false;
-  }
-
-  Dart_Handle isolate_args[] = {
-      entrypoint,
-      Dart_Null(),
-  };
-
-  if (tonic::LogIfError(Dart_Invoke(
-          isolate_lib, tonic::ToDart("_startMainIsolate"),
-          sizeof(isolate_args) / sizeof(isolate_args[0]), isolate_args))) {
+  if (!InvokeMainEntrypoint(user_entrypoint_function)) {
     return false;
   }
 
