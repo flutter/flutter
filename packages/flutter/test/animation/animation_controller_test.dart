@@ -581,7 +581,7 @@ void main() {
   });
 
   test('calling repeat with reverse set to true makes the animation alternate '
-      'between lowerBound and upperBound values on each repeat', () {
+       'between lowerBound and upperBound values on each repeat', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
@@ -629,7 +629,7 @@ void main() {
   });
 
   test('calling repeat with specified min and max values makes the animation '
-      'alternate between min and max values on each repeat', () {
+       'alternate between min and max values on each repeat', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
