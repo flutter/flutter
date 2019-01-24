@@ -342,14 +342,18 @@ FlutterResult FlutterEngineRun(size_t version,
   settings.icu_data_path = icu_data_path;
   settings.assets_path = args->assets_path;
 
-  // Verify the assets path contains Dart 2 kernel assets.
-  const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
-  std::string application_kernel_path = fml::paths::JoinPaths(
-      {settings.assets_path, kApplicationKernelSnapshotFileName});
-  if (!fml::IsFile(application_kernel_path)) {
-    return kInvalidArguments;
+  if (!blink::DartVM::IsRunningPrecompiledCode()) {
+    // Verify the assets path contains Dart 2 kernel assets.
+    const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
+    std::string application_kernel_path = fml::paths::JoinPaths(
+        {settings.assets_path, kApplicationKernelSnapshotFileName});
+    if (!fml::IsFile(application_kernel_path)) {
+      FML_LOG(ERROR) << "Not running in AOT mode but could not resolve the "
+                        "kernel binary.";
+      return kInvalidArguments;
+    }
+    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
   }
-  settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
 
   settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
