@@ -124,85 +124,6 @@ class AttachCommand extends FlutterCommand {
     }
   }
 
-
-  Future<int> mdnsQueryDartObservatoryPort() async {
-    const String dartObservatoryName = '_dartobservatory._tcp.local';
-    final MDnsClient client = MDnsClient();
-
-    printStatus('Checking for advertised Dart observatories...');
-    try {
-      await client.start();
-      final List<PtrResourceRecord> pointerRecords = await client
-          .lookup<PtrResourceRecord>(
-            ResourceRecordQuery.ptr(dartObservatoryName),
-          )
-          .toList();
-      if (pointerRecords.isEmpty) {
-        return null;
-      }
-      // We have no guarantee that we won't get multiple hits from the same
-      // service on this.
-      final List<String> uniqueDomainNames = pointerRecords
-          .map<String>((PtrResourceRecord record) => record.domainName)
-          .toSet()
-          .toList();
-
-      String domainName;
-      if (appId != null) {
-        for (String name in uniqueDomainNames) {
-          if (name.toLowerCase().startsWith(appId.toLowerCase())) {
-            domainName = name;
-            break;
-          }
-        }
-        throwToolExit('Did not find a observatory port advertised for $appId.');
-      } else if (uniqueDomainNames.length > 1) {
-        printStatus('There are multiple observatory ports available:');
-        printStatus('');
-        for (int i = 0; i < uniqueDomainNames.length; i++) {
-          printStatus(
-            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$dartObservatoryName', '')}',
-            indent: 2,
-          );
-        }
-        printStatus('');
-        int selection;
-        while (selection == null) {
-          printStatus('Selection [1-${uniqueDomainNames.length}]: ', newline: false);
-          final String selectionString = io.stdin.readLineSync();
-          selection = int.tryParse(selectionString);
-          if (selection == null ||
-              selection < 1 ||
-              selection > pointerRecords.length) {
-            printStatus('Please enter a valid integer value between '
-                '1 and ${uniqueDomainNames.length}.\n');
-            selection = null;
-          }
-        }
-        domainName = uniqueDomainNames[selection - 1];
-      } else {
-        domainName = pointerRecords[0].domainName;
-      }
-      printStatus('Checking for available port on $domainName');
-      // Here, if we get more than one, it should just be a duplicate.
-      final List<SrvResourceRecord> srv = await client
-          .lookup<SrvResourceRecord>(
-            ResourceRecordQuery.srv(domainName),
-          )
-          .toList();
-      if (srv.isEmpty) {
-        return null;
-      }
-      if (srv.length > 1) {
-        printError('Unexpectedly found more than one observatory report for $domainName '
-                   '- using first one (${srv.first.port}).');
-      }
-      return srv.first.port;
-    } finally {
-      client.stop();
-    }
-  }
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -215,7 +136,7 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
-    final int devicePort = debugPort ?? await mdnsQueryDartObservatoryPort();
+    final int devicePort = debugPort ?? await MDnsObservatoryPortDiscovery().queryForPort(applicationId: appId);
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
@@ -366,4 +287,113 @@ class HotRunnerFactory {
     stayResident: stayResident,
     ipv6: ipv6,
   );
+}
+
+/// A wrapper around [MDnsClient] to find a Dart observatory port.
+class MDnsObservatoryPortDiscovery {
+  /// Creates a new [MDnsObservatoryPortDiscovery] object.
+  ///
+  /// The [client] parameter will be defaulted to a new [MDnsClient] if null.
+  /// The [applicationId] parameter may be null, and can be used to
+  /// automatically select which application to use if multiple are advertising
+  /// Dart observatory ports.
+  MDnsObservatoryPortDiscovery({MDnsClient mdnsClient})
+    : client = mdnsClient ?? MDnsClient();
+
+  /// The [MDnsClient] used to do a lookup.
+  final MDnsClient client;
+
+  /// Executes an mDNS query for a Dart Observatory port.
+  ///
+  /// The [applicationId] parameter may be used to specify which application
+  /// to find.  For Android, it refers to the package name; on iOS, it refers to
+  /// the bundle ID.
+  ///
+  /// If it is not null, this method will find the port of the
+  /// Dart Observatory for that application. If it cannot find a Dart
+  /// Observatory matching that application identifier, it will call
+  /// [throwToolExit].
+  ///
+  /// If it is null and there are multiple ports available, the user will be
+  /// prompted with a list of available observatory ports and asked to select
+  /// one.
+  ///
+  /// If it is null and there is only one available port, it will return that
+  /// port regardless of what application the port is for.
+  Future<int> queryForPort({String applicationId}) async {
+    const String dartObservatoryName = '_dartobservatory._tcp.local';
+
+    printStatus('Checking for advertised Dart observatories...');
+    try {
+      await client.start();
+      final List<PtrResourceRecord> pointerRecords = await client
+          .lookup<PtrResourceRecord>(
+            ResourceRecordQuery.serverPointer(dartObservatoryName),
+          )
+          .toList();
+      if (pointerRecords.isEmpty) {
+        return null;
+      }
+      // We have no guarantee that we won't get multiple hits from the same
+      // service on this.
+      final List<String> uniqueDomainNames = pointerRecords
+          .map<String>((PtrResourceRecord record) => record.domainName)
+          .toSet()
+          .toList();
+
+      String domainName;
+      if (applicationId != null) {
+        for (String name in uniqueDomainNames) {
+          if (name.toLowerCase().startsWith(applicationId.toLowerCase())) {
+            domainName = name;
+            break;
+          }
+        }
+        throwToolExit('Did not find a observatory port advertised for $applicationId.');
+      } else if (uniqueDomainNames.length > 1) {
+        printStatus('There are multiple observatory ports available:');
+        printStatus('');
+        for (int i = 0; i < uniqueDomainNames.length; i++) {
+          printStatus(
+            '${i + 1}) ${uniqueDomainNames[i].replaceAll('.$dartObservatoryName', '')}',
+            indent: 2,
+          );
+        }
+        printStatus('');
+        int selection;
+        while (selection == null) {
+          printStatus('Selection [1-${uniqueDomainNames.length}]: ', newline: false);
+          final String selectionString = io.stdin.readLineSync();
+          selection = int.tryParse(selectionString);
+          if (selection == null ||
+              selection < 1 ||
+              selection > pointerRecords.length) {
+            printStatus('Please enter a valid integer value between '
+                '1 and ${uniqueDomainNames.length}.\n');
+            selection = null;
+          }
+        }
+        domainName = uniqueDomainNames[selection - 1];
+      } else {
+        domainName = pointerRecords[0].domainName;
+      }
+      printStatus('Checking for available port on $domainName');
+      // Here, if we get more than one, it should just be a duplicate.
+      final List<SrvResourceRecord> srv = await client
+          .lookup<SrvResourceRecord>(
+            ResourceRecordQuery.service(domainName),
+          )
+          .toList();
+      if (srv.isEmpty) {
+        return null;
+      }
+      if (srv.length > 1) {
+        printError('Unexpectedly found more than one observatory report for $domainName '
+                   '- using first one (${srv.first.port}).');
+      }
+      return srv.first.port;
+    } finally {
+      client.stop();
+    }
+  }
 }
