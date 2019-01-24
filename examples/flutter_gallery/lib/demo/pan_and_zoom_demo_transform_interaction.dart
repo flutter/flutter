@@ -56,7 +56,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
   // Start out looking at the center.
-  Offset __translation = const Offset(0, 0);
   Offset _translateFromScene; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
   double __scale = 1.0;
@@ -75,22 +74,27 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // there.
   double __rotation = 0.0;
   Rect _visibleRect;
+  Matrix4 _transform = Matrix4.identity();
 
-  Offset get _translation => __translation;
-  set _translation(Offset offset) {
+  // Perform a translation on the given matrix within constraints of the scene.
+  Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
     if (widget.disableTranslation) {
-      return;
+      return matrix;
     }
     final Size scaledSize = widget.size / _scale;
-    __translation = Offset(
-      offset.dx.clamp(
+    final Offset clampedTranslation = Offset(
+      translation.dx.clamp(
         scaledSize.width - _visibleRect.right,
         -_visibleRect.left,
       ),
-      offset.dy.clamp(
+      translation.dy.clamp(
          scaledSize.height - _visibleRect.bottom,
         -_visibleRect.top,
       ),
+    );
+    return matrix..translate(
+      clampedTranslation.dx,
+      clampedTranslation.dy,
     );
   }
 
@@ -101,30 +105,34 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     }
 
     // Don't allow a scale that moves the viewport outside of _visibleRect
+    // TODO this might mess you up because transform includes rotation, but we
+    // were previously setting rotation to 0.0
+    Vector3 translationVector = _transform.getTranslation();
+    Offset translation = Offset(translationVector.x, translationVector.y);
     final Offset tl = fromViewport(
       const Offset(0, 0),
-      _translation,
+      translation,
       scale,
       0.0,
       widget.size,
     );
     final Offset tr = fromViewport(
       Offset(widget.size.width, 0),
-      _translation,
+      translation,
       scale,
       0.0,
       widget.size,
     );
     final Offset bl = fromViewport(
       Offset(0, widget.size.height),
-      _translation,
+      translation,
       scale,
       0.0,
       widget.size,
     );
     final Offset br = fromViewport(
       Offset(widget.size.width, widget.size.height),
-      _translation,
+      translation,
       scale,
       0.0,
       widget.size,
@@ -154,7 +162,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       ? widget.visibleRect
       : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
     if (widget.initialTranslation != null) {
-      _translation = widget.initialTranslation;
+      _transform = matrixTranslate(_transform, widget.initialTranslation);
     }
     if (widget.initialScale != null) {
       _scale = widget.initialScale;
@@ -180,11 +188,14 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       child: ClipRect(
         // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
+          transform: _transform,
+            /*
           transform: TransformInteractionState.getTransformationMatrix(
             _translation,
             _scale,
             _rotation,
           ),
+          */
           child: Container(
             child: widget.child,
             height: widget.size.height,
@@ -231,11 +242,13 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle panning and pinch zooming events
   void _onScaleStart(ScaleStartDetails details) {
     _controller.stop();
+    final Vector3 translationVector = _transform.getTranslation();
+    final Offset translation = Offset(translationVector.x, translationVector.y);
     setState(() {
       _scaleStart = _scale;
       _translateFromScene = fromViewport(
         details.focalPoint,
-        _translation,
+        translation,
         _scale,
         0.0,
         widget.size,
@@ -244,10 +257,12 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
+    final Vector3 translationVector = _transform.getTranslation();
+    final Offset translation = Offset(translationVector.x, translationVector.y);
     setState(() {
       final Offset focalPointScene = fromViewport(
         details.focalPoint,
-        _translation,
+        translation,
         _scale,
         0.0, // rotation is 0 because translation happens before rotation
         widget.size,
@@ -265,21 +280,24 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
           // scale.
           final Offset focalPointSceneNext = fromViewport(
             details.focalPoint,
-            _translation,
+            translation,
             _scale,
             0.0,
             widget.size,
           );
-          _translation = _translation + focalPointSceneNext - focalPointScene;
+          // TODO _translation = _translation + focalPointSceneNext - focalPointScene;
         }
       }
       if (_translateFromScene != null && details.scale == 1.0) {
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
-        _translation = _translation + (focalPointScene - _translateFromScene);
+        final Offset translationChange = focalPointScene - _translateFromScene;
+        _transform = matrixTranslate(_transform, translationChange);
+        final Vector3 translationVectorNext = _transform.getTranslation();
+        final Offset translationNext = Offset(translationVectorNext.x, translationVectorNext.y);
         _translateFromScene = fromViewport(
           details.focalPoint,
-          _translation,
+          translationNext,
           _scale,
           0.0,
           widget.size,
@@ -304,8 +322,10 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       return;
     }
 
-    final InertialMotion inertialMotion = InertialMotion(details.velocity, _translation);
-    _animation = Tween<Offset>(begin: _translation, end: inertialMotion.finalPosition).animate(_controller);
+    Vector3 translationVector = _transform.getTranslation();
+    Offset translation = Offset(translationVector.x, translationVector.y);
+    final InertialMotion inertialMotion = InertialMotion(details.velocity, translation);
+    _animation = Tween<Offset>(begin: translation, end: inertialMotion.finalPosition).animate(_controller);
     _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
     _animation.addListener(_onAnimate);
     _controller.fling();
@@ -314,13 +334,18 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle inertia drag animation
   void _onAnimate() {
     setState(() {
-      _translation = _animation.value;
+      // TODO can I get the change without doing this subtraction?
+      final Vector3 translationVector = _transform.getTranslation();
+      final Offset translation = Offset(translationVector.x, translationVector.y);
+      _transform = matrixTranslate(_transform, _animation.value - translation);
     });
   }
 
   // Handle tapping to select a tile
   void _onTapUp(TapUpDetails details) {
-    widget.onTapUp(fromViewport(details.globalPosition, _translation, _scale, _rotation, widget.size));
+    Vector3 translationVector = _transform.getTranslation();
+    Offset translation = Offset(translationVector.x, translationVector.y);
+    widget.onTapUp(fromViewport(details.globalPosition, translation, _scale, _rotation, widget.size));
   }
 
   @override
