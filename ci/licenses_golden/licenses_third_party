@@ -1,4 +1,4 @@
-Signature: 58032626656f97f990acd094737b0751
+Signature: 120dae0c7996ecd90362d836b86989e5
 
 UNUSED LICENSES:
 
@@ -4519,7 +4519,6 @@ FILE: ../../../third_party/dart/sdk/lib/libraries.json
 FILE: ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/clang.tar.gz.sha1
-FILE: ../../../third_party/dart/third_party/gsutil.tar.gz.sha1
 ----------------------------------------------------------------------------------------------------
 Copyright 2012, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
