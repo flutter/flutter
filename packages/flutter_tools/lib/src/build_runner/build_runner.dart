@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
@@ -16,6 +17,9 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
+
+/// The [BuildRunnerFactory] instance.
+BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
 
 /// Whether to attempt to build a flutter project using build* libraries.
 ///
@@ -41,6 +45,16 @@ set experimentalBuildEnabled(bool value) {
   _experimentalBuildEnabled = value;
 }
 
+/// An injectable factory to create instances of [BuildRunner].
+class BuildRunnerFactory {
+  const BuildRunnerFactory();
+
+  /// Creates a new [BuildRunner] instance.
+  BuildRunner create() {
+    return BuildRunner();
+  }
+}
+
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
 ///
@@ -53,12 +67,12 @@ class BuildRunner {
   /// The defines of the build command are the arguments required in the
   /// flutter_build kernel builder.
   Future<BuildResult> build({
-    bool aot,
-    bool linkPlatformKernelIn,
-    bool trackWidgetCreation,
-    bool targetProductVm,
-    String mainPath,
-    List<String> extraFrontEndOptions,
+    @required bool aot,
+    @required bool linkPlatformKernelIn,
+    @required bool trackWidgetCreation,
+    @required bool targetProductVm,
+    @required String mainPath,
+    @required List<String> extraFrontEndOptions,
   }) async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final String frontendServerPath = artifacts.getArtifactPath(
