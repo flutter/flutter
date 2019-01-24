@@ -519,7 +519,6 @@ void main() {
     );
   });
 
-
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String value;
@@ -529,7 +528,6 @@ void main() {
     await tester.pumpWidget(build());
     final RenderBox buttonBoxNullValue = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxNullValue.attached);
-
 
     value = 'three';
     await tester.pumpWidget(build());
@@ -543,6 +541,7 @@ void main() {
   });
 
   testWidgets('Size of DropdownButton with no items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/26419
     final Key buttonKey = UniqueKey();
     List<String> items;
 
@@ -552,12 +551,10 @@ void main() {
     final RenderBox buttonBoxNullItems = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxNullItems.attached);
 
-
     items = <String>[];
     await tester.pumpWidget(build());
     final RenderBox buttonBoxEmptyItems = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxEmptyItems.attached);
-
 
     items = <String>['one', 'two', 'three', 'four'];
     await tester.pumpWidget(build());
@@ -609,7 +606,6 @@ void main() {
     expect(find.text('onetwothree'), findsOneWidget);
     final RenderBox buttonBoxHintValue = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxHintValue.attached);
-
 
     value = 'three';
     await tester.pumpWidget(build());
@@ -741,7 +737,6 @@ void main() {
     await tester.pump();
     expect(find.byType(ListView, skipOffstage: false), findsNothing);
   });
-
 
   testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
