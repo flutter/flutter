@@ -391,9 +391,9 @@
 
   if (_engineNeedsLaunch) {
     [_engine.get() launchEngine:nil libraryURI:nil];
+    [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }
-  [_engine.get() setViewController:self];
 
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
@@ -425,7 +425,6 @@
   TRACE_EVENT0("flutter", "viewDidDisappear");
   [self surfaceUpdated:NO];
   [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
-  [_engine.get() setViewController:nil];
   [super viewDidDisappear:animated];
 }
 
