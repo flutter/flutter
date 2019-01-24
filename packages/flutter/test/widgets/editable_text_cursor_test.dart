@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:mockito/mockito.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'editable_text_test.dart';
@@ -219,58 +218,6 @@ void main() {
     expect(controller.selection.baseOffset, 11);
   });
 
-  testWidgets(
-      'Can change cursor color, radius, visibility',
-      (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'test');
-    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
-    EditableText.debugDeterministicCursor = true;
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: EditableText(
-        autofocus: true,
-        backgroundCursorColor: Colors.grey,
-        controller: controller,
-        focusNode: focusNode,
-        style: textStyle,
-        cursorColor: cursorColor,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
-        onEditingComplete: () {
-          // This prevents the default focus change behavior on submission.
-        },
-      ),
-    ));
-
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.showCursor = showCursor;
-    await tester.pump();
-
-    expect(renderEditable, paints..rect(
-      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(56, 2, 2, 10),
-    ));
-
-    renderEditable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
-    renderEditable.cursorWidth = 4;
-    renderEditable.cursorRadius = const Radius.circular(3);
-    await tester.pump();
-
-    expect(renderEditable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(56, 2, 4, 10),
-        const Radius.circular(3),
-      ),
-    ));
-
-    showCursor.value = false;
-    await tester.pump();
-
-    expect(renderEditable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
-
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
@@ -396,34 +343,4 @@ void main() {
 
     await tester.pumpAndSettle();
   });
-}
-
-class MockTextSelectionControls extends Mock implements TextSelectionControls {}
-
-class CustomStyleEditableText extends EditableText {
-  CustomStyleEditableText({
-    TextEditingController controller,
-    Color cursorColor,
-    FocusNode focusNode,
-    TextStyle style,
-  }) : super(
-          controller: controller,
-          cursorColor: cursorColor,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: style,
-        );
-  @override
-  CustomStyleEditableTextState createState() =>
-      CustomStyleEditableTextState();
-}
-
-class CustomStyleEditableTextState extends EditableTextState {
-  @override
-  TextSpan buildTextSpan() {
-    return TextSpan(
-      style: const TextStyle(fontStyle: FontStyle.italic),
-      text: widget.controller.value.text,
-    );
-  }
 }
