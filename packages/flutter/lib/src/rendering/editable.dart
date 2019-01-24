@@ -1428,10 +1428,13 @@ class RenderEditable extends RenderBox {
       sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetFloatingCursorAnimationValue);
     }
 
-    final Rect floatingCaretPrototype = Rect.fromLTRB(_caretPrototype.left - sizeAdjustmentX,
-                                              _caretPrototype.top - sizeAdjustmentY,
-                                              _caretPrototype.right + sizeAdjustmentX,
-                                              _caretPrototype.bottom + sizeAdjustmentY);
+    final Rect floatingCaretPrototype = Rect.fromLTRB(
+      _caretPrototype.left - sizeAdjustmentX,
+      _caretPrototype.top - sizeAdjustmentY,
+      _caretPrototype.right + sizeAdjustmentX,
+      _caretPrototype.bottom + sizeAdjustmentY
+    );
+    
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
