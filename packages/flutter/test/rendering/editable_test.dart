@@ -27,10 +27,6 @@ class FakeEditableTextState extends TextSelectionDelegate {
 }
 
 void main() {
-
-  final TextEditingController controller = TextEditingController();
-  const TextStyle textStyle = TextStyle();
-
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -140,9 +136,11 @@ void main() {
       rect: Rect.fromLTWH(40, 2, 1, 6),
     ));
 
+    // Now change to a rounded caret.
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
+    pumpFrame();
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -152,7 +150,21 @@ void main() {
       ),
     ));
 
+    editable.textScaleFactor = 2;
+    pumpFrame();
+
+    // Now the caret height is much bigger due to the bigger font scale.
+    expect(editable, paints..rrect(
+      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(80, 2, 4, 16),
+        const Radius.circular(3),
+      ),
+    ));
+
+    // Can turn off caret.
     showCursor.value = false;
+    pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
