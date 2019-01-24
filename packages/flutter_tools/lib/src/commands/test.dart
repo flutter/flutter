@@ -76,9 +76,11 @@ class TestCommand extends FlutterCommand {
               'update the golden files rather than test for an existing match.',
       )
       ..addFlag('watch',
+        defaultsTo: false,
         negatable: false,
+        hide: true, // TODO(gamebox): Remove when UX is finalized
         help: 'After initial run, continue watching application directory for '
-              'changes and re-run tests on change.\n'
+              'changes and re-run tests with similar semantics to hot reload.\n'
               'Should be called with only the test files that you care to track.'
       )
       ..addOption('concurrency',
@@ -130,6 +132,10 @@ class TestCommand extends FlutterCommand {
 
     Directory workDir;
     if (files.isEmpty) {
+      if (argResults['watch']) {
+        throwToolExit(
+          'When using --watch, you must specify one or more test file(s) to run.');
+      }
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
       workDir = fs.directory('test');
@@ -145,7 +151,8 @@ class TestCommand extends FlutterCommand {
     }
 
     CoverageCollector collector;
-    if (argResults['coverage'] || argResults['merge-coverage']) {
+    if (argResults['coverage'] ||
+        argResults['merge-coverage']) {
       collector = CoverageCollector();
     }
 
@@ -155,9 +162,6 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool watchTests = argResults['watch'];
-    if (collector != null && watchTests) {
-      throwToolExit("The test command doesn't support --watch and coverage together");
-    }
 
     TestWatcher watcher;
     if (collector != null) {
@@ -185,8 +189,11 @@ class TestCommand extends FlutterCommand {
     );
 
     if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
+      final bool coverageDataCollected = await collector.collectCoverageData(
+          argResults['coverage-path'],
+          mergeCoverageData: argResults['merge-coverage']);
+
+      if (!coverageDataCollected)
         throwToolExit(null);
     }
 

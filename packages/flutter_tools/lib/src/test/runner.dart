@@ -76,7 +76,9 @@ Future<int> runTests(
 
   final TestCompiler compiler = TestCompiler(trackWidgetCreation, projectRootDirectory);
 
-  final Function compileTestFiles = ({List<String> invalidatedFiles = const <String>[]}) async {
+  final List<String> invalidatedFiles = <String>[];
+
+  final Function compileTestFiles = () async {
     int index = 0;
     final Map<String, String> precompiledDillFiles = <String, String>{};
     final Map<String, List<Finalizer>> finalizers = <String, List<Finalizer>>{};
@@ -93,7 +95,7 @@ Future<int> runTests(
       final String dillPath = await compiler.compile(mainDart, invalidatedFiles: invalidatedFiles);
       // We only need to invalidate the changed file once, so clear the list
       if (invalidatedFiles.isNotEmpty) {
-        invalidatedFiles = <String>[];
+        invalidatedFiles.clear();
       }
       precompiledDillFiles[file] = dillPath;
       finalizers[file] = fileFinalizers;
@@ -114,8 +116,6 @@ Future<int> runTests(
       fileFinalizers: finalizers,
     );
   };
-
-
   await compileTestFiles();
 
   // Make the global packages path absolute.
@@ -125,6 +125,14 @@ Future<int> runTests(
 
   // Call package:test's main method in the appropriate directory.
   final Directory saved = fs.currentDirectory;
+  
+  final Function printReloadMessage = () {
+    printStatus(
+      "Press 'r' to hot reload your tests, 'q' to quit",
+      color: TerminalColor.red
+    );
+  };
+
   try {
     if (workDir != null) {
       printTrace('switching to directory $workDir to run tests');
@@ -138,26 +146,44 @@ Future<int> runTests(
       final Completer<void> completer = Completer<void>();
       final DirectoryWatcher directoryWatcher = DirectoryWatcher(saved.path);
 
-       directoryWatcher.events.listen(
-        (WatchEvent event) async {
-          if (!event.path.endsWith('.dart')) {
-            return;
-          }
-          await compileTestFiles(invalidatedFiles: <String>[event.path]);
-          await test.runTests(testArgs);
-        },
-        onDone: completer.complete
-      );
+      directoryWatcher.events.listen((WatchEvent event) {
+        if (event.path.endsWith('.dart')) {
+          invalidatedFiles.add(event.path);
+        }
+      });
 
-       await directoryWatcher.ready;
+      terminal.singleCharMode = true;
+      terminal.onCharInput.asBroadcastStream().listen((String char) async {
+        switch(char) {
+          case 'r':
+            stdout.writeln(terminal.clearScreen());
+            printStatus('Recompiling test files...\n', emphasis: true, color: TerminalColor.blue);
 
-       printStatus('Watcher is ready for events...', emphasis: true, color: TerminalColor.blue);
+            await compileTestFiles();
+            await test.runTests(testArgs);
 
-       await completer.future;
-       test.completeShutdown();
+            printReloadMessage();
+            break;
+          case 'q':
+            completer.complete();
+        }
+      }, onDone: completer.complete);
+
+      await directoryWatcher.ready;
+
+      printReloadMessage();
+
+      await completer.future;
+      stdout.writeln(terminal.clearScreen());
     }
 
-     await compiler.dispose();
+    try {
+      test.completeShutdown();
+    } on StateError catch (e) {
+      printTrace(e.toString());
+    } finally {
+      await compiler.dispose();
+    }
 
     // test.main() sets dart:io's exitCode global.
     printTrace('test package returned with exit code $exitCode');
