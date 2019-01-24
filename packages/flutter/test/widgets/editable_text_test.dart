@@ -2102,7 +2102,7 @@ testWidgets(
 
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 11);
+    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
@@ -2159,14 +2159,19 @@ testWidgets(
 
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          backgroundCursorColor: Colors.grey,
+      MediaQuery(
+        data: const MediaQueryData(
+          devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
         ),
       ),
     );
@@ -2187,15 +2192,20 @@ testWidgets(
 
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          backgroundCursorColor: Colors.grey,
-          keyboardAppearance: Brightness.dark,
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardAppearance: Brightness.dark,
+          ),
         ),
       ),
     );
