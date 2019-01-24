@@ -6,7 +6,6 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'colors.dart';
 import 'constants.dart';
@@ -17,8 +16,6 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-const double _kActiveFontSize = 14.0;
-const double _kInactiveFontSize = 12.0;
 const double _kTopMargin = 6.0;
 const double _kBottomMargin = 8.0;
 
@@ -222,26 +219,18 @@ class _BottomNavigationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // In order to use the flex container to grow the tile during animation, we
-    // need to divide the changes in flex allotment into smaller pieces to
-    // produce smooth animation. We do this by multiplying the flex value
-    // (which is an integer) by a large number.
-    int size;
     Widget label;
 
     switch (type) {
       case BottomNavigationBarType.fixed:
-        size = 1;
         label = _FixedLabel(colorTween: colorTween, animation: animation, item: item);
         break;
       case BottomNavigationBarType.shifting:
-        size = (flex * 1000.0).round();
         label = _ShiftingLabel(animation: animation, item: item);
         break;
     }
 
     return Expanded(
-      flex: size,
       child: Semantics(
         container: true,
         header: true,
@@ -298,15 +287,12 @@ class _TileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double tweenStart;
     Color iconColor;
     switch (type) {
       case BottomNavigationBarType.fixed:
-        tweenStart = 8.0;
         iconColor = colorTween.evaluate(animation);
         break;
       case BottomNavigationBarType.shifting:
-        tweenStart = 16.0;
         iconColor = Colors.white;
         break;
     }
@@ -314,12 +300,7 @@ class _TileIcon extends StatelessWidget {
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: Container(
-        margin: EdgeInsets.only(
-          top: Tween<double>(
-            begin: tweenStart,
-            end: _kTopMargin,
-          ).evaluate(animation),
-        ),
+        margin: const EdgeInsets.only(top: _kTopMargin),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor,
@@ -352,25 +333,8 @@ class _FixedLabel extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: _kBottomMargin),
         child: DefaultTextStyle.merge(
-          style: TextStyle(
-            fontSize: _kActiveFontSize,
-            color: colorTween.evaluate(animation),
-          ),
-          // The font size should grow here when active, but because of the way
-          // font rendering works, it doesn't grow smoothly if we just animate
-          // the font size, so we use a transform instead.
-          child: Transform(
-            transform: Matrix4.diagonal3(
-              Vector3.all(
-                Tween<double>(
-                  begin: _kInactiveFontSize / _kActiveFontSize,
-                  end: 1.0,
-                ).evaluate(animation),
-              ),
-            ),
-            alignment: Alignment.bottomCenter,
-            child: item.title,
-          ),
+          style: TextStyle(color: colorTween.evaluate(animation)),
+          child: item.title,
         ),
       ),
     );
@@ -407,10 +371,7 @@ class _ShiftingLabel extends StatelessWidget {
           alwaysIncludeSemantics: true,
           opacity: animation,
           child: DefaultTextStyle.merge(
-            style: const TextStyle(
-              fontSize: _kActiveFontSize,
-              color: Colors.white,
-            ),
+            style: const TextStyle(color: Colors.white),
             child: item.title,
           ),
         ),
