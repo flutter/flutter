@@ -16,6 +16,8 @@ import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
+import '../ios/devices.dart';
+import '../ios/simulators.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -135,7 +137,19 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
-    final int devicePort = debugPort ?? await MDnsObservatoryPortDiscovery().queryForPort(applicationId: appId);
+    Future<int> getDevicePort() async {
+      if (debugPort != null) {
+        return debugPort;
+      }
+      // This call takes a non-trivial amount of time, and only iOS devices and
+      // simulators support it.
+      // If/when we do this on Android or other platforms, we can update it here.
+      if (device is IOSDevice || device is IOSSimulator) {
+        return MDnsObservatoryPortDiscovery().queryForPort(applicationId: appId);
+      }
+      return null;
+    }
+    final int devicePort = await getDevicePort();
 
     final Daemon daemon = argResults['machine']
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
