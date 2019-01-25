@@ -17,6 +17,12 @@ import tempfile
 import zipfile
 
 
+# Definition copied from pylib/constants/__init__.py to avoid adding
+# a dependency on pylib.
+DIR_SOURCE_ROOT = os.environ.get('CHECKOUT_SOURCE_ROOT',
+    os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                 os.pardir, os.pardir, os.pardir, os.pardir)))
+
 CHROMIUM_SRC = os.path.normpath(
     os.path.join(os.path.dirname(__file__),
                  os.pardir, os.pardir, os.pardir, os.pardir))
@@ -305,13 +311,14 @@ def GetPythonDependencies():
   A path is assumed to be a "system" import if it is outside of chromium's
   src/. The paths will be relative to the current directory.
   """
+  _ForceLazyModulesToLoad()
   module_paths = (m.__file__ for m in sys.modules.itervalues()
                   if m is not None and hasattr(m, '__file__'))
-
   abs_module_paths = map(os.path.abspath, module_paths)
 
+  assert os.path.isabs(DIR_SOURCE_ROOT)
   non_system_module_paths = [
-      p for p in abs_module_paths if p.startswith(CHROMIUM_SRC)]
+      p for p in abs_module_paths if p.startswith(DIR_SOURCE_ROOT)]
   def ConvertPycToPy(s):
     if s.endswith('.pyc'):
       return s[:-1]
@@ -321,6 +328,22 @@ def GetPythonDependencies():
   non_system_module_paths = map(os.path.relpath, non_system_module_paths)
   return sorted(set(non_system_module_paths))
 
+
+def _ForceLazyModulesToLoad():
+  """Forces any lazily imported modules to fully load themselves.
+
+  Inspecting the modules' __file__ attribute causes lazily imported modules
+  (e.g. from email) to get fully imported and update sys.modules. Iterate
+  over the values until sys.modules stabilizes so that no modules are missed.
+  """
+  while True:
+    num_modules_before = len(sys.modules.keys())
+    for m in sys.modules.values():
+      if m is not None and hasattr(m, '__file__'):
+        _ = m.__file__
+    num_modules_after = len(sys.modules.keys())
+    if num_modules_before == num_modules_after:
+      break
 
 def AddDepfileOption(parser):
   parser.add_option('--depfile',
