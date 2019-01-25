@@ -16,7 +16,7 @@ class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBindi
   @override
   Future<ui.Codec> instantiateImageCodec(Uint8List list) {
     counter++;
-    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use
+    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
   }
 
   @override
@@ -32,11 +32,11 @@ void main() {
   test('decodedCacheRatio', () async {
     // final PaintingBinding binding = PaintingBinding.instance;
     // Has default value.
-    expect(binding.decodedCacheRatioCap, isNot(null)); // ignore: deprecated_member_use
+    expect(binding.decodedCacheRatioCap, isNot(null)); // ignore: deprecated_member_use_from_same_package
 
     // Can be set.
-    binding.decodedCacheRatioCap = 1.0; // ignore: deprecated_member_use
-    expect(binding.decodedCacheRatioCap, 1.0); // ignore: deprecated_member_use
+    binding.decodedCacheRatioCap = 1.0; // ignore: deprecated_member_use_from_same_package
+    expect(binding.decodedCacheRatioCap, 1.0); // ignore: deprecated_member_use_from_same_package
   });
 
   test('instantiateImageCodec used for loading images', () async {

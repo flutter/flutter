@@ -256,8 +256,14 @@ class RenderEditable extends RenderBox {
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
-    if (defaultTargetPlatform != TargetPlatform.android)
-      return;
+    // Only handle key events on Android.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        return;
+    }
 
     if (keyEvent is RawKeyUpEvent)
       return;

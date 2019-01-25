@@ -316,7 +316,6 @@ class _DecelerateCurve extends Curve {
   }
 }
 
-
 // BOUNCE CURVES
 
 double _bounce(double t) {
@@ -536,6 +535,15 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
   static const Curve decelerate = _DecelerateCurve._();
 
+  /// A curve that is very steep and linear at the beginning, but quickly flattens out
+  /// and very slowly eases in.
+  ///
+  /// By default is the curve used to animate pages on iOS back to their original
+  /// position if a swipe gesture is ended midway through a swipe.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/fast_linear_to_slow_ease_in.mp4}
+  static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
+
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
@@ -545,6 +553,13 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
+
+  /// A cubic animation curve that starts starts slowly and ends linearly.
+  ///
+  /// The symmetric animation to [linearToEaseOut].
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_to_linear.mp4}
+  static const Cubic easeInToLinear = Cubic(0.67, 0.03, 0.65, 0.09);
 
   /// A cubic animation curve that starts slowly and ends quickly. This is
   /// similar to [Curves.easeIn], but with sinusoidal easing for a slightly less
@@ -639,6 +654,13 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
+
+  /// A cubic animation curve that starts linearly and ends slowly.
+  ///
+  /// A symmetric animation to [easeInToLinear].
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/linear_to_ease_out.mp4}
+  static const Cubic linearToEaseOut = Cubic(0.35, 0.91, 0.33, 0.97);
 
   /// A cubic animation curve that starts quickly and ends slowly. This is
   /// similar to [Curves.easeOut], but with sinusoidal easing for a slightly

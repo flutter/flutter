@@ -74,18 +74,18 @@ void main() {
       run.stdin.write('P');
       await driver.drive('none');
       final Future<String> reloadStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('] Initializing hot reload...'));
       final Future<String> reloadEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Hot reload performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('] Reloaded ') && line.endsWith('ms.'));
       print('test: pressing "r" to perform a hot reload...');
       run.stdin.write('r');
       await reloadStartingText;
       await reloadEndingText;
       await driver.drive('none');
       final Future<String> restartStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('hot restart...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('Performing hot restart...'));
       final Future<String> restartEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Hot restart performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('] Restarted application in '));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;

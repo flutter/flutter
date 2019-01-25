@@ -3043,7 +3043,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///  * [InputDecorator.isFocused], which is true if the [InputDecorator]'s child
   ///    has the focus.
   ///  * [InputDecoration.errorText], the error shown by the [InputDecorator], if non-null.
- ///  * [border], for a description of where the [InputDecorator] border appears.
+  ///  * [border], for a description of where the [InputDecorator] border appears.
   ///  * [UnderlineInputBorder], an [InputDecorator] border which draws a horizontal
   ///    line at the bottom of the input decorator's container.
   ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
@@ -3059,7 +3059,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///    and [InputDecoration.errorText] is null.
   final InputBorder focusedErrorBorder;
 
-   /// The border to display when the [InputDecorator] is disabled and is not
+  /// The border to display when the [InputDecorator] is disabled and is not
   /// showing an error.
   ///
   /// See also:

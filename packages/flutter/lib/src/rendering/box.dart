@@ -1736,7 +1736,7 @@ abstract class RenderBox extends RenderObject {
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
           information.write('  ');
           information.writeln(node.toStringShallow(joiner: '\n  '));
-         }
+        }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
@@ -1834,7 +1834,7 @@ abstract class RenderBox extends RenderObject {
       // notify them again.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
-       if (parent is RenderObject) {
+      if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
       }

@@ -88,15 +88,13 @@ class AndroidDevice extends Device {
           propCommand,
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
-        ).timeout(const Duration(seconds: 5));
+        );
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
           printError('Error retrieving device properties for $name:');
           printError(result.stderr);
         }
-      } on TimeoutException catch (_) {
-        throwToolExit('adb not responding');
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
       }
@@ -279,7 +277,7 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', timeout: kSlowOperation);
     final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -364,7 +362,8 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !debuggingOptions.buildInfo.isDebug) {
+        !(debuggingOptions.buildInfo.isDebug ||
+          debuggingOptions.buildInfo.isDynamic)) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
@@ -677,9 +676,9 @@ class _AdbLogReader extends DeviceLogReader {
     final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
     final String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
-        _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
+      _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
-        _timeOrigin = null;
+      _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // Previously this line specified allowMalformed: true.
