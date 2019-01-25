@@ -575,60 +575,56 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
-    WidgetTesterCallback getBodySizeTesterCallback({bool expanded = false, Size size}) => (WidgetTester tester) async {
-      final Key bodyKey = UniqueKey();
+    testWidgets('body size with extendedBody', (WidgetTester tester) async {
+      Key bodyKey;
 
-      Widget buildFrame(bool extendedBody) {
-        return MaterialApp(
-          home: Scaffold(
-            extendedBody: extendedBody,
-            body: Container(
-              key: bodyKey,),
-            bottomNavigationBar: BottomAppBar(
-              child: Container(height: 48.0,),
+      Widget buildFrame({bool extendedBody, bool resizeToAvoidBottomInset, double viewInsetBottom}){
+        bodyKey = UniqueKey();
+        
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: viewInsetBottom),
+            ),
+            child: Scaffold(
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+              extendedBody: extendedBody,
+              body: Container(
+                key: bodyKey,
+              ),
+              bottomNavigationBar: BottomAppBar(
+                child: const SizedBox(height: 48.0,),
+              ),
             ),
           ),
         );
       }
 
-      await tester.pumpWidget(buildFrame(expanded));
-      expect(tester.getSize(find.byKey(bodyKey)), size);
-    };
+      await tester.pumpWidget(buildFrame(extendedBody: true, resizeToAvoidBottomInset: true, viewInsetBottom: 0.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
 
-    testWidgets('body size with extendedBody = true', getBodySizeTesterCallback(expanded: true, size: const Size(800.0, 600.0)));
-    testWidgets('body size with extendedBody = false', getBodySizeTesterCallback(expanded: false, size: const Size(800.0, 552.0)));
+      await tester.pumpWidget(buildFrame(extendedBody: false, resizeToAvoidBottomInset: true, viewInsetBottom: 0.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 552.0));
 
-    testWidgets('body size with resizeToAvoidBottomInset and extendedBody', (
-        WidgetTester tester) async {
-      final Key bodyKey = UniqueKey();
+      await tester.pumpWidget(buildFrame(extendedBody: true, resizeToAvoidBottomInset: false, viewInsetBottom: 0.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
 
-      Future<void> buildFrame(bool extendedBody) async {
-        return tester.pumpWidget(Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-                data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
-                child: Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  extendedBody: extendedBody,
-                  body: Container(
-                    key: bodyKey,
-                  ),
-                  bottomNavigationBar: BottomAppBar(
-                      child: Container(height: 48.0,)
-                  ),
-                )
-            )
-        )
-        );
-      }
+      await tester.pumpWidget(buildFrame(extendedBody: false, resizeToAvoidBottomInset: false, viewInsetBottom: 0.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 552.0));
 
-      await buildFrame(true);
-      final Size sizeWithExtendedBody = tester.getSize(find.byKey(bodyKey));
+      await tester.pumpWidget(buildFrame(extendedBody: true, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
 
-      await buildFrame(false);
-      final Size sizeWithoutExtendedBody = tester.getSize(find.byKey(bodyKey));
+      await tester.pumpWidget(buildFrame(extendedBody: false, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
 
-      expect(sizeWithoutExtendedBody, sizeWithExtendedBody);
+      await tester.pumpWidget(buildFrame(extendedBody: true, resizeToAvoidBottomInset: false, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+
+      await tester.pumpWidget(buildFrame(extendedBody: false, resizeToAvoidBottomInset: false, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 552.0));
+
     });
   });
 
