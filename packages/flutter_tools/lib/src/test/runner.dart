@@ -123,7 +123,7 @@ Future<int> runTests(
 
   // Call package:test's main method in the appropriate directory.
   final Directory saved = fs.currentDirectory;
-  
+
   final Function printReloadMessage = () {
     printStatus(
       "Press 'r' to rerun your tests, 'q' to quit",
