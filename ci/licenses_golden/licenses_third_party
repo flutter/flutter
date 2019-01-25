@@ -1,4 +1,4 @@
-Signature: 32b15cd487d27e8ce0f5389651ff8172
+Signature: 7bc13540016cdf11ccc8c49232b9b96d
 
 UNUSED LICENSES:
 
@@ -4890,9 +4890,7 @@ FILE: ../../../third_party/dart/runtime/vm/version.h
 FILE: ../../../third_party/dart/runtime/vm/version_in.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory.h
-FILE: ../../../third_party/dart/runtime/vm/virtual_memory_android.cc
-FILE: ../../../third_party/dart/runtime/vm/virtual_memory_linux.cc
-FILE: ../../../third_party/dart/runtime/vm/virtual_memory_macos.cc
+FILE: ../../../third_party/dart/runtime/vm/virtual_memory_posix.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_test.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_win.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.cc
