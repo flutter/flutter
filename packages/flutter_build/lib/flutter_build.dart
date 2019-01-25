@@ -6,6 +6,10 @@ import 'package:build/build.dart';
 
 import 'src/kernel_builder.dart';
 
+/// Utility method called by build_runner to generate a build script.
+///
+/// This method does not need to be invoked manually, and instead should
+/// be configured via the `build.yaml` file.
 Builder flutterKernelBuilder(BuilderOptions builderOptions) {
   final Map<String, Object> config = builderOptions.config;
   final List<Object> extraFrontEndOptions = config['extraFrontEndOptions'];

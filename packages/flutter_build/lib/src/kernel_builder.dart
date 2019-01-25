@@ -65,8 +65,14 @@ class FlutterKernelBuilder implements Builder {
 
   /// Whether to provide the Dart product define to the frontend server.
   final bool targetProductVm;
+
+  /// When in batch mode, link platform kernel file into result kernel file.
   final bool linkPlatformKernelIn;
+
+  /// Whether to compile incrementally.
   final String incrementalCompilerByteStorePath;
+
+  /// Additional arguments to pass to the frontend server.
   final List<String> extraFrontEndOptions;
 
   @override
@@ -76,7 +82,7 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    // Do not run builder if has been disabled or if this asset does not
+    // Do not run builder if it has been disabled or if this asset does not
     // correspond to the current entrypoint.
     if (disabled || !mainPath.contains(buildStep.inputId.path)) {
       return;
@@ -85,7 +91,7 @@ class FlutterKernelBuilder implements Builder {
     final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
     // Create a scratch space file that can be read/written by the frontend server.
-    // It is okay to hard code these file names because we will copy them back
+    // It is okay to hard-code these file names because we will copy them back
     // from the temp directory at the end of the build step.
     final Directory tempDirecory = await Directory.systemTemp.createTemp('_flutter_build');
     final File packagesFile = File(path.join(tempDirecory.path, _kPackagesExtension));
@@ -142,19 +148,21 @@ class FlutterKernelBuilder implements Builder {
     if (extraFrontEndOptions != null) {
       arguments.addAll(extraFrontEndOptions);
     }
-    final Uri mainUri = PackageUriMapper.findUri(
+    final Uri mainUri = _PackageUriMapper.findUri(
       mainPath,
       packagesFile.path,
       multiRootScheme,
       <String>[projectDir.absolute.path, generatedRoot],
     );
     arguments.add(mainUri.toString());
-    // Invoke the frontend server and copy the generated dill back to the
-    // generated directory.
+    // Invoke the frontend server and copy the dill back to the output
+    // directory.
     try {
       final Process server = await Process.start(engineDartBinaryPath, arguments);
-      final StdoutHandler _stdoutHandler = StdoutHandler();
-      server.stderr.transform<String>(utf8.decoder).listen(log.shout);
+      final _StdoutHandler _stdoutHandler = _StdoutHandler();
+      server.stderr
+        .transform<String>(utf8.decoder)
+        .listen(log.shout);
       server.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
@@ -169,14 +177,14 @@ class FlutterKernelBuilder implements Builder {
   }
 }
 
-class StdoutHandler {
-  StdoutHandler() {
+class _StdoutHandler {
+  _StdoutHandler() {
     reset();
   }
 
   bool compilerMessageReceived = false;
   String boundaryKey;
-  Completer<CompilerOutput> compilerOutput;
+  Completer<_CompilerOutput> compilerOutput;
 
   bool _suppressCompilerMessages;
 
@@ -193,7 +201,7 @@ class StdoutHandler {
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
       compilerOutput.complete(
-        CompilerOutput(
+        _CompilerOutput(
           message.substring(boundaryKey.length + 1, spaceDelimiter),
           int.parse(message.substring(spaceDelimiter + 1).trim())));
     } else if (!_suppressCompilerMessages) {
@@ -210,14 +218,14 @@ class StdoutHandler {
   void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
     compilerMessageReceived = false;
-    compilerOutput = Completer<CompilerOutput>();
+    compilerOutput = Completer<_CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
   }
 }
 
 /// Converts filesystem paths to package URIs.
-class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, this.fileSystemScheme, this.fileSystemRoots) {
+class _PackageUriMapper {
+  _PackageUriMapper(String scriptPath, String packagesPath, this.fileSystemScheme, this.fileSystemRoots) {
     final List<int> bytes = File(path.absolute(packagesPath)).readAsBytesSync();
     final Map<String, Uri> packageMap = packages_file.parse(bytes, Uri.file(packagesPath, windows: Platform.isWindows));
     final String scriptUri = Uri.file(scriptPath, windows: Platform.isWindows).toString();
@@ -256,12 +264,12 @@ class PackageUriMapper {
   }
 
   static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
+    return _PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
 }
 
-class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount);
+class _CompilerOutput {
+  const _CompilerOutput(this.outputFilename, this.errorCount);
 
   final String outputFilename;
   final int errorCount;
