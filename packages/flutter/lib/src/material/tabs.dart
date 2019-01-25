@@ -393,7 +393,7 @@ class _IndicatorPainter extends CustomPainter {
       else if (value == index + 1.0)
         _currentRect = next ?? middle;
       else if (value == index)
-         _currentRect = middle;
+        _currentRect = middle;
       else if (value < index)
         _currentRect = previous == null ? middle : Rect.lerp(middle, previous, index - value);
       else
@@ -864,7 +864,7 @@ class _TabBarState extends State<TabBar> {
     else if (value == index + 1.0)
       offset = trailingPosition ?? middlePosition;
     else if (value == index)
-       offset = middlePosition;
+      offset = middlePosition;
     else if (value < index)
       offset = leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value);
     else

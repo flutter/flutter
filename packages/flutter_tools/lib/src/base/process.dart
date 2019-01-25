@@ -381,8 +381,8 @@ class RunResult {
     return out.toString().trimRight();
   }
 
- /// Throws a [ProcessException] with the given `message`.
- void throwException(String message) {
+  /// Throws a [ProcessException] with the given `message`.
+  void throwException(String message) {
     throw ProcessException(
       _command.first,
       _command.skip(1).toList(),

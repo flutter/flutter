@@ -1182,10 +1182,10 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
     final Offset p1Argument = arguments[0];
     final Offset p2Argument = arguments[1];
     if (p1 != null && p1Argument != p1) {
-        throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
+      throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
     }
     if (p2 != null && p2Argument != p2) {
-        throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
+      throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
     }
   }
 
