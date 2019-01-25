@@ -23,6 +23,7 @@ dependencies:
   json_schema: 1.0.10
   linter: 0.1.74
   meta: 1.1.6
+  multicast_dns: 0.1.0+1
   mustache: 1.1.0
   package_config: 1.0.5
   platform: 2.2.0
@@ -95,4 +96,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3fcc
+# PUBSPEC CHECKSUM: 78f0
