@@ -996,7 +996,7 @@ void main() {
 
     navigatorKey.currentState.pushNamedAndRemoveUntil(
       '/C',
-          (Route<dynamic> route) => route.isFirst,
+      (Route<dynamic> route) => route.isFirst,
       arguments: TypedDictionary()..set<String>('pushNamedAndRemoveUntil'),
     );
     await tester.pumpAndSettle();

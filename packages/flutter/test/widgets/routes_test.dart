@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -112,6 +113,22 @@ void main() {
     final RouteSettings settings3 = settings2.copyWith(isInitialRoute: true);
     expect(settings3.name, 'B');
     expect(settings3.isInitialRoute, true);
+  });
+
+  testWidgets('Route settings arguments', (WidgetTester tester) async {
+    const RouteSettings settings = RouteSettings(name: 'A');
+    expect(settings.arguments.isEmpty, isTrue);
+
+    final TypedDictionary arguments = TypedDictionary()..set<String>('hello');
+    final RouteSettings settings2 = RouteSettings(name: 'A', arguments: arguments);
+    expect(settings2.arguments, equals(arguments));
+
+    final RouteSettings settings3 = settings2.copyWith();
+    expect(settings3.arguments, equals(arguments));
+
+    final TypedDictionary arguments2 = TypedDictionary()..set<String>('world');
+    final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
+    expect(settings4.arguments, equals(arguments2));
   });
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
