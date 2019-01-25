@@ -593,8 +593,8 @@ void main() {
               body: Container(
                 key: bodyKey,
               ),
-              bottomNavigationBar: BottomAppBar(
-                child: const SizedBox(height: 48.0,),
+              bottomNavigationBar: const BottomAppBar(
+                child: SizedBox(height: 48.0,),
               ),
             ),
           ),
