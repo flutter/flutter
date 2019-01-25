@@ -1028,26 +1028,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
-
-  /// Called whenever the application is reassembled during debugging, for
-  /// example during hot reload.
-  ///
-  /// This method should rerun any initialization logic that depends on global
-  /// state, for example, image loading from asset bundles (since the asset
-  /// bundle may have changed).
-  ///
-  /// In addition to this method being invoked, it is guaranteed that the
-  /// [build] method will be invoked when a reassemble is signaled. Most
-  /// widgets therefore do not need to do anything in the [reassemble] method.
-  ///
-  /// This function will only be called during development. In release builds,
-  /// the `ext.flutter.reassemble` hook is not available, and so this code will
-  /// never execute.
-  ///
-  /// See also:
-  ///
-  ///  * [BindingBase.reassembleApplication]
-  ///  * [Image], which uses this to reload images.
+  
+  /// {@macro flutter.widgets.reassemble}
   @protected
   @mustCallSuper
   void reassemble() { }
@@ -2594,7 +2576,27 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   bool _active = false;
 
-  /// Called when a hot-reload is triggered.
+  /// {@template flutter.widgets.reassemble}
+  /// Called whenever the application is reassembled during debugging, for
+  /// example during hot reload.
+  ///
+  /// This method should rerun any initialization logic that depends on global
+  /// state, for example, image loading from asset bundles (since the asset
+  /// bundle may have changed).
+  ///
+  /// In addition to this method being invoked, it is guaranteed that the
+  /// [build] method will be invoked when a reassemble is signaled. Most
+  /// widgets therefore do not need to do anything in the [reassemble] method.
+  ///
+  /// This function will only be called during development. In release builds,
+  /// the `ext.flutter.reassemble` hook is not available, and so this code will
+  /// never execute.
+  ///
+  /// See also:
+  ///
+  ///  * [BindingBase.reassembleApplication]
+  ///  * [Image], which uses this to reload images.
+  /// {@endtemplate}
   @mustCallSuper
   @protected
   void reassemble() {
