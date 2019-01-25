@@ -523,8 +523,20 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    final List<String> portPaths = await _sshCommandRunner
-        .run('/system/bin/find /hub -name vmservice-port');
+    List<String> portPaths = <String>[];
+
+    // Occasionally running this command will hang, which means this might need
+    // to run a couple times.
+    while (true) {
+      try {
+        portPaths = await _sshCommandRunner
+            .run('/system/bin/find /hub -name vmservice-port')
+            .timeout(const Duration(seconds: 1));
+        break;
+      } on TimeoutException {
+        _log.warning('`find` timed out. Running again');
+      }
+    }
     final List<int> ports = <int>[];
     for (String path in portPaths) {
       if (path == '') {

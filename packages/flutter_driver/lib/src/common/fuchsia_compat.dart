@@ -49,7 +49,7 @@ class _DummySshCommandRunner implements SshCommandRunner {
       final List<String> splitCommand = command.split(' ');
       final String exe = splitCommand[0];
       final List<String> args = splitCommand.skip(1).toList();
-      final ProcessResult r = Process.runSync(exe, args);
+      final ProcessResult r = await Process.run(exe, args);
       return r.stdout.split('\n');
     } on ProcessException catch (e) {
       _log.warning("Error running '$command': $e");
@@ -93,7 +93,7 @@ class FuchsiaCompat {
   /// [FuchsiaRemoteConnection.stop].
   static Future<FuchsiaRemoteConnection> connect() async {
     FuchsiaCompat._init();
-    return FuchsiaRemoteConnection
-        .connectWithSshCommandRunner(_DummySshCommandRunner());
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
+        _DummySshCommandRunner());
   }
 }
