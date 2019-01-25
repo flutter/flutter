@@ -580,7 +580,7 @@ void main() {
 
       Widget buildFrame({bool extendedBody, bool resizeToAvoidBottomInset, double viewInsetBottom}){
         bodyKey = UniqueKey();
-        
+
         return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
