@@ -681,7 +681,6 @@ class _AdbLogReader extends DeviceLogReader {
       _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
-      // Previously this line specified allowMalformed: true.
       const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);

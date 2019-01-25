@@ -1,7 +1,9 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Hide the original utf8 [Codec] so that we can export our own implementation
+// which adds additional error handling.
 import 'dart:convert' hide utf8;
 import 'dart:convert' as cnv show utf8, Utf8Decoder;
 
