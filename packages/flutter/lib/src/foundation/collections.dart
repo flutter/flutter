@@ -80,7 +80,7 @@ class TypedDictionary {
   ///
   /// Any previously-existing data associated with that type is removed.
   ///
-  /// An exception will be thrown if this dictionary was created using
+  /// An [UnsupportedError] will be thrown if this dictionary was created using
   /// [TypedDictionary.unmodifiable].
   void set<T>(T data) {
     _storage[T] = data;
@@ -103,23 +103,5 @@ class TypedDictionary {
   int get length => _storage.length;
 
   @override
-  String toString() {
-    if (_storage.isEmpty)
-      return '{}';
-    final StringBuffer result = StringBuffer();
-    result.write('{');
-    final List<Type> keys = _storage.keys.toList();
-    keys.sort((Type a, Type b) => a.runtimeType.toString().compareTo(b.runtimeType.toString()));
-    bool addComma = false;
-    for (Type key in keys) {
-      if (addComma)
-        result.write(', ');
-      result.write(key.toString());
-      result.write(': ');
-      result.write(_storage[key].toString());
-      addComma = true;
-    }
-    result.write('}');
-    return result.toString();
-  }
+  String toString() => _storage.toString();
 }
