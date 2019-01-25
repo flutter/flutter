@@ -117,11 +117,15 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     return matrix..scale(clampedScale);
   }
 
-  Matrix4 matrixRotate(Matrix4 matrix, double rotation) {
+  Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation) {
       return matrix;
     }
-    return matrix..rotateZ(-rotation);
+    final Offset focalPointScene = fromViewport(focalPoint, matrix);
+    return matrix
+      ..translate(focalPointScene.dx, focalPointScene.dy)
+      ..rotateZ(-rotation)
+      ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
   @override
@@ -137,7 +141,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       _transform = matrixScale(_transform, widget.initialScale);
     }
     if (widget.initialRotation != null) {
-      _transform = matrixRotate(_transform, widget.initialRotation);
+      _transform = matrixRotate(_transform, widget.initialRotation, Offset.zero);
     }
     _controller = AnimationController(
       vsync: this,
@@ -218,7 +222,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
         _transform = matrixTranslate(_transform, focalPointSceneNext - focalPointScene);
       } else if (details.rotation != 0.0) {
         final double desiredRotation = _rotationStart + details.rotation;
-        _transform = matrixRotate(_transform, _currentRotation - desiredRotation);
+        _transform = matrixRotate(_transform, _currentRotation - desiredRotation, details.focalPoint);
         _currentRotation = desiredRotation;
       } else if (_translateFromScene != null && details.scale == 1.0) {
         // Translate so that the same point in the scene is underneath the
