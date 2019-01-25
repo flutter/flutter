@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:watcher/watcher.dart';
@@ -69,14 +70,11 @@ Future<int> runTests(
   if (!processManager.canRun(shellPath))
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
+  final Uri projectRootDirectory = fs.currentDirectory.uri;
+  final TestCompiler compiler = TestCompiler(trackWidgetCreation, projectRootDirectory);
+  final List<String> invalidatedFiles = <String>[];
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
-
-  final Uri projectRootDirectory = fs.currentDirectory.uri;
-
-  final TestCompiler compiler = TestCompiler(trackWidgetCreation, projectRootDirectory);
-
-  final List<String> invalidatedFiles = <String>[];
 
   final Function compileTestFiles = () async {
     int index = 0;
@@ -128,7 +126,7 @@ Future<int> runTests(
   
   final Function printReloadMessage = () {
     printStatus(
-      "Press 'r' to hot reload your tests, 'q' to quit",
+      "Press 'r' to rerun your tests, 'q' to quit",
       color: TerminalColor.red
     );
   };
@@ -156,10 +154,11 @@ Future<int> runTests(
       terminal.onCharInput.asBroadcastStream().listen((String char) async {
         switch(char) {
           case 'r':
-            stdout.writeln(terminal.clearScreen());
-            printStatus('Recompiling test files...\n', emphasis: true, color: TerminalColor.blue);
-
+            final Status status =
+                logger.startProgress('Recompiling test files...\n');
             await compileTestFiles();
+            status.stop();
+
             await test.runTests(testArgs);
 
             printReloadMessage();
@@ -180,7 +179,7 @@ Future<int> runTests(
     try {
       test.completeShutdown();
     } on StateError catch (e) {
-      printTrace(e.toString());
+      printError(e.toString());
     } finally {
       await compiler.dispose();
     }
