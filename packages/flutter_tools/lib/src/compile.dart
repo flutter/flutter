@@ -63,8 +63,9 @@ class CompilerOutput {
   final int errorCount;
 }
 
-class _StdoutHandler {
-  _StdoutHandler({this.consumer = printError}) {
+/// Handles stdin/stdout communication with the frontend server.
+class StdoutHandler {
+  StdoutHandler({this.consumer = printError}) {
     reset();
   }
 
@@ -90,8 +91,7 @@ class _StdoutHandler {
         CompilerOutput(
           message.substring(boundaryKey.length + 1, spaceDelimiter),
           int.parse(message.substring(spaceDelimiter + 1).trim())));
-    }
-    else if (!_suppressCompilerMessages) {
+    } else if (!_suppressCompilerMessages) {
       if (compilerMessageReceived == false) {
         consumer('\nCompiler message:');
         compilerMessageReceived = true;
@@ -110,9 +110,9 @@ class _StdoutHandler {
   }
 }
 
-// Converts filesystem paths to package URIs.
-class _PackageUriMapper {
-  _PackageUriMapper(String scriptPath, String packagesPath) {
+/// Converts filesystem paths to package URIs.
+class PackageUriMapper {
+  PackageUriMapper(String scriptPath, String packagesPath) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
 
@@ -132,7 +132,6 @@ class _PackageUriMapper {
   Uri map(String scriptPath) {
     if (_packageName == null)
       return null;
-
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
     if (scriptUri.startsWith(_uriPrefix)) {
       return Uri.parse('package:$_packageName/${scriptUri.substring(_uriPrefix.length)}');
@@ -142,7 +141,7 @@ class _PackageUriMapper {
   }
 
   static Uri findUri(String scriptPath, String packagesPath) {
-    return _PackageUriMapper(scriptPath, packagesPath).map(scriptPath);
+    return PackageUriMapper(scriptPath, packagesPath).map(scriptPath);
   }
 }
 
@@ -224,7 +223,7 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-      mainUri = _PackageUriMapper.findUri(mainPath, packagesPath);
+      mainUri = PackageUriMapper.findUri(mainPath, packagesPath);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
@@ -253,7 +252,7 @@ class KernelCompiler {
       printError('Failed to start frontend server $error, $stack');
     });
 
-    final _StdoutHandler _stdoutHandler = _StdoutHandler();
+    final StdoutHandler _stdoutHandler = StdoutHandler();
 
     server.stderr
       .transform<String>(utf8.decoder)
@@ -340,7 +339,7 @@ class ResidentCompiler {
        _fileSystemRoots = fileSystemRoots,
        _fileSystemScheme = fileSystemScheme,
        _targetModel = targetModel,
-       _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
+       _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
        _unsafePackageSerialization = unsafePackageSerialization,
@@ -357,7 +356,7 @@ class ResidentCompiler {
   final String _fileSystemScheme;
   String _sdkRoot;
   Process _server;
-  final _StdoutHandler _stdoutHandler;
+  final StdoutHandler _stdoutHandler;
   String _initializeFromDill;
   bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
@@ -390,9 +389,9 @@ class ResidentCompiler {
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
-    _PackageUriMapper packageUriMapper;
+    PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null) {
-      packageUriMapper = _PackageUriMapper(request.mainPath, request.packagesFilePath);
+      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath);
     }
 
     if (_server == null) {
@@ -560,11 +559,11 @@ class ResidentCompiler {
     _server?.stdin?.writeln('reset');
   }
 
-  String _mapFilename(String filename, _PackageUriMapper packageUriMapper) {
+  String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
     return _doMapFilename(filename, packageUriMapper) ?? filename;
   }
 
-  String _mapFileUri(String fileUri, _PackageUriMapper packageUriMapper) {
+  String _mapFileUri(String fileUri, PackageUriMapper packageUriMapper) {
     String filename;
     try {
       filename = Uri.parse(fileUri).toFilePath();
@@ -574,7 +573,7 @@ class ResidentCompiler {
     return _doMapFilename(filename, packageUriMapper) ?? fileUri;
   }
 
-  String _doMapFilename(String filename, _PackageUriMapper packageUriMapper) {
+  String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
     if (packageUriMapper != null) {
       final Uri packageUri = packageUriMapper.map(filename);
       if (packageUri != null)
