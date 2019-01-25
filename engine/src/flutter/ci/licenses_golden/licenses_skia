@@ -1,4 +1,4 @@
-Signature: c211e91edebfad57b9aa328f9e8c20ea
+Signature: 8b8312d5a19f66c7f5b1868130f3b76f
 
 UNUSED LICENSES:
 
@@ -5036,6 +5036,8 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
+FILE: ../../../third_party/skia/src/sksl/SkSLDefines.h
+FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google Inc.
 
