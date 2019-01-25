@@ -256,14 +256,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       environment: androidSdk.sdkManagerEnv,
     );
     process.stdin.write('n\n');
+    // We expect logcat streams to occasionally contain invalid utf-8,
+    // see: https://github.com/flutter/flutter/pull/8864.
     final Future<void> output = process.stdout
-      // Previously this line specified allowMalformed: true.
       .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_handleLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
-       // Previously this line specified allowMalformed: true.
       .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_handleLine)
