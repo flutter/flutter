@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:build/build.dart';
-import 'package:build_modules/build_modules.dart';
 import 'package:package_config/packages_file.dart' as packages_file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 const String _kFlutterDillOutputExtension = '.app.dill';
 const String _kPackagesExtension = '.packages';
+const String multiRootScheme = 'org-dartlang-app';
 
 /// A builder which creates a kernel and packages file for a Flutter app.
 ///
