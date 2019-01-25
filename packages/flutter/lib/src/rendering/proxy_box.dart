@@ -3098,7 +3098,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-   /// Called when the user taps on the render object.
+  /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
   set onTap(GestureTapCallback value) {

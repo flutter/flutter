@@ -1305,7 +1305,7 @@ class Isolate extends ServiceObjectOwner {
     final Map<String, dynamic> result =
       await invokeFlutterExtensionRpcRaw('ext.flutter.saveCompilationTrace');
     if (result != null && result['value'] is List<dynamic>)
-        return result['value'].cast<int>();
+      return result['value'].cast<int>();
     return null;
   }
 
