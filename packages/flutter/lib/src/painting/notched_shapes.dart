@@ -88,22 +88,40 @@ class CircularNotchedRectangle implements NotchedShape {
     p[5] = Offset(-1.0 * p[0].dx, p[0].dy);
 
     // translate all points back to the absolute coordinate system.
-    for (int i = 0; i < p.length; i += 1)
-      p[i] += guest.center;
+    for (int i = 0; i < p.length; i += 1) p[i] += guest.center;
 
-    return Path()
+    final Path path = Path()
       ..moveTo(host.left, host.top)
       ..lineTo(p[0].dx, p[0].dy)
-      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy)
-      ..arcToPoint(
+      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy);
+    if (guest.height == guest.width) {
+      // circle
+      path.arcToPoint(
         p[3],
         radius: Radius.circular(notchRadius),
         clockwise: false,
-      )
+      );
+    } else {
+      // stadium
+      path
+        ..arcToPoint(
+          guest.bottomLeft + Offset(guest.height / 2, 0),
+          radius: Radius.circular(guest.height / 2),
+          clockwise: false,
+        )
+        ..lineTo(guest.right - guest.height / 2, guest.bottom)
+        ..arcToPoint(
+          p[3],
+          radius: Radius.circular(guest.height / 2),
+          clockwise: false,
+        );
+    }
+    path
       ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
       ..lineTo(host.right, host.top)
       ..lineTo(host.right, host.bottom)
       ..lineTo(host.left, host.bottom)
       ..close();
+    return path;
   }
 }
