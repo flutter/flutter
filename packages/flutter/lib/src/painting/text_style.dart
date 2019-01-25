@@ -262,6 +262,20 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// If all custom fallback font families are exhausted and no match was found
 /// or no custom fallback was provided, the platform font fallback will be used.
 ///
+/// ### Inconsistent platform fonts
+///
+/// Since Flutter's font discovery for default fonts depends on the fonts present
+/// on the device, it is not safe to assume all default fonts will be available or
+/// consistent across devices.
+///
+/// A known example of this is that Samsung devices ship with a CJK font that has
+/// smaller line spacing than the Android default. This results in Samsung devices
+/// displaying more tightly spaced text than on other Android devices when no
+/// custom font is specified.
+///
+/// To avoid this, a custom font should be specified if absolute font consistency
+/// is required for your application.
+///
 /// See also:
 ///
 ///  * [Text], the widget for showing text in a single style.
