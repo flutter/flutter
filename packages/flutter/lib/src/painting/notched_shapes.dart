@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math' as math;
 
 import 'basic_types.dart';
@@ -6,7 +10,7 @@ import 'basic_types.dart';
 ///
 /// Typically used as the outline of a 'host' widget to make a notch that
 /// accommodates a 'guest' widget. e.g the [BottomAppBar] may have a notch to
-/// accomodate the [FloatingActionBar].
+/// accommodate the [FloatingActionButton].
 
 /// See also: [ShapeBorder], which defines a shaped border without a dynamic
 /// notch.
@@ -26,7 +30,7 @@ abstract class NotchedShape {
 
 /// A rectangle with a smooth circular notch.
 class CircularNotchedRectangle implements NotchedShape {
-  /// Creates a `CircularNotchedRectangle`.
+  /// Creates a [CircularNotchedRectangle].
   ///
   /// The same object can be used to create multiple shapes.
   const CircularNotchedRectangle();
@@ -36,7 +40,7 @@ class CircularNotchedRectangle implements NotchedShape {
   /// `host` is the bounding box for the returned shape. Conceptually this is
   /// the rectangle to which the notch will be applied.
   ///
-  /// `guest` is the bounding box of a circle that the notch accomodates. All
+  /// `guest` is the bounding box of a circle that the notch accommodates. All
   /// points in the circle bounded by `guest` will be outside of the returned
   /// path.
   ///
@@ -55,7 +59,7 @@ class CircularNotchedRectangle implements NotchedShape {
     // We build a path for the notch from 3 segments:
     // Segment A - a Bezier curve from the host's top edge to segment B.
     // Segment B - an arc with radius notchRadius.
-    // Segment C - a Bezier curver from segment B back to the host's top edge.
+    // Segment C - a Bezier curve from segment B back to the host's top edge.
     //
     // A detailed explanation and the derivation of the formulas below is
     // available at: https://goo.gl/Ufzrqn
