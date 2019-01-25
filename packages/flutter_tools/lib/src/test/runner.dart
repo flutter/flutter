@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:watcher/watcher.dart';
@@ -13,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
