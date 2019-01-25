@@ -476,9 +476,9 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(label != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -613,11 +613,11 @@ class InputChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(selected != null),
-        assert(isEnabled != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(selected != null),
+       assert(isEnabled != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -775,10 +775,10 @@ class ChoiceChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -956,10 +956,10 @@ class FilterChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -1087,13 +1087,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(label != null),
-        assert(
-          onPressed != null,
-          'Rather than disabling an ActionChip by setting onPressed to null, '
-          'remove it from the interface entirely.',
-        ),
-        super(key: key);
+  }) : assert(label != null),
+       assert(
+         onPressed != null,
+         'Rather than disabling an ActionChip by setting onPressed to null, '
+         'remove it from the interface entirely.',
+       ),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -1211,12 +1211,12 @@ class RawChip extends StatefulWidget
     this.backgroundColor,
     this.materialTapTargetSize,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(label != null),
-        assert(isEnabled != null),
-        assert(clipBehavior != null),
-        assert(pressElevation != null && pressElevation >= 0.0),
-        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
-        super(key: key);
+  }) : assert(label != null),
+       assert(isEnabled != null),
+       assert(clipBehavior != null),
+       assert(pressElevation != null && pressElevation >= 0.0),
+       deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -1649,8 +1649,8 @@ class _ChipRenderWidget extends RenderObjectWidget {
     this.deleteDrawerAnimation,
     this.enableAnimation,
     this.avatarBorder,
-  })  : assert(theme != null),
-        super(key: key);
+  }) : assert(theme != null),
+       super(key: key);
 
   final _ChipRenderTheme theme;
   final bool value;
@@ -1878,10 +1878,10 @@ class _RenderChip extends RenderBox {
     this.deleteDrawerAnimation,
     this.enableAnimation,
     this.avatarBorder,
-  })  : assert(theme != null),
-        assert(textDirection != null),
-        _theme = theme,
-        _textDirection = textDirection {
+  }) : assert(theme != null),
+       assert(textDirection != null),
+       _theme = theme,
+       _textDirection = textDirection {
     checkmarkAnimation.addListener(markNeedsPaint);
     avatarDrawerAnimation.addListener(markNeedsLayout);
     deleteDrawerAnimation.addListener(markNeedsLayout);

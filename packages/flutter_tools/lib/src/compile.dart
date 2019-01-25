@@ -286,9 +286,13 @@ abstract class _CompilationRequest {
 }
 
 class _RecompileRequest extends _CompilationRequest {
-  _RecompileRequest(Completer<CompilerOutput> completer, this.mainPath,
-      this.invalidatedFiles, this.outputPath, this.packagesFilePath) :
-      super(completer);
+  _RecompileRequest(
+    Completer<CompilerOutput> completer,
+    this.mainPath,
+    this.invalidatedFiles,
+    this.outputPath,
+    this.packagesFilePath,
+  ) : super(completer);
 
   String mainPath;
   List<String> invalidatedFiles;
@@ -301,9 +305,15 @@ class _RecompileRequest extends _CompilationRequest {
 }
 
 class _CompileExpressionRequest extends _CompilationRequest {
-  _CompileExpressionRequest(Completer<CompilerOutput> completer, this.expression, this.definitions,
-      this.typeDefinitions, this.libraryUri, this.klass, this.isStatic) :
-      super(completer);
+  _CompileExpressionRequest(
+    Completer<CompilerOutput> completer,
+    this.expression,
+    this.definitions,
+    this.typeDefinitions,
+    this.libraryUri,
+    this.klass,
+    this.isStatic
+  ) : super(completer);
 
   String expression;
   List<String> definitions;

@@ -304,12 +304,13 @@ void tearDownAll(Function body) {
 /// fixed, this must not import `dart:io`.
 class _Reporter {
   _Reporter({bool color = true, bool printPath = true})
-  : _printPath = printPath,
-    _green = color ? '\u001b[32m' : '',
-    _red = color ? '\u001b[31m' : '',
-    _yellow = color ? '\u001b[33m' : '',
-    _bold = color ? '\u001b[1m' : '',
-    _noColor = color ? '\u001b[0m' : '';
+    : _printPath = printPath,
+      _green = color ? '\u001b[32m' : '',
+      _red = color ? '\u001b[31m' : '',
+      _yellow = color ? '\u001b[33m' : '',
+      _bold = color ? '\u001b[1m' : '',
+      _noColor = color ? '\u001b[0m' : '';
+
   final List<LiveTest> passed = <LiveTest>[];
   final List<LiveTest> failed = <LiveTest>[];
   final List<Test> skipped = <Test>[];

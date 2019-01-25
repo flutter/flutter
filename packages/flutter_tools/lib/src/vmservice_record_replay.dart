@@ -195,7 +195,7 @@ class _RecordingSink implements StreamSink<String> {
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
+    : _transactions = _loadTransactions(location);
 
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();

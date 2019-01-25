@@ -27,8 +27,8 @@ class FlutterTesterApp extends ApplicationPackage {
   }
 
   FlutterTesterApp._(Directory directory)
-      : _directory = directory,
-        super(id: directory.path);
+    : _directory = directory,
+      super(id: directory.path);
 
   final Directory _directory;
 

@@ -512,7 +512,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
   }) : assert(items == null || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+       super(key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;

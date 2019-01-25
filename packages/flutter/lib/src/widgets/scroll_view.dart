@@ -756,19 +756,20 @@ class ListView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? children.length,
-    dragStartBehavior: dragStartBehavior,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
   ///
@@ -820,19 +821,20 @@ class ListView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? itemCount,
-    dragStartBehavior: dragStartBehavior,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? itemCount,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated
   /// by list item "separators".
@@ -925,18 +927,19 @@ class ListView extends BoxScrollView {
          semanticIndexCallback: (Widget _, int index) {
            return index.isEven ? index ~/ 2 : null;
          }
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: _computeSemanticChildCount(itemCount),
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: _computeSemanticChildCount(itemCount),
+       );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
   ///
@@ -1327,19 +1330,20 @@ class GridView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? children.length,
-    dragStartBehavior: dragStartBehavior,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
   /// maximum cross-axis extent.
@@ -1385,18 +1389,19 @@ class GridView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    semanticChildCount: semanticChildCount ?? children.length,
-    dragStartBehavior: dragStartBehavior,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// A delegate that controls the layout of the children within the [GridView].
   ///

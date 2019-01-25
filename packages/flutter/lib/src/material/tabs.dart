@@ -1236,7 +1236,10 @@ class TabPageSelectorIndicator extends StatelessWidget {
     @required this.backgroundColor,
     @required this.borderColor,
     @required this.size,
-  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
+  }) : assert(backgroundColor != null),
+       assert(borderColor != null),
+       assert(size != null),
+       super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1275,7 +1278,8 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0),
+       super(key: key);
 
   /// This widget's selection and animation state.
   ///

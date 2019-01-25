@@ -82,15 +82,15 @@ class FloatingActionButton extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation == null || disabledElevation >= 0.0),
-        assert(mini != null),
-        assert(shape != null),
-        assert(isExtended != null),
-        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
-        disabledElevation = disabledElevation ?? elevation,
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(mini != null),
+       assert(shape != null),
+       assert(isExtended != null),
+       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with both
   /// an [icon] and a [label].
@@ -115,28 +115,28 @@ class FloatingActionButton extends StatelessWidget {
     this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation == null || disabledElevation >= 0.0),
-        assert(shape != null),
-        assert(isExtended != null),
-        assert(clipBehavior != null),
-        _sizeConstraints = _kExtendedSizeConstraints,
-        disabledElevation = disabledElevation ?? elevation,
-        mini = false,
-        child = _ChildOverflowBox(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(width: 16.0),
-              icon,
-              const SizedBox(width: 8.0),
-              label,
-              const SizedBox(width: 20.0),
-            ],
-          ),
-        ),
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(shape != null),
+       assert(isExtended != null),
+       assert(clipBehavior != null),
+       _sizeConstraints = _kExtendedSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       mini = false,
+       child = _ChildOverflowBox(
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: <Widget>[
+             const SizedBox(width: 16.0),
+             icon,
+             const SizedBox(width: 8.0),
+             label,
+             const SizedBox(width: 20.0),
+           ],
+         ),
+       ),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

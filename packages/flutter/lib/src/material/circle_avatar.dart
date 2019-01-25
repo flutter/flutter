@@ -61,8 +61,8 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-  })  : assert(radius == null || (minRadius == null && maxRadius == null)),
-        super(key: key);
+  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

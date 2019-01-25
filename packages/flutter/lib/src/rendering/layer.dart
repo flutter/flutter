@@ -323,7 +323,8 @@ class TextureLayer extends Layer {
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
-  }): assert(rect != null), assert(textureId != null);
+  }) : assert(rect != null),
+       assert(textureId != null);
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -366,7 +367,8 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
-  }): assert(rect != null), assert(viewId != null);
+  }) : assert(rect != null),
+       assert(viewId != null);
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -815,9 +817,13 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ @required Rect clipRect, Clip clipBehavior = Clip.hardEdge }) :
-        _clipRect = clipRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRectLayer({
+    @required Rect clipRect,
+    Clip clipBehavior = Clip.hardEdge,
+  }) : _clipRect = clipRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -887,9 +893,13 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ @required RRect clipRRect, Clip clipBehavior = Clip.antiAlias }) :
-        _clipRRect = clipRRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRRectLayer({
+    @required RRect clipRRect,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipRRect = clipRRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -955,9 +965,13 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ @required Path clipPath, Clip clipBehavior = Clip.antiAlias }) :
-        _clipPath = clipPath, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipPathLayer({
+    @required Path clipPath,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -1094,8 +1108,11 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({ @required int alpha, Offset offset = Offset.zero })
-      : _alpha = alpha, _offset = offset;
+  OpacityLayer({
+    @required int alpha,
+    Offset offset = Offset.zero,
+  }) : _alpha = alpha,
+       _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1152,8 +1169,13 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({ @required Shader shader, @required Rect maskRect, @required BlendMode blendMode })
-      : _shader = shader, _maskRect = maskRect, _blendMode = blendMode;
+  ShaderMaskLayer({
+    @required Shader shader,
+    @required Rect maskRect,
+    @required BlendMode blendMode,
+  }) : _shader = shader,
+       _maskRect = maskRect,
+       _blendMode = blendMode;
 
   /// The shader to apply to the children.
   ///
