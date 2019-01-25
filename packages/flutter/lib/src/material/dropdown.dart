@@ -476,15 +476,14 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// shows the currently selected item as well as an arrow that opens a menu for
 /// selecting another item.
 ///
-/// The type `T` is the type of the values the dropdown items represent. All the
-/// entries in a given menu must represent values with consistent types.
+/// The type `T` is the type of the [value] that each dropdown item represents.
+/// All the entries in a given menu must represent values with consistent types.
 /// Typically, an enum is used. Each [DropdownMenuItem] in [items] must be
 /// specialized with that same type argument.
 ///
 /// The [onChanged] callback should update a state variable that defines the
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
-///
 ///
 /// {@tool snippet --template=stateful_widget}
 ///
@@ -524,7 +523,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// If the [onChanged] callback is null or the list of [items] is null
 /// then the dropdown button will be disabled, i.e. its arrow will be
 /// displayed in grey and it will not respond to input. A disabled button
-/// will display the [disabledHint] widget if it is non null.
+/// will display the [disabledHint] widget if it is non-null.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -570,12 +569,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non null.
+  /// will display the [disabledHint] widget if it is non-null.
   final List<DropdownMenuItem<T>> items;
 
   /// The value of the currently selected [DropdownMenuItem], or null if no
-  /// item has been selected. If value is null then the menu is popped up as
-  /// if the first item was selected.
+  /// item has been selected. If `value` is null then the menu is popped up as
+  /// if the first item were selected.
   final T value;
 
   /// Displayed if [value] is null.
@@ -591,13 +590,13 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of [items] is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non null.
+  /// will display the [disabledHint] widget if it is non-null.
   final ValueChanged<T> onChanged;
 
   /// The z-coordinate at which to place the menu when open.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
-  /// 16, 24. See [kElevationToShadow].
+  /// 16, and 24. See [kElevationToShadow].
   ///
   /// Defaults to 8, the appropriate elevation for dropdown buttons.
   final int elevation;
