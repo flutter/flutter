@@ -51,6 +51,10 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
+  ///
+  /// If the [shrinkWrap] argument is true, the [center] argument must be null.
+  ///
+  /// The [scrollDirection], [reverse], and [shrinkWrap] arguments must not be null.
   const ScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
@@ -59,16 +63,19 @@ abstract class ScrollView extends StatelessWidget {
     bool primary,
     ScrollPhysics physics,
     this.shrinkWrap = false,
+    this.center,
     this.cacheExtent,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.down,
-  }) : assert(reverse != null),
+  }) : assert(scrollDirection != null),
+       assert(reverse != null),
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
        ),
+       assert(!shrinkWrap || center == null),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
@@ -172,6 +179,19 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to false.
   final bool shrinkWrap;
 
+  /// The first child in the [GrowthDirection.forward] growth direction.
+  ///
+  /// Children after [center] will be placed in the [axisDirection] relative to
+  /// the [center]. Children before [center] will be placed in the opposite of
+  /// the [axisDirection] relative to the [center].
+  ///
+  /// The [center] must be the key of one of the slivers built by [buildSlivers].
+  ///
+  /// Of the built-in subclasses of [ScrollView], only [CustomScrollView]
+  /// supports [center]; for that class, the given key must be the key of one of
+  /// the slivers in the [CustomScrollView.slivers] list.
+  final Key center;
+
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
@@ -221,6 +241,14 @@ abstract class ScrollView extends StatelessWidget {
   /// Subclasses may override this method to change how the viewport is built.
   /// The default implementation uses a [ShrinkWrappingViewport] if [shrinkWrap]
   /// is true, and a regular [Viewport] otherwise.
+  ///
+  /// The `offset` argument is the value obtained from
+  /// [Scrollable.viewportBuilder].
+  ///
+  /// The `axisDirection` argument is the value obtained from [getDirection],
+  /// which by default uses [scrollDirection] and [reverse].
+  ///
+  /// The `slivers` argument is the value obtained from [buildSlivers].
   @protected
   Widget buildViewport(
     BuildContext context,
@@ -240,6 +268,7 @@ abstract class ScrollView extends StatelessWidget {
       offset: offset,
       slivers: slivers,
       cacheExtent: cacheExtent,
+      center: center,
     );
   }
 
@@ -401,6 +430,7 @@ class CustomScrollView extends ScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap = false,
+    Key center,
     double cacheExtent,
     this.slivers = const <Widget>[],
     int semanticChildCount,
@@ -413,6 +443,7 @@ class CustomScrollView extends ScrollView {
     primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
+    center: center,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
     dragStartBehavior: dragStartBehavior,
