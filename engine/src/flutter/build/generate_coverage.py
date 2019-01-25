@@ -47,7 +47,7 @@ def main():
       required=True, help='The unit tests to run and gather coverage data on.')
   parser.add_argument('-o', '--output', dest='output',
       required=True, help='The output directory for coverage results.')
-  parser.add_argument('-f', '--format', type=str, choices=['all', 'html', 'summary'],
+  parser.add_argument('-f', '--format', type=str, choices=['all', 'html', 'summary', 'lcov'],
       required=True, help='The type of coverage information to be displayed.')
 
   args = parser.parse_args()
@@ -77,7 +77,7 @@ def main():
 
     print "Running test %s to gather profile." % os.path.basename(absolute_test_path)
     
-    subprocess.check_call([absolute_test_path], shell=True, env={
+    subprocess.check_call([absolute_test_path], env={
       "LLVM_PROFILE_FILE":  raw_profile
     })
 
@@ -138,6 +138,20 @@ def main():
       ignore_flags,
     ]
     subprocess.check_call(report_command)
+    print("Done.")
+
+  # Generate a lcov summary if specified.
+  if generate_all_reports or args.format == 'lcov':
+    print("Generating LCOV report.")
+    lcov_file = os.path.join(output, 'coverage.lcov')
+    RemoveIfExists(lcov_file)
+    lcov_command = [llvm_cov_binary, "export"] + binaries_flag + [
+      instr_profile_flag,
+      ignore_flags,
+      "-format=lcov",
+    ]
+    with open(lcov_file, 'w') as lcov_redirect:
+      subprocess.check_call(lcov_command, stdout=lcov_redirect)
     print("Done.")
 
   return 0
