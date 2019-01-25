@@ -810,8 +810,8 @@ class Scaffold extends StatefulWidget {
        assert(drawerDragStartBehavior != null),
        super(key: key);
 
-  /// If true and a [bottomNavigationBar] is specified then the body 
-  /// extends to the bottom of the Scaffold, instead of only extending 
+  /// If true and a [bottomNavigationBar] is specified then the body
+  /// extends to the bottom of the Scaffold, instead of only extending
   /// to the top of the [bottomNavigationBar].
   final bool extendedBody;
 
