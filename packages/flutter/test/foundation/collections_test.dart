@@ -22,6 +22,8 @@ void main() {
     expect(dict.get<String>(), 'flutter');
     expect(dict.get<int>(), 44);
     expect(dict.get<double>(), isNull);
+
+    expect(() => dict.set<dynamic>(44), throwsAssertionError);
   });
 
   test('TypedDictionary.toString', () {

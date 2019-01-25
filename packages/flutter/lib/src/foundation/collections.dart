@@ -78,11 +78,17 @@ class TypedDictionary {
 
   /// Stores data in the dictionary under the key `T`.
   ///
-  /// Any previously-existing data associated with that type is removed.
+  /// Any previously-existing data associated with that type is removed and
+  /// `T` must not be dynamic.
   ///
   /// An [UnsupportedError] will be thrown if this dictionary was created using
   /// [TypedDictionary.unmodifiable].
   void set<T>(T data) {
+    assert(
+      T != dynamic,
+      '$runtimeType does not support dynamic.\n'
+      'To place or retrive an untyped object into the $runtimeType, use set<Object>(x) and get<Object>().'
+    );
     _storage[T] = data;
   }
 
