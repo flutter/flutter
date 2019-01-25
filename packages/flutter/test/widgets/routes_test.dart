@@ -129,6 +129,7 @@ void main() {
     final TypedDictionary arguments2 = TypedDictionary()..set<String>('world');
     final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
     expect(settings4.arguments, equals(arguments2));
+    expect(settings4.arguments, isNot(equals(arguments)));
   });
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
