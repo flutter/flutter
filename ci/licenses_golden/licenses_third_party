@@ -1,4 +1,4 @@
-Signature: 7bc13540016cdf11ccc8c49232b9b96d
+Signature: c1372293a8ad7d13e9db0872c55f25d7
 
 UNUSED LICENSES:
 
@@ -4757,6 +4757,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_x64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_x86.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/object_pool_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/constant_propagator.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_compiler.h
@@ -5602,11 +5603,17 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
+FILE: ../../../third_party/dart/runtime/vm/class_id.h
+FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.h
+FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
+FILE: ../../../third_party/dart/runtime/vm/pointer_tagging.h
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
 FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
@@ -5674,6 +5681,7 @@ FILE: ../../../third_party/dart/runtime/vm/double_conversion.cc
 FILE: ../../../third_party/dart/runtime/vm/double_conversion.h
 FILE: ../../../third_party/dart/runtime/vm/exceptions.cc
 FILE: ../../../third_party/dart/runtime/vm/exceptions.h
+FILE: ../../../third_party/dart/runtime/vm/handle_visitor.h
 FILE: ../../../third_party/dart/runtime/vm/handles.h
 FILE: ../../../third_party/dart/runtime/vm/heap/freelist.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/marker.cc
@@ -5694,6 +5702,7 @@ FILE: ../../../third_party/dart/runtime/vm/native_entry.cc
 FILE: ../../../third_party/dart/runtime/vm/native_entry.h
 FILE: ../../../third_party/dart/runtime/vm/native_entry_test.cc
 FILE: ../../../third_party/dart/runtime/vm/native_entry_test.h
+FILE: ../../../third_party/dart/runtime/vm/native_function.h
 FILE: ../../../third_party/dart/runtime/vm/object_store_test.cc
 FILE: ../../../third_party/dart/runtime/vm/os.h
 FILE: ../../../third_party/dart/runtime/vm/port.h
