@@ -5,6 +5,9 @@
 import 'dart:async';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../build_runner/build_runner.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -81,6 +84,12 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (await experimentalBuildEnabled) {
+      final Status status = logger.startProgress('Running builders...', timeout: null);
+      final BuildRunner runner = buildRunnerFactory.create();
+      await runner.codegen();
+      status.stop();
+    }
     if (argResults['watch']) {
       await AnalyzeContinuously(
         argResults,

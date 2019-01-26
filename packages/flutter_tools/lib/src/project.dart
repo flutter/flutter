@@ -106,6 +106,13 @@ class FlutterProject {
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
+  /// The directory containing the generated code for this project.
+  Directory get generated => directory
+    .childDirectory('.dart_tool')
+    .childDirectory('build')
+    .childDirectory('generated')
+    .childDirectory(manifest.appName);
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),

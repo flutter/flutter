@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
+import '../build_runner/build_runner.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
@@ -205,6 +206,14 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
+      ResidentCompiler generator;
+      if (await experimentalBuildEnabled) {
+        generator = await BuildResidentCompiler.create(
+          mainPath: targetFile,
+          trackWidgetCreation: false,
+          unsafePackageSerialization: false,
+        );
+    }
       final FlutterDevice flutterDevice = FlutterDevice(
         device,
         trackWidgetCreation: false,
@@ -213,6 +222,7 @@ class AttachCommand extends FlutterCommand {
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
         targetModel: TargetModel(argResults['target-model']),
+        generator: generator,
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

@@ -16,13 +16,31 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'build_runner/build_kernel_compiler.dart';
+import 'build_runner/build_runner.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
-KernelCompiler get kernelCompiler => context[KernelCompiler];
+KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
 
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
+
+/// An injectable factory to provide a different implementation of [KernelCompiler].
+///
+/// The [experimentalBuildEnabled] flag is only usable after reading from the
+/// project file, so we must delay creating the current kernel compiler type.
+class KernelCompilerFactory {
+  const KernelCompilerFactory();
+
+  /// Create an instance of a [KernelCompiler].
+   Future<KernelCompiler> create() async {
+    if (await experimentalBuildEnabled) {
+      return const BuildKernelCompiler();
+    }
+    return const KernelCompiler();
+  }
+}
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -112,36 +130,46 @@ class StdoutHandler {
 
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath) {
+  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
 
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
+      if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
+        _packageName = packageName;
+        _uriPrefixes = fileSystemRoots
+          .map((String name) => Uri.file('$name/lib/', windows: platform.isWindows).toString())
+          .toList();
+        return;
+      }
       if (scriptUri.startsWith(prefix)) {
         _packageName = packageName;
-        _uriPrefix = prefix;
+        _uriPrefixes = <String>[prefix];
         return;
       }
     }
   }
 
   String _packageName;
-  String _uriPrefix;
+  List<String> _uriPrefixes;
 
   Uri map(String scriptPath) {
-    if (_packageName == null)
+    if (_packageName == null) {
       return null;
+    }
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    if (scriptUri.startsWith(_uriPrefix)) {
-      return Uri.parse('package:$_packageName/${scriptUri.substring(_uriPrefix.length)}');
+    for (String uriPrefix in _uriPrefixes) {
+      if (scriptUri.startsWith(uriPrefix)) {
+        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
+      }
     }
 
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath) {
-    return PackageUriMapper(scriptPath, packagesPath).map(scriptPath);
+  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
+    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
 }
 
@@ -223,7 +251,7 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath);
+      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
@@ -388,7 +416,7 @@ class ResidentCompiler {
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null) {
-      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath);
+      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath, _fileSystemScheme, _fileSystemRoots);
     }
 
     if (_server == null) {

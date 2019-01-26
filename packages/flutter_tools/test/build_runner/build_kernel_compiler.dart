@@ -39,7 +39,7 @@ void main() {
         targetProductVm: anyNamed('targetProductVm'),
         trackWidgetCreation: anyNamed('trackWidgetCreation')
       )).thenAnswer((Invocation invocation) async {
-        return BuildResult(fs.file('.packages'), fs.file('main.app.dill'));
+        return FlutterBuildResult(fs.file('.packages'), fs.file('main.app.dill'));
       });
       final CompilerOutput buildResult = await kernelCompiler.compile(
         outputFilePath: 'output.app.dill',

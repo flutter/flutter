@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_runner/build_runner.dart';
 import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
@@ -300,8 +301,11 @@ class FlutterDevice {
 
     startEchoingDeviceLog();
 
+    // Dependenies are handled by build_runner if [experimentalBuildEnabled] is true.
+    final bool hasDirtyDependencies = await experimentalBuildEnabled
+      ? false
+      : hotRunner.hasDirtyDependencies(this);
     // Start the application.
-    final bool hasDirtyDependencies = hotRunner.hasDirtyDependencies(this);
     final Future<LaunchResult> futureResult = device.startApp(
       package,
       mainPath: hotRunner.mainPath,

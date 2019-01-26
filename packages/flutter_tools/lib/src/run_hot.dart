@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_runner/build_runner.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/dependencies.dart';
@@ -120,6 +121,10 @@ class HotRunner extends ResidentRunner {
         '$error'
       );
       return false;
+    }
+    if (await experimentalBuildEnabled) {
+      // Dependencies will be checked as part of build, multi-root not supported.
+      return true;
     }
 
     final DartDependencySetBuilder dartDependencySetBuilder =

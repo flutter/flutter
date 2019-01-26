@@ -7,8 +7,11 @@ import 'dart:math' as math;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
+import '../build_runner/build_runner.dart';
 import '../cache.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
@@ -120,6 +123,13 @@ class TestCommand extends FlutterCommand {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
+    }
+
+    if (await experimentalBuildEnabled) {
+      final Status status = logger.startProgress('Running builders...', timeout: null);
+      final BuildRunner runner = buildRunnerFactory.create();
+      await runner.codegen();
+      status.stop();
     }
 
     Directory workDir;

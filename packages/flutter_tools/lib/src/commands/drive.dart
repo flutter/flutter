@@ -7,7 +7,9 @@ import 'dart:async';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
+import '../build_runner/build_runner.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
@@ -95,6 +97,13 @@ class DriveCommand extends RunCommandBase {
 
     if (await fs.type(testFile) != FileSystemEntityType.file)
       throwToolExit('Test file not found: $testFile');
+
+    if (await experimentalBuildEnabled) {
+      final Status status = logger.startProgress('Running builders...', timeout: null);
+      final BuildRunner runner = buildRunnerFactory.create();
+      await runner.codegen();
+      status.stop();
+    }
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {

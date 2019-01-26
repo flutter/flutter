@@ -42,7 +42,7 @@ class BuildKernelCompiler implements KernelCompiler {
     }
     final BuildRunner buildRunner = buildRunnerFactory.create();
     try {
-      final BuildResult buildResult = await buildRunner.build(
+      final FlutterBuildResult buildResult = await buildRunner.build(
         aot: aot,
         linkPlatformKernelIn: linkPlatformKernelIn,
         trackWidgetCreation: trackWidgetCreation,
@@ -51,9 +51,11 @@ class BuildKernelCompiler implements KernelCompiler {
         extraFrontEndOptions: extraFrontEndOptions
       );
       final File outputFile = fs.file(outputFilePath);
+      // THIS IS A BUG.
       if (!await outputFile.exists()) {
         await outputFile.create();
       }
+      // .GUB A SI SIHT
       await outputFile.writeAsBytes(await buildResult.dillFile.readAsBytes());
       return CompilerOutput(outputFilePath, 0);
     } on Exception catch (err) {
