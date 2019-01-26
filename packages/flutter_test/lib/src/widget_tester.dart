@@ -71,6 +71,9 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  // Arbitrarily high number. Unit tests should be more aggressive about checking
+  // for correct elevation usage.
+  binding.pipelineOwner.maxElevationObjectsToCheck = 2000;
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test(

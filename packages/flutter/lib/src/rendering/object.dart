@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show PictureRecorder, PathMetrics, PathMetric;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -650,6 +650,18 @@ class SemanticsHandle {
   }
 }
 
+@immutable
+class _ElevationData {
+  const _ElevationData(this.elevation, this.area, this.path)
+      : assert(elevation != null),
+        assert(area != null),
+        assert(path != null);
+
+  final double elevation;
+  final Rect area;
+  final Path path;
+}
+
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -821,6 +833,125 @@ class PipelineOwner {
     profile(() { Timeline.finishSync(); });
   }
 
+  /// The maximum number of iterations to use when checking for potential
+  /// incorrect uses of elevation on a [RenderPhysicalModel] or
+  /// [RenderPhysicalShape] with regard to painting order. This number is not
+  /// the same as the number of total [RenderObject]s in the tree, but rather the
+  /// total number of [RenderPhysicalModel] or [RenderPhysicalShape]s to check.
+  ///
+  /// This property is only used when asserts are enabled (e.g. debug mode).
+  ///
+  /// The default value is 10.
+  ///
+  /// See also [debugCheckElevationData].
+  int get maxElevationObjectsToCheck => _maxElevationObjectsToCheck;
+  int _maxElevationObjectsToCheck = 10;
+
+  /// Sets the maximum number of iterations to use when checking for potential
+  /// incorrect uses of elevation on a [RenderPhysicalModel] or
+  /// [RenderPhysicalShape] with regard to painting order. This number is not
+  /// the same as the number of total [RenderObject]s in the tree, but rather the
+  /// total number of [RenderPhysicalModel] or [RenderPhysicalShape]s to check.
+  ///
+  /// Setting this number too high will degrade performance if many render
+  /// objects using elevation are present in the tree all are used correctly.
+  /// See [debugCheckElevationData] for a discussion of the performance
+  /// characterstics of the check.
+  ///
+  /// This property is only used when asserts are enabled (e.g. debug mode).
+  ///
+  /// The default value is 10.
+  ///
+  /// This value must be >= 0 and must not be null. Setting it to 0 will
+  /// disable the check, and a warning will be printed once if there are more
+  /// objects available than actually being checked.
+  set maxElevationObjectsToCheck(int value) {
+    assert(value != null);
+    assert(value >= 0);
+    _maxElevationObjectsToCheck = value;
+  }
+
+  List<_ElevationData> _elevations;
+  Path _translatePath(Path p, Offset offset) {
+    final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
+    return p.transform(matrix.storage);
+  }
+  bool _printedExceededmaxElevationObjectsToCheckWarning = false;
+
+  /// Checks for elevation consistency with regard to painting order.
+  ///
+  /// This method is only meant for debug builds, and should only be called from
+  /// an `assert` from within the framework. All of the parameters must not be
+  /// null.
+  ///
+  /// The [elevation] refers to the elevation specified on the
+  /// [RenderPhysicalModel] or [RenderPhysicalShape]. The [area] parameter
+  /// specifies the [Rect] on the screen in which the physical model will be
+  /// drawn, and the [path] parameter specifies the actual [Path] to be drawn.
+  /// The path is expected to be smaller than the area.
+  ///
+  /// If the durrent paint cycle results in drawing a shape at an elevation
+  /// lower than another shape already drawn in this area, a [Path] will be
+  /// returned describing the boundary of the conflicting shapes. Callers can
+  /// use this path to highlight the area of the screen where the conflict
+  /// occurs.
+  ///
+  /// This check has worst case performance of O(Σn) time, which is better than
+  /// O(n^2) but worse than O(n log(n)) (its curve is similar to O(n^1.8)). If
+  /// the check degrades performance unacceptably for debug usage, consider
+  /// setting [maxElevationObjectsToCheck] to a lower number, or to 0 to disable
+  /// it completely. The number can still be set higher in unit tests, where
+  /// performance is less critical.
+  Path debugCheckElevationData(
+    double elevation,
+    Rect area,
+    Path path,
+  ) {
+    assert(elevation != null);
+    assert(area != null);
+    assert(path != null);
+    // Check in reverse order - we're more likely to fail on a nearer leaf node
+    // if we're going to fail at all. Take only _maxElevationObjectsToCheck
+    // to avoid this taking too long in the paint cycle. Unit tests can set this
+    // number arbitrarily high.
+    final Iterable<_ElevationData> elevationsToCheck = _elevations
+        .reversed
+        .take(_maxElevationObjectsToCheck)
+        .where((_ElevationData elevationData) {
+          return elevation < elevationData.elevation &&
+                 area.overlaps(elevationData.area);
+        });
+    for (final _ElevationData elevationData in elevationsToCheck) {
+      // Create a union of the path
+      final Path difference = Path.combine(
+        PathOperation.union,
+        path,
+        _translatePath(elevationData.path, elevationData.area.topLeft - area.topLeft),
+      );
+      // Check if the union created a path with a single segment. If so, the
+      // paths overlap.
+      // This will not work if we're dealing with input paths that are already
+      // multi-segment shape, but checking for the segments of the incoming paths
+      // adds complexity and cost for an unusual case.
+      final ui.PathMetrics differenceMetrics = difference.computeMetrics();
+      if (differenceMetrics.length == 1) {
+        return difference;
+      }
+    }
+    if (!_printedExceededmaxElevationObjectsToCheckWarning &&
+         _elevations.length - _maxElevationObjectsToCheck > 0) {
+      debugPrint('Skipped checking ${_elevations.length - _maxElevationObjectsToCheck} '
+                 'objects with elevation.\n'
+                 'If you would like to validate more objects, set PipelineOwner'
+                 '.maxElevationObjectsToCheck to a higher value. This warning '
+                 'will not be printed again until a hot reload or app restart '
+                 'occurs.');
+      _printedExceededmaxElevationObjectsToCheckWarning = true;
+    }
+    _elevations.add(_ElevationData(elevation, area, path));
+    return null;
+  }
+
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
 
   /// Whether this pipeline is currently in the paint phase.
@@ -842,6 +973,7 @@ class PipelineOwner {
     profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
     assert(() {
       _debugDoingPaint = true;
+      _elevations = <_ElevationData>[];
       return true;
     }());
     try {
@@ -862,6 +994,7 @@ class PipelineOwner {
     } finally {
       assert(() {
         _debugDoingPaint = false;
+        _elevations = <_ElevationData>[];
         return true;
       }());
       profile(() { Timeline.finishSync(); });
@@ -3605,3 +3738,4 @@ class _SemanticsGeometry {
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
 }
+

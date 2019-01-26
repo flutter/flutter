@@ -10,6 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/scheduler/ticker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart' hide test, expect, group, setUp;
+
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
@@ -74,6 +77,213 @@ void main() {
     expect(root.needsCompositing, isFalse);
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  group('RenderPhysicalModel checks elevation', () {
+    testWidgets('entirely overlapping, correct painting order', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+            children: <Widget>[
+              Container(
+                width: 300,
+                height: 300,
+                child: Material(
+                  elevation: 1.0,
+                  color: Colors.green,
+                ),
+              ),
+              Container(
+                width: 300,
+                height: 300,
+                child: Material(
+                  elevation: 2.0,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+    testWidgets('entirely overlapping, wrong painting order', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+            children: <Widget>[
+              Container(
+                width: 300,
+                height: 300,
+                child: Material(
+                  elevation: 2.0,
+                  color: Colors.green,
+                ),
+              ),
+              Container(
+                width: 300,
+                height: 300,
+                child: Material(
+                  elevation: 1.0,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isFlutterError);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+    testWidgets('not non-rect not overlapping, wrong painting order', (WidgetTester tester) async {
+      // These would be overlapping if we only took the rectangular bounds of the circle.
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned.fromRect(
+              rect: Rect.fromLTWH(150, 150, 150, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 3.0,
+                    color: Colors.brown,
+                  ),
+                ),
+              ),
+              Positioned.fromRect(
+                rect: Rect.fromLTWH(20, 20, 140, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 2.0,
+                    color: Colors.red,
+                    shape: const CircleBorder()
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+    testWidgets('not non-rect entirely overlapping, wrong painting order', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned.fromRect(
+              rect: Rect.fromLTWH(20, 20, 140, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 3.0,
+                    color: Colors.brown,
+                  ),
+                ),
+              ),
+              Positioned.fromRect(
+                rect: Rect.fromLTWH(50, 50, 100, 100),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 2.0,
+                    color: Colors.red,
+                    shape: const CircleBorder()
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isFlutterError);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+
+    testWidgets('non-rect partially overlapping, wrong painting order', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned.fromRect(
+              rect: Rect.fromLTWH(150, 150, 150, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 3.0,
+                    color: Colors.brown,
+                  ),
+                ),
+              ),
+              Positioned.fromRect(
+                rect: Rect.fromLTWH(30, 20, 150, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 2.0,
+                    color: Colors.red,
+                    shape: const CircleBorder()
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isFlutterError);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+    testWidgets('non-rect partially overlapping, wrong painting order, max to check is 0', (WidgetTester tester) async {
+      tester.binding.pipelineOwner.maxElevationObjectsToCheck = 0; // disables the check.
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned.fromRect(
+              rect: Rect.fromLTWH(150, 150, 150, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 3.0,
+                    color: Colors.brown,
+                  ),
+                ),
+              ),
+              Positioned.fromRect(
+                rect: Rect.fromLTWH(30, 20, 150, 150),
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  child: Material(
+                    elevation: 2.0,
+                    color: Colors.red,
+                    shape: const CircleBorder()
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
