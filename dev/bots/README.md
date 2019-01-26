@@ -43,6 +43,20 @@ To work on this infrastructure you will need:
 - Python package installer: `sudo apt-get install python-pip`
 - Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 
+To run prepare_package.dart locally:
+
+- Make sure the depot_tools is in your PATH. If you're on Windows, you also need
+  an environment variable called DEPOT_TOOLS with the path to depot_tools as value.
+- Run `gsutil.py config` (or `python %DEPOT_TOOLS%\gsutil.py` on Windows) to
+  authenticate with your auth token. When asked, the GCP project ID is
+  `turquoise-dev`.
+- Create a local temp directory. `cd` into it.
+- Run `dart [path to your normal Flutter repo]/dev/bots/prepare_package.dart
+  --temp_dir=. --revision=[revision to package] --branch=[branch to deploy to]
+  --publish`.
+- If you're running into gsutil permission issues, check with @Hixie to make sure
+  you have the right push permissions.
+
 ### Getting the code
 
 The following will get way more than just recipe code, but it _will_ get the recipe code:
@@ -77,9 +91,9 @@ The typical cycle for editing a recipe is:
 
 1. Make your edits (probably to files in
    `//chrome_infra/build/scripts/slave/recipes/flutter`).
-1. Update the tests. Run `build/scripts/slave/recipes.py --use-bootstrap test
-   train` to update existing expected output to match the new output. Verify
-   completely new test cases by altering the `GenTests` method of the recipe.
+1. Update the tests. Run `build/scripts/slave/recipes.py test train` to update
+   existing expected output to match the new output. Verify completely new test
+   cases by altering the `GenTests` method of the recipe.
    The recipe is required to have 100% test coverage.
 1. Run `build/scripts/slave/recipes.py run flutter/<repo> slavename=<slavename>
    mastername=client.flutter buildername=<buildername> buildnumber=1234` where `<repo>` is one
