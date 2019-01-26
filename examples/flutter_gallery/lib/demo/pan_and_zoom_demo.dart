@@ -60,8 +60,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
         initialTranslation: Offset(screenSize.width / 2, screenSize.height / 2),
         onTapUp: _onTapUp,
         size: screenSize,
-        maxScale: 2.5,
-        minScale: 0.8,
       ),
     );
   }

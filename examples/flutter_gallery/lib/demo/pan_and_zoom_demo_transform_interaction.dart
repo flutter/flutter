@@ -48,6 +48,12 @@ class TransformInteraction extends StatefulWidget {
   @override TransformInteractionState createState() => TransformInteractionState();
 }
 
+enum GestureType {
+  translate,
+  scale,
+  rotate,
+}
+
 class TransformInteractionState extends State<TransformInteraction> with SingleTickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
@@ -60,6 +66,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   double _rotationStart = 0.0;
   Rect _visibleRect;
   Matrix4 _transform = Matrix4.identity();
+  GestureType gestureType;
 
   // Perform a translation on the given matrix within constraints of the scene.
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
@@ -189,6 +196,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   double _currentRotation = 0.0;
   void _onScaleStart(ScaleStartDetails details) {
     _controller.stop();
+    gestureType = null;
     setState(() {
       _scaleStart = _transform.getMaxScaleOnAxis();
       _translateFromScene = fromViewport(details.focalPoint, _transform);
@@ -201,8 +209,17 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       details.focalPoint,
       _transform,
     );
+    if (gestureType == null) {
+      if ((details.scale - 1).abs() > details.rotation.abs()) {
+        gestureType = GestureType.scale;
+      } else if (details.rotation != 0) {
+        gestureType = GestureType.rotate;
+      } else {
+        gestureType = GestureType.translate;
+      }
+    }
     setState(() {
-      if (_scaleStart != null && details.scale > 1.0) {
+      if (gestureType == GestureType.scale && _scaleStart != null) {
         // details.scale gives us the amount to change the scale as of the
         // start of this gesture, so calculate the amount to scale as of the
         // previous call to _onScaleUpdate.
@@ -220,7 +237,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
           _transform,
         );
         _transform = matrixTranslate(_transform, focalPointSceneNext - focalPointScene);
-      } else if (details.rotation != 0.0) {
+      } else if (gestureType == GestureType.rotate && details.rotation != 0.0) {
+        print('justin rotat');
         final double desiredRotation = _rotationStart + details.rotation;
         _transform = matrixRotate(_transform, _currentRotation - desiredRotation, details.focalPoint);
         _currentRotation = desiredRotation;
