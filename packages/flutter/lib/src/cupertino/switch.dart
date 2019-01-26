@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -290,6 +291,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   set onChanged(ValueChanged<bool> value) {
     if (value == _onChanged)
       return;
+    print('herere');
+    HapticFeedback.lightImpact();
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
