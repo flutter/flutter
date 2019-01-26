@@ -253,7 +253,10 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     final Vector3 translationVector = _transform.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final InertialMotion inertialMotion = InertialMotion(details.velocity, translation);
-    _animation = Tween<Offset>(begin: translation, end: inertialMotion.finalPosition).animate(_controller);
+    _animation = Tween<Offset>(
+      begin: translation,
+      end: inertialMotion.finalPosition,
+    ).animate(_controller);
     _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
     _animation.addListener(_onAnimate);
     _controller.fling();
@@ -262,10 +265,11 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle inertia drag animation
   void _onAnimate() {
     setState(() {
-      // TODO can I get the change without doing this subtraction?
       final Vector3 translationVector = _transform.getTranslation();
       final Offset translation = Offset(translationVector.x, translationVector.y);
-      _transform = matrixTranslate(_transform, _animation.value - translation);
+      final Offset translationChange = _animation.value - translation;
+      final Offset translationChangeScene = translationChange / _transform.getMaxScaleOnAxis();
+      _transform = matrixTranslate(_transform, translationChangeScene);
     });
   }
 
