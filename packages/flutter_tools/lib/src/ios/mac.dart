@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -20,6 +19,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../plugins.dart';
 import '../project.dart';

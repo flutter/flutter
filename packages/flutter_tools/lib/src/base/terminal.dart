@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show AsciiDecoder;
 
+import '../convert.dart';
 import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;

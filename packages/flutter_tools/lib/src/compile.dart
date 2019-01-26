@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:usage/uuid/uuid.dart';
@@ -17,6 +16,7 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 

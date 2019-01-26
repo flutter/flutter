@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -17,6 +16,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'dart/dependencies.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
