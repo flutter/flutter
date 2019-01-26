@@ -70,6 +70,7 @@ class TravelDestinationItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         height: height,
         child: Card(
+          clipBehavior: Clip.antiAlias,
           shape: shape,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -17,9 +17,9 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../tracing.dart';
 import 'daemon.dart';
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
@@ -30,7 +30,7 @@ abstract class RunCommandBase extends FlutterCommand {
     argParser
       ..addFlag('trace-startup',
         negatable: false,
-        help: 'Start tracing during startup.',
+        help: 'Trace application startup, then exit, saving the trace to a file.',
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
@@ -49,7 +49,7 @@ abstract class RunCommandBase extends FlutterCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
-        allowed: <String>['default', 'android-arm', 'android-arm64'],
+        allowed: <String>['default', 'android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'Specify the target platform when building the app for an '
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
@@ -90,6 +90,14 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
       )
+      ..addFlag('await-first-frame-when-tracing',
+        defaultsTo: true,
+        help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
+              'or just dump the trace as soon as the application is running. The first frame '
+              'is detected by looking for a Timeline event with the name '
+              '"${Tracing.firstUsefulFrameEventName}". '
+              'By default, the widgets library\'s binding takes care of sending this event. ',
+      )
       ..addFlag('use-test-fonts',
         negatable: true,
         help: 'Enable (and default to) the "Ahem" font. This is a special font '
@@ -108,7 +116,7 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+        help: 'Track widget creation locations.',
       )
       ..addOption('project-root',
         hide: !verboseHelp,
@@ -123,18 +131,18 @@ class RunCommand extends RunCommandBase {
       ..addFlag('hot',
         negatable: true,
         defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading.',
-      )
-      ..addOption('pid-file',
-        help: 'Specify a file to write the process id to. '
-              'You can send SIGUSR1 to trigger a hot reload '
-              'and SIGUSR2 to trigger a hot restart.',
+        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag('resident',
         negatable: true,
         defaultsTo: true,
         hide: !verboseHelp,
-        help: 'Stay resident after launching the application.',
+        help: 'Stay resident after launching the application. Not available with "--trace-startup".',
+      )
+      ..addOption('pid-file',
+        help: 'Specify a file to write the process id to. '
+              'You can send SIGUSR1 to trigger a hot reload '
+              'and SIGUSR2 to trigger a hot restart.',
       )
       ..addFlag('benchmark',
         negatable: false,
@@ -145,7 +153,11 @@ class RunCommand extends RunCommandBase {
               'intended for use in generating automated flutter benchmarks.',
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
+      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
+      ..addMultiOption(FlutterOptions.kEnableExperiment,
+        splitCommas: true,
+        hide: true,
+      );
   }
 
   @override
@@ -202,7 +214,7 @@ class RunCommand extends RunCommandBase {
 
   bool shouldUseHotMode() {
     final bool hotArg = argResults['hot'] ?? false;
-    final bool shouldUseHotMode = hotArg;
+    final bool shouldUseHotMode = hotArg && !traceStartup;
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
@@ -210,6 +222,7 @@ class RunCommand extends RunCommandBase {
       argResults['use-application-binary'] != null;
 
   bool get stayResident => argResults['resident'];
+  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'];
 
   @override
   Future<void> validateCommand() async {
@@ -303,7 +316,7 @@ class RunCommand extends RunCommandBase {
         }
 
         if (!isEmulatorBuildMode(getBuildMode())) {
-          throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+          throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
         }
       }
     }
@@ -355,6 +368,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
+        awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),

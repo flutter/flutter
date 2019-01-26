@@ -224,7 +224,7 @@ class ScrollController extends ChangeNotifier {
   ///    This is used when the environment has changed and the [Scrollable]
   ///    needs to recreate the [ScrollPosition] object. It is null the first
   ///    time the [ScrollPosition] is created.
- ScrollPosition createScrollPosition(
+  ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition oldPosition,
@@ -297,11 +297,11 @@ class ScrollController extends ChangeNotifier {
 ///       controller: _trackingScrollController,
 ///       children: List<Widget>.generate(100, (int i) => Text('page 0 item $i')).toList(),
 ///     ),
-///    ListView(
-///      controller: _trackingScrollController,
-///      children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
-///    ),
-///    ListView(
+///     ListView(
+///       controller: _trackingScrollController,
+///       children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
+///     ),
+///     ListView(
 ///      controller: _trackingScrollController,
 ///      children: List<Widget>.generate(300, (int i) => Text('page 2 item $i')).toList(),
 ///     ),

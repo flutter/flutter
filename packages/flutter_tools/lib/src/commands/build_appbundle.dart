@@ -40,7 +40,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
     await buildAppBundle(
       project: await FlutterProject.current(),
       target: targetFile,

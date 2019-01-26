@@ -595,18 +595,18 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///  @override
-///  Widget build(BuildContext context) {
-///    return MaterialApp(
-///      // ...some parameters omitted...
-///      // MaterialApp contains our top-level Navigator
-///      initialRoute: '/',
-///      routes: {
-///        '/': (BuildContext context) => HomePage(),
-///        '/signup': (BuildContext context) => SignUpPage(),
-///      },
-///    );
-///  }
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       // ...some parameters omitted...
+///       // MaterialApp contains our top-level Navigator
+///       initialRoute: '/',
+///       routes: {
+///         '/': (BuildContext context) => HomePage(),
+///         '/signup': (BuildContext context) => SignUpPage(),
+///       },
+///     );
+///   }
 /// }
 ///
 /// class SignUpPage extends StatelessWidget {

@@ -1596,4 +1596,27 @@ void main() {
     await tester.pumpWidget(_wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+
+  testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
+    await tester.pumpWidget(_wrapForChip(child: const FilterChip(
+      avatar: CircleAvatar(child: Text('t')),
+      label: Text('test'),
+      selected: true,
+      onSelected: null,
+    )));
+    final RenderBox rawChip = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byWidgetPredicate((Widget widget) {
+          return widget.runtimeType.toString() == '_ChipRenderWidget';
+        })
+      )
+    );
+    const Color selectScrimColor = Color(0x60191919);
+    expect(rawChip, paints..path(color: selectScrimColor, includes: <Offset>[
+      const Offset(10, 10),
+    ], excludes: <Offset>[
+      const Offset(4, 4),
+    ]));
+  });
 }
