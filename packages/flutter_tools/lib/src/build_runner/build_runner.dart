@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/data/server_log.dart';
 import 'package:meta/meta.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
@@ -77,6 +78,7 @@ class BuildRunner {
       'build_runner',
       'build',
       '--define', 'flutter_build|kernel=disabled=true',
+      '--define', 'flutter_build|kernel=extraFrontEndOptions=[]',
       '--delete-conflicting-outputs'
     ]);
     process.stdout
@@ -195,6 +197,9 @@ class BuildRunner {
       '--delete-conflicting-outputs'
     ];
     final BuildDaemonClient client = await BuildDaemonClient.connect(flutterProject.directory.path, command);
+    client.serverLogs.listen((ServerLog log) {
+      printTrace(log.log);
+    });
     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder..target = buildTarget;
     }));

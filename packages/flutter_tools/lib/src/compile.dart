@@ -96,9 +96,8 @@ class StdoutHandler {
 
   void handler(String message) {
     const String kResultPrefix = 'result ';
-    if (boundaryKey == null) {
-      if (message.startsWith(kResultPrefix))
-        boundaryKey = message.substring(kResultPrefix.length);
+    if (boundaryKey == null && message.startsWith(kResultPrefix)) {
+      boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
@@ -284,7 +283,7 @@ class KernelCompiler {
 
     server.stderr
       .transform<String>(utf8.decoder)
-      .listen((String message) { printError(message); });
+      .listen(printError);
     server.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -416,14 +415,19 @@ class ResidentCompiler {
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null) {
-      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath, _fileSystemScheme, _fileSystemRoots);
+      packageUriMapper = PackageUriMapper(
+        request.mainPath,
+        request.packagesFilePath ?? _packagesPath,
+        _fileSystemScheme,
+        _fileSystemRoots,
+      );
     }
 
     if (_server == null) {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath, /* packageUriMapper= */ null)
+          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null)
       );
     }
 
