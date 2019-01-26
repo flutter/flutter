@@ -119,6 +119,7 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+  String get friendlyModeName => getFriendlyModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       BuildInfo(mode, flavor,
@@ -142,13 +143,21 @@ enum BuildMode {
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
+String getFriendlyModeName(BuildMode mode) {
+  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+}
+
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
   return mode == BuildMode.profile || mode == BuildMode.release;
 }
 
 // Returns true if the given build mode can be used on emulators / simulators.
-bool isEmulatorBuildMode(BuildMode mode) => mode == BuildMode.debug;
+bool isEmulatorBuildMode(BuildMode mode) {
+  return mode == BuildMode.debug ||
+    mode == BuildMode.dynamicRelease ||
+    mode == BuildMode.dynamicProfile;
+}
 
 enum HostPlatform {
   darwin_x64,

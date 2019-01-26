@@ -342,7 +342,7 @@ class _RenderCheckbox extends RenderToggleable {
 
         _initStrokePaint(paint);
         final double tShrink = (t - 0.5) * 2.0;
-        if (_oldValue == null)
+        if (_oldValue == null || value == null)
           _drawDash(canvas, origin, tShrink, paint);
         else
           _drawCheck(canvas, origin, tShrink, paint);

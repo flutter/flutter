@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -20,6 +21,50 @@ import 'src/context.dart';
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
+  group(PackageUriMapper, () {
+    const String packagesContents = r'''
+xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
+yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
+example:file:///example/lib/
+''';
+    final MockFileSystem mockFileSystem = MockFileSystem();
+    final MockFile mockFile = MockFile();
+    when(mockFileSystem.path).thenReturn(fs.path);
+    when(mockFileSystem.file(any)).thenReturn(mockFile);
+    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+
+    testUsingContext('Can map main.dart to correct package', () async {
+      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
+      expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
+    });
+
+    testUsingContext('Maps file from other package to null', () async {
+      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
+      expect(packageUriMapper.map('/xml/lib/xml.dart'),  null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
+    });
+
+    testUsingContext('Maps non-main file from same package', () async {
+      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
+      expect(packageUriMapper.map('/example/lib/src/foo.dart').toString(), 'package:example/src/foo.dart');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
+    });
+  });
+
+  test(StdoutHandler, () async {
+    final StdoutHandler stdoutHandler = StdoutHandler();
+    stdoutHandler.handler('result 12345');
+    expect(stdoutHandler.boundaryKey, '12345');
+    stdoutHandler.handler('12345 message 0');
+    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+    expect(output.errorCount, 0);
+    expect(output.outputFilename, 'message');
+  });
+
   group('batch compile', () {
     ProcessManager mockProcessManager;
     MockProcess mockFrontendServer;
@@ -458,3 +503,5 @@ class MockStdIn extends Mock implements IOSink {
     _stdInWrites.writeln(o);
   }
 }
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFile extends Mock implements File {}

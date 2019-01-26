@@ -103,6 +103,9 @@ class FlutterProject {
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
+  /// The `.dart-tool` directory of this project.
+  Directory get dartTool => directory.childDirectory('.dart_tool');
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),

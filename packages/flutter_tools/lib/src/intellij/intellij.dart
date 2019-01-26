@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:archive/archive.dart';
 
 import '../base/file_system.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor.dart';
 
 class IntelliJPlugins {
