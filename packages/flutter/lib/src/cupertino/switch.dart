@@ -291,14 +291,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   set onChanged(ValueChanged<bool> value) {
     if (value == _onChanged)
       return;
-    print('herere');
-    HapticFeedback.lightImpact();
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
+    HapticFeedback.lightImpact();
   }
 
   TextDirection get textDirection => _textDirection;
