@@ -159,7 +159,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     GalleryDemo(
       title: 'Bottom sheet: Modal',
-      subtitle: 'A dismissable bottom sheet',
+      subtitle: 'A dismissible bottom sheet',
       icon: GalleryIcons.bottom_sheets,
       category: _kMaterialComponents,
       routeName: ModalBottomSheetDemo.routeName,
@@ -243,9 +243,9 @@ List<GalleryDemo> _buildGalleryDemos() {
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
       category: _kMaterialComponents,
-      routeName: TwoLevelListDemo.routeName,
+      routeName: ExpansionTileListDemo.routeName,
       documentationUrl: 'https://docs.flutter.io/flutter/material/ExpansionTile-class.html',
-      buildRoute: (BuildContext context) => TwoLevelListDemo(),
+      buildRoute: (BuildContext context) => ExpansionTileListDemo(),
     ),
     GalleryDemo(
       title: 'Expansion panels',

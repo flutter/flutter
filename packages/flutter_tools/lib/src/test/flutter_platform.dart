@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -26,6 +25,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -33,11 +33,17 @@ import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = Duration(minutes: 1);
+///
+/// We time out test execution because we expect some tests to hang and we want
+/// to know which test hung, rather than have the entire test harness just do
+/// nothing for a few hours until the user (or CI environment) gets bored.
+const Duration _kTestStartupTimeout = Duration(minutes: 5);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
 /// any problem with Flutter, so we give it a large timeout.
+///
+/// See comment under [_kTestStartupTimeout] regarding timeouts.
 const Duration _kTestProcessTimeout = Duration(minutes: 5);
 
 /// Message logged by the test process to signal that its main method has begun
@@ -138,7 +144,7 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
 
@@ -288,13 +294,11 @@ class _Compiler {
             firstCompile = true;
           }
           suppressOutput = false;
-          final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
-            compiler.recompile(
-              request.path,
-              <String>[request.path],
-              outputPath: outputDill.path),
-              request.path,
-            );
+          final CompilerOutput compilerOutput = await compiler.recompile(
+            request.path,
+            <String>[request.path],
+            outputPath: outputDill.path,
+          );
           final String outputPath = compilerOutput?.outputFilename;
 
           // In case compiler didn't produce output or reported compilation
@@ -337,7 +341,7 @@ class _Compiler {
   Future<String> compile(String mainDart) {
     final Completer<String> completer = Completer<String>();
     compilerController.add(_CompilationRequest(mainDart, completer));
-    return handleTimeout<String>(completer.future, mainDart);
+    return completer.future;
   }
 
   Future<void> _shutdown() async {
@@ -352,13 +356,6 @@ class _Compiler {
   Future<void> dispose() async {
     await _shutdown();
     await compilerController.close();
-  }
-
-  static Future<T> handleTimeout<T>(Future<T> value, String path) {
-    return value.timeout(const Duration(minutes: 5), onTimeout: () {
-      printError('Compilation of $path timed out after 5 minutes.');
-      return null;
-    });
   }
 }
 

@@ -35,11 +35,11 @@ class SteppingProject extends Project {
 
     Future<void> doAsyncStuff() async {
       print("test"); // BREAKPOINT
-      await new Future.value(true); // STEP 1
-      await new Future.microtask(() => true); // STEP 2 // STEP 3
-      await new Future.delayed(const Duration(milliseconds: 1)); // STEP 4 // STEP 5
-      print("done!"); // STEP 6
-    }
+      await new Future.value(true); // STEP 1 // STEP 2
+      await new Future.microtask(() => true); // STEP 3 // STEP 4
+      await new Future.delayed(const Duration(milliseconds: 1)); // STEP 5 // STEP 6
+      print("done!"); // STEP 7
+    } // STEP 8
 
     @override
     Widget build(BuildContext context) {
@@ -51,7 +51,9 @@ class SteppingProject extends Project {
   }
   ''';
 
+  Uri get breakpointUri => mainDart;
+  int get breakpointLine => lineContaining(main, '// BREAKPOINT');
   int lineForStep(int i) => lineContaining(main, '// STEP $i');
 
-  final int numberOfSteps = 6;
+  final int numberOfSteps = 8;
 }

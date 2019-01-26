@@ -39,6 +39,8 @@ class SnippetGenerator {
   /// snippet.
   final Configuration configuration;
 
+  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
+
   /// A Dart formatted used to format the snippet code and finished application
   /// code.
   static DartFormatter formatter = DartFormatter(pageWidth: 80, fixes: StyleFix.all);
@@ -193,7 +195,7 @@ class SnippetGenerator {
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
   /// [SnippetType.application].
-  String generate(File input, SnippetType type, {String template, String id, File output}) {
+  String generate(File input, SnippetType type, {String template, String id, File output, Map<String, Object> metadata}) {
     assert(template != null || type != SnippetType.application);
     assert(id != null || type != SnippetType.application);
     assert(input != null);
@@ -226,6 +228,23 @@ class SnippetGenerator {
         final File outputFile = output ?? getOutputFile(id);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
+
+        final File metadataFile = File(path.join(path.dirname(outputFile.path),
+            '${path.basenameWithoutExtension(outputFile.path)}.json'));
+        stderr.writeln('Writing metadata to ${metadataFile.absolute.path}');
+        final _ComponentTuple description = snippetData.firstWhere(
+          (_ComponentTuple data) => data.name == 'description',
+          orElse: () => null,
+        );
+        metadata ??= <String, Object>{};
+        metadata.addAll(<String, Object>{
+          'id': id,
+          'file': path.basename(outputFile.path),
+          'description': description != null
+              ? description.mergedContent
+              : null,
+        });
+        metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
       case SnippetType.sample:
         break;

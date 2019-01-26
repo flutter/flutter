@@ -45,16 +45,42 @@ void main() {
   test('Curve is continuous', () {
     assertMaximumSlope(Curves.linear, 20.0);
     assertMaximumSlope(Curves.decelerate, 20.0);
+    assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
     assertMaximumSlope(Curves.bounceIn, 20.0);
     assertMaximumSlope(Curves.bounceOut, 20.0);
     assertMaximumSlope(Curves.bounceInOut, 20.0);
     assertMaximumSlope(Curves.elasticOut, 20.0);
     assertMaximumSlope(Curves.elasticInOut, 20.0);
     assertMaximumSlope(Curves.ease, 20.0);
+
     assertMaximumSlope(Curves.easeIn, 20.0);
+    assertMaximumSlope(Curves.easeInSine, 20.0);
+    assertMaximumSlope(Curves.easeInQuad, 20.0);
+    assertMaximumSlope(Curves.easeInCubic, 20.0);
+    assertMaximumSlope(Curves.easeInQuart, 20.0);
+    assertMaximumSlope(Curves.easeInQuint, 20.0);
+    assertMaximumSlope(Curves.easeInExpo, 20.0);
+    assertMaximumSlope(Curves.easeInCirc, 20.0);
+
     assertMaximumSlope(Curves.easeOut, 20.0);
+    assertMaximumSlope(Curves.easeOutSine, 20.0);
+    assertMaximumSlope(Curves.easeOutQuad, 20.0);
+    assertMaximumSlope(Curves.easeOutCubic, 20.0);
+    assertMaximumSlope(Curves.easeOutQuart, 20.0);
+    assertMaximumSlope(Curves.easeOutQuint, 20.0);
+    assertMaximumSlope(Curves.easeOutExpo, 20.0);
+    assertMaximumSlope(Curves.easeOutCirc, 20.0);
+
+    // Curves.easeInOutExpo is discontinuous at its midpoint, so not included
+    // here
+
     assertMaximumSlope(Curves.easeInOut, 20.0);
-    assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
+    assertMaximumSlope(Curves.easeInOutSine, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuad, 20.0);
+    assertMaximumSlope(Curves.easeInOutCubic, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuart, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuint, 20.0);
+    assertMaximumSlope(Curves.easeInOutCirc, 20.0);
   });
 
   void expectStaysInBounds(Curve curve) {
@@ -111,6 +137,23 @@ void main() {
     expect(bounds[0], greaterThanOrEqualTo(0.0));
     expect(bounds[1], greaterThan(1.0));
     bounds = estimateBounds(Curves.elasticInOut);
+    expect(bounds[0], lessThan(0.0));
+    expect(bounds[1], greaterThan(1.0));
+  });
+
+  test('Back overshoots its bounds', () {
+    expect(Curves.easeInBack, hasOneLineDescription);
+    expect(Curves.easeOutBack, hasOneLineDescription);
+    expect(Curves.easeInOutBack, hasOneLineDescription);
+
+    List<double> bounds;
+    bounds = estimateBounds(Curves.easeInBack);
+    expect(bounds[0], lessThan(0.0));
+    expect(bounds[1], lessThanOrEqualTo(1.0));
+    bounds = estimateBounds(Curves.easeOutBack);
+    expect(bounds[0], greaterThanOrEqualTo(0.0));
+    expect(bounds[1], greaterThan(1.0));
+    bounds = estimateBounds(Curves.easeInOutBack);
     expect(bounds[0], lessThan(0.0));
     expect(bounds[1], greaterThan(1.0));
   });
