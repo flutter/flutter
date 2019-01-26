@@ -7,8 +7,13 @@ builders:
       - metaModuleCleanBuilderFactoryForPlatform('flutter')
       - moduleBuilderFactoryForPlatform('flutter')
     applies_builders: ["build_modules|module_cleanup"]
-    is_optional: True
-    auto_apply: none
+    build_extensions:
+      $lib$:
+        - .flutter.meta_module.raw
+        - .flutter.meta_module.clean
+      .dart:
+        - .flutter.module
+    auto_apply: all_packages
     required_inputs: [".dart", ".module.library"]
   kernel:
     import: "package:flutter_build/flutter_build.dart"
@@ -18,6 +23,7 @@ builders:
       ".dart":
         - ".app.dill"
         - ".packages"
+    required_inputs: [".dart", ".flutter.module"]
     auto_apply: root_package
     build_to: cache
     defaults:
