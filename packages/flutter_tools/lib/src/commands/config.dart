@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../usage.dart';
