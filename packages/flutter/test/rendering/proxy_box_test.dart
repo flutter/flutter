@@ -88,7 +88,7 @@ void main() {
               Container(
                 width: 300,
                 height: 300,
-                child: Material(
+                child: const Material(
                   elevation: 1.0,
                   color: Colors.green,
                 ),
@@ -96,7 +96,7 @@ void main() {
               Container(
                 width: 300,
                 height: 300,
-                child: Material(
+                child: const Material(
                   elevation: 2.0,
                   color: Colors.blue,
                 ),
@@ -117,7 +117,7 @@ void main() {
               Container(
                 width: 300,
                 height: 300,
-                child: Material(
+                child: const Material(
                   elevation: 2.0,
                   color: Colors.green,
                 ),
@@ -125,7 +125,7 @@ void main() {
               Container(
                 width: 300,
                 height: 300,
-                child: Material(
+                child: const Material(
                   elevation: 1.0,
                   color: Colors.blue,
                 ),
@@ -149,7 +149,7 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 3.0,
                     color: Colors.brown,
                   ),
@@ -160,10 +160,10 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 2.0,
                     color: Colors.red,
-                    shape: const CircleBorder()
+                    shape: CircleBorder()
                   ),
                 ),
               ),
@@ -185,7 +185,7 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 3.0,
                     color: Colors.brown,
                   ),
@@ -196,10 +196,10 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 2.0,
                     color: Colors.red,
-                    shape: const CircleBorder()
+                    shape: CircleBorder()
                   ),
                 ),
               ),
@@ -222,7 +222,7 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 3.0,
                     color: Colors.brown,
                   ),
@@ -233,10 +233,10 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 2.0,
                     color: Colors.red,
-                    shape: const CircleBorder()
+                    shape: CircleBorder()
                   ),
                 ),
               ),
@@ -259,7 +259,7 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 3.0,
                     color: Colors.brown,
                   ),
@@ -270,10 +270,10 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 300,
-                  child: Material(
+                  child: const Material(
                     elevation: 2.0,
                     color: Colors.red,
-                    shape: const CircleBorder()
+                    shape: CircleBorder()
                   ),
                 ),
               ),

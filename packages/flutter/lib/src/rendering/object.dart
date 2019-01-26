@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder, PathMetrics, PathMetric;
+import 'dart:ui' as ui show PictureRecorder, PathMetrics;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
