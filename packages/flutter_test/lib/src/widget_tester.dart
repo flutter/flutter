@@ -231,7 +231,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// {@tool sample}
   /// ```dart
-  /// test('MyWidget asserts invalid bounds', (WidgetTester tester) async {
+  /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
   ///   await tester.pumpWidget(MyWidget(-1));
   ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
   /// });
