@@ -912,8 +912,7 @@ class PipelineOwner {
     assert(path != null);
     // Check in reverse order - we're more likely to fail on a nearer leaf node
     // if we're going to fail at all. Take only _maxElevationObjectsToCheck
-    // to avoid this taking too long in the paint cycle. Unit tests can set this
-    // number arbitrarily high.
+    // to avoid this taking too long in the paint cycle.
     final Iterable<_ElevationData> elevationsToCheck = _elevations
         .reversed
         .take(_maxElevationObjectsToCheck)
@@ -922,7 +921,6 @@ class PipelineOwner {
                  area.overlaps(elevationData.area);
         });
     for (final _ElevationData elevationData in elevationsToCheck) {
-      // Create a union of the path
       final Path difference = Path.combine(
         PathOperation.union,
         path,
@@ -934,7 +932,11 @@ class PipelineOwner {
       // multi-segment shape, but checking for the segments of the incoming paths
       // adds complexity and cost for an unusual case.
       final ui.PathMetrics differenceMetrics = difference.computeMetrics();
-      if (differenceMetrics.length == 1) {
+      // Don't use `PathMetrics.length`, we don't actually want to iterate the
+      // whole set. Instead, just make sure we've ended up with one distinct
+      // contour.
+      differenceMetrics.iterator.moveNext();
+      if (!differenceMetrics.iterator.moveNext()) {
         return difference;
       }
     }
