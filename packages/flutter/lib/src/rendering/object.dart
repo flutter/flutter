@@ -906,6 +906,7 @@ class PipelineOwner {
     double elevation,
     Rect area,
     Path path,
+    RenderObject object,
   ) {
     assert(elevation != null);
     assert(area != null);
@@ -937,6 +938,19 @@ class PipelineOwner {
       // contour.
       differenceMetrics.iterator.moveNext();
       if (!differenceMetrics.iterator.moveNext()) {
+        object._debugReportException(
+          'paint',
+          'An attempt was made to paint a ${object.runtimeType} with an elevation of '
+          '$elevation after another PhysicalShape with an elevation of ${elevationData.elevation} in '
+          'the same area of the screen.\n\n'
+          'This can happen when placing multiple children that have '
+          'elevations in a Stack or CustomMultiChildLayout widget and '
+          'painting them out of order with respect to their elevations.\n\n'
+          'This is not a valid use of elevation, and will cause rendering '
+          'inconsistencies on platforms that use the elevation property to '
+          'in ways that affect painting order.',
+          null, // The stackTrace is very unhelpful here.
+        );
         return difference;
       }
     }

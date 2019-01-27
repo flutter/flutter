@@ -1596,27 +1596,17 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
         elevation,
         Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
         clipPath,
+        this,
       );
       if (diff != null) {
         final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
         context.canvas.drawPath(
           diff.transform(matrix.storage),
           Paint()..color = const Color(0xFFAA0000)
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 5,
-          );
-          throw FlutterError(
-            'An attempt was made to paint a $runtimeType with an elevation of '
-            '$elevation after another PhysicalShape with a higher elevation in '
-            'the same area of the screen.\n\n'
-            'This can happen when placing multiple children that have '
-            'elevations in a Stack or CustomMultiChildLayout widget and '
-            'painting them out of order with respect to their elevations.\n\n'
-            'This is not a valid use of elevation, and will cause rendering '
-            'inconsistencies on platforms that use the elevation property to '
-            'in ways that affect painting order.',
-          );
-        }
+                 ..style = PaintingStyle.stroke
+                 ..strokeWidth = 5,
+        );
+      }
       return true;
     }());
     super.paint(context, offset);
