@@ -40,7 +40,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
-    _mouseTracker = createMouseTracker();
+    _mouseTracker = _createMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -190,9 +190,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   SemanticsHandle _semanticsHandle;
 
-  /// Creates a [MouseTracker] which manages state about currently connected
-  /// mice, for hover notification.
-  MouseTracker createMouseTracker() {
+  // Creates a [MouseTracker] which manages state about currently connected
+  // mice, for hover notification.
+  MouseTracker _createMouseTracker() {
     return MouseTracker(pointerRouter, (Offset offset) {
       // Layer hit testing is done using device pixels, so we have to convert
       // the logical coordinates of the event location back to device pixels

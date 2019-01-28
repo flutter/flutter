@@ -130,11 +130,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
-      // In addition to PointerDownEvents, this block also handles
-      // PointerMoveEvents. Because PointerMoveEvents should be dispatched to
-      // the same place that their initial PointerDownEvent was, we want to
-      // re-use the path we found when the pointer went down, rather than do hit
-      // detection each time we get a PointerMoveEvent.
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
       hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
@@ -168,6 +168,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // No hit test information implies that this is a hover or pointer
     // add/remove event.
     if (hitTestResult == null) {
+      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {

@@ -458,6 +458,9 @@ abstract class WidgetController {
   /// Creates a gesture with an initial down gesture at a particular point, and
   /// returns the [TestGesture] object which you can use to continue the
   /// gesture.
+  ///
+  /// You can use [createGesture] if your gesture doesn't begin with an initial
+  /// down gesture.
   Future<TestGesture> startGesture(Offset downLocation, {int pointer}) async {
     final TestGesture result = await createGesture(pointer: pointer);
     await result.down(downLocation);

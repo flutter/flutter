@@ -5071,12 +5071,6 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [MouseTracker] an object that tracks mouse locations in the [GestureBinding].
-///  * [PointerEnterEventListener] which describes the type of function that can
-///    receive a mouse enter event.
-///  * [PointerExitEventListener] which describes the type of function that can receive
-///    a mouse exit event.
-///  * [PointerHoverEventListener] which describes the type of function that can receive
-///    a mouse move event.
 class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///

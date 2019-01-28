@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/scheduler.dart';
 
 import 'events.dart';
@@ -120,10 +121,8 @@ class MouseTracker {
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     assert(trackedAnnotation != null, "Tried to detach an annotation that wasn't attached: $annotation");
-    if (trackedAnnotation.activeDevices.isNotEmpty) {
-      for (int deviceId in trackedAnnotation.activeDevices) {
-        annotation.onExit(PointerExitEvent.fromHoverEvent(_lastMouseEvent[deviceId]));
-      }
+    for (int deviceId in trackedAnnotation.activeDevices) {
+      annotation.onExit(PointerExitEvent.fromHoverEvent(_lastMouseEvent[deviceId]));
     }
     _trackedAnnotations.remove(trackedAnnotation);
   }
@@ -176,8 +175,12 @@ class MouseTracker {
   /// a callback to fetch the [MouseTrackerAnnotation] associated with a global
   /// offset.
   ///
-  /// This is called from the [RenderView] when the layer tree has been updated,
-  /// right after rendering.
+  /// This is called from a post-frame callback when the layer tree has been
+  /// updated, right after rendering the frame.
+  ///
+  /// This function is only public to allow for proper testing of the
+  /// MouseTracker. Do not call in other contexts.
+  @visibleForTesting
   void collectMousePositions() {
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {

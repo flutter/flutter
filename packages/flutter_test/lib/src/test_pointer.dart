@@ -13,8 +13,8 @@ export 'dart:ui' show Offset;
 
 /// A class for generating coherent artificial pointer events.
 ///
-/// You can use this to manually simulate individual events, but the
-/// simplest way to generate coherent gestures is to use [TestGesture].
+/// You can use this to manually simulate individual events, but the simplest
+/// way to generate coherent gestures is to use [TestGesture].
 class TestPointer {
   /// Creates a [TestPointer]. By default, the pointer identifier used is 1,
   /// however this can be overridden by providing an argument to the
@@ -70,9 +70,8 @@ class TestPointer {
 
   /// Create a [PointerDownEvent] at the given location.
   ///
-  /// By default, the time stamp on the event is [Duration.zero]. You
-  /// can give a specific time stamp by passing the `timeStamp`
-  /// argument.
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
   PointerDownEvent down(Offset newLocation, {Duration timeStamp = Duration.zero}) {
     assert(!isDown);
     _isDown = true;
@@ -87,9 +86,11 @@ class TestPointer {
 
   /// Create a [PointerMoveEvent] to the given location.
   ///
-  /// By default, the time stamp on the event is [Duration.zero]. You
-  /// can give a specific time stamp by passing the `timeStamp`
-  /// argument.
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  ///
+  /// [isDown] must be true when this is called, since move events can only
+  /// be generated when the pointer is down.
   PointerMoveEvent move(Offset newLocation, {Duration timeStamp = Duration.zero}) {
     assert(
         isDown,
@@ -109,9 +110,8 @@ class TestPointer {
 
   /// Create a [PointerUpEvent].
   ///
-  /// By default, the time stamp on the event is [Duration.zero]. You
-  /// can give a specific time stamp by passing the `timeStamp`
-  /// argument.
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
   ///
   /// The object is no longer usable after this method has been called.
   PointerUpEvent up({Duration timeStamp = Duration.zero}) {
@@ -127,9 +127,8 @@ class TestPointer {
 
   /// Create a [PointerCancelEvent].
   ///
-  /// By default, the time stamp on the event is [Duration.zero]. You
-  /// can give a specific time stamp by passing the `timeStamp`
-  /// argument.
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
   ///
   /// The object is no longer usable after this method has been called.
   PointerCancelEvent cancel({Duration timeStamp = Duration.zero}) {
@@ -145,9 +144,11 @@ class TestPointer {
 
   /// Create a [PointerHoverEvent] to the given location.
   ///
-  /// By default, the time stamp on the event is [Duration.zero]. You
-  /// can give a specific time stamp by passing the `timeStamp`
-  /// argument.
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  ///
+  /// [isDown] must be false, since hover events can't be sent when the pointer
+  /// is up.
   PointerHoverEvent hover(
     Offset newLocation, {
     Duration timeStamp = Duration.zero,
@@ -182,7 +183,7 @@ typedef HitTester = HitTestResult Function(Offset location);
 /// The simplest way to create a [TestGesture] is to call
 /// [WidgetTester.startGesture].
 class TestGesture {
-  /// Create a TestGesture without dispatching any events from it.
+  /// Create a [TestGesture] without dispatching any events from it.
   /// The [TestGesture] can then be manipulated to perform future actions.
   ///
   /// By default, the pointer identifier used is 1. This can be overridden by

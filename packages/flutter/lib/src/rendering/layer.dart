@@ -1729,9 +1729,10 @@ class FollowerLayer extends ContainerLayer {
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new layer annotated with [value] that clips to [size] if provided.
+  /// Creates a new layer annotated with [value] that clips to rectangle defined
+  /// by the [size] and [offset] if provided.
   ///
-  /// The value provided cannot be null.
+  /// The [value] provided cannot be null.
   AnnotatedRegionLayer(this.value, {this.size, Offset offset})
       : offset = offset ?? Offset.zero,
         assert(value != null);
@@ -1776,5 +1777,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<T>('value', value));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
   }
 }
