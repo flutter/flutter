@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -4996,6 +4997,86 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
+///
+/// {@tool snippet --template=stateful_widget}
+/// This example makes a [Container] react to being entered by a mouse
+/// pointer, showing a count of the number of entries and exits.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+///
+/// ```dart
+/// int _enterCounter = 0;
+/// int _exitCounter = 0;
+/// double x = 0.0;
+/// double y = 0.0;
+///
+/// void _incrementCounter(PointerEnterEvent details) {
+///   setState(() {
+///     _enterCounter++;
+///   });
+/// }
+///
+/// void _decrementCounter(PointerExitEvent details) {
+///   setState(() {
+///     _exitCounter++;
+///   });
+/// }
+///
+/// void _updateLocation(PointerHoverEvent details) {
+///   setState(() {
+///     x = details.position.dx;
+///     y = details.position.dy;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Hover Example'),
+///     ),
+///     body: Center(
+///       child: ConstrainedBox(
+///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///         child: Listener(
+///           onPointerEnter: _incrementCounter,
+///           onPointerHover: _updateLocation,
+///           onPointerExit: _decrementCounter,
+///           child: Container(
+///             color: Colors.lightBlueAccent,
+///             child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 Text('You have pointed at this box this many times:'),
+///                 Text(
+///                   '$_enterCounter Entries\n$_exitCounter Exits',
+///                   style: Theme.of(context).textTheme.display1,
+///                 ),
+///                 Text(
+///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [MouseTracker] an object that tracks mouse locations in the [GestureBinding].
+///  * [PointerEnterEventListener] which describes the type of function that can
+///    receive a mouse enter event.
+///  * [PointerExitEventListener] which describes the type of function that can receive
+///    a mouse exit event.
+///  * [PointerHoverEventListener] which describes the type of function that can receive
+///    a mouse move event.
 class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
@@ -5024,27 +5105,30 @@ class Listener extends SingleChildRenderObjectWidget {
 
   /// Called when a pointer enters the region for this widget.
   ///
-  /// If this is a touch pointer, this will only fire when [onPointerDown]
-  /// fires.
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget.
+  /// the region defined by this widget, or when the widget appears under the
+  /// pointer.
   final PointerEnterEventListener onPointerEnter;
-
-  /// Called when a pointer leaves the region for this widget.
-  ///
-  /// If this is a touch pointer, this will only fire when [onPointerUp]
-  /// fires.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget.
-  final PointerExitEventListener onPointerExit;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
   ///
-  /// Typically only fired for mouse pointers.
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
   final PointerHoverEventListener onPointerHover;
+
+  /// Called when a pointer leaves the region for this widget.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget, or when the widget disappears from
+  /// under the pointer.
+  final PointerExitEventListener onPointerExit;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -5059,13 +5143,12 @@ class Listener extends SingleChildRenderObjectWidget {
 
   @override
   RenderPointerListener createRenderObject(BuildContext context) {
-    RendererBinding.instance.mouseTracker.attachAnnotation(value);
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerEnter: onPointerEnter,
-      onPointerExit: onPointerExit,
       onPointerHover: onPointerHover,
+      onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
       behavior: behavior
@@ -5078,8 +5161,8 @@ class Listener extends SingleChildRenderObjectWidget {
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
       ..onPointerEnter = onPointerEnter
-      ..onPointerExit = onPointerExit
       ..onPointerHover = onPointerHover
+      ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
       ..behavior = behavior;

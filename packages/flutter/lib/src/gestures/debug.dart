@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 /// Whether to print the results of each hit test to the console.
 ///
 /// When this is set, in debug mode, any time a hit test is triggered by the
-/// [GestureBinding], the results are dumped to the console.
+/// [GestureBinding] the results are dumped to the console.
 ///
 /// This has no effect in release builds.
 bool debugPrintHitTestResults = false;

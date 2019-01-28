@@ -14,6 +14,7 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -2471,21 +2472,6 @@ typedef PointerDownEventListener = void Function(PointerDownEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerMoveEventListener = void Function(PointerMoveEvent event);
 
-/// Signature for listening to [PointerEnterEvent] events.
-///
-/// Used by [Listener] and [RenderPointerListener].
-typedef PointerEnterEventListener = void Function(PointerEnterEvent event);
-
-/// Signature for listening to [PointerExitEvent] events.
-///
-/// Used by [Listener] and [RenderPointerListener].
-typedef PointerExitEventListener = void Function(PointerExitEvent event);
-
-/// Signature for listening to [PointerHoverEvent] events.
-///
-/// Used by [Listener] and [RenderPointerListener].
-typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
-
 /// Signature for listening to [PointerUpEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
@@ -2496,33 +2482,15 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
-/// The annotation object used to annotate layers that are interested in mouse
-/// movements.
-///
-/// This is added to a layer and managed by the [MouseDetector] widget.
-class _HoverEventAnnotation {
-  /// Creates an annotation that can be used to find layers interested in mouse
-  /// movements.
-  const _HoverEventAnnotation({this.onEnter, this.onMove, this.onExit});
-
-  /// Triggered when a pointer has entered the bounding box of the annotated
-  /// layer.
-  final PointerEnterEventListener onEnter;
-
-  /// Triggered when a pointer has moved within the bounding box of the
-  /// annotated layer.
-  final PointerHoverEventListener onMove;
-
-  /// Triggered when a pointer has exited the bounding box of the annotated
-  /// layer.
-  final PointerExitEventListener onExit;
-}
-
 /// Calls callbacks in response to pointer events.
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
+///
+/// The [onPointerEnter], [onPointerHover], and [onPointerExit] events are only
+/// relevant to and fired by pointers that can hover (e.g. mouse pointers, but
+/// not most touch pointers).
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2530,14 +2498,25 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
-    this.onPointerEnter,
-    this.onPointerHover,
-    this.onPointerExit,
+    PointerEnterEventListener onPointerEnter,
+    PointerHoverEventListener onPointerHover,
+    PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox child
-  }) : super(behavior: behavior, child: child);
+    RenderBox child,
+  })  : _onPointerEnter = onPointerEnter,
+        _onPointerHover = onPointerHover,
+        _onPointerExit = onPointerExit,
+        super(behavior: behavior, child: child) {
+    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+      _hoverAnnotation = MouseTrackerAnnotation(
+        onEnter: _onPointerEnter,
+        onHover: _onPointerHover,
+        onExit: _onPointerExit,
+      );
+    }
+  }
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -2554,13 +2533,27 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer enters
   /// the region defined by this widget.
-  PointerEnterEventListener onPointerEnter;
+  PointerEnterEventListener get onPointerEnter => _onPointerEnter;
+  set onPointerEnter(PointerEnterEventListener value) {
+    if (_onPointerEnter != value) {
+      _onPointerEnter = value;
+      _updateAnnotations();
+    }
+  }
+  PointerEnterEventListener _onPointerEnter;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
   ///
   /// Typically only triggered for mouse pointers.
-  PointerHoverEventListener onPointerHover;
+  PointerHoverEventListener get onPointerHover => _onPointerHover;
+  set onPointerHover(PointerHoverEventListener value) {
+    if (_onPointerHover != value) {
+      _onPointerHover = value;
+      _updateAnnotations();
+    }
+  }
+  PointerHoverEventListener _onPointerHover;
 
   /// Called when a pointer leaves the region for this widget.
   ///
@@ -2569,7 +2562,14 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer leaves
   /// the region defined by this widget.
-  PointerExitEventListener onPointerExit;
+  PointerExitEventListener get onPointerExit => _onPointerExit;
+  set onPointerExit(PointerExitEventListener value) {
+    if (_onPointerExit != value) {
+      _onPointerExit = value;
+      _updateAnnotations();
+    }
+  }
+  PointerExitEventListener _onPointerExit;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -2579,13 +2579,45 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  _HoverEventAnnotation _hoverAnnotation;
+  // Object used for annotation of the layer used for hover hit detection.
+  MouseTrackerAnnotation _hoverAnnotation;
+
+  void _updateAnnotations() {
+    if (_hoverAnnotation != null) {
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+    }
+    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+      _hoverAnnotation = MouseTrackerAnnotation(
+        onEnter: _onPointerEnter,
+        onHover: _onPointerHover,
+        onExit: _onPointerExit,
+      );
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+    } else {
+      _hoverAnnotation = null;
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_hoverAnnotation != null) {
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+    }
+  }
+
+  @override
+  void detach() {
+    if (_hoverAnnotation != null) {
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+    }
+    super.detach();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (onPointerExit != null || onPointerEnter != null || onPointerHover != null) {
-      _hoverAnnotation = _HoverEventAnnotation(onEnter: onPointerEnter, onMove: onPointerHover, onExit: onPointerExit);
-      final AnnotatedRegionLayer<_HoverEventAnnotation> layer = AnnotatedRegionLayer<_HoverEventAnnotation>(
+    if (_hoverAnnotation != null) {
+      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
         offset: offset,
@@ -2603,16 +2635,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
+    // The onPointerEnter, onPointerHover, and onPointerExit events are are
+    // triggered from within the MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
       return onPointerMove(event);
-    if (onPointerEnter != null && event is PointerEnterEvent)
-      return onPointerEnter(event);
-    if (onPointerHover != null && event is PointerHoverEvent)
-      return onPointerHover(event);
-    if (onPointerExit != null && event is PointerExitEvent)
-      return onPointerExit(event);
     if (onPointerUp != null && event is PointerUpEvent)
       return onPointerUp(event);
     if (onPointerCancel != null && event is PointerCancelEvent)

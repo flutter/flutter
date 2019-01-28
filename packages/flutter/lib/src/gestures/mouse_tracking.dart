@@ -4,153 +4,63 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'events.dart';
 import 'pointer_router.dart';
 
-class _MouseDetails {
-  /// Creates details for mouse event callback arguments.
-  ///
-  /// The [deviceId] argument must be provided, and must not be null.
-  _MouseDetails({
-    this.sourceTimeStamp,
-    this.globalPosition,
-    @required this.deviceId,
-  }) : assert(deviceId != null);
-
-  /// Recorded timestamp of the source pointer event that last reported its
-  /// position.
-  ///
-  /// May be null if the mouse pointer is removed while the mouse pointer is
-  /// being tracked.
-  final Duration sourceTimeStamp;
-
-  /// The pointer's global position when it triggered this event in logical
-  /// pixels.
-  ///
-  /// May be null if the mouse pointer is removed while the mouse pointer is
-  /// being tracked.
-  final Offset globalPosition;
-
-  /// The device ID of the mouse that triggered this event.
-  ///
-  /// The device ID will remain the same for each interaction, but may change
-  /// if, for instance, the mouse is removed and re-added. There may be multiple
-  /// simultaneous mouse pointers active at one time, so it is possible to get
-  /// two enter events before an exit event with two different device IDs if
-  /// there is more than one device.
-  final int deviceId;
-
-  @override
-  int get hashCode => hashValues(sourceTimeStamp, globalPosition, deviceId);
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return sourceTimeStamp == other.sourceTimeStamp && globalPosition == other.globalPosition && deviceId == other.deviceId;
-  }
-
-  @override
-  String toString() => '$runtimeType(globalPosition: $globalPosition, '
-      'sourceTimeStamp: $sourceTimeStamp, deviceId: $deviceId)';
-}
-
-/// Details object for [MouseEnterCallback]s.
-class MouseEnterDetails extends _MouseDetails {
-  /// Creates details for a [MouseMoveCallback] call.
-  ///
-  /// The [deviceId] argument must be provided, and must not be null.
-  MouseEnterDetails({
-    Duration sourceTimeStamp,
-    Offset globalPosition,
-    @required int deviceId,
-  }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
-}
-
-/// The `details` object provides the position of the mouse pointer at the
-/// time of entry.
+/// Signature for listening to [PointerEnterEvent] events.
 ///
-/// This is used in a [MouseDetectorAnnotation] to specify the callback called
-/// when a mouse enters the bounds of a widget.
-typedef MouseEnterCallback = void Function(MouseEnterDetails details);
+/// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
+typedef PointerEnterEventListener = void Function(PointerEnterEvent event);
 
-/// Details object for callbacks that use [MouseMoveCallback].
-class MouseMoveDetails extends _MouseDetails {
-  /// Creates details for a [MouseMoveCallback] call.
-  ///
-  /// The [deviceId] argument must be provided, and must not be null.
-  MouseMoveDetails({
-    Duration sourceTimeStamp,
-    Offset globalPosition,
-    @required int deviceId,
-  }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
-}
-
-/// The `details` object provides the global position of the mouse pointer.
+/// Signature for listening to [PointerExitEvent] events.
 ///
-/// This is used in a [MouseDetectorAnnotation] to specify the callback called
-/// when a mouse moves inside of a widget.
-typedef MouseMoveCallback = void Function(MouseMoveDetails details);
+/// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
+typedef PointerExitEventListener = void Function(PointerExitEvent event);
 
-/// Details object for callbacks that use [MouseExitCallback].
-class MouseExitDetails extends _MouseDetails {
-  /// Creates details for a [MouseMoveCallback] call.
-  ///
-  /// The [deviceId] argument must be provided and must not be null.
-  MouseExitDetails({
-    Duration sourceTimeStamp,
-    Offset globalPosition,
-    @required int deviceId,
-  }) : super(sourceTimeStamp: sourceTimeStamp, globalPosition: globalPosition, deviceId: deviceId);
-}
-
-/// The `details` object provides the global position of the mouse pointer at
-/// the time of exit.
+/// Signature for listening to [PointerHoverEvent] events.
 ///
-/// This is used in a [MouseDetectorAnnotation] to specify the callback called
-/// when a mouse leaves the bounds of a widget.
-typedef MouseExitCallback = void Function(MouseExitDetails details);
+/// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
+typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
-/// This is added to a layer and managed by the [MouseDetector] widget.
-class MouseDetectorAnnotation {
+/// This is added to a layer and managed by the [Listener] widget.
+class MouseTrackerAnnotation {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
-  const MouseDetectorAnnotation({this.onEnter, this.onMove, this.onExit});
+  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});
 
   /// Triggered when a pointer has entered the bounding box of the annotated
   /// layer.
-  final MouseEnterCallback onEnter;
+  final PointerEnterEventListener onEnter;
 
   /// Triggered when a pointer has moved within the bounding box of the
   /// annotated layer.
-  final MouseMoveCallback onMove;
+  final PointerHoverEventListener onHover;
 
   /// Triggered when a pointer has exited the bounding box of the annotated
   /// layer.
-  final MouseExitCallback onExit;
+  final PointerExitEventListener onExit;
 
   @override
   String toString() {
-    final String none = (onEnter == null && onExit == null && onMove == null) ? ' <none>' : '';
+    final String none = (onEnter == null && onExit == null && onHover == null) ? ' <none>' : '';
     return '[$runtimeType${hashCode.toRadixString(16)}$none'
         '${onEnter == null ? '' : ' onEnter'}'
-        '${onMove == null ? '' : ' onMove'}'
+        '${onHover == null ? '' : ' onHover'}'
         '${onExit == null ? '' : ' onExit'}]';
   }
 }
 
-// Used for accounting for which annotation is active inside of the MouseTracker.
+// Used internally by the MouseTracker for accounting for which annotation is
+// active on which devices inside of the MouseTracker.
 class _TrackedAnnotation {
   _TrackedAnnotation(this.annotation);
 
-  final MouseDetectorAnnotation annotation;
+  final MouseTrackerAnnotation annotation;
 
   /// Tracks devices that are currently active for this annotation.
   ///
@@ -167,7 +77,7 @@ class _TrackedAnnotation {
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
-typedef MouseDetectorAnnotationFinder = MouseDetectorAnnotation Function(Offset offset);
+typedef MouseDetectorAnnotationFinder = MouseTrackerAnnotation Function(Offset offset);
 
 /// Keeps state about which objects are interested in tracking mouse positions
 /// and notifies them when a mouse pointer enters, moves, or leaves an annotated
@@ -189,13 +99,13 @@ class MouseTracker {
 
   // The collection of annotations that are currently being tracked. They may or
   // may not be active, depending on the value of _TrackedAnnotation.active.
-  final Map<MouseDetectorAnnotation, _TrackedAnnotation> _trackedAnnotations = <MouseDetectorAnnotation, _TrackedAnnotation>{};
+  final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations = <MouseTrackerAnnotation, _TrackedAnnotation>{};
 
   /// Track an annotation so that if the mouse enters it, we send it events.
   ///
   /// This is typically called when the [AnnotatedRegion] containing this
   /// annotation has been added to the layer tree.
-  void attachAnnotation(MouseDetectorAnnotation annotation) {
+  void attachAnnotation(MouseTrackerAnnotation annotation) {
     _trackedAnnotations[annotation] = _TrackedAnnotation(annotation);
     // Schedule a check so that we test this new annotation to see if the mouse
     // is currently inside its region.
@@ -207,18 +117,12 @@ class MouseTracker {
   ///
   /// If the associated layer is not removed, and receives a hit, then
   /// [collectMousePositions] will assert the next time it is called.
-  void detachAnnotation(MouseDetectorAnnotation annotation) {
+  void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     assert(trackedAnnotation != null, "Tried to detach an annotation that wasn't attached: $annotation");
     if (trackedAnnotation.activeDevices.isNotEmpty) {
       for (int deviceId in trackedAnnotation.activeDevices) {
-        annotation.onExit(
-          MouseExitDetails(
-            globalPosition: _lastMouseEvent[deviceId]?.position,
-            sourceTimeStamp: _lastMouseEvent[deviceId]?.timeStamp,
-            deviceId: deviceId,
-          ),
-        );
+        annotation.onExit(PointerExitEvent.fromHoverEvent(_lastMouseEvent[deviceId]));
       }
     }
     _trackedAnnotations.remove(trackedAnnotation);
@@ -259,7 +163,7 @@ class MouseTracker {
     }
   }
 
-  _TrackedAnnotation _findAnnotation(MouseDetectorAnnotation annotation) {
+  _TrackedAnnotation _findAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _trackedAnnotations[annotation];
     assert(
         trackedAnnotation != null,
@@ -269,7 +173,7 @@ class MouseTracker {
   }
 
   /// Tells interested objects that a mouse has entered, exited, or moved, given
-  /// a callback to fetch the [MouseDetectorAnnotation] associated with a global
+  /// a callback to fetch the [MouseTrackerAnnotation] associated with a global
   /// offset.
   ///
   /// This is called from the [RenderView] when the layer tree has been updated,
@@ -277,11 +181,7 @@ class MouseTracker {
   void collectMousePositions() {
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
-        trackedAnnotation.annotation.onExit(MouseExitDetails(
-          globalPosition: _lastMouseEvent[deviceId]?.position,
-          sourceTimeStamp: _lastMouseEvent[deviceId]?.timeStamp,
-          deviceId: deviceId,
-        ));
+        trackedAnnotation.annotation.onExit(PointerExitEvent.fromHoverEvent(_lastMouseEvent[deviceId]));
         trackedAnnotation.activeDevices.remove(deviceId);
       }
     }
@@ -305,7 +205,7 @@ class MouseTracker {
 
     for (int deviceId in _lastMouseEvent.keys) {
       final PointerEvent lastEvent = _lastMouseEvent[deviceId];
-      final MouseDetectorAnnotation hit = annotationFinder(lastEvent.position);
+      final MouseTrackerAnnotation hit = annotationFinder(lastEvent.position);
 
       // No annotation was found at this position for this deviceId, so send an
       // exit to all active tracked annotations, since none of them were hit.
@@ -323,19 +223,11 @@ class MouseTracker {
         // event sent to it.
         hitAnnotation.activeDevices.add(deviceId);
         if (hitAnnotation.annotation?.onEnter != null) {
-          hitAnnotation.annotation.onEnter(MouseEnterDetails(
-            globalPosition: lastEvent.position,
-            sourceTimeStamp: lastEvent.timeStamp,
-            deviceId: deviceId,
-          ));
+          hitAnnotation.annotation.onEnter(PointerEnterEvent.fromHoverEvent(lastEvent));
         }
       }
-      if (hitAnnotation.annotation?.onMove != null) {
-        hitAnnotation.annotation.onMove(MouseMoveDetails(
-          globalPosition: lastEvent.position,
-          sourceTimeStamp: lastEvent.timeStamp,
-          deviceId: deviceId,
-        ));
+      if (hitAnnotation.annotation?.onHover != null) {
+        hitAnnotation.annotation.onHover(lastEvent);
       }
 
       // Tell any tracked annotations that weren't hit that they are no longer
@@ -346,11 +238,7 @@ class MouseTracker {
         }
         if (trackedAnnotation.activeDevices.contains(deviceId)) {
           if (trackedAnnotation.annotation?.onExit != null) {
-            trackedAnnotation.annotation.onExit(MouseExitDetails(
-              globalPosition: lastEvent.position,
-              sourceTimeStamp: lastEvent.timeStamp,
-              deviceId: deviceId,
-            ));
+            trackedAnnotation.annotation.onExit(PointerExitEvent.fromHoverEvent(lastEvent));
           }
           trackedAnnotation.activeDevices.remove(deviceId);
         }
