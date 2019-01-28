@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart' show Offstage;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -652,14 +653,27 @@ class SemanticsHandle {
 
 @immutable
 class _ElevationData {
-  const _ElevationData(this.elevation, this.area, this.path)
+  const _ElevationData(this.elevation, this.area, this.path, this.object)
       : assert(elevation != null),
         assert(area != null),
-        assert(path != null);
+        assert(path != null),
+        assert(object != null);
 
   final double elevation;
   final Rect area;
   final Path path;
+  final RenderObject object;
+
+  bool objectIsOnstage() {
+    AbstractNode parent = object.parent;
+    while (parent != null) {
+      if (parent is Offstage) {
+        return false;
+      }
+      parent = parent.parent;
+    }
+    return debugPrintHitTestResults;
+  }
 }
 
 /// The pipeline owner manages the rendering pipeline.
@@ -911,6 +925,7 @@ class PipelineOwner {
     assert(elevation != null);
     assert(area != null);
     assert(path != null);
+    assert(object != null);
     // Check in reverse order - we're more likely to fail on a nearer leaf node
     // if we're going to fail at all. Take only _maxElevationObjectsToCheck
     // to avoid this taking too long in the paint cycle.
@@ -919,7 +934,8 @@ class PipelineOwner {
         .take(_maxElevationObjectsToCheck)
         .where((_ElevationData elevationData) {
           return elevation < elevationData.elevation &&
-                 area.overlaps(elevationData.area);
+                 area.overlaps(elevationData.area) &&
+                 elevationData.objectIsOnstage();
         });
     for (final _ElevationData elevationData in elevationsToCheck) {
       final Path difference = Path.combine(
@@ -964,7 +980,7 @@ class PipelineOwner {
                  'occurs.');
       _printedExceededmaxElevationObjectsToCheckWarning = true;
     }
-    _elevations.add(_ElevationData(elevation, area, path));
+    _elevations.add(_ElevationData(elevation, area, path, object));
     return null;
   }
 
