@@ -5004,6 +5004,8 @@ class Listener extends SingleChildRenderObjectWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
+    this.onPointerEnter,
+    this.onPointerExit,
     this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
@@ -5012,11 +5014,31 @@ class Listener extends SingleChildRenderObjectWidget {
   }) : assert(behavior != null),
        super(key: key, child: child);
 
-  /// Called when a pointer comes into contact with the screen at this object.
+  /// Called when a pointer comes into contact with the screen (for touch
+  /// pointers), or has its button pressed (for mouse pointers) at this widget's
+  /// location.
   final PointerDownEventListener onPointerDown;
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
+
+  /// Called when a pointer enters the region for this widget.
+  ///
+  /// If this is a touch pointer, this will only fire when [onPointerDown]
+  /// fires.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer enters
+  /// the region defined by this widget.
+  final PointerEnterEventListener onPointerEnter;
+
+  /// Called when a pointer leaves the region for this widget.
+  ///
+  /// If this is a touch pointer, this will only fire when [onPointerUp]
+  /// fires.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget.
+  final PointerExitEventListener onPointerExit;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
@@ -5037,9 +5059,12 @@ class Listener extends SingleChildRenderObjectWidget {
 
   @override
   RenderPointerListener createRenderObject(BuildContext context) {
+    RendererBinding.instance.mouseTracker.attachAnnotation(value);
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
+      onPointerEnter: onPointerEnter,
+      onPointerExit: onPointerExit,
       onPointerHover: onPointerHover,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
@@ -5052,6 +5077,8 @@ class Listener extends SingleChildRenderObjectWidget {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
+      ..onPointerEnter = onPointerEnter
+      ..onPointerExit = onPointerExit
       ..onPointerHover = onPointerHover
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
@@ -5066,6 +5093,10 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
+    if (onPointerEnter != null)
+      listeners.add('enter');
+    if (onPointerExit != null)
+      listeners.add('exit');
     if (onPointerHover != null)
       listeners.add('hover');
     if (onPointerUp != null)

@@ -198,7 +198,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // the logical coordinates of the event location back to device pixels
       // here.
       return renderView.layer
-          .find<MouseDetectorAnnotation>(offset * ui.window.devicePixelRatio);
+          .find<MouseTrackerAnnotation>(offset * ui.window.devicePixelRatio);
     });
   }
 

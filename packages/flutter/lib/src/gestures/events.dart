@@ -401,6 +401,9 @@ class PointerRemovedEvent extends PointerEvent {
 ///
 /// See also:
 ///
+///  * [PointerEnterEvent], which reports when the pointer has entered an
+///    object.
+///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
 class PointerHoverEvent extends PointerEvent {
@@ -408,6 +411,126 @@ class PointerHoverEvent extends PointerEvent {
   ///
   /// All of the arguments must be non-null.
   const PointerHoverEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset delta = Offset.zero,
+    int buttons = 0,
+    bool obscured = false,
+    double pressure = 0.0,
+    double pressureMin = 1.0,
+    double pressureMax = 1.0,
+    double distance = 0.0,
+    double distanceMax = 0.0,
+    double size = 0.0,
+    double radiusMajor = 0.0,
+    double radiusMinor = 0.0,
+    double radiusMin = 0.0,
+    double radiusMax = 0.0,
+    double orientation = 0.0,
+    double tilt = 0.0,
+    bool synthesized = false,
+  }) : super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: false,
+    obscured: obscured,
+    pressure: pressure,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: distance,
+    distanceMax: distanceMax,
+    size: size,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt,
+    synthesized: synthesized,
+  );
+}
+
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device, and entered a target object.
+///
+/// See also:
+///
+///  * [PointerHoverEvent], which reports when the pointer has moved while
+///    within an object.
+///  * [PointerExitEvent], which reports when the pointer has left an object.
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerEnterEvent extends PointerEvent {
+  /// Creates a pointer enter event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerEnterEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset delta = Offset.zero,
+    int buttons = 0,
+    bool obscured = false,
+    double pressure = 0.0,
+    double pressureMin = 1.0,
+    double pressureMax = 1.0,
+    double distance = 0.0,
+    double distanceMax = 0.0,
+    double size = 0.0,
+    double radiusMajor = 0.0,
+    double radiusMinor = 0.0,
+    double radiusMin = 0.0,
+    double radiusMax = 0.0,
+    double orientation = 0.0,
+    double tilt = 0.0,
+    bool synthesized = false,
+  }) : super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: false,
+    obscured: obscured,
+    pressure: pressure,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: distance,
+    distanceMax: distanceMax,
+    size: size,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt,
+    synthesized: synthesized,
+  );
+}
+
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device, and entered a target object.
+///
+/// See also:
+///
+///  * [PointerHoverEvent], which reports when the pointer has moved while
+///    within an object.
+///  * [PointerEnterEvent], which reports when the pointer has entered an object.
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerExitEvent extends PointerEvent {
+  /// Creates a pointer exit event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerExitEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
