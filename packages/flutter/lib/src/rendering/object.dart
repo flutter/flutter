@@ -653,27 +653,14 @@ class SemanticsHandle {
 
 @immutable
 class _ElevationData {
-  const _ElevationData(this.elevation, this.area, this.path, this.object)
+  const _ElevationData(this.elevation, this.area, this.path)
       : assert(elevation != null),
         assert(area != null),
-        assert(path != null),
-        assert(object != null);
+        assert(path != null);
 
   final double elevation;
   final Rect area;
   final Path path;
-  final RenderObject object;
-
-  bool objectIsOnstage() {
-    AbstractNode parent = object.parent;
-    while (parent != null) {
-      if (parent is RenderOffstage && parent.offstage) {
-        return false;
-      }
-      parent = parent.parent;
-    }
-    return debugPrintHitTestResults;
-  }
 }
 
 /// The pipeline owner manages the rendering pipeline.
@@ -934,8 +921,7 @@ class PipelineOwner {
         .take(_maxElevationObjectsToCheck)
         .where((_ElevationData elevationData) {
           return elevation < elevationData.elevation &&
-                 area.overlaps(elevationData.area) &&
-                 elevationData.objectIsOnstage();
+                 area.overlaps(elevationData.area);
         });
     for (final _ElevationData elevationData in elevationsToCheck) {
       final Path difference = Path.combine(
@@ -980,7 +966,7 @@ class PipelineOwner {
                  'occurs.');
       _printedExceededmaxElevationObjectsToCheckWarning = true;
     }
-    _elevations.add(_ElevationData(elevation, area, path, object));
+    _elevations.add(_ElevationData(elevation, area, path));
     return null;
   }
 

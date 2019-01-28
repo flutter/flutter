@@ -1592,6 +1592,14 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   @mustCallSuper
   void paint(PaintingContext context, Offset offset) {
     assert(() {
+      // Make sure we're not offstage.
+      AbstractNode ancestor = parent;
+      while (ancestor != null) {
+        if (ancestor is RenderOffstage && ancestor.offstage) {
+          return true;
+        }
+        ancestor = ancestor.parent;
+      }
       final Path diff = owner.debugCheckElevationData(
         elevation,
         Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
