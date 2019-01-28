@@ -568,12 +568,12 @@ void main() {
                 child: const Text('Menu Button'),
                 initialValue: '1',
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem(
+                  const PopupMenuItem<String>(
                     child: Text('1'),
                     value: '1',
                   ),
-                  PopupMenuDivider(),
-                  PopupMenuItem(
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
                     child: Text('2'),
                     value: '2',
                   ),
