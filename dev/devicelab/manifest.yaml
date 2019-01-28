@@ -512,6 +512,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  codegen_benchmark:
+    description: >
+      Measures the speed of empty codegen startup.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_ios32__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS.
