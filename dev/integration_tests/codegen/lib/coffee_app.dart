@@ -1,7 +1,11 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:inject/inject.dart';
 
 // This is a compile-time generated file and does not exist in source.
-import 'coffee_app.inject.dart' as generated;
+import 'coffee_app.inject.dart' as generated; // ignore: uri_does_not_exist
 import 'src/coffee.dart';
 
 @module
@@ -45,9 +49,9 @@ class Stove extends Heater {
   }
 }
 
-@Injector([PourOverCoffeeModule])
+@Injector(<Type>[PourOverCoffeeModule])
 abstract class CoffeeApp {
-  static final create = generated.Coffee$Injector.create;
+  static final Future<CoffeeApp> Function(PourOverCoffeeModule) create = generated.CoffeeApp$Injector.create;
 
   @provide
   CoffeeMaker getCoffeeMaker();
