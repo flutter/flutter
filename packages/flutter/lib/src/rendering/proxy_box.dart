@@ -1595,7 +1595,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
       // Make sure we're not offstage.
       AbstractNode ancestor = parent;
       while (ancestor != null) {
-        if (ancestor is RenderOffstage && ancestor.offstage) {
+        if (ancestor is RenderOffstage) {
           return true;
         }
         ancestor = ancestor.parent;
