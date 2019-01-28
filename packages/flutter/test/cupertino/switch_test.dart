@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -39,6 +40,7 @@ void main() {
   });
 
   testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
     bool value = false;
 
@@ -75,6 +77,7 @@ void main() {
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
