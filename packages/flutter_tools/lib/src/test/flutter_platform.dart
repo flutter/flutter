@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -26,6 +25,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -144,7 +144,7 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
 

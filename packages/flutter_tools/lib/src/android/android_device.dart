@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -18,6 +17,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -172,7 +172,7 @@ class AndroidDevice extends Device {
       if (majorVersion == 1 && minorVersion > 0) {
         return true;
       }
-      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 32) {
+      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 39) {
         return true;
       }
       return false;
@@ -190,7 +190,7 @@ class AndroidDevice extends Device {
       final RunResult adbVersion = await runCheckedAsync(<String>[getAdbPath(androidSdk), 'version']);
       if (_isValidAdbVersion(adbVersion.stdout))
         return true;
-      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
+      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
     } catch (error, trace) {
       printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -681,7 +681,9 @@ class _AdbLogReader extends DeviceLogReader {
       _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
-      const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
+      // We expect logcat streams to occasionally contain invalid utf-8,
+      // see: https://github.com/flutter/flutter/pull/8864.
+      const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

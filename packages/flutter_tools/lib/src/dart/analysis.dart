@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import '../base/file_system.dart' hide IOSink;
@@ -13,6 +12,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../globals.dart';
 
 class AnalysisServer {

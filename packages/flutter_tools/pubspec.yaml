@@ -10,7 +10,7 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   analyzer: 0.33.6+1
-  archive: 2.0.7
+  archive: 2.0.8
   args: 1.5.1
   cli_util: 0.1.3+2
   completion: 0.2.1+1
@@ -23,6 +23,7 @@ dependencies:
   json_schema: 1.0.10
   linter: 0.1.74
   meta: 1.1.6
+  multicast_dns: 0.1.0+1
   mustache: 1.1.0
   package_config: 1.0.5
   platform: 2.2.0
@@ -95,4 +96,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3fcc
+# PUBSPEC CHECKSUM: b4f1

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +14,7 @@ import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'base/time.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {

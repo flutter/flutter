@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
+import '../convert.dart';
 import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';

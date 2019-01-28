@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show base64, utf8;
-
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
@@ -15,6 +13,7 @@ import 'base/io.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
+import 'convert.dart' show base64, utf8;
 import 'dart/package_map.dart';
 import 'globals.dart';
 import 'vmservice.dart';
