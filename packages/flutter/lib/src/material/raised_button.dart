@@ -31,6 +31,45 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// {@tool sample}
+///
+/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
+/// and lastly a RaisedButton with gradient background.
+///
+/// ```dart
+/// Column(
+///   children: <Widget>[
+///     RaisedButton(
+///       onPressed: null,
+///       child: Text('Disabled Button'),
+///     ),
+///     RaisedButton(
+///       onPressed: () {},
+///       child: Text('Enabled Button'),
+///     ),
+///     RaisedButton(
+///       onPressed: () {},
+///       textColor: Colors.white,
+///       padding: EdgeInsets.all(0.0),
+///       child: Container(
+///         decoration: BoxDecoration(
+///             gradient: LinearGradient(
+///                 colors: [Colors.red, Colors.green, Colors.blue],
+///               ),
+///             ),
+///         child: Padding(
+///           padding: EdgeInsets.all(10.0),
+///           child: Text(
+///             'Gradient Button',
+///           ),
+///         ),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FlatButton], a material design button without a shadow.
