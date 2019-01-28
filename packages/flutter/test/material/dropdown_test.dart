@@ -374,7 +374,7 @@ void main() {
       Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection, onChanged: onChanged);
 
       await tester.pumpWidget(build());
-      final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+      final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
       assert(buttonBox.attached);
       final Offset buttonOriginBeforeTap = buttonBox.localToGlobal(Offset.zero);
 
@@ -388,7 +388,7 @@ void main() {
       // The selected dropdown item is both in menu we just popped up, and in
       // the IndexedStack contained by the dropdown button. Both of them should
       // have the same origin and height as the dropdown button.
-      final List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+      final List<RenderObject> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
       expect(itemBoxes.length, equals(2));
       for (RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
@@ -419,10 +419,10 @@ void main() {
     Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
-    final RenderBox arrowIcon = tester.renderObject(find.byIcon(Icons.arrow_drop_down));
+    final RenderBox arrowIcon = tester.renderObject<RenderBox>(find.byIcon(Icons.arrow_drop_down));
     assert(arrowIcon.attached);
 
     // Arrow icon should be aligned with far right of button when expanded
@@ -437,7 +437,7 @@ void main() {
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     await tester.tap(find.text('two'));
@@ -504,7 +504,7 @@ void main() {
       items: List<String>.generate(/*length=*/ 100, (int index) => index.toString()),
       onChanged: onChanged,
     ));
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle(); // finish the menu animation
 
@@ -519,7 +519,6 @@ void main() {
     );
   });
 
-
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String value;
@@ -527,19 +526,45 @@ void main() {
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, onChanged: onChanged);
 
     await tester.pumpWidget(build());
-    final RenderBox buttonBoxNullValue = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBoxNullValue = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxNullValue.attached);
-
 
     value = 'three';
     await tester.pumpWidget(build());
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // A Dropdown button with a null value should be the same size as a
     // one with a non-null value.
     expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxNullValue.localToGlobal(Offset.zero)));
     expect(buttonBox.size, equals(buttonBoxNullValue.size));
+  });
+
+  testWidgets('Size of DropdownButton with no items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/26419
+    final Key buttonKey = UniqueKey();
+    List<String> items;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, items: items, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxNullItems = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxNullItems.attached);
+
+    items = <String>[];
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxEmptyItems = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxEmptyItems.attached);
+
+    items = <String>['one', 'two', 'three', 'four'];
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A Dropdown button with a null value should be the same size as a
+    // one with a non-null value.
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxNullItems.localToGlobal(Offset.zero)));
+    expect(buttonBox.size, equals(buttonBoxNullItems.size));
   });
 
   testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
@@ -553,7 +578,7 @@ void main() {
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, onChanged: onChanged);
 
     await tester.pumpWidget(build());
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // Show the menu.
@@ -579,13 +604,12 @@ void main() {
 
     await tester.pumpWidget(build());
     expect(find.text('onetwothree'), findsOneWidget);
-    final RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBoxHintValue = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBoxHintValue.attached);
-
 
     value = 'three';
     await tester.pumpWidget(build());
-    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // A Dropdown button with a null value and a hint should be the same size as a
@@ -713,7 +737,6 @@ void main() {
     await tester.pump();
     expect(find.byType(ListView, skipOffstage: false), findsNothing);
   });
-
 
   testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -853,14 +876,14 @@ void main() {
     await tester.pumpWidget(build(items: menuItems, onChanged: null));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
-    final RenderBox disabledHintBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox disabledHintBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
 
     // A Dropdown button with a disabled hint should be the same size as a
     // one with a regular enabled hint.
     await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
     expect(find.text('disabled'), findsNothing);
     expect(find.text('enabled'), findsOneWidget);
-    final RenderBox enabledHintBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox enabledHintBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
     expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
