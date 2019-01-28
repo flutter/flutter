@@ -1592,14 +1592,21 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   @mustCallSuper
   void paint(PaintingContext context, Offset offset) {
     assert(() {
-      // Constrain this check to physical models with the same [RenderOffstage]
-      // ancestor. It would probably be even better if we could use [Overlay]
-      // instead, but that doesn't have a render object. The idea is that if
-      // it's contained in an overlay, it's ok for elevations to get mixed up
-      // because overlays
       RenderObject ancestor = parent;
       while (ancestor != null) {
+        if (ancestor is _RenderPhysicalModelBase) {
+          // We're the direct child of another physical model. That is the one
+          // that needs to be checked, as it has established a new elevation
+          // context for us.
+          return true;
+        }
         if (ancestor is RenderOffstage) {
+          // Keep the RenderOffstage to pass to the check, which (at least for
+          // now) will scope checks to children of the same RenderOffstage.
+          // This is to prevent getting lots of noise right now during route
+          // transitions, and is probably not an entirely valid way of checking
+          // this.  Need more input to determine the right way to handle
+          // transitions involving elevations.
           break;
         }
         ancestor = ancestor.parent;
