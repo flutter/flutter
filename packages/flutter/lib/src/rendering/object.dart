@@ -11,12 +11,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/widgets.dart' show Offstage;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'proxy_box.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
@@ -667,7 +667,7 @@ class _ElevationData {
   bool objectIsOnstage() {
     AbstractNode parent = object.parent;
     while (parent != null) {
-      if (parent is Offstage) {
+      if (parent is RenderOffstage && parent.offstage) {
         return false;
       }
       parent = parent.parent;
