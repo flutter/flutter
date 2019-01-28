@@ -203,10 +203,14 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer);
-    if (_state == _ForceState.ready) {
-      _state = _ForceState.possible;
-      _lastPosition = event.position;
+    if (event.pressureMax <= 1.0) {
+      resolve(GestureDisposition.rejected);
+    } else {
+      startTrackingPointer(event.pointer);
+      if (_state == _ForceState.ready) {
+        _state = _ForceState.possible;
+        _lastPosition = event.position;
+      }
     }
   }
 
