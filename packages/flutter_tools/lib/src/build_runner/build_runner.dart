@@ -38,7 +38,10 @@ FutureOr<bool> get experimentalBuildEnabled async {
   if (_experimentalBuildEnabled != null) {
     return _experimentalBuildEnabled;
   }
-  final bool flagEnabled = platform?.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
+  final Map<String, String> environment = platform.environment;
+  final bool flagEnabled = environment != null
+    ? environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true'
+    : false;
   if (!flagEnabled) {
     return _experimentalBuildEnabled = false;
   }
