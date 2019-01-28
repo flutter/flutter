@@ -151,11 +151,11 @@ Future<int> runTests(
       });
 
       terminal.singleCharMode = true;
-      terminal.onCharInput.asBroadcastStream().listen((String char) async {
+      terminal.keystrokes.asBroadcastStream().listen((String char) async {
         switch(char) {
           case 'r':
             final Status status =
-                logger.startProgress('Recompiling test files...\n');
+                logger.startProgress('Recompiling test files...\n', timeout: null);
             await compileTestFiles();
             status.stop();
 
@@ -173,13 +173,12 @@ Future<int> runTests(
       printReloadMessage();
 
       await completer.future;
-      stdout.writeln(terminal.clearScreen());
     }
 
     try {
       test.completeShutdown();
     } on StateError catch (e) {
-      printError(e.toString());
+      printTrace(e.toString());
     } finally {
       await compiler.dispose();
     }
