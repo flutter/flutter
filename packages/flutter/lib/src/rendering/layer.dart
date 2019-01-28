@@ -404,6 +404,7 @@ class PerformanceOverlayLayer extends Layer {
     @required this.rasterizerThreshold,
     @required this.checkerboardRasterCacheImages,
     @required this.checkerboardOffscreenLayers,
+    this.mockData = const <int>[],
   }) : _overlayRect = overlayRect;
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
@@ -451,10 +452,13 @@ class PerformanceOverlayLayer extends Layer {
   /// replacing an [Opacity] widget with an [widgets.Image] using a [BlendMode]).
   final bool checkerboardOffscreenLayers;
 
+  /// {@macro performance_overlay.mock_data}
+  final List<int> mockData;
+
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
+    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset), mockData: mockData);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);

@@ -33,33 +33,21 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
     this.rasterizerThreshold = 0,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
+    this.mockData = const <int>[],
   }) : super(key: key);
 
   /// Create a performance overlay that displays all available statistics
   PerformanceOverlay.allEnabled({ Key key,
                                   this.rasterizerThreshold = 0,
                                   this.checkerboardRasterCacheImages = false,
-                                  this.checkerboardOffscreenLayers = false })
+                                  this.checkerboardOffscreenLayers = false,
+                                  this.mockData = const <int>[]})
     : optionsMask =
         1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
         1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
         1 << PerformanceOverlayOption.displayEngineStatistics.index |
         1 << PerformanceOverlayOption.visualizeEngineStatistics.index,
       super(key: key);
-
-  /// Create a performance overlay that displays mocked data. This is only for
-  /// testing the correct rendering of the performance overlay.
-  PerformanceOverlay.mock({ Key key,
-    this.rasterizerThreshold = 0,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false })
-      : optionsMask =
-  1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
-  1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
-  1 << PerformanceOverlayOption.displayEngineStatistics.index |
-  1 << PerformanceOverlayOption.visualizeEngineStatistics.index |
-  1 << PerformanceOverlayOption.mockStatistics.index,
-        super(key: key);
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -116,18 +104,27 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// replacing an [Opacity] widget with an [widgets.Image] using a [BlendMode]).
   final bool checkerboardOffscreenLayers;
 
+  /// {@template performance_overlay.mock_data}
+  /// If this is non-empty, we will display it as the frame time milliseconds
+  /// instead of the real statistics. The mockData is only for testing the
+  /// performance overlay.
+  /// {@endtemplate}
+  final List<int> mockData;
+
   @override
   RenderPerformanceOverlay createRenderObject(BuildContext context) => RenderPerformanceOverlay(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold,
     checkerboardRasterCacheImages: checkerboardRasterCacheImages,
     checkerboardOffscreenLayers: checkerboardOffscreenLayers,
+    mockData: mockData,
   );
 
   @override
   void updateRenderObject(BuildContext context, RenderPerformanceOverlay renderObject) {
     renderObject
       ..optionsMask = optionsMask
-      ..rasterizerThreshold = rasterizerThreshold;
+      ..rasterizerThreshold = rasterizerThreshold
+      ..mockData = mockData;
   }
 }

@@ -15,6 +15,11 @@ void main() {
   });
 
   testWidgets('Performance overlay golden test', (WidgetTester tester) async {
+    final List<int> mockData = <int>[
+      17, 1,  4,  24, 4,  25, 30, 4,  13, 34,
+      14, 0,  18, 9,  32, 36, 26, 23, 5,  8,
+      32, 18, 29, 16, 29, 18, 0,  36, 33, 10];
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -22,7 +27,7 @@ void main() {
             children: <Widget>[
               const CircularProgressIndicator(),
               RepaintBoundary(
-                child: PerformanceOverlay.mock(),
+                child: PerformanceOverlay.allEnabled(mockData: mockData),
               )
             ],
           )

@@ -40,11 +40,6 @@ enum PerformanceOverlayOption {
   /// spent by the engine as a fraction of the total frame slice. When the bar
   /// turns red, a frame is lost.
   visualizeEngineStatistics,
-
-  /// Display mocked frame times instead of the real rasterizer and engine
-  /// statistics. This is only for testing the correct rendering of the
-  /// performance overlay.
-  mockStatistics,
 }
 
 /// Displays performance statistics.
@@ -71,14 +66,17 @@ class RenderPerformanceOverlay extends RenderBox {
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
+    List<int> mockData = const <int>[],
   }) : assert(optionsMask != null),
        assert(rasterizerThreshold != null),
        assert(checkerboardRasterCacheImages != null),
        assert(checkerboardOffscreenLayers != null),
+       assert(mockData != null),
        _optionsMask = optionsMask,
        _rasterizerThreshold = rasterizerThreshold,
        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
-       _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
+       _checkerboardOffscreenLayers = checkerboardOffscreenLayers,
+       _mockData = mockData;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -102,6 +100,17 @@ class RenderPerformanceOverlay extends RenderBox {
     if (value == _rasterizerThreshold)
       return;
     _rasterizerThreshold = value;
+    markNeedsPaint();
+  }
+
+  /// {@macro performance_layer.mock_data}}
+  List<int> get mockData => _mockData;
+  List<int> _mockData;
+  set mockData(List<int> value) {
+    assert(value != null);
+    if (value == _mockData)
+      return;
+    _mockData = value;
     markNeedsPaint();
   }
 
@@ -179,6 +188,7 @@ class RenderPerformanceOverlay extends RenderBox {
       rasterizerThreshold: rasterizerThreshold,
       checkerboardRasterCacheImages: checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: checkerboardOffscreenLayers,
+      mockData: _mockData
     ));
   }
 }
