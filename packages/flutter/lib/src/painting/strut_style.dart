@@ -25,8 +25,8 @@ import 'basic_types.dart';
 /// The vertical components of strut are as follows:
 /// 
 ///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
-///  * `ascent * lineHeight`
-///  * `descent * lineHeight`
+///  * `ascent * height`
+///  * `descent * height`
 ///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
 ///
 /// The sum of these four values is the total height of the line.
@@ -67,8 +67,8 @@ import 'basic_types.dart';
 ///    be negative.
 ///    Default is `14` logical pixels.
 ///
-///  * [lineHeight] the multiple of [fontSize] to multiply the ascent and descent by.
-///    The [lineHeight] will impact the spacing above and below the baseline differently
+///  * [height] the multiple of [fontSize] to multiply the ascent and descent by.
+///    The [height] will impact the spacing above and below the baseline differently
 ///    depending on the ratios between the font's ascent and descent. This property is
 ///    separate from the leading multiplier, which is controlled through [leading].
 ///    Default is `1.0`.
@@ -76,7 +76,7 @@ import 'basic_types.dart';
 ///  * [leading] the custom leading to apply to the strut as a multiple of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
 ///    to the top and the other half to the bottom of the line height. This differs
-///    from [lineHeight] since the spacing is equally distributed above and below the
+///    from [height] since the spacing is equally distributed above and below the
 ///    baseline.
 ///    Default is `null`, which will use the font-specified leading.
 ///
@@ -110,7 +110,7 @@ import 'basic_types.dart';
 ///   strutStyle: StrutStyle(
 ///     fontFamily: 'Roboto',
 ///     fontSize: 30,
-///     lineHeight: 1.5,
+///     height: 1.5,
 ///   ),
 /// ),
 /// ```
@@ -118,7 +118,7 @@ import 'basic_types.dart';
 ///
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
-/// The strut [lineHeight] was defined as 1.5 (the default font size is 14), which
+/// The strut [height] was defined as 1.5 (the default font size is 14), which
 /// caused all lines to be laid out taller than without strut. This extra space was
 /// able to accomodate the larger font size of `Second line!` without causing the line
 /// height to change for the second line only. All lines in this example are thus the
@@ -151,7 +151,7 @@ import 'basic_types.dart';
 ///   ),
 ///   strutStyle: StrutStyle(
 ///     fontFamily: 'Roboto',
-///     lineHeight: 1.5,
+///     height: 1.5,
 ///   ),
 /// ),
 /// ```
@@ -193,7 +193,7 @@ import 'basic_types.dart';
 ///   strutStyle: StrutStyle(
 ///     fontFamily: 'Roboto',
 ///     fontSize: 14,
-///     lineHeight: 1,
+///     height: 1,
 ///     forceStrutHeight: true,
 ///   ),
 /// ),
@@ -267,7 +267,7 @@ class StrutStyle extends Diagnosticable {
     String fontFamily,
     List<String> fontFamilyFallback,
     this.fontSize,
-    this.lineHeight,
+    this.height,
     this.leading,
     this.fontWeight,
     this.fontStyle,
@@ -338,12 +338,12 @@ class StrutStyle extends Diagnosticable {
   ///
   /// Ascent is the spacing above the baseline and descent is the spacing below the baseline.
   ///
-  /// The [lineHeight] will impact the spacing above and below the baseline differently
+  /// The [height] will impact the spacing above and below the baseline differently
   /// depending on the ratios between the font's ascent and descent. This property is
   /// separate from the leading multiplier, which is controlled through [leading].
   ///
-  /// The default lineHeight is `1.0`.
-  final double lineHeight;
+  /// The default height is `1.0`.
+  final double height;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
@@ -359,7 +359,7 @@ class StrutStyle extends Diagnosticable {
   ///
   /// Leading is additional spacing between lines. Half of the leading is added
   /// to the top and the other half to the bottom of the line. This differs
-  /// from [lineHeight] since the spacing is equally distributed above and below the
+  /// from [height] since the spacing is equally distributed above and below the
   /// baseline.
   ///
   /// The default leading is `null`, which will use the font-specified leading.
@@ -399,7 +399,7 @@ class StrutStyle extends Diagnosticable {
         fontSize != other.fontSize ||
         fontWeight != other.fontWeight ||
         fontStyle != other.fontStyle ||
-        lineHeight != other.lineHeight ||
+        height != other.height ||
         leading != other.leading ||
         forceStrutHeight != other.forceStrutHeight ||
         !listEquals(fontFamilyFallback, other.fontFamilyFallback))
@@ -418,7 +418,7 @@ class StrutStyle extends Diagnosticable {
            fontSize == typedOther.fontSize &&
            fontWeight == typedOther.fontWeight &&
            fontStyle == typedOther.fontStyle &&
-           lineHeight == typedOther.lineHeight &&
+           height == typedOther.height &&
            leading == typedOther.leading &&
            forceStrutHeight == typedOther.forceStrutHeight;
   }
@@ -430,7 +430,7 @@ class StrutStyle extends Diagnosticable {
       fontSize,
       fontWeight,
       fontStyle,
-      lineHeight,
+      height,
       leading,
       forceStrutHeight,
     );
@@ -488,7 +488,7 @@ class StrutStyle extends Diagnosticable {
       defaultValue: null,
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
-    styles.add(DoubleProperty('${prefix}height', lineHeight, unit: 'x', defaultValue: null));
+    styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
