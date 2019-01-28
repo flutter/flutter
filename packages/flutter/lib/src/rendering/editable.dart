@@ -138,7 +138,7 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
-    bool maxLinesIncrementalHeight = false,
+    bool expands = false,
     Color selectionColor,
     double textScaleFactor = 1.0,
     TextSelection selection,
@@ -156,7 +156,7 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
-       assert(maxLinesIncrementalHeight != null),
+       assert(expands != null),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
@@ -175,7 +175,7 @@ class RenderEditable extends RenderBox {
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
-       _maxLinesIncrementalHeight = maxLinesIncrementalHeight,
+       _expands = expands,
        _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset,
@@ -661,14 +661,14 @@ class RenderEditable extends RenderBox {
   ///
   /// If true, the text field will increase its height until reach the max lines.
   /// Otherwise, the text field will start its height respecting [maxLines] size.
-  bool get maxLinesIncrementalHeight => _maxLinesIncrementalHeight;
-  bool _maxLinesIncrementalHeight;
+  bool get expands => _expands;
+  bool _expands;
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set maxLinesIncrementalHeight(bool value) {
+  set expands(bool value) {
     assert(value != null);
-    if (maxLinesIncrementalHeight == value)
+    if (expands == value)
       return;
-    _maxLinesIncrementalHeight = value;
+    _expands = value;
     markNeedsTextLayout();
   }
 
@@ -1095,7 +1095,7 @@ class RenderEditable extends RenderBox {
 
   double _preferredHeight(double width) {
     if (maxLines != null) {
-      if (maxLinesIncrementalHeight) {
+      if (expands) {
         final double maxHeight = preferredLineHeight * maxLines;
         if (_textPainter.height < maxHeight) {
           return _textPainter.height;
@@ -1487,7 +1487,7 @@ class RenderEditable extends RenderBox {
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
-    properties.add(DiagnosticsProperty<bool>('maxLinesIncrementalHeight', maxLinesIncrementalHeight));
+    properties.add(DiagnosticsProperty<bool>('expands', expands));
     properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));

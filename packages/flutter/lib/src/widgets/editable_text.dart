@@ -201,7 +201,8 @@ class EditableText extends StatefulWidget {
     this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
-    this.maxLinesIncrementalHeight = false,
+    this.minLines = 1,
+    this.expands = false,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,
@@ -229,7 +230,7 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
-       assert(maxLinesIncrementalHeight != null),
+       assert(expands != null),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -358,16 +359,25 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final int maxLines;
 
-  /// {@template flutter.widgets.editableText.maxLinesIncrementalHeight}
-  /// Whether this text field should increase its height incrementally until
-  /// reach the [maxLines].
+  /// {@template flutter.widgets.editableText.minLines}
+  /// The minimum number of lines to occupy, even when empty.
+  /// {@endtemplate}
+  final int minLines;
+
+  /// {@template flutter.widgets.editableText.expands}
+  /// Whether this widget can be sized based on its content or a parent Expanded
+  /// widget.
   ///
-  /// If true, the text field will increase its height until reach the max lines.
-  /// Otherwise, the text field will start its height respecting [maxLines] size.
+  /// If true, TextField will increase its height as content is entered by the
+  /// user. If [maxLines] is set, it will stop expanding at that number of 
+  /// lines.
+
+  /// If set to true and wrapped in an [Expanded] widget, the TextField will
+  /// size itself based on the parent widget.
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
-  final bool maxLinesIncrementalHeight;
+  final bool expands;
 
   /// {@template flutter.widgets.editableText.autofocus}
   /// Whether this text field should focus itself if nothing else is already
@@ -544,7 +554,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(DiagnosticsProperty<bool>('maxLinesIncrementalHeight', maxLinesIncrementalHeight, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
@@ -1123,7 +1133,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
-              maxLinesIncrementalHeight: widget.maxLinesIncrementalHeight,
+              expands: widget.expands,
               selectionColor: widget.selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
@@ -1190,7 +1200,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.hasFocus,
     this.maxLines,
-    this.maxLinesIncrementalHeight,
+    this.expands,
     this.selectionColor,
     this.textScaleFactor,
     this.textAlign,
@@ -1217,7 +1227,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
-  final bool maxLinesIncrementalHeight;
+  final bool expands;
   final Color selectionColor;
   final double textScaleFactor;
   final TextAlign textAlign;
@@ -1243,7 +1253,7 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
-      maxLinesIncrementalHeight: maxLinesIncrementalHeight,
+      expands: expands,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
@@ -1270,7 +1280,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines
-      ..maxLinesIncrementalHeight = maxLinesIncrementalHeight
+      ..expands = expands
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign

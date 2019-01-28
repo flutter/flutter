@@ -727,13 +727,13 @@ void main() {
   testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
-    Widget builder(int maxLines, [bool maxLinesIncrementalHeight = false]) {
+    Widget builder(int maxLines, [bool expands = false]) {
       return boilerplate(
         child: TextField(
           key: textFieldKey,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: maxLines,
-          maxLinesIncrementalHeight: maxLinesIncrementalHeight,
+          expands: expands,
           decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
@@ -769,7 +769,7 @@ void main() {
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
-    // The size will be equals to lines as maxLinesIncrementalHeight is set to true
+    // The size will be equal to lines as expands is set to true
     await tester.enterText(find.byType(TextField), kThreeLines);
     await tester.pumpWidget(builder(4, true));
     expect(findInputBox(), equals(inputBox));
