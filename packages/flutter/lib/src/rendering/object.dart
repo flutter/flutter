@@ -653,14 +653,16 @@ class SemanticsHandle {
 
 @immutable
 class _ElevationData {
-  const _ElevationData(this.elevation, this.area, this.path)
+  const _ElevationData(this.elevation, this.area, this.path, this.object)
       : assert(elevation != null),
         assert(area != null),
-        assert(path != null);
+        assert(path != null),
+        assert(object != null);
 
   final double elevation;
   final Rect area;
   final Path path;
+  final RenderObject object;
 }
 
 /// The pipeline owner manages the rendering pipeline.
@@ -872,7 +874,7 @@ class PipelineOwner {
     _maxElevationObjectsToCheck = value;
   }
 
-  List<_ElevationData> _elevations;
+  Map<RenderObject, List<_ElevationData>> _elevations;
   Path _translatePath(Path p, Offset offset) {
     final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
     return p.transform(matrix.storage);
@@ -908,15 +910,17 @@ class PipelineOwner {
     Rect area,
     Path path,
     RenderObject object,
+    RenderObject lastCommonAncestor,
   ) {
     assert(elevation != null);
     assert(area != null);
     assert(path != null);
     assert(object != null);
-    // Check in reverse order - we're more likely to fail on a nearer leaf node
+    _elevations[lastCommonAncestor] ??= <_ElevationData>[];
+    // Check in reverse order - we're more likely to fail on a closer node
     // if we're going to fail at all. Take only _maxElevationObjectsToCheck
     // to avoid this taking too long in the paint cycle.
-    final Iterable<_ElevationData> elevationsToCheck = _elevations
+    final Iterable<_ElevationData> elevationsToCheck = _elevations[lastCommonAncestor]
         .reversed
         .take(_maxElevationObjectsToCheck)
         .where((_ElevationData elevationData) {
@@ -942,16 +946,18 @@ class PipelineOwner {
       if (!differenceMetrics.iterator.moveNext()) {
         object._debugReportException(
           'paint',
-          'An attempt was made to paint a ${object.runtimeType} with an elevation of '
-          '$elevation after another PhysicalShape with an elevation of ${elevationData.elevation} in '
-          'the same area of the screen.\n\n'
+          'An attempt was made to paint a $object with an '
+          'elevation of $elevation after a ${elevationData.object} with an '
+          'elevation of ${elevationData.elevation} in the same area of the '
+          'screen.\n\n'
           'This can happen when placing multiple children that have '
           'elevations in a Stack or CustomMultiChildLayout widget and '
           'painting them out of order with respect to their elevations.\n\n'
           'This is not a valid use of elevation, and will cause rendering '
           'inconsistencies on platforms that use the elevation property to '
           'in ways that affect painting order.',
-          null, // The stackTrace is very unhelpful here.
+          null, // The StackTrace is very unhelpful here.
+          relatedObject: elevationData.object,
         );
         return difference;
       }
@@ -966,7 +972,7 @@ class PipelineOwner {
                  'occurs.');
       _printedExceededmaxElevationObjectsToCheckWarning = true;
     }
-    _elevations.add(_ElevationData(elevation, area, path));
+    _elevations[lastCommonAncestor].add(_ElevationData(elevation, area, path, object));
     return null;
   }
 
@@ -991,7 +997,7 @@ class PipelineOwner {
     profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
     assert(() {
       _debugDoingPaint = true;
-      _elevations = <_ElevationData>[];
+      _elevations = <RenderObject, List<_ElevationData>>{};
       return true;
     }());
     try {
@@ -1012,7 +1018,7 @@ class PipelineOwner {
     } finally {
       assert(() {
         _debugDoingPaint = false;
-        _elevations = <_ElevationData>[];
+        _elevations = <RenderObject, List<_ElevationData>>{};
         return true;
       }());
       profile(() { Timeline.finishSync(); });
@@ -1323,7 +1329,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Used in debug messages.
   dynamic debugCreator;
 
-  void _debugReportException(String method, dynamic exception, StackTrace stack) {
+  void _debugReportException(
+    String method,
+    dynamic exception,
+    StackTrace stack, {
+    RenderObject relatedObject,
+  }) {
     FlutterError.reportError(FlutterErrorDetailsForRendering(
       exception: exception,
       stack: stack,
@@ -1359,6 +1370,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           information.writeln('This RenderObject has no descendants.');
         }
         information.writeAll(descendants, '\n');
+        if (relatedObject != null) {
+          information.writeln('\n');
+          information.writeln('The following related RenderObject was being processed when the exception was fired:');
+          information.writeln('  ${relatedObject.toStringShallow(joiner: '\n  ')}');
+        }
       }
     ));
   }

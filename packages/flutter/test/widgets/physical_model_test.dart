@@ -13,7 +13,7 @@ void main() {
           color: Colors.grey,
           shadowColor: Colors.red,
           elevation: 1.0,
-          child: Material(child: TextField(controller: TextEditingController())),
+          child: Material(child: TextField(controller: TextEditingController()), elevation: 1.0,),
         ),
       ),
     );

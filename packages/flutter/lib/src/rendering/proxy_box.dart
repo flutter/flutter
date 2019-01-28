@@ -1592,11 +1592,15 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   @mustCallSuper
   void paint(PaintingContext context, Offset offset) {
     assert(() {
-      // Make sure we're not offstage.
-      AbstractNode ancestor = parent;
+      // Constrain this check to physical models with the same [RenderOffstage]
+      // ancestor. It would probably be even better if we could use [Overlay]
+      // instead, but that doesn't have a render object. The idea is that if
+      // it's contained in an overlay, it's ok for elevations to get mixed up
+      // because overlays
+      RenderObject ancestor = parent;
       while (ancestor != null) {
         if (ancestor is RenderOffstage) {
-          return true;
+          break;
         }
         ancestor = ancestor.parent;
       }
@@ -1605,6 +1609,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
         Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
         clipPath,
         this,
+        ancestor,
       );
       if (diff != null) {
         final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
