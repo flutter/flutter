@@ -182,7 +182,7 @@ void main() {
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
-    ),
+      ),
       hitTester: tester.hitTestOnBinding,
       dispatcher: tester.sendEventToBinding,
     );
