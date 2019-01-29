@@ -720,7 +720,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 1000),
+    Duration additionalTime = const Duration(milliseconds: 250),
   }) {
     assert(additionalTime != null);
     assert(() {

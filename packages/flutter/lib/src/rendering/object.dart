@@ -2595,7 +2595,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   @override
-  String toString({ DiagnosticLevel minLevel }) => toStringShort();
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) => toStringShort();
 
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
@@ -2631,7 +2631,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [toStringDeep], but does not recurse to any children.
   @override
   String toStringShallow({
-    String joiner = '; ',
+    String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
     RenderObject debugPreviousActiveLayout;
