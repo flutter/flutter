@@ -24,7 +24,7 @@ typedef enum {
   kInvalidLibraryVersion,
   kInvalidArguments,
   kInternalInconsistency,
-} FlutterResult;
+} FlutterEngineResult;
 
 typedef enum {
   kOpenGL,
@@ -248,32 +248,33 @@ typedef struct {
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineRun(size_t version,
-                               const FlutterRendererConfig* config,
-                               const FlutterProjectArgs* args,
-                               void* user_data,
-                               FlutterEngine* engine_out);
+FlutterEngineResult FlutterEngineRun(size_t version,
+                                     const FlutterRendererConfig* config,
+                                     const FlutterProjectArgs* args,
+                                     void* user_data,
+                                     FlutterEngine* engine_out);
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineShutdown(FlutterEngine engine);
+FlutterEngineResult FlutterEngineShutdown(FlutterEngine engine);
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineSendWindowMetricsEvent(
+FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
     FlutterEngine engine,
     const FlutterWindowMetricsEvent* event);
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
-                                            const FlutterPointerEvent* events,
-                                            size_t events_count);
+FlutterEngineResult FlutterEngineSendPointerEvent(
+    FlutterEngine engine,
+    const FlutterPointerEvent* events,
+    size_t events_count);
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineSendPlatformMessage(
+FlutterEngineResult FlutterEngineSendPlatformMessage(
     FlutterEngine engine,
     const FlutterPlatformMessage* message);
 
 FLUTTER_EXPORT
-FlutterResult FlutterEngineSendPlatformMessageResponse(
+FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
     FlutterEngine engine,
     const FlutterPlatformMessageResponseHandle* handle,
     const uint8_t* data,
@@ -283,7 +284,7 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
 // message loop not controlled by the Flutter engine. This API will be
 // deprecated soon.
 FLUTTER_EXPORT
-FlutterResult __FlutterEngineFlushPendingTasksNow();
+FlutterEngineResult __FlutterEngineFlushPendingTasksNow();
 
 // Register an external texture with a unique (per engine) identifier. Only
 // rendering backends that support external textures accept external texture
@@ -291,18 +292,19 @@ FlutterResult __FlutterEngineFlushPendingTasksNow();
 // mark that a frame is available by calling
 // |FlutterEngineMarkExternalTextureFrameAvailable|.
 FLUTTER_EXPORT
-FlutterResult FlutterEngineRegisterExternalTexture(FlutterEngine engine,
-                                                   int64_t texture_identifier);
+FlutterEngineResult FlutterEngineRegisterExternalTexture(
+    FlutterEngine engine,
+    int64_t texture_identifier);
 
 // Unregister a previous texture registration.
 FLUTTER_EXPORT
-FlutterResult FlutterEngineUnregisterExternalTexture(
+FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FlutterEngine engine,
     int64_t texture_identifier);
 
 // Mark that a new texture frame is available for a given texture identifier.
 FLUTTER_EXPORT
-FlutterResult FlutterEngineMarkExternalTextureFrameAvailable(
+FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     FlutterEngine engine,
     int64_t texture_identifier);
 

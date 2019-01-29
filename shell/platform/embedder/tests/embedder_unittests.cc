@@ -10,9 +10,9 @@ TEST(EmbedderTest, MustNotRunWithInvalidArgs) {
   FlutterEngine engine = nullptr;
   FlutterRendererConfig config = {};
   FlutterProjectArgs args = {};
-  FlutterResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION + 1, &config,
-                                          &args, NULL, &engine);
-  ASSERT_NE(result, FlutterResult::kSuccess);
+  FlutterEngineResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION + 1,
+                                                &config, &args, NULL, &engine);
+  ASSERT_NE(result, FlutterEngineResult::kSuccess);
 }
 
 TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
@@ -31,10 +31,10 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   args.assets_path = testing::GetFixturesPath();
 
   FlutterEngine engine = nullptr;
-  FlutterResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config,
-                                          &args, nullptr, &engine);
-  ASSERT_EQ(result, FlutterResult::kSuccess);
+  FlutterEngineResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config,
+                                                &args, nullptr, &engine);
+  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
 
   result = FlutterEngineShutdown(engine);
-  ASSERT_EQ(result, FlutterResult::kSuccess);
+  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
 }
