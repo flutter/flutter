@@ -303,11 +303,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Offset localToGlobal(Offset point) => point;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result, {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     assert(source == TestBindingEventSource.test);
-    super.dispatchEvent(event, result);
+    super.dispatchEvent(event, hitTestResult);
   }
 
   /// A stub for the system's onscreen keyboard. Callers must set the
@@ -1177,7 +1177,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   HitTestDispatcher deviceEventDispatcher;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result, {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     switch (source) {
@@ -1191,11 +1191,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             renderView._pointers[event.pointer].decay = _kPointerDecay;
         }
         _handleViewNeedsPaint();
-        super.dispatchEvent(event, result, source: source);
+        super.dispatchEvent(event, hitTestResult, source: source);
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null)
-          deviceEventDispatcher.dispatchEvent(event, result);
+          deviceEventDispatcher.dispatchEvent(event, hitTestResult);
         break;
     }
   }

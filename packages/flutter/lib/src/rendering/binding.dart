@@ -21,7 +21,7 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -40,6 +40,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    _mouseTracker = _createMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -134,6 +135,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     renderView.scheduleInitialFrame();
   }
 
+  /// The object that manages state about currently connected mice, for hover
+  /// notification.
+  MouseTracker get mouseTracker => _mouseTracker;
+  MouseTracker _mouseTracker;
+
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics
   PipelineOwner get pipelineOwner => _pipelineOwner;
@@ -183,6 +189,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   }
 
   SemanticsHandle _semanticsHandle;
+
+  // Creates a [MouseTracker] which manages state about currently connected
+  // mice, for hover notification.
+  MouseTracker _createMouseTracker() {
+    return MouseTracker(pointerRouter, (Offset offset) {
+      // Layer hit testing is done using device pixels, so we have to convert
+      // the logical coordinates of the event location back to device pixels
+      // here.
+      return renderView.layer
+          .find<MouseTrackerAnnotation>(offset * ui.window.devicePixelRatio);
+    });
+  }
 
   void _handleSemanticsEnabledChanged() {
     setSemanticsEnabled(ui.window.semanticsEnabled);
