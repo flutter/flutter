@@ -472,7 +472,7 @@ class ResidentCompiler {
     if (_unsafePackageSerialization == true) {
       command.add('--unsafe-package-serialization');
     }
-    if (_experimentalFlags.length > 0) {
+    if ((_experimentalFlags != null) && (_experimentalFlags.length > 0)) {
       final String expFlags = _experimentalFlags.join(',');
       command.add('--enable-experiment=$expFlags');
     }
