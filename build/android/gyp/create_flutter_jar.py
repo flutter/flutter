@@ -24,7 +24,7 @@ def main(args):
   parser.add_option('--asset_dir', help='Path to assets.')
   options, _ = parser.parse_args(args)
   build_utils.CheckOptions(options, parser, [
-    'output', 'dist_jar', 'native_lib', 'android_abi', 'asset_dir'
+    'output', 'dist_jar', 'native_lib', 'android_abi'
   ])
 
   input_deps = []
@@ -41,10 +41,11 @@ def main(args):
       out_zip.write(native_lib,
                     'lib/%s/%s' % (options.android_abi, os.path.basename(native_lib)))
 
-    for asset_file in os.listdir(options.asset_dir):
-      input_deps.append(asset_file)
-      out_zip.write(os.path.join(options.asset_dir, asset_file),
-                    'assets/flutter_shared/%s' % asset_file)
+    if options.asset_dir:
+      for asset_file in os.listdir(options.asset_dir):
+        input_deps.append(asset_file)
+        out_zip.write(os.path.join(options.asset_dir, asset_file),
+                      'assets/flutter_shared/%s' % asset_file)
 
   if options.depfile:
     build_utils.WriteDepfile(

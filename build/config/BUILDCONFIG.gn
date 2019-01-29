@@ -535,10 +535,6 @@ if (is_win) {
   _shared_library_configs += _windows_linker_configs
 } else if (is_mac) {
   _shared_library_configs += [ "//build/config/mac:mac_dynamic_flags" ]
-} else if (is_android) {
-  # Only export JNI_OnLoad symbol.
-  _shared_library_configs +=
-      [ "//build/config/android:hide_all_but_jni_onload" ]
 }
 set_defaults("shared_library") {
   configs = _shared_library_configs
