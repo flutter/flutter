@@ -231,6 +231,8 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
   settings.trace_skia =
       command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
+  settings.trace_systrace =
+      command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
 #endif
 
   return settings;
