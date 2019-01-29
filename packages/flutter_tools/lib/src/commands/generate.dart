@@ -1,11 +1,11 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-
-
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart';
-
+import '../base/logger.dart';
 import '../build_runner/build_runner.dart';
+import '../cache.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
