@@ -286,11 +286,11 @@ void PopulateSnapshotMappingCallbacks(const FlutterProjectArgs* args,
   }
 }
 
-FlutterResult FlutterEngineRun(size_t version,
-                               const FlutterRendererConfig* config,
-                               const FlutterProjectArgs* args,
-                               void* user_data,
-                               FlutterEngine* engine_out) {
+FlutterEngineResult FlutterEngineRun(size_t version,
+                                     const FlutterRendererConfig* config,
+                                     const FlutterProjectArgs* args,
+                                     void* user_data,
+                                     FlutterEngine* engine_out) {
   // Step 0: Figure out arguments for shell creation.
   if (version != FLUTTER_ENGINE_VERSION) {
     return kInvalidLibraryVersion;
@@ -504,7 +504,7 @@ FlutterResult FlutterEngineRun(size_t version,
   return kSuccess;
 }
 
-FlutterResult FlutterEngineShutdown(FlutterEngine engine) {
+FlutterEngineResult FlutterEngineShutdown(FlutterEngine engine) {
   if (engine == nullptr) {
     return kInvalidArguments;
   }
@@ -514,7 +514,7 @@ FlutterResult FlutterEngineShutdown(FlutterEngine engine) {
   return kSuccess;
 }
 
-FlutterResult FlutterEngineSendWindowMetricsEvent(
+FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
     FlutterEngine engine,
     const FlutterWindowMetricsEvent* flutter_metrics) {
   if (engine == nullptr || flutter_metrics == nullptr) {
@@ -548,9 +548,10 @@ inline blink::PointerData::Change ToPointerDataChange(
   return blink::PointerData::Change::kCancel;
 }
 
-FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
-                                            const FlutterPointerEvent* pointers,
-                                            size_t events_count) {
+FlutterEngineResult FlutterEngineSendPointerEvent(
+    FlutterEngine engine,
+    const FlutterPointerEvent* pointers,
+    size_t events_count) {
   if (engine == nullptr || pointers == nullptr || events_count == 0) {
     return kInvalidArguments;
   }
@@ -579,7 +580,7 @@ FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
              : kInvalidArguments;
 }
 
-FlutterResult FlutterEngineSendPlatformMessage(
+FlutterEngineResult FlutterEngineSendPlatformMessage(
     FlutterEngine engine,
     const FlutterPlatformMessage* flutter_message) {
   if (engine == nullptr || flutter_message == nullptr) {
@@ -604,7 +605,7 @@ FlutterResult FlutterEngineSendPlatformMessage(
              : kInvalidArguments;
 }
 
-FlutterResult FlutterEngineSendPlatformMessageResponse(
+FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
     FlutterEngine engine,
     const FlutterPlatformMessageResponseHandle* handle,
     const uint8_t* data,
@@ -627,13 +628,14 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
   return kSuccess;
 }
 
-FlutterResult __FlutterEngineFlushPendingTasksNow() {
+FlutterEngineResult __FlutterEngineFlushPendingTasksNow() {
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   return kSuccess;
 }
 
-FlutterResult FlutterEngineRegisterExternalTexture(FlutterEngine engine,
-                                                   int64_t texture_identifier) {
+FlutterEngineResult FlutterEngineRegisterExternalTexture(
+    FlutterEngine engine,
+    int64_t texture_identifier) {
   if (engine == nullptr || texture_identifier == 0) {
     return kInvalidArguments;
   }
@@ -644,7 +646,7 @@ FlutterResult FlutterEngineRegisterExternalTexture(FlutterEngine engine,
   return kSuccess;
 }
 
-FlutterResult FlutterEngineUnregisterExternalTexture(
+FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FlutterEngine engine,
     int64_t texture_identifier) {
   if (engine == nullptr || texture_identifier == 0) {
@@ -659,7 +661,7 @@ FlutterResult FlutterEngineUnregisterExternalTexture(
   return kSuccess;
 }
 
-FlutterResult FlutterEngineMarkExternalTextureFrameAvailable(
+FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     FlutterEngine engine,
     int64_t texture_identifier) {
   if (engine == nullptr || texture_identifier == 0) {
