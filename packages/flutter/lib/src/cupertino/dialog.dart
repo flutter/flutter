@@ -137,8 +137,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
-  })  : assert(actions != null),
-        super(key: key);
+  }) : assert(actions != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -893,8 +893,8 @@ class _CupertinoAlertActionSection extends StatefulWidget {
     Key key,
     @required this.children,
     this.scrollController,
-  })  : assert(children != null),
-        super(key: key);
+  }) : assert(children != null),
+       super(key: key);
 
   final List<Widget> children;
 

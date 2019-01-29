@@ -110,9 +110,9 @@ class Interval extends Curve {
   ///
   /// The arguments must not be null.
   const Interval(this.begin, this.end, { this.curve = Curves.linear })
-      : assert(begin != null),
-        assert(end != null),
-        assert(curve != null);
+    : assert(begin != null),
+      assert(end != null),
+      assert(curve != null);
 
   /// The largest value for which this interval is 0.0.
   ///
@@ -199,10 +199,10 @@ class Cubic extends Curve {
   ///
   /// The [a], [b], [c], and [d] arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
-      : assert(a != null),
-        assert(b != null),
-        assert(c != null),
-        assert(d != null);
+    : assert(a != null),
+      assert(b != null),
+      assert(c != null),
+      assert(d != null);
 
   /// The x coordinate of the first control point.
   ///
