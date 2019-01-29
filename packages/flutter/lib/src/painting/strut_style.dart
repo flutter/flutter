@@ -101,7 +101,7 @@ import 'basic_types.dart';
 /// itself is shorter than the strut.
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'Hello, world!\nSecond line!',
 ///   style: TextStyle(
 ///     fontSize: 10,
@@ -125,7 +125,7 @@ import 'basic_types.dart';
 /// same height (`14 * 1.5`).
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     text: 'First line!\n',
 ///     style: TextStyle(
@@ -166,7 +166,7 @@ import 'basic_types.dart';
 /// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example.png)
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     text: '---------         ---------\n',
 ///     style: TextStyle(
@@ -374,6 +374,12 @@ class StrutStyle extends Diagnosticable {
   ///
   /// This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
+  /// 
+  /// This is equivalent to setting [TextStyle.height] to zero for all [TextStyle]s
+  /// in the paragraph. Since the height of each line is calculated as a max of the
+  /// metrics of each run of text, zero height [TextStyle]s cause the minimums
+  /// defined by strut to always manifest, resulting in all lines having the height
+  /// of the strut.
   ///
   /// The default is false.
   final bool forceStrutHeight;
