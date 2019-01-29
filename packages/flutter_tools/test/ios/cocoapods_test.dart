@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -188,6 +189,34 @@ void main() {
 
       final FlutterProject project = await FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
+
+      final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+      expect(debugContents, contains(
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+      expect(debugContents, contains('Existing debug config'));
+      final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+      expect(releaseContents, contains(
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+      expect(releaseContents, contains('Existing release config'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+  });
+
+  group('Update xcconfig', () {
+    testUsingContext('includes Pod config in xcconfig files, if there is a Pod dependency', () async {
+      projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
+      projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Existing Podfile');
+      projectUnderTest.packagesFile..createSync()..writeAsStringSync('');
+      projectUnderTest.ios.xcodeConfigFor('Debug')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Existing debug config');
+      projectUnderTest.ios.xcodeConfigFor('Release')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Existing release config');
+
+      final FlutterProject project = await FlutterProject.fromPath('project');
+      await injectPlugins(project);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(

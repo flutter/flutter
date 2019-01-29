@@ -300,8 +300,11 @@ Future<void> injectPlugins(FlutterProject project) async {
   if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
     final IosProject iosProject = IosProject.fromFlutter(project);
     final CocoaPods cocoaPods = CocoaPods();
-    if (plugins.isNotEmpty || iosProject.podfile.existsSync())
+    if (plugins.isNotEmpty) {
       cocoaPods.setupPodfile(project.ios);
+    } else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
+      cocoaPods.addPodsDependencyToFlutterXcconfig(iosProject);
+    }
   }
 }
 
