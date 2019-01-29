@@ -248,14 +248,14 @@ class Material extends StatefulWidget {
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
 
-  /// If non-null, the corners of this box are rounded by this [BorderRadius].
+  /// If non-null, the corners of this box are rounded by this [BorderRadiusGeometry].
   /// Otherwise, the corners specified for the current [type] of material are
   /// used.
   ///
   /// If [shape] is non null then the border radius is ignored.
   ///
   /// Must be null if [type] is [MaterialType.circle].
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// The ink controller from the closest instance of this class that
   /// encloses the given context.
