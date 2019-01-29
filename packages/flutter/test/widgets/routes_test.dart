@@ -117,19 +117,19 @@ void main() {
 
   testWidgets('Route settings arguments', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
-    expect(settings.arguments.isEmpty, isTrue);
+    expect(settings.arguments, isNull);
 
-    final TypedDictionary arguments = TypedDictionary()..set<String>('hello');
+    final Object arguments = Object();
     final RouteSettings settings2 = RouteSettings(name: 'A', arguments: arguments);
-    expect(settings2.arguments, equals(arguments));
+    expect(settings2.arguments, same(arguments));
 
     final RouteSettings settings3 = settings2.copyWith();
     expect(settings3.arguments, equals(arguments));
 
-    final TypedDictionary arguments2 = TypedDictionary()..set<String>('world');
+    final Object arguments2 = Object();
     final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
-    expect(settings4.arguments, equals(arguments2));
-    expect(settings4.arguments, isNot(equals(arguments)));
+    expect(settings4.arguments, same(arguments2));
+    expect(settings4.arguments, isNot(same(arguments)));
   });
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {

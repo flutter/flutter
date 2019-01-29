@@ -287,20 +287,18 @@ abstract class Route<T> {
 @immutable
 class RouteSettings {
   /// Creates data used to construct routes.
-  ///
-  /// The [arguments] parameter must not be null.
   const RouteSettings({
     this.name,
     this.isInitialRoute = false,
-    this.arguments = TypedDictionary.empty,
-  }) : assert(arguments != null);
+    this.arguments,
+  });
 
   /// Creates a copy of this route settings object with the given fields
   /// replaced with the new values.
   RouteSettings copyWith({
     String name,
     bool isInitialRoute,
-    TypedDictionary arguments,
+    Object arguments,
   }) {
     return RouteSettings(
       name: name ?? this.name,
@@ -320,11 +318,7 @@ class RouteSettings {
   final bool isInitialRoute;
 
   /// The arguments passed to this route.
-  ///
-  /// The arguments are key-value pairs, keyed by [Type], with values matching
-  /// the [Type]. For example, a key may be `MyArgumentsObject`, with a value
-  /// corresponding to an instance of `MyArgumentsObject`.
-  final TypedDictionary arguments;
+  final Object arguments;
 
   @override
   String toString() => '$runtimeType("$name", $arguments)';
@@ -761,9 +755,8 @@ class Navigator extends StatefulWidget {
   static Future<T> pushNamed<T extends Object>(
     BuildContext context,
     String routeName, {
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
    }) {
-    assert(arguments != null);
     return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
@@ -817,9 +810,8 @@ class Navigator extends StatefulWidget {
     BuildContext context,
     String routeName, {
     TO result,
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -873,9 +865,8 @@ class Navigator extends StatefulWidget {
     BuildContext context,
     String routeName, {
     TO result,
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
    }) {
-    assert(arguments != null);
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -935,9 +926,8 @@ class Navigator extends StatefulWidget {
     BuildContext context,
     String newRouteName,
     RoutePredicate predicate, {
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
@@ -1380,7 +1370,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         Navigator.defaultRouteName,
       ];
       final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
-        _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: TypedDictionary.empty),
+        _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: null),
       ];
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
@@ -1388,7 +1378,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         for (String part in routeParts) {
           routeName += '/$part';
           plannedInitialRouteNames.add(routeName);
-          plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: TypedDictionary.empty));
+          plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
       if (plannedInitialRoutes.contains(null)) {
@@ -1408,15 +1398,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
           return true;
         }());
-        push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: TypedDictionary.empty));
+        push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: null));
       } else {
         plannedInitialRoutes.forEach(push);
       }
     } else {
       Route<Object> route;
       if (initialRouteName != Navigator.defaultRouteName)
-        route = _routeNamed<Object>(initialRouteName, allowNull: true, arguments: TypedDictionary.empty);
-      route ??= _routeNamed<Object>(Navigator.defaultRouteName, arguments: TypedDictionary.empty);
+        route = _routeNamed<Object>(initialRouteName, allowNull: true, arguments: null);
+      route ??= _routeNamed<Object>(Navigator.defaultRouteName, arguments: null);
       push(route);
     }
     for (Route<dynamic> route in _history)
@@ -1467,10 +1457,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<T> _routeNamed<T>(String name, { @required TypedDictionary arguments, bool allowNull = false }) {
+  Route<T> _routeNamed<T>(String name, { @required Object arguments, bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
-    assert(arguments != null);
     final RouteSettings settings = RouteSettings(
       name: name,
       isInitialRoute: _history.isEmpty,
@@ -1526,9 +1515,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @optionalTypeArgs
   Future<T> pushNamed<T extends Object>(
     String routeName, {
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     return push<T>(_routeNamed<T>(routeName, arguments: arguments));
   }
 
@@ -1554,9 +1542,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
     String routeName, {
     TO result,
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments), result: result);
   }
 
@@ -1581,9 +1568,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> popAndPushNamed<T extends Object, TO extends Object>(
     String routeName, {
     TO result,
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     pop<TO>(result);
     return pushNamed<T>(routeName, arguments: arguments);
   }
@@ -1609,9 +1595,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushNamedAndRemoveUntil<T extends Object>(
     String newRouteName,
     RoutePredicate predicate, {
-    TypedDictionary arguments = TypedDictionary.empty,
+    Object arguments,
   }) {
-    assert(arguments != null);
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments), predicate);
   }
 

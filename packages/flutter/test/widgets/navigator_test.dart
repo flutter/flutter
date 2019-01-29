@@ -874,7 +874,7 @@ void main() {
 
   testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
     GlobalKey currentRouteKey;
-    final List<TypedDictionary> arguments = <TypedDictionary>[];
+    final List<Object> arguments = <Object>[];
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
@@ -887,41 +887,39 @@ void main() {
     ));
 
     expect(find.text('/'), findsOneWidget);
-    expect(arguments.single.isEmpty, isTrue);
+    expect(arguments.single, isNull);
     arguments.clear();
 
     Navigator.pushNamed(
       currentRouteKey.currentContext,
       '/A',
-      arguments: TypedDictionary()..set<String>('pushNamed'),
+      arguments: 'pushNamed',
     );
     await tester.pumpAndSettle();
 
     expect(find.text('/'), findsNothing);
     expect(find.text('/A'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushNamed');
+    expect(arguments.single, 'pushNamed');
     arguments.clear();
 
     Navigator.popAndPushNamed(
       currentRouteKey.currentContext,
       '/B',
-      arguments: TypedDictionary()..set<String>('popAndPushNamed'),
+      arguments: 'popAndPushNamed',
     );
     await tester.pumpAndSettle();
 
     expect(find.text('/'), findsNothing);
     expect(find.text('/A'), findsNothing);
     expect(find.text('/B'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'popAndPushNamed');
+    expect(arguments.single, 'popAndPushNamed');
     arguments.clear();
 
     Navigator.pushNamedAndRemoveUntil(
       currentRouteKey.currentContext,
       '/C',
       (Route<dynamic> route) => route.isFirst,
-      arguments: TypedDictionary()..set<String>('pushNamedAndRemoveUntil'),
+      arguments: 'pushNamedAndRemoveUntil',
     );
     await tester.pumpAndSettle();
 
@@ -929,14 +927,13 @@ void main() {
     expect(find.text('/A'), findsNothing);
     expect(find.text('/B'), findsNothing);
     expect(find.text('/C'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushNamedAndRemoveUntil');
+    expect(arguments.single, 'pushNamedAndRemoveUntil');
     arguments.clear();
 
     Navigator.pushReplacementNamed(
       currentRouteKey.currentContext,
       '/D',
-      arguments: TypedDictionary()..set<String>('pushReplacementNamed'),
+      arguments: 'pushReplacementNamed',
     );
     await tester.pumpAndSettle();
 
@@ -945,14 +942,13 @@ void main() {
     expect(find.text('/B'), findsNothing);
     expect(find.text('/C'), findsNothing);
     expect(find.text('/D'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushReplacementNamed');
+    expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
   });
 
   testWidgets('arguments for named routes on NavigatorState', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-    final List<TypedDictionary> arguments = <TypedDictionary>[];
+    final List<Object> arguments = <Object>[];
 
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -966,38 +962,36 @@ void main() {
     ));
 
     expect(find.text('/'), findsOneWidget);
-    expect(arguments.single.isEmpty, isTrue);
+    expect(arguments.single, isNull);
     arguments.clear();
 
     navigatorKey.currentState.pushNamed(
       '/A',
-      arguments: TypedDictionary()..set<String>('pushNamed'),
+      arguments:'pushNamed',
     );
     await tester.pumpAndSettle();
 
     expect(find.text('/'), findsNothing);
     expect(find.text('/A'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushNamed');
+    expect(arguments.single, 'pushNamed');
     arguments.clear();
 
     navigatorKey.currentState.popAndPushNamed(
       '/B',
-      arguments: TypedDictionary()..set<String>('popAndPushNamed'),
+      arguments: 'popAndPushNamed',
     );
     await tester.pumpAndSettle();
 
     expect(find.text('/'), findsNothing);
     expect(find.text('/A'), findsNothing);
     expect(find.text('/B'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'popAndPushNamed');
+    expect(arguments.single, 'popAndPushNamed');
     arguments.clear();
 
     navigatorKey.currentState.pushNamedAndRemoveUntil(
       '/C',
       (Route<dynamic> route) => route.isFirst,
-      arguments: TypedDictionary()..set<String>('pushNamedAndRemoveUntil'),
+      arguments: 'pushNamedAndRemoveUntil',
     );
     await tester.pumpAndSettle();
 
@@ -1005,13 +999,12 @@ void main() {
     expect(find.text('/A'), findsNothing);
     expect(find.text('/B'), findsNothing);
     expect(find.text('/C'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushNamedAndRemoveUntil');
+    expect(arguments.single, 'pushNamedAndRemoveUntil');
     arguments.clear();
 
     navigatorKey.currentState.pushReplacementNamed(
       '/D',
-      arguments: TypedDictionary()..set<String>('pushReplacementNamed'),
+      arguments: 'pushReplacementNamed',
     );
     await tester.pumpAndSettle();
 
@@ -1020,8 +1013,7 @@ void main() {
     expect(find.text('/B'), findsNothing);
     expect(find.text('/C'), findsNothing);
     expect(find.text('/D'), findsOneWidget);
-    expect(arguments.single.length, 1);
-    expect(arguments.single.get<String>(), 'pushReplacementNamed');
+    expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
   });
 }
