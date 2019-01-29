@@ -21,7 +21,6 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
@@ -1030,23 +1029,15 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// Called whenever the application is reassembled during debugging, for
-  /// example during hot reload.
-  ///
-  /// This method should rerun any initialization logic that depends on global
-  /// state, for example, image loading from asset bundles (since the asset
-  /// bundle may have changed).
+  /// {@macro flutter.widgets.reassemble}
   ///
   /// In addition to this method being invoked, it is guaranteed that the
   /// [build] method will be invoked when a reassemble is signaled. Most
   /// widgets therefore do not need to do anything in the [reassemble] method.
   ///
-  /// This function will only be called during development. In release builds,
-  /// the `ext.flutter.reassemble` hook is not available, and so this code will
-  /// never execute.
-  ///
   /// See also:
   ///
+  ///  * [Element.reassemble]
   ///  * [BindingBase.reassembleApplication]
   ///  * [Image], which uses this to reload images.
   @protected
@@ -2467,7 +2458,7 @@ class BuildOwner {
     try {
       assert(root._parent == null);
       assert(root.owner == this);
-      root._reassemble();
+      root.reassemble();
     } finally {
       Timeline.finishSync();
     }
@@ -2595,11 +2586,30 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   bool _active = false;
 
+  /// {@template flutter.widgets.reassemble}
+  /// Called whenever the application is reassembled during debugging, for
+  /// example during hot reload.
+  ///
+  /// This method should rerun any initialization logic that depends on global
+  /// state, for example, image loading from asset bundles (since the asset
+  /// bundle may have changed).
+  ///
+  /// This function will only be called during development. In release builds,
+  /// the `ext.flutter.reassemble` hook is not available, and so this code will
+  /// never execute.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [State.reassemble]
+  ///  * [BindingBase.reassembleApplication]
+  ///  * [Image], which uses this to reload images.
   @mustCallSuper
-  void _reassemble() {
+  @protected
+  void reassemble() {
     markNeedsBuild();
     visitChildren((Element child) {
-      child._reassemble();
+      child.reassemble();
     });
   }
 
@@ -3817,9 +3827,9 @@ class StatefulElement extends ComponentElement {
   State<StatefulWidget> _state;
 
   @override
-  void _reassemble() {
+  void reassemble() {
     state.reassemble();
-    super._reassemble();
+    super.reassemble();
   }
 
   @override
