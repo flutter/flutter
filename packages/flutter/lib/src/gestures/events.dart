@@ -517,7 +517,7 @@ class PointerEnterEvent extends PointerEvent {
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
-  /// This is used by the [MouseTracker] to synthesize exit events, since it
+  /// This is used by the [MouseTracker] to synthesize enter events, since it
   /// only actually receives hover events.
   PointerEnterEvent.fromHoverEvent(PointerHoverEvent hover) : super(
     timeStamp: hover?.timeStamp,

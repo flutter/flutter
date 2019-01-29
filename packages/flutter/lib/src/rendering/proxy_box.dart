@@ -2526,10 +2526,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer enters the region for this widget.
-  ///
-  /// If this is a touch pointer, this will only fire when [onPointerDown]
-  /// fires.
+  /// Called when a hovering pointer enters the region for this widget.
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer enters
   /// the region defined by this widget.
@@ -2555,10 +2552,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
   PointerHoverEventListener _onPointerHover;
 
-  /// Called when a pointer leaves the region for this widget.
-  ///
-  /// If this is a touch pointer, this will only fire when [onPointerUp]
-  /// fires.
+  /// Called when a hovering pointer leaves the region for this widget.
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer leaves
   /// the region defined by this widget.
@@ -2583,7 +2577,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation _hoverAnnotation;
 
   void _updateAnnotations() {
-    if (_hoverAnnotation != null) {
+    if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
@@ -2592,7 +2586,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         onHover: _onPointerHover,
         onExit: _onPointerExit,
       );
-      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      if (attached) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      }
     } else {
       _hoverAnnotation = null;
     }
