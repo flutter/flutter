@@ -1,5 +1,20 @@
 # Read about `build.yaml` at https://pub.dartlang.org/packages/build_config
 builders:
+  flutter:
+    import: "package:build_modules/builders.dart"
+    builder_factories:
+      - metaModuleBuilderFactoryForPlatform('flutter')
+      - metaModuleCleanBuilderFactoryForPlatform('flutter')
+      - moduleBuilderFactoryForPlatform('flutter')
+    applies_builders: ["build_modules|module_cleanup"]
+    build_extensions:
+      $lib$:
+        - .flutter.meta_module.raw
+        - .flutter.meta_module.clean
+      .dart:
+        - .flutter.module
+    auto_apply: all_packages
+    required_inputs: [".dart", ".module.library"]
   kernel:
     import: "package:flutter_build/flutter_build.dart"
     builder_factories:
@@ -8,6 +23,7 @@ builders:
       ".dart":
         - ".app.dill"
         - ".packages"
+    required_inputs: [".dart", ".flutter.module"]
     auto_apply: root_package
     build_to: cache
     defaults:
