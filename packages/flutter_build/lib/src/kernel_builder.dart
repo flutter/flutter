@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:build_modules/build_modules.dart';
 import 'package:build/build.dart';
 import 'package:package_config/packages_file.dart' as packages_file;
 import 'package:meta/meta.dart';
@@ -56,7 +57,7 @@ class FlutterKernelBuilder implements Builder {
   /// Whether to build an ahead of time build.
   final bool aot;
 
-  /// Whether to disable this builder entirely.
+  /// Whether to disable production of kernel.
   final bool disabled;
 
   /// Whether the `trackWidgetCreation` flag is provided to the frontend
@@ -82,13 +83,24 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    // Do not run builder if it has been disabled or if this asset does not
+    final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
+    final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
+
+    // Use modules to verify dependencies are sound.
+    final AssetId moduleId = buildStep.inputId.changeExtension(moduleExtension(DartPlatform.flutter));
+    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+    try {
+      await module.computeTransitiveDependencies(buildStep);
+    } on MissingModulesException catch (err) {
+      log.shout(err);
+      return;
+    }
+
+    // Do not generate kernel if it has been disabled or if this asset does not
     // correspond to the current entrypoint.
     if (disabled || !mainPath.contains(buildStep.inputId.path)) {
       return;
     }
-    final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
-    final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
     // Create a scratch space file that can be read/written by the frontend server.
     // It is okay to hard-code these file names because we will copy them back
