@@ -527,14 +527,14 @@ class PaintingContext extends ClipContext {
 ///   width is equivalent to one where the maximum width is set to that minimum
 ///   width (`2<w<1` is equivalent to `2<w<2`, since minimum constraints have
 ///   priority). This getter is used by the default implementation of
-///   [debugAssertIsValid].
+///   [debugAssertIsValidStructured].
 ///
-/// * The [debugAssertIsValid] method, which should assert if there's anything
+/// * The [debugAssertIsValidStructured] method, which should assert if there's anything
 ///   wrong with the constraints object. (We use this approach rather than
 ///   asserting in constructors so that our constructors can be `const` and so
 ///   that it is possible to create invalid constraints temporarily while
 ///   building valid ones.) See the implementation of
-///   [BoxConstraints.debugAssertIsValid] for an example of the detailed checks
+///   [BoxConstraints.debugAssertIsValidStructured] for an example of the detailed checks
 ///   that can be made.
 ///
 /// * The [==] operator and the [hashCode] getter, so that constraints can be
@@ -576,13 +576,50 @@ abstract class Constraints {
   /// called when an exception is to be thrown. The collected information is
   /// then included in the message after the error line.
   ///
+  /// The `errorBuilder` argument takes an optional [FlutterErrorBuilder] which
+  /// contains collected information is then included in the message after the
+  /// error line.
+  //
   /// Returns the same as [isNormalized] if asserts are disabled.
-  bool debugAssertIsValid({
+  bool debugAssertIsValidStructured({
     bool isAppliedConstraint = false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
+    RenderErrorBuilder errorBuilder,
   }) {
     assert(isNormalized);
     return isNormalized;
+  }
+
+  /// Asserts that the constraints are valid.
+  ///
+  /// This might involve checks more detailed than [isNormalized].
+  ///
+  /// For example, the [BoxConstraints] subclass verifies that the constraints
+  /// are not [double.nan].
+  ///
+  /// If the `isAppliedConstraint` argument is true, then even stricter rules
+  /// are enforced. This argument is set to true when checking constraints that
+  /// are about to be applied to a [RenderObject] during layout, as opposed to
+  /// constraints that may be further affected by other constraints. For
+  /// example, the asserts for verifying the validity of
+  /// [RenderConstrainedBox.additionalConstraints] do not set this argument, but
+  /// the asserts for verifying the argument passed to the [RenderObject.layout]
+  /// method do.
+  ///
+  /// The `informationCollector` argument takes an optional callback which is
+  /// called when an exception is to be thrown. The collected information is
+  /// then included in the message after the error line.
+  //
+  /// Returns the same as [isNormalized] if asserts are disabled.
+  @Deprecated('Use debugAssertIsValidStructured instead.')
+  bool debugAssertIsValid({
+    bool isAppliedConstraint = false,
+    InformationCollector informationCollector,
+  }) {
+    return debugAssertIsValidStructured(
+      isAppliedConstraint: isAppliedConstraint,
+      informationCollector: informationCollector,
+    );
   }
 }
 
@@ -635,8 +672,8 @@ class SemanticsHandle {
     assert(() {
       if (_owner == null) {
         throw FlutterError(
-          'SemanticsHandle has already been disposed.\n'
-          'Each SemanticsHandle should be disposed exactly once.'
+          'SemanticsHandle has already been disposed.',
+          contract: 'Each SemanticsHandle should be disposed exactly once.'
         );
       }
       return true;
@@ -1179,36 +1216,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       library: 'rendering library',
       context: 'during $method()',
       renderObject: this,
-      informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-        final List<String> descendants = <String>[];
-        const int maxDepth = 5;
-        int depth = 0;
-        const int maxLines = 25;
-        int lines = 0;
-        void visitor(RenderObject child) {
-          if (lines < maxLines) {
-            depth += 1;
-            descendants.add('${"  " * depth}$child');
-            if (depth < maxDepth)
-              child.visitChildren(visitor);
-            depth -= 1;
-          } else if (lines == maxLines) {
-            descendants.add('  ...(descendants list truncated after $lines lines)');
-          }
-          lines += 1;
-        }
-        visitChildren(visitor);
-        if (lines > 1) {
-          information.writeln('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-        } else if (descendants.length == 1) {
-          information.writeln('This RenderObject had the following child:');
-        } else {
-          information.writeln('This RenderObject has no descendants.');
-        }
-        information.writeAll(descendants, '\n');
-      }
+      errorBuilder: RenderErrorBuilder()
+        ..addRenderObject(
+          'The following RenderObject was being processed when the exception was fired',
+          this,
+        )
+        // XXX this case is broken. See original code. The concept was to show a
+        // truncated tree
+        ..addRenderObject(
+          'This RenderObject',
+          this,
+          style: DiagnosticsTreeStyle.truncateChildren,
+        )
     ));
   }
 
@@ -1546,9 +1565,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(constraints != null);
-    assert(constraints.debugAssertIsValid(
+    assert(constraints.debugAssertIsValidStructured(
       isAppliedConstraint: true,
-      informationCollector: (StringBuffer information) {
+      errorBuilder: RenderErrorBuilder.lazy(() {
+        final RenderErrorBuilder errorBuilder = RenderErrorBuilder();
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1559,20 +1579,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           }
         }
         if (targetFrame != null && targetFrame < stack.length) {
-          information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s layout() '
-            'function by the following function, which probably computed the '
-            'invalid constraints in question:'
-          );
           final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
-          if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
-            information.writeln('  ${targetFrameMatch.group(1)}');
-          } else {
-            information.writeln(stack[targetFrame]);
-          }
+          final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
+          errorBuilder.addErrorProperty<String>(
+            'These invalid constraints were provided to $runtimeType\'s layout() '
+            'function by the following function, which probably computed the '
+            'invalid constraints in question',
+            problemFunction
+          );
         }
-      }
+        return errorBuilder;
+      })
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
@@ -2045,13 +2063,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugDoingThisPaint) {
-        throw FlutterError(
-          'Tried to paint a RenderObject reentrantly.\n'
-          'The following RenderObject was already being painted when it was '
-          'painted again:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'Since this typically indicates an infinite recursion, it is '
-          'disallowed.'
+        throw FlutterError.from(RenderErrorBuilder()
+          ..error = 'Tried to paint a RenderObject reentrantly.'
+          ..addRenderObject(
+              'The following RenderObject was already being painted when it was '
+              'painted again',
+              this,
+            )
+            ..addHint(
+              'Since this typically indicates an infinite recursion, it is '
+              'disallowed.'
+            )
         );
       }
       return true;
@@ -2067,16 +2089,22 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        throw FlutterError(
-          'Tried to paint a RenderObject before its compositing bits were '
-          'updated.\n'
-          'The following RenderObject was marked as having dirty compositing '
-          'bits at the time that it was painted:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'A RenderObject that still has dirty compositing bits cannot be '
-          'painted because this indicates that the tree has not yet been '
-          'properly configured for creating the layer tree.\n'
-          'This usually indicates an error in the Flutter framework itself.'
+        throw FlutterError.from(RenderErrorBuilder()
+          ..addError(
+            'Tried to paint a RenderObject before its compositing bits were '
+            'updated.'
+          )
+          ..addRenderObject(
+            'The following RenderObject was marked as having dirty compositing '
+            'bits at the time that it was painted',
+            this,
+          )
+          ..addHint(
+            'A RenderObject that still has dirty compositing bits cannot be '
+            'painted because this indicates that the tree has not yet been '
+            'properly configured for creating the layer tree.\n'
+            'This usually indicates an error in the Flutter framework itself.'
+          )
         );
       }
       return true;
@@ -2717,20 +2745,28 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
-          'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
-          'coordinate with their children during layout and paint. For '
-          'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addError(
+            'A $runtimeType expected a child of type $ChildType but received a '
+            'child of type ${child.runtimeType}.'
+          )
+          ..addDescription(
+            'RenderObjects expect specific types of children because they '
+            'coordinate with their children during layout and paint. For '
+            'example, a RenderSliver cannot be the child of a RenderBox because '
+            'a RenderSliver does not understand the RenderBox layout protocol.',
+          )
+          ..addSeparator()
+          ..addProperty<dynamic>(
+            'The $runtimeType that expected a $ChildType child was created by',
+            debugCreator,
+          )
+          ..addSeparator()
+          ..addProperty<dynamic>(
+            'The ${child.runtimeType} that did not match the expected child type '
+            'was created by',
+            child.debugCreator,
+          )
         );
       }
       return true;
@@ -2846,20 +2882,24 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
-          'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
-          'coordinate with their children during layout and paint. For '
-          'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
+        throw FlutterError.from(FlutterErrorBuilder()
+          ..addError(
+            'A $runtimeType expected a child of type $ChildType but received a '
+            'child of type ${child.runtimeType}.'
+          )
+          ..addContract(
+            'RenderObjects expect specific types of children because they '
+            'coordinate with their children during layout and paint. For '
+            'example, a RenderSliver cannot be the child of a RenderBox because '
+            'a RenderSliver does not understand the RenderBox layout protocol.\n'
+          )
+          ..addProperty<dynamic>('The $runtimeType that expected a $ChildType child was created by', debugCreator)
+          ..addSeparator()
+          ..addProperty<dynamic>(
+            'The ${child.runtimeType} that did not match the expected child type '
+            'was created by',
+            child.debugCreator,
+          ),
         );
       }
       return true;
@@ -3085,6 +3125,55 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 }
 
+/// Variant of [FlutterErrorBuilder] with additional methods for describing
+/// rendering errors.
+///
+/// It it important to add basic parts to the error report using base
+/// class methods such as addError, addDescription, addHint, etc.
+///
+/// See also:
+///
+///  * [WidgetErrorBuilder], which provides additional methods for describing
+///    widget layer errors.
+class RenderErrorBuilder extends FlutterErrorBuilder {
+
+  /// Creates a [RenderErrorBuilder].
+  ///
+  /// See also:
+  ///
+  ///  * [RenderErrorBuilder.lazy], which should be used instead if computing
+  //     the error properties is expensive.
+  RenderErrorBuilder();
+
+  /// Creates a [RenderErrorBuilder] with its details computed only when needed.
+  ///
+  /// Use if computing the error details may throw an exception or is expensive
+  /// such as for the case of computing properties derived from walking the
+  /// current [StackTrace].
+  RenderErrorBuilder.lazy(ErrorBuilderCallback<RenderErrorBuilder> callback) : super.lazy(callback);
+
+  /// Adds layout constraints of the render object to the error report.
+  void addConstraintsProperty(String name, Constraints constraints) {
+    addProperty<Constraints>(
+      name,
+      constraints,
+      level: DiagnosticLevel.contract,
+      style: DiagnosticsTreeStyle.indentedSingleLine,
+    );
+  }
+
+  /// Adds a debug representation of a RenderObject, usually the one causing
+  /// the failure or contract violation to the error report.
+  void addRenderObject(
+      String name,
+      RenderObject renderObject, {
+        DiagnosticLevel level = DiagnosticLevel.info,
+        DiagnosticsTreeStyle style = DiagnosticsTreeStyle.shallow,
+      }) {
+    // TODO(jacobr): include the level in the output.
+    addDiagnostic(renderObject.toDiagnosticsNode(name: name, style: style));
+  }
+}
 /// Variant of [FlutterErrorDetails] with extra fields for the rendering
 /// library.
 class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
@@ -3100,13 +3189,17 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     InformationCollector informationCollector,
+    RenderErrorBuilder errorBuilder,
     bool silent = false
   }) : super(
     exception: exception,
     stack: stack,
     library: library,
     context: context,
+    // TODO(jacobr): should we add this?
+    // contextObject: renderObject,
     informationCollector: informationCollector,
+    errorBuilder: errorBuilder,
     silent: silent
   );
 

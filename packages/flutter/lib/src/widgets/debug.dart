@@ -5,6 +5,10 @@
 import 'dart:collection';
 import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs below
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
+import 'package:flutter/rendering.dart' show RenderErrorBuilder;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
@@ -107,6 +111,106 @@ Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   return null;
 }
 
+/// Variant of [FlutterErrorBuilder] with extra methods for describing widget
+/// errors.
+///
+/// It is important to add basic parts to the error report using base class
+/// methods such as addError, addDescription, addHint, etc.
+///
+/// If the error you want to report is from the rendering layer, consider using
+/// [RenderErrorBuilder] instead.
+/// See also:
+///
+///  * [RenderErrorBuilder], which should be used instead if the error you want
+///    to report only deals with the rendering layer.
+class WidgetErrorBuilder extends RenderErrorBuilder {
+  /// Creates a [WidgetErrorBuilder]
+  WidgetErrorBuilder();
+
+  /// Creates a [RenderErrorBuilder] with its details computed only when needed.
+  /// Use if computing the error details may throw an exception or is expensive.
+  WidgetErrorBuilder.lazy(ErrorBuilderCallback<WidgetErrorBuilder> callback) : super.lazy(callback);
+
+  /// Adds a description of a specific type of widget missing from the current
+  /// build context's ancestry tree.
+  ///
+  /// You can find an example of using this method in [debugCheckHasMaterial].
+  void describeMissingAncestor(
+    BuildContext context, {
+    @required Type expectedAncestorType,
+  }) {
+    final List<Element> ancestors = <Element>[];
+    context.visitAncestorElements((Element element) {
+      ancestors.add(element);
+      return true;
+    });
+
+    // TODO(jacobr): indicate this is the context on the error.
+    addDiagnostic(DiagnosticsProperty<Element>(
+      'The specific widget that could not find a $expectedAncestorType ancestor was',
+      context,
+      style: DiagnosticsTreeStyle.indentedSingleLine,
+    ));
+
+    if (ancestors.isNotEmpty) {
+      describeElements('The ancestors of this widget were', ancestors);
+    } else {
+      addDiagnostic(DiagnosticsNode.message(
+          'This widget is the root of the tree, so it has no '
+              'ancestors, let alone a "$expectedAncestorType" ancestor.'
+      ));
+    }
+  }
+
+  /// Adds a description of the specific widget the error is originated from
+  /// to the error report.
+  ///
+  /// The description will include the widget's type and its properties.
+  /// Technically this method logs the [Element] rather than just the [Widget]
+  /// so that GUI tools can jump to the exact location in the Element tree where
+  /// the widget was created.
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// WidgetErrorBuilder()
+  ///   ..addWidgetContext('The specific widget that could not find a Table ancestor was', context)
+  /// ```
+  /// {@end-tool}
+  /// {@tool sample}
+  void addWidgetContext(String name, BuildContext context) {
+    addDiagnostic(DiagnosticsProperty<Element>(name, context, style: DiagnosticsTreeStyle.indentedSingleLine));
+  }
+  
+  /// Adds a description of an [Element] from the current build context
+  /// to the error report.
+  void describeElement(String name, Element element, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine}) {
+    addDiagnostic(DiagnosticsProperty<Element>(name, element, style: style));
+  }
+
+  /// Adds a list of [Element]s from the current build context to the error report.
+  void describeElements(String name, Iterable<Element> elements) {
+    addDiagnostic(DiagnosticsBlock(
+      name: name,
+      children: elements.map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element)).toList(),
+      allowTruncate: true,
+    ));
+  }
+
+  /// Adds a description of a specific [Ticker] to the error report. 
+  void describeTicker(String name, Ticker ticker) {
+    // TODO(jacobr): this toString includes a StackTrace. create a TickerProperty DiagnosticsNode.
+    addDiagnostic(DiagnosticsProperty<Ticker>('The offending ticker was', ticker, description: ticker.toString(debugIncludeStack: true)));
+  }
+
+  /// Adds a description of the ownership chain from a specific [Element]
+  /// to the error report. It's useful for debugging the source of an element.
+  void describeOwnershipChain(String name, Element element) {
+    // XXX make this structured so clients can allow clicks on individual entries.
+    // For example, is this an iterable with arrows as the separators?
+    addDiagnostic(StringProperty(name, element.debugGetCreatorChain(10)));
+  }
+}
+
 /// Asserts if the given child list contains any duplicate non-null keys.
 ///
 /// To invoke this function, use the following pattern, typically in the
@@ -125,10 +229,11 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
-      throw FlutterError(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        '$parent has multiple children with key $nonUniqueKey.'
+      throw FlutterError.from(FlutterErrorBuilder()
+        ..addError('Duplicate keys found.')
+        ..addContract('If multiple keyed nodes exist as children of another node, they must have unique keys.')
+        // TODO(jacobr): expose both the parent and key as structured objects.
+        ..addViolation('$parent has multiple children with key $nonUniqueKey.')
       );
     }
     return true;
@@ -152,7 +257,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw FlutterError('Duplicate key found: $nonUniqueKey.');
+      throw FlutterError.from(FlutterErrorBuilder()..addErrorProperty('Duplicate key found', nonUniqueKey, style: DiagnosticsTreeStyle.singleLine));
     return true;
   }());
   return false;
@@ -174,13 +279,11 @@ bool debugCheckHasTable(BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
       final Element element = context;
-      throw FlutterError(
-        'No Table widget found.\n'
-        '${context.widget.runtimeType} widgets require a Table widget ancestor.\n'
-        'The specific widget that could not find a Table ancestor was:\n'
-        '  ${context.widget}\n'
-        'The ownership chain for the affected widget is:\n'
-        '  ${element.debugGetCreatorChain(10)}'
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('No Table widget found.')
+        ..addContract('${context.widget.runtimeType} widgets require a Table widget ancestor.')
+        ..addWidgetContext('The specific widget that could not find a Table ancestor was', context)
+        ..describeOwnershipChain('The ownership chain for the affected widget is', element)
       );
     }
     return true;
@@ -205,15 +308,15 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
       final Element element = context;
-      throw FlutterError(
-        'No MediaQuery widget found.\n'
-        '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.\n'
-        'The specific widget that could not find a MediaQuery ancestor was:\n'
-        '  ${context.widget}\n'
-        'The ownership chain for the affected widget is:\n'
-        '  ${element.debugGetCreatorChain(10)}\n'
-        'Typically, the MediaQuery widget is introduced by the MaterialApp or '
-        'WidgetsApp widget at the top of your application widget tree.'
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('No MediaQuery widget found.')
+        ..addViolation('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.')
+        ..addWidgetContext('The specific widget that could not find a MediaQuery ancestor was', context)
+        ..describeOwnershipChain('The ownership chain for the affected widget is', element)
+        ..addHint(
+          'Typically, the MediaQuery widget is introduced by the MaterialApp or '
+          'WidgetsApp widget at the top of your application widget tree.'
+        )
       );
     }
     return true;
@@ -238,19 +341,19 @@ bool debugCheckHasDirectionality(BuildContext context) {
   assert(() {
     if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
       final Element element = context;
-      throw FlutterError(
-        'No Directionality widget found.\n'
-        '${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'
-        'The specific widget that could not find a Directionality ancestor was:\n'
-        '  ${context.widget}\n'
-        'The ownership chain for the affected widget is:\n'
-        '  ${element.debugGetCreatorChain(10)}\n'
-        'Typically, the Directionality widget is introduced by the MaterialApp '
-        'or WidgetsApp widget at the top of your application widget tree. It '
-        'determines the ambient reading direction and is used, for example, to '
-        'determine how to lay out text, how to interpret "start" and "end" '
-        'values, and to resolve EdgeInsetsDirectional, '
-        'AlignmentDirectional, and other *Directional objects.'
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('No Directionality widget found.')
+        ..addContract('${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n')
+        ..addWidgetContext('The specific widget that could not find a Directionality ancestor was', context)
+        ..describeOwnershipChain('The ownership chain for the affected widget is', element)
+        ..addHint(
+          'Typically, the Directionality widget is introduced by the MaterialApp '
+          'or WidgetsApp widget at the top of your application widget tree. It '
+          'determines the ambient reading direction and is used, for example, to '
+          'determine how to lay out text, how to interpret "start" and "end" '
+          'values, and to resolve EdgeInsetsDirectional, '
+          'AlignmentDirectional, and other *Directional objects.'
+        )
       );
     }
     return true;
@@ -267,20 +370,23 @@ bool debugCheckHasDirectionality(BuildContext context) {
 void debugWidgetBuilderValue(Widget widget, Widget built) {
   assert(() {
     if (built == null) {
-      throw FlutterError(
-        'A build function returned null.\n'
-        'The offending widget is: $widget\n'
-        'Build functions must never return null. '
-        'To return an empty space that causes the building widget to fill available room, return "new Container()". '
-        'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
+      // XXX review how this message looks.
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('A build function returned null.')
+        ..addProperty('The offending widget is', widget)
+        ..addContract('Build functions must never return null.')
+        ..addHint('To return an empty space that causes the building widget to fill available room, return "new Container()".')
+        ..addHint('To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".')
       );
     }
     if (widget == built) {
-      throw FlutterError(
-        'A build function returned context.widget.\n'
-        'The offending widget is: $widget\n'
-        'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
-        'Doing so introduces a loop in the widget tree that can cause the app to crash.'
+      throw FlutterError.from(WidgetErrorBuilder()
+        ..addError('A build function returned context.widget.')
+        ..addProperty('The offending widget is', widget)
+        ..addContract(
+          'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
+          'Doing so introduces a loop in the widget tree that can cause the app to crash.'
+        )
       );
     }
     return true;
