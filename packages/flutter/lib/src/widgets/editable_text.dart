@@ -230,7 +230,16 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (minLines == null || maxLines == null) || (maxLines >= minLines),
+         'minLines must be less than or equal to maxLines if not null. Both default to 1.',
+       ),
        assert(expands != null),
+       assert(
+         !(expands == true && maxLines == 1),
+         'Cannot expand when maxLines is 1',
+       ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -362,6 +371,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy, even when empty.
   /// {@endtemplate}
+  // TODO(justinmc): document
   final int minLines;
 
   /// {@template flutter.widgets.editableText.expands}
@@ -554,6 +564,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(IntProperty('minLines', minLines, defaultValue: 1));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
@@ -1133,6 +1144,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
+              minLines: widget.minLines,
               expands: widget.expands,
               selectionColor: widget.selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
@@ -1200,6 +1212,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.hasFocus,
     this.maxLines,
+    this.minLines,
     this.expands,
     this.selectionColor,
     this.textScaleFactor,
@@ -1227,6 +1240,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
+  final int minLines;
   final bool expands;
   final Color selectionColor;
   final double textScaleFactor;
@@ -1253,6 +1267,7 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
+      minLines: minLines,
       expands: expands,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
@@ -1280,6 +1295,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines
+      ..minLines = minLines
       ..expands = expands
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor

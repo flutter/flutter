@@ -138,6 +138,7 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
+    int minLines = 1,
     bool expands = false,
     Color selectionColor,
     double textScaleFactor = 1.0,
@@ -156,6 +157,11 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (minLines == null || maxLines == null) || (maxLines >= minLines),
+         'minLines must be less than or equal to maxLines if not null. Both default to 1.',
+       ),
        assert(expands != null),
        assert(textScaleFactor != null),
        assert(offset != null),
@@ -175,6 +181,7 @@ class RenderEditable extends RenderBox {
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
+       _minLines = minLines,
        _expands = expands,
        _selectionColor = selectionColor,
        _selection = selection,
@@ -651,6 +658,18 @@ class RenderEditable extends RenderBox {
   set maxLines(int value) {
     assert(value == null || value > 0);
     if (maxLines == value)
+      return;
+    _maxLines = value;
+    markNeedsTextLayout();
+  }
+
+  // TODO(justinmc): document
+  int get minLines => _minLines;
+  int _minLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
+  set minLines(int value) {
+    assert(value == null || value > 0);
+    if (minLines == value)
       return;
     _maxLines = value;
     markNeedsTextLayout();
@@ -1487,6 +1506,7 @@ class RenderEditable extends RenderBox {
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
+    properties.add(IntProperty('minLines', minLines));
     properties.add(DiagnosticsProperty<bool>('expands', expands));
     properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
