@@ -172,6 +172,7 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
+    this.borderOnForeground = true,
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
@@ -233,6 +234,12 @@ class Material extends StatefulWidget {
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
   final ShapeBorder shape;
+
+  /// Whether to paint the [shape] border in front of the child.
+  ///
+  /// This defaults to true.
+  /// If false, the border will be painted behind the child.
+  final bool borderOnForeground;
 
   /// {@template flutter.widgets.Clip}
   /// The content will be clipped (or not) according to this option.
@@ -370,6 +377,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       curve: Curves.fastOutSlowIn,
       duration: widget.animationDuration,
       shape: shape,
+      borderOnForeground: widget.borderOnForeground,
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor,
@@ -617,6 +625,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
+    this.borderOnForeground = true,
     this.clipBehavior = Clip.none,
     @required this.elevation,
     @required this.color,
@@ -641,6 +650,12 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// This border will be painted, and in addition the outer path of the border
   /// determines the physical shape.
   final ShapeBorder shape;
+
+  /// Whether to paint the border in front of the child.
+  ///
+  /// This defaults to true.
+  /// If false, the border will be painted behind the child.
+  final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
@@ -689,6 +704,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       child: _ShapeBorderPaint(
         child: widget.child,
         shape: shape,
+        borderOnForeground: widget.borderOnForeground,
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
@@ -706,16 +722,19 @@ class _ShapeBorderPaint extends StatelessWidget {
   const _ShapeBorderPaint({
     @required this.child,
     @required this.shape,
+    this.borderOnForeground = true,
   });
 
   final Widget child;
   final ShapeBorder shape;
+  final bool borderOnForeground;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       child: child,
-      foregroundPainter: _ShapeBorderPainter(shape, Directionality.of(context)),
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.of(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.of(context)) : null,
     );
   }
 }

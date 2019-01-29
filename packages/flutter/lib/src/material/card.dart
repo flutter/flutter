@@ -72,6 +72,7 @@ class Card extends StatelessWidget {
     this.color,
     this.elevation,
     this.shape,
+    this.borderOnForeground = true,
     this.margin,
     this.clipBehavior,
     this.child,
@@ -104,6 +105,12 @@ class Card extends StatelessWidget {
   /// If that's null then the shape will be a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder shape;
+
+  /// Whether to paint the [shape] border in front of the child.
+  ///
+  /// This defaults to true.
+  /// If false, the border will be painted behind the child.
+  final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
   /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
@@ -155,6 +162,7 @@ class Card extends StatelessWidget {
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
+          borderOnForeground: borderOnForeground,
           clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? _defaultClipBehavior,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
