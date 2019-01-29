@@ -302,8 +302,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);
-    // This super call is safe since it will be bound to a mixed-in declaration.
-    super.hitTest(result, position); // ignore: abstract_super_member_reference
+    super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {
