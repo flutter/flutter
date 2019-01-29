@@ -2214,7 +2214,7 @@ class Tangent {
 /// valid until the next one is obtained.
 class PathMetrics extends collection.IterableBase<PathMetric> {
   PathMetrics._(Path path, bool forceClosed) :
-    _iterator = new PathMetricIterator._(new PathMetric._(path, forceClosed));
+    _iterator = new PathMetricIterator._(new _PathMeasure(path, forceClosed));
 
   final Iterator<PathMetric> _iterator;
 
@@ -2224,22 +2224,25 @@ class PathMetrics extends collection.IterableBase<PathMetric> {
 
 /// Tracks iteration from one segment of a path to the next for measurement.
 class PathMetricIterator implements Iterator<PathMetric> {
-  PathMetricIterator._(this._pathMetric);
+  PathMetricIterator._(this._pathMeasure) : assert(_pathMeasure != null);
 
   PathMetric _pathMetric;
-  bool _firstTime = true;
+  _PathMeasure _pathMeasure;
 
   @override
-  PathMetric get current => _firstTime ? null : _pathMetric;
+  PathMetric get current => _pathMetric;
 
   @override
   bool moveNext() {
     // PathMetric isn't a normal iterable - it's already initialized to its
     // first Path.  Should only call _moveNext when done with the first one.
-    if (_firstTime == true) {
-      _firstTime = false;
+    if (_pathMeasure.currentContourIndex == -1) {
+      _pathMeasure.currentContourIndex++;
+      _pathMetric = PathMetric._(_pathMeasure);
       return true;
-    } else if (_pathMetric?._moveNext() == true) {
+    }
+    if (_pathMeasure._nextContour()) {
+      _pathMetric = PathMetric._(_pathMeasure);
       return true;
     }
     _pathMetric = null;
@@ -2252,16 +2255,46 @@ class PathMetricIterator implements Iterator<PathMetric> {
 /// Iterate over the object returned by [Path.computeMetrics] to obtain
 /// [PathMetric] objects.
 ///
-/// Once created, metrics will only be valid while the iterator is at the given
-/// contour. When the next contour's [PathMetric] is obtained, this object
-/// becomes invalid.
-class PathMetric extends NativeFieldWrapperClass2 {
-  /// Create a new empty [Path] object.
-  PathMetric._(Path path, bool forceClosed) { _constructor(path, forceClosed); }
-  void _constructor(Path path, bool forceClosed) native 'PathMeasure_constructor';
+/// Once created, the methods on this class will only be valid while the
+/// iterator is at the contour for which they were created. When the next
+/// contour's [PathMetric] is obtained, the [length] and [isClosed] properties
+/// remain valid, but the [getTangentForOffset] and [extractPath] will throw a
+/// [StateError].
+// TODO(dnfield): Fix this if/when https://bugs.chromium.org/p/skia/issues/detail?id=8721 lands.
+class PathMetric {
+  PathMetric._(this._measure)
+    : assert(_measure != null),
+      length = _measure.length,
+      isClosed = _measure.isClosed,
+      contourIndex = _measure.currentContourIndex;
 
   /// Return the total length of the current contour.
-  double get length native 'PathMeasure_getLength';
+  final double length;
+
+  /// Whether the contour is closed.
+  ///
+  /// Returns true if the contour ends with a call to [Path.close] (which may
+  /// have been implied when using [Path.addRect]) or if `forceClosed` was
+  /// specified as true in the call to [Path.computeMetrics].  Returns false
+  /// otherwise.
+  final bool isClosed;
+
+  /// The zero-based index of the contour.
+  ///
+  /// [Path] objects are made up of zero or more contours. The first contour is
+  /// created once a drawing command (e.g. [Path.lineTo]) is issued. A
+  /// [Path.moveTo] command after a drawing command may create a new contour,
+  /// although it may not if optimizations are applied that determine the move
+  /// command did not actually result in moving the pen.
+  ///
+  /// This property is only valid with reference to its original iterator. If
+  /// [getTangetForOffset] or [extractPath] are called when this property does
+  /// not match the actual count of the iterator, those methods will throw a
+  /// [StateError].
+  final int contourIndex;
+
+  final _PathMeasure _measure;
+
 
   /// Computes the position of hte current contour at the given offset, and the
   /// angle of the path at that point.
@@ -2273,6 +2306,38 @@ class PathMetric extends NativeFieldWrapperClass2 {
   /// Returns null if the contour has zero [length].
   ///
   /// The distance is clamped to the [length] of the current contour.
+  Tangent getTangentForOffset(double distance) {
+    if (contourIndex != _measure.currentContourIndex) {
+      throw StateError('This method cannot be invoked once the underlying iterator has advanced.');
+    }
+    return _measure.getTangentForOffset(distance);
+  }
+
+  /// Given a start and stop distance, return the intervening segment(s).
+  ///
+  /// `start` and `end` are pinned to legal values (0..[length])
+  /// Returns null if the segment is 0 length or `start` > `stop`.
+  /// Begin the segment with a moveTo if `startWithMoveTo` is true.
+  Path extractPath(double start, double end, {bool startWithMoveTo: true}) {
+    if (contourIndex != _measure.currentContourIndex) {
+      throw StateError('This method cannot be invoked once the underlying iterator has advanced.');
+    }
+    return _measure.extractPath(start, end, startWithMoveTo: startWithMoveTo);
+  }
+
+  @override
+  String toString() => '$runtimeType{length: $length, isClosed: $isClosed, contourIndex:$contourIndex}';
+}
+
+class _PathMeasure extends NativeFieldWrapperClass2 {
+  _PathMeasure(Path path, bool forceClosed) {
+    currentContourIndex = -1; // PathMetricIterator will increment this the first time.
+    _constructor(path, forceClosed);
+  }
+  void _constructor(Path path, bool forceClosed) native 'PathMeasure_constructor';
+
+  double get length native 'PathMeasure_getLength';
+
   Tangent getTangentForOffset(double distance) {
     final Float32List posTan = _getPosTan(distance);
     // first entry == 0 indicates that Skia returned false
@@ -2287,19 +2352,8 @@ class PathMetric extends NativeFieldWrapperClass2 {
   }
   Float32List _getPosTan(double distance) native 'PathMeasure_getPosTan';
 
-  /// Given a start and stop distance, return the intervening segment(s).
-  ///
-  /// `start` and `end` are pinned to legal values (0..[length])
-  /// Returns null if the segment is 0 length or `start` > `stop`.
-  /// Begin the segment with a moveTo if `startWithMoveTo` is true.
   Path extractPath(double start, double end, {bool startWithMoveTo: true}) native 'PathMeasure_getSegment';
 
-  /// Whether the contour is closed.
-  ///
-  /// Returns true if the contour ends with a call to [Path.close] (which may
-  /// have been implied when using [Path.addRect]) or if `forceClosed` was
-  /// specified as true in the call to [Path.computeMetrics].  Returns false
-  /// otherwise.
   bool get isClosed native 'PathMeasure_isClosed';
 
   // Move to the next contour in the path.
@@ -2312,7 +2366,16 @@ class PathMetric extends NativeFieldWrapperClass2 {
   // [Iterator.current]. In this case, the [PathMetric] is valid before
   // calling `_moveNext` - `_moveNext` should be called after the first
   // iteration is done instead of before.
-  bool _moveNext() native 'PathMeasure_nextContour';
+  bool _nextContour() {
+    final bool next = _nativeNextContour();
+    if (next) {
+      currentContourIndex++;
+    }
+    return next;
+  }
+  bool _nativeNextContour() native 'PathMeasure_nextContour';
+
+  int currentContourIndex;
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
