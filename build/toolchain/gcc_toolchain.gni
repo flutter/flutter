@@ -5,6 +5,8 @@
 # This value will be inherited in the toolchain below.
 concurrent_links = exec_script("get_concurrent_links.py", [], "value")
 
+import("//build/toolchain/clang.gni")
+
 # This template defines a toolchain for something that works like gcc
 # (including clang).
 #
@@ -93,9 +95,14 @@ template("gcc_toolchain") {
     lib_switch = "-l"
     lib_dir_switch = "-L"
 
+    coverage_flags = ""
+    if (enable_coverage) {
+      coverage_flags = "-fprofile-instr-generate -fcoverage-mapping"
+    }
+
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
@@ -105,7 +112,7 @@ template("gcc_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}  $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
@@ -116,7 +123,7 @@ template("gcc_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -147,7 +154,7 @@ template("gcc_toolchain") {
       # existing .TOC file, overwrite it, otherwise, don't change it.
       tocfile = sofile + ".TOC"
       temporary_tocname = sofile + ".tmp"
-      link_command = "$ld -shared {{ldflags}} -o $sofile -Wl,--build-id -Wl,-soname=$soname @$rspfile"
+      link_command = "$ld -shared {{ldflags}} $coverage_flags -o $sofile -Wl,--build-id -Wl,-soname=$soname @$rspfile"
       toc_command = "{ $readelf -d $sofile | grep SONAME ; $nm -gD -f p $sofile | cut -f1-2 -d' '; } > $temporary_tocname"
       replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
 
@@ -197,7 +204,7 @@ template("gcc_toolchain") {
         unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
       }
 
-      command = "$ld {{ldflags}} -o $unstripped_outfile -Wl,--build-id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group $libs_section_prefix {{libs}} $libs_section_postfix"
+      command = "$ld {{ldflags}} $coverage_flags -o $unstripped_outfile -Wl,--build-id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group $libs_section_prefix {{libs}} $libs_section_postfix"
       if (defined(invoker.strip)) {
         strip = invoker.strip
         strip_command =
