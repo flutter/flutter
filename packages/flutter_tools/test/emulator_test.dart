@@ -203,8 +203,8 @@ class MockProcessManager extends Mock implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding,
-    Encoding stderrEncoding
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding
   }) {
     final String program = command[0];
     final List<String> args = command.sublist(1);
