@@ -155,22 +155,69 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    const Offset offset = Offset(400.0, 50.0);
+
+    TestGesture gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pumpAndSettle();
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+    ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
 
@@ -181,16 +228,52 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
-
+    const Offset offset = Offset(400.0, 50.0);
+    TestGesture gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
     // Initiate a quick tap.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.0, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(
+      const PointerMoveEvent(
+        pointer: pointerValue,
+        position: Offset(0.0, 0.0),
+        pressure: 0.0,
+        pressureMin: 0,
+        pressureMax: 1
+      )
+    );
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
 
     // Initiate a force tap.
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(
+      pointer: pointerValue,
+      position: Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
     expect(forcePressStartCount, 1);
 
     await tester.pump(const Duration(milliseconds: 50));
