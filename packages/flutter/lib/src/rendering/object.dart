@@ -410,7 +410,6 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the path is clipped.
-  // ignore: deprecated_member_use
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
@@ -435,7 +434,6 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the rounded rectangle is clipped.
-  // ignore: deprecated_member_use
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
