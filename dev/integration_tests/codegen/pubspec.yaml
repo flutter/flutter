@@ -1,4 +1,4 @@
-name: external_ui
+name: codegen
 description: A test of Flutter integrating external UIs.
 
 environment:

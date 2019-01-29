@@ -414,7 +414,7 @@ class ResidentCompiler {
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
-    if (request.packagesFilePath != null) {
+    if (request.packagesFilePath != null || _packagesPath != null) {
       packageUriMapper = PackageUriMapper(
         request.mainPath,
         request.packagesFilePath ?? _packagesPath,
