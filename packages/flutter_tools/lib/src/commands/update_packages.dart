@@ -903,7 +903,8 @@ class PubspecDependency extends PubspecLine {
     DependencyKind kind,
     this.version,
     this.sourcePath,
-  }) : _kind = kind, super(line);
+  }) : _kind = kind,
+       super(line);
 
   static PubspecDependency parse(String line, { @required String filename }) {
     // We recognize any line that:

@@ -477,7 +477,7 @@ class PassingValidator extends DoctorValidator {
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator(): super('Missing Validator');
+  MissingValidator() : super('Missing Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -490,7 +490,7 @@ class MissingValidator extends DoctorValidator {
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator(): super('Not Available Validator');
+  NotAvailableValidator() : super('Not Available Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -622,7 +622,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name): super(name);
+  MissingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -633,7 +633,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name): super(name);
+  PartialGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -702,7 +702,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-      : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);

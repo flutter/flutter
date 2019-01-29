@@ -19,8 +19,8 @@ class ImageInfo {
   ///
   /// Both the image and the scale must not be null.
   const ImageInfo({ @required this.image, this.scale = 1.0 })
-      : assert(image != null),
-        assert(scale != null);
+    : assert(image != null),
+      assert(scale != null);
 
   /// The raw image pixels.
   ///
@@ -371,7 +371,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
-    : assert(image != null) {
+      : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: 'resolving a single-frame image stream',
