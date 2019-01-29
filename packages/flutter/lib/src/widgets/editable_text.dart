@@ -230,6 +230,7 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines != null),
        assert(minLines == null || minLines > 0),
        assert(
          (minLines == null || maxLines == null) || (maxLines >= minLines),
@@ -369,9 +370,11 @@ class EditableText extends StatefulWidget {
   final int maxLines;
 
   /// {@template flutter.widgets.editableText.minLines}
-  /// The minimum number of lines to occupy, even when empty.
+  /// The minimum number of lines to occupy when the content spans fewer lines.
+  ///
+  /// Unlike [maxLines], this cannot be null.
   /// {@endtemplate}
-  // TODO(justinmc): document
+  // TODO(justinmc): improve documentation
   final int minLines;
 
   /// {@template flutter.widgets.editableText.expands}

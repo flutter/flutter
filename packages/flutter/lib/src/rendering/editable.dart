@@ -157,12 +157,17 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines != null),
        assert(minLines == null || minLines > 0),
        assert(
          (minLines == null || maxLines == null) || (maxLines >= minLines),
          'minLines must be less than or equal to maxLines if not null. Both default to 1.',
        ),
        assert(expands != null),
+       assert(
+         !(expands == true && maxLines == 1),
+         'Cannot expand when maxLines is 1',
+       ),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),

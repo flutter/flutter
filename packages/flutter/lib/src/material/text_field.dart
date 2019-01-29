@@ -157,12 +157,17 @@ class TextField extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines != null),
        assert(minLines == null || minLines > 0),
        assert(
          (minLines == null || maxLines == null) || (maxLines >= minLines),
          'minLines must be less than or equal to maxLines if not null. Both default to 1.',
        ),
        assert(expands != null),
+       assert(
+         !(expands == true && maxLines == 1),
+         'Cannot expand when maxLines is 1',
+       ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
