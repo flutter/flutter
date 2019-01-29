@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
-/// [StrutStyle] defines the strut, which defines the minimum height a line can be
+/// Defines the strut, which sets the minimum height a line can be
 /// relative to the baseline. Strut applies to all lines in the pararaph.
 ///
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
@@ -55,38 +55,38 @@ import 'basic_types.dart';
 ///
 /// Omitted or null properties will take the default values specified below:
 ///
-///  * [fontFamily] the name of the font to use when calcualting the strut (e.g., Roboto).
+///  * [fontFamily]: the name of the font to use when calcualting the strut (e.g., Roboto).
 ///    No glyphs from the font will be drawn and the font will be used purely for metrics.
 ///
-///  * [fontFamilyFallback] an ordered list of font family names that will be searched for when
+///  * [fontFamilyFallback]: an ordered list of font family names that will be searched for when
 ///    the font in [fontFamily] cannot be found. When all specified font families have been
 ///    exhausted an no match was found, the default platform font will be used.
 ///
-///  * [fontSize] the size of the ascent plus descent in logical pixels. This is also
+///  * [fontSize]: the size of the ascent plus descent in logical pixels. This is also
 ///    used as the basis of the custom leading caluclation. This value cannot
 ///    be negative.
-///    Default is `14` logical pixels.
+///    Default is 14 logical pixels.
 ///
-///  * [height] the multiple of [fontSize] to multiply the ascent and descent by.
+///  * [height]: the multiple of [fontSize] to multiply the ascent and descent by.
 ///    The [height] will impact the spacing above and below the baseline differently
 ///    depending on the ratios between the font's ascent and descent. This property is
 ///    separate from the leading multiplier, which is controlled through [leading].
-///    Default is `1.0`.
+///    Default is 1.0.
 ///
-///  * [leading] the custom leading to apply to the strut as a multiple of [fontSize].
+///  * [leading]: the custom leading to apply to the strut as a multiple of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added
 ///    to the top and the other half to the bottom of the line height. This differs
 ///    from [height] since the spacing is equally distributed above and below the
 ///    baseline.
 ///    Default is `null`, which will use the font-specified leading.
 ///
-///  * [fontWeight] the typeface thickness to use when calculating the strut (e.g., bold).
-///    Default is `w400`.
+///  * [fontWeight]: the typeface thickness to use when calculating the strut (e.g., bold).
+///    Default is [FontWeight.w400].
 ///
-///  * [fontStyle] the typeface variant to use when calculating the strut (e.g., italic).
-///    Default is `normal`.
+///  * [fontStyle]: the typeface variant to use when calculating the strut (e.g., italic).
+///    Default is [FontStyle.normal].
 ///
-///  * [forceStrutHeight] when true, all lines will be laid out with the height of the
+///  * [forceStrutHeight]: when true, all lines will be laid out with the height of the
 ///    strut. All line and run-specific metrics will be ignored/overridden and only strut
 ///    metrics will be used instead. This property guarantees uniform line spacing, however
 ///    text in adjacent lines may overlap. This property should be enabled with caution as
@@ -331,7 +331,7 @@ class StrutStyle extends Diagnosticable {
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size. [fontSize] must be a positive value.
   ///
-  /// The default fontSize is `14` logical pixels.
+  /// The default fontSize is 14 logical pixels.
   final double fontSize;
 
   /// The multiple of [fontSize] to multiply the ascent and descent by where `ascent + descent = fontSize`.
@@ -342,17 +342,17 @@ class StrutStyle extends Diagnosticable {
   /// depending on the ratios between the font's ascent and descent. This property is
   /// separate from the leading multiplier, which is controlled through [leading].
   ///
-  /// The default height is `1.0`.
+  /// The default height is 1.0.
   final double height;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
-  /// The default fontWeight is `w400`.
+  /// The default fontWeight is [FontWeight.w400].
   final FontWeight fontWeight;
 
   /// The typeface variant to use when calculating the strut (e.g., italics).
   ///
-  /// The default fontStyle is `normal`.
+  /// The default fontStyle is [FontStyle.normal].
   final FontStyle fontStyle;
 
   /// The custom leading to apply to the strut as a multiple of [fontSize].
@@ -362,7 +362,7 @@ class StrutStyle extends Diagnosticable {
   /// from [height] since the spacing is equally distributed above and below the
   /// baseline.
   ///
-  /// The default leading is `null`, which will use the font-specified leading.
+  /// The default leading is null, which will use the font-specified leading.
   final double leading;
 
   /// Whether the strut height should be forced.
@@ -375,7 +375,7 @@ class StrutStyle extends Diagnosticable {
   /// This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
   ///
-  /// The default is `false`.
+  /// The default is false.
   final bool forceStrutHeight;
 
   /// A human-readable description of this strut style.
