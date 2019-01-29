@@ -38,7 +38,9 @@ void main() {
   for (String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
-      environment: <String, String>{},
+      environment: <String, String>{
+        'DEPOT_TOOLS': path.join('D:', 'depot_tools'),
+      },
     );
     group('ProcessRunner for $platform', () {
       test('Returns stdout', () async {
@@ -256,12 +258,15 @@ void main() {
 }
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
+        final String gsutilCall = platform.isWindows
+            ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+            : 'gsutil.py';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'gsutil.py -- rm $gsArchivePath': null,
-          'gsutil.py -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          'gsutil.py -- cp $gsJsonPath $jsonPath': null,
-          'gsutil.py -- rm $gsJsonPath': null,
-          'gsutil.py -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
