@@ -136,6 +136,7 @@ void main() {
         when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
+        mockKernelCompilerFactory = MockKernelCompilerFactory();
         when(mockKernelCompilerFactory.create()).thenAnswer((Invocation invocation) async {
           return mockKernelCompiler;
         });
