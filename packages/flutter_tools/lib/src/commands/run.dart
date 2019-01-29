@@ -341,7 +341,7 @@ class RunCommand extends RunCommandBase {
 
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment] != null) {
+        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
 
@@ -353,7 +353,7 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
-	experimentalFlags: expFlags,
+        experimentalFlags: expFlags,
       );
     }).toList();
 
