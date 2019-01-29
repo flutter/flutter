@@ -268,8 +268,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    profile(() {
       registerSignalServiceExtension(
         name: 'debugDumpApp',
         callback: () {
@@ -294,11 +293,14 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         name: 'didSendFirstFrameEvent',
         callback: (_) async {
           return <String, dynamic>{
+            // This is defined to return a STRING, not a boolean.
+            // Devtools, the Intellij plugin, and the flutter tool all depend
+            // on it returning a string and not a boolean.
             'enabled': _needToReportFirstFrame ? 'false' : 'true'
           };
         },
       );
-    }
+    });
 
     assert(() {
       registerBoolServiceExtension(
@@ -540,22 +542,25 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   /// Whether the first frame has finished rendering.
   ///
-  /// Only valid in profile and debug builds, it can't be used in release
-  /// builds.
-  /// It can be deferred using [deferFirstFrameReport] and
-  /// [allowFirstFrameReport].
-  /// The value is set at the end of the call to [drawFrame].
+  /// Only useful in profile and debug builds; in release builds, this always
+  /// return false. This can be deferred using [deferFirstFrameReport] and
+  /// [allowFirstFrameReport]. The value is set at the end of the call to
+  /// [drawFrame].
+  ///
+  /// This value can also be obtained over the VM service protocol as
+  /// `ext.flutter.didSendFirstFrameEvent`.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to report the first frame.
-  //
-  // TODO(ianh): This method should only be available in debug and profile modes.
+  /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
+  /// during startup as the "first frame".
   void deferFirstFrameReport() {
-    assert(_deferFirstFrameReportCount >= 0);
-    _deferFirstFrameReportCount += 1;
+    profile(() {
+      assert(_deferFirstFrameReportCount >= 0);
+      _deferFirstFrameReportCount += 1;
+    });
   }
 
   /// When called after [deferFirstFrameReport]: tell the framework to report
@@ -564,12 +569,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This method may only be called once for each corresponding call
   /// to [deferFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to report the first frame.
-  //
-  // TODO(ianh): This method should only be available in debug and profile modes.
+  /// This is used by [WidgetsApp] to report when the first useful frame is
+  /// painted.
   void allowFirstFrameReport() {
-    assert(_deferFirstFrameReportCount >= 1);
-    _deferFirstFrameReportCount -= 1;
+    profile(() {
+      assert(_deferFirstFrameReportCount >= 1);
+      _deferFirstFrameReportCount -= 1;
+    });
   }
 
   void _handleBuildScheduled() {
@@ -691,13 +697,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         return true;
       }());
     }
-    // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
-    // See https://github.com/dart-lang/sdk/issues/27192
-    if (_needToReportFirstFrame && _reportFirstFrame) {
-      developer.Timeline.instantSync('Widgets completed first useful frame');
-      developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-      _needToReportFirstFrame = false;
-    }
+    profile(() {
+      if (_needToReportFirstFrame && _reportFirstFrame) {
+        developer.Timeline.instantSync('Widgets completed first useful frame');
+        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+        _needToReportFirstFrame = false;
+      }
+    });
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the

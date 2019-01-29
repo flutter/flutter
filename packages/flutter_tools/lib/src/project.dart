@@ -31,9 +31,9 @@ import 'template.dart';
 class FlutterProject {
   @visibleForTesting
   FlutterProject(this.directory, this.manifest, this._exampleManifest)
-      : assert(directory != null),
-        assert(manifest != null),
-        assert(_exampleManifest != null);
+    : assert(directory != null),
+      assert(manifest != null),
+      assert(_exampleManifest != null);
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -102,6 +102,9 @@ class FlutterProject {
 
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
+
+  /// The `.dart-tool` directory of this project.
+  Directory get dartTool => directory.childDirectory('.dart_tool');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(

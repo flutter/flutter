@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -2851,6 +2852,74 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
 ///
+/// {@tool sample}
+///
+/// Using a [Stack] you can position widgets over one another.
+///
+/// ```dart
+/// Stack(
+///   children: <Widget>[
+///     Container(
+///       width: 100,
+///       height: 100,
+///       color: Colors.red,
+///     ),
+///     Container(
+///       width: 90,
+///       height: 90,
+///       color: Colors.green,
+///     ),
+///     Container(
+///       width: 80,
+///       height: 80,
+///       color: Colors.blue,
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+///
+/// This example shows how [Stack] can be used to enhance text visibility
+/// by adding gradient backdrops.
+///
+/// ```dart
+/// SizedBox(
+///   width: 250,
+///   height: 250,
+///   child: Stack(
+///     children: <Widget>[
+///       Container(
+///         width: 250,
+///         height: 250,
+///         color: Colors.white,
+///       ),
+///       Container(
+///         padding: EdgeInsets.all(5.0),
+///         alignment: Alignment.bottomCenter,
+///         decoration: BoxDecoration(
+///           gradient: LinearGradient(
+///             begin: Alignment.topCenter,
+///             end: Alignment.bottomCenter,
+///             colors: <Color>[
+///               Colors.black.withAlpha(0),
+///               Colors.black12,
+///               Colors.black45
+///             ],
+///           ),
+///         ),
+///         child: Text(
+///           "Foreground Text",
+///           style: TextStyle(color: Colors.white, fontSize: 20.0),
+///         ),
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
@@ -4934,6 +5003,80 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
+///
+/// {@tool snippet --template=stateful_widget}
+/// This example makes a [Container] react to being entered by a mouse
+/// pointer, showing a count of the number of entries and exits.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+///
+/// ```dart
+/// int _enterCounter = 0;
+/// int _exitCounter = 0;
+/// double x = 0.0;
+/// double y = 0.0;
+///
+/// void _incrementCounter(PointerEnterEvent details) {
+///   setState(() {
+///     _enterCounter++;
+///   });
+/// }
+///
+/// void _decrementCounter(PointerExitEvent details) {
+///   setState(() {
+///     _exitCounter++;
+///   });
+/// }
+///
+/// void _updateLocation(PointerHoverEvent details) {
+///   setState(() {
+///     x = details.position.dx;
+///     y = details.position.dy;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Hover Example'),
+///     ),
+///     body: Center(
+///       child: ConstrainedBox(
+///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///         child: Listener(
+///           onPointerEnter: _incrementCounter,
+///           onPointerHover: _updateLocation,
+///           onPointerExit: _decrementCounter,
+///           child: Container(
+///             color: Colors.lightBlueAccent,
+///             child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 Text('You have pointed at this box this many times:'),
+///                 Text(
+///                   '$_enterCounter Entries\n$_exitCounter Exits',
+///                   style: Theme.of(context).textTheme.display1,
+///                 ),
+///                 Text(
+///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [MouseTracker] an object that tracks mouse locations in the [GestureBinding].
 class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
@@ -4942,6 +5085,9 @@ class Listener extends SingleChildRenderObjectWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
+    this.onPointerEnter,
+    this.onPointerExit,
+    this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
     this.behavior = HitTestBehavior.deferToChild,
@@ -4949,16 +5095,47 @@ class Listener extends SingleChildRenderObjectWidget {
   }) : assert(behavior != null),
        super(key: key, child: child);
 
-  /// Called when a pointer comes into contact with the screen at this object.
+  /// Called when a pointer comes into contact with the screen (for touch
+  /// pointers), or has its button pressed (for mouse pointers) at this widget's
+  /// location.
   final PointerDownEventListener onPointerDown;
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in contact with the screen.
+  /// Called when a pointer enters the region for this widget.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer enters
+  /// the region defined by this widget, or when the widget appears under the
+  /// pointer.
+  final PointerEnterEventListener onPointerEnter;
+
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  final PointerHoverEventListener onPointerHover;
+
+  /// Called when a pointer leaves the region for this widget.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget, or when the widget disappears from
+  /// under the pointer.
+  final PointerExitEventListener onPointerExit;
+
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
   final PointerUpEventListener onPointerUp;
 
-  /// Called when the input from a pointer that triggered an [onPointerDown] is no longer directed towards this receiver.
+  /// Called when the input from a pointer that triggered an [onPointerDown] is
+  /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
   /// How to behave during hit testing.
@@ -4969,6 +5146,9 @@ class Listener extends SingleChildRenderObjectWidget {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
+      onPointerEnter: onPointerEnter,
+      onPointerHover: onPointerHover,
+      onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
       behavior: behavior
@@ -4980,6 +5160,9 @@ class Listener extends SingleChildRenderObjectWidget {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
+      ..onPointerEnter = onPointerEnter
+      ..onPointerHover = onPointerHover
+      ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
       ..behavior = behavior;
@@ -4993,6 +5176,12 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
+    if (onPointerEnter != null)
+      listeners.add('enter');
+    if (onPointerExit != null)
+      listeners.add('exit');
+    if (onPointerHover != null)
+      listeners.add('hover');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)
@@ -5653,7 +5842,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
     this.excluding = true,
     Widget child,
   }) : assert(excluding != null),
-        super(key: key, child: child);
+       super(key: key, child: child);
 
   /// Whether this widget is excluded in the semantics tree.
   final bool excluding;

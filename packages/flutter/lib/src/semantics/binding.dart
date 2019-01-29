@@ -50,7 +50,7 @@ mixin SemanticsBinding on BindingBase {
     bool value = _accessibilityFeatures.disableAnimations;
     assert(() {
       if (debugSemanticsDisableAnimations != null)
-          value = debugSemanticsDisableAnimations;
+        value = debugSemanticsDisableAnimations;
       return true;
     }());
     return value;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -18,6 +17,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -88,15 +88,13 @@ class AndroidDevice extends Device {
           propCommand,
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
-        ).timeout(const Duration(seconds: 5));
+        );
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
           printError('Error retrieving device properties for $name:');
           printError(result.stderr);
         }
-      } on TimeoutException catch (_) {
-        throwToolExit('adb not responding');
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
       }
@@ -174,7 +172,7 @@ class AndroidDevice extends Device {
       if (majorVersion == 1 && minorVersion > 0) {
         return true;
       }
-      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 32) {
+      if (majorVersion == 1 && minorVersion == 0 && patchVersion >= 39) {
         return true;
       }
       return false;
@@ -192,7 +190,7 @@ class AndroidDevice extends Device {
       final RunResult adbVersion = await runCheckedAsync(<String>[getAdbPath(androidSdk), 'version']);
       if (_isValidAdbVersion(adbVersion.stdout))
         return true;
-      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
+      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
     } catch (error, trace) {
       printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -279,7 +277,7 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', timeout: kSlowOperation);
     final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -430,6 +428,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
     if (debuggingOptions.traceSkia)
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
+    if (debuggingOptions.traceSystrace)
+      cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
@@ -678,12 +678,14 @@ class _AdbLogReader extends DeviceLogReader {
     final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
     final String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
-        _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
+      _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
-        _timeOrigin = null;
+      _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
-      const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
+      // We expect logcat streams to occasionally contain invalid utf-8,
+      // see: https://github.com/flutter/flutter/pull/8864.
+      const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

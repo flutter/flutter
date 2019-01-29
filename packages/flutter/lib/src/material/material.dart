@@ -600,7 +600,7 @@ class ShapeBorderTween extends Tween<ShapeBorder> {
   ///
   /// the [begin] and [end] properties may be null; see [ShapeBorder.lerp] for
   /// the null handling semantics.
-  ShapeBorderTween({ShapeBorder begin, ShapeBorder end}): super(begin: begin, end: end);
+  ShapeBorderTween({ShapeBorder begin, ShapeBorder end}) : super(begin: begin, end: end);
 
   /// Returns the value this tween has at the given animation clock value.
   @override

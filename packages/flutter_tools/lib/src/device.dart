@@ -156,7 +156,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
-          printTrace('Device poll timed out.');
+          printTrace('Device poll timed out. Will retry.');
         }
       }, _pollingInterval);
     }
@@ -356,18 +356,20 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
+    this.traceSystrace = false,
     this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo) :
-    debuggingEnabled = false,
-    useTestFonts = false,
-    startPaused = false,
-    enableSoftwareRendering = false,
-    skiaDeterministicRendering = false,
-    traceSkia = false,
-    observatoryPort = null;
+  DebuggingOptions.disabled(this.buildInfo)
+    : debuggingEnabled = false,
+      useTestFonts = false,
+      startPaused = false,
+      enableSoftwareRendering = false,
+      skiaDeterministicRendering = false,
+      traceSkia = false,
+      traceSystrace = false,
+      observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -376,6 +378,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final bool traceSystrace;
   final bool useTestFonts;
   final int observatoryPort;
 
@@ -384,7 +387,9 @@ class DebuggingOptions {
 
 class LaunchResult {
   LaunchResult.succeeded({ this.observatoryUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null;
+  LaunchResult.failed()
+    : started = false,
+      observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 

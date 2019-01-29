@@ -124,7 +124,7 @@ class RaisedButton extends MaterialButton {
     @required Widget label,
   }) = _RaisedButtonWithIcon;
 
- @override
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);

@@ -303,11 +303,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Offset localToGlobal(Offset point) => point;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result, {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     assert(source == TestBindingEventSource.test);
-    super.dispatchEvent(event, result);
+    super.dispatchEvent(event, hitTestResult);
   }
 
   /// A stub for the system's onscreen keyboard. Callers must set the
@@ -720,7 +720,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 1000),
+    Duration additionalTime = const Duration(milliseconds: 250),
   }) {
     assert(additionalTime != null);
     assert(() {
@@ -985,7 +985,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is intended to be used by benchmarks (hence the name) that drive the
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
-  /// directly (invoking [Window.onBeginFrame] and [Window.onDrawFrame]) to run.
+  /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
+  /// [Window.onBeginFrame] and [Window.onDrawFrame]).
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
@@ -1143,8 +1144,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame.complete(); // unlocks the test API
       _pendingFrame = null;
       _expectingFrame = false;
-    } else {
-      assert(framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark);
+    } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
       ui.window.scheduleFrame();
     }
   }
@@ -1177,7 +1177,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   HitTestDispatcher deviceEventDispatcher;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result, {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     switch (source) {
@@ -1191,11 +1191,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             renderView._pointers[event.pointer].decay = _kPointerDecay;
         }
         _handleViewNeedsPaint();
-        super.dispatchEvent(event, result, source: source);
+        super.dispatchEvent(event, hitTestResult, source: source);
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null)
-          deviceEventDispatcher.dispatchEvent(event, result);
+          deviceEventDispatcher.dispatchEvent(event, hitTestResult);
         break;
     }
   }
