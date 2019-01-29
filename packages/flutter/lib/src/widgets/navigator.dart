@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -734,11 +733,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@template flutter.widgets.navigator.pushNamed.arguments}
   /// The provided `arguments` are passed to the pushed route via
-  /// [RouteSettings.arguments]. They are key-value pairs, keyed by [Type], with
-  /// values matching the [Type]. For example, a key may be `MyArgumentsObject`,
-  /// with a value corresponding to an instance of `MyArgumentsObject`.
-  ///
-  /// The `arguments` parameter must not be null.
+  /// [RouteSettings.arguments]. An object can be passed as `arguments` (e.g. a
+  /// [String], [int], or an instance of a custom `MyRouteArguments` class).
+  /// Often, a [Map] is used to pass key-value pairs.
   /// {@endtemplate}
   ///
   /// {@tool sample}
@@ -748,6 +745,25 @@ class Navigator extends StatefulWidget {
   /// ```dart
   /// void _didPushButton() {
   ///   Navigator.pushNamed(context, '/nyc/1776');
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample}
+  ///
+  /// The following example shows how to pass additional `arguments` to the
+  /// route:
+  ///
+  /// ```dart
+  /// void _didPushButton() {
+  ///   Navigator.pushNamed(
+  ///     context,
+  ///     '/weather',
+  ///     arguments: <String, String>{
+  ///       'city': 'Berlin',
+  ///       'country': 'Germany',
+  ///     },
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
