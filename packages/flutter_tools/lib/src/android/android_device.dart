@@ -428,6 +428,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
     if (debuggingOptions.traceSkia)
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
+    if (debuggingOptions.traceSystrace)
+      cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
