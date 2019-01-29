@@ -109,10 +109,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.tightFor({
     double width,
     double height
-  }): minWidth = width != null ? width : 0.0,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : 0.0,
-      maxHeight = height != null ? height : double.infinity;
+  }) : minWidth = width != null ? width : 0.0,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : 0.0,
+       maxHeight = height != null ? height : double.infinity;
 
   /// Creates box constraints that require the given width or height, except if
   /// they are infinite.
@@ -124,10 +124,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
     double height = double.infinity
-  }): minWidth = width != double.infinity ? width : 0.0,
-      maxWidth = width != double.infinity ? width : double.infinity,
-      minHeight = height != double.infinity ? height : 0.0,
-      maxHeight = height != double.infinity ? height : double.infinity;
+  }) : minWidth = width != double.infinity ? width : 0.0,
+       maxWidth = width != double.infinity ? width : double.infinity,
+       minHeight = height != double.infinity ? height : 0.0,
+       maxHeight = height != double.infinity ? height : double.infinity;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -143,10 +143,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.expand({
     double width,
     double height
-  }): minWidth = width != null ? width : double.infinity,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : double.infinity,
-      maxHeight = height != null ? height : double.infinity;
+  }) : minWidth = width != null ? width : double.infinity,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : double.infinity,
+       maxHeight = height != null ? height : double.infinity;
 
   /// The minimum width that satisfies the constraints.
   final double minWidth;
@@ -615,8 +615,8 @@ class BoxHitTestEntry extends HitTestEntry {
   ///
   /// The [localPosition] argument must not be null.
   const BoxHitTestEntry(RenderBox target, this.localPosition)
-      : assert(localPosition != null),
-        super(target);
+    : assert(localPosition != null),
+      super(target);
 
   @override
   RenderBox get target => super.target;

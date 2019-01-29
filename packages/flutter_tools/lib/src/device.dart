@@ -361,15 +361,15 @@ class DebuggingOptions {
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo) :
-    debuggingEnabled = false,
-    useTestFonts = false,
-    startPaused = false,
-    enableSoftwareRendering = false,
-    skiaDeterministicRendering = false,
-    traceSkia = false,
-    traceSystrace = false,
-    observatoryPort = null;
+  DebuggingOptions.disabled(this.buildInfo)
+    : debuggingEnabled = false,
+      useTestFonts = false,
+      startPaused = false,
+      enableSoftwareRendering = false,
+      skiaDeterministicRendering = false,
+      traceSkia = false,
+      traceSystrace = false,
+      observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -387,7 +387,9 @@ class DebuggingOptions {
 
 class LaunchResult {
   LaunchResult.succeeded({ this.observatoryUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null;
+  LaunchResult.failed()
+    : started = false,
+      observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 

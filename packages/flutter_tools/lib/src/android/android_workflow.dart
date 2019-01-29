@@ -51,7 +51,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator(): super('Android toolchain - develop for Android devices',);
+  AndroidValidator() : super('Android toolchain - develop for Android devices',);
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -167,7 +167,7 @@ class AndroidValidator extends DoctorValidator {
 }
 
 class AndroidLicenseValidator extends DoctorValidator {
-  AndroidLicenseValidator(): super('Android license subvalidator',);
+  AndroidLicenseValidator() : super('Android license subvalidator',);
 
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';

@@ -1153,7 +1153,9 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     RenderBox child,
     CustomClipper<T> clipper,
     this.clipBehavior = Clip.antiAlias,
-  }) : _clipper = clipper, assert(clipBehavior != null), super(child);
+  }) : _clipper = clipper,
+       assert(clipBehavior != null),
+       super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1318,7 +1320,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none), _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
+  }) : assert(clipBehavior != Clip.none),
+       _borderRadius = borderRadius,
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1389,7 +1393,8 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1464,7 +1469,8 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -2878,7 +2884,9 @@ class RenderIgnorePointer extends RenderProxyBox {
     RenderBox child,
     bool ignoring = true,
     bool ignoringSemantics
-  }) : _ignoring = ignoring, _ignoringSemantics = ignoringSemantics, super(child) {
+  }) : _ignoring = ignoring,
+       _ignoringSemantics = ignoringSemantics,
+       super(child) {
     assert(_ignoring != null);
   }
 
@@ -4381,7 +4389,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 class RenderBlockSemantics extends RenderProxyBox {
   /// Create a render object that blocks semantics for nodes below it in paint
   /// order.
-  RenderBlockSemantics({ RenderBox child, bool blocking = true, }) : _blocking = blocking, super(child);
+  RenderBlockSemantics({
+    RenderBox child,
+    bool blocking = true,
+  }) : _blocking = blocking,
+       super(child);
 
   /// Whether this render object is blocking semantics of previously painted
   /// [RenderObject]s below a common semantics boundary from the semantic tree.
@@ -4440,7 +4452,8 @@ class RenderExcludeSemantics extends RenderProxyBox {
   RenderExcludeSemantics({
     RenderBox child,
     bool excluding = true,
-  }) : _excluding = excluding, super(child) {
+  }) : _excluding = excluding,
+       super(child) {
     assert(_excluding != null);
   }
 
@@ -4485,8 +4498,8 @@ class RenderIndexedSemantics extends RenderProxyBox {
     RenderBox child,
     @required int index,
   }) : assert(index != null),
-        _index = index,
-        super(child);
+       _index = index,
+       super(child);
 
   /// The index used to annotated child semantics.
   int get index => _index;

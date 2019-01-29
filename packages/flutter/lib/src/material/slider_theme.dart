@@ -35,9 +35,9 @@ class SliderTheme extends InheritedWidget {
     Key key,
     @required this.data,
     @required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
@@ -197,22 +197,22 @@ class SliderThemeData extends Diagnosticable {
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
     @required this.valueIndicatorTextStyle,
-  })  : assert(activeTrackColor != null),
-        assert(inactiveTrackColor != null),
-        assert(disabledActiveTrackColor != null),
-        assert(disabledInactiveTrackColor != null),
-        assert(activeTickMarkColor != null),
-        assert(inactiveTickMarkColor != null),
-        assert(disabledActiveTickMarkColor != null),
-        assert(disabledInactiveTickMarkColor != null),
-        assert(thumbColor != null),
-        assert(disabledThumbColor != null),
-        assert(overlayColor != null),
-        assert(valueIndicatorColor != null),
-        assert(thumbShape != null),
-        assert(valueIndicatorShape != null),
-        assert(valueIndicatorTextStyle != null),
-        assert(showValueIndicator != null);
+  }) : assert(activeTrackColor != null),
+       assert(inactiveTrackColor != null),
+       assert(disabledActiveTrackColor != null),
+       assert(disabledInactiveTrackColor != null),
+       assert(activeTickMarkColor != null),
+       assert(inactiveTickMarkColor != null),
+       assert(disabledActiveTickMarkColor != null),
+       assert(disabledInactiveTickMarkColor != null),
+       assert(thumbColor != null),
+       assert(disabledThumbColor != null),
+       assert(overlayColor != null),
+       assert(valueIndicatorColor != null),
+       assert(thumbShape != null),
+       assert(valueIndicatorShape != null),
+       assert(valueIndicatorTextStyle != null),
+       assert(showValueIndicator != null);
 
   /// Generates a SliderThemeData from three main colors.
   ///

@@ -164,7 +164,7 @@ class TestEmulatorManager extends EmulatorManager {
 
 class _MockEmulator extends Emulator {
   _MockEmulator(String id, this.name, this.manufacturer, this.label)
-      : super(id, true);
+    : super(id, true);
 
   @override
   final String name;
