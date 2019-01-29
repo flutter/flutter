@@ -90,6 +90,11 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
       )
+      ..addFlag('trace-systrace',
+        negatable: false,
+        help: 'Enable tracing to the system tracer. This is only useful on '
+              'platforms where such a tracer is available (Android and Fuchsia).',
+      )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
         help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
@@ -249,6 +254,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
+        traceSystrace: argResults['trace-systrace'],
         observatoryPort: observatoryPort,
       );
     }
