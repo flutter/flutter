@@ -260,7 +260,7 @@ void main() {
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
-                lineHeight: 1.5,
+                height: 1.5,
               ),
             ),
           ),
@@ -285,7 +285,7 @@ void main() {
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
-                lineHeight: 1.123,
+                height: 1.123,
                 fontSize: 18,
               ),
             ),
@@ -334,7 +334,7 @@ void main() {
               textDirection: TextDirection.ltr,
               strutStyle: StrutStyle(
                 fontSize: 18,
-                lineHeight: 1.1,
+                height: 1.1,
                 leading: 0.1,
               ),
             ),
@@ -444,7 +444,7 @@ void main() {
               textDirection: TextDirection.ltr,
               strutStyle: StrutStyle(
                 fontSize: 18,
-                lineHeight: 1.05,
+                height: 1.05,
                 forceStrutHeight: true,
               ),
             ),

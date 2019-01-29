@@ -803,7 +803,7 @@ class TextStyle extends Diagnosticable {
       double fontSize,
       FontWeight fontWeight,
       FontStyle fontStyle,
-      double lineHeight,
+      double height,
       StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
@@ -817,12 +817,12 @@ class TextStyle extends Diagnosticable {
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
-      lineHeight: lineHeight ?? height,
+      height: height ?? this.height,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
         fontSize: strutStyle.fontSize,
-        lineHeight: strutStyle.lineHeight,
+        height: strutStyle.height,
         leading: strutStyle.leading,
         fontWeight: strutStyle.fontWeight,
         fontStyle: strutStyle.fontStyle,

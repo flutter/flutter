@@ -93,7 +93,7 @@ class RenderErrorBox extends RenderBox {
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = ui.ParagraphStyle(
-    lineHeight: 1.0,
+    height: 1.0,
   );
 
   @override
