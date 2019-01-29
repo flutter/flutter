@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_build:
     sdk: flutter
+  # TODO(jonahwilliams): replace with pub version when everything is compatible
   inject:
     git:
       url: https://github.com/jonahwilliams/inject.dart
@@ -19,6 +20,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: 1.2.1
+  # TODO(jonahwilliams): replace with pub version when everything is compatible
   inject_generator:
     git:
       url: https://github.com/jonahwilliams/inject.dart
