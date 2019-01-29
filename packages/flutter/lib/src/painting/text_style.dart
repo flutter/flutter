@@ -933,35 +933,7 @@ class TextStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      switch (fontWeight) {
-        case FontWeight.w100:
-          weightDescription = '100';
-          break;
-        case FontWeight.w200:
-          weightDescription = '200';
-          break;
-        case FontWeight.w300:
-          weightDescription = '300';
-          break;
-        case FontWeight.w400:
-          weightDescription = '400';
-          break;
-        case FontWeight.w500:
-          weightDescription = '500';
-          break;
-        case FontWeight.w600:
-          weightDescription = '600';
-          break;
-        case FontWeight.w700:
-          weightDescription = '700';
-          break;
-        case FontWeight.w800:
-          weightDescription = '800';
-          break;
-        case FontWeight.w900:
-          weightDescription = '900';
-          break;
-      }
+      weightDescription = '${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing
