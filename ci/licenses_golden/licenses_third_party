@@ -1,4 +1,4 @@
-Signature: 32805e8e6ee8e549ae0e8d0c84ccdb17
+Signature: 7abb53f852a78b364206cd2b1d81d0d9
 
 UNUSED LICENSES:
 
@@ -5600,8 +5600,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc
+FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
