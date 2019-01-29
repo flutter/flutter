@@ -104,6 +104,12 @@ DEF_SWITCH(TraceSkia,
            "Trace Skia calls. This is useful when debugging the GPU threed."
            "By default, Skia tracing is not enable to reduce the number of "
            "traced events")
+DEF_SWITCH(
+    TraceSystrace,
+    "trace-systrace",
+    "Trace to the system tracer (instead of the timeline) on platforms where "
+    "such a tracer is available. Currently only supported on Android and "
+    "Fuchsia.")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "

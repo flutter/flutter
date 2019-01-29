@@ -312,6 +312,9 @@ public final class FlutterActivityDelegate
         if (intent.getBooleanExtra("trace-skia", false)) {
             args.add("--trace-skia");
         }
+        if (intent.getBooleanExtra("trace-systrace", false)) {
+            args.add("--trace-systrace");
+        }
         if (intent.getBooleanExtra("verbose-logging", false)) {
             args.add("--verbose-logging");
         }
