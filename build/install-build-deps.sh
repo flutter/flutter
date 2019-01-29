@@ -134,7 +134,7 @@ arm_list="libc6-dev-armhf-cross
           linux-libc-dev-armhf-cross"
 
 # Work around for dependency issue Debian/Stretch
-if [ "x$codename" = "xstretch" ]; then
+if [[ "x$codename" = "xstretch" || "x$codename" = "xxenial" ]]; then
   arm_list+=" g++-5-arm-linux-gnueabihf"
 else
   arm_list+=" g++-arm-linux-gnueabihf"
