@@ -733,7 +733,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@template flutter.widgets.navigator.pushNamed.arguments}
   /// The provided `arguments` are passed to the pushed route via
-  /// [RouteSettings.arguments]. An object can be passed as `arguments` (e.g. a
+  /// [RouteSettings.arguments]. Any object can be passed as `arguments` (e.g. a
   /// [String], [int], or an instance of a custom `MyRouteArguments` class).
   /// Often, a [Map] is used to pass key-value pairs.
   /// {@endtemplate}
