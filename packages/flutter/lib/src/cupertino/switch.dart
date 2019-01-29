@@ -297,8 +297,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
-    if (defaultTargetPlatform == TargetPlatform.iOS)
-      HapticFeedback.lightImpact();
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.lightImpact();
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+    }
   }
 
   TextDirection get textDirection => _textDirection;
