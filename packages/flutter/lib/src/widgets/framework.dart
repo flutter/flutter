@@ -1030,6 +1030,16 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   void didUpdateWidget(covariant T oldWidget) { }
   
   /// {@macro flutter.widgets.reassemble}
+  /// 
+  /// In addition to this method being invoked, it is guaranteed that the
+  /// [build] method will be invoked when a reassemble is signaled. Most
+  /// widgets therefore do not need to do anything in the [reassemble] method.
+  ///
+  /// See also:
+  /// 
+  ///  * [Element.reassemble]
+  ///  * [BindingBase.reassembleApplication]
+  ///  * [Image], which uses this to reload images.
   @protected
   @mustCallSuper
   void reassemble() { }
@@ -2584,19 +2594,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// state, for example, image loading from asset bundles (since the asset
   /// bundle may have changed).
   ///
-  /// In addition to this method being invoked, it is guaranteed that the
-  /// [build] method will be invoked when a reassemble is signaled. Most
-  /// widgets therefore do not need to do anything in the [reassemble] method.
-  ///
   /// This function will only be called during development. In release builds,
   /// the `ext.flutter.reassemble` hook is not available, and so this code will
   /// never execute.
-  ///
+  /// {@endtemplate}
+  /// 
   /// See also:
-  ///
+  /// 
+  ///  * [State.reassemble]
   ///  * [BindingBase.reassembleApplication]
   ///  * [Image], which uses this to reload images.
-  /// {@endtemplate}
   @mustCallSuper
   @protected
   void reassemble() {
