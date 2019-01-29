@@ -988,26 +988,20 @@ class _RenderListTile extends RenderBox {
     // This attempts to implement the redlines for the vertical position of the
     // leading and trailing icons on the spec page:
     //   https://material.io/design/components/lists.html#specs
-    // Some liberties have been taken to handle cases that aren't covered by
-    // that specification, such as leading and trailing widgets with weird
-    // sizes, "one-line" list tiles with title widgets that span multiple lines,
-    // etc.
+    // The interpretation for these red lines is as follows:
+    //  - For large tiles (> 72dp), both leading and trailing controls should be
+    //    a fixed distance from top. As per guidelines this is set to 16dp.
+    //  - For smaller tiles, trailing should always be centered. Leading can be
+    //    centered or closer to the top. It should never be further than 16dp
+    //    to the top.
     double leadingY;
     double trailingY;
-    if (isOneLine) {
-      leadingY = (defaultTileHeight - leadingSize.height) / 2.0;
-      trailingY = (defaultTileHeight - trailingSize.height) / 2.0;
-    } else if (isTwoLine) {
-      if (isDense) {
-        leadingY = 12.0; // by extrapolation
-        trailingY = 20.0; // by extrapolation
-      } else {
-        leadingY = leadingSize.height <= 40.0 ? 16.0 : 8.0;
-        trailingY = 24.0;
-      }
-    } else {
+    if (tileHeight > 72.0) {
       leadingY = 16.0;
       trailingY = 16.0;
+    } else {
+      leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
+      trailingY = (tileHeight - trailingSize.height) / 2.0;
     }
 
     switch (textDirection) {

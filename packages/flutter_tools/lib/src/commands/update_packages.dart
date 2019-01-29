@@ -87,7 +87,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      expectSlowOperation: true,
+      timeout: kSlowOperation,
     );
     final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
@@ -119,7 +119,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
-      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'flutter_build'];
       // ensure we only get flutter/packages
       packages.retainWhere((Directory directory) {
         return consumerPackages.any((String package) {
@@ -640,7 +640,6 @@ class PubspecYaml {
         // place to insert our transitive dependencies.
         if (section == Section.dependencies)
           endOfDirectDependencies = output.length;
-          endOfDevDependencies = output.length;
         if (section == Section.devDependencies)
           endOfDevDependencies = output.length;
         section = data.section; // track which section we're now in.

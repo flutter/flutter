@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
@@ -35,6 +36,14 @@ typedef InputCounterWidgetBuilder = Widget Function(
     @required bool isFocused,
   }
 );
+
+// An eyeballed value that moves the cursor slightly left of where it is
+// rendered for text on Android so it's positioning more accurately matches the
+// native iOS text cursor positioning.
+//
+// This value is in device pixels, not logical pixels as is typically used
+// throughout the codebase.
+const int _iOSHorizontalCursorOffsetPixels = 2;
 
 /// A material design text field.
 ///
@@ -143,7 +152,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
     this.onTap,
     this.buildCounter,
@@ -469,6 +478,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
+  Radius get _cursorRadius {
+    if (widget.cursorRadius != null)
+      return widget.cursorRadius;
+    if (Theme.of(context).platform == TargetPlatform.iOS)
+      return const Radius.circular(2.0);
+    return null;
+  }
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -613,16 +630,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleForcePressStarted(ForcePressDetails details) {
     if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          // The cause is not technically double tap, but we would like to show
-          // the toolbar.
-          _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          break;
-      }
+      // The cause is not technically double tap, but we would like to show
+      // the toolbar.
+      _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
     }
   }
 
@@ -689,6 +699,22 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
 
+  bool get _cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
+
+  Offset get _getCursorOffset => Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
+
+  bool get _paintCursorAboveText => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
+
+  Color get _cursorColor {
+    if (widget.cursorColor == null) {
+      if (Theme.of(context).platform == TargetPlatform.iOS)
+        return CupertinoTheme.of(context).primaryColor;
+      else
+        return Theme.of(context).cursorColor;
+    }
+    return widget.cursorColor;
+  }
+
   @override
   void deactivate() {
     if (_splashes != null) {
@@ -711,7 +737,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&
-         (widget.style.fontSize == null || widget.style.textBaseline == null)),
+        (widget.style.fontSize == null || widget.style.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
 
@@ -723,6 +749,20 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+
+    bool forcePressEnabled;
+    TextSelectionControls textSelectionControls;
+    switch (themeData.platform) {
+      case TargetPlatform.iOS:
+        forcePressEnabled = true;
+        textSelectionControls = cupertinoTextSelectionControls;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls = materialTextSelectionControls;
+        break;
+    }
 
     Widget child = RepaintBoundary(
       child: EditableText(
@@ -740,11 +780,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.selectionEnabled
-          ? (themeData.platform == TargetPlatform.iOS
-             ? cupertinoTextSelectionControls
-             : materialTextSelectionControls)
-          : null,
+        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
@@ -752,8 +788,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
-        cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor ?? themeData.cursorColor,
+        cursorRadius: _cursorRadius,
+        cursorColor: _cursorColor,
+        cursorOpacityAnimates: _cursorOpacityAnimates,
+        cursorOffset: _getCursorOffset,
+        paintCursorAboveText: _paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
@@ -789,7 +828,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
-          onForcePressStart: _handleForcePressStarted,
+          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapDown: _handleSingleLongTapDown,

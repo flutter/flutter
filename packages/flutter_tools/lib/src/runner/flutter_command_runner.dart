@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -27,6 +26,7 @@ import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -457,6 +457,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final String basename = fs.path.basename(engineBuildPath);
     final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
+    if (!fs.isDirectorySync(engineHostBuildPath)) {
+      throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+    }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }

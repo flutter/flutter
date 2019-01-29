@@ -135,6 +135,56 @@ void main() {
     );
   }, skip: !Platform.isLinux);
 
+  // TODO(garyq): This test requires an update when the background
+  // drawing from the beginning of the line bug is fixed. The current
+  // tested version is not completely correct.
+  testWidgets('Text Background', (WidgetTester tester) async {
+    const Color red = Colors.red;
+    const Color blue = Colors.blue;
+    const Color translucentGreen = Color(0x5000F000);
+    const Color translucentDarkRed = Color(0x500F0000);
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Colors.green,
+            ),
+            child: RichText(
+              textDirection: TextDirection.ltr,
+              text: TextSpan(
+                text: 'text1 ',
+                style: TextStyle(
+                  color: translucentGreen,
+                  background: Paint()
+                    ..color = red.withOpacity(0.5)
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'text2',
+                    style: TextStyle(
+                      color: translucentDarkRed,
+                      background: Paint()
+                        ..color = blue.withOpacity(0.5)
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('text_golden.Background.png'),
+    );
+  }, skip: !Platform.isLinux);
+
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
