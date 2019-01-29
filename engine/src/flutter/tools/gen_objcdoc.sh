@@ -5,16 +5,23 @@
 
 # Generates objc docs for Flutter iOS libraries.
 
-if [ ! -d "shell/platform/darwin/ios" ]
+if [[ ! -d "shell/platform/darwin/ios" ]]
   then
       echo "Error: This script must be run at the root of the Flutter source tree."
       exit 1
 fi
 
-if [ $# -eq 0 ]
+if [[ $# -eq 0 ]]
   then
       echo "Error: Argument specifying output directory required."
       exit 1
+fi
+
+# If GEM_HOME is set, prefer using its copy of jazzy.
+# LUCI will put jazzy here instead of on the path.
+if [[ -n "${GEM_HOME}" ]]
+  then
+    PATH="${GEM_HOME}/bin:$PATH"
 fi
 
 # Use iPhoneSimulator SDK
@@ -28,8 +35,8 @@ jazzy \
   --github_url 'https://github.com/flutter'\
   --github-file-prefix 'http://github.com/flutter/engine/blob/master'\
   --module-version 1.0.0\
-  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,$(xcrun --show-sdk-path --sdk iphonesimulator),-I,$(pwd)\
+  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,"$(xcrun --show-sdk-path --sdk iphonesimulator)",-I,"$(pwd)"\
   --module Flutter\
   --root-url https://docs.flutter.io/objc/\
-  --output $1\
+  --output "$1"\
   --no-download-badge
