@@ -703,7 +703,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, {@required Offset position}) {
+  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
     assert(position != null);
     RenderBox child = lastChild;
     while (child != null) {

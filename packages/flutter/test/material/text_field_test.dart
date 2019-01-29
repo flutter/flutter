@@ -2039,7 +2039,7 @@ void main() {
       home: Material(
         child: Center(
             child: TextField(
-              buildCounter: (BuildContext context, {int currentLength, int maxLength, bool isFocused}) {
+              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
                 return Text('${currentLength.toString()} of ${maxLength.toString()}');
               },
               maxLength: 10,

@@ -306,7 +306,7 @@ void main() {
   });
 }
 
-void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
+void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
   for (int i in visible) {
     expect(find.text('$i'), findsOneWidget);
   }

@@ -23,7 +23,7 @@ class _CustomPhysics extends ClampingScrollPhysics {
   }
 }
 
-Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
+Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[

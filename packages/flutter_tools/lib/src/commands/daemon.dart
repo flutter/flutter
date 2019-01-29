@@ -157,7 +157,7 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({dynamic error}) {
+  void shutdown({ dynamic error }) {
     _commandSubscription?.cancel();
     for (Domain domain in _domainMap.values)
       domain.dispose();
@@ -208,7 +208,7 @@ abstract class Domain {
     });
   }
 
-  void sendEvent(String name, [dynamic args]) {
+  void sendEvent(String name, [ dynamic args ]) {
     final Map<String, dynamic> map = <String, dynamic>{ 'event': name };
     if (args != null)
       map['params'] = _toJsonable(args);
@@ -331,8 +331,12 @@ class AppDomain extends Domain {
   final List<AppInstance> _apps = <AppInstance>[];
 
   Future<AppInstance> startApp(
-    Device device, String projectDirectory, String target, String route,
-    DebuggingOptions options, bool enableHotReload, {
+    Device device,
+    String projectDirectory,
+    String target,
+    String route,
+    DebuggingOptions options,
+    bool enableHotReload, {
     File applicationBinary,
     @required bool trackWidgetCreation,
     String projectRootPath,
@@ -402,12 +406,13 @@ class AppDomain extends Domain {
   }
 
   Future<AppInstance> launch(
-      ResidentRunner runner,
-      _RunOrAttach runOrAttach,
-      Device device,
-      String projectDirectory,
-      bool enableHotReload,
-      Directory cwd) async {
+    ResidentRunner runner,
+    _RunOrAttach runOrAttach,
+    Device device,
+    String projectDirectory,
+    bool enableHotReload,
+    Directory cwd,
+  ) async {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
@@ -556,7 +561,7 @@ class AppDomain extends Domain {
     return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
 
-  void _sendAppEvent(AppInstance app, String name, [Map<String, dynamic> args]) {
+  void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
     final Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
     if (args != null)
       eventArgs.addAll(args);
@@ -609,7 +614,7 @@ class DeviceDomain extends Domain {
 
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
-  Future<List<Map<String, dynamic>>> getDevices([Map<String, dynamic> args]) async {
+  Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
     final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
 
     for (PollingDeviceDiscovery discoverer in _discoverers) {
@@ -750,27 +755,27 @@ class NotifyingLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis = false,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis = false,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
-      String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    bool newline = true,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _messageController.add(LogMessage('status', message));
   }
 
@@ -840,7 +845,7 @@ class EmulatorDomain extends Domain {
 
   EmulatorManager emulators = EmulatorManager();
 
-  Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
+  Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
     return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
@@ -887,14 +892,14 @@ class _AppRunLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     if (parent != null) {
       parent.printError(
         message,
@@ -922,14 +927,14 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-      String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    bool newline = true,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     if (parent != null) {
       parent.printStatus(
         message,

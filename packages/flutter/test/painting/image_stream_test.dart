@@ -40,7 +40,7 @@ class FakeImage implements Image {
   void dispose() {}
 
   @override
-  Future<ByteData> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) async {
+  Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }

@@ -196,7 +196,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, {Version newerThan}) {
+    bool _hasStudioAt(String path, { Version newerThan }) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path)
           return false;

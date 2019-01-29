@@ -26,7 +26,7 @@ void main() {
     MemoryFileSystem fs;
     Directory tempDir;
 
-    void withMockDevice([Device mock]) {
+    void withMockDevice([ Device mock ]) {
       mockDevice = mock ?? MockDevice();
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);

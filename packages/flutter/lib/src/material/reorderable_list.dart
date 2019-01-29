@@ -328,7 +328,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
-  Widget _buildContainerForScrollDirection({List<Widget> children}) {
+  Widget _buildContainerForScrollDirection({ List<Widget> children }) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         return Row(children: children);

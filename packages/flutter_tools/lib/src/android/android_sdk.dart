@@ -46,7 +46,7 @@ const int minimumAndroidSdkVersion = 25;
 /// This should be used over accessing androidSdk.adbPath directly because it
 /// will work for those users who have Android Platform Tools installed but
 /// not the full SDK.
-String getAdbPath([AndroidSdk existingSdk]) {
+String getAdbPath([ AndroidSdk existingSdk ]) {
   if (existingSdk?.adbPath != null)
     return existingSdk.adbPath;
 
@@ -63,7 +63,7 @@ String getAdbPath([AndroidSdk existingSdk]) {
 /// This should be used over accessing androidSdk.emulatorPath directly because it
 /// will work for those users who have Android Tools installed but
 /// not the full SDK.
-String getEmulatorPath([AndroidSdk existingSdk]) {
+String getEmulatorPath([ AndroidSdk existingSdk ]) {
   return existingSdk?.emulatorPath ??
     AndroidSdk.locateAndroidSdk()?.emulatorPath;
 }
@@ -100,7 +100,7 @@ String getAvdPath() {
 /// This should be used over accessing androidSdk.avdManagerPath directly because it
 /// will work for those users who have Android Tools installed but
 /// not the full SDK.
-String getAvdManagerPath([AndroidSdk existingSdk]) {
+String getAvdManagerPath([ AndroidSdk existingSdk ]) {
   return existingSdk?.avdManagerPath ??
     AndroidSdk.locateAndroidSdk()?.avdManagerPath;
 }

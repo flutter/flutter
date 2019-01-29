@@ -189,8 +189,7 @@ class VsCode {
     ]);
   }
 
-  static List<VsCode> _findInstalled(
-      List<_VsCodeInstallLocation> allLocations) {
+  static List<VsCode> _findInstalled(List<_VsCodeInstallLocation> allLocations) {
     final Iterable<_VsCodeInstallLocation> searchLocations =
       _includeInsiders
         ? allLocations

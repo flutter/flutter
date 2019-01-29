@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
       theme: theme,
       home: Material(

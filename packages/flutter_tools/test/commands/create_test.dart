@@ -908,7 +908,7 @@ Future<void> _analyzeProject(String workingDir) async {
   expect(exec.exitCode, 0);
 }
 
-Future<void> _runFlutterTest(Directory workingDir, {String target}) async {
+Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -1009,8 +1009,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(void onData(List<int> event), {
-    Function onError, void onDone(), bool cancelOnError
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
+    Function onError,
+    void onDone(),
+    bool cancelOnError
   }) {
     return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

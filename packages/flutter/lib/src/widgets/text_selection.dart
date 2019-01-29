@@ -348,7 +348,7 @@ class TextSelectionOverlay {
     _markNeedsBuild();
   }
 
-  void _markNeedsBuild([Duration duration]) {
+  void _markNeedsBuild([ Duration duration ]) {
     if (_handles != null) {
       _handles[0].markNeedsBuild();
       _handles[1].markNeedsBuild();

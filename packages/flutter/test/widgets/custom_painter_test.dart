@@ -700,7 +700,7 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<void> diff({List<String> from, List<String> to}) async {
+  Future<void> diff({ List<String> from, List<String> to }) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {

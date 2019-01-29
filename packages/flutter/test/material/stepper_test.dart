@@ -380,7 +380,7 @@ void main() {
     }
 
     final ControlsWidgetBuilder builder =
-      (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+      (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
         return Container(
           margin: const EdgeInsets.only(top: 16.0),
           child: ConstrainedBox(

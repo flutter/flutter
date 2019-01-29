@@ -275,7 +275,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  _ShapeDecorationPainter createBoxPainter([VoidCallback onChanged]) {
+  _ShapeDecorationPainter createBoxPainter([ VoidCallback onChanged ]) {
     assert(onChanged != null || image == null);
     return _ShapeDecorationPainter(this, onChanged);
   }

@@ -200,7 +200,7 @@ class FlutterLogoDecoration extends Decoration {
   bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   @override
-  BoxPainter createBoxPainter([VoidCallback onChanged]) {
+  BoxPainter createBoxPainter([ VoidCallback onChanged ]) {
     assert(debugAssertIsValid());
     return _FlutterLogoPainter(this);
   }

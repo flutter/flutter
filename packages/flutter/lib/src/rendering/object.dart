@@ -388,7 +388,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   /// * `clipBehavior` controls how the rectangle is clipped.
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge}) {
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       pushLayer(ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
@@ -410,7 +410,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the path is clipped.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
@@ -434,7 +434,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the rounded rectangle is clipped.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
@@ -2537,9 +2537,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to the tree. If new [SemanticsNode]s are instantiated in this method
   /// they must be disposed in [clearSemantics].
   void assembleSemanticsNode(
-      SemanticsNode node,
-      SemanticsConfiguration config,
-      Iterable<SemanticsNode> children,
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
   ) {
     assert(node == _semantics);
     node.updateWith(config: config, childrenInInversePaintOrder: children);
@@ -3273,7 +3273,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
     assert(parentSemanticsClipRect == null);
     assert(parentPaintClipRect == null);
@@ -3363,7 +3363,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     if (!_isExplicit) {
       owner._semantics = null;
       for (_InterestingSemanticsFragment fragment in _children) {
@@ -3486,7 +3486,7 @@ class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     yield owner._semantics;
   }
 

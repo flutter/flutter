@@ -248,7 +248,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;

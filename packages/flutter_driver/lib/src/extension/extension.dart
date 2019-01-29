@@ -194,7 +194,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, { bool isError = false }) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,
@@ -208,7 +208,7 @@ class FlutterDriverExtension {
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void> completer]) {
+  Future<void> _waitUntilFrame(bool condition(), [ Completer<void> completer ]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {

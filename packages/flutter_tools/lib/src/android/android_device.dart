@@ -488,7 +488,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
     // The Android log reader isn't app-specific.
     _logReader ??= _AdbLogReader(this);
     return _logReader;
@@ -574,7 +574,8 @@ final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 /// of devices and possible device issue diagnostics. Either argument can be null,
 /// in which case information for that parameter won't be populated.
 @visibleForTesting
-void parseADBDeviceOutput(String text, {
+void parseADBDeviceOutput(
+  String text, {
   List<AndroidDevice> devices,
   List<String> diagnostics
 }) {
@@ -847,7 +848,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
     final RunResult process = await runCheckedAsync(device.adbCommandForDevice(
       <String>['forward', 'tcp:$hostPort', 'tcp:$devicePort']

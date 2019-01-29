@@ -511,8 +511,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void testUsingContextAndFs(String description, FileSystem filesystem,
-        dynamic testMethod()) {
+    void testUsingContextAndFs(
+      String description,
+      FileSystem filesystem,
+      dynamic testMethod(),
+    ) {
       testUsingContext(description,
               () async {
             writeEmptySchemaFile(filesystem);

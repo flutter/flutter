@@ -33,7 +33,7 @@ class Utf8Decoder extends cnv.Utf8Decoder {
   final bool reportErrors;
 
   @override
-  String convert(List<int> codeUnits, [int start = 0, int end]) {
+  String convert(List<int> codeUnits, [ int start = 0, int end ]) {
     final String result = super.convert(codeUnits, start, end);
     // Finding a unicode replacement character indicates that the input
     // was malformed.

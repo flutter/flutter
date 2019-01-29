@@ -321,7 +321,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({@required bool animate}) {
+  void _addEntryForNewChild({ @required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);

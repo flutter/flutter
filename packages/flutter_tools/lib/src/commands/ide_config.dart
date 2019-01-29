@@ -266,7 +266,7 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String _validateFlutterDir(String dirPath, {String flutterRoot}) {
+String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.notFound) {

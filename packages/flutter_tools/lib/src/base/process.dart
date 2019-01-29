@@ -93,7 +93,7 @@ Future<void> runShutdownHooks() async {
   printTrace('Shutdown hooks complete');
 }
 
-Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
+Map<String, String> _environment(bool allowReentrantFlutter, [ Map<String, String> environment ]) {
   if (allowReentrantFlutter) {
     if (environment == null)
       environment = <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' };
@@ -106,7 +106,8 @@ Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String
 
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
-Future<Process> runCommand(List<String> cmd, {
+Future<Process> runCommand(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment
@@ -121,7 +122,8 @@ Future<Process> runCommand(List<String> cmd, {
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr. Completes with the process's exit code.
-Future<int> runCommandAndStreamOutput(List<String> cmd, {
+Future<int> runCommandAndStreamOutput(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   String prefix = '',
@@ -180,7 +182,8 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 /// Runs the [command] interactively, connecting the stdin/stdout/stderr
 /// streams of this process to those of the child process. Completes with
 /// the exit code of the child process.
-Future<int> runInteractively(List<String> command, {
+Future<int> runInteractively(
+  List<String> command, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment
@@ -212,7 +215,8 @@ Future<Process> runDetached(List<String> cmd) {
   return proc;
 }
 
-Future<RunResult> runAsync(List<String> cmd, {
+Future<RunResult> runAsync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment
@@ -228,7 +232,8 @@ Future<RunResult> runAsync(List<String> cmd, {
   return runResults;
 }
 
-Future<RunResult> runCheckedAsync(List<String> cmd, {
+Future<RunResult> runCheckedAsync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment
@@ -267,7 +272,8 @@ Future<bool> exitsHappyAsync(List<String> cli) async {
 /// Run cmd and return stdout.
 ///
 /// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd, {
+String runCheckedSync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   bool hideStdout = false,
@@ -285,7 +291,8 @@ String runCheckedSync(List<String> cmd, {
 }
 
 /// Run cmd and return stdout.
-String runSync(List<String> cmd, {
+String runSync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false
 }) {
@@ -305,7 +312,8 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
   }
 }
 
-String _runWithLoggingSync(List<String> cmd, {
+String _runWithLoggingSync(
+  List<String> cmd, {
   bool checked = false,
   bool noisyErrors = false,
   bool throwStandardErrorOnError = false,

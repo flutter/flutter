@@ -482,7 +482,7 @@ void main() {
   });
 
   group('contributes semantics', () {
-    TestSemantics buildExpected({String routeName}) {
+    TestSemantics buildExpected({ String routeName }) {
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(

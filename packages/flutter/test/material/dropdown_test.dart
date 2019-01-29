@@ -855,7 +855,7 @@ void main() {
   testWidgets('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String> items, ValueChanged<String> onChanged}) => buildFrame(
+    Widget build({ List<String> items, ValueChanged<String> onChanged }) => buildFrame(
       items: items,
       onChanged: onChanged,
       buttonKey: buttonKey, value: null,

@@ -192,7 +192,9 @@ class TableBorder {
   ///
   /// The paint order is particularly notable in the case of
   /// partially-transparent borders.
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     @required Iterable<double> rows,
     @required Iterable<double> columns,
   }) {

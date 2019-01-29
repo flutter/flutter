@@ -40,8 +40,11 @@ class _TimePickerLauncher extends StatelessWidget {
   }
 }
 
-Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged,
-    { Locale locale = const Locale('en', 'US') }) async {
+Future<Offset> startPicker(
+  WidgetTester tester,
+  ValueChanged<TimeOfDay> onChanged, {
+  Locale locale = const Locale('en', 'US'),
+}) async {
   await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));

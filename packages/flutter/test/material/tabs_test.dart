@@ -66,12 +66,12 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
 }
 
 Widget buildFrame({
-    Key tabBarKey,
-    List<String> tabs,
-    String value,
-    bool isScrollable = false,
-    Color indicatorColor,
-  }) {
+  Key tabBarKey,
+  List<String> tabs,
+  String value,
+  bool isScrollable = false,
+  Color indicatorColor,
+}) {
   return boilerplate(
     child: DefaultTabController(
       initialIndex: tabs.indexOf(value),

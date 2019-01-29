@@ -83,7 +83,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({String name}) async {
+  Future<void> _createEmulator({ String name }) async {
     final CreateEmulatorResult createResult =
         await emulatorManager.createEmulator(name: name);
 
@@ -118,8 +118,10 @@ class EmulatorsCommand extends FlutterCommand {
     _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
   }
 
-  void _printAdditionalInfo({ bool showRunInstruction = false,
-      bool showCreateInstruction = false }) {
+  void _printAdditionalInfo({
+    bool showRunInstruction = false,
+    bool showCreateInstruction = false,
+  }) {
     printStatus('');
     if (showRunInstruction) {
       printStatus(

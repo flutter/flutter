@@ -250,14 +250,12 @@ class TestSemantics {
 
   bool _matches(
     SemanticsNode node,
-    Map<dynamic, dynamic> matchState,
-    {
-      bool ignoreRect = false,
-      bool ignoreTransform = false,
-      bool ignoreId = false,
-      DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
-    }
-  ) {
+    Map<dynamic, dynamic> matchState, {
+    bool ignoreRect = false,
+    bool ignoreTransform = false,
+    bool ignoreId = false,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+  }) {
     bool fail(String message) {
       matchState[TestSemantics] = '$message';
       return false;
@@ -343,7 +341,7 @@ class TestSemantics {
   }
 
   @override
-  String toString([int indentAmount = 0]) {
+  String toString([ int indentAmount = 0 ]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     buf.writeln('$indent$runtimeType(');
@@ -688,7 +686,8 @@ class _HasSemantics extends Matcher {
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
-Matcher hasSemantics(TestSemantics semantics, {
+Matcher hasSemantics(
+  TestSemantics semantics, {
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,

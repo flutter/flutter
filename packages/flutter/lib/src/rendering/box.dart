@@ -247,14 +247,14 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
-  double constrainWidth([double width = double.infinity]) {
+  double constrainWidth([ double width = double.infinity ]) {
     assert(debugAssertIsValid());
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
-  double constrainHeight([double height = double.infinity]) {
+  double constrainHeight([ double height = double.infinity ]) {
     assert(debugAssertIsValid());
     return height.clamp(minHeight, maxHeight);
   }

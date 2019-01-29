@@ -659,7 +659,7 @@ void main() {
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
-    Future<void> boilerplate({bool accessibleNavigation}) {
+    Future<void> boilerplate({ bool accessibleNavigation }) {
       return tester.pumpWidget(MaterialApp(
           home: MediaQuery(
               data: MediaQueryData(accessibleNavigation: accessibleNavigation),

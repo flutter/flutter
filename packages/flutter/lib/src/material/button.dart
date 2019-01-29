@@ -324,7 +324,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return super.hitTest(result, position: position) ||
       child.hitTest(result, position: child.size.center(Offset.zero));
   }

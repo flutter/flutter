@@ -678,7 +678,7 @@ class _DragAvatar<T> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag(_DragEndKind endKind, [Velocity velocity]) {
+  void finishDrag(_DragEndKind endKind, [ Velocity velocity ]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget.didDrop(this);

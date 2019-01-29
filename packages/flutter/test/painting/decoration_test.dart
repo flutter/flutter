@@ -85,7 +85,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }
@@ -150,7 +150,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () {
-    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = DelayedImageProvider();

@@ -90,7 +90,7 @@ void main() {
   });
 }
 
-Future<void> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
+Future<void> _testFile(String testName, String workingDirectory, String testDirectory, { Matcher exitCode }) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);

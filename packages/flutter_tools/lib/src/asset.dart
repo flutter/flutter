@@ -36,7 +36,7 @@ abstract class AssetBundle {
 
   bool wasBuiltOnce();
 
-  bool needsBuild({String manifestPath = _ManifestAssetBundle.defaultManifestPath});
+  bool needsBuild({ String manifestPath = _ManifestAssetBundle.defaultManifestPath });
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
@@ -75,7 +75,7 @@ class _ManifestAssetBundle implements AssetBundle {
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   @override
-  bool needsBuild({String manifestPath = defaultManifestPath}) {
+  bool needsBuild({ String manifestPath = defaultManifestPath }) {
     if (_lastBuildTimestamp == null)
       return true;
 
@@ -303,9 +303,9 @@ final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 /// Returns a DevFSContent representing the license file.
 Future<DevFSContent> _obtainLicenses(
   PackageMap packageMap,
-  String assetBase,
-  { bool reportPackages }
-) async {
+  String assetBase, {
+  bool reportPackages,
+}) async {
   // Read the LICENSE file from each package in the .packages file, splitting
   // each one into each component license (so that we can de-dupe if possible).
   //
@@ -564,7 +564,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   return result;
 }
 
-void _parseAssetsFromFolder(PackageMap packageMap,
+void _parseAssetsFromFolder(
+  PackageMap packageMap,
   FlutterManifest flutterManifest,
   String assetBase,
   _AssetDirectoryCache cache,
@@ -595,7 +596,8 @@ void _parseAssetsFromFolder(PackageMap packageMap,
   }
 }
 
-void _parseAssetFromFile(PackageMap packageMap,
+void _parseAssetFromFile(
+  PackageMap packageMap,
   FlutterManifest flutterManifest,
   String assetBase,
   _AssetDirectoryCache cache,

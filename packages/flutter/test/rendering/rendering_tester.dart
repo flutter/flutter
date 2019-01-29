@@ -55,7 +55,8 @@ TestRenderingFlutterBinding get renderer {
 ///
 /// The EnginePhase must not be [EnginePhase.build], since the rendering layer
 /// has no build phase.
-void layout(RenderBox box, {
+void layout(
+  RenderBox box, {
   BoxConstraints constraints,
   Alignment alignment = Alignment.center,
   EnginePhase phase = EnginePhase.layout,

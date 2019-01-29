@@ -164,7 +164,7 @@ abstract class Decoration extends Diagnosticable {
   /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
-  BoxPainter createBoxPainter([VoidCallback onChanged]);
+  BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 }
 
 /// A stateful class that can paint a particular [Decoration].
