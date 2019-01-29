@@ -1,4 +1,4 @@
-Signature: f8265c6642639361478b6d5eb536250d
+Signature: c4dd2593c6aa82c2072f0ec673277a9a
 
 UNUSED LICENSES:
 
@@ -5605,6 +5605,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.cc
