@@ -486,7 +486,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Starting Xcode build...', timeout: kFastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: kFastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,

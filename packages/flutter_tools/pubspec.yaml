@@ -23,7 +23,6 @@ dependencies:
   json_schema: 1.0.10
   linter: 0.1.74
   meta: 1.1.6
-  multicast_dns: 0.1.0+1
   mustache: 1.1.0
   package_config: 1.0.5
   platform: 2.2.0
@@ -35,7 +34,7 @@ dependencies:
   usage: 3.4.1
   vm_service_client: 0.2.6
   web_socket_channel: 1.0.9
-  xml: 3.3.0
+  xml: 3.3.1
   yaml: 2.1.15
   flutter_goldens_client:
     path: ../flutter_goldens_client
@@ -96,4 +95,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: b4f1
+# PUBSPEC CHECKSUM: 68ce
