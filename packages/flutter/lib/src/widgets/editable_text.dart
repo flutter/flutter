@@ -670,7 +670,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // If this is a multiline EditableText, do nothing for a "newline"
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
-        if (widget.maxLines == 1)
+        if (!_isMultiline)
           _finalizeEditing(true);
         break;
       case TextInputAction.done:

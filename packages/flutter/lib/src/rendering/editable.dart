@@ -671,9 +671,9 @@ class RenderEditable extends RenderBox {
   // TODO(justinmc): document
   int get minLines => _minLines;
   int _minLines;
-  /// The value may be null. If it is not null, then it must be greater than zero.
+  /// The value must be greater than zero and cannot be null.
   set minLines(int value) {
-    assert(value == null || value > 0);
+    assert(value > 0);
     if (minLines == value)
       return;
     _maxLines = value;
@@ -1118,18 +1118,25 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    if (maxLines != null) {
-      if (expands) {
-        final double maxHeight = preferredLineHeight * maxLines;
-        if (_textPainter.height < maxHeight) {
-          return _textPainter.height;
-        } else {
-          return maxHeight;
-        }
-      } else {
+    // If needed, set the height based on minLines and/or maxLines
+    if (expands == false) {
+      if (maxLines != null) {
         return preferredLineHeight * maxLines;
       }
+      if (minLines != null) {
+        return preferredLineHeight * maxLines;
+      }
+    } else {
+      if (maxLines != null && _textPainter.height > preferredLineHeight * maxLines) {
+        return preferredLineHeight * maxLines;
+      }
+      if (_textPainter.height < preferredLineHeight * minLines) {
+        return preferredLineHeight * minLines;
+      }
+      // TODO(justinmc): also size based on Expanded if Expanded is parent?
     }
+
+    // Set the height based on the content
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
