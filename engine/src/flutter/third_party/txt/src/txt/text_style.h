@@ -55,6 +55,8 @@ class TextStyle {
   SkPaint background;
   bool has_foreground = false;
   SkPaint foreground;
+  // An ordered list of shadows where the first shadow will be drawn first (at
+  // the bottom).
   std::vector<TextShadow> text_shadows;
 
   TextStyle();

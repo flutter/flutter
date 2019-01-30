@@ -25,12 +25,15 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static fml::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
-                                              const std::string& fontFamily,
-                                              double fontSize,
-                                              double lineHeight,
-                                              const std::u16string& ellipsis,
-                                              const std::string& locale);
+  static fml::RefPtr<ParagraphBuilder> create(
+      tonic::Int32List& encoded,
+      Dart_Handle strutData,
+      const std::string& fontFamily,
+      const std::vector<std::string>& strutFontFamilies,
+      double fontSize,
+      double height,
+      const std::u16string& ellipsis,
+      const std::string& locale);
 
   ~ParagraphBuilder() override;
 
@@ -57,9 +60,11 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
 
  private:
   explicit ParagraphBuilder(tonic::Int32List& encoded,
+                            Dart_Handle strutData,
                             const std::string& fontFamily,
+                            const std::vector<std::string>& strutFontFamilies,
                             double fontSize,
-                            double lineHeight,
+                            double height,
                             const std::u16string& ellipsis,
                             const std::string& locale);
 
