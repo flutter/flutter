@@ -231,10 +231,10 @@ class EditableText extends StatefulWidget {
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines != null),
-       assert(minLines == null || minLines > 0),
+       assert(minLines > 0),
        assert(
-         (minLines == null || maxLines == null) || (maxLines >= minLines),
-         'minLines must be less than or equal to maxLines if not null. Both default to 1.',
+         (maxLines == null) || (maxLines >= minLines),
+         'minLines can\'t be greater than maxLines',
        ),
        assert(expands != null),
        assert(
