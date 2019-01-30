@@ -1151,6 +1151,32 @@ mixin WidgetInspectorService {
         };
       },
     );
+    registerServiceExtension(
+      name: 'inspectAt',
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('x'));
+        assert(parameters.containsKey('y'));
+        //   XXX impl
+        final ui.Image image = await screenshot(
+          toObject(parameters['id']),
+          width: double.parse(parameters['x']),
+          height: double.parse(parameters['y']),
+          margin: parameters.containsKey('margin') ?
+          double.parse(parameters['margin']) : 0.0,
+          maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+          double.parse(parameters['maxPixelRatio']) : 1.0,
+          debugPaint: parameters['debugPaint'] == 'true',
+        );
+        if (image == null) {
+          return <String, Object>{'result': null};
+        }
+        final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+
+        return <String, Object>{
+          'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+        };
+      },
+    );
   }
 
   void _clearStats() {

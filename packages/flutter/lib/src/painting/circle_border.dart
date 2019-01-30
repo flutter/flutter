@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
@@ -92,7 +94,8 @@ class CircleBorder extends ShapeBorder {
   int get hashCode => side.hashCode;
 
   @override
-  String toString() {
-    return '$runtimeType($side)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
   }
 }

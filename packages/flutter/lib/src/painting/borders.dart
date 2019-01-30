@@ -265,10 +265,13 @@ class BorderSide {
 ///
 /// This class handles how to add multiple borders together.
 @immutable
-abstract class ShapeBorder {
+abstract class ShapeBorder extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const ShapeBorder();
+
+  @override
+  String toStringShort() => '$runtimeType';
 
   /// The widths of the sides of this border represented as an [EdgeInsets].
   ///
@@ -465,11 +468,6 @@ abstract class ShapeBorder {
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection });
-
-  @override
-  String toString() {
-    return '$runtimeType()';
-  }
 }
 
 /// Represents the addition of two otherwise-incompatible borders.
@@ -615,12 +613,13 @@ class _CompoundBorder extends ShapeBorder {
   int get hashCode => hashList(borders);
 
   @override
-  String toString() {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     // We list them in reverse order because when adding two borders they end up
     // in the list in the opposite order of what the source looks like: a + b =>
     // [b, a]. We do this to make the painting code more optimal, and most of
-    // the rest of the code doesn't care, except toString() (for debugging).
-    return borders.reversed.map<String>((ShapeBorder border) => border.toString()).join(' + ');
+    // the rest of the code doesn't care, except for debugging.
+    properties.add(IterableProperty<ShapeBorder>('borders', borders.reversed, separator: ' + ', showName: false));
   }
 }
 

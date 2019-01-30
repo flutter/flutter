@@ -1455,15 +1455,18 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// [defaultValue] is used to indicate that a specific concrete value is not
   /// interesting to display.
   ///
-  /// The [style], [showName], and [level] arguments must not be null.
+  /// The [separator], [style], [showName], and [level] arguments must not be
+  /// null.
   IterableProperty(String name, Iterable<T> value, {
     Object defaultValue = kNoDefaultValue,
     String ifNull,
     String ifEmpty = '[]',
+    this.separator = ', ',
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     bool showName = true,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(style != null),
+  }) : assert(separator != null),
+       assert(style != null),
        assert(showName != null),
        assert(level != null),
        super(
@@ -1476,6 +1479,9 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     showName: showName,
     level: level,
   );
+
+  /// Separator to include between items in the iterable.
+  final String separator;
 
   @override
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
@@ -1491,7 +1497,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
       return '[${value.join(', ')}]';
     }
 
-    return value.join(style == DiagnosticsTreeStyle.singleLine ? ', ' : '\n');
+    return value.join(style == DiagnosticsTreeStyle.singleLine ? separator : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -2073,6 +2079,62 @@ class DiagnosticPropertiesBuilder {
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
     properties.add(property);
+  }
+
+  /// Adds a diagnostic containing just a string `message` and not a concrete
+  /// name or value.
+  ///
+  /// The [style] and [level] arguments must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [MessageProperty], which is better suited to messages that are to be
+  ///    formatted like a property with a separate name and message.
+  void addMessage(
+    String message, {
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) {
+    properties.add(DiagnosticsNode.message(message, style: style, level: level));
+  }
+
+  /// Adds a diagnostics property.
+  ///
+  /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
+  /// arguments must not be null.
+  ///
+  /// The [level] argument is just a suggestion and can be overridden if
+  /// something else about the property causes it to have a lower or higher
+  /// level. For example, if the property value is null and [missingIfNull] is
+  /// true, [level] is raised to [DiagnosticLevel.warning].
+  void addProperty<T>(
+    String name,
+    T value, {
+    String description,
+    String ifNull,
+    Object ifEmpty,
+    bool showName = true,
+    bool showSeparator = true,
+    Object defaultValue = kNoDefaultValue,
+    String tooltip,
+    bool missingIfNull = false,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) {
+    properties.add(DiagnosticsProperty<T>(
+      name,
+      value,
+      description: description,
+      ifNull: ifNull,
+      ifEmpty: ifEmpty,
+      showName: showName,
+      showSeparator: showSeparator,
+      defaultValue: defaultValue,
+      tooltip: tooltip,
+      missingIfNull: missingIfNull,
+      style: style,
+      level: level,
+    ));
   }
 
   /// List of properties accumulated so far.

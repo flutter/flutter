@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -121,8 +123,9 @@ class StadiumBorder extends ShapeBorder {
   int get hashCode => side.hashCode;
 
   @override
-  String toString() {
-    return '$runtimeType($side)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
   }
 }
 
@@ -269,9 +272,13 @@ class _StadiumToCircleBorder extends ShapeBorder {
   int get hashCode => hashValues(side, circleness);
 
   @override
-  String toString() {
-    return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% '
-           'of the way to being a CircleBorder)';
+  String toStringShort() => 'StadiumBorder';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
+    properties.add(PercentProperty('circleness', circleness, showName: false, tooltip: 'of the way to being a CircleBorder'));
   }
 }
 
@@ -411,10 +418,15 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   @override
   int get hashCode => hashValues(side, borderRadius, rectness);
 
+
   @override
-  String toString() {
-    return 'StadiumBorder($side, $borderRadius, '
-           '${(rectness * 100).toStringAsFixed(1)}% of the way to being a '
-           'RoundedRectangleBorder)';
+  String toStringShort() => 'StadiumBorder';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
+    properties.addProperty<BorderRadius>('borderRadius', borderRadius, showName: false);
+    properties.add(PercentProperty('circleness', rectness, showName: false, tooltip: 'of the way to being a RoundedRectangleBorder'));
   }
 }

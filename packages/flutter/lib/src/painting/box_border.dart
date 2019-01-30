@@ -516,19 +516,17 @@ class Border extends BoxBorder {
   int get hashCode => hashValues(top, right, bottom, left);
 
   @override
-  String toString() {
-    if (isUniform)
-      return '$runtimeType.all($top)';
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (right != BorderSide.none)
-      arguments.add('right: $right');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
-    if (left != BorderSide.none)
-      arguments.add('left: $left');
-    return '$runtimeType(${arguments.join(", ")})';
+  String toStringShort() => isUniform ? '$runtimeType.all' : '$runtimeType';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final DiagnosticLevel level = isUniform ? DiagnosticLevel.hidden : DiagnosticLevel.info;
+
+    properties.addProperty('top', top, defaultValue: BorderSide.none, level: DiagnosticLevel.info, showName: !isUniform);
+    properties.addProperty('right', top, defaultValue: BorderSide.none, level: level);
+    properties.addProperty('bottom', top, defaultValue: BorderSide.none, level: level);
+    properties.addProperty('left', top, defaultValue: BorderSide.none, level: level);
   }
 }
 
@@ -821,16 +819,11 @@ class BorderDirectional extends BoxBorder {
   int get hashCode => hashValues(top, start, end, bottom);
 
   @override
-  String toString() {
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (start != BorderSide.none)
-      arguments.add('start: $start');
-    if (end != BorderSide.none)
-      arguments.add('end: $end');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
-    return '$runtimeType(${arguments.join(", ")})';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty('top', top, defaultValue: BorderSide.none);
+    properties.addProperty('right', top, defaultValue: BorderSide.none);
+    properties.addProperty('bottom', top, defaultValue: BorderSide.none);
+    properties.addProperty('left', top, defaultValue: BorderSide.none);
   }
 }

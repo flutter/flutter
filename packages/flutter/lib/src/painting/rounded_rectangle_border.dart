@@ -135,8 +135,10 @@ class RoundedRectangleBorder extends ShapeBorder {
   int get hashCode => hashValues(side, borderRadius);
 
   @override
-  String toString() {
-    return '$runtimeType($side, $borderRadius)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
+    properties.addProperty<BorderRadiusGeometry>('borderRadius', borderRadius, showName: false);
   }
 }
 
@@ -296,7 +298,13 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
   int get hashCode => hashValues(side, borderRadius, circleness);
 
   @override
-  String toString() {
-    return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
+  String toStringShort() => 'RoundedRectangleBorder';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
+    properties.addProperty<BorderRadiusGeometry>('borderRadius', borderRadius, showName: false);
+    properties.add(PercentProperty('circleness', circleness, showName: false, tooltip: 'of the way to being a CircleBorder'));
   }
 }

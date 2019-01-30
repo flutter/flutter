@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -145,7 +147,9 @@ class BeveledRectangleBorder extends ShapeBorder {
   int get hashCode => hashValues(side, borderRadius);
 
   @override
-  String toString() {
-    return '$runtimeType($side, $borderRadius)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.addProperty<BorderSide>('side', side, showName: false);
+    properties.addProperty<BorderRadiusGeometry>('borderRadius', borderRadius, showName: false);
   }
 }
