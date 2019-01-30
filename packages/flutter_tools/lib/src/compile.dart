@@ -397,7 +397,7 @@ class ResidentCompiler {
   String _initializeFromDill;
   bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
-  bool _reloadRequestNeedsConfirmation = false;
+  bool _compileRequestNeedsConfirmation = false;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -437,6 +437,8 @@ class ResidentCompiler {
       );
     }
 
+    _compileRequestNeedsConfirmation = true;
+
     if (_server == null) {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
@@ -454,8 +456,6 @@ class ResidentCompiler {
       _server.stdin.writeln(_mapFileUri(fileUri, packageUriMapper));
     }
     _server.stdin.writeln(inputKey);
-
-    _reloadRequestNeedsConfirmation = true;
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -587,10 +587,10 @@ class ResidentCompiler {
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
   void accept() {
-    if (_reloadRequestNeedsConfirmation) {
+    if (_compileRequestNeedsConfirmation) {
       _server.stdin.writeln('accept');
     }
-    _reloadRequestNeedsConfirmation = false;
+    _compileRequestNeedsConfirmation = false;
   }
 
   /// Should be invoked when results of compilation are rejected by the client.
@@ -607,12 +607,12 @@ class ResidentCompiler {
   }
 
   Future<CompilerOutput> _reject() {
-    if (!_reloadRequestNeedsConfirmation) {
+    if (!_compileRequestNeedsConfirmation) {
       return Future<CompilerOutput>.value(null);
     }
     _stdoutHandler.reset();
     _server.stdin.writeln('reject');
-    _reloadRequestNeedsConfirmation = false;
+    _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput.future;
   }
 
