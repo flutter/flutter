@@ -346,6 +346,14 @@ class _CompileExpressionRequest extends _CompilationRequest {
       compiler._compileExpression(this);
 }
 
+class _RejectRequest extends _CompilationRequest {
+  _RejectRequest(Completer<CompilerOutput> completer): super(completer);
+
+  @override
+  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+      compiler._reject();
+}
+
 /// Wrapper around incremental frontend server compiler, that communicates with
 /// server via stdin/stdout.
 ///
@@ -389,6 +397,7 @@ class ResidentCompiler {
   String _initializeFromDill;
   bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
+  bool _reloadRequestNeedsConfirmation = false;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -445,6 +454,8 @@ class ResidentCompiler {
       _server.stdin.writeln(_mapFileUri(fileUri, packageUriMapper));
     }
     _server.stdin.writeln(inputKey);
+
+    _reloadRequestNeedsConfirmation = true;
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -576,14 +587,33 @@ class ResidentCompiler {
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
   void accept() {
-    _server.stdin.writeln('accept');
+    if (_reloadRequestNeedsConfirmation) {
+      _server.stdin.writeln('accept');
+    }
+    _reloadRequestNeedsConfirmation = false;
   }
 
   /// Should be invoked when results of compilation are rejected by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
-  void reject() {
+  Future<CompilerOutput> reject() {
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    _controller.add(_RejectRequest(completer));
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _reject() {
+    if (!_reloadRequestNeedsConfirmation) {
+      return Future.value(null);
+    }
+    _stdoutHandler.reset();
     _server.stdin.writeln('reject');
+    _reloadRequestNeedsConfirmation = false;
+    return _stdoutHandler.compilerOutput.future;
   }
 
   /// Should be invoked when frontend server compiler should forget what was
