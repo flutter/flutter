@@ -222,7 +222,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
   /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
@@ -720,7 +720,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
     assert(() {
@@ -1223,7 +1223,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
       if (!_runningAsyncTasks)
