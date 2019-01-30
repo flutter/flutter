@@ -552,9 +552,11 @@ class _RenderDecoration extends RenderBox {
     @required TextDirection textDirection,
     @required TextBaseline textBaseline,
     @required bool isFocused,
+    @required this.expands,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
+       assert(expands != null),
        _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
@@ -709,6 +711,8 @@ class _RenderDecoration extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  final bool expands;
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -810,7 +814,8 @@ class _RenderDecoration extends RenderBox {
   // in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
-    BoxConstraints boxConstraints = layoutConstraints.loosen();
+    BoxConstraints boxConstraints = expands
+      ? layoutConstraints : layoutConstraints.loosen();
     double aboveBaseline = 0.0;
     double belowBaseline = 0.0;
     void layoutLineBox(RenderBox box) {
@@ -1370,15 +1375,18 @@ class _Decorator extends RenderObjectWidget {
     @required this.textDirection,
     @required this.textBaseline,
     @required this.isFocused,
+    @required this.expands,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
+       assert(expands != null),
        super(key: key);
 
   final _Decoration decoration;
   final TextDirection textDirection;
   final TextBaseline textBaseline;
   final bool isFocused;
+  final bool expands;
 
   @override
   _RenderDecorationElement createElement() => _RenderDecorationElement(this);
@@ -1390,6 +1398,7 @@ class _Decorator extends RenderObjectWidget {
       textDirection: textDirection,
       textBaseline: textBaseline,
       isFocused: isFocused,
+      expands: expands,
     );
   }
 
@@ -1461,6 +1470,7 @@ class InputDecorator extends StatefulWidget {
     this.baseStyle,
     this.textAlign,
     this.isFocused = false,
+    this.expands = false,
     this.isEmpty = false,
     this.child,
   }) : assert(isFocused != null),
@@ -1494,6 +1504,14 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isFocused;
+
+  /// Whether the input field can expand its height to fill its parent.
+  ///
+  /// If wrapped in a widget that lays out its child's height, like Expanded or
+  /// Flex, the input field will only be affected if [expands] is set to true.
+  ///
+  /// Defaults to false.
+  final bool expands;
 
   /// Whether the input field is empty.
   ///
@@ -1533,6 +1551,7 @@ class InputDecorator extends StatefulWidget {
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isFocused', isFocused));
+    properties.add(DiagnosticsProperty<bool>('expands', expands));
     properties.add(DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 }
@@ -1928,6 +1947,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textDirection: textDirection,
       textBaseline: textBaseline,
       isFocused: isFocused,
+      expands: widget.expands,
     );
   }
 }

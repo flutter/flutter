@@ -1322,6 +1322,10 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  /*
+  @override
+  final bool sizedByParent = true;
+  */
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
