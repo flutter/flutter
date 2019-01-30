@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/string_view.h"
 #include "flutter/shell/version/version.h"
@@ -121,6 +122,17 @@ static bool GetSwitchValue(const fml::CommandLine& command_line,
   return false;
 }
 
+std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix) {
+  fml::RefPtr<fml::NativeLibrary> proc_library =
+      fml::NativeLibrary::CreateForCurrentProcess();
+  const uint8_t* mapping =
+      proc_library->ResolveSymbol((symbol_prefix + "_start").c_str());
+  const intptr_t size = reinterpret_cast<intptr_t>(
+      proc_library->ResolveSymbol((symbol_prefix + "_size").c_str()));
+  FML_CHECK(mapping && size) << "Unable to resolve symbols: " << symbol_prefix;
+  return std::make_unique<fml::NonOwnedMapping>(mapping, size);
+}
+
 blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   blink::Settings settings = {};
 
@@ -213,6 +225,14 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
                               &settings.icu_data_path);
+  if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
+    std::string icu_symbol_prefix;
+    command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),
+                                &icu_symbol_prefix);
+    settings.icu_mapper = [icu_symbol_prefix] {
+      return GetSymbolMapping(icu_symbol_prefix);
+    };
+  }
 
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
