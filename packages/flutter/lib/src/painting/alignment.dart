@@ -162,7 +162,7 @@ abstract class AlignmentGeometry {
 /// the point (x * w/2 + w/2, y * h/2 + h/2) in the coordinate system of the
 /// rectangle.
 ///
-/// [Alignment] use visual coordinates, which means increasing [x] moves the
+/// [Alignment] uses visual coordinates, which means increasing [x] moves the
 /// point from left to right. To support layouts with a right-to-left
 /// [TextDirection], consider using [AlignmentDirectional], in which the
 /// direction the point moves when increasing the horizontal value depends on
