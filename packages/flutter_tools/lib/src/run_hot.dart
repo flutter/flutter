@@ -436,7 +436,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
     final Completer<void> completer = Completer<void>();
-    Future.wait(futures).whenComplete(() { completer.complete(null); }); // ignore: unawaited_futures
+    Future.wait(futures).whenComplete(() { completer.complete(null); });
     return completer.future;
   }
 
