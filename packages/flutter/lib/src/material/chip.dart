@@ -112,7 +112,7 @@ abstract class ChipAttributes {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   MaterialTapTargetSize get materialTapTargetSize;
 
-  /// Elevation to be applied on the chip relative to its parent
+  /// Elevation to be applied on the chip relative to its parent.
   ///
   /// This controls the size of the shadow below the chip.
   ///
