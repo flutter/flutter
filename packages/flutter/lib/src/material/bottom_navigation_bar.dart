@@ -231,35 +231,38 @@ class _BottomNavigationTile extends StatelessWidget {
     }
 
     return Expanded(
-      child: Semantics(
-        container: true,
-        header: true,
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _TileIcon(
-                    type: type,
-                    colorTween: colorTween,
-                    animation: animation,
-                    iconSize: iconSize,
-                    selected: selected,
-                    item: item,
-                  ),
-                  label,
-                ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: Semantics(
+          container: true,
+          header: true,
+          selected: selected,
+          child: Stack(
+            children: <Widget>[
+              InkResponse(
+                onTap: onTap,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _TileIcon(
+                      type: type,
+                      colorTween: colorTween,
+                      animation: animation,
+                      iconSize: iconSize,
+                      selected: selected,
+                      item: item,
+                    ),
+                    label,
+                  ],
+                ),
               ),
-            ),
-            Semantics(
-              label: indexLabel,
-            )
-          ],
+              Semantics(
+                label: indexLabel,
+              )
+            ],
+          ),
         ),
       ),
     );
