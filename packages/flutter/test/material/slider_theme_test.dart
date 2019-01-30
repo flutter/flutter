@@ -101,7 +101,7 @@ void main() {
   });
 
   testWidgets('SliderThemeData assigns the correct default shapes', (WidgetTester tester) async {
-    final SliderThemeData sliderTheme = _createDefaultSliderTheme();
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme;
     expect(sliderTheme.trackShape, equals(isInstanceOf<RectangularSliderTrackShape>()));
     expect(sliderTheme.tickMarkShape, equals(isInstanceOf<RoundSliderTickMarkShape>()));
     expect(sliderTheme.thumbShape, equals(isInstanceOf<RoundSliderThumbShape>()));
@@ -110,7 +110,7 @@ void main() {
   });
 
   testWidgets('SliderThemeData assigns the correct default flags', (WidgetTester tester) async {
-    final SliderThemeData sliderTheme = _createDefaultSliderTheme();
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme;
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
   });
 
@@ -181,9 +181,7 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
     double value = 0.25;
-    Widget buildApp({
-      bool enabled = true,
-    }) {
+    Widget buildApp({ bool enabled = true }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -210,10 +208,10 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
-        sliderBox,
-        paints
-          ..rect(rect: Rect.fromLTRB(16.0, 299.0, 208.0, 301.0), color: sliderTheme.activeTrackColor)
-          ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor)
+      sliderBox,
+      paints
+        ..rect(rect: Rect.fromLTRB(16.0, 299.0, 208.0, 301.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor)
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
@@ -221,10 +219,10 @@ void main() {
     // The disabled thumb is smaller so the track has to paint longer to get
     // to the edge.
     expect(
-        sliderBox,
-        paints
-          ..rect(rect: Rect.fromLTRB(16.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
-          ..rect(rect: Rect.fromLTRB(214.0, 299.0, 784.0, 301.0), color: sliderTheme.disabledInactiveTrackColor)
+      sliderBox,
+      paints
+        ..rect(rect: Rect.fromLTRB(16.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 299.0, 784.0, 301.0), color: sliderTheme.disabledInactiveTrackColor)
     );
   });
 
@@ -235,9 +233,7 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
     double value = 0.25;
-    Widget buildApp({
-      bool enabled = true,
-    }) {
+    Widget buildApp({ bool enabled = true }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -265,14 +261,14 @@ void main() {
 
     // With no touch, paints only the thumb.
     expect(
-        sliderBox,
-        paints
-          ..circle(
-            color: sliderTheme.thumbColor,
-            x: 208.0,
-            y: 300.0,
-            radius: 6.0,
-          )
+      sliderBox,
+      paints
+        ..circle(
+          color: sliderTheme.thumbColor,
+          x: 208.0,
+          y: 300.0,
+          radius: 6.0,
+        )
     );
 
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -282,34 +278,34 @@ void main() {
 
     // After touch, paints thumb and overlay.
     expect(
-        sliderBox,
-        paints
-          ..circle(
-            color: sliderTheme.overlayColor,
-            x: 208.0,
-            y: 300.0,
-            radius: 16.0,
-          )
-          ..circle(
-            color: sliderTheme.thumbColor,
-            x: 208.0,
-            y: 300.0,
-            radius: 6.0,
-          )
+      sliderBox,
+      paints
+        ..circle(
+          color: sliderTheme.overlayColor,
+          x: 208.0,
+          y: 300.0,
+          radius: 16.0,
+        )
+        ..circle(
+          color: sliderTheme.thumbColor,
+          x: 208.0,
+          y: 300.0,
+          radius: 6.0,
+        )
     );
 
     await gesture.up();
     await tester.pumpAndSettle();
     // After the gesture is up and complete, it again paints only the thumb.
     expect(
-        sliderBox,
-        paints
-          ..circle(
-            color: sliderTheme.thumbColor,
-            x: 208.0,
-            y: 300.0,
-            radius: 6.0,
-          )
+      sliderBox,
+      paints
+        ..circle(
+          color: sliderTheme.thumbColor,
+          x: 208.0,
+          y: 300.0,
+          radius: 6.0,
+        )
     );
   });
 
@@ -359,25 +355,25 @@ void main() {
     await tester.pumpWidget(buildApp(divisions: 3));
     await tester.pumpAndSettle(); // wait for disable animation
     expect(
-        sliderBox,
-        paints
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.thumbColor, radius: 6.0)
+      sliderBox,
+      paints
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..circle(color: sliderTheme.thumbColor, radius: 6.0)
     );
 
     await tester.pumpWidget(buildApp(divisions: 3, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
     expect(
-        sliderBox,
-        paints
-          ..circle(color: sliderTheme.disabledActiveTickMarkColor)
-          ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
-          ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
-          ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
-          ..circle(color: sliderTheme.disabledThumbColor, radius: 4.0)
+      sliderBox,
+      paints
+        ..circle(color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
+        ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
+        ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
+        ..circle(color: sliderTheme.disabledThumbColor, radius: 4.0)
     );
   });
 
@@ -422,17 +418,18 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -40.0),
-              const Offset(15.9, -40.0),
-              const Offset(-15.9, -40.0),
-            ],
-            excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -40.0),
+            const Offset(15.9, -40.0),
+            const Offset(-15.9, -40.0),
+          ],
+          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
+        )
+    );
 
     await gesture.up();
 
@@ -443,17 +440,18 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -40.0),
-              const Offset(35.9, -40.0),
-              const Offset(-35.9, -40.0),
-            ],
-            excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -40.0),
+            const Offset(35.9, -40.0),
+            const Offset(-35.9, -40.0),
+          ],
+          excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
+        )
+    );
     await gesture.up();
 
     // Test that it avoids the left edge of the screen.
@@ -463,17 +461,18 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -40.0),
-              const Offset(98.0, -40.0),
-              const Offset(-16.0, -40.0),
-            ],
-            excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -40.0),
+            const Offset(98.0, -40.0),
+            const Offset(-16.0, -40.0),
+          ],
+          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
+        )
+    );
     await gesture.up();
 
     // Test that it avoids the right edge of the screen.
@@ -483,17 +482,18 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -40.0),
-              const Offset(16.0, -40.0),
-              const Offset(-98.0, -40.0),
-            ],
-            excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -40.0),
+            const Offset(16.0, -40.0),
+            const Offset(-98.0, -40.0),
+          ],
+          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
+        )
+    );
     await gesture.up();
 
     // Test that the neck stretches when the text scale gets smaller.
@@ -503,22 +503,23 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -49.0),
-              const Offset(90.0, -49.0),
-              const Offset(-24.0, -49.0),
-            ],
-            excludes: <Offset>[
-              const Offset(98.0, -32.0),  // inside full size, outside small
-              const Offset(-16.0, -32.0),  // inside full size, outside small
-              const Offset(90.1, -49.0),
-              const Offset(-24.1, -49.0),
-            ],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -49.0),
+            const Offset(90.0, -49.0),
+            const Offset(-24.0, -49.0),
+          ],
+          excludes: <Offset>[
+            const Offset(98.0, -32.0),  // inside full size, outside small
+            const Offset(-16.0, -32.0),  // inside full size, outside small
+            const Offset(90.1, -49.0),
+            const Offset(-24.1, -49.0),
+          ],
+        )
+    );
     await gesture.up();
 
     // Test that the neck shrinks when the text scale gets larger.
@@ -528,33 +529,23 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
-        paints
-          ..path(
-            color: sliderTheme.valueIndicatorColor,
-            includes: <Offset>[
-              const Offset(0.0, -38.8),
-              const Offset(98.0, -38.8),
-              const Offset(-16.0, -38.8),
-              const Offset(10.0, -23.0), // Inside large, outside scale=1.0
-              const Offset(-4.0, -23.0), // Inside large, outside scale=1.0
-            ],
-            excludes: <Offset>[
-              const Offset(98.5, -38.8),
-              const Offset(-16.1, -38.8),
-            ],
-          ));
+      sliderBox,
+      paints
+        ..path(
+          color: sliderTheme.valueIndicatorColor,
+          includes: <Offset>[
+            const Offset(0.0, -38.8),
+            const Offset(98.0, -38.8),
+            const Offset(-16.0, -38.8),
+            const Offset(10.0, -23.0), // Inside large, outside scale=1.0
+            const Offset(-4.0, -23.0), // Inside large, outside scale=1.0
+          ],
+          excludes: <Offset>[
+            const Offset(98.5, -38.8),
+            const Offset(-16.1, -38.8),
+          ],
+        )
+    );
     await gesture.up();
   });
-}
-
-SliderThemeData _createDefaultSliderTheme() {
-  // The fromPrimaryColors constructor is chosen because it is the quickest
-  // way to create a SliderThemeData. The values are not important.
-  return SliderThemeData.fromPrimaryColors(
-    primaryColor: Colors.black,
-    primaryColorDark: Colors.black,
-    primaryColorLight: Colors.black,
-    valueIndicatorTextStyle: ThemeData.fallback().textTheme.body1,
-  );
 }

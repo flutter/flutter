@@ -728,7 +728,7 @@ abstract class SliderTickMarkShape {
     bool isEnabled,
   });
 
-  /// Paints the sliders track.
+  /// Paints the slider track.
   ///
   /// {@macro flutter.material.slider.shape.context}
   ///
