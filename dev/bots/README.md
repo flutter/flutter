@@ -77,7 +77,7 @@ The typical cycle for editing a recipe is:
 
 1. Make your edits (probably to files in
    `//chrome_infra/build/scripts/slave/recipes/flutter`).
-1. Update the tests. Run `build/scripts/slave/recipes.py --use-bootstrap test
+1. Update the tests. Run `build/scripts/slave/recipes.py test
    train` to update existing expected output to match the new output. Verify
    completely new test cases by altering the `GenTests` method of the recipe.
    The recipe is required to have 100% test coverage.
