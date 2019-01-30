@@ -1,4 +1,4 @@
-Signature: 9fbc0d30a3a9de96a9a329b406654e52
+Signature: eeafbd18a447691d6b04247ac2d41ecc
 
 UNUSED LICENSES:
 
@@ -1334,7 +1334,6 @@ FILE: ../../../third_party/skia/src/compute/skc/styling.c
 FILE: ../../../third_party/skia/src/compute/skc/styling.h
 FILE: ../../../third_party/skia/src/compute/skc/styling_types.h
 FILE: ../../../third_party/skia/src/compute/skc/tile.h
-FILE: ../../../third_party/skia/src/core/Sk4x4f.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
 FILE: ../../../third_party/skia/src/core/SkATrace.h
 FILE: ../../../third_party/skia/src/core/SkAnnotationKeys.h
@@ -5033,9 +5032,18 @@ ORIGIN: ../../../third_party/skia/gm/skbug_8664.cpp + ../../../third_party/skia/
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
+FILE: ../../../third_party/skia/include/private/GrContext_Base.h
+FILE: ../../../third_party/skia/include/private/GrImageContext.h
+FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
+FILE: ../../../third_party/skia/src/gpu/GrBaseContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxy.cpp
+FILE: ../../../third_party/skia/src/gpu/GrContext_Base.cpp
+FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrImageContextPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDefines.h
