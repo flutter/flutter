@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart' as convert;
@@ -76,14 +77,22 @@ class FlutterManifest {
   /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
+  // Flag to avoid printing multiple invalid version messages.
+  bool _hasShowInvalidVersionMsg = false;
+
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String get appVersion {
     final String version = _descriptor['version']?.toString();
-    if (version != null && _versionPattern.hasMatch(version))
-      return version;
-    else
-      return null;
+    if (version != null) {
+      if (_versionPattern.hasMatch(version)) {
+        return version;
+      } else if (!_hasShowInvalidVersionMsg) {
+        printStatus(userMessages.invalidVersionSettingHintMessage(version), emphasis: true);
+        _hasShowInvalidVersionMsg = true;
+      }
+    }
+    return null;
   }
 
   /// The build version name from the `pubspec.yaml` file.
