@@ -7,6 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// scrolling by this offset will move the picker to the next item
+const Offset _kRowOffset = Offset(0.0, -32.0);
+
 void main() {
   group('Countdown timer picker', () {
     testWidgets('onTimerDurationChanged is not null', (WidgetTester tester) async {
@@ -541,6 +544,57 @@ void main() {
       );
     });
 
+    testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
+      DateTime date;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+              initialDateTime: DateTime(2019, 1, 1, 3),
+            ),
+          ),
+        ),
+      );
+
+      // 3:00 -> 15:00
+
+      await tester.drag(find.text('AM'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 15));
+
+      // 15:00 -> 16:00
+
+      await tester.drag(find.text('3'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 16));
+
+      // 16:00 -> 4:00
+
+      await tester.drag(find.text('PM'), -_kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 4));
+
+      // 4:00 -> 3:00
+
+      await tester.drag(find.text('4'), -_kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 3));
+    });
+
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
@@ -559,12 +613,9 @@ void main() {
         ),
       );
 
-      // scrolling by this offset will increase the hour column by 1
-      const Offset hourOffset = Offset(0.0, -32.0);
-
       // 11:59 -> 12:59
 
-      await tester.drag(find.text('11'), hourOffset);
+      await tester.drag(find.text('11'), _kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -572,7 +623,7 @@ void main() {
 
       // 12:59 -> 11:59
 
-      await tester.drag(find.text('12'), -hourOffset);
+      await tester.drag(find.text('12'), -_kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -580,7 +631,7 @@ void main() {
 
       // 11:59 -> 9:59
 
-      await tester.drag(find.text('11'), -hourOffset * 2);
+      await tester.drag(find.text('11'), -_kRowOffset * 2);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -588,7 +639,7 @@ void main() {
 
       // 9:59 -> 15:59
 
-      await tester.drag(find.text('9'), hourOffset * 6);
+      await tester.drag(find.text('9'), _kRowOffset * 6);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
