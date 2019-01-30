@@ -231,7 +231,7 @@ class BuildRunner {
   String _updateBuildScript(String source) {
     const String imports = r'''
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as path; // ignore: ignore: package_path_import
 import 'package:build_runner_core/build_runner_core.dart';
 import 'package:build_runner/src/entrypoint/build.dart';
 import 'package:build_runner/src/entrypoint/clean.dart';
