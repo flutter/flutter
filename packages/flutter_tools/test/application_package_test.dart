@@ -26,33 +26,33 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 
 void main() {
   group('ApkManifestData', () {
-    test('Select explicity enabled, launcher and main activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledActivity);
+    test('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    test('Select default enabled, launcher and main activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledActivity);
+    test('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    testUsingContext('Error on no enabled activity', () {
+    testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
-    testUsingContext('Error on no main activity', () {
+    testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
       expect(data, isNull);
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     });
-    testUsingContext('Error on no launcher activity', () {
+    testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
       final BufferLogger logger = context[Logger];
@@ -175,7 +175,7 @@ void main() {
   });
 }
 
-const String _aaptDataWithExplicitEnabledActivity =
+const String _aaptDataWithExplicitEnabledAndMainLauncherActivity =
 '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
@@ -216,7 +216,7 @@ const String _aaptDataWithExplicitEnabledActivity =
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
 
-const String _aaptDataWithDefaultEnabledActivity =
+const String _aaptDataWithDefaultEnabledAndMainLauncherActivity =
 '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
