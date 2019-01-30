@@ -214,6 +214,7 @@ class MediaQueryData {
     Size size,
     double devicePixelRatio,
     double textScaleFactor,
+    ui.Brightness platformBrightness,
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,

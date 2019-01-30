@@ -176,7 +176,7 @@ class MaterialApp extends StatefulWidget {
   /// apps to go into "dark mode".
   ///
   /// See also
-  ///  - [MediaQueryData.platformBrightness], which is used to toggle between
+  ///  * [MediaQueryData.platformBrightness], which is used to toggle between
   ///    [theme] and [darkTheme] within [MaterialApp].
   final ThemeData darkTheme;
 
