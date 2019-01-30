@@ -779,7 +779,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// class WeatherRouteArguments {
-  ///   WeatherRouteArguments(this.city, this.country);
+  ///   WeatherRouteArguments({ this.city, this.country });
   ///   final String city;
   ///   final String country;
   ///
