@@ -59,12 +59,11 @@ typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding sche
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
-    // ignore: prefer_asserts_in_initializer_lists
+    completer = Completer<T>();
     assert(() {
       debugStack = StackTrace.current;
       return true;
     }());
-    completer = Completer<T>();
   }
   final TaskCallback<T> task;
   final int priority;

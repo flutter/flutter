@@ -37,7 +37,7 @@ class Usage {
     _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
         // Analyzer doesn't recognize that [Directory] objects match up due to a
         // conditional import.
-        // ignore: argument_type_not_assignable
+
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.

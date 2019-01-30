@@ -144,8 +144,8 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';  // ignore: dart_convert_import
-import 'dart:io';  // ignore: dart_io_import
+import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -497,7 +497,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // Callback can't throw since it's just setting a variable.
       controller.sink.done.whenComplete(() { // ignore: unawaited_futures
         controllerSinkClosed = true;
-      }); // ignore: unawaited_futures
+      });
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);

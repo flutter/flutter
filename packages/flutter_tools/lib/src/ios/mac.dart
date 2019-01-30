@@ -163,7 +163,7 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
-        // Ignore: return null below.
+        // Intentionally left empty.
       }
     }
     return _xcodeSelectPath;

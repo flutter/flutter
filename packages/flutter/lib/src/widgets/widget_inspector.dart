@@ -1855,7 +1855,7 @@ mixin WidgetInspectorService {
   /// is required as injecting creation locations requires a
   /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
   bool isWidgetCreationTracked() {
-    _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
+    _widgetCreationTracked ??= _WidgetForTypeTests() is HasCreationLocation;
     return _widgetCreationTracked;
   }
 
@@ -2010,10 +2010,10 @@ class _ElementLocationStatsTracker {
   /// the creation location is local to the current project.
   void add(Element element) {
     final Object widget = element.widget;
-    if (widget is! _HasCreationLocation) {
+    if (widget is! HasCreationLocation) {
       return;
     }
-    final _HasCreationLocation creationLocationSource = widget;
+    final HasCreationLocation creationLocationSource = widget;
     final _Location location = creationLocationSource._location;
     final int id = _toLocationId(location);
 
@@ -2744,8 +2744,8 @@ const TextStyle _messageStyle = TextStyle(
 /// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
-// ignore: unused_element
-abstract class _HasCreationLocation {
+
+abstract class HasCreationLocation {
   _Location get _location;
 }
 
@@ -2814,7 +2814,7 @@ class _Location {
 /// Currently creation locations are only available for [Widget] and [Element]
 _Location _getCreationLocation(Object object) {
   final Object candidate =  object is Element ? object.widget : object;
-  return candidate is _HasCreationLocation ? candidate._location : null;
+  return candidate is HasCreationLocation ? candidate._location : null;
 }
 
 // _Location objects are always const so we don't need to worry about the GC
