@@ -168,7 +168,6 @@ class CupertinoDatePicker extends StatefulWidget {
   CupertinoDatePicker({
     this.mode = CupertinoDatePickerMode.dateAndTime,
     @required this.onDateTimeChanged,
-    // ignore: always_require_non_null_named_parameters
     DateTime initialDateTime,
     this.minimumDate,
     this.maximumDate,
@@ -179,32 +178,33 @@ class CupertinoDatePicker extends StatefulWidget {
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
-       assert(initialDateTime != null),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !initialDateTime.isBefore(minimumDate),
-         'initial date is before minimum date',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !initialDateTime.isAfter(maximumDate),
-         'initial date is after maximum date',
-       ),
        assert(minimumYear != null),
-       assert(
-         mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && initialDateTime.year >= minimumYear),
-         'initial year is not greater than minimum year, or mininum year is not positive',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.date || maximumYear == null || initialDateTime.year <= maximumYear,
-         'initial year is not smaller than maximum year',
-       ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
-       ),
-       assert(
-         initialDateTime.minute % minuteInterval == 0,
-         'initial minute is not divisible by minute interval',
-       );
+       ) {
+    assert(this.initialDateTime != null);
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate),
+      'initial date is before minimum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !this.initialDateTime.isAfter(maximumDate),
+      'initial date is after maximum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
+      'initial year is not greater than minimum year, or mininum year is not positive',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear,
+      'initial year is not smaller than maximum year',
+    );
+    assert(
+      this.initialDateTime.minute % minuteInterval == 0,
+      'initial minute is not divisible by minute interval',
+    );
+  }
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode].
   /// Defaults to [CupertinoDatePickerMode.dateAndTime]. Cannot be null and
