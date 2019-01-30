@@ -206,8 +206,9 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   }
 
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
-    if (reverseCrossAxis)
-      return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent;
+    // this line is causing issue https://github.com/flutter/flutter/issues/27151
+    //if (reverseCrossAxis)
+      //return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent;
     return crossAxisStart;
   }
 
