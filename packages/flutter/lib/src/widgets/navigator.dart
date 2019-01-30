@@ -317,6 +317,8 @@ class RouteSettings {
   final bool isInitialRoute;
 
   /// The arguments passed to this route.
+  ///
+  /// May be used when building the route, e.g. in [Navigator.onGenerateRoute].
   final Object arguments;
 
   @override
@@ -736,6 +738,9 @@ class Navigator extends StatefulWidget {
   /// [RouteSettings.arguments]. Any object can be passed as `arguments` (e.g. a
   /// [String], [int], or an instance of a custom `MyRouteArguments` class).
   /// Often, a [Map] is used to pass key-value pairs.
+  ///
+  /// The `arguments` may be used in [Navigator.onGenerateRoute] or
+  /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
   /// {@tool sample}
