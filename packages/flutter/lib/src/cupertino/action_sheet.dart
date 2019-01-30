@@ -176,6 +176,7 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return Container(
+      color: _kBackgroundColor,
       child: _CupertinoAlertActionSection(
         children: actions,
         scrollController: actionScrollController,
