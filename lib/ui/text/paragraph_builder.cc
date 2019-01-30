@@ -183,8 +183,10 @@ void decodeStrut(Dart_Handle strut_data,
         static_cast<txt::FontStyle>(uint8_data[byte_count++]);
   }
 
-  float float_data[byte_data.length_in_bytes() - byte_count / 4];
-  memcpy(float_data, static_cast<const char*>(byte_data.data()) + byte_count,
+  std::vector<float> float_data;
+  float_data.resize((byte_data.length_in_bytes() - byte_count) / 4);
+  memcpy(float_data.data(),
+         static_cast<const char*>(byte_data.data()) + byte_count,
          byte_data.length_in_bytes() - byte_count);
   size_t float_count = 0;
   if (mask & sFontSizeMask) {
