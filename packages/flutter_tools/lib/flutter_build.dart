@@ -4,7 +4,7 @@
 
 import 'package:build/build.dart';
 
-import 'src/kernel_builder.dart';
+import 'src/build/kernel_builder.dart';
 
 /// Utility method called by build_runner to generate a build script.
 ///
