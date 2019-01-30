@@ -35,6 +35,14 @@ const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
 
+// An eyeballed value that moves the cursor slightly left of where it is
+// rendered for text on Android so it's positioning more accurately matches the
+// native iOS text cursor positioning.
+//
+// This value is in device pixels, not logical pixels as is typically used
+// throughout the codebase.
+const int _iOSHorizontalCursorOffsetPixels = -2;
+
 /// Visibility of text field overlays based on the state of the current text entry.
 ///
 /// Used to toggle the visibility behavior of the optional decorating widgets
@@ -163,7 +171,7 @@ class CupertinoTextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
-    this.cursorRadius,
+    this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor = CupertinoColors.activeBlue,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
@@ -598,6 +606,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final TextEditingController controller = _effectiveController;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
@@ -631,6 +640,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
           cursorColor: widget.cursorColor,
+          cursorOpacityAnimates: true,
+          cursorOffset: cursorOffset,
+          paintCursorAboveText: true,
           backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,

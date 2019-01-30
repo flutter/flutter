@@ -277,6 +277,65 @@ void main() {
     await checkCursorToggle();
   });
 
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
+        ),
+      ),
+    );
+
+    final Finder textFinder = find.byType(TextField);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 16);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
@@ -305,6 +364,7 @@ void main() {
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -321,9 +381,11 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.0.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -341,6 +403,7 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.1.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
@@ -1469,7 +1532,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1478,7 +1541,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1501,7 +1564,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1510,7 +1573,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    expect(topLeft.dx, equals(401.0));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
@@ -1723,7 +1786,7 @@ void main() {
 
     scrollableState = tester.firstState(find.byType(Scrollable));
     // For a horizontal input, scrolls to the exact position of the caret.
-    expect(scrollableState.position.pixels, equals(222.0));
+    expect(scrollableState.position.pixels, equals(223.0));
   });
 
   testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
@@ -3130,7 +3193,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
     );
 
-    expect(topLeft.dx, equals(701.0));
+    expect(topLeft.dx, equals(701.6666870117188));
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -3150,7 +3213,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
     );
 
-    expect(topLeft.dx, equals(160.0));
+    expect(topLeft.dx, equals(160.6666717529297));
   });
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
