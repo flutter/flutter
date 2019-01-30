@@ -23,7 +23,7 @@ import 'basic_types.dart';
 /// Strut is defined independently from any text content or [TextStyle]s.
 ///
 /// The vertical components of strut are as follows:
-/// 
+///
 ///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
 ///  * `ascent * height`
 ///  * `descent * height`
@@ -41,7 +41,7 @@ import 'basic_types.dart';
 /// Each line's spacing above the baseline will be at least as tall as the half
 /// leading plus ascent. Each line's spacing below the baseline will be at least as
 /// tall as the half leading plus descent.
-/// 
+///
 /// ### Fields and their default values.
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -374,7 +374,7 @@ class StrutStyle extends Diagnosticable {
   ///
   /// This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
-  /// 
+  ///
   /// This is equivalent to setting [TextStyle.height] to zero for all [TextStyle]s
   /// in the paragraph. Since the height of each line is calculated as a max of the
   /// metrics of each run of text, zero height [TextStyle]s cause the minimums
