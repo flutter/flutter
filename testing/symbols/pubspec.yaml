@@ -1,3 +1,4 @@
 name: verify_exported
 dependencies:
   path: 1.6.2
+  collection: 1.14.11
