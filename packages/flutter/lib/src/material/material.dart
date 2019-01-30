@@ -291,7 +291,7 @@ class Material extends StatefulWidget {
     properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
     properties.add(EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
