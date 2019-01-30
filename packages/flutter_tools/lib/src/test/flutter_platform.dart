@@ -926,8 +926,9 @@ class _FlutterPlatform extends PlatformPlugin {
       command.add('--ipv6');
     }
 
-    command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-checked-mode',
+      '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-dart-profiling',
