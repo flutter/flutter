@@ -32,7 +32,7 @@ void main() {
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    test('Select default enabled,launcher and main activity', () {
+    test('Select default enabled, launcher and main activity', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -305,7 +305,7 @@ const String _aaptDataWithNoMainActivity =
       E: activity (line=34)
         A: android:theme(0x01010000)=@0x1030009
         A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-        A: android:enabled(0x0101000e)=(type 0x12)0x0
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
         A: android:launchMode(0x0101001d)=(type 0x10)0x1
         A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
         A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
@@ -333,7 +333,7 @@ const String _aaptDataWithNoLauncherActivity =
       E: activity (line=34)
         A: android:theme(0x01010000)=@0x1030009
         A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-        A: android:enabled(0x0101000e)=(type 0x12)0x0
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
         A: android:launchMode(0x0101001d)=(type 0x10)0x1
         A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
         A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10

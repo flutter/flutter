@@ -159,14 +159,17 @@ class AndroidApk extends ApplicationPackage {
     String launchActivity;
     for (xml.XmlElement activity in document.findAllElements('activity')) {
       final String enabled = activity.getAttribute('android:enabled');
-      if (enabled != null && enabled == 'false')
+      if (enabled != null && enabled == 'false') {
         continue;
+      }
+
       for (xml.XmlElement element in activity.findElements('intent-filter')) {
         String actionName = '';
         String categoryName = '';
         for (xml.XmlNode node in element.children) {
-          if (!(node is xml.XmlElement))
+          if (!(node is xml.XmlElement)) {
             continue;
+          }
           final xml.XmlElement xmlElement = node;
           final String name = xmlElement.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
@@ -454,23 +457,28 @@ class ApkManifestData {
     _Element launchActivity;
     for (_Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
-      final Iterable<_Element> intentFilters =
-          activity.allElements('intent-filter').cast<_Element>();
-      if (enabled!=null && !enabled.value.contains('0xffffffff'))
+      final Iterable<_Element> intentFilters = activity
+          .allElements('intent-filter')
+          .cast<_Element>();
+      final bool isEnabledByDefault = enabled == null;
+      final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
+      if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
+      }
+
       for (_Element element in intentFilters) {
         final _Element action = element.firstElement('action');
         final _Element category = element.firstElement('category');
-        final String actionAttributeValue =
-            action?.firstAttribute('android:name')?.value;
+        final String actionAttributeValue = action
+            ?.firstAttribute('android:name')
+            ?.value;
         final String categoryAttributeValue =
             category?.firstAttribute('android:name')?.value;
-        if ((actionAttributeValue != null &&
-                actionAttributeValue
-                    .startsWith('"android.intent.action.MAIN"')) &&
-            (categoryAttributeValue != null &&
-                categoryAttributeValue
-                    .startsWith('"android.intent.category.LAUNCHER"'))) {
+        final bool isMainAction = actionAttributeValue != null &&
+            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
+        final bool isLauncherCategory = categoryAttributeValue != null &&
+            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
+        if (isMainAction && isLauncherCategory) {
           launchActivity = activity;
           break;
         }
