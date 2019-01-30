@@ -744,7 +744,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _didPushButton() {
-  ///   Navigator.pushNamed(context, '/nyc/1776');
+  ///   Navigator.pushNamed(context, '/settings');
   /// }
   /// ```
   /// {@end-tool}
@@ -763,6 +763,31 @@ class Navigator extends StatefulWidget {
   ///       'city': 'Berlin',
   ///       'country': 'Germany',
   ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample}
+  ///
+  /// The following example shows how to pass a custom Object to the route:
+  ///
+  /// ```dart
+  /// class WeatherRouteArguments {
+  ///   WeatherRouteArguments(this.city, this.country);
+  ///   final String city;
+  ///   final String country;
+  ///
+  ///   bool get isGermanCapital {
+  ///     return country == 'Germany' && city == 'Berlin';
+  ///   }
+  /// }
+  ///
+  /// void _didPushButton() {
+  ///   Navigator.pushNamed(
+  ///     context,
+  ///     '/weather',
+  ///     arguments: WeatherRouteArguments(city: 'Berlin', country: 'Germany'),
   ///   );
   /// }
   /// ```
@@ -816,8 +841,8 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _showNext() {
-  ///   Navigator.pushReplacementNamed(context, '/jouett/1781');
+  /// void _switchToBrightness() {
+  ///   Navigator.pushReplacementNamed(context, '/settings/brightness');
   /// }
   /// ```
   /// {@end-tool}
@@ -871,8 +896,8 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _selectNewYork() {
-  ///   Navigator.popAndPushNamed(context, '/nyc/1776');
+  /// void _selectAccessibility() {
+  ///   Navigator.popAndPushNamed(context, '/settings/accessibility');
   /// }
   /// ```
   /// {@end-tool}
