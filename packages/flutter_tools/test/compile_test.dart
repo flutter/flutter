@@ -277,8 +277,7 @@ example:org-dartlang-app:///lib/
       // No accept or reject commands should be issued until we
       // send recompile request.
       await _accept(streamController, generator, mockFrontendServerStdIn, '');
-      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
-          '');
+      await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
@@ -524,7 +523,7 @@ Future<void> _accept(StreamController<List<int>> streamController,
     String expected) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
-  await generator.accept();
+  generator.accept();
   final String commands = mockFrontendServerStdIn.getAndClear();
   final RegExp re = RegExp(expected);
   expect(commands, matches(re));

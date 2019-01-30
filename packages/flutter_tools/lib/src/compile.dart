@@ -608,7 +608,7 @@ class ResidentCompiler {
 
   Future<CompilerOutput> _reject() {
     if (!_reloadRequestNeedsConfirmation) {
-      return Future.value(null);
+      return Future<CompilerOutput>.value(null);
     }
     _stdoutHandler.reset();
     _server.stdin.writeln('reject');
