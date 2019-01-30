@@ -1,6 +1,28 @@
 <script async="" defer="">
   var url = window.location.href;
-  var apiPages = [];
+  var surveyPercent = 0.10;
+  var apiPages = [
+    'Container',
+    'Scaffold',
+    'ListView',
+    'Icons',
+    'RaisedButton',
+    'Text',
+    'AppBar',
+    'TextField',
+    'Card',
+    'BottomNavigationBar',
+    'ListTile',
+    'Icon',
+    'Image',
+    'MaterialApp',
+    'Row',
+    'TextStyle',
+    'Column',
+    'Stack',
+    'GridView',
+    'AlertDialog',
+  ];
   var fragments = url.split('/');
   if (fragments == null || fragments.length == 0) {
     return;
@@ -14,7 +36,6 @@
     return;
   }
   var apiDocClass = apiDocClassFragments[0];
-  var surveyPercent = 0.05;
   if (url == null || apiPages.indexOf(apiDocClass) == -1) {
     return;
   }
@@ -22,7 +43,6 @@
   if (random > surveyPercent) {
     return;
   }
-  var scriptElement = document.createElement('script');
-  scriptElement.setAttribute('src', '//www.google.com/insights/consumersurveys/async_survey?site=sygvgfetfwmwm7isniaym3m6f4');
+  scriptElement.setAttribute('src', 'www.google.com/insights/consumersurveys/async_survey?site=sygvgfetfwmwm7isniaym3m6f4');
   document.head.appendChild(scriptElement);
 </script>
