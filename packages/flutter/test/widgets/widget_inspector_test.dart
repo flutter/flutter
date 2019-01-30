@@ -292,7 +292,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final GlobalKey topButtonKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Container(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -304,7 +304,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           child: WidgetInspector(
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
-            child: Container(
+            child: Material(
               child: ListView(
                 children: <Widget>[
                   RaisedButton(
