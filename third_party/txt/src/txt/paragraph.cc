@@ -290,7 +290,7 @@ bool Paragraph::ComputeLineBreaks() {
       std::shared_ptr<minikin::FontCollection> collection =
           GetMinikinFontCollectionForStyle(run.style);
       if (collection == nullptr) {
-        FML_LOG(INFO) << "Could not find font collection for family \""
+        FML_LOG(INFO) << "Could not find font collection for families \""
                       << (run.style.font_families.empty()
                               ? ""
                               : run.style.font_families[0])
@@ -424,6 +424,52 @@ bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
   return true;
 }
 
+void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
+  strut->ascent = 0;
+  strut->descent = 0;
+  strut->leading = 0;
+  strut->half_leading = 0;
+  strut->line_height = 0;
+  strut->force_strut = false;
+
+  // Font size must be positive.
+  bool valid_strut =
+      paragraph_style_.strut_enabled && paragraph_style_.strut_font_size >= 0;
+  if (!valid_strut) {
+    return;
+  }
+  // force_strut makes all lines have exactly the strut metrics, and ignores all
+  // actual metrics. We only force the strut if the strut is non-zero and valid.
+  strut->force_strut = paragraph_style_.force_strut_height && valid_strut;
+  const FontSkia* font_skia =
+      static_cast<const FontSkia*>(font_collection_->GetMinikinFontForFamilies(
+          paragraph_style_.strut_font_families,
+          // TODO(garyq): The variant is currently set to 0 (default) as we do
+          // not have a property to set it with. We should eventually support
+          // default, compact, and elegant variants.
+          minikin::FontStyle(
+              0, GetWeight(paragraph_style_.strut_font_weight),
+              paragraph_style_.strut_font_style == FontStyle::italic)));
+
+  if (font_skia != nullptr) {
+    font.setTypeface(font_skia->GetSkTypeface());
+    font.setSize(paragraph_style_.strut_font_size);
+    SkFontMetrics strut_metrics;
+    font.getMetrics(&strut_metrics);
+
+    strut->ascent = paragraph_style_.strut_height * -strut_metrics.fAscent;
+    strut->descent = paragraph_style_.strut_height * strut_metrics.fDescent;
+    strut->leading =
+        // Use font's leading if there is no user specified strut leading.
+        paragraph_style_.strut_leading < 0
+            ? strut_metrics.fLeading
+            : (paragraph_style_.strut_leading *
+               (strut_metrics.fDescent - strut_metrics.fAscent));
+    strut->half_leading = strut->leading / 2;
+    strut->line_height = strut->ascent + strut->descent + strut->leading;
+  }
+}
+
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
   if (!needs_layout_ && width == width_ && !force) {
@@ -462,6 +508,11 @@ void Paragraph::Layout(double width, bool force) {
   double prev_max_descent = 0;
   double max_word_width = 0;
 
+  // Compute strut minimums according to paragraph_style_.
+  StrutMetrics strut;
+  ComputeStrut(&strut, font);
+
+  // Paragraph bounds tracking.
   size_t line_limit = std::min(paragraph_style_.max_lines, line_ranges_.size());
   did_exceed_max_lines_ = (line_ranges_.size() > paragraph_style_.max_lines);
 
@@ -757,36 +808,29 @@ void Paragraph::Layout(double width, bool force) {
           line_code_unit_runs.back().direction);
     }
 
-    double max_line_spacing = 0;
-    double max_descent = 0;
+    // Calculate the amount to advance in the y direction. This is done by
+    // computing the maximum ascent and descent with respect to the strut.
+    double max_ascent = strut.ascent + strut.half_leading;
+    double max_descent = strut.descent + strut.half_leading;
     SkScalar max_unscaled_ascent = 0;
     auto update_line_metrics = [&](const SkFontMetrics& metrics,
                                    const TextStyle& style) {
-      // TODO(garyq): Multipling in the style.height on the first line is
-      // probably wrong. Figure out how paragraph and line heights are supposed
-      // to work and fix it.
-      double line_spacing =
-          (line_number == 0)
-              ? -metrics.fAscent * style.height
-              : (-metrics.fAscent + metrics.fLeading) * style.height;
-      if (line_spacing > max_line_spacing) {
-        max_line_spacing = line_spacing;
-        if (line_number == 0) {
-          alphabetic_baseline_ = line_spacing;
-          ideographic_baseline_ =
-              (metrics.fDescent - metrics.fAscent) * style.height;
-        }
-      }
-      max_line_spacing = std::max(line_spacing, max_line_spacing);
+      if (!strut.force_strut) {
+        double ascent =
+            (-metrics.fAscent + metrics.fLeading / 2) * style.height;
+        max_ascent = std::max(ascent, max_ascent);
 
-      double descent = metrics.fDescent * style.height;
-      max_descent = std::max(descent, max_descent);
+        double descent =
+            (metrics.fDescent + metrics.fLeading / 2) * style.height;
+        max_descent = std::max(descent, max_descent);
+      }
 
       max_unscaled_ascent = std::max(-metrics.fAscent, max_unscaled_ascent);
     };
     for (const PaintRecord& paint_record : paint_records) {
       update_line_metrics(paint_record.metrics(), paint_record.style());
     }
+
     // If no fonts were actually rendered, then compute a baseline based on the
     // font of the paragraph style.
     if (paint_records.empty()) {
@@ -798,17 +842,24 @@ void Paragraph::Layout(double width, bool force) {
       update_line_metrics(metrics, style);
     }
 
-    // TODO(garyq): Remove rounding of line heights because it is irrelevant in
-    // a world of high DPI devices.
+    // Calculate the baselines. This is only done on the first line.
+    if (line_number == 0) {
+      alphabetic_baseline_ = max_ascent;
+      // TODO(garyq): Ideographic baseline is currently bottom of EM
+      // box, which is not correct. This should be obtained from metrics.
+      // Skia currently does not support various baselines.
+      ideographic_baseline_ = (max_ascent + max_descent);
+    }
+
     line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
-                            round(max_line_spacing + max_descent));
+                            round(max_ascent + max_descent));
     line_baselines_.push_back(line_heights_.back() - max_descent);
-    y_offset += round(max_line_spacing + prev_max_descent);
+    y_offset += round(max_ascent + prev_max_descent);
     prev_max_descent = max_descent;
 
     // The max line spacing and ascent have been multiplied by -1 to make math
     // in GetRectsForRange more logical/readable.
-    line_max_spacings_.push_back(max_line_spacing);
+    line_max_spacings_.push_back(max_ascent);
     line_max_descent_.push_back(max_descent);
     line_max_ascent_.push_back(max_unscaled_ascent);
 

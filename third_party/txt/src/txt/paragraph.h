@@ -352,6 +352,16 @@ class Paragraph {
         : x_start(x_s), y_start(y_s), x_end(x_e), y_end(y_e) {}
   };
 
+  // Strut metrics of zero will have no effect on the layout.
+  struct StrutMetrics {
+    double ascent = 0;  // Positive value to keep signs clear.
+    double descent = 0;
+    double leading = 0;
+    double half_leading = 0;
+    double line_height = 0;
+    bool force_strut = false;
+  };
+
   // Passes in the text and Styled Runs. text_ and runs_ will later be passed
   // into breaker_ in InitBreaker(), which is called in Layout().
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
@@ -365,6 +375,9 @@ class Paragraph {
 
   // Break the text into runs based on LTR/RTL text direction.
   bool ComputeBidiRuns(std::vector<BidiRun>* result);
+
+  // Calculates and populates strut based on paragraph_style_ strut info.
+  void ComputeStrut(StrutMetrics* strut, SkFont& font);
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
