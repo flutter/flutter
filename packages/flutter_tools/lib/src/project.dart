@@ -156,7 +156,7 @@ class IosProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
@@ -225,7 +225,7 @@ class IosProject {
       // Info.plist has no build variables in product bundle ID.
       return fromPlist;
     }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
     if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
       // Common case. Avoids parsing build settings.
       return fromPbxproj;
