@@ -185,7 +185,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool applicationNeedsRebuild = false,
-    bool usesTerminalUi = false,
+    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
 

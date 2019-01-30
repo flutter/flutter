@@ -46,9 +46,9 @@ class ChipTheme extends InheritedWidget {
     Key key,
     @required this.data,
     @required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -178,16 +178,16 @@ class ChipThemeData extends Diagnosticable {
     @required this.labelStyle,
     @required this.secondaryLabelStyle,
     @required this.brightness,
-  })  : assert(backgroundColor != null),
-        assert(disabledColor != null),
-        assert(selectedColor != null),
-        assert(secondarySelectedColor != null),
-        assert(labelPadding != null),
-        assert(padding != null),
-        assert(shape != null),
-        assert(labelStyle != null),
-        assert(secondaryLabelStyle != null),
-        assert(brightness != null);
+  }) : assert(backgroundColor != null),
+       assert(disabledColor != null),
+       assert(selectedColor != null),
+       assert(secondarySelectedColor != null),
+       assert(labelPadding != null),
+       assert(padding != null),
+       assert(shape != null),
+       assert(labelStyle != null),
+       assert(secondaryLabelStyle != null),
+       assert(brightness != null);
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
   /// style.

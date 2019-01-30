@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
+import '../convert.dart';
 import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -361,7 +361,9 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
+  RunResult(this.processResult, this._command)
+    : assert(_command != null),
+      assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 

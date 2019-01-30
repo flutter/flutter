@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -17,6 +16,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../fuchsia/fuchsia_device.dart';
@@ -784,7 +784,7 @@ class NotifyingLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
@@ -961,8 +961,8 @@ class _AppRunLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
-    int progressIndicatorPadding = 52,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
     final int id = _nextProgressId++;

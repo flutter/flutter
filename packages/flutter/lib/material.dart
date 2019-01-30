@@ -29,6 +29,7 @@ export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
+export 'src/material/card_theme.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/chip.dart';

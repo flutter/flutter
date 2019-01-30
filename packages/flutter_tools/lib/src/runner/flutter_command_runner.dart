@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -27,6 +26,7 @@ import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';

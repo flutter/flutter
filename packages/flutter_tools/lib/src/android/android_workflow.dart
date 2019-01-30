@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -14,6 +13,7 @@ import '../base/process_manager.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
@@ -51,7 +51,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator(): super('Android toolchain - develop for Android devices',);
+  AndroidValidator() : super('Android toolchain - develop for Android devices',);
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -167,7 +167,7 @@ class AndroidValidator extends DoctorValidator {
 }
 
 class AndroidLicenseValidator extends DoctorValidator {
-  AndroidLicenseValidator(): super('Android license subvalidator',);
+  AndroidLicenseValidator() : super('Android license subvalidator',);
 
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
@@ -256,13 +256,15 @@ class AndroidLicenseValidator extends DoctorValidator {
       environment: androidSdk.sdkManagerEnv,
     );
     process.stdin.write('n\n');
+    // We expect logcat streams to occasionally contain invalid utf-8,
+    // see: https://github.com/flutter/flutter/pull/8864.
     final Future<void> output = process.stdout
-      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_handleLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
-      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const Utf8Decoder(reportErrors: false))
       .transform<String>(const LineSplitter())
       .listen(_handleLine)
       .asFuture<void>(null);
