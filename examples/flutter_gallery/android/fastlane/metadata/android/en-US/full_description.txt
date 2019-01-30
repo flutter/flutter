@@ -1,8 +1,8 @@
-(Flutter is alpha technology)
+(Flutter is beta technology)
 
-A gallery of widgets and behaviors, plus demos and vignettes, all built with Flutter. This is a demo of some of the features of Flutter, and some features like accessibility are not yet wired in.
+A gallery of widgets and behaviors, plus demos and vignettes, all built with Flutter.
 
-Flutter is a new project to help developers build high-performance, high-fidelity, mobile apps for iOS and Android from a single codebase.
+Flutter is Google’s multi-platform mobile app SDK for crafting beautiful native experiences on iOS and Android in record time.
 
 This app is open source. Check out the code to see how this app is built: https://github.com/flutter/flutter/tree/master/examples/flutter_gallery
 

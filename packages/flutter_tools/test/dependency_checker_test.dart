@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
-import 'package:test/test.dart';
+
 import 'src/common.dart';
 import 'src/context.dart';
 
@@ -30,7 +30,7 @@ void main() {
     });
 
     setUp(() {
-      testFileSystem = new MemoryFileSystem();
+      testFileSystem = MemoryFileSystem();
     });
 
     testUsingContext('good', () {
@@ -40,12 +40,12 @@ void main() {
       final String barPath = fs.path.join(testPath, 'lib', 'bar.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       final DependencyChecker dependencyChecker =
-          new DependencyChecker(builder, null);
+          DependencyChecker(builder, null);
 
       // Set file modification time on all dependencies to be in the past.
-      final DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = DateTime.now();
       updateFileModificationTime(packagesPath, baseTime, -10);
       updateFileModificationTime(mainPath, baseTime, -10);
       updateFileModificationTime(fooPath, baseTime, -10);
@@ -72,11 +72,11 @@ void main() {
       final String packagesPath = fs.path.join(testPath, '.packages');
 
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, packagesPath);
+          DartDependencySetBuilder(mainPath, packagesPath);
       final DependencyChecker dependencyChecker =
-          new DependencyChecker(builder, null);
+          DependencyChecker(builder, null);
 
-      final DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = DateTime.now();
 
       // Set file modification time on all dependencies to be in the past.
       updateFileModificationTime(packagesPath, baseTime, -10);
@@ -93,16 +93,18 @@ void main() {
     /// Tests that the flutter tool doesn't crash and displays a warning when its own location
     /// changed since it was last referenced to in a package's .packages file.
     testUsingContext('moved flutter sdk', () async {
-      final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_dependency_checker_test.');
+
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
-      const LocalFileSystem localFileSystem = const LocalFileSystem();
+      const LocalFileSystem localFileSystem = LocalFileSystem();
       final Directory sourcePath = localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
-      copyDirectorySync(sourcePath, destinationPath);
-      fs.currentDirectory = destinationPath;
+      copyDirectorySync(sourcePath, tempDir);
+      fs.currentDirectory = tempDir;
 
       // Doesn't matter what commands we run. Arbitrarily list devices here.
-      await createTestCommandRunner(new DevicesCommand()).run(<String>['devices']);
+      await createTestCommandRunner(DevicesCommand()).run(<String>['devices']);
       expect(testLogger.errorText, contains('.packages'));
+      tryToDelete(tempDir);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });

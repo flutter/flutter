@@ -8,21 +8,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('TrackingScrollController saves offset',
       (WidgetTester tester) async {
-    final TrackingScrollController controller = new TrackingScrollController();
+    final TrackingScrollController controller = TrackingScrollController();
     const double listItemHeight = 100.0;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new PageView.builder(
+        child: PageView.builder(
           itemBuilder: (BuildContext context, int index) {
-            return new ListView(
+            return ListView(
               controller: controller,
-              children: new List<Widget>.generate(
+              children: List<Widget>.generate(
                 10,
-                (int i) => new Container(
+                (int i) => Container(
                   height: listItemHeight,
-                  child: new Text('Page$index-Item$i'),
+                  child: Text('Page$index-Item$i'),
                 ),
               ).toList(),
             );

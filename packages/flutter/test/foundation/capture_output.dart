@@ -8,7 +8,7 @@ import 'dart:ui' show VoidCallback;
 List<String> captureOutput(VoidCallback fn) {
   final List<String> log = <String>[];
 
-  runZoned<void>(fn, zoneSpecification: new ZoneSpecification(
+  runZoned<void>(fn, zoneSpecification: ZoneSpecification(
     print: (Zone self,
             ZoneDelegate parent,
             Zone zone,

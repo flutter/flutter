@@ -6,25 +6,25 @@ import 'dart:async';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-      : super(devices);
+    : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 
   @override
-  Future<Null> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() async { }
 
   @override
-  Future<Null> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() async { }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
+  Future<void> handleTerminalCommand(String code) async {
     receivedCommand = code;
   }
 
@@ -36,46 +36,48 @@ class TestRunner extends ResidentRunner {
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<dynamic> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild: true,
-  }) => null;
+    bool shouldBuild = true,
+  }) async => null;
+
+  @override
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async => null;
 }
 
 void main() {
-  TestRunner testRunner;
-
-  setUp(() {
-    // TODO(jacobr): make these tests run with `previewDart2: true` and
-    // `trackWidgetCreation: true` as well as the default flags.
-    // Currently the TestRunner is not properly configured to be able to run
-    // with `previewDart2: true` due to missing resources.
-    testRunner = new TestRunner(
-      <FlutterDevice>[new FlutterDevice(
-        new MockDevice(),
-        previewDart2: false,
-        trackWidgetCreation: false,
-      )],
+  TestRunner createTestRunner() {
+    // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
+    // well as the default flags.
+    return TestRunner(
+      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false)],
     );
-  });
+  }
 
   group('keyboard input handling', () {
     testUsingContext('single help character', () async {
+      final TestRunner testRunner = createTestRunner();
       expect(testRunner.hasHelpBeenPrinted, isFalse);
       await testRunner.processTerminalInput('h');
       expect(testRunner.hasHelpBeenPrinted, isTrue);
     });
     testUsingContext('help character surrounded with newlines', () async {
+      final TestRunner testRunner = createTestRunner();
       expect(testRunner.hasHelpBeenPrinted, isFalse);
       await testRunner.processTerminalInput('\nh\n');
       expect(testRunner.hasHelpBeenPrinted, isTrue);
     });
     testUsingContext('reload character with trailing newline', () async {
+      final TestRunner testRunner = createTestRunner();
       expect(testRunner.receivedCommand, isNull);
       await testRunner.processTerminalInput('r\n');
       expect(testRunner.receivedCommand, equals('r'));
     });
     testUsingContext('newlines', () async {
+      final TestRunner testRunner = createTestRunner();
       expect(testRunner.receivedCommand, isNull);
       await testRunner.processTerminalInput('\n\n');
       expect(testRunner.receivedCommand, equals(''));

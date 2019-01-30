@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -12,15 +14,15 @@ void main() {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new Semantics(),
-            new Semantics(
+            Semantics(),
+            Semantics(
               container: true,
             ),
-            new Semantics(
+            Semantics(
               label: 'label',
               textDirection: TextDirection.ltr,
             ),
@@ -30,16 +32,16 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Stack(
+        child: SemanticsDebugger(
+          child: Stack(
             children: <Widget>[
-              new Semantics(),
-              new Semantics(
+              Semantics(),
+              Semantics(
                 container: true,
               ),
-              new Semantics(
+              Semantics(
                 label: 'label',
                 textDirection: TextDirection.ltr,
               ),
@@ -54,22 +56,22 @@ void main() {
 
   testWidgets('SemanticsDebugger reparents subtree',
       (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Stack(
+        child: SemanticsDebugger(
+          child: Stack(
             children: <Widget>[
-              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
-              new Positioned(
+              Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              Positioned(
                 key: key,
                 left: 0.0,
                 top: 0.0,
                 width: 100.0,
                 height: 100.0,
-                child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                child: Semantics(label: 'label2', textDirection: TextDirection.ltr),
               ),
             ],
           ),
@@ -78,25 +80,25 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Stack(
+        child: SemanticsDebugger(
+          child: Stack(
             children: <Widget>[
-              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
-              new Semantics(
+              Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              Semantics(
                 container: true,
-                child: new Stack(
+                child: Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       key: key,
                       left: 0.0,
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                      child: Semantics(label: 'label2', textDirection: TextDirection.ltr),
                     ),
-                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    Semantics(label: 'label3', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -107,25 +109,25 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Stack(
+        child: SemanticsDebugger(
+          child: Stack(
             children: <Widget>[
-              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
-              new Semantics(
+              Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              Semantics(
                 container: true,
-                child: new Stack(
+                child: Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                         key: key,
                         left: 0.0,
                         top: 0.0,
                         width: 100.0,
                         height: 100.0,
-                        child: new Semantics(label: 'label2', textDirection: TextDirection.ltr)),
-                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
-                    new Semantics(label: 'label4', textDirection: TextDirection.ltr),
+                        child: Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                    Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    Semantics(label: 'label4', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -143,19 +145,19 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Material(
-            child: new ListView(
+        child: SemanticsDebugger(
+          child: Material(
+            child: ListView(
               children: <Widget>[
-                new RaisedButton(
+                RaisedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP'),
                 ),
-                new RaisedButton(
+                RaisedButton(
                   onPressed: () {
                     log.add('bottom');
                   },
@@ -182,20 +184,20 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Material(
-            child: new ListView(
+        child: SemanticsDebugger(
+          child: Material(
+            child: ListView(
               children: <Widget>[
-                new RaisedButton(
+                RaisedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP', textDirection: TextDirection.ltr),
                 ),
-                new ExcludeSemantics(
-                  child: new RaisedButton(
+                ExcludeSemantics(
+                  child: RaisedButton(
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -219,15 +221,15 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger scroll test', (WidgetTester tester) async {
-    final Key childKey = new UniqueKey();
+    final Key childKey = UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new ListView(
+        child: SemanticsDebugger(
+          child: ListView(
             children: <Widget>[
-              new Container(
+              Container(
                 key: childKey,
                 height: 5000.0,
                 color: Colors.green[500],
@@ -265,10 +267,10 @@ void main() {
     bool didLongPress = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new GestureDetector(
+        child: SemanticsDebugger(
+          child: GestureDetector(
             onLongPress: () {
               expect(didLongPress, isFalse);
               didLongPress = true;
@@ -287,18 +289,21 @@ void main() {
     double value = 0.75;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Directionality(
+        child: SemanticsDebugger(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new Material(
-              child: new Center(
-                child: new Slider(
-                  value: value,
-                  onChanged: (double newValue) {
-                    value = newValue;
-                  },
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: Slider(
+                    value: value,
+                    onChanged: (double newValue) {
+                      value = newValue;
+                    },
+                  ),
                 ),
               ),
             ),
@@ -313,31 +318,31 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0);
-    expect(value, equals(0.65));
+    expect(value, equals(0.70));
   });
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
-    final Key keyTop = new UniqueKey();
-    final Key keyBottom = new UniqueKey();
+    final Key keyTop = UniqueKey();
+    final Key keyBottom = UniqueKey();
 
     bool valueTop = false;
-    final bool valueBottom = true;
+    const bool valueBottom = true;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new SemanticsDebugger(
-          child: new Material(
-            child: new ListView(
+        child: SemanticsDebugger(
+          child: Material(
+            child: ListView(
               children: <Widget>[
-                new Checkbox(
+                Checkbox(
                   key: keyTop,
                   value: valueTop,
                   onChanged: (bool newValue) {
                     valueTop = newValue;
                   },
                 ),
-                new Checkbox(
+                Checkbox(
                   key: keyBottom,
                   value: valueBottom,
                   onChanged: null,

@@ -4,9 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/expansion_tile_sample.dart' as expansion_tile_sample;
-import '../lib/expansion_tile_sample.dart' show Entry;
+import 'package:sample_catalog/expansion_tile_sample.dart' as expansion_tile_sample;
+import 'package:sample_catalog/expansion_tile_sample.dart' show Entry;
 
 void main() {
   testWidgets('expansion_tile sample smoke test', (WidgetTester tester) async {
@@ -23,12 +22,12 @@ void main() {
       }
     }
 
-    Future<Null> scrollUpOneEntry() async {
+    Future<void> scrollUpOneEntry() async {
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -88.00));
       await tester.pumpAndSettle();
     }
 
-    Future<Null> tapEntry(String title) async {
+    Future<void> tapEntry(String title) async {
       await tester.tap(find.text(title));
       await tester.pumpAndSettle();
     }

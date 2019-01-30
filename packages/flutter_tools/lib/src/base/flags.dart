@@ -8,7 +8,7 @@ import 'context.dart';
 
 /// command-line flags and options that were specified during the invocation of
 /// the Flutter tool.
-Flags get flags => context?.getVariable(Flags) ?? const _EmptyFlags();
+Flags get flags => context[Flags];
 
 /// Encapsulation of the command-line flags and options that were specified
 /// during the invocation of the Flutter tool.
@@ -52,8 +52,8 @@ class Flags {
   }
 }
 
-class _EmptyFlags implements Flags {
-  const _EmptyFlags();
+class EmptyFlags implements Flags {
+  const EmptyFlags();
 
   @override
   ArgResults get _globalResults => null;

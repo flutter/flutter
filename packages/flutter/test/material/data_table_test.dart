@@ -11,8 +11,8 @@ void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int sortColumnIndex, bool sortAscending: true }) {
-      return new DataTable(
+    Widget buildTable({ int sortColumnIndex, bool sortAscending = true }) {
+      return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
         onSelectAll: (bool value) {
@@ -20,10 +20,10 @@ void main() {
         },
         columns: <DataColumn>[
           const DataColumn(
-            label: const Text('Name'),
+            label: Text('Name'),
             tooltip: 'Name',
           ),
-          new DataColumn(
+          DataColumn(
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
@@ -32,18 +32,18 @@ void main() {
             }
           ),
         ],
-        rows: kDesserts.map((Dessert dessert) {
-          return new DataRow(
-            key: new Key(dessert.name),
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: Key(dessert.name),
             onSelectChanged: (bool selected) {
               log.add('row-selected: ${dessert.name}');
             },
             cells: <DataCell>[
-              new DataCell(
-                new Text(dessert.name),
+              DataCell(
+                Text(dessert.name),
               ),
-              new DataCell(
-                new Text('${dessert.calories}'),
+              DataCell(
+                Text('${dessert.calories}'),
                 showEditIcon: true,
                 onTap: () {
                   log.add('cell-tap: ${dessert.calories}');
@@ -55,8 +55,8 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(child: buildTable())
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable())
     ));
 
     await tester.tap(find.byType(Checkbox).first);
@@ -74,8 +74,8 @@ void main() {
     expect(log, <String>['column-sort: 1 true']);
     log.clear();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(child: buildTable(sortColumnIndex: 1))
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortColumnIndex: 1))
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
     await tester.tap(find.text('Calories'));
@@ -83,8 +83,8 @@ void main() {
     expect(log, <String>['column-sort: 1 false']);
     log.clear();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(child: buildTable(sortColumnIndex: 1, sortAscending: false))
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false))
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
@@ -101,19 +101,19 @@ void main() {
 
   testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new DataTable(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
             columns: <DataColumn>[
-              new DataColumn(
-                label: new Text('X' * 2000),
+              DataColumn(
+                label: Text('X' * 2000),
               ),
             ],
             rows: const <DataRow>[
-              const DataRow(
-                cells: const <DataCell>[
-                  const DataCell(
-                    const Text('X'),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('X'),
                   ),
                 ],
               ),
@@ -129,19 +129,19 @@ void main() {
 
   testWidgets('DataTable overflow test - header with spaces', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new DataTable(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
             columns: <DataColumn>[
-              new DataColumn(
-                label: new Text('X ' * 2000), // has soft wrap points, but they should be ignored
+              DataColumn(
+                label: Text('X ' * 2000), // has soft wrap points, but they should be ignored
               ),
             ],
             rows: const <DataRow>[
-              const DataRow(
-                cells: const <DataCell>[
-                  const DataCell(
-                    const Text('X'),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('X'),
                   ),
                 ],
               ),
@@ -157,19 +157,19 @@ void main() {
 
   testWidgets('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new DataTable(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
             columns: const <DataColumn>[
-              const DataColumn(
-                label: const Text('X'),
+              DataColumn(
+                label: Text('X'),
               ),
             ],
             rows: <DataRow>[
-              new DataRow(
+              DataRow(
                 cells: <DataCell>[
-                  new DataCell(
-                    new Text('X' * 2000),
+                  DataCell(
+                    Text('X' * 2000),
                   ),
                 ],
               ),
@@ -185,19 +185,19 @@ void main() {
 
   testWidgets('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new DataTable(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
             columns: const <DataColumn>[
-              const DataColumn(
-                label: const Text('X'),
+              DataColumn(
+                label: Text('X'),
               ),
             ],
             rows: <DataRow>[
-              new DataRow(
+              DataRow(
                 cells: <DataCell>[
-                  new DataCell(
-                    new Text('X ' * 2000), // wraps
+                  DataCell(
+                    Text('X ' * 2000), // wraps
                   ),
                 ],
               ),

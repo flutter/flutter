@@ -37,15 +37,59 @@ const double _kMinButtonSize = 48.0;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateful_widget}
+///
+/// This sample shows an `IconButton` that uses the Material icon "volume_up" to
+/// increase the volume.
+///
+/// ```dart preamble
+/// double _volume = 0.0;
+/// ```
 ///
 /// ```dart
-/// new IconButton(
-///   icon: new Icon(Icons.volume_up),
-///   tooltip: 'Increase volume by 10%',
-///   onPressed: () { setState(() { _volume *= 1.1; }); },
+/// Widget build(BuildContext) {
+///   return IconButton(
+///     icon: Icon(Icons.volume_up),
+///     tooltip: 'Increase volume by 10%',
+///     onPressed: () { setState(() { _volume *= 1.1; }); },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Adding a filled background
+///
+/// Icon buttons don't support specifying a background color or other
+/// background decoration because typically the icon is just displayed
+/// on top of the parent widget's background. Icon buttons that appear
+/// in [AppBar.actions] are an example of this.
+///
+/// It's easy enough to create an icon button with a filled background
+/// using the [Ink] widget. The [Ink] widget renders a decoration on
+/// the underlying [Material] along with the splash and highlight
+/// [InkResponse] contributed by descendant widgets.
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// In this sample the icon button's background color is defined with an [Ink]
+/// widget whose child is an [IconButton]. The icon button's filled background
+/// is a light shade of blue, it's a filled circle, and it's as big as the
+/// button is.
+///
+/// ```dart
+/// Ink(
+///   decoration: ShapeDecoration(
+///     color: Colors.purple,
+///     shape: CircleBorder(),
+///   ),
+///   child: IconButton(
+///     icon: Icon(Icons.android),
+///     color: Colors.white,
+///     onPressed: () { print("filled background"); },
+///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -71,9 +115,9 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key key,
-    this.iconSize: 24.0,
-    this.padding: const EdgeInsets.all(8.0),
-    this.alignment: Alignment.center,
+    this.iconSize = 24.0,
+    this.padding = const EdgeInsets.all(8.0),
+    this.alignment = Alignment.center,
     @required this.icon,
     this.color,
     this.highlightColor,
@@ -137,11 +181,11 @@ class IconButton extends StatelessWidget {
   /// See also [disabledColor].
   ///
   /// ```dart
-  ///  new IconButton(
-  ///    color: Colors.blue,
-  ///    onPressed: _handleTap,
-  ///    icon: Icons.widgets,
-  ///  ),
+  /// IconButton(
+  ///   color: Colors.blue,
+  ///   onPressed: _handleTap,
+  ///   icon: Icons.widgets,
+  /// )
   /// ```
   final Color color;
 
@@ -191,20 +235,20 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
-    Widget result = new Semantics(
+    Widget result = Semantics(
       button: true,
       enabled: onPressed != null,
-      child: new ConstrainedBox(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
-        child: new Padding(
+        child: Padding(
           padding: padding,
-          child: new SizedBox(
+          child: SizedBox(
             height: iconSize,
             width: iconSize,
-            child: new Align(
+            child: Align(
               alignment: alignment,
               child: IconTheme.merge(
-                data: new IconThemeData(
+                data: IconThemeData(
                   size: iconSize,
                   color: currentColor
                 ),
@@ -217,12 +261,12 @@ class IconButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      result = new Tooltip(
+      result = Tooltip(
         message: tooltip,
         child: result
       );
     }
-    return new InkResponse(
+    return InkResponse(
       onTap: onPressed,
       child: result,
       highlightColor: highlightColor ?? Theme.of(context).highlightColor,
@@ -236,10 +280,10 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

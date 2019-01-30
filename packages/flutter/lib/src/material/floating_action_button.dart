@@ -4,20 +4,30 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'ink_well.dart';
-import 'material.dart';
+import 'button.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
-// TODO(eseidel): This needs to change based on device size?
-// http://material.google.com/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
-const double _kSize = 56.0;
-const double _kSizeMini = 40.0;
+const BoxConstraints _kSizeConstraints = BoxConstraints.tightFor(
+  width: 56.0,
+  height: 56.0,
+);
+
+const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
+  width: 40.0,
+  height: 40.0,
+);
+
+const BoxConstraints _kExtendedSizeConstraints = BoxConstraints(
+  minHeight: 48.0,
+  maxHeight: 48.0,
+);
 
 class _DefaultHeroTag {
   const _DefaultHeroTag();
@@ -25,7 +35,6 @@ class _DefaultHeroTag {
   String toString() => '<default FloatingActionButton tag>';
 }
 
-// TODO(amirh): update the documentation once the BAB notch can be disabled.
 /// A material design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
@@ -34,39 +43,100 @@ class _DefaultHeroTag {
 ///
 /// Use at most a single floating action button per screen. Floating action
 /// buttons should be used for positive actions such as "create", "share", or
-/// "navigate".
+/// "navigate". (If more than one floating action button is used within a
+/// [Route], then make sure that each button has a unique [heroTag], otherwise
+/// an exception will be thrown.)
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and
-/// will not react to touch.
-///
-/// If the floating action button is a descendant of a [Scaffold] that also has a
-/// [BottomAppBar], the [BottomAppBar] will show a notch to accomodate the
-/// [FloatingActionButton] when it overlaps the [BottomAppBar]. The notch's
-/// shape is an arc for a circle whose radius is the floating action button's
-/// radius plus [FloatingActionButton.notchMargin].
+/// will not react to touch. It is highly discouraged to disable a floating
+/// action button as there is no indication to the user that the button is
+/// disabled. Consider changing the [backgroundColor] if disabling the floating
+/// action button.
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * <https://material.google.com/components/buttons-floating-action-button.html>
-class FloatingActionButton extends StatefulWidget {
-  /// Creates a floating action button.
+///  * [Scaffold], in which floating action buttons typically live.
+///  * [RaisedButton], another kind of button that appears to float above the
+///    content.
+///  * <https://material.io/design/components/buttons-floating-action-button.html>
+class FloatingActionButton extends StatelessWidget {
+  /// Creates a circular floating action button.
   ///
-  /// Most commonly used in the [Scaffold.floatingActionButton] field.
+  /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
+  /// arguments must not be null. Additionally, [elevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
   const FloatingActionButton({
     Key key,
     this.child,
     this.tooltip,
+    this.foregroundColor,
     this.backgroundColor,
-    this.heroTag: const _DefaultHeroTag(),
-    this.elevation: 6.0,
-    this.highlightElevation: 12.0,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
+    double disabledElevation,
     @required this.onPressed,
-    this.mini: false,
-    this.notchMargin: 4.0,
-  }) : super(key: key);
+    this.mini = false,
+    this.shape = const CircleBorder(),
+    this.clipBehavior = Clip.none,
+    this.materialTapTargetSize,
+    this.isExtended = false,
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(mini != null),
+       assert(shape != null),
+       assert(isExtended != null),
+       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       super(key: key);
+
+  /// Creates a wider [StadiumBorder]-shaped floating action button with both
+  /// an [icon] and a [label].
+  ///
+  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior] and
+  /// [shape] arguments must not be null. Additionally, [elevation]
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
+  FloatingActionButton.extended({
+    Key key,
+    this.tooltip,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
+    double disabledElevation,
+    @required this.onPressed,
+    this.shape = const StadiumBorder(),
+    this.isExtended = true,
+    this.materialTapTargetSize,
+    this.clipBehavior = Clip.none,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(shape != null),
+       assert(isExtended != null),
+       assert(clipBehavior != null),
+       _sizeConstraints = _kExtendedSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       mini = false,
+       child = _ChildOverflowBox(
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: <Widget>[
+             const SizedBox(width: 16.0),
+             icon,
+             const SizedBox(width: 8.0),
+             label,
+             const SizedBox(width: 20.0),
+           ],
+         ),
+       ),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -79,9 +149,14 @@ class FloatingActionButton extends StatefulWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// The default icon and text color.
+  ///
+  /// Defaults to [ThemeData.accentIconTheme.color] for the current theme.
+  final Color foregroundColor;
+
   /// The color to use when filling the button.
   ///
-  /// Defaults to the accent color of the current theme.
+  /// Defaults to [ThemeData.accentColor] for the current theme.
   final Color backgroundColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -103,219 +178,189 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the floating action button.
+  /// The z-coordinate at which to place this button releative to its parent.
   ///
-  /// Defaults to 6, the appropriate elevation for floating action buttons.
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to 6, the appropriate elevation for floating action buttons. The
+  /// value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  ///  * [disabledElevation], the elevation when the button is disabled.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when the user is touching
-  /// the button. This controls the size of the shadow below the floating action
-  /// button.
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the user is touching the button.
+  ///
+  /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
-  /// while they are being touched.
+  /// while they are being touched. The value is always non-negative.
   ///
   /// See also:
   ///
   ///  * [elevation], the default elevation.
   final double highlightElevation;
 
+  /// The z-coordinate at which to place this button when the button is disabled
+  /// ([onPressed] is null).
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to the same value as [elevation]. Setting this to zero makes the
+  /// floating action button work similar to a [RaisedButton] but the titular
+  /// "floating" effect is lost. The value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  final double disabledElevation;
+
   /// Controls the size of this button.
   ///
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
-  /// and width of 40.0 logical pixels.
+  /// and width of 40.0 logical pixels with a layout width and height of 48.0
+  /// logical pixels. (The extra 4 pixels of padding on each side are added as a
+  /// result of the floating action button having [MaterialTapTargetSize.padded]
+  /// set on the underlying [RawMaterialButton.materialTapTargetSize].)
   final bool mini;
 
-  /// The margin to keep around the floating action button when creating a
-  /// notch for it.
+  /// The shape of the button's [Material].
   ///
-  /// The notch is an arc of a circle with radius r+[notchMargin] where r is the
-  /// radius of the floating action button. This expanded radius leaves a margin
-  /// around the floating action button.
+  /// The button's highlight and splash are clipped to this shape. If the
+  /// button has an elevation, then its drop shadow is defined by this
+  /// shape as well.
+  final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
+  /// True if this is an "extended" floating action button.
+  ///
+  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// and have been created with the [FloatingActionButton.extended]
+  /// constructor.
+  ///
+  /// The [Scaffold] animates the appearance of ordinary floating
+  /// action buttons with scale and rotation transitions. Extended
+  /// floating action buttons are scaled and faded in.
+  final bool isExtended;
+
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
   ///
   /// See also:
   ///
-  ///  * [BottomAppBar], a material design elements that shows a notch for the
-  ///    floating action button.
-  final double notchMargin;
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
 
-  @override
-  _FloatingActionButtonState createState() => new _FloatingActionButtonState();
-}
-
-class _FloatingActionButtonState extends State<FloatingActionButton> {
-  bool _highlight = false;
-
-  VoidCallback _clearComputeNotch;
-
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
+  final BoxConstraints _sizeConstraints;
 
   @override
   Widget build(BuildContext context) {
-    Color iconColor = Colors.white;
-    Color materialColor = widget.backgroundColor;
-    if (materialColor == null) {
-      final ThemeData themeData = Theme.of(context);
-      materialColor = themeData.accentColor;
-      iconColor = themeData.accentIconTheme.color;
-    }
-
+    final ThemeData theme = Theme.of(context);
+    final Color foregroundColor = this.foregroundColor ?? theme.accentIconTheme.color;
     Widget result;
 
-    if (widget.child != null) {
-      result = new Center(
-        child: IconTheme.merge(
-          data: new IconThemeData(color: iconColor),
-          child: widget.child,
+    if (child != null) {
+      result = IconTheme.merge(
+        data: IconThemeData(
+          color: foregroundColor,
         ),
+        child: child,
       );
     }
 
-    if (widget.tooltip != null) {
-      result = new Tooltip(
-        message: widget.tooltip,
-        child: result,
-      );
-    }
-
-    result = new Material(
-      color: materialColor,
-      type: MaterialType.circle,
-      elevation: _highlight ? widget.highlightElevation : widget.elevation,
-      child: new Container(
-        width: widget.mini ? _kSizeMini : _kSize,
-        height: widget.mini ? _kSizeMini : _kSize,
-        child: new Semantics(
-          button: true,
-          enabled: widget.onPressed != null,
-          child: new InkWell(
-            onTap: widget.onPressed,
-            onHighlightChanged: _handleHighlightChanged,
-            child: result,
-          ),
-        ),
+    result = RawMaterialButton(
+      onPressed: onPressed,
+      elevation: elevation,
+      highlightElevation: highlightElevation,
+      disabledElevation: disabledElevation,
+      constraints: _sizeConstraints,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      fillColor: backgroundColor ?? theme.accentColor,
+      textStyle: theme.accentTextTheme.button.copyWith(
+        color: foregroundColor,
+        letterSpacing: 1.2,
       ),
+      shape: shape,
+      clipBehavior: clipBehavior,
+      child: result,
     );
 
-    if (widget.heroTag != null) {
-      result = new Hero(
-        tag: widget.heroTag,
+    if (tooltip != null) {
+      result = MergeSemantics(
+        child: Tooltip(
+          message: tooltip,
+          child: result,
+        ),
+      );
+    }
+
+    if (heroTag != null) {
+      result = Hero(
+        tag: heroTag,
         child: result,
       );
     }
 
     return result;
   }
+}
+
+// This widget's size matches its child's size unless its constraints
+// force it to be larger or smaller. The child is centered.
+//
+// Used to encapsulate extended FABs whose size is fixed, using Row
+// and MainAxisSize.min, to be as wide as their label and icon.
+class _ChildOverflowBox extends SingleChildRenderObjectWidget {
+  const _ChildOverflowBox({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
+  _RenderChildOverflowBox createRenderObject(BuildContext context) {
+    return _RenderChildOverflowBox(
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
-  void deactivate() {
-    if (_clearComputeNotch != null)
-      _clearComputeNotch();
-    super.deactivate();
+  void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context);
   }
+}
 
-  Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
-    // The FAB's shape is a circle bounded by the guest rectangle.
-    // So the FAB's radius is half the guest width.
-    final double fabRadius = guest.width / 2.0;
-    final double notchRadius = fabRadius + widget.notchMargin;
+class _RenderChildOverflowBox extends RenderAligningShiftedBox {
+  _RenderChildOverflowBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
 
-    assert(_notchAssertions(host, guest, start, end, fabRadius, notchRadius));
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
 
-    // If there's no overlap between the guest's margin boundary and the host,
-    // don't make a notch, just return a straight line from start to end.
-    if (!host.overlaps(guest.inflate(widget.notchMargin)))
-      return new Path()..lineTo(end.dx, end.dy);
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
 
-    // We build a path for the notch from 3 segments:
-    // Segment A - a Bezier curve from the host's top edge to segment B.
-    // Segment B - an arc with radius notchRadius.
-    // Segment C - a Bezier curver from segment B back to the host's top edge.
-    //
-    // A detailed explanation and the derivation of the formulas below is
-    // available at: https://goo.gl/Ufzrqn
-
-    const double s1 = 15.0;
-    const double s2 = 1.0;
-
-    final double r = notchRadius;
-    final double a = -1.0 * r - s2;
-    final double b = host.top - guest.center.dy;
-
-    final double n2 = math.sqrt(b * b * r * r * (a * a + b * b - r * r));
-    final double p2xA = ((a * r * r) - n2) / (a * a + b * b);
-    final double p2xB = ((a * r * r) + n2) / (a * a + b * b);
-    final double p2yA = math.sqrt(r * r - p2xA * p2xA);
-    final double p2yB = math.sqrt(r * r - p2xB * p2xB);
-
-    final List<Offset> p = new List<Offset>(6);
-
-    // p0, p1, and p2 are the control points for segment A.
-    p[0] = new Offset(a - s1, b);
-    p[1] = new Offset(a, b);
-    final double cmp = b < 0 ? -1.0 : 1.0;
-    p[2] = cmp * p2yA > cmp * p2yB ? new Offset(p2xA, p2yA) : new Offset(p2xB, p2yB);
-
-    // p3, p4, and p5 are the control points for segment B, which is a mirror
-    // of segment A around the y axis.
-    p[3] = new Offset(-1.0 * p[2].dx, p[2].dy);
-    p[4] = new Offset(-1.0 * p[1].dx, p[1].dy);
-    p[5] = new Offset(-1.0 * p[0].dx, p[0].dy);
-
-    // translate all points back to the absolute coordinate system.
-    for (int i = 0; i < p.length; i += 1)
-      p[i] += guest.center;
-
-    return new Path()
-      ..lineTo(p[0].dx, p[0].dy)
-      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy)
-      ..arcToPoint(
-        p[3],
-        radius: new Radius.circular(notchRadius),
-        clockwise: false,
-      )
-      ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
-      ..lineTo(end.dx, end.dy);
-  }
-
-  bool _notchAssertions(Rect host, Rect guest, Offset start, Offset end,
-    double fabRadius, double notchRadius) {
-    if (end.dy != host.top)
-      throw new FlutterError(
-        'The notch of the floating action button must end at the top edge of the host.\n'
-        'The notch\'s path end point: $end is not in the top edge of $host'
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
       );
-
-    if (start.dy != host.top)
-      throw new FlutterError(
-        'The notch of the floating action button must start at the top edge of the host.\n'
-        'The notch\'s path start point: $start is not in the top edge of $host'
-      );
-
-    if (guest.center.dx - notchRadius < start.dx)
-      throw new FlutterError(
-        'The notch\'s path start point must be to the left of the floating action button.\n'
-        'Start point was $start, guest was $guest, notchMargin was ${widget.notchMargin}.'
-      );
-
-    if (guest.center.dx + notchRadius > end.dx)
-      throw new FlutterError(
-        'The notch\'s end point must be to the right of the floating action button.\n'
-        'End point was $start, notch was $guest, notchMargin was ${widget.notchMargin}.'
-      );
-
-    return true;
+      alignChild();
+    } else {
+      size = constraints.biggest;
+    }
   }
 }

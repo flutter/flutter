@@ -11,18 +11,20 @@ import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
+import 'test_border.dart' show TestBorder;
 
-Future<Null> main() async {
-  final ui.Image rawImage = await decodeImageFromList(new Uint8List.fromList(kTransparentImage));
-  final ImageProvider image = new TestImageProvider(0, 0, image: rawImage);
+Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
+  final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new DecoratedBox(
-          decoration: new ShapeDecoration(
-            shape: new Border.all(width: 1.0, color: Colors.white) +
-                   new Border.all(width: 1.0, color: Colors.black),
-            image: new DecorationImage(
+      MaterialApp(
+        home: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: Border.all(width: 1.0, color: Colors.white) +
+                   Border.all(width: 1.0, color: Colors.black),
+            image: DecorationImage(
               image: image,
             ),
           ),
@@ -40,11 +42,11 @@ Future<Null> main() async {
 
   testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new DecoratedBox(
-          decoration: new ShapeDecoration(
-            shape: new Border.all(width: 1.0, color: Colors.white) +
-                   new Border.all(width: 1.0, color: Colors.black),
+      MaterialApp(
+        home: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: Border.all(width: 1.0, color: Colors.white) +
+                   Border.all(width: 1.0, color: Colors.black),
             color: Colors.blue,
           ),
         ),
@@ -53,7 +55,7 @@ Future<Null> main() async {
     expect(
       find.byType(DecoratedBox),
       paints
-        ..path(color: new Color(Colors.blue.value))
+        ..path(color: Color(Colors.blue.value))
         ..rect(color: Colors.black)
         ..rect(color: Colors.white)
     );
@@ -62,10 +64,10 @@ Future<Null> main() async {
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new DecoratedBox(
-          decoration: new ShapeDecoration(
-            shape: new TestBorder(log.add),
+      MaterialApp(
+        home: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: TestBorder(log.add),
             color: Colors.green,
           ),
         ),
@@ -83,12 +85,12 @@ Future<Null> main() async {
   testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new DecoratedBox(
-          decoration: new ShapeDecoration(
-            shape: new TestBorder(log.add),
-            image: new DecorationImage(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: TestBorder(log.add),
+            image: DecorationImage(
               image: image,
             ),
           ),
@@ -103,35 +105,4 @@ Future<Null> main() async {
       ],
     );
   });
-}
-
-typedef void Logger(String caller);
-
-class TestBorder extends ShapeBorder {
-  const TestBorder(this.onLog) : assert(onLog != null);
-
-  final Logger onLog;
-
-  @override
-  EdgeInsetsGeometry get dimensions => const EdgeInsetsDirectional.only(start: 1.0);
-
-  @override
-  ShapeBorder scale(double t) => new TestBorder(onLog);
-
-  @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    onLog('getInnerPath $rect $textDirection');
-    return new Path();
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    onLog('getOuterPath $rect $textDirection');
-    return new Path();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    onLog('paint $rect $textDirection');
-  }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
@@ -12,18 +10,18 @@ import 'media_query.dart';
 /// Signature for a function that builds a widget given an [Orientation].
 ///
 /// Used by [OrientationBuilder.builder].
-typedef Widget OrientationWidgetBuilder(BuildContext context, Orientation orientation);
+typedef OrientationWidgetBuilder = Widget Function(BuildContext context, Orientation orientation);
 
 /// Builds a widget tree that can depend on the parent widget's orientation
 /// (distinct from the device orientation).
 ///
 /// See also:
 ///
-/// * [LayoutBuilder], which exposes the complete constraints, not just the
-///   orientation.
-/// * [CustomSingleChildLayout], which positions its child during layout.
-/// * [CustomMultiChildLayout], with which you can define the precise layout
-///   of a list of children during the layout phase.
+///  * [LayoutBuilder], which exposes the complete constraints, not just the
+///    orientation.
+///  * [CustomSingleChildLayout], which positions its child during layout.
+///  * [CustomMultiChildLayout], with which you can define the precise layout
+///    of a list of children during the layout phase.
 class OrientationBuilder extends StatelessWidget {
   /// Creates an orientation builder.
   ///
@@ -52,6 +50,6 @@ class OrientationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(builder: _buildWithConstraints);
+    return LayoutBuilder(builder: _buildWithConstraints);
   }
 }

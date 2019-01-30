@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +12,8 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kFadeDuration = const Duration(milliseconds: 200);
-const Duration _kShowDuration = const Duration(milliseconds: 1500);
+const Duration _kFadeDuration = Duration(milliseconds: 200);
+const Duration _kShowDuration = Duration(milliseconds: 1500);
 
 /// A material design tooltip.
 ///
@@ -44,11 +43,11 @@ class Tooltip extends StatefulWidget {
   const Tooltip({
     Key key,
     @required this.message,
-    this.height: 32.0,
-    this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    this.verticalOffset: 24.0,
-    this.preferBelow: true,
-    this.excludeFromSemantics: false,
+    this.height = 32.0,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0),
+    this.verticalOffset = 24.0,
+    this.preferBelow = true,
+    this.excludeFromSemantics = false,
     this.child,
   }) : assert(message != null),
        assert(height != null),
@@ -89,14 +88,14 @@ class Tooltip extends StatefulWidget {
   final Widget child;
 
   @override
-  _TooltipState createState() => new _TooltipState();
+  _TooltipState createState() => _TooltipState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, showName: false));
-    description.add(new DoubleProperty('vertical offset', verticalOffset));
-    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('message', message, showName: false));
+    properties.add(DoubleProperty('vertical offset', verticalOffset));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 
@@ -108,7 +107,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
+    _controller = AnimationController(duration: _kFadeDuration, vsync: this)
       ..addStatusListener(_handleStatusChanged);
   }
 
@@ -132,11 +131,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
-    final Widget overlay = new _TooltipOverlay(
+    final Widget overlay = _TooltipOverlay(
       message: widget.message,
       height: widget.height,
       padding: widget.padding,
-      animation: new CurvedAnimation(
+      animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn
       ),
@@ -144,9 +143,10 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       verticalOffset: widget.verticalOffset,
       preferBelow: widget.preferBelow
     );
-    _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
+    _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    SemanticsService.tooltip(widget.message);
     _controller.forward();
     return true;
   }
@@ -163,7 +163,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handlePointerEvent(PointerEvent event) {
     assert(_entry != null);
     if (event is PointerUpEvent || event is PointerCancelEvent)
-      _timer ??= new Timer(_kShowDuration, _controller.reverse);
+      _timer ??= Timer(_kShowDuration, _controller.reverse);
     else if (event is PointerDownEvent)
       _controller.reverse();
   }
@@ -192,11 +192,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
-    return new GestureDetector(
+    return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
-      child: new Semantics(
+      child: Semantics(
         label: widget.excludeFromSemantics ? null : widget.message,
         child: widget.child,
       ),
@@ -277,35 +277,35 @@ class _TooltipOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ThemeData darkTheme = new ThemeData(
+    final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
     );
-    return new Positioned.fill(
-      child: new IgnorePointer(
-        child: new CustomSingleChildLayout(
-          delegate: new _TooltipPositionDelegate(
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: CustomSingleChildLayout(
+          delegate: _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
             preferBelow: preferBelow,
           ),
-          child: new FadeTransition(
+          child: FadeTransition(
             opacity: animation,
-            child: new Opacity(
+            child: Opacity(
               opacity: 0.9,
-              child: new ConstrainedBox(
-                constraints: new BoxConstraints(minHeight: height),
-                child: new Container(
-                  decoration: new BoxDecoration(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: height),
+                child: Container(
+                  decoration: BoxDecoration(
                     color: darkTheme.backgroundColor,
-                    borderRadius: new BorderRadius.circular(2.0),
+                    borderRadius: BorderRadius.circular(2.0),
                   ),
                   padding: padding,
-                  child: new Center(
+                  child: Center(
                     widthFactor: 1.0,
                     heightFactor: 1.0,
-                    child: new Text(message, style: darkTheme.textTheme.body1),
+                    child: Text(message, style: darkTheme.textTheme.body1),
                   ),
                 ),
               ),

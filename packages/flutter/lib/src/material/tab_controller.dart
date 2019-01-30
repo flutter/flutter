@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -17,10 +16,10 @@ import 'constants.dart';
 /// a [TabController] and share it directly.
 ///
 /// When the [TabBar] and [TabBarView] don't have a convenient stateful
-/// ancestor, a [TabController] can be shared with the [DefaultTabController]
-/// inherited widget.
+/// ancestor, a [TabController] can be shared by providing a
+/// [DefaultTabController] inherited widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -28,13 +27,13 @@ import 'constants.dart';
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key key }) : super(key: key);
 ///   @override
-///   _MyTabbedPageState createState() => new _MyTabbedPageState();
+///   _MyTabbedPageState createState() => _MyTabbedPageState();
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   TabController _tabController;
@@ -42,7 +41,7 @@ import 'constants.dart';
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _tabController = new TabController(vsync: this, length: myTabs.length);
+///     _tabController = TabController(vsync: this, length: myTabs.length);
 ///   }
 ///
 ///  @override
@@ -53,23 +52,24 @@ import 'constants.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Scaffold(
-///       appBar: new AppBar(
-///         bottom: new TabBar(
+///     return Scaffold(
+///       appBar: AppBar(
+///         bottom: TabBar(
 ///           controller: _tabController,
 ///           tabs: myTabs,
 ///         ),
 ///       ),
-///       body: new TabBarView(
+///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return new Center(child: new Text(tab.text));
+///           return Center(child: Text(tab.text));
 ///         }).toList(),
 ///       ),
 ///     );
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///
@@ -78,12 +78,12 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If [length] is
   /// zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
+  TabController({ int initialIndex = 0, @required this.length, @required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = length < 2 ? null : new AnimationController(
+      _animationController = length < 2 ? null : AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
         vsync: vsync
@@ -159,7 +159,7 @@ class TabController extends ChangeNotifier {
   ///
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
-  void animateTo(int value, { Duration duration: kTabScrollDuration, Curve curve: Curves.ease }) {
+  void animateTo(int value, { Duration duration = kTabScrollDuration, Curve curve = Curves.ease }) {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
@@ -205,34 +205,35 @@ class _TabControllerScope extends InheritedWidget {
   }
 }
 
-/// The [TabController] for descendant widgets that don't specify one explicitly.
+/// The [TabController] for descendant widgets that don't specify one
+/// explicitly.
 ///
-/// DefaultTabController is an inherited widget that is used to share a
-/// TabController with a [TabBar] or a [TabBarView]. It's used when
-/// sharing an explicitly created TabController isn't convenient because
-/// the tab bar widgets are created by a stateless parent widget or by
-/// different parent widgets.
+/// [DefaultTabController] is an inherited widget that is used to share a
+/// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an
+/// explicitly created [TabController] isn't convenient because the tab bar
+/// widgets are created by a stateless parent widget or by different parent
+/// widgets.
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new DefaultTabController(
+///     return DefaultTabController(
 ///       length: myTabs.length,
-///       child: new Scaffold(
-///         appBar: new AppBar(
-///           bottom: new TabBar(
+///       child: Scaffold(
+///         appBar: AppBar(
+///           bottom: TabBar(
 ///             tabs: myTabs,
 ///           ),
 ///         ),
-///         body: new TabBarView(
+///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return new Center(child: new Text(tab.text));
+///             return Center(child: Text(tab.text));
 ///           }).toList(),
 ///         ),
 ///       ),
@@ -249,7 +250,7 @@ class DefaultTabController extends StatefulWidget {
   const DefaultTabController({
     Key key,
     @required this.length,
-    this.initialIndex: 0,
+    this.initialIndex = 0,
     @required this.child,
   }) : assert(initialIndex != null),
        super(key: key);
@@ -282,7 +283,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  _DefaultTabControllerState createState() => new _DefaultTabControllerState();
+  _DefaultTabControllerState createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
@@ -291,7 +292,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(
+    _controller = TabController(
       vsync: this,
       length: widget.length,
       initialIndex: widget.initialIndex,
@@ -306,7 +307,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
 
   @override
   Widget build(BuildContext context) {
-    return new _TabControllerScope(
+    return _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
       child: widget.child,

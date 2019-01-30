@@ -11,13 +11,13 @@ void main() {
   testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i++)
-      textWidgets.add(new Text('$i'));
+      textWidgets.add(Text('$i'));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView(children: textWidgets),
-          right: new Container()
+        child: FlipWidget(
+          left: ListView(children: textWidgets),
+          right: Container()
         ),
       ),
     );

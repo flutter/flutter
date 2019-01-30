@@ -17,8 +17,11 @@
 ///    painting boxes.
 library painting;
 
+export 'dart:ui' show Shadow;
+
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';
+export 'src/painting/beveled_rectangle_border.dart';
 export 'src/painting/binding.dart';
 export 'src/painting/border_radius.dart';
 export 'src/painting/borders.dart';
@@ -27,7 +30,9 @@ export 'src/painting/box_decoration.dart';
 export 'src/painting/box_fit.dart';
 export 'src/painting/box_shadow.dart';
 export 'src/painting/circle_border.dart';
+export 'src/painting/clip.dart';
 export 'src/painting/colors.dart';
+export 'src/painting/debug.dart';
 export 'src/painting/decoration.dart';
 export 'src/painting/decoration_image.dart';
 export 'src/painting/edge_insets.dart';
@@ -41,10 +46,12 @@ export 'src/painting/image_provider.dart';
 export 'src/painting/image_resolution.dart';
 export 'src/painting/image_stream.dart';
 export 'src/painting/matrix_utils.dart';
+export 'src/painting/notched_shapes.dart';
 export 'src/painting/paint_utilities.dart';
 export 'src/painting/rounded_rectangle_border.dart';
 export 'src/painting/shape_decoration.dart';
 export 'src/painting/stadium_border.dart';
+export 'src/painting/superellipse_shape.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';

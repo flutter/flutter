@@ -14,30 +14,20 @@ void main() {
   testWidgets('Flutter gallery button example code displays', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/6147
 
-    await tester.pumpWidget(const GalleryApp());
+    await tester.pumpWidget(const GalleryApp(testMode: true));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-
-    // Scroll the Buttons demo into view so that a tap will succeed
-    final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
-    final Finder button = find.text('Buttons');
-    while (button.evaluate().isEmpty) {
-      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));
-      await tester.pump(); // start the scroll
-      await tester.pump(const Duration(seconds: 1));
-    }
+    await Scrollable.ensureVisible(tester.element(find.text('Material')), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Material'));
+    await tester.pumpAndSettle();
 
     // Launch the buttons demo and then prove that showing the example
     // code dialog does not crash.
 
     await tester.tap(find.text('Buttons'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
-
-    await tester.tap(find.text('RAISED'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1)); // end animation
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Show example code'));
     await tester.pump(); // start animation

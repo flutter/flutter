@@ -354,10 +354,10 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     if (_focus != null)
-      description.add(new DiagnosticsProperty<FocusNode>('focus', _focus));
+      properties.add(DiagnosticsProperty<FocusNode>('focus', _focus));
   }
 
   @override
@@ -414,7 +414,7 @@ class FocusManager {
   ///
   /// This field is rarely used direction. Instead, to find the
   /// [FocusScopeNode] for a given [BuildContext], use [FocusScope.of].
-  final FocusScopeNode rootScope = new FocusScopeNode();
+  final FocusScopeNode rootScope = FocusScopeNode();
 
   FocusNode _currentFocus;
 

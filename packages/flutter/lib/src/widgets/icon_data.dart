@@ -23,7 +23,7 @@ class IconData {
     this.codePoint, {
     this.fontFamily,
     this.fontPackage,
-    this.matchTextDirection: false,
+    this.matchTextDirection = false,
   });
 
   /// The Unicode code point at which this icon is stored in the icon font.

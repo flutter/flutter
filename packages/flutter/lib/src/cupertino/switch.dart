@@ -9,9 +9,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
+
+// Examples can assume:
+// bool _lights;
+// void setState(VoidCallback fn) { }
 
 /// An iOS-style switch.
 ///
@@ -22,17 +27,17 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
 /// [MergeSemantics] is used to turn the entire [ListTile] into a single item
 /// for accessibility tools.
 ///
 /// ```dart
-/// new MergeSemantics(
-///   child: new ListTile(
-///     title: new Text('Lights'),
-///     trailing: new CupertinoSwitch(
+/// MergeSemantics(
+///   child: ListTile(
+///     title: Text('Lights'),
+///     trailing: CupertinoSwitch(
 ///       value: _lights,
 ///       onChanged: (bool value) { setState(() { _lights = value; }); },
 ///     ),
@@ -40,6 +45,7 @@ import 'thumb_painter.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -47,12 +53,16 @@ import 'thumb_painter.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
+  ///
+  /// [dragStartBehavior] must not be null.
   const CupertinoSwitch({
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.activeColor: CupertinoColors.activeGreen,
-  }) : super(key: key);
+    this.activeColor,
+    this.dragStartBehavior = DragStartBehavior.down,
+  }) : assert(dragStartBehavior != null),
+       super(key: key);
 
   /// Whether this switch is on or off.
   final bool value;
@@ -70,7 +80,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CupertinoSwitch(
+  /// CupertinoSwitch(
   ///   value: _giveVerse,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
@@ -82,27 +92,52 @@ class CupertinoSwitch extends StatefulWidget {
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this switch is on.
+  ///
+  /// Defaults to [CupertinoColors.activeGreen] when null and ignores the
+  /// [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
-  @override
-  _CupertinoSwitchState createState() => new _CupertinoSwitchState();
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
+  /// {@template flutter.cupertino.switch.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag behavior used to move the
+  /// switch from on to off will begin upon the detection of a drag gesture. If
+  /// set to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.down].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  /// {@endtemplate}
+  final DragStartBehavior dragStartBehavior;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    description.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+  _CupertinoSwitchState createState() => _CupertinoSwitchState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
 class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return new _CupertinoSwitchRenderObjectWidget(
+    return _CupertinoSwitchRenderObjectWidget(
       value: widget.value,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
       onChanged: widget.onChanged,
       vsync: this,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 }
@@ -114,21 +149,24 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeColor,
     this.onChanged,
     this.vsync,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : super(key: key);
 
   final bool value;
   final Color activeColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
-    return new _RenderCupertinoSwitch(
+    return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
+      dragStartBehavior: dragStartBehavior
     );
   }
 
@@ -139,7 +177,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeColor = activeColor
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
-      ..vsync = vsync;
+      ..vsync = vsync
+      ..dragStartBehavior = dragStartBehavior;
   }
 }
 
@@ -153,8 +192,8 @@ const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
-const Duration _kReactionDuration = const Duration(milliseconds: 300);
-const Duration _kToggleDuration = const Duration(milliseconds: 200);
+const Duration _kReactionDuration = Duration(milliseconds: 300);
+const Duration _kToggleDuration = Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({
@@ -163,6 +202,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),
@@ -172,30 +212,31 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _vsync = vsync,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    _tap = new TapGestureRecognizer()
+    _tap = TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
-    _drag = new HorizontalDragGestureRecognizer()
+    _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd;
-    _positionController = new AnimationController(
+      ..onEnd = _handleDragEnd
+      ..dragStartBehavior = dragStartBehavior;
+    _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value ? 1.0 : 0.0,
       vsync: vsync,
     );
-    _position = new CurvedAnimation(
+    _position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.linear,
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = new AnimationController(
+    _reactionController = AnimationController(
       duration: _kReactionDuration,
       vsync: vsync,
     );
-    _reaction = new CurvedAnimation(
+    _reaction = CurvedAnimation(
       parent: _reactionController,
       curve: Curves.ease,
     )..addListener(markNeedsPaint);
@@ -256,6 +297,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.lightImpact();
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+    }
   }
 
   TextDirection get textDirection => _textDirection;
@@ -266,6 +315,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       return;
     _textDirection = value;
     markNeedsPaint();
+  }
+
+  DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
+  set dragStartBehavior(DragStartBehavior value) {
+    assert(value != null);
+    if (_drag.dragStartBehavior == value)
+      return;
+    _drag.dragStartBehavior = value;
   }
 
   bool get isInteractive => onChanged != null;
@@ -378,13 +435,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value;
+
+    config.isEnabled = isInteractive;
+    config.isToggled = _value;
   }
 
-  final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();
+  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -406,17 +464,17 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final Color trackColor = _value ? activeColor : _kTrackColor;
     final double borderThickness = 1.5 + (_kTrackRadius - 1.5) * math.max(currentReactionValue, currentValue);
 
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = trackColor;
 
-    final Rect trackRect = new Rect.fromLTWH(
+    final Rect trackRect = Rect.fromLTWH(
         offset.dx + (size.width - _kTrackWidth) / 2.0,
         offset.dy + (size.height - _kTrackHeight) / 2.0,
         _kTrackWidth,
         _kTrackHeight
     );
-    final RRect outerRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    final RRect innerRRect = new RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
+    final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
+    final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
     canvas.drawDRRect(outerRRect, innerRRect, paint);
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
@@ -432,7 +490,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
 
-    _thumbPainter.paint(canvas, new Rect.fromLTRB(
+    _thumbPainter.paint(canvas, Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
@@ -443,7 +501,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
-    description.add(new FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
+    description.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
+    description.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
   }
 }

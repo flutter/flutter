@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
               focusNode: focusNode,
             ),
           ),
@@ -28,7 +28,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -37,10 +37,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
-          child: const Center(
-            child: const TextField(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
               autofocus: true,
             ),
           ),
@@ -50,7 +50,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -59,10 +59,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
-          child: const Center(
-            child: const TextField(),
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(),
           ),
         ),
       ),
@@ -84,7 +84,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -93,10 +93,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
-          child: const Center(
-            child: const TextField(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
               autofocus: true,
             ),
           ),
@@ -108,9 +108,9 @@ void main() {
 
     final BuildContext context = tester.element(find.byType(TextField));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
-      child: const SimpleDialog(title: const Text('Dialog')),
+      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
     await tester.pump();
@@ -127,23 +127,23 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new ListView(
+      MaterialApp(
+        home: Material(
+          child: ListView(
             children: <Widget>[
-              new TextField(
+              TextField(
                 focusNode: focusNode,
               ),
-              new Container(
+              Container(
                 height: 1000.0,
               ),
             ],
@@ -162,7 +162,7 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
     expect(tester.testTextInput.isVisible, isTrue);
 
     focusNode.unfocus();
@@ -173,20 +173,20 @@ void main() {
   });
 
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     Widget makeTest(String prefix) {
-      return new MaterialApp(
-        home: new Material(
-          child: new ListView(
+      return MaterialApp(
+        home: Material(
+          child: ListView(
             children: <Widget>[
-              new TextField(
+              TextField(
                 focusNode: focusNode,
-                decoration: new InputDecoration(
+                decoration: InputDecoration(
                   prefixText: prefix,
                 ),
               ),
-              new Container(
+              Container(
                 height: 1000.0,
               ),
             ],
@@ -201,9 +201,30 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
     await tester.pumpWidget(makeTest('test'));
     await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('TextField with decoration:null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/16880
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              decoration: null
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    await tester.tap(find.byType(TextField));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
   });
 }

@@ -4,9 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/custom_semantics.dart' as custom_semantics show main;
-import '../lib/custom_semantics.dart';
+import 'package:sample_catalog/custom_semantics.dart' as custom_semantics show main;
+import 'package:sample_catalog/custom_semantics.dart';
 
 void main() {
   testWidgets('custom_semantics sample smoke test', (WidgetTester tester) async {
@@ -93,12 +92,12 @@ void main() {
 }
 
 void expectAdjustable(SemanticsNode node, {
-  bool hasIncreaseAction: true,
-  bool hasDecreaseAction: true,
-  String label: '',
-  String decreasedValue: '',
-  String value: '',
-  String increasedValue: '',
+  bool hasIncreaseAction = true,
+  bool hasDecreaseAction = true,
+  String label = '',
+  String decreasedValue = '',
+  String value = '',
+  String increasedValue = '',
 }) {
   final SemanticsData semanticsData = node.getSemanticsData();
 

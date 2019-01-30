@@ -7,15 +7,19 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'fuchsia/fuchsia_device.dart';
+
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'linux/linux_device.dart';
+import 'macos/macos_device.dart';
+import 'tester/flutter_tester.dart';
+import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
@@ -25,9 +29,14 @@ class DeviceManager {
   /// of their methods are called.
   DeviceManager() {
     // Register the known discoverers.
-    _deviceDiscoverers.add(new AndroidDevices());
-    _deviceDiscoverers.add(new IOSDevices());
-    _deviceDiscoverers.add(new IOSSimulators());
+    _deviceDiscoverers.add(AndroidDevices());
+    _deviceDiscoverers.add(IOSDevices());
+    _deviceDiscoverers.add(IOSSimulators());
+    _deviceDiscoverers.add(FuchsiaDevices());
+    _deviceDiscoverers.add(FlutterTesterDevices());
+    _deviceDiscoverers.add(MacOSDevices());
+    _deviceDiscoverers.add(LinuxDevices());
+    _deviceDiscoverers.add(WindowsDevices());
   }
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
@@ -121,7 +130,7 @@ abstract class DeviceDiscovery {
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
-  Future<List<String>> getDiagnostics() => new Future<List<String>>.value(<String>[]);
+  Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -129,8 +138,8 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = const Duration(seconds: 4);
-  static const Duration _pollingTimeout = const Duration(seconds: 30);
+  static const Duration _pollingInterval = Duration(seconds: 4);
+  static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
@@ -140,14 +149,14 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   void startPolling() {
     if (_poller == null) {
-      _items ??= new ItemListNotifier<Device>();
+      _items ??= ItemListNotifier<Device>();
 
-      _poller = new Poller(() async {
+      _poller = Poller(() async {
         try {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
-          printTrace('Device poll timed out.');
+          printTrace('Device poll timed out. Will retry.');
         }
       }, _pollingInterval);
     }
@@ -160,17 +169,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> get devices async {
-    _items ??= new ItemListNotifier<Device>.from(await pollingGetDevices());
+    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices());
     return _items.items;
   }
 
   Stream<Device> get onAdded {
-    _items ??= new ItemListNotifier<Device>();
+    _items ??= ItemListNotifier<Device>();
     return _items.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    _items ??= new ItemListNotifier<Device>();
+    _items ??= ItemListNotifier<Device>();
     return _items.onRemoved;
   }
 
@@ -181,6 +190,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
+
   Device(this.id);
 
   final String id;
@@ -261,25 +271,30 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
-    bool ipv6: false,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   });
 
-  /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => true;
+  /// Whether this device implements support for hot reload.
+  bool get supportsHotReload => true;
+
+  /// Whether this device implements support for hot restart.
+  bool get supportsHotRestart => true;
+
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
+  bool get supportsStopApp => true;
+
+  /// Whether the device supports taking screenshots of a running flutter
+  /// application.
+  bool get supportsScreenshot => false;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
-  bool get supportsScreenshot => false;
-
-  Future<Null> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
-
-  /// Find the apps that are currently running on this device.
-  Future<List<DiscoveredApp>> discoverApps() =>
-      new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
+  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
@@ -318,41 +333,43 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map((int i) => 0).toList();
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
     for (List<String> row in table) {
-      yield indices.map((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
     }
   }
 
-  static Future<Null> printDevices(List<Device> devices) async {
+  static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
 }
 
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
-    this.startPaused: false,
-    this.enableSoftwareRendering: false,
-    this.skiaDeterministicRendering: false,
-    this.traceSkia: false,
-    this.useTestFonts: false,
+    this.startPaused = false,
+    this.enableSoftwareRendering = false,
+    this.skiaDeterministicRendering = false,
+    this.traceSkia = false,
+    this.traceSystrace = false,
+    this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo) :
-    debuggingEnabled = false,
-    useTestFonts = false,
-    startPaused = false,
-    enableSoftwareRendering = false,
-    skiaDeterministicRendering = false,
-    traceSkia = false,
-    observatoryPort = null;
+  DebuggingOptions.disabled(this.buildInfo)
+    : debuggingEnabled = false,
+      useTestFonts = false,
+      startPaused = false,
+      enableSoftwareRendering = false,
+      skiaDeterministicRendering = false,
+      traceSkia = false,
+      traceSystrace = false,
+      observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -361,23 +378,18 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final bool traceSystrace;
   final bool useTestFonts;
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
-
-  /// Return the user specified observatory port. If that isn't available,
-  /// return [kDefaultObservatoryPort], or a port close to that one.
-  Future<int> findBestObservatoryPort() {
-    if (hasObservatoryPort)
-      return new Future<int>.value(observatoryPort);
-    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
-  }
 }
 
 class LaunchResult {
   LaunchResult.succeeded({ this.observatoryUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null;
+  LaunchResult.failed()
+    : started = false,
+      observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
@@ -386,7 +398,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    final StringBuffer buf = new StringBuffer('started=$started');
+    final StringBuffer buf = StringBuffer('started=$started');
     if (observatoryUri != null)
       buf.write(', observatory=$observatoryUri');
     return buf.toString();
@@ -412,12 +424,12 @@ abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
 
   /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
+  /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
-  Future<Null> unforward(ForwardedPort forwardedPort);
+  Future<void> unforward(ForwardedPort forwardedPort);
 }
 
 /// Read the log for a particular device.
@@ -439,4 +451,32 @@ class DiscoveredApp {
   DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
+}
+
+// An empty device log reader
+class NoOpDeviceLogReader implements DeviceLogReader {
+  NoOpDeviceLogReader(this.name);
+
+  @override
+  final String name;
+
+  @override
+  int appPid;
+
+  @override
+  Stream<String> get logLines => const Stream<String>.empty();
+}
+
+// A portforwarder which does not support forwarding ports.
+class NoOpDevicePortForwarder implements DevicePortForwarder {
+  const NoOpDevicePortForwarder();
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
 }

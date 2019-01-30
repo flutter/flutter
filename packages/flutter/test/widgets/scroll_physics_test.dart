@@ -11,7 +11,7 @@ class TestScrollPhysics extends ScrollPhysics {
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor);
+    return TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor);
   }
 
   TestScrollPhysics get namedParent => parent;
@@ -28,11 +28,11 @@ class TestScrollPhysics extends ScrollPhysics {
 
 void main() {
   test('ScrollPhysics applyTo()', () {
-    const ScrollPhysics a = const TestScrollPhysics(name: 'a');
-    const ScrollPhysics b = const TestScrollPhysics(name: 'b');
-    const ScrollPhysics c = const TestScrollPhysics(name: 'c');
-    const ScrollPhysics d = const TestScrollPhysics(name: 'd');
-    const ScrollPhysics e = const TestScrollPhysics(name: 'e');
+    const ScrollPhysics a = TestScrollPhysics(name: 'a');
+    const ScrollPhysics b = TestScrollPhysics(name: 'b');
+    const ScrollPhysics c = TestScrollPhysics(name: 'c');
+    const ScrollPhysics d = TestScrollPhysics(name: 'd');
+    const ScrollPhysics e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -52,11 +52,11 @@ void main() {
   });
 
   test('ScrollPhysics subclasses applyTo()', () {
-    const ScrollPhysics bounce = const BouncingScrollPhysics();
-    const ScrollPhysics clamp = const ClampingScrollPhysics();
-    const ScrollPhysics never = const NeverScrollableScrollPhysics();
-    const ScrollPhysics always = const AlwaysScrollableScrollPhysics();
-    const ScrollPhysics page = const PageScrollPhysics();
+    const ScrollPhysics bounce = BouncingScrollPhysics();
+    const ScrollPhysics clamp = ClampingScrollPhysics();
+    const ScrollPhysics never = NeverScrollableScrollPhysics();
+    const ScrollPhysics always = AlwaysScrollableScrollPhysics();
+    const ScrollPhysics page = PageScrollPhysics();
 
     String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
 
@@ -84,7 +84,7 @@ void main() {
     });
 
     test('overscroll is progressively harder', () {
-      final ScrollMetrics lessOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics lessOverscrolledPosition = FixedScrollMetrics(
           minScrollExtent: 0.0,
           maxScrollExtent: 1000.0,
           pixels: -20.0,
@@ -92,7 +92,7 @@ void main() {
           axisDirection: AxisDirection.down,
       );
 
-      final ScrollMetrics moreOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics moreOverscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -40.0,
@@ -117,7 +117,7 @@ void main() {
     });
 
     test('easing an overscroll still has resistance', () {
-      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -20.0,
@@ -133,7 +133,7 @@ void main() {
     });
 
     test('no resistance when not overscrolled', () {
-      final ScrollMetrics scrollPosition = new FixedScrollMetrics(
+      final ScrollMetrics scrollPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: 300.0,
@@ -146,7 +146,7 @@ void main() {
     });
 
     test('easing an overscroll meets less resistance than tensioning', () {
-      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -20.0,
@@ -163,7 +163,7 @@ void main() {
     });
 
     test('overscroll a small list and a big list works the same way', () {
-      final ScrollMetrics smallListOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
           minScrollExtent: 0.0,
           maxScrollExtent: 10.0,
           pixels: -20.0,
@@ -171,7 +171,7 @@ void main() {
           axisDirection: AxisDirection.down,
       );
 
-      final ScrollMetrics bigListOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics bigListOverscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -20.0,

@@ -9,7 +9,7 @@ const double _kEpsilon = .00001;
 
 void main() {
   test('Friction simulation positive velocity', () {
-    final FrictionSimulation friction = new FrictionSimulation(0.135, 100.0, 100.0);
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, 100.0);
 
     expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
     expect(friction.dx(0.0), closeTo(100.0, _kEpsilon));
@@ -25,12 +25,12 @@ void main() {
     expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
     expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
 
-    expect(friction.timeAtX(-1.0), double.INFINITY);
-    expect(friction.timeAtX(200.0), double.INFINITY);
+    expect(friction.timeAtX(-1.0), double.infinity);
+    expect(friction.timeAtX(200.0), double.infinity);
   });
 
   test('Friction simulation negative velocity', () {
-    final FrictionSimulation friction = new FrictionSimulation(0.135, 100.0, -100.0);
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, -100.0);
 
     expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
     expect(friction.dx(0.0), closeTo(-100.0, _kEpsilon));
@@ -46,7 +46,7 @@ void main() {
     expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
     expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
 
-    expect(friction.timeAtX(101.0), double.INFINITY);
-    expect(friction.timeAtX(40.0), double.INFINITY);
+    expect(friction.timeAtX(101.0), double.infinity);
+    expect(friction.timeAtX(40.0), double.infinity);
   });
 }

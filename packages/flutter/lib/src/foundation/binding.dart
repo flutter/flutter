@@ -3,15 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
+import 'dart:ui' show saveCompilationTrace;
 
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'debug.dart';
 import 'platform.dart';
+import 'print.dart';
 
 /// Signature for service extensions.
 ///
@@ -20,12 +23,12 @@ import 'platform.dart';
 /// "type" key will be set to the string `_extensionType` to indicate
 /// that this is a return value from a service extension, and the
 /// "method" key will be set to the full name of the method.
-typedef Future<Map<String, dynamic>> ServiceExtensionCallback(Map<String, String> parameters);
+typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
 ///
-/// To use this class in a mixin, inherit from it and implement
+/// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
 /// in checked mode).
@@ -91,9 +94,7 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// Service extensions are only exposed when the observatory is
-  /// included in the build, which should only happen in checked mode
-  /// and in profile mode.
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   ///
   /// See also:
   ///
@@ -102,21 +103,35 @@ abstract class BindingBase {
   @mustCallSuper
   void initServiceExtensions() {
     assert(!_debugServiceExtensionsRegistered);
-    registerSignalServiceExtension(
-      name: 'reassemble',
-      callback: reassembleApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'exit',
-      callback: _exitApplication,
-    );
-    registerSignalServiceExtension(
-      name: 'frameworkPresent',
-      callback: () => new Future<Null>.value(),
-    );
+
     assert(() {
+      registerSignalServiceExtension(
+        name: 'reassemble',
+        callback: reassembleApplication,
+      );
+      return true;
+    }());
+
+    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+    if (!isReleaseMode) {
+      registerSignalServiceExtension(
+        name: 'exit',
+        callback: _exitApplication,
+      );
       registerServiceExtension(
-        name: 'platformOverride',
+        name: 'saveCompilationTrace',
+        callback: (Map<String, String> parameters) async {
+          return <String, dynamic> {
+            'value': saveCompilationTrace(),
+          };
+        }
+      );
+    }
+
+    assert(() {
+      const String platformOverrideExtensionName = 'platformOverride';
+      registerServiceExtension(
+        name: platformOverrideExtensionName,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -133,6 +148,10 @@ abstract class BindingBase {
               default:
                 debugDefaultTargetPlatformOverride = null;
             }
+            _postExtensionStateChangedEvent(
+              platformOverrideExtensionName,
+              defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
+            );
             await reassembleApplication();
           }
           return <String, dynamic>{
@@ -167,13 +186,13 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<Null> lockEvents(Future<Null> callback()) {
+  Future<void> lockEvents(Future<void> callback()) {
     developer.Timeline.startSync('Lock events');
 
     assert(callback != null);
     _lockCount += 1;
-    final Future<Null> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<Null> that completes when the lock is to expire.');
+    final Future<void> future = callback();
+    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
@@ -211,7 +230,7 @@ abstract class BindingBase {
   ///
   /// Subclasses (binding classes) should override [performReassemble] to react
   /// to this method being called. This method itself should not be overridden.
-  Future<Null> reassembleApplication() {
+  Future<void> reassembleApplication() {
     return lockEvents(performReassemble);
   }
 
@@ -227,9 +246,9 @@ abstract class BindingBase {
   /// Do not call this method directly. Instead, use [reassembleApplication].
   @mustCallSuper
   @protected
-  Future<Null> performReassemble() {
+  Future<void> performReassemble() {
     FlutterError.resetErrorCount();
-    return new Future<Null>.value();
+    return Future<void>.value();
   }
 
   /// Registers a service extension method with the given name (full
@@ -237,6 +256,8 @@ abstract class BindingBase {
   /// no value.
   ///
   /// Calls the `callback` callback when the service extension is called.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
     @required String name,
@@ -265,6 +286,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
     @required String name,
@@ -277,8 +300,10 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey('enabled'))
+        if (parameters.containsKey('enabled')) {
           await setter(parameters['enabled'] == 'true');
+          _postExtensionStateChangedEvent(name, await getter() ? 'true' : 'false');
+        }
         return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
       }
     );
@@ -295,6 +320,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
     @required String name,
@@ -307,11 +334,42 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey(name))
+        if (parameters.containsKey(name)) {
           await setter(double.parse(parameters[name]));
+          _postExtensionStateChangedEvent(name, (await getter()).toString());
+        }
         return <String, dynamic>{ name: (await getter()).toString() };
       }
     );
+  }
+
+  /// Sends an event when a service extension's state is changed.
+  ///
+  /// Clients should listen for this event to stay aware of the current service
+  /// extension state. Any service extension that manages a state should call
+  /// this method on state change.
+  ///
+  /// `value` reflects the newly updated service extension value.
+  ///
+  /// This will be called automatically for service extensions registered via
+  /// [registerBoolServiceExtension], [registerNumericServiceExtension], or
+  /// [registerStringServiceExtension].
+  void _postExtensionStateChangedEvent(String name, dynamic value) {
+    postEvent(
+      'Flutter.ServiceExtensionStateChanged',
+      <String, dynamic>{
+        'extension': 'ext.flutter.$name',
+        'value': value,
+      },
+    );
+  }
+
+  /// All events dispatched by a [BindingBase] use this method instead of
+  /// calling [developer.postEvent] directly so that tests for [BindingBase]
+  /// can track which events were dispatched by overriding this method.
+  @protected
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+    developer.postEvent(eventKind, eventData);
   }
 
   /// Registers a service extension method with the given name (full name
@@ -324,6 +382,8 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  ///
+  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
     @required String name,
@@ -336,23 +396,60 @@ abstract class BindingBase {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        if (parameters.containsKey('value'))
+        if (parameters.containsKey('value')) {
           await setter(parameters['value']);
+          _postExtensionStateChangedEvent(name, await getter());
+        }
         return <String, dynamic>{ 'value': await getter() };
       }
     );
   }
 
-  /// Registers a service extension method with the given name (full
-  /// name "ext.flutter.name"). The given callback is called when the
-  /// extension method is called. The callback must return a [Future]
-  /// that either eventually completes to a return value in the form
-  /// of a name/value map where the values can all be converted to
-  /// JSON using `JSON.encode()` (see [JsonCodec.encode]), or fails. In case of failure, the
-  /// failure is reported to the remote caller and is dumped to the
-  /// logs.
+  /// Registers a service extension method with the given name (full name
+  /// "ext.flutter.name").
+  ///
+  /// The given callback is called when the extension method is called. The
+  /// callback must return a [Future] that either eventually completes to a
+  /// return value in the form of a name/value map where the values can all be
+  /// converted to JSON using `json.encode()` (see [JsonEncoder]), or fails. In
+  /// case of failure, the failure is reported to the remote caller and is
+  /// dumped to the logs.
   ///
   /// The returned map will be mutated.
+  ///
+  /// {@template flutter.foundation.bindingBase.registerServiceExtension}
+  /// A registered service extension can only be activated if the vm-service
+  /// is included in the build, which only happens in debug and profile mode.
+  /// Although a service extension cannot be used in release mode its code may
+  /// still be included in the Dart snapshot and blow up binary size if it is
+  /// not wrapped in a guard that allows the tree shaker to remove it (see
+  /// sample code below).
+  ///
+  /// ## Sample Code
+  ///
+  /// The following code registers a service extension that is only included in
+  /// debug builds:
+  ///
+  /// ```dart
+  /// assert(() {
+  ///   // Register your service extension here.
+  ///   return true;
+  /// }());
+  ///
+  /// ```
+  ///
+  /// A service extension registered with the following code snippet is
+  /// available in debug and profile mode:
+  ///
+  /// ```dart
+  /// if (!const bool.fromEnvironment('dart.vm.product')) {
+  //   // Register your service extension here.
+  // }
+  /// ```
+  ///
+  /// Both guards ensure that Dart's tree shaker can remove the code for the
+  /// service extension in release builds.
+  /// {@endtemplate}
   @protected
   void registerServiceExtension({
     @required String name,
@@ -363,6 +460,26 @@ abstract class BindingBase {
     final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
+      assert(() {
+        if (debugInstrumentationEnabled)
+          debugPrint('service extension method received: $method($parameters)');
+        return true;
+      }());
+
+      // VM service extensions are handled as "out of band" messages by the VM,
+      // which means they are handled at various times, generally ASAP.
+      // Notably, this includes being handled in the middle of microtask loops.
+      // While this makes sense for some service extensions (e.g. "dump current
+      // stack trace", which explicitly doesn't want to wait for a loop to
+      // complete), Flutter extensions need not be handled with such high
+      // priority. Further, handling them with such high priority exposes us to
+      // the possibility that they're handled in the middle of a frame, which
+      // breaks many assertions. As such, we ensure they we run the callbacks
+      // on the outer event loop here.
+      await debugInstrumentAction<void>('Wait for outer event loop', () {
+        return Future<void>.delayed(Duration.zero);
+      });
+
       dynamic caughtException;
       StackTrace caughtStack;
       Map<String, dynamic> result;
@@ -375,16 +492,16 @@ abstract class BindingBase {
       if (caughtException == null) {
         result['type'] = '_extensionType';
         result['method'] = method;
-        return new developer.ServiceExtensionResponse.result(JSON.encode(result));
+        return developer.ServiceExtensionResponse.result(json.encode(result));
       } else {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: caughtException,
           stack: caughtStack,
           context: 'during a service extension callback for "$method"'
         ));
-        return new developer.ServiceExtensionResponse.error(
+        return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
-          JSON.encode(<String, String>{
+          json.encode(<String, String>{
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
             'method': method,
@@ -399,6 +516,6 @@ abstract class BindingBase {
 }
 
 /// Terminate the Flutter application.
-Future<Null> _exitApplication() async {
+Future<void> _exitApplication() async {
   exit(0);
 }

@@ -4,7 +4,8 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:image/image.dart';
-import 'package:test/test.dart';
+
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('FlutterDriver', () {
@@ -41,6 +42,6 @@ void main() {
 
         imageBefore = imageAfter;
       }
-    }, timeout: const Timeout(const Duration(minutes: 2)));
+    }, timeout: const Timeout(Duration(minutes: 2)));
   });
 }

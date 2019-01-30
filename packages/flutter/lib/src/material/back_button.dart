@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -40,7 +41,7 @@ class BackButtonIcon extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => new Icon(_getIconData(Theme.of(context).platform));
+  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
 }
 
 /// A material design back button.
@@ -81,12 +82,13 @@ class BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new IconButton(
+    assert(debugCheckHasMaterialLocalizations(context));
+    return IconButton(
       icon: const BackButtonIcon(),
       color: color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       }
     );
   }
@@ -114,11 +116,12 @@ class CloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new IconButton(
+    assert(debugCheckHasMaterialLocalizations(context));
+    return IconButton(
       icon: const Icon(Icons.close),
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       },
     );
   }

@@ -22,7 +22,7 @@ import 'proxy_box.dart';
 /// The returned list must not be mutated after this function completes. To
 /// change the semantic information, the function must return a new list
 /// instead.
-typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
+typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size size);
 
 /// The interface used by [CustomPaint] (in the widgets library) and
 /// [RenderCustomPaint] (in the rendering library).
@@ -62,7 +62,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 /// class is provided, to check if the new instance contains different
 /// information that affects the semantics tree.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample extends the same code shown for [RadialGradient] to create a
 /// custom painter that paints a sky.
@@ -72,7 +72,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   @override
 ///   void paint(Canvas canvas, Size size) {
 ///     var rect = Offset.zero & size;
-///     var gradient = new RadialGradient(
+///     var gradient = RadialGradient(
 ///       center: const Alignment(0.7, -0.6),
 ///       radius: 0.2,
 ///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
@@ -80,7 +80,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///     );
 ///     canvas.drawRect(
 ///       rect,
-///       new Paint()..shader = gradient.createShader(rect),
+///       Paint()..shader = gradient.createShader(rect),
 ///     );
 ///   }
 ///
@@ -93,11 +93,11 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///       // touch.
 ///       var rect = Offset.zero & size;
 ///       var width = size.shortestSide * 0.4;
-///       rect = const Alignment(0.8, -0.9).inscribe(new Size(width, width), rect);
+///       rect = const Alignment(0.8, -0.9).inscribe(Size(width, width), rect);
 ///       return [
-///         new CustomPainterSemantics(
+///         CustomPainterSemantics(
 ///           rect: rect,
-///           properties: new SemanticsProperties(
+///           properties: SemanticsProperties(
 ///             label: 'Sun',
 ///             textDirection: TextDirection.ltr,
 ///           ),
@@ -111,10 +111,13 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   // Therefore we return false here. If we had fields (set
 ///   // from the constructor) then we would return true if any
 ///   // of them differed from the same fields on the oldDelegate.
+///   @override
 ///   bool shouldRepaint(Sky oldDelegate) => false;
+///   @override
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -188,9 +191,9 @@ abstract class CustomPainter extends Listenable {
   ///
   /// See also:
   ///
-  /// * [SemanticsConfiguration.isSemanticBoundary], which causes new
-  ///   [SemanticsNode]s to be added to the semantics tree.
-  /// * [RenderCustomPaint], which uses this getter to build semantics.
+  ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
+  ///    [SemanticsNode]s to be added to the semantics tree.
+  ///  * [RenderCustomPaint], which uses this getter to build semantics.
   SemanticsBuilderCallback get semanticsBuilder => null;
 
   /// Called whenever a new instance of the custom painter delegate class is
@@ -273,8 +276,8 @@ abstract class CustomPainter extends Listenable {
 ///
 /// See also:
 ///
-/// * [SemanticsNode], which is created using the properties of this class.
-/// * [CustomPainter], which creates instances of this class.
+///  * [SemanticsNode], which is created using the properties of this class.
+///  * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
 
@@ -319,8 +322,8 @@ class CustomPainterSemantics {
   ///
   /// See also:
   ///
-  /// * [Semantics], which is a widget that also uses [SemanticsProperties] to
-  ///   annotate.
+  ///  * [Semantics], which is a widget that also uses [SemanticsProperties] to
+  ///    annotate.
   final SemanticsProperties properties;
 
   /// Tags used by the parent [SemanticsNode] to determine the layout of the
@@ -360,9 +363,9 @@ class RenderCustomPaint extends RenderProxyBox {
   RenderCustomPaint({
     CustomPainter painter,
     CustomPainter foregroundPainter,
-    Size preferredSize: Size.zero,
-    this.isComplex: false,
-    this.willChange: false,
+    Size preferredSize = Size.zero,
+    this.isComplex = false,
+    this.willChange = false,
     RenderBox child,
   }) : assert(preferredSize != null),
        _painter = painter,
@@ -526,7 +529,7 @@ class RenderCustomPaint extends RenderProxyBox {
       // below that number.
       final int debugNewCanvasSaveCount = canvas.getSaveCount();
       if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
-        throw new FlutterError(
+        throw FlutterError(
           'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
           '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
           'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
@@ -536,7 +539,7 @@ class RenderCustomPaint extends RenderProxyBox {
         );
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
-        throw new FlutterError(
+        throw FlutterError(
           'The $painter custom painter called canvas.restore() '
           '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
           'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
@@ -598,7 +601,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ) {
     assert(() {
       if (child == null && children.isNotEmpty) {
-        throw new FlutterError(
+        throw FlutterError(
           '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode:\n'
           '${children.join('\n')}'
         );
@@ -664,8 +667,8 @@ class RenderCustomPaint extends RenderProxyBox {
     newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
 
     assert(() {
-      final Map<Key, int> keys = new HashMap<Key, int>();
-      final StringBuffer errors = new StringBuffer();
+      final Map<Key, int> keys = HashMap<Key, int>();
+      final StringBuffer errors = StringBuffer();
       for (int i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
@@ -679,7 +682,7 @@ class RenderCustomPaint extends RenderProxyBox {
       }
 
       if (errors.isNotEmpty) {
-        throw new FlutterError(
+        throw FlutterError(
           'Failed to update the list of CustomPainterSemantics:\n'
           '$errors'
         );
@@ -693,7 +696,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode> newChildren = new List<SemanticsNode>(newChildSemantics.length);
+    final List<SemanticsNode> newChildren = List<SemanticsNode>(newChildSemantics.length);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -801,13 +804,15 @@ class RenderCustomPaint extends RenderProxyBox {
   static SemanticsNode _updateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
     assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
 
-    final SemanticsNode newChild = oldChild ?? new SemanticsNode(
+    final SemanticsNode newChild = oldChild ?? SemanticsNode(
       key: newSemantics.key,
     );
 
     final SemanticsProperties properties = newSemantics.properties;
-    final SemanticsConfiguration config = new SemanticsConfiguration();
-
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    if (properties.sortKey != null) {
+      config.sortKey = properties.sortKey;
+    }
     if (properties.checked != null) {
       config.isChecked = properties.checked;
     }
@@ -816,6 +821,42 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.button != null) {
       config.isButton = properties.button;
+    }
+    if (properties.textField != null) {
+      config.isTextField = properties.textField;
+    }
+    if (properties.focused != null) {
+      config.isFocused = properties.focused;
+    }
+    if (properties.enabled != null) {
+      config.isEnabled = properties.enabled;
+    }
+    if (properties.inMutuallyExclusiveGroup != null) {
+      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
+    }
+    if (properties.obscured != null) {
+      config.isObscured = properties.obscured;
+    }
+    if (properties.hidden != null) {
+      config.isHidden = properties.hidden;
+    }
+    if (properties.header != null) {
+      config.isHeader = properties.header;
+    }
+    if (properties.scopesRoute != null) {
+      config.scopesRoute = properties.scopesRoute;
+    }
+    if (properties.namesRoute != null) {
+      config.namesRoute = properties.namesRoute;
+    }
+    if (properties.liveRegion != null) {
+      config.liveRegion = properties.liveRegion;
+    }
+    if (properties.toggled != null) {
+      config.isToggled = properties.toggled;
+    }
+    if (properties.image != null) {
+      config.isImage = properties.image;
     }
     if (properties.label != null) {
       config.label = properties.label;
@@ -882,6 +923,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
+    }
+    if (properties.onDismiss != null) {
+      config.onDismiss = properties.onDismiss;
     }
 
     newChild.updateWith(

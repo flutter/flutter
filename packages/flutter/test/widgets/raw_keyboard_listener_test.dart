@@ -18,21 +18,21 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
-    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
-    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
-    await tester.pumpWidget(new Container());
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Fuchsia key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(new RawKeyboardListener(
+    await tester.pumpWidget(RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
-      child: new Container(),
+      child: Container(),
     ));
 
     tester.binding.focusManager.rootScope.requestFocus(focusNode);
@@ -43,7 +43,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -53,9 +53,10 @@ void main() {
     final RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
-    expect(typedData.modifiers, 0x08);
+    expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
+    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 
@@ -63,12 +64,12 @@ void main() {
       (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(new RawKeyboardListener(
+    await tester.pumpWidget(RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
-      child: new Container(),
+      child: Container(),
     ));
 
     tester.binding.focusManager.rootScope.requestFocus(focusNode);
@@ -79,28 +80,28 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
     expect(events.length, 1);
     events.clear();
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     sendFakeKeyEvent(<String, dynamic>{
       'type': 'keydown',
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
 
     await tester.idle();
 
     expect(events.length, 0);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 }

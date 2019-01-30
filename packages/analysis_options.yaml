@@ -1,0 +1,8 @@
+# Take our settings from the repo's main analysis_options.yaml file, but include
+# an additional rule to validate that public members are documented.
+
+include: ../analysis_options.yaml
+
+linter:
+  rules:
+    - public_member_api_docs

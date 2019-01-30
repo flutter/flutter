@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/animated_list.dart' as animated_list_sample;
+import 'package:sample_catalog/animated_list.dart' as animated_list_sample;
 
 void main() {
   testWidgets('animated_list sample app smoke test', (WidgetTester tester) async {

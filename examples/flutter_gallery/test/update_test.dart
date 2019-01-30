@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 Future<String> mockUpdateUrlFetcher() {
   // A real implementation would connect to the network to retrieve this value
-  return new Future<String>.value('http://www.example.com/');
+  return Future<String>.value('http://www.example.com/');
 }
 
 void main() {
@@ -17,7 +17,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('update dialog', (WidgetTester tester) async {
-    await tester.pumpWidget(const GalleryApp(updateUrlFetcher: mockUpdateUrlFetcher));
+    await tester.pumpWidget(
+      const GalleryApp(
+        testMode: true,
+        updateUrlFetcher: mockUpdateUrlFetcher
+      )
+    );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -26,8 +31,8 @@ void main() {
     await tester.tap(find.text('NO THANKS'));
     await tester.pump();
 
-    await tester.tap(find.text('Shrine'));
-    await tester.pump(); // Launch shrine
+    await tester.tap(find.text('Studies'));
+    await tester.pump(); // Launch
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     final Finder backButton = find.byTooltip('Back');

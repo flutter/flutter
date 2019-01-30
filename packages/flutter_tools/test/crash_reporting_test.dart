@@ -11,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:test/test.dart';
 
 import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
@@ -20,6 +19,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -29,14 +30,12 @@ void main() {
     });
 
     setUp(() async {
-      tools.crashFileSystem = new MemoryFileSystem();
-      tools.writelnStderr = ([_]) { };
+      tools.crashFileSystem = MemoryFileSystem();
       setExitFunctionForTests((_) { });
     });
 
     tearDown(() {
       tools.crashFileSystem = const LocalFileSystem();
-      tools.writelnStderr = stderr.writeln;
       restoreExitFunction();
     });
 
@@ -45,18 +44,18 @@ void main() {
       Uri uri;
       Map<String, String> fields;
 
-      CrashReportSender.initializeWith(new MockClient((Request request) async {
+      CrashReportSender.initializeWith(MockClient((Request request) async {
         method = request.method;
         uri = request.url;
 
         // A very ad-hoc multipart request parser. Good enough for this test.
         String boundary = request.headers['Content-Type'];
         boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
-        fields = new Map<String, String>.fromIterable(
-          UTF8.decode(request.bodyBytes)
+        fields = Map<String, String>.fromIterable(
+          utf8.decode(request.bodyBytes)
               .split('--$boundary')
               .map<List<String>>((String part) {
-                final Match nameMatch = new RegExp(r'name="(.*)"').firstMatch(part);
+                final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
                 if (nameMatch == null)
                   return null;
                 final String name = nameMatch[1];
@@ -74,7 +73,7 @@ void main() {
           }
         );
 
-        return new Response(
+        return Response(
             'test-report-id',
             200
         );
@@ -82,7 +81,7 @@ void main() {
 
       final int exitCode = await tools.run(
         <String>['crash'],
-        <FlutterCommand>[new _CrashCommand()],
+        <FlutterCommand>[_CrashCommand()],
         reportCrashes: true,
         flutterVersion: 'test-version',
       );
@@ -91,7 +90,7 @@ void main() {
 
       // Verify that we sent the crash report.
       expect(method, 'POST');
-      expect(uri, new Uri(
+      expect(uri, Uri(
         scheme: 'https',
         host: 'clients2.google.com',
         port: 443,
@@ -108,6 +107,7 @@ void main() {
       expect(fields['osVersion'], 'fake OS name and version');
       expect(fields['type'], 'DartError');
       expect(fields['error_runtime_type'], 'StateError');
+      expect(fields['error_message'], 'Bad state: Test bad state error');
 
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
@@ -119,6 +119,47 @@ void main() {
             .map((FileSystemEntity e) => e.path).toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('can override base URL', () async {
+      Uri uri;
+      CrashReportSender.initializeWith(MockClient((Request request) async {
+        uri = request.url;
+        return Response('test-report-id', 200);
+      }));
+
+      final int exitCode = await tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      );
+
+      expect(exitCode, 1);
+
+      // Verify that we sent the crash report.
+      expect(uri, isNotNull);
+      expect(uri, Uri(
+        scheme: 'https',
+        host: 'localhost',
+        port: 12345,
+        path: '/fake_server',
+        queryParameters: <String, String>{
+          'product': 'Flutter_Tools',
+          'version' : 'test-version',
+        },
+      ));
+    }, overrides: <Type, Generator> {
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
+        },
+        script: Uri(scheme: 'data'),
+      ),
+      Stdio: () => const _NoStderr(),
     });
   });
 }
@@ -133,9 +174,9 @@ class _CrashCommand extends FlutterCommand {
   String get name => 'crash';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     void fn1() {
-      throw new StateError('Test bad state error');
+      throw StateError('Test bad state error');
     }
 
     void fn2() {
@@ -147,5 +188,54 @@ class _CrashCommand extends FlutterCommand {
     }
 
     fn3();
+
+    return null;
   }
+}
+
+class _NoStderr extends Stdio {
+  const _NoStderr();
+
+  @override
+  IOSink get stderr => const _NoopIOSink();
+}
+
+class _NoopIOSink implements IOSink {
+  const _NoopIOSink();
+
+  @override
+  Encoding get encoding => utf8;
+
+  @override
+  set encoding(_) => throw UnsupportedError('');
+
+  @override
+  void add(_) {}
+
+  @override
+  void write(_) {}
+
+  @override
+  void writeAll(_, [__ = '']) {}
+
+  @override
+  void writeln([_ = '']) {}
+
+  @override
+  void writeCharCode(_) {}
+
+  @override
+  void addError(_, [__]) {}
+
+  @override
+  Future<dynamic> addStream(_) async {}
+
+  @override
+  Future<dynamic> flush() async {}
+
+  @override
+  Future<dynamic> close() async {}
+
+  @override
+  Future<dynamic> get done async {}
 }

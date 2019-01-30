@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'assertions.dart';
 import 'platform.dart';
 import 'print.dart';
@@ -19,18 +21,55 @@ import 'print.dart';
 ///
 /// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
 /// a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride: debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     return true;
   }());
   return true;
 }
 
-/// Arguments to whitelist [Timeline] events in order to be shown in the
-/// developer centric version of the Observatory Timeline.
-const Map<String, String> timelineWhitelistArguments = const <String, String>{
+/// Boolean value indicating whether [debugInstrumentAction] will instrument
+/// actions in debug builds.
+bool debugInstrumentationEnabled = false;
+
+/// Runs the specified [action], timing how long the action takes in debug
+/// builds when [debugInstrumentationEnabled] is true.
+///
+/// The instrumentation will be printed to the logs using [debugPrint]. In
+/// non-debug builds, or when [debugInstrumentationEnabled] is false, this will
+/// run [action] without any instrumentation.
+///
+/// Returns the result of running [action].
+///
+/// See also:
+///
+///  * [Timeline], which is used to record synchronous tracing events for
+///    visualization in Chrome's tracing format. This method does not
+///    implicitly add any timeline events.
+Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
+  bool instrument = false;
+  assert(() { instrument = debugInstrumentationEnabled; return true; }());
+  if (instrument) {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    return action().whenComplete(() {
+      stopwatch.stop();
+      debugPrint('Action "$description" took ${stopwatch.elapsed}');
+    });
+  } else {
+    return action();
+  }
+}
+
+/// Argument passed to [Timeline] events in order to cause those events to be
+/// shown in the developer-centric version of the Observatory Timeline.
+///
+/// See also:
+///
+///  * [Timeline.startSync], which typically takes this value as its `arguments`
+///    argument.
+const Map<String, String> timelineWhitelistArguments = <String, String>{
   'mode': 'basic'
 };

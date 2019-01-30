@@ -28,7 +28,7 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     try {
       await runCheckedAsync(<String>[
         'git', 'rev-parse', '@{u}'
@@ -60,7 +60,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join('bin', 'flutter'), '--no-color', 'precache',
+        fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true
@@ -80,20 +80,22 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Running flutter doctor...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join('bin', 'flutter'), 'doctor',
+        fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
     );
+
+    return null;
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
-  static final RegExp _gitDiffRegex = new RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
+  static final RegExp _gitDiffRegex = RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
 
   //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
   //  delete mode 100644 doc/index.html
   //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
-  static final RegExp _gitChangedRegex = new RegExp(r' (rename|delete mode|create mode) .+');
+  static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
 
   @visibleForTesting
   static bool matchesGitLine(String line) {

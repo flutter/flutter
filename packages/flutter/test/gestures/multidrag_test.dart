@@ -13,15 +13,15 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
-    final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
+    final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
     drag.onStart = (Offset position) {
       didStartDrag = true;
-      return new TestDrag();
+      return TestDrag();
     };
 
-    final TestPointer pointer = new TestPointer(5);
+    final TestPointer pointer = TestPointer(5);
     final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
@@ -38,15 +38,15 @@ void main() {
   });
 
   testGesture('MultiDrag: delay triggers', (GestureTester tester) {
-    final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
+    final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
     drag.onStart = (Offset position) {
       didStartDrag = true;
-      return new TestDrag();
+      return TestDrag();
     };
 
-    final TestPointer pointer = new TestPointer(5);
+    final TestPointer pointer = TestPointer(5);
     final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);

@@ -5,12 +5,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'object.dart';
+
 export 'package:flutter/foundation.dart' show debugPrint;
 
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
-const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
+const HSVColor _kDebugDefaultRepaintColor = HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra
 /// boxes, such as [RenderPadding], to draw construction lines.
@@ -38,6 +40,11 @@ bool debugPaintLayerBordersEnabled = false;
 bool debugPaintPointersEnabled = false;
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
+///
+/// See also:
+///
+///  * [RepaintBoundary], which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
 /// Overlay a rotating set of colors when repainting text in checked mode.
@@ -76,10 +83,8 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 ///  * [debugProfilePaintsEnabled], which does something similar for
 ///    painting but using the timeline view.
-///
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugPrintLayouts = false;
 
@@ -103,21 +108,76 @@ bool debugCheckIntrinsicSizes = false;
 ///
 ///  * [debugPrintLayouts], which does something similar for layout but using
 ///    console output.
-///
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
 ///    equivalent.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
+///  * [RepaintBoundary], which can be used to contain repaints when unchanged
+///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
+/// Signature for [debugOnProfilePaint] implementations.
+typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+
+/// Callback invoked for every [RenderObject] painted each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar but adds
+///    [dart:developer.Timeline] events instead of invoking a callback.
+///  * [debugOnRebuildDirtyWidget], which does something similar for widgets
+///    being built.
+///  * [WidgetInspectorService], which uses the [debugOnProfilePaint]
+///    callback to generate aggregate profile statistics describing what paints
+///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
+///    extension is enabled.
+ProfilePaintCallback debugOnProfilePaint;
+
+/// Setting to true will cause all clipping effects from the layer tree to be
+/// ignored.
+///
+/// Can be used to debug whether objects being clipped are painting excessively
+/// in clipped areas. Can also be used to check whether excessive use of
+/// clipping is affecting performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the clipping layers to be skipped
+/// when building the scene.
+bool debugDisableClipLayers = false;
+
+/// Setting to true will cause all physical modeling effects from the layer
+/// tree, such as shadows from elevations, to be ignored.
+///
+/// Can be used to check whether excessive use of physical models is affecting
+/// performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the physical shape layers to be
+/// skipped when building the scene.
+bool debugDisablePhysicalShapeLayers = false;
+
+/// Setting to true will cause all opacity effects from the layer tree to be
+/// ignored.
+///
+/// An optimization to not paint the child at all when opacity is 0 will still
+/// remain.
+///
+/// Can be used to check whether excessive use of opacity effects is affecting
+/// performance.
+///
+/// This will not reduce the number of [Layer] objects created; the compositing
+/// strategy is unaffected. It merely causes the opacity layers to be skipped
+/// when building the scene.
+bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path = new Path()
+  final Path path = Path()
     ..fillType = PathFillType.evenOdd
     ..addRect(outerRect)
     ..addRect(innerRect);
-  final Paint paint = new Paint()
+  final Paint paint = Paint()
     ..color = color;
   canvas.drawPath(path, paint);
 }
@@ -126,13 +186,13 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth: 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
       _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, const Color(0xFF0090FF));
     } else {
-      final Paint paint = new Paint()
+      final Paint paint = Paint()
         ..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
@@ -151,7 +211,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride: false }) {
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -164,8 +224,9 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
-        debugProfilePaintsEnabled) {
-      throw new FlutterError(reason);
+        debugProfilePaintsEnabled ||
+        debugOnProfilePaint != null) {
+      throw FlutterError(reason);
     }
     return true;
   }());

@@ -22,7 +22,25 @@ export 'pointer_router.dart' show PointerRouter;
 /// [GestureRecognizer.invokeCallback]. This allows the
 /// [GestureRecognizer.invokeCallback] mechanism to be generically used with
 /// anonymous functions that return objects of particular types.
-typedef T RecognizerCallback<T>();
+typedef RecognizerCallback<T> = T Function();
+
+/// Configuration of offset passed to [DragStartDetails].
+///
+/// The settings determines when a drag formally starts when the user
+/// initiates a drag.
+///
+/// See also:
+///
+///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+enum DragStartBehavior {
+  /// Set the initial offset, at the position where the first down even was
+  /// detected.
+  down,
+
+  /// Set the initial position at the position where the drag start event was
+  /// detected.
+  start,
+}
 
 /// The base class that all gesture recognizers inherit from.
 ///
@@ -101,7 +119,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
       }());
       result = callback();
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'gesture',
@@ -117,9 +135,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
   }
 }
 
@@ -136,7 +154,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   OneSequenceGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
-  final Set<int> _trackedPointers = new HashSet<int>();
+  final Set<int> _trackedPointers = HashSet<int>();
 
   /// Called when a pointer event is routed to this recognizer.
   @protected
@@ -160,7 +178,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    final List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries.values);
+    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
@@ -299,7 +317,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       primaryPointer = event.pointer;
       initialPosition = event.position;
       if (deadline != null)
-        _timer = new Timer(deadline, didExceedDeadline);
+        _timer = Timer(deadline, didExceedDeadline);
     }
   }
 
@@ -364,8 +382,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<GestureRecognizerState>('state', state));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<GestureRecognizerState>('state', state));
   }
 }

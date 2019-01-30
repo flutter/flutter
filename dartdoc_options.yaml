@@ -1,0 +1,11 @@
+# This file is used by dartdoc when generating API documentation for Flutter.
+dartdoc:
+  # Before you can run dartdoc, the snippets tool needs to have a snapshot built.
+  # The dev/tools/dartdoc.dart script does this automatically.
+  tools:
+    snippet:
+      command: ["dev/snippets/lib/main.dart", "--type=application"]
+      description: "Creates application sample code documentation output from embedded documentation samples."
+    sample:
+      command: ["dev/snippets/lib/main.dart", "--type=sample"]
+      description: "Creates sample code documentation output from embedded documentation samples."

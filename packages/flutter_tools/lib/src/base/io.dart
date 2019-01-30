@@ -41,7 +41,7 @@ export 'dart:io'
         exitCode,
         // File              NO! Use `file_system.dart`
         // FileSystemEntity  NO! Use `file_system.dart`
-        GZIP,
+        gzip,
         HandshakeException,
         HttpClient,
         HttpClientRequest,
@@ -71,14 +71,15 @@ export 'dart:io'
         // stdout,           NO! Use `io.dart`
         Socket,
         SocketException,
-        SYSTEM_ENCODING,
+        systemEncoding,
         WebSocket,
+        WebSocketException,
         WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
-typedef void ExitFunction(int exitCode);
+typedef ExitFunction = void Function(int exitCode);
 
-final ExitFunction _defaultExitFunction = io.exit;
+const ExitFunction _defaultExitFunction = io.exit;
 
 ExitFunction _exitFunction = _defaultExitFunction;
 
@@ -96,7 +97,7 @@ ExitFunction get exit => _exitFunction;
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
   _exitFunction = exitFunction ?? (int exitCode) {
-    throw new ProcessExit(exitCode, immediate: true);
+    throw ProcessExit(exitCode, immediate: true);
   };
 }
 
@@ -115,17 +116,18 @@ class ProcessSignal implements io.ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
-  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
-  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
-  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
-  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2);
-  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT);
+  static const ProcessSignal SIGWINCH = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
+  static const ProcessSignal SIGTERM = _PosixProcessSignal._(io.ProcessSignal.sigterm);
+  static const ProcessSignal SIGUSR1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
+  static const ProcessSignal SIGUSR2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
+  static const ProcessSignal SIGINT =  ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal SIGKILL =  ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
 
   @override
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map((io.ProcessSignal signal) => this);
+    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
   }
 
   @override
@@ -153,25 +155,14 @@ class Stdio {
   Stream<List<int>> get stdin => io.stdin;
   io.IOSink get stdout => io.stdout;
   io.IOSink get stderr => io.stderr;
+
+  bool get hasTerminal => io.stdout.hasTerminal;
+  int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
+  int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
+  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
-io.IOSink get stderr {
-  if (context == null)
-    return io.stderr;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stderr;
-}
-
-Stream<List<int>> get stdin {
-  if (context == null)
-    return io.stdin;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stdin;
-}
-
-io.IOSink get stdout {
-  if (context == null)
-    return io.stdout;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stdout;
-}
+Stdio get stdio => context[Stdio];
+io.IOSink get stdout => stdio.stdout;
+Stream<List<int>> get stdin => stdio.stdin;
+io.IOSink get stderr => stdio.stderr;

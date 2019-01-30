@@ -160,7 +160,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalParentData)
-      child.parentData = new SliverPhysicalParentData();
+      child.parentData = SliverPhysicalParentData();
   }
 
   @override
@@ -172,7 +172,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     final double mainAxisPadding = this.mainAxisPadding;
     final double crossAxisPadding = this.crossAxisPadding;
     if (child == null) {
-      geometry = new SliverGeometry(
+      geometry = SliverGeometry(
         scrollExtent: mainAxisPadding,
         paintExtent: math.min(mainAxisPadding, constraints.remainingPaintExtent),
         maxPaintExtent: mainAxisPadding,
@@ -182,15 +182,17 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     child.layout(
       constraints.copyWith(
         scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
+        cacheOrigin: math.min(0.0, constraints.cacheOrigin + beforePadding),
         overlap: 0.0,
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
+        remainingCacheExtent: constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: beforePadding),
         crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
       ),
       parentUsesSize: true,
     );
     final SliverGeometry childLayoutGeometry = child.geometry;
     if (childLayoutGeometry.scrollOffsetCorrection != null) {
-      geometry = new SliverGeometry(
+      geometry = SliverGeometry(
         scrollOffsetCorrection: childLayoutGeometry.scrollOffsetCorrection,
       );
       return;
@@ -206,14 +208,26 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
       to: mainAxisPadding + childLayoutGeometry.scrollExtent,
     );
     final double mainAxisPaddingPaintExtent = beforePaddingPaintExtent + afterPaddingPaintExtent;
+    final double beforePaddingCacheExtent = calculateCacheOffset(
+      constraints,
+      from: 0.0,
+      to: beforePadding,
+    );
+    final double afterPaddingCacheExtent = calculateCacheOffset(
+      constraints,
+      from: beforePadding + childLayoutGeometry.scrollExtent,
+      to: mainAxisPadding + childLayoutGeometry.scrollExtent,
+    );
+    final double mainAxisPaddingCacheExtent = afterPaddingCacheExtent + beforePaddingCacheExtent;
     final double paintExtent = math.min(
       beforePaddingPaintExtent + math.max(childLayoutGeometry.paintExtent, childLayoutGeometry.layoutExtent + afterPaddingPaintExtent),
       constraints.remainingPaintExtent,
     );
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: mainAxisPadding + childLayoutGeometry.scrollExtent,
       paintExtent: paintExtent,
       layoutExtent: math.min(mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent, paintExtent),
+      cacheExtent: math.min(mainAxisPaddingCacheExtent + childLayoutGeometry.cacheExtent, constraints.remainingCacheExtent),
       maxPaintExtent: mainAxisPadding + childLayoutGeometry.maxPaintExtent,
       hitTestExtent: math.max(
         mainAxisPaddingPaintExtent + childLayoutGeometry.paintExtent,
@@ -227,16 +241,16 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     assert(constraints.growthDirection != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
-        childParentData.paintOffset = new Offset(_resolvedPadding.left, calculatePaintOffset(constraints, from: _resolvedPadding.bottom + childLayoutGeometry.scrollExtent, to: _resolvedPadding.bottom + childLayoutGeometry.scrollExtent + _resolvedPadding.top));
+        childParentData.paintOffset = Offset(_resolvedPadding.left, calculatePaintOffset(constraints, from: _resolvedPadding.bottom + childLayoutGeometry.scrollExtent, to: _resolvedPadding.bottom + childLayoutGeometry.scrollExtent + _resolvedPadding.top));
         break;
       case AxisDirection.right:
-        childParentData.paintOffset = new Offset(calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.left), _resolvedPadding.top);
+        childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.left), _resolvedPadding.top);
         break;
       case AxisDirection.down:
-        childParentData.paintOffset = new Offset(_resolvedPadding.left, calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.top));
+        childParentData.paintOffset = Offset(_resolvedPadding.left, calculatePaintOffset(constraints, from: 0.0, to: _resolvedPadding.top));
         break;
       case AxisDirection.left:
-        childParentData.paintOffset = new Offset(calculatePaintOffset(constraints, from: _resolvedPadding.right + childLayoutGeometry.scrollExtent, to: _resolvedPadding.right + childLayoutGeometry.scrollExtent + _resolvedPadding.left), _resolvedPadding.top);
+        childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: _resolvedPadding.right + childLayoutGeometry.scrollExtent, to: _resolvedPadding.right + childLayoutGeometry.scrollExtent + _resolvedPadding.left), _resolvedPadding.top);
         break;
     }
     assert(childParentData.paintOffset != null);
@@ -326,9 +340,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

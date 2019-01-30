@@ -10,19 +10,21 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/basic_messaging.dart';
 import 'src/method_calls.dart';
+import 'src/pair.dart';
 import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(new TestApp());
+  runApp(TestApp());
 }
 
 class TestApp extends StatefulWidget {
   @override
-  _TestAppState createState() => new _TestAppState();
+  _TestAppState createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
+  static final dynamic anUnknownValue = DateTime.fromMillisecondsSinceEpoch(1520777802314);
   static final List<dynamic> aList = <dynamic>[
     false,
     0,
@@ -39,36 +41,40 @@ class _TestAppState extends State<TestApp> {
     'd': 'hello',
     'e': <dynamic>[
       <String, dynamic>{'key': 42}
-    ]
+    ],
   };
-  static final Uint8List someUint8s = new Uint8List.fromList(<int>[
+  static final Uint8List someUint8s = Uint8List.fromList(<int>[
     0xBA,
     0x5E,
     0xBA,
     0x11,
   ]);
-  static final Int32List someInt32s = new Int32List.fromList(<int>[
+  static final Int32List someInt32s = Int32List.fromList(<int>[
     -0x7fffffff - 1,
     0,
     0x7fffffff,
   ]);
-  static final Int64List someInt64s = new Int64List.fromList(<int>[
+  static final Int64List someInt64s = Int64List.fromList(<int>[
     -0x7fffffffffffffff - 1,
     0,
     0x7fffffffffffffff,
   ]);
   static final Float64List someFloat64s =
-      new Float64List.fromList(<double>[
-    double.NAN,
-    double.NEGATIVE_INFINITY,
-    -double.MAX_FINITE,
-    -double.MIN_POSITIVE,
+      Float64List.fromList(<double>[
+    double.nan,
+    double.negativeInfinity,
+    -double.maxFinite,
+    -double.minPositive,
     -0.0,
     0.0,
-    double.MIN_POSITIVE,
-    double.MAX_FINITE,
-    double.INFINITY,
+    double.minPositive,
+    double.maxFinite,
+    double.infinity,
   ]);
+  static final dynamic aCompoundUnknownValue = <dynamic>[
+    anUnknownValue,
+    Pair(anUnknownValue, aList),
+  ];
   static final List<TestStep> steps = <TestStep>[
     () => methodCallJsonSuccessHandshake(null),
     () => methodCallJsonSuccessHandshake(true),
@@ -83,14 +89,16 @@ class _TestAppState extends State<TestApp> {
     () => methodCallStandardSuccessHandshake('world'),
     () => methodCallStandardSuccessHandshake(aList),
     () => methodCallStandardSuccessHandshake(aMap),
+    () => methodCallStandardSuccessHandshake(anUnknownValue),
+    () => methodCallStandardSuccessHandshake(aCompoundUnknownValue),
     () => methodCallJsonErrorHandshake(null),
     () => methodCallJsonErrorHandshake('world'),
     () => methodCallStandardErrorHandshake(null),
     () => methodCallStandardErrorHandshake('world'),
     () => methodCallStandardNotImplementedHandshake(),
     () => basicBinaryHandshake(null),
-    () => basicBinaryHandshake(new ByteData(0)),
-    () => basicBinaryHandshake(new ByteData(4)..setUint32(0, 0x12345678)),
+    () => basicBinaryHandshake(ByteData(0)),
+    () => basicBinaryHandshake(ByteData(4)..setUint32(0, 0x12345678)),
     () => basicStringHandshake('hello, world'),
     () => basicStringHandshake('hello \u263A \u{1f602} unicode'),
     () => basicStringHandshake(''),
@@ -138,6 +146,8 @@ class _TestAppState extends State<TestApp> {
     () => basicStandardHandshake(<String, dynamic>{}),
     () => basicStandardHandshake(<dynamic, dynamic>{7: true, false: -7}),
     () => basicStandardHandshake(aMap),
+    () => basicStandardHandshake(anUnknownValue),
+    () => basicStandardHandshake(aCompoundUnknownValue),
     () => basicBinaryMessageToUnknownChannel(),
     () => basicStringMessageToUnknownChannel(),
     () => basicJsonMessageToUnknownChannel(),
@@ -146,17 +156,12 @@ class _TestAppState extends State<TestApp> {
   Future<TestStepResult> _result;
   int _step = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _executeNextStep() {
     setState(() {
       if (_step < steps.length)
         _result = steps[_step++]();
       else
-        _result = new Future<TestStepResult>.value(TestStepResult.complete);
+        _result = Future<TestStepResult>.value(TestStepResult.complete);
     });
   }
 
@@ -164,25 +169,25 @@ class _TestAppState extends State<TestApp> {
     BuildContext context,
     AsyncSnapshot<TestStepResult> snapshot,
   ) {
-    return new TestStepResult.fromSnapshot(snapshot).asWidget(context);
+    return TestStepResult.fromSnapshot(snapshot).asWidget(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Channels Test',
-      home: new Scaffold(
-        appBar: new AppBar(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('Channels Test'),
         ),
-        body: new Padding(
+        body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: new FutureBuilder<TestStepResult>(
+          child: FutureBuilder<TestStepResult>(
             future: _result,
             builder: _buildTestResultWidget,
           ),
         ),
-        floatingActionButton: new FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
           key: const ValueKey<String>('step'),
           onPressed: _executeNextStep,
           child: const Icon(Icons.navigate_next),

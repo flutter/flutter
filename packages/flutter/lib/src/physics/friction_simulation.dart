@@ -19,7 +19,7 @@ class FrictionSimulation extends Simulation {
   /// length units as used for [x]; and the initial velocity, in the same
   /// velocity units as used for [dx].
   FrictionSimulation(double drag, double position, double velocity, {
-    Tolerance tolerance: Tolerance.defaultTolerance,
+    Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,
@@ -41,11 +41,11 @@ class FrictionSimulation extends Simulation {
     assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
-    return new FrictionSimulation(
+    return FrictionSimulation(
       _dragFor(startPosition, endPosition, startVelocity, endVelocity),
       startPosition,
       startVelocity,
-      tolerance: new Tolerance(velocity: endVelocity.abs()),
+      tolerance: Tolerance(velocity: endVelocity.abs()),
     );
   }
 
@@ -62,7 +62,7 @@ class FrictionSimulation extends Simulation {
   // Solving for D given x(time) is trickier. Algebra courtesy of Wolfram Alpha:
   // x1 = x0 + (v0 * D^((log(v1) - log(v0)) / log(D))) / log(D) - v0 / log(D), find D
   static double _dragFor(double startPosition, double endPosition, double startVelocity, double endVelocity) {
-    return math.pow(math.E, (startVelocity - endVelocity) / (startPosition - endPosition));
+    return math.pow(math.e, (startVelocity - endVelocity) / (startPosition - endPosition));
   }
 
   @override
@@ -71,17 +71,17 @@ class FrictionSimulation extends Simulation {
   @override
   double dx(double time) => _v * math.pow(_drag, time);
 
-  /// The value of [x] at `double.INFINITY`.
+  /// The value of [x] at `double.infinity`.
   double get finalX => _x - _v / _dragLog;
 
   /// The time at which the value of `x(time)` will equal [x].
   ///
-  /// Returns `double.INFINITY` if the simulation will never reach [x].
+  /// Returns `double.infinity` if the simulation will never reach [x].
   double timeAtX(double x) {
     if (x == _x)
       return 0.0;
     if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX)))
-      return double.INFINITY;
+      return double.infinity;
     return math.log(_dragLog * (x - _x) / _v + 1.0) / _dragLog;
   }
 

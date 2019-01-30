@@ -9,11 +9,11 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoScrollbar(
-        child: new SingleChildScrollView(
-          child: const SizedBox(width: 4000.0, height: 4000.0),
+      child: CupertinoScrollbar(
+        child: SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
     ));
@@ -26,8 +26,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       color: const Color(0x99777777),
-      rrect: new RRect.fromRectAndRadius(
-        new Rect.fromLTWH(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
           800.0 - 2.5 - 2.5, // Screen width - margin - thickness.
           4.0, // Initial position is the top margin.
           2.5, // Thickness.

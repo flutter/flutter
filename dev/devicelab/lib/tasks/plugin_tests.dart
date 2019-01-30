@@ -10,32 +10,47 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+/// Combines several TaskFunctions with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return TaskResult.success(null);
+  };
+}
+
 /// Defines task that creates new Flutter project, adds a plugin, and then
 /// builds the specified [buildTarget].
 class PluginTest {
-  final String buildTarget;
+  PluginTest(this.buildTarget, this.options);
 
-  PluginTest(this.buildTarget);
+  final String buildTarget;
+  final List<String> options;
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
-    final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp);
-    if (buildTarget == 'ios') {
-      await prepareProvisioningCertificates(project.rootPath);
-    }
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     try {
-      section('Add plugin');
-      await project.addPlugin('path_provider');
-
-      section('Build');
-      await project.build(buildTarget);
-
-      return new TaskResult.success(null);
+      final FlutterProject project = await FlutterProject.create(tempDir, options);
+      try {
+        if (buildTarget == 'ios')
+          await prepareProvisioningCertificates(project.rootPath);
+        section('Add plugin');
+        await project.addPlugin('path_provider');
+        section('Build');
+        await project.build(buildTarget);
+      } finally {
+        await project.delete();
+      }
+      return TaskResult.success(null);
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     } finally {
-      await project.delete();
+      rmTree(tempDir);
     }
   }
 }
@@ -46,17 +61,20 @@ class FlutterProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterProject> create(Directory directory) async {
+  static Future<FlutterProject> create(Directory directory, List<String> options) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--org', 'io.flutter.devicelab', 'plugintest']);
+      await flutter(
+        'create',
+        options: <String>['--template=app', '--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
+      );
     });
-    return new FlutterProject(directory, 'plugintest');
+    return FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
 
-  Future<Null> addPlugin(String plugin) async {
-    final File pubspec = new File(path.join(rootPath, 'pubspec.yaml'));
+  Future<void> addPlugin(String plugin) async {
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '\ndependencies:\n',
@@ -65,13 +83,24 @@ class FlutterProject {
     await pubspec.writeAsString(content, flush: true);
   }
 
-  Future<Null> build(String target) async {
-    await inDirectory(new Directory(rootPath), () async {
+  Future<void> build(String target) async {
+    await inDirectory(Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
   }
 
-  Future<Null> delete() async {
-    await parent.delete(recursive: true);
+  Future<void> delete() async {
+    if (Platform.isWindows) {
+      // A running Gradle daemon might prevent us from deleting the project
+      // folder on Windows.
+      await exec(
+        path.absolute(path.join(rootPath, 'android', 'gradlew.bat')),
+        <String>['--stop'],
+        canFail: true,
+      );
+      // TODO(ianh): Investigating if flakiness is timing dependent.
+      await Future<void>.delayed(const Duration(seconds: 10));
+    }
+    rmTree(parent);
   }
 }

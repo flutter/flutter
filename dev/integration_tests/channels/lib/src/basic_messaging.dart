@@ -5,40 +5,74 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
+import 'pair.dart';
 import 'test_step.dart';
+
+class ExtendedStandardMessageCodec extends StandardMessageCodec {
+  const ExtendedStandardMessageCodec();
+
+  static const int _dateTime = 128;
+  static const int _pair = 129;
+
+  @override
+  void writeValue(WriteBuffer buffer, dynamic value) {
+    if (value is DateTime) {
+      buffer.putUint8(_dateTime);
+      buffer.putInt64(value.millisecondsSinceEpoch);
+    } else if (value is Pair) {
+      buffer.putUint8(_pair);
+      writeValue(buffer, value.left);
+      writeValue(buffer, value.right);
+    } else {
+      super.writeValue(buffer, value);
+    }
+  }
+
+  @override
+  dynamic readValueOfType(int type, ReadBuffer buffer) {
+    switch (type) {
+    case _dateTime:
+      return DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
+    case _pair:
+      return Pair(readValue(buffer), readValue(buffer));
+    default: return super.readValueOfType(type, buffer);
+    }
+  }
+}
 
 Future<TestStepResult> basicBinaryHandshake(ByteData message) async {
   const BasicMessageChannel<ByteData> channel =
-      const BasicMessageChannel<ByteData>(
+      BasicMessageChannel<ByteData>(
     'binary-msg',
-    const BinaryCodec(),
+    BinaryCodec(),
   );
   return _basicMessageHandshake<ByteData>(
       'Binary >${toString(message)}<', channel, message);
 }
 
 Future<TestStepResult> basicStringHandshake(String message) async {
-  const BasicMessageChannel<String> channel = const BasicMessageChannel<String>(
+  const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
     'string-msg',
-    const StringCodec(),
+    StringCodec(),
   );
   return _basicMessageHandshake<String>('String >$message<', channel, message);
 }
 
 Future<TestStepResult> basicJsonHandshake(dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
-      const BasicMessageChannel<dynamic>(
+      BasicMessageChannel<dynamic>(
     'json-msg',
-    const JSONMessageCodec(),
+    JSONMessageCodec(),
   );
   return _basicMessageHandshake<dynamic>('JSON >$message<', channel, message);
 }
 
 Future<TestStepResult> basicStandardHandshake(dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
-      const BasicMessageChannel<dynamic>(
+      BasicMessageChannel<dynamic>(
     'std-msg',
-    const StandardMessageCodec(),
+    ExtendedStandardMessageCodec(),
   );
   return _basicMessageHandshake<dynamic>(
       'Standard >${toString(message)}<', channel, message);
@@ -46,35 +80,35 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
 
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
   const BasicMessageChannel<ByteData> channel =
-      const BasicMessageChannel<ByteData>(
+      BasicMessageChannel<ByteData>(
     'binary-unknown',
-    const BinaryCodec(),
+    BinaryCodec(),
   );
   return _basicMessageToUnknownChannel<ByteData>('Binary', channel);
 }
 
 Future<TestStepResult> basicStringMessageToUnknownChannel() async {
-  const BasicMessageChannel<String> channel = const BasicMessageChannel<String>(
+  const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
     'string-unknown',
-    const StringCodec(),
+    StringCodec(),
   );
   return _basicMessageToUnknownChannel<String>('String', channel);
 }
 
 Future<TestStepResult> basicJsonMessageToUnknownChannel() async {
   const BasicMessageChannel<dynamic> channel =
-      const BasicMessageChannel<dynamic>(
+      BasicMessageChannel<dynamic>(
     'json-unknown',
-    const JSONMessageCodec(),
+    JSONMessageCodec(),
   );
   return _basicMessageToUnknownChannel<dynamic>('JSON', channel);
 }
 
 Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
   const BasicMessageChannel<dynamic> channel =
-      const BasicMessageChannel<dynamic>(
+      BasicMessageChannel<dynamic>(
     'std-unknown',
-    const StandardMessageCodec(),
+    ExtendedStandardMessageCodec(),
   );
   return _basicMessageToUnknownChannel<dynamic>('Standard', channel);
 }

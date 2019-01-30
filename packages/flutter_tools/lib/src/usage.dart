@@ -16,19 +16,25 @@ import 'globals.dart';
 import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+const String kEventReloadReasonParameterName = 'cd5';
+const String kEventReloadFinalLibraryCount = 'cd6';
+const String kEventReloadSyncedLibraryCount = 'cd7';
+const String kEventReloadSyncedClassesCount = 'cd8';
+const String kEventReloadSyncedProceduresCount = 'cd9';
+const String kEventReloadSyncedBytes = 'cd10';
+const String kEventReloadInvalidatedSourcesCount = 'cd11';
+const String kEventReloadTransferTimeInMs = 'cd12';
+const String kEventReloadOverallTimeInMs = 'cd13';
 
 Usage get flutterUsage => Usage.instance;
 
 class Usage {
   /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
   /// used for testing.
-  Usage({ String settingsName: 'flutter', String versionOverride, String configDirOverride}) {
+  Usage({ String settingsName = 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
-        // Analyzer doesn't recognize that [Directory] objects match up due to a
-        // conditional import.
-        // ignore: argument_type_not_assignable
+    _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
@@ -49,7 +55,7 @@ class Usage {
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context.putIfAbsent(Usage, () => new Usage());
+  static Usage get instance => context[Usage];
 
   Analytics _analytics;
 
@@ -122,7 +128,7 @@ class Usage {
 
   /// Returns when the last analytics event has been sent, or after a fixed
   /// (short) delay, whichever is less.
-  Future<Null> ensureAnalyticsSent() async {
+  Future<void> ensureAnalyticsSent() async {
     // TODO(devoncarew): This may delay tool exit and could cause some analytics
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?

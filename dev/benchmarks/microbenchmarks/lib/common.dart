@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -32,7 +32,7 @@ class BenchmarkResultPrinter {
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
   void addResult({ @required String description, @required double value, @required String unit, @required String name }) {
-    _results.add(new _BenchmarkResult(description, value, unit, name));
+    _results.add(_BenchmarkResult(description, value, unit, name));
   }
 
   /// Prints the results added via [addResult] to standard output, once as JSON
@@ -54,11 +54,11 @@ class BenchmarkResultPrinter {
     for (_BenchmarkResult result in _results) {
       results[result.name] = result.value;
     }
-    return JSON.encode(results);
+    return json.encode(results);
   }
 
   String _printPlainText() {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = StringBuffer();
     for (_BenchmarkResult result in _results) {
       buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }

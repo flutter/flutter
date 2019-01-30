@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
+import 'theme.dart';
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
 ///
@@ -23,37 +23,37 @@ import 'bottom_tab_bar.dart';
 /// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
 /// navigation state and history.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
 /// ```dart
-/// new CupertinoTabScaffold(
-///   tabBar: new CupertinoTabBar(
+/// CupertinoTabScaffold(
+///   tabBar: CupertinoTabBar(
 ///     items: <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),
 ///   tabBuilder: (BuildContext context, int index) {
-///     return new CupertinoTabView(
+///     return CupertinoTabView(
 ///       builder: (BuildContext context) {
-///         return new CupertinoPageScaffold(
-///           navigationBar: new CupertinoNavigationBar(
-///             middle: new Text('Page 1 of tab $index'),
+///         return CupertinoPageScaffold(
+///           navigationBar: CupertinoNavigationBar(
+///             middle: Text('Page 1 of tab $index'),
 ///           ),
-///           child: new Center(
-///             child: new CupertinoButton(
+///           child: Center(
+///             child: CupertinoButton(
 ///               child: const Text('Next page'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push(
-///                   new CupertinoPageRoute<Null>(
+///                   CupertinoPageRoute<void>(
 ///                     builder: (BuildContext context) {
-///                       return new CupertinoPageScaffold(
-///                         navigationBar: new CupertinoNavigationBar(
-///                           middle: new Text('Page 2 of tab $index'),
+///                       return CupertinoPageScaffold(
+///                         navigationBar: CupertinoNavigationBar(
+///                           middle: Text('Page 2 of tab $index'),
 ///                         ),
-///                         child: new Center(
-///                           child: new CupertinoButton(
+///                         child: Center(
+///                           child: CupertinoButton(
 ///                             child: const Text('Back'),
 ///                             onPressed: () { Navigator.of(context).pop(); },
 ///                           ),
@@ -71,6 +71,12 @@ import 'bottom_tab_bar.dart';
 ///   },
 /// )
 /// ```
+/// {@end-tool}
+///
+/// To push a route above all tabs instead of inside the currently selected one
+/// (such as when showing a dialog on top of this scaffold), use
+/// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
+/// [CupertinoTabView].
 ///
 /// See also:
 ///
@@ -88,6 +94,8 @@ class CupertinoTabScaffold extends StatefulWidget {
     Key key,
     @required this.tabBar,
     @required this.tabBuilder,
+    this.backgroundColor,
+    this.resizeToAvoidBottomInset = true,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
        super(key: key);
@@ -96,16 +104,20 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// When provided, [CupertinoTabBar.currentIndex] will be ignored and will
-  /// be managed by the [CupertinoTabScaffold] to show the currently selected page
-  /// as the active item index. If [CupertinoTabBar.onTap] is provided, it will
-  /// still be called. [CupertinoTabScaffold] automatically also listen to the
+  /// Setting and changing [CupertinoTabBar.currentIndex] programmatically will
+  /// change the currently selected tab item in the [tabBar] as well as change
+  /// the currently focused tab from the [tabBuilder].
+
+  /// If [CupertinoTabBar.onTap] is provided, it will still be called.
+  /// [CupertinoTabScaffold] automatically also listen to the
   /// [CupertinoTabBar]'s `onTap` to change the [CupertinoTabBar]'s `currentIndex`
   /// and change the actively displayed tab in [CupertinoTabScaffold]'s own
   /// main content area.
   ///
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
+  ///
+  /// Must not be null.
   final CupertinoTabBar tabBar;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
@@ -121,58 +133,105 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
   /// bottom padding indicating the area of obstructing overlap from the
   /// [tabBar].
+  ///
+  /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
 
+  /// The color of the widget that underlies the entire scaffold.
+  ///
+  /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
+  final Color backgroundColor;
+
+  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
+  /// prevents widgets inside the body from being obscured by the keyboard.
+  ///
+  /// Defaults to true and cannot be null.
+  final bool resizeToAvoidBottomInset;
+
   @override
-  _CupertinoTabScaffoldState createState() => new _CupertinoTabScaffoldState();
+  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  int _currentPage = 0;
+  int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.tabBar.currentIndex;
+  }
+
+  @override
+  void didUpdateWidget(CupertinoTabScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
+      _currentPage = widget.tabBar.currentIndex;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    Widget content = new _TabSwitchingView(
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    MediaQueryData newMediaQuery = MediaQuery.of(context);
+
+    Widget content = _TabSwitchingView(
       currentTabIndex: _currentPage,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
 
-    if (widget.tabBar != null) {
-      final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    if (widget.resizeToAvoidBottomInset) {
+      // Remove the view inset and add it back as a padding in the inner content.
+      newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
+      content = Padding(
+        padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
+        child: content,
+      );
+    }
 
+    if (widget.tabBar != null &&
+        // Only pad the content with the height of the tab bar if the tab
+        // isn't already entirely obstructed by a keyboard or other view insets.
+        // Don't double pad.
+        (!widget.resizeToAvoidBottomInset ||
+            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double bottomPadding = widget.tabBar.preferredSize.height
-          + existingMediaQuery.padding.bottom;
+      final double bottomPadding =
+          widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
 
       // If tab bar opaque, directly stop the main content higher. If
       // translucent, let main content draw behind the tab bar but hint the
       // obstructed area.
-      if (widget.tabBar.opaque) {
-        content = new Padding(
-          padding: new EdgeInsets.only(bottom: bottomPadding),
+      if (widget.tabBar.opaque(context)) {
+        content = Padding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
           child: content,
         );
       } else {
-        content = new MediaQuery(
-          data: existingMediaQuery.copyWith(
-            padding: existingMediaQuery.padding.copyWith(
-              bottom: bottomPadding,
-            ),
+        newMediaQuery = newMediaQuery.copyWith(
+          padding: newMediaQuery.padding.copyWith(
+            bottom: bottomPadding,
           ),
-          child: content,
         );
       }
     }
+
+    content = MediaQuery(
+      data: newMediaQuery,
+      child: content,
+    );
 
     // The main content being at the bottom is added to the stack first.
     stacked.add(content);
 
     if (widget.tabBar != null) {
-      stacked.add(new Align(
+      stacked.add(Align(
         alignment: Alignment.bottomCenter,
         // Override the tab bar's currentIndex to the current tab and hook in
         // our own listener to update the _currentPage on top of a possibly user
@@ -191,8 +250,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ));
     }
 
-    return new Stack(
-      children: stacked,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
+      ),
+      child: Stack(
+        children: stacked,
+      ),
     );
   }
 }
@@ -213,7 +277,7 @@ class _TabSwitchingView extends StatefulWidget {
   final IndexedWidgetBuilder tabBuilder;
 
   @override
-  _TabSwitchingViewState createState() => new _TabSwitchingViewState();
+  _TabSwitchingViewState createState() => _TabSwitchingViewState();
 }
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
@@ -223,10 +287,10 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   @override
   void initState() {
     super.initState();
-    tabs = new List<Widget>(widget.tabNumber);
-    tabFocusNodes = new List<FocusScopeNode>.generate(
+    tabs = List<Widget>(widget.tabNumber);
+    tabFocusNodes = List<FocusScopeNode>.generate(
       widget.tabNumber,
-      (int index) => new FocusScopeNode(),
+      (int index) => FocusScopeNode(),
     );
   }
 
@@ -256,22 +320,22 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
+    return Stack(
       fit: StackFit.expand,
-      children: new List<Widget>.generate(widget.tabNumber, (int index) {
+      children: List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
 
         if (active || tabs[index] != null) {
           tabs[index] = widget.tabBuilder(context, index);
         }
 
-        return new Offstage(
+        return Offstage(
           offstage: !active,
-          child: new TickerMode(
+          child: TickerMode(
             enabled: active,
-            child: new FocusScope(
+            child: FocusScope(
               node: tabFocusNodes[index],
-              child: tabs[index] ?? new Container(),
+              child: tabs[index] ?? Container(),
             ),
           ),
         );

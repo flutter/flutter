@@ -4,15 +4,17 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/material/persistent-bottom-sheet';
 
   @override
-  _PersistentBottomSheetDemoState createState() => new _PersistentBottomSheetDemoState();
+  _PersistentBottomSheetDemoState createState() => _PersistentBottomSheetDemoState();
 }
 
 class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   VoidCallback _showBottomSheetCallback;
 
@@ -26,17 +28,17 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       final ThemeData themeData = Theme.of(context);
-      return new Container(
-        decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: themeData.disabledColor))
+      return Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: themeData.disabledColor))
         ),
-        child: new Padding(
+        child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: new Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+          child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
             textAlign: TextAlign.center,
-            style: new TextStyle(
+            style: TextStyle(
               color: themeData.accentColor,
               fontSize: 24.0
             )
@@ -54,26 +56,35 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   }
 
   void _showMessage() {
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
-      child: new AlertDialog(
-        content: const Text('You tapped the floating action button.'),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () { Navigator.pop(context); },
-            child: const Text('OK')
-          )
-        ]
-      )
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text('You tapped the floating action button.'),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK')
+            )
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(title: const Text('Persistent bottom sheet')),
-      floatingActionButton: new FloatingActionButton(
+      appBar: AppBar(
+        title: const Text('Persistent bottom sheet'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(PersistentBottomSheetDemo.routeName),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,
         child: const Icon(
@@ -81,8 +92,8 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
           semanticLabel: 'Add',
         ),
       ),
-      body: new Center(
-        child: new RaisedButton(
+      body: Center(
+        child: RaisedButton(
           onPressed: _showBottomSheetCallback,
           child: const Text('SHOW BOTTOM SHEET')
         )

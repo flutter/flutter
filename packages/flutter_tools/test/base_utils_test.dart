@@ -5,12 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 void main() {
   group('ItemListNotifier', () {
     test('sends notifications', () async {
-      final ItemListNotifier<String> list = new ItemListNotifier<String>();
+      final ItemListNotifier<String> list = ItemListNotifier<String>();
       expect(list.items, isEmpty);
 
       final Future<List<String>> addedStreamItems = list.onAdded.toList();

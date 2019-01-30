@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
+import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
@@ -16,48 +17,39 @@ export 'package:file/file.dart';
 export 'package:file/local.dart';
 
 const String _kRecordingType = 'file';
-const FileSystem _kLocalFs = const LocalFileSystem();
+const FileSystem _kLocalFs = LocalFileSystem();
 
 /// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
+FileSystem get fs => context[FileSystem] ?? _kLocalFs;
 
-/// Enables recording of file system activity to the specified base recording
-/// [location].
-///
-/// This sets the [active file system](fs) to one that records all invocation
-/// activity before delegating to a [LocalFileSystem].
+/// Gets a [FileSystem] that will record file system activity to the specified
+/// base recording [location].
 ///
 /// Activity will be recorded in a subdirectory of [location] named `"file"`.
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
-void enableRecordingFileSystem(String location) {
-  final FileSystem originalFileSystem = fs;
+RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  final RecordingFileSystem fileSystem = new RecordingFileSystem(
+  final RecordingFileSystem fileSystem = RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
-    await fileSystem.recording.flush(
-      pendingResultTimeout: const Duration(seconds: 5),
-    );
-    context.setVariable(FileSystem, originalFileSystem);
+    await fileSystem.recording.flush();
   }, ShutdownStage.SERIALIZE_RECORDING);
-  context.setVariable(FileSystem, fileSystem);
+  return fileSystem;
 }
 
-/// Enables file system replay mode.
-///
-/// This sets the [active file system](fs) to one that replays invocation
-/// activity from a previously recorded set of invocations.
+/// Gets a [FileSystem] that replays invocation activity from a previously
+/// recorded set of invocations.
 ///
 /// [location] must represent a directory to which file system activity has
 /// been recorded (i.e. the result of having been previously passed to
-/// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
-void enableReplayFileSystem(String location) {
+/// [getRecordingFileSystem]), or a [ToolExit] will be thrown.
+ReplayFileSystem getReplayFileSystem(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
-  context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
+  return ReplayFileSystem(recording: dir);
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.
@@ -78,7 +70,7 @@ void ensureDirectoryExists(String filePath) {
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
   if (!srcDir.existsSync())
-    throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
@@ -93,7 +85,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
       copyDirectorySync(
         entity, destDir.fileSystem.directory(newPath));
     } else {
-      throw new Exception('${entity.path} is neither File nor Directory');
+      throw Exception('${entity.path} is neither File nor Directory');
     }
   }
 }
@@ -111,15 +103,15 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
 Directory getRecordingSink(String dirname, String basename) {
   final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.FILE:
-    case FileSystemEntityType.LINK:
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.link:
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
-    case FileSystemEntityType.DIRECTORY:
+    case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
-    case FileSystemEntityType.NOT_FOUND:
+    case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
   }
   return _kLocalFs.directory(location);
@@ -152,3 +144,16 @@ String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path)
 /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
 /// path unchanged.
 String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+
+/// Returns true if the file system [entity] has not been modified since the
+/// latest modification to [referenceFile].
+///
+/// Returns true, if [entity] does not exist.
+///
+/// Returns false, if [entity] exists, but [referenceFile] does not.
+bool isOlderThanReference({@required FileSystemEntity entity, @required File referenceFile}) {
+  if (!entity.existsSync())
+    return true;
+  return referenceFile.existsSync()
+      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+}

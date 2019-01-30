@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/tabbed_app_bar.dart' as tabbed_app_bar_sample;
+import 'package:sample_catalog/tabbed_app_bar.dart' as tabbed_app_bar_sample;
 
 final int choiceCount = tabbed_app_bar_sample.choices.length;
 IconData iconAt(int index) => tabbed_app_bar_sample.choices[index].icon;

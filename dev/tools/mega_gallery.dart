@@ -17,9 +17,8 @@ void main(List<String> args) {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  final ArgParser argParser = new ArgParser();
-  // ../mega_gallery? dev/benchmarks/mega_gallery?
-  argParser.addOption('out', defaultsTo: _normalize('dev/benchmarks/mega_gallery'));
+  final ArgParser argParser = ArgParser();
+  argParser.addOption('out');
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
@@ -33,8 +32,8 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final Directory source = new Directory(_normalize('examples/flutter_gallery'));
-  final Directory out = new Directory(_normalize(results['out']));
+  final Directory source = Directory(_normalize('examples/flutter_gallery'));
+  final Directory out = Directory(_normalize(results['out']));
 
   if (results['delete']) {
     if (out.existsSync()) {
@@ -43,6 +42,12 @@ void main(List<String> args) {
     }
 
     exit(0);
+  }
+
+  if (!results.wasParsed('out')) {
+    print('The --out parameter is required.');
+    print(argParser.usage);
+    exit(1);
   }
 
   int copies;
@@ -56,8 +61,8 @@ void main(List<String> args) {
   print('Making $copies copies of flutter_gallery.');
   print('');
   print('Stats:');
-  print('  packages/flutter            : ${getStatsFor(new Directory("packages/flutter"))}');
-  print('  examples/flutter_gallery    : ${getStatsFor(new Directory("examples/flutter_gallery"))}');
+  print('  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
+  print('  examples/flutter_gallery    : ${getStatsFor(Directory("examples/flutter_gallery"))}');
 
   final Directory lib = _dir(out, 'lib');
   if (lib.existsSync())
@@ -78,6 +83,9 @@ void main(List<String> args) {
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
+  // Remove the (flutter_gallery specific) analysis_options.yaml file.
+  _file(out, 'analysis_options.yaml').deleteSync();
+
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
@@ -86,12 +94,11 @@ void main(List<String> args) {
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
 void _createEntry(File mainFile, int copies) {
-  final StringBuffer imports = new StringBuffer();
-  final StringBuffer importRefs = new StringBuffer();
+  final StringBuffer imports = StringBuffer();
 
   for (int i = 1; i < copies; i++) {
+    imports.writeln('// ignore: unused_import');
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
-    importRefs.writeln('  main_$i.main;');
   }
 
   final String contents = '''
@@ -105,9 +112,6 @@ import 'gallery/app.dart';
 ${imports.toString().trim()}
 
 void main() {
-  // Make sure the imports are not marked as unused.
-  ${importRefs.toString().trim()}
-
   runApp(const GalleryApp());
 }
 ''';
@@ -128,7 +132,7 @@ void _copyGallery(Directory galleryDir, int index) {
 
 void _copy(Directory source, Directory target) {
   if (!target.existsSync())
-    target.createSync();
+    target.createSync(recursive: true);
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
@@ -136,18 +140,18 @@ void _copy(Directory source, Directory target) {
     if (entity is Directory) {
       if (name == 'build' || name.startsWith('.'))
         continue;
-      _copy(entity, new Directory(path.join(target.path, name)));
+      _copy(entity, Directory(path.join(target.path, name)));
     } else if (entity is File) {
       if (name == '.packages' || name == 'pubspec.lock')
         continue;
-      final File dest = new File(path.join(target.path, name));
+      final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
 }
 
-Directory _dir(Directory parent, String name) => new Directory(path.join(parent.path, name));
-File _file(Directory parent, String name) => new File(path.join(parent.path, name));
+Directory _dir(Directory parent, String name) => Directory(path.join(parent.path, name));
+File _file(Directory parent, String name) => File(path.join(parent.path, name));
 String _normalize(String filePath) => path.normalize(path.absolute(filePath));
 
 class SourceStats {
@@ -159,7 +163,7 @@ class SourceStats {
 }
 
 SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
-  stats ??= new SourceStats();
+  stats ??= SourceStats();
 
   for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
     final String name = path.basename(entity.path);

@@ -43,8 +43,8 @@ Offset positionDependentBox({
   @required Size childSize,
   @required Offset target,
   @required bool preferBelow,
-  double verticalOffset: 0.0,
-  double margin: 10.0,
+  double verticalOffset = 0.0,
+  double margin = 10.0,
 }) {
   assert(size != null);
   assert(childSize != null);
@@ -76,5 +76,5 @@ Offset positionDependentBox({
       x = normalizedTargetX - childSize.width / 2.0;
     }
   }
-  return new Offset(x, y);
+  return Offset(x, y);
 }

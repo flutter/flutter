@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 import '../../../rendering/flex_layout.dart' as demo;
 

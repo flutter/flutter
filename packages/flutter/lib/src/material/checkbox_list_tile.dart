@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'list_tile.dart';
 import 'theme.dart';
+import 'theme_data.dart';
+
+// Examples can assume:
+// void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
@@ -34,13 +37,16 @@ import 'theme.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
 ///
+/// This sample requires that you also import 'package:flutter/scheduler.dart',
+/// so that you can reference [timeDilation].
+///
 /// ```dart
-/// new CheckboxListTile(
+/// CheckboxListTile(
 ///   title: const Text('Animate Slowly'),
 ///   value: timeDilation != 1.0,
 ///   onChanged: (bool value) {
@@ -49,9 +55,7 @@ import 'theme.dart';
 ///   secondary: const Icon(Icons.hourglass_empty),
 /// )
 /// ```
-///
-/// This sample requires that you also import 'package:flutter/scheduler.dart',
-/// so that you can reference [timeDilation].
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -83,11 +87,11 @@ class CheckboxListTile extends StatelessWidget {
     this.activeColor,
     this.title,
     this.subtitle,
-    this.isThreeLine: false,
+    this.isThreeLine = false,
     this.dense,
     this.secondary,
-    this.selected: false,
-    this.controlAffinity: ListTileControlAffinity.platform,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
   }) : assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -113,14 +117,14 @@ class CheckboxListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CheckboxListTile(
+  /// CheckboxListTile(
   ///   value: _throwShotAway,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Throw away your shot'),
+  ///   title: Text('Throw away your shot'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
@@ -170,10 +174,11 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Checkbox(
+    final Widget control = Checkbox(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -187,10 +192,10 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

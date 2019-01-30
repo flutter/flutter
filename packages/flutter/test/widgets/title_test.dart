@@ -8,17 +8,17 @@ import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    final Widget widget = new Title(
+    final Widget widget = Title(
       color: const Color(0xFF00FF00),
       title: 'Awesome app',
-      child: new Container(),
+      child: Container(),
     );
     expect(widget.toString, isNot(throwsException));
   });
 
   testWidgets('should handle having no title', (WidgetTester tester) async {
-    final Title widget = new Title(
-      child: new Container(),
+    final Title widget = Title(
+      child: Container(),
       color: const Color(0xFF00FF00),
     );
     expect(widget.toString, isNot(throwsException));
@@ -27,21 +27,21 @@ void main() {
   });
 
   testWidgets('should not allow null title or color', (WidgetTester tester) async {
-    expect(() => new Title(
+    expect(() => Title(
       title: null,
       color: const Color(0xFF00FF00),
-      child: new Container(),
+      child: Container(),
     ), throwsAssertionError);
-    expect(() => new Title(
+    expect(() => Title(
       color: null,
-      child: new Container(),
+      child: Container(),
     ), throwsAssertionError);
   });
 
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
-    expect(() => new Title(
+    expect(() => Title(
       color: const Color(0),
-      child: new Container(),
+      child: Container(),
     ), throwsAssertionError);
   });
 
@@ -53,8 +53,8 @@ void main() {
       log.add(methodCall);
     });
 
-    await tester.pumpWidget(new Title(
-      child: new Container(),
+    await tester.pumpWidget(Title(
+      child: Container(),
       color: const Color(0xFF00FF00),
     ));
 

@@ -16,7 +16,7 @@ FileSystem fs = const LocalFileSystem();
 /// Overrides the file system so it can be tested without hitting the hard
 /// drive.
 void useMemoryFileSystemForTesting() {
-  fs = new MemoryFileSystem();
+  fs = MemoryFileSystem();
 }
 
 /// Restores the file system to the default local file system implementation.

@@ -8,7 +8,7 @@ class LifecycleWatcher extends StatefulWidget {
   const LifecycleWatcher({ Key key }) : super(key: key);
 
   @override
-  _LifecycleWatcherState createState() => new _LifecycleWatcherState();
+  _LifecycleWatcherState createState() => _LifecycleWatcherState();
 }
 
 class _LifecycleWatcherState extends State<LifecycleWatcher>
@@ -38,7 +38,7 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
   Widget build(BuildContext context) {
     if (_lastLifecycleState == null)
       return const Text('This widget has not observed any lifecycle changes.');
-    return new Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.');
+    return Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.');
   }
 }
 
@@ -47,8 +47,8 @@ void main() {
   runApp(
     const Directionality(
       textDirection: TextDirection.ltr,
-      child: const Center(
-        child: const LifecycleWatcher(),
+      child: Center(
+        child: LifecycleWatcher(),
       ),
     ),
   );

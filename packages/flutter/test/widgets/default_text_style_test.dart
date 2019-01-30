@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = const Text('Hello', textDirection: TextDirection.ltr);
-    const TextStyle s1 = const TextStyle(
+    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const TextStyle s1 = TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
       height: 123.0,
@@ -42,13 +42,13 @@ void main() {
   });
 
   testWidgets('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = const Text('Hello', textDirection: TextDirection.ltr);
-    const TextStyle s1 = const TextStyle(
+    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const TextStyle s1 = TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
       height: 123.0,
     );
-    const TextStyle s2 = const TextStyle(
+    const TextStyle s2 = TextStyle(
       fontSize: 20.0,
       fontWeight: FontWeight.w200,
       height: 1.0,
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpWidget(const AnimatedDefaultTextStyle(
       style: s1,
       child: textWidget,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     ));
 
     final RichText text1 = tester.firstWidget(find.byType(RichText));
@@ -75,7 +75,7 @@ void main() {
       overflow: TextOverflow.fade,
       maxLines: 3,
       child: textWidget,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     ));
 
     final RichText text2 = tester.firstWidget(find.byType(RichText));

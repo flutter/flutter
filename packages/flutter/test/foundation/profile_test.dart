@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 // We run our tests in debug mode, to this will always evaluate to false...
-const bool isReleaseMode = const bool.fromEnvironment('dart.vm.product');
+const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 void main() {
   // TODO(devoncarew): This test - while very nice - isn't testing what we really want to know:

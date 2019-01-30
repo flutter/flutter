@@ -27,9 +27,9 @@ class SystemChannels {
   ///  * [WidgetsBindingObserver.didPopRoute] and
   ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
   ///    methods.
-  static const MethodChannel navigation = const MethodChannel(
+  static const MethodChannel navigation = MethodChannel(
       'flutter/navigation',
-      const JSONMethodCodec(),
+      JSONMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
@@ -84,9 +84,9 @@ class SystemChannels {
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
-  static const MethodChannel platform = const OptionalMethodChannel(
+  static const MethodChannel platform = OptionalMethodChannel(
       'flutter/platform',
-      const JSONMethodCodec(),
+      JSONMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for handling text input.
@@ -143,9 +143,9 @@ class SystemChannels {
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
-  static const MethodChannel textInput = const OptionalMethodChannel(
+  static const MethodChannel textInput = OptionalMethodChannel(
       'flutter/textinput',
-      const JSONMethodCodec(),
+      JSONMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.
@@ -168,9 +168,9 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = const BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
       'flutter/keyevent',
-      const JSONMessageCodec(),
+      JSONMessageCodec(),
   );
 
   /// A string [BasicMessageChannel] for lifecycle events.
@@ -183,9 +183,9 @@ class SystemChannels {
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
-  static const BasicMessageChannel<String> lifecycle = const BasicMessageChannel<String>(
+  static const BasicMessageChannel<String> lifecycle = BasicMessageChannel<String>(
       'flutter/lifecycle',
-      const StringCodec(),
+      StringCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for system events.
@@ -199,21 +199,40 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = const BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
       'flutter/system',
-      const JSONMessageCodec(),
+      JSONMessageCodec(),
   );
 
   /// A [BasicMessageChannel] for accessibility events.
   ///
   /// See also:
   ///
-  /// * [SemanticsEvent] and its subclasses for a list of valid accessibility
-  ///   events that can be sent over this channel.
-  /// * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = const BasicMessageChannel<dynamic>(
+  ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
+  ///    events that can be sent over this channel.
+  ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
+  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
     'flutter/accessibility',
-    const StandardMessageCodec(),
+    StandardMessageCodec(),
   );
 
+  /// A [MethodChannel] for controlling platform views.
+  ///
+  /// See also: [PlatformViewsService] for the available operations on this channel.
+  static const MethodChannel platform_views = MethodChannel(
+    'flutter/platform_views',
+    StandardMethodCodec(),
+  );
+
+  /// A [MethodChannel] for configuring the Skia graphics library.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Skia.setResourceCacheMaxBytes`: Set the maximum number of bytes that
+  ///    can be held in the GPU resource cache.
+  static const MethodChannel skia = MethodChannel(
+    'flutter/skia',
+    JSONMethodCodec(),
+  );
 }

@@ -4,12 +4,12 @@
 
 import 'package:flutter/painting.dart';
 
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('RRect.contains()', () {
-    final RRect rrect = new RRect.fromRectAndCorners(
-      new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+    final RRect rrect = RRect.fromRectAndCorners(
+      Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
       bottomRight: const Radius.elliptical(0.25, 0.75),
@@ -27,8 +27,8 @@ void main() {
   });
 
   test('RRect.contains() large radii', () {
-    final RRect rrect = new RRect.fromRectAndCorners(
-      new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+    final RRect rrect = RRect.fromRectAndCorners(
+      Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),
       bottomRight: const Radius.elliptical(2500.0, 7500.0),

@@ -10,4 +10,4 @@ import 'dart:async';
 /// therefore will not accept requests to run tasks. When the runner attempts to
 /// connect and run the test it will receive a "method not found" error from the
 /// VM service, will likely retry and finally time out.
-Future<Null> main() async {}
+Future<void> main() async {}

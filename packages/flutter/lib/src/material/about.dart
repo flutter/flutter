@@ -41,7 +41,7 @@ class AboutListTile extends StatelessWidget {
   /// values default to the empty string.
   const AboutListTile({
     Key key,
-    this.icon: const Icon(null),
+    this.icon = const Icon(null),
     this.child,
     this.applicationName,
     this.applicationVersion,
@@ -109,10 +109,11 @@ class AboutListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new ListTile(
+    assert(debugCheckHasMaterialLocalizations(context));
+    return ListTile(
       leading: icon,
       title: child ??
-        new Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
+        Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
       onTap: () {
         showAboutDialog(
           context: context,
@@ -149,17 +150,20 @@ void showAboutDialog({
   String applicationVersion,
   Widget applicationIcon,
   String applicationLegalese,
-  List<Widget> children
+  List<Widget> children,
 }) {
-  showDialog<Null>(
+  assert(context != null);
+  showDialog<void>(
     context: context,
-    child: new AboutDialog(
-      applicationName: applicationName,
-      applicationVersion: applicationVersion,
-      applicationIcon: applicationIcon,
-      applicationLegalese: applicationLegalese,
-      children: children
-    )
+    builder: (BuildContext context) {
+      return AboutDialog(
+        applicationName: applicationName,
+        applicationVersion: applicationVersion,
+        applicationIcon: applicationIcon,
+        applicationLegalese: applicationLegalese,
+        children: children,
+      );
+    }
   );
 }
 
@@ -183,10 +187,9 @@ void showLicensePage({
   Widget applicationIcon,
   String applicationLegalese
 }) {
-  // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
-  Navigator.pop(context);
-  Navigator.push(context, new MaterialPageRoute<Null>(
-    builder: (BuildContext context) => new LicensePage(
+  assert(context != null);
+  Navigator.push(context, MaterialPageRoute<void>(
+    builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
       applicationLegalese: applicationLegalese
@@ -261,40 +264,41 @@ class AboutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
     List<Widget> body = <Widget>[];
     if (icon != null)
-      body.add(new IconTheme(data: const IconThemeData(size: 48.0), child: icon));
-    body.add(new Expanded(
-      child: new Padding(
+      body.add(IconTheme(data: const IconThemeData(size: 48.0), child: icon));
+    body.add(Expanded(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: new ListBody(
+        child: ListBody(
           children: <Widget>[
-            new Text(name, style: Theme.of(context).textTheme.headline),
-            new Text(version, style: Theme.of(context).textTheme.body1),
-            new Container(height: 18.0),
-            new Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption)
+            Text(name, style: Theme.of(context).textTheme.headline),
+            Text(version, style: Theme.of(context).textTheme.body1),
+            Container(height: 18.0),
+            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption)
           ]
         )
       )
     ));
     body = <Widget>[
-      new Row(
+      Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: body
       ),
     ];
     if (children != null)
       body.addAll(children);
-    return new AlertDialog(
-      content: new SingleChildScrollView(
-        child: new ListBody(children: body),
+    return AlertDialog(
+      content: SingleChildScrollView(
+        child: ListBody(children: body),
       ),
       actions: <Widget>[
-        new FlatButton(
-          child: new Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
+        FlatButton(
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -305,8 +309,8 @@ class AboutDialog extends StatelessWidget {
             );
           }
         ),
-        new FlatButton(
-          child: new Text(MaterialLocalizations.of(context).closeButtonLabel),
+        FlatButton(
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           }
@@ -362,7 +366,7 @@ class LicensePage extends StatefulWidget {
   final String applicationLegalese;
 
   @override
-  _LicensePageState createState() => new _LicensePageState();
+  _LicensePageState createState() => _LicensePageState();
 }
 
 class _LicensePageState extends State<LicensePage> {
@@ -375,7 +379,7 @@ class _LicensePageState extends State<LicensePage> {
   final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
-  Future<Null> _initLicenses() async {
+  Future<void> _initLicenses() async {
     final Flow flow = Flow.begin();
     Timeline.timeSync('_initLicenses()', () { }, flow: flow);
     await for (LicenseEntry license in LicenseRegistry.licenses) {
@@ -391,17 +395,17 @@ class _LicensePageState extends State<LicensePage> {
         );
       setState(() {
         _licenses.add(const Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: const Text(
+          padding: EdgeInsets.symmetric(vertical: 18.0),
+          child: Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
         ));
-        _licenses.add(new Container(
+        _licenses.add(Container(
           decoration: const BoxDecoration(
-            border: const Border(bottom: const BorderSide(width: 0.0))
+            border: Border(bottom: BorderSide(width: 0.0))
           ),
-          child: new Text(
+          child: Text(
             license.packages.join(', '),
             style: const TextStyle(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center
@@ -409,9 +413,9 @@ class _LicensePageState extends State<LicensePage> {
         ));
         for (LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
-            _licenses.add(new Padding(
+            _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),
-              child: new Text(
+              child: Text(
                 paragraph.text,
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center
@@ -419,9 +423,9 @@ class _LicensePageState extends State<LicensePage> {
             ));
           } else {
             assert(paragraph.indent >= 0);
-            _licenses.add(new Padding(
-              padding: new EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
-              child: new Text(paragraph.text)
+            _licenses.add(Padding(
+              padding: EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
+              child: Text(paragraph.text)
             ));
           }
         }
@@ -435,42 +439,46 @@ class _LicensePageState extends State<LicensePage> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> contents = <Widget>[
-      new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
-      new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      new Container(height: 18.0),
-      new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
-      new Container(height: 18.0),
-      new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      new Container(height: 24.0),
+      Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+      Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      Container(height: 18.0),
+      Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+      Container(height: 18.0),
+      Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      Container(height: 24.0),
     ];
     contents.addAll(_licenses);
     if (!_loaded) {
       contents.add(const Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: const Center(
-          child: const CircularProgressIndicator()
+        padding: EdgeInsets.symmetric(vertical: 24.0),
+        child: Center(
+          child: CircularProgressIndicator()
         )
       ));
     }
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(localizations.licensesPageTitle),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(localizations.licensesPageTitle),
       ),
       // All of the licenses page text is English. We don't want localized text
       // or text direction.
-      body: new Localizations.override(
+      body: Localizations.override(
         locale: const Locale('en', 'US'),
         context: context,
-        child: new DefaultTextStyle(
+        child: DefaultTextStyle(
           style: Theme.of(context).textTheme.caption,
-          child: new Scrollbar(
-            child: new ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              children: contents,
+          child: SafeArea(
+            bottom: false,
+            child: Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                children: contents,
+              ),
             ),
           ),
         ),

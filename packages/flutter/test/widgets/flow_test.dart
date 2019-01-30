@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
@@ -19,7 +20,7 @@ class TestFlowDelegate extends FlowDelegate {
   void paintChildren(FlowPaintingContext context) {
     double dy = startOffset.value;
     for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, transform: new Matrix4.translationValues(0.0, dy, 0.0));
+      context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
       dy += 0.75 * context.getChildSize(i).height;
     }
   }
@@ -28,30 +29,46 @@ class TestFlowDelegate extends FlowDelegate {
   bool shouldRepaint(TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
 }
 
+class OpacityFlowDelegate extends FlowDelegate {
+  OpacityFlowDelegate(this.opacity);
+
+  double opacity;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, opacity: opacity);
+    }
+  }
+
+  @override
+  bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
+}
+
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
-    final AnimationController startOffset = new AnimationController.unbounded(
+    final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
     final List<int> log = <int>[];
 
     Widget buildBox(int i) {
-      return new GestureDetector(
+      return GestureDetector(
         onTap: () {
           log.add(i);
         },
-        child: new Container(
+        child: Container(
           width: 100.0,
           height: 100.0,
           color: const Color(0xFF0000FF),
-          child: new Text('$i', textDirection: TextDirection.ltr)
+          child: Text('$i', textDirection: TextDirection.ltr)
         )
       );
     }
 
     await tester.pumpWidget(
-      new Flow(
-        delegate: new TestFlowDelegate(startOffset: startOffset),
+      Flow(
+        delegate: TestFlowDelegate(startOffset: startOffset),
         children: <Widget>[
           buildBox(0),
           buildBox(1),
@@ -81,5 +98,24 @@ void main() {
     log.clear();
     await tester.tapAt(const Offset(20.0, 90.0));
     expect(log, equals(<int>[0]));
+  });
+
+  testWidgets('Flow opacity layer', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      Flow(
+        delegate: OpacityFlowDelegate(opacity),
+        children: <Widget>[
+          Container(width: 100.0, height: 100.0),
+        ]
+      )
+    );
+    ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
+    while (layer != null && !(layer is OpacityLayer))
+      layer = layer.firstChild;
+    expect(layer, isInstanceOf<OpacityLayer>());
+    final OpacityLayer opacityLayer = layer;
+    expect(opacityLayer.alpha, equals(opacity * 255));
+    expect(layer.firstChild, isInstanceOf<TransformLayer>());
   });
 }

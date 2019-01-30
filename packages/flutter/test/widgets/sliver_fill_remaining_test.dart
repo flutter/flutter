@@ -7,14 +7,14 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillRemaining - no siblings', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            new SliverFillRemaining(child: new Container()),
+            SliverFillRemaining(child: Container()),
           ],
         ),
       ),
@@ -35,15 +35,15 @@ void main() {
   });
 
   testWidgets('SliverFillRemaining - one sibling', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 100.0)),
-            new SliverFillRemaining(child: new Container()),
+            const SliverToBoxAdapter(child: SizedBox(height: 100.0)),
+            SliverFillRemaining(child: Container()),
           ],
         ),
       ),

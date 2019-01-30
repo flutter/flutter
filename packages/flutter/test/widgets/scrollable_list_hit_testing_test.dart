@@ -5,26 +5,29 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
-const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
+const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             height: 50.0,
-            child: new ListView(
+            child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
-              children: items.map((int item) {
-                return new Container(
-                  child: new GestureDetector(
+              children: items.map<Widget>((int item) {
+                return Container(
+                  child: GestureDetector(
                     onTap: () { tapped.add(item); },
-                    child: new Text('$item'),
+                    child: Text('$item'),
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),
@@ -54,19 +57,21 @@ void main() {
   testWidgets('Tap item after scroll - vertical', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             width: 50.0,
-            child: new ListView(
+            child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.vertical,
-              children: items.map((int item) {
-                return new Container(
-                  child: new GestureDetector(
+              children: items.map<Widget>((int item) {
+                return Container(
+                  child: GestureDetector(
                     onTap: () { tapped.add(item); },
-                    child: new Text('$item'),
+                    child: Text('$item'),
+                    dragStartBehavior: DragStartBehavior.down,
                   ),
                 );
               }).toList(),
@@ -99,16 +104,16 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           itemExtent: 290.0,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
+          children: items.map<Widget>((int item) {
+            return Container(
+              child: GestureDetector(
                 onTap: () { tapped.add(item); },
-                child: new Text('$item'),
+                child: Text('$item'),
               ),
             );
           }).toList(),
@@ -133,17 +138,17 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           itemExtent: 290.0,
           reverse: true,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
+          children: items.map<Widget>((int item) {
+            return Container(
+              child: GestureDetector(
                 onTap: () { tapped.add(item); },
-                child: new Text('$item'),
+                child: Text('$item'),
               ),
             );
           }).toList(),
@@ -169,15 +174,15 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           itemExtent: 200.0,
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
+          children: items.map<Widget>((int item) {
+            return Container(
+              child: GestureDetector(
                 onTap: () { tapped.add(item); },
-                child: new Text('$item'),
+                child: Text('$item'),
               ),
             );
           }).toList(),

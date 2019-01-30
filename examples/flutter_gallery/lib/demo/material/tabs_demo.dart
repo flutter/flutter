@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 // Each TabBarView contains a _Page and for each _Page there is a list
 // of _CardData objects. Each _CardData object is displayed by a _CardItem.
 
@@ -25,67 +27,67 @@ class _CardData {
 }
 
 final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
-  new _Page(label: 'LEFT'): <_CardData>[
+  _Page(label: 'HOME'): <_CardData>[
     const _CardData(
-      title: 'Vintage Bluetooth Radio',
-      imageAsset: 'shrine/products/radio.png',
+      title: 'Flatwear',
+      imageAsset: 'products/flatwear.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Sunglasses',
-      imageAsset: 'shrine/products/sunnies.png',
+      title: 'Pine Table',
+      imageAsset: 'products/table.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Clock',
-      imageAsset: 'shrine/products/clock.png',
+      title: 'Blue Cup',
+      imageAsset: 'products/cup.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Red popsicle',
-      imageAsset: 'shrine/products/popsicle.png',
+      title: 'Tea Set',
+      imageAsset: 'products/teaset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Folding Chair',
-      imageAsset: 'shrine/products/lawn_chair.png',
+      title: 'Desk Set',
+      imageAsset: 'products/deskset.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Green comfort chair',
-      imageAsset: 'shrine/products/chair.png',
+      title: 'Blue Linen Napkins',
+      imageAsset: 'products/napkins.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Old Binoculars',
-      imageAsset: 'shrine/products/binoculars.png',
+      title: 'Planters',
+      imageAsset: 'products/planters.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Teapot',
-      imageAsset: 'shrine/products/teapot.png',
+      title: 'Kitchen Quattro',
+      imageAsset: 'products/kitchen_quattro.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Blue suede shoes',
-      imageAsset: 'shrine/products/chucks.png',
+      title: 'Platter',
+      imageAsset: 'products/platter.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
-  new _Page(label: 'RIGHT'): <_CardData>[
+  _Page(label: 'APPAREL'): <_CardData>[
     const _CardData(
-      title: 'Beachball',
-      imageAsset: 'shrine/products/beachball.png',
+      title: 'Cloud-White Dress',
+      imageAsset: 'products/dress.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Dipped Brush',
-      imageAsset: 'shrine/products/brush.png',
+      title: 'Ginger Scarf',
+      imageAsset: 'products/scarf.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
     const _CardData(
-      title: 'Perfect Goldfish Bowl',
-      imageAsset: 'shrine/products/fish_bowl.png',
+      title: 'Blush Sweats',
+      imageAsset: 'products/sweats.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
@@ -100,30 +102,30 @@ class _CardDataItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Card(
-      child: new Padding(
+    return Card(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: new Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            new Align(
-              alignment: page.id == 'L'
+            Align(
+              alignment: page.id == 'H'
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
-              child: new CircleAvatar(child: new Text('${page.id}')),
+              child: CircleAvatar(child: Text('${page.id}')),
             ),
-            new SizedBox(
+            SizedBox(
               width: 144.0,
               height: 144.0,
-              child: new Image.asset(
+              child: Image.asset(
                 data.imageAsset,
                 package: data.imageAssetPackage,
                 fit: BoxFit.contain,
               ),
             ),
-            new Center(
-              child: new Text(
+            Center(
+              child: Text(
                 data.title,
                 style: Theme.of(context).textTheme.title,
               ),
@@ -140,56 +142,57 @@ class TabsDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new DefaultTabController(
+    return DefaultTabController(
       length: _allPages.length,
-      child: new Scaffold(
-        body: new NestedScrollView(
+      child: Scaffold(
+        body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              new SliverOverlapAbsorber(
+              SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                child: new SliverAppBar(
+                child: SliverAppBar(
                   title: const Text('Tabs and scrolling'),
+                  actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
                   pinned: true,
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
-                  bottom: new TabBar(
-                    tabs: _allPages.keys.map(
-                      (_Page page) => new Tab(text: page.label),
+                  bottom: TabBar(
+                    tabs: _allPages.keys.map<Widget>(
+                      (_Page page) => Tab(text: page.label),
                     ).toList(),
                   ),
                 ),
               ),
             ];
           },
-          body: new TabBarView(
-            children: _allPages.keys.map((_Page page) {
-              return new SafeArea(
+          body: TabBarView(
+            children: _allPages.keys.map<Widget>((_Page page) {
+              return SafeArea(
                 top: false,
                 bottom: false,
-                child: new Builder(
+                child: Builder(
                   builder: (BuildContext context) {
-                    return new CustomScrollView(
-                      key: new PageStorageKey<_Page>(page),
+                    return CustomScrollView(
+                      key: PageStorageKey<_Page>(page),
                       slivers: <Widget>[
-                        new SliverOverlapInjector(
+                        SliverOverlapInjector(
                           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                         ),
-                        new SliverPadding(
+                        SliverPadding(
                           padding: const EdgeInsets.symmetric(
                             vertical: 8.0,
                             horizontal: 16.0,
                           ),
-                          sliver: new SliverFixedExtentList(
+                          sliver: SliverFixedExtentList(
                             itemExtent: _CardDataItem.height,
-                            delegate: new SliverChildBuilderDelegate(
+                            delegate: SliverChildBuilderDelegate(
                               (BuildContext context, int index) {
                                 final _CardData data = _allPages[page][index];
-                                return new Padding(
+                                return Padding(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 8.0,
                                   ),
-                                  child: new _CardDataItem(
+                                  child: _CardDataItem(
                                     page: page,
                                     data: data,
                                   ),

@@ -18,7 +18,7 @@ When the exception was thrown, this was the stack:
 The test description was:
 TestAsyncUtils - handling unguarded async helper functions
 ════════════════════════════════════════════════════════════════════════════════════════════════════
-.*..:.. \+0 -1: - TestAsyncUtils - handling unguarded async helper functions *
+.*..:.. \+0 -1: TestAsyncUtils - handling unguarded async helper functions *
   Test failed\. See exception logs above\.
   The test description was: TestAsyncUtils - handling unguarded async helper functions
  *

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -60,9 +59,9 @@ class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
 
   @override
   _RenderSizeChangedWithCallback createRenderObject(BuildContext context) {
-    return new _RenderSizeChangedWithCallback(
+    return _RenderSizeChangedWithCallback(
       onLayoutChangedCallback: () {
-        new SizeChangedLayoutNotification().dispatch(context);
+        SizeChangedLayoutNotification().dispatch(context);
       }
     );
   }

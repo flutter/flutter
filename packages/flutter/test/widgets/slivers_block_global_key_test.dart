@@ -12,27 +12,30 @@ class GenerationText extends StatefulWidget {
   const GenerationText(this.value);
   final int value;
   @override
-  _GenerationTextState createState() => new _GenerationTextState();
+  _GenerationTextState createState() => _GenerationTextState();
 }
 
 class _GenerationTextState extends State<GenerationText> {
   _GenerationTextState() : generation = globalGeneration;
   final int generation;
   @override
-  Widget build(BuildContext context) => new Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
+  Widget build(BuildContext context) => Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
 }
 
-Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
+// Creates a SliverList with `keys.length` children and each child having a key from `keys` and a text of `key:generation`.
+// The generation is increased with every call to this method.
+Future<void> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
   return tester.pumpWidget(
-    new Directionality(
+    Directionality(
       textDirection: TextDirection.ltr,
-      child: new Viewport(
-        offset: new ViewportOffset.fixed(offset),
+      child: Viewport(
+        cacheExtent: 0.0,
+        offset: ViewportOffset.fixed(offset),
         slivers: <Widget>[
-          new SliverList(
-            delegate: new SliverChildListDelegate(keys.map((int key) {
-              return new SizedBox(key: new GlobalObjectKey(key), height: 100.0, child: new GenerationText(key));
+          SliverList(
+            delegate: SliverChildListDelegate(keys.map<Widget>((int key) {
+              return SizedBox(key: GlobalObjectKey(key), height: 100.0, child: GenerationText(key));
             }).toList()),
           ),
         ],
@@ -41,6 +44,8 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   );
 }
 
+// `answerKey`: Expected offsets of visible SliverList children in global coordinate system.
+// `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
     (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
@@ -48,8 +53,8 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data)
-    .reduce((String value, String element) => value + element);
+        .map<String>((Text widget) => widget.data)
+        .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }
 

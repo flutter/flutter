@@ -1,18 +1,14 @@
 package {{androidIdentifier}};
 
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-/**
- * {{pluginClass}}
- */
+/** {{pluginClass}} */
 public class {{pluginClass}} implements MethodCallHandler {
-  /**
-   * Plugin registration.
-   */
+  /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
     final MethodChannel channel = new MethodChannel(registrar.messenger(), "{{projectName}}");
     channel.setMethodCallHandler(new {{pluginClass}}());

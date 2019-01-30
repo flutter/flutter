@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:convert' show UTF8;
 
 import 'package:quiver/strings.dart';
 
@@ -11,95 +10,107 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../convert.dart' show utf8;
 import '../globals.dart';
 
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
 const String noCertificatesInstruction = '''
-═══════════════════════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
-You can connect to your Apple Developer account by signing in with your Apple ID in Xcode
-and create an iOS Development Certificate as well as a Provisioning Profile for your project by:
+You can connect to your Apple Developer account by signing in with your Apple ID
+in Xcode and create an iOS Development Certificate as well as a Provisioning\u0020
+Profile for your project by:
 $fixWithDevelopmentTeamInstruction
   5- Trust your newly created Development Certificate on your iOS device
      via Settings > General > Device Management > [your new certificate] > Trust
 
 For more information, please visit:
-  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
+  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
+  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
 
 Or run on an iOS simulator without code signing
-═══════════════════════════════════════════════════════════════════════════════════''';
+════════════════════════════════════════════════════════════════════════════════''';
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
 const String noProvisioningProfileInstruction = '''
-═══════════════════════════════════════════════════════════════════════════════════
-No Provisioning Profile was found for your project's Bundle Identifier or your device.
-You can create a new Provisioning Profile for your project in Xcode for your
-team by:
+════════════════════════════════════════════════════════════════════════════════
+No Provisioning Profile was found for your project's Bundle Identifier or your\u0020
+device. You can create a new Provisioning Profile for your project in Xcode for\u0020
+your team by:
 $fixWithDevelopmentTeamInstruction
 
-It's also possible that a previously installed app with the same Bundle Identifier was
-signed with a different certificate.
+It's also possible that a previously installed app with the same Bundle\u0020
+Identifier was signed with a different certificate.
 
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
-═══════════════════════════════════════════════════════════════════════════════════''';
+════════════════════════════════════════════════════════════════════════════════''';
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
 const String noDevelopmentTeamInstruction = '''
-═══════════════════════════════════════════════════════════════════════════════════
-Building a deployable iOS app requires a selected Development Team with a Provisioning Profile
-Please ensure that a Development Team is selected by:
+════════════════════════════════════════════════════════════════════════════════
+Building a deployable iOS app requires a selected Development Team with a\u0020
+Provisioning Profile. Please ensure that a Development Team is selected by:
 $fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
-═══════════════════════════════════════════════════════════════════════════════════''';
+════════════════════════════════════════════════════════════════════════════════''';
 const String fixWithDevelopmentTeamInstruction = '''
   1- Open the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected. You may need to
+  3- In the 'General' tab, make sure a 'Development Team' is selected.\u0020
+     You may need to:
          - Log in with your Apple ID in Xcode first
          - Ensure you have a valid unique Bundle ID
          - Register your device with your Apple Developer Account
          - Let Xcode automatically provision a profile for your app
   4- Build or run your project again''';
 
+
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    new RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
-final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'.*\(([a-zA-Z0-9]+)\)');
-final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
+    RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
+final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
+final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
 /// Given a [BuildableIOSApp], this will try to find valid development code
 /// signing identities in the user's keychain prompting a choice if multiple
 /// are found.
 ///
+/// Returns a set of build configuration settings that uses the selected
+/// signing identities.
+///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bool usesTerminalUi: true}) async{
-  if (iosApp.buildSettings == null)
+Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
+  BuildableIOSApp iosApp,
+  bool usesTerminalUi = true
+}) async{
+  final Map<String, String> buildSettings = iosApp.project.buildSettings;
+  if (buildSettings == null)
     return null;
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
+  if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
     printStatus(
       'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}'
+      'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
     );
     return null;
   }
 
-  if (isNotEmpty(iosApp.buildSettings['PROVISIONING_PROFILE']))
+  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE']))
     return null;
 
   // If the user's environment is missing the tools needed to find and read
@@ -108,7 +119,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
     return null;
 
   const List<String> findIdentityCommand =
-      const <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
+      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
   final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')
       .map<String>((String outputLine) {
@@ -142,11 +153,9 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
   );
 
   final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
-  opensslProcess.stdin
-      ..write(signingCertificate)
-      ..close();
+  await (opensslProcess.stdin..write(signingCertificate)).close();
 
-  final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
+  final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
   opensslProcess.stderr.drain<String>(); // ignore: unawaited_futures
@@ -154,9 +163,11 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return _certificateOrganizationalUnitExtractionPattern
+  return <String, String> {
+    'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
-      ?.group(1);
+      ?.group(1),
+  };
 }
 
 Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {
@@ -198,7 +209,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
     printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      new List<String>.generate(count, (int number) => '${number + 1}')
+      List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,

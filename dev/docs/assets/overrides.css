@@ -1,0 +1,146 @@
+/* Overrides for dartdoc styles. */
+body {
+  font-size: 15px;
+  font-family: Roboto, sans-serif;
+  line-height: 1.5;
+  color: #111;
+  background-color: #fdfdfd;
+  font-weight: 300;
+  -webkit-font-smoothing: auto;
+}
+
+header {
+  background-color: white;
+  color: #424242;
+}
+
+nav.navbar {
+  min-height: 57px;
+  padding: 6px 0;
+}
+
+header.header-fixed nav.navbar-fixed-top {
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
+}
+
+h1, h2 {
+  font-weight: 300;
+}
+
+h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 42px !important;
+  letter-spacing: -1px;
+}
+
+header h1 {
+  font-weight: 300;
+}
+
+h2 {
+  color: #111;
+  font-size: 24px;
+}
+
+.markdown h2 {
+  font-size: 24px;
+}
+
+section.summary h2 {
+  font-size: 24px;
+  color: inherit;
+  border-bottom: none;
+}
+
+.sidebar ol,
+.sidebar ol li.section-title {
+  font-size: inherit;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar-offcanvas-left.active {
+    padding: 10px;
+  }
+}
+
+.sidebar-offcanvas-left ol {
+  padding: 0 16px 16px 0;
+}
+
+.sidebar-offcanvas-left h5 {
+  display: none;
+}
+
+pre,
+pre.prettyprint,
+pre > code {
+  font-size: 14px;
+}
+
+pre,
+pre.prettyprint {
+  background: #f5f2f0;
+  margin: 0 0 15px 0;
+  padding: 8px 12px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+code {
+  background-color: inherit;
+  font-size: 1em; /* browsers default to smaller font for code */
+  font-weight: 300;
+  padding-left: 0; /* otherwise we get ragged left margins */
+  padding-right: 0;
+}
+
+#search-box {
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font-family: inherit;
+  padding: 4px 6px;
+  font-size: 15px;
+}
+
+input.form-control.typeahead {
+  padding: 4px 7px;
+  font-size: 15px;
+}
+
+dl.dl-horizontal dt {
+  color: inherit;
+}
+
+/* Line the material icons up with their labels */
+i.material-icons.md-36,
+i.material-icons.md-48 {
+  vertical-align: bottom;
+}
+
+/* thinify the inherited names in lists */
+li.inherited a {
+  font-weight: 100;
+}
+
+/* address a style issue with the background of code sections */
+code.hljs {
+  background: inherit;
+}
+
+footer {
+  font-size: 13px;
+  padding: 12px 20px;
+}
+/* Override the comment color for highlight.js to make it more
+   prominent/readable */
+.hljs-comment {
+  color: #128c00;
+  font-style: italic;
+  font-weight: bold;
+}

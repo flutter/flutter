@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
+import '../convert.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
@@ -12,7 +11,7 @@ class Config {
   Config([File configFile]) {
     _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
-      _values = JSON.decode(_configFile.readAsStringSync());
+      _values = json.decode(_configFile.readAsStringSync());
   }
 
   static Config get instance => context[Config];
