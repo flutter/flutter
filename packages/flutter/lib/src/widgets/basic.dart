@@ -1556,7 +1556,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///   child: Container(
 ///     height: 100.0,
 ///     width: 100.0,
-///     color: Colors.yellow
+///     color: Colors.yellow,
 ///     child: Align(
 ///       alignment: FractionalOffset(0.2, 0.6),
 ///       child: Container(
@@ -1566,8 +1566,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///       ),
 ///     ),
 ///   ),
-/// );
-///
+/// )
 /// ```
 /// {@end-tool}
 ///
