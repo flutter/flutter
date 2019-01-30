@@ -179,6 +179,7 @@ class CupertinoDatePicker extends StatefulWidget {
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
+       assert(initialDateTime != null),
        assert(
          mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !initialDateTime.isBefore(minimumDate),
          'initial date is before minimum date',
