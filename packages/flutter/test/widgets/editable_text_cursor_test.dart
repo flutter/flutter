@@ -14,8 +14,7 @@ import '../rendering/mock_canvas.dart';
 import 'editable_text_test.dart';
 
 void main() {
-  testWidgets('cursor has expected width and radius',
-      (WidgetTester tester) async {
+  testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
         MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
@@ -30,16 +29,14 @@ void main() {
           cursorRadius: const Radius.circular(2.0),
         ))));
 
-    final EditableText editableText =
-        tester.firstWidget(find.byType(EditableText));
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorRadius.x, 2.0);
   });
 
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
     String changedValue;
     final Widget widget = MaterialApp(
@@ -65,8 +62,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -93,8 +89,7 @@ void main() {
   }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
     String changedValue;
     final Widget widget = MaterialApp(
@@ -121,8 +116,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -383,8 +377,7 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgets('autofocus sets cursor to the end of text',
-      (WidgetTester tester) async {
+  testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
     final FocusScopeNode focusScopeNode = FocusScopeNode();
     final FocusNode focusNode = FocusNode();
@@ -442,9 +435,15 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Start),
+    );
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: const Offset(20, 20),
+      ),
+    );
     await tester.pump();
 
     expect(editable, paints
