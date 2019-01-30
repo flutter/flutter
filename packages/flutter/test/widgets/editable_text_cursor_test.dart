@@ -16,7 +16,9 @@ import 'editable_text_test.dart';
 void main() {
   testWidgets('cursor has expected width and radius',
       (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+        MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -26,13 +28,14 @@ void main() {
           cursorColor: cursorColor,
           cursorWidth: 10.0,
           cursorRadius: const Radius.circular(2.0),
-        )));
+        ))));
 
     final EditableText editableText =
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorRadius.x, 2.0);
   });
+
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -73,9 +76,13 @@ void main() {
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(changedValue, clipboardContent);
 
@@ -137,23 +144,125 @@ void main() {
     );
   }, skip: !Platform.isLinux);
 
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: const Material(
+        child: TextField(
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 16);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+  });
+
+  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: const Material(
+        child: TextField(
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: const Material(
+        child: TextField(
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+  });
+
   testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -215,7 +324,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 11);
+    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
@@ -224,17 +333,20 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -278,21 +390,26 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     controller.text = text;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: FocusScope(
-        node: focusScopeNode,
-        autofocus: true,
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          autofocus: true,
-          style: textStyle,
-          cursorColor: cursorColor,
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: true,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
@@ -307,11 +424,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Material(
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
+        home: Padding(
+          padding: const EdgeInsets.only(top: 0.25),
+          child: Material(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+            ),
           ),
         ),
       ),
@@ -327,16 +447,40 @@ void main() {
       offset: const Offset(20, 20)));
     await tester.pump();
 
-    expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, 0, 467.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+    expect(editable, paints
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          Rect.fromLTRB(464.6666564941406, 2.0833332538604736, 466.6666564941406, 14.083333015441895),
+          const Radius.circular(2.0),
+        ),
+        color: const Color(0xff8e8e93))
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          Rect.fromLTRB(465.1666564941406, 1.0833336114883423, 468.1666564941406, 15.083333969116211),
+          const Radius.circular(1.0),
+        ),
+        color: const Color(0xbf2196f3))
     );
 
     // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(
+          state: FloatingCursorDragState.Update,
+          offset: const Offset(-250, 20)));
 
-    expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, 0, 197.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+    expect(find.byType(EditableText), paints
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          Rect.fromLTRB(192.6666717529297, 2.0833332538604736, 194.6666717529297, 14.083333015441895),
+          const Radius.circular(2.0),
+        ),
+        color: const Color(0xff8e8e93))
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          Rect.fromLTRB(195.16665649414062, 1.0833336114883423, 198.16665649414062, 15.083333969116211),
+          const Radius.circular(1.0),
+        ),
+        color: const Color(0xbf2196f3))
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));

@@ -108,28 +108,6 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
   });
 
-  testWidgets('cursor has expected width and radius',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          cursorWidth: 10.0,
-          cursorRadius: const Radius.circular(2.0),
-        ))));
-
-    final EditableText editableText =
-        tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorWidth, 10.0);
-    expect(editableText.cursorRadius.x, 2.0);
-  });
-
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -751,119 +729,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            maxLines: 3,
-          )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 110);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 16);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-            child: TextField(
-              maxLines: 3,
-            )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-            child: TextField(
-              maxLines: 3,
-            )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-testWidgets(
+  testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -1915,39 +1781,6 @@ testWidgets(
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     expect(render.text.style.fontStyle, FontStyle.italic);
-  });
-
-  testWidgets('autofocus sets cursor to the end of text',
-      (WidgetTester tester) async {
-    const String text = 'hello world';
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    final FocusNode focusNode = FocusNode();
-
-    controller.text = text;
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              autofocus: true,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(focusNode.hasFocus, true);
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, text.length);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
