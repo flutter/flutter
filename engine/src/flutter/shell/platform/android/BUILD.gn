@@ -49,10 +49,12 @@ shared_library("flutter_shell_native") {
     "platform_view_android_jni.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
+    "$root_build_dir/flutter_icu/icudtl.o",
   ]
 
   deps = [
     ":android_gpu_configuration",
+    ":icudtl_object",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
@@ -90,6 +92,8 @@ shared_library("flutter_shell_native") {
     "EGL",
     "GLESv2",
   ]
+
+  ldflags = ["-Wl,--version-script=" + rebase_path("android_exports.lst")]
 }
 
 java_library("flutter_shell_java") {
@@ -200,19 +204,25 @@ java_prebuilt("android_arch_lifecycle_viewmodel") {
   jar_path = "//third_party/android_support/android_arch_lifecycle_viewmodel.jar"
 }
 
-copy("flutter_shell_assets") {
-  visibility = [ ":*" ]
+action("icudtl_object") {
+  script = "$flutter_root/sky/tools/objcopy.py"
 
-  sources = [
-    "//third_party/icu/flutter/icudtl.dat",
+  icudtl_input = "//third_party/icu/flutter/icudtl.dat"
+  icudtl_output = "$root_build_dir/flutter_icu/icudtl.o"
+
+  inputs = [
+    "$icudtl_input",
   ]
 
   outputs = [
-    "$root_build_dir/flutter_shell_assets/{{source_file_part}}",
+    "$icudtl_output",
   ]
 
-  deps = [
-    "//third_party/icu:icudata",
+  args = [
+    "--objcopy", rebase_path(android_objcopy),
+    "--input", rebase_path(icudtl_input),
+    "--output", rebase_path(icudtl_output),
+    "--arch", current_cpu,
   ]
 }
 
@@ -222,7 +232,6 @@ action("android") {
   inputs = [
     "$root_build_dir/flutter_java.jar",
     "$root_build_dir/lib.stripped/libflutter.so",
-    "$root_build_dir/flutter_shell_assets/icudtl.dat",
   ]
 
   outputs = [
@@ -234,8 +243,6 @@ action("android") {
     rebase_path("flutter.jar", root_build_dir, root_build_dir),
     "--dist_jar",
     rebase_path("flutter_java.jar", root_build_dir, root_build_dir),
-    "--asset_dir",
-    rebase_path("flutter_shell_assets", root_build_dir, root_build_dir),
     "--native_lib",
     rebase_path("lib.stripped/libflutter.so", root_build_dir, root_build_dir),
     "--android_abi",
@@ -243,7 +250,6 @@ action("android") {
   ]
 
   deps = [
-    ":flutter_shell_assets",
     ":flutter_shell_java",
     ":flutter_shell_native",
   ]

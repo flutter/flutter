@@ -105,6 +105,7 @@ struct Settings {
   bool verbose_logging = false;
   std::string log_tag = "flutter";
   std::string icu_data_path;
+  MappingCallback icu_mapper;
 
   // Assets settings
   fml::UniqueFD::element_type assets_dir =
