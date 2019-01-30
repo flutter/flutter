@@ -755,7 +755,7 @@ class Navigator extends StatefulWidget {
   /// route:
   ///
   /// ```dart
-  /// void _didPushButton() {
+  /// void _showBerlinWeather() {
   ///   Navigator.pushNamed(
   ///     context,
   ///     '/weather',
@@ -783,7 +783,7 @@ class Navigator extends StatefulWidget {
   ///   }
   /// }
   ///
-  /// void _didPushButton() {
+  /// void _showWeather() {
   ///   Navigator.pushNamed(
   ///     context,
   ///     '/weather',
