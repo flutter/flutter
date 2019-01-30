@@ -155,8 +155,9 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [shadowColor], and [animationDuration] arguments
-  /// must not be null. Additionally, [elevation] must be non-negative.
+  /// The [type], [elevation], [shadowColor], [borderOnForeground] and
+  /// [animationDuration] arguments must not be null. Additionally, [elevation]
+  /// must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -183,6 +184,7 @@ class Material extends StatefulWidget {
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        assert(clipBehavior != null),
+       assert(borderOnForeground != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -289,6 +291,7 @@ class Material extends StatefulWidget {
     properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: null));
     properties.add(EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 

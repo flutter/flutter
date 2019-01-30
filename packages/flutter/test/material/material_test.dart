@@ -558,7 +558,7 @@ void main() {
                 width: 200,
                 height: 300,
                 child: Material(
-                  clipBehavior: Clip.antiAlias,
+                  clipBehavior: Clip.hardEdge,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: const BorderSide(color: Colors.grey, width: 6),
@@ -598,7 +598,7 @@ void main() {
                 width: 200,
                 height: 300,
                 child: Material(
-                  clipBehavior: Clip.antiAlias,
+                  clipBehavior: Clip.hardEdge,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: const BorderSide(color: Colors.grey, width: 6),
