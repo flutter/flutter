@@ -182,8 +182,8 @@ void main() {
   });
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
-    final Widget widget = MaterialApp(
-      home: const Material(
+    const Widget widget = MaterialApp(
+      home: Material(
         child: TextField(
           maxLines: 3,
         ),
