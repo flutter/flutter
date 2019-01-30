@@ -19,7 +19,7 @@ class UserMessages {
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-libstdc++5';
+      'On Arch: pacman -S lib32-libstdc++5 (you need to enable multilib: https://wiki.archlinux.org/index.php/Official_repositories#multilib)';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
