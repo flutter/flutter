@@ -2116,7 +2116,6 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     });
 
-
     testWidgets('Down and up test 2', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
@@ -4278,12 +4277,22 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 5.0);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    final TestGesture gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -4312,8 +4321,20 @@ void main() {
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+    final Offset offset = textfieldStart + const Offset(150.0, 5.0);
+    final TestGesture gesture = await TestGesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0
+      ),
+      hitTester: tester.hitTestOnBinding,
+      dispatcher: tester.sendEventToBinding,
+    );
+
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     // We expect the force press to select a word at the given location.
     expect(

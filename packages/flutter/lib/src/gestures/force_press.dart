@@ -206,8 +206,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
-    // If the device has a maximum pressure of less than 1, (ie. on a non iOS
-    // device) we want do not want any callbacks to be called.
+    // If the device has a maximum pressure of less than or equal to 1, (ie. on
+    // a non iOS device) we want do not want any callbacks to be called.
     if (!(event is PointerUpEvent) && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
