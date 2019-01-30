@@ -1528,6 +1528,49 @@ class Padding extends SingleChildRenderObjectWidget {
 /// dimension and the size factor. For example if widthFactor is 2.0 then
 /// the width of this widget will always be twice its child's width.
 ///
+/// ## How it works
+///
+/// The [alignment] property describes a point in the `child`'s coordinate system
+/// and a different point in the coordinate system of this widget. The [Align]
+/// widget positions the `child` such that both points are lined up on top of
+/// each other.
+///
+/// {@tool sample}
+/// The [FractionalOffset] used in the following example defines two points:
+///
+///   * (0.2 * width of red [Container], 0.6 * height of red [Container]) = (8.0, 24.0)
+///     in the coordinate system of the red container.
+///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (20.0, 60.0) in the
+///     coordinate system of the [Align] widget.
+///
+/// The [Align] widget positions the red [Container] such that the two points are on
+/// top of each other. In this example, the top left of the red [Container] will
+/// be placed at (20.0, 60.0) - (8.0, 24.0) = (12.0, 36.0) from the top left of
+/// the [Align] widget.
+///
+/// Using [Alignment] instead of [FractionalOffset] for [alignment] just changes
+/// the way how the two points for alignment are calculated.
+///
+/// ```dart
+/// Center(
+///   child: Container(
+///     height: 100.0,
+///     width: 100.0,
+///     color: Colors.yellow
+///     child: Align(
+///       alignment: FractionalOffset(0.2, 0.6),
+///       child: Container(
+///         height: 40.0,
+///         width: 40.0,
+///         color: Colors.red,
+///       ),
+///     ),
+///   ),
+/// );
+///
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
