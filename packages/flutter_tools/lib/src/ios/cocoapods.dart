@@ -193,6 +193,12 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfile.path);
     }
+    addPodsDependencyToFlutterXcconfig(iosProject);
+  }
+
+  /// Ensures all `Flutter/Xxx.xcconfig` files for the given iOS sub-project of
+  /// a parent Flutter project include pods configuration.
+  void addPodsDependencyToFlutterXcconfig(IosProject iosProject) {
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }

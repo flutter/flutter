@@ -607,7 +607,12 @@ class _DiagnosticsPathNode {
   /// [DiagnosticsNode] objects.
   ///
   /// The [node] and [child] arguments must not be null.
-  _DiagnosticsPathNode({ @required this.node, @required this.children, this.childIndex }) : assert(node != null), assert(children != null);
+  _DiagnosticsPathNode({
+    @required this.node,
+    @required this.children,
+    this.childIndex,
+  }) : assert(node != null),
+       assert(children != null);
 
   /// Node at the point in the path this [_DiagnosticsPathNode] is describing.
   final DiagnosticsNode node;
@@ -686,13 +691,12 @@ class _SerializeConfig {
     _SerializeConfig base, {
     int subtreeDepth,
     Iterable<Diagnosticable> pathToInclude,
-  }) :
-    groupName = base.groupName,
-    summaryTree = base.summaryTree,
-    subtreeDepth = subtreeDepth ?? base.subtreeDepth,
-    pathToInclude = pathToInclude ?? base.pathToInclude,
-    includeProperties = base.includeProperties,
-    expandPropertyValues = base.expandPropertyValues;
+  }) : groupName = base.groupName,
+       summaryTree = base.summaryTree,
+       subtreeDepth = subtreeDepth ?? base.subtreeDepth,
+       pathToInclude = pathToInclude ?? base.pathToInclude,
+       includeProperties = base.includeProperties,
+       expandPropertyValues = base.expandPropertyValues;
 
   /// Optional object group name used to manage manage lifetimes of object
   /// references in the returned JSON.
@@ -2443,7 +2447,9 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 
 class _RenderInspectorOverlay extends RenderBox {
   /// The arguments must not be null.
-  _RenderInspectorOverlay({ @required InspectorSelection selection }) : _selection = selection, assert(selection != null);
+  _RenderInspectorOverlay({ @required InspectorSelection selection })
+    : _selection = selection,
+      assert(selection != null);
 
   InspectorSelection get selection => _selection;
   InspectorSelection _selection;
@@ -2476,9 +2482,9 @@ class _RenderInspectorOverlay extends RenderBox {
 }
 
 class _TransformedRect {
-  _TransformedRect(RenderObject object) :
-    rect = object.semanticBounds,
-    transform = object.getTransformTo(null);
+  _TransformedRect(RenderObject object)
+    : rect = object.semanticBounds,
+      transform = object.getTransformTo(null);
 
   final Rect rect;
   final Matrix4 transform;
@@ -2545,7 +2551,8 @@ class _InspectorOverlayLayer extends Layer {
   _InspectorOverlayLayer({
     @required this.overlayRect,
     @required this.selection,
-  }) : assert(overlayRect != null), assert(selection != null) {
+  }) : assert(overlayRect != null),
+       assert(selection != null) {
     bool inDebugMode = false;
     assert(() {
       inDebugMode = true;

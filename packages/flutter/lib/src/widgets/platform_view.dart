@@ -212,9 +212,9 @@ class UiKitView extends StatefulWidget {
     this.creationParamsCodec,
     this.gestureRecognizers,
   }) : assert(viewType != null),
-        assert(hitTestBehavior != null),
-        assert(creationParams == null || creationParamsCodec != null),
-        super(key: key);
+       assert(hitTestBehavior != null),
+       assert(creationParams == null || creationParamsCodec != null),
+       super(key: key);
 
   // TODO(amirh): reference the iOS API doc once avaliable.
   /// The unique identifier for iOS view type to be embedded by this widget.

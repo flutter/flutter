@@ -27,7 +27,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({DiagnosticLevel minLevel}) => '$index $alive';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
