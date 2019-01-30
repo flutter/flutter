@@ -132,14 +132,14 @@ enum ShowValueIndicator {
 ///  * The "thumb", which is a shape that slides horizontally when the user
 ///    drags it.
 ///  * The "track", which is the line that the slider thumb slides along.
-///  * The "ticks", which are regularly spaced marks that are drawn when
+///  * The "tick marks", which are regularly spaced marks that are drawn when
 ///    using discrete divisions.
 ///  * The "value indicator", which appears when the user is dragging the thumb
 ///    to indicate the value being selected.
 ///  * The "overlay", which appears around the thumb, and is shown when the
 ///    thumb is pressed, focused, or hovered. It is painted underneath the
-///    thumb, so it must extend the bounds of the thumb itself to actually be
-///    visible.
+///    thumb, so it must extend beyond the bounds of the thumb itself to
+///    actually be visible.
 ///  * The "active" side of the slider is the side between the thumb and the
 ///    minimum value.
 ///  * The "inactive" side of the slider is the side between the thumb and the
@@ -147,8 +147,8 @@ enum ShowValueIndicator {
 ///  * The [Slider] is disabled when it is not accepting user input. See
 ///    [Slider] for details on when this happens.
 ///
-/// The thumb, track, ticks, value indicator, and overlay can be customized by
-/// creating subclasses of [SliderTrackShape],
+/// The thumb, track, tick marks, value indicator, and overlay can be customized
+/// by creating subclasses of [SliderTrackShape],
 /// [SliderComponentShape], and/or [SliderTickMarkShape]. See
 /// [RoundSliderThumbShape], [RectangularSliderTrackShape],
 /// [RoundSliderTickMarkShape], [PaddleSliderValueIndicatorShape], and
@@ -367,7 +367,7 @@ class SliderThemeData extends Diagnosticable {
   /// The default value is [RectangularSliderTrackShape].
   final SliderTrackShape trackShape;
 
-  /// The shape that will be used to draw the [Slider]'s ticks.
+  /// The shape that will be used to draw the [Slider]'s tick marks.
   ///
   /// The [SliderTickMarkShape.getPreferredSize] is used to help determine the
   /// location of each tick mark on the track. The slider's minimum size will
@@ -616,8 +616,9 @@ class SliderThemeData extends Diagnosticable {
 
 /// Base class for slider track shapes.
 ///
-/// The slider's thumb moves along the track and a discrete slider's tick marks
-/// appear below the thumb and aligned to the track.
+/// The slider's thumb moves along the track. A discrete slider's tick marks
+/// are drawn after the track, but before the thumb, and are aligned with the
+/// track.
 ///
 /// The [getPreferredRect] helps position the slider thumb and tick marks
 /// relative to the track.
@@ -641,10 +642,8 @@ abstract class SliderTrackShape {
   /// [parentBox] can be used to help determine the preferredRect relative to
   /// attributes of the render box of the slider itself, such as size.
   ///
-  /// [offset] is relative to this the caller's bounding box. It can be called
-  /// to be used relative to the slider's bounding box to calculate gesture
-  /// coordinates, or it can be called to be used relative to the painting
-  /// context's canvas.
+  /// [offset] is relative to the caller's bounding box. It can be used to
+  /// convert gesture coordinates from global to slider-relative coordinates.
   ///
   /// {@macro flutter.material.slider.shape.sliderTheme}
   ///
@@ -709,7 +708,7 @@ abstract class SliderTrackShape {
 ///
 /// See also:
 ///
-///  * [RoundSliderTickMarkShape] for a simple example of a tick shape.
+///  * [RoundSliderTickMarkShape] for a simple example of a tick mark shape.
 ///  * [SliderTrackShape] for the base class for custom a track shape.
 ///  * [SliderComponentShape] for the base class for custom a component shape.
 abstract class SliderTickMarkShape {
@@ -729,7 +728,7 @@ abstract class SliderTickMarkShape {
     bool isEnabled,
   });
 
-  /// Paints the shape, taking into account the state passed to it.
+  /// Paints the sliders track.
   ///
   /// {@macro flutter.material.slider.shape.context}
   ///
@@ -991,9 +990,9 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     }
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation);
 
-    // The ticks are tiny circles that are the same height as the track.
-    final double tickRadius = sliderTheme.trackHeight / 2;
-    context.canvas.drawCircle(center, tickRadius, paint);
+    // The tick marks are tiny circles that are the same height as the track.
+    final double tickMarkRadius = sliderTheme.trackHeight / 2;
+    context.canvas.drawCircle(center, tickMarkRadius, paint);
   }
 }
 
@@ -1050,7 +1049,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///
 /// The shape of the overlay is a circle with the same center as the thumb, but
 /// with a larger radius. It animates to full size when the thumb is pressed,
-/// and animates back down to size 0 when it is depressed. It is painted behind
+/// and animates back down to size 0 when it is released. It is painted behind
 /// the thumb, and is expected to extend beyond the bounds of the thumb so that
 /// it is visible.
 ///

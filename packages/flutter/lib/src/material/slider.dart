@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -584,22 +585,23 @@ class _RenderSlider extends RenderBox {
       curve: Curves.easeInOut,
     );
   }
-  // This value is the touch target, 48, multiplied by 3.
-  static const double _minPreferredTrackWidth = 144.0;
-
   static const Duration _positionAnimationDuration = Duration(milliseconds: 75);
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
-  // Compute the largest width and height needed to paint the shapes that
-  // need to padding to the track relative to the slider box itself. It is
-  // assumed that these shapes are vertically centered on the track.
-  double get _maxHorizontalTrackPadding => _sizesThatCanPadTrack.map((Size size) => size.width).reduce(math.max);
-  double get _maxVerticalTrackPadding => _sizesThatCanPadTrack.map((Size size) => size.width).reduce(math.max);
-  List<Size> get _sizesThatCanPadTrack => <Size>[
+  // This value is the touch target, 48, multiplied by 3.
+  static const double _minPreferredTrackWidth = 144.0;
+
+  // Compute the largest width and height needed to paint the slider shapes,
+  // other than the track shape. It is assumed that these shapes are vertically
+  // centered on the track.
+  double get _maxSliderPartWidth => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
+  double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
+  List<Size> get _sliderPartSizes => <Size>[
     _sliderTheme.overlayShape.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.tickMarkShape.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
   ];
+  double get _minPreferredTrackHeight =>_sliderTheme.trackHeight;
 
   _SliderState _state;
   Animation<double> _overlayAnimation;
@@ -922,16 +924,16 @@ class _RenderSlider extends RenderBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxHorizontalTrackPadding;
+  double computeMinIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxHorizontalTrackPadding;
+  double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMinIntrinsicHeight(double width) => _maxVerticalTrackPadding;
+  double computeMinIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
-  double computeMaxIntrinsicHeight(double width) => _maxVerticalTrackPadding;
+  double computeMaxIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
   bool get sizedByParent => true;
@@ -939,8 +941,8 @@ class _RenderSlider extends RenderBox {
   @override
   void performResize() {
     size = Size(
-      constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxHorizontalTrackPadding,
-      constraints.hasBoundedHeight ? constraints.maxHeight : _maxVerticalTrackPadding,
+      constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
+      constraints.hasBoundedHeight ? constraints.maxHeight : max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
   }
 
