@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ class VersionCommand extends FlutterCommand {
   VersionCommand(): super() {
     argParser.addFlag('force',
       abbr: 'f',
-      help: 'Force to switch to those versions that are not support version command',
+      help: 'Force switch to older Flutter versions that do not include a version command',
     );
   }
 
@@ -29,6 +29,8 @@ class VersionCommand extends FlutterCommand {
   @override
   final String description = 'List or switch flutter versions.';
 
+  // The first version of Flutter which includes the flutter version command. Switching to older
+  // versions will require the user to manually upgrade.
   Version minSupportedVersion = Version.parse('1.1.10');
 
   Future<List<String>> getTags() async {
@@ -77,8 +79,7 @@ class VersionCommand extends FlutterCommand {
 
     final FlutterVersion flutterVersion = FlutterVersion();
 
-    printStatus(
-      'Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}...');
+    printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
