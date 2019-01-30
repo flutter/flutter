@@ -375,7 +375,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
