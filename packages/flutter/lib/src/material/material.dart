@@ -235,10 +235,10 @@ class Material extends StatefulWidget {
   /// zero.
   final ShapeBorder shape;
 
-  /// Whether to paint the [shape] border in front of the child.
+  /// Whether to paint the [shape] border in front of the [child].
   ///
-  /// This defaults to true.
-  /// If false, the border will be painted behind the child.
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
 
   /// {@template flutter.widgets.Clip}
@@ -653,7 +653,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
   /// Whether to paint the border in front of the child.
   ///
-  /// This defaults to true.
+  /// The default value is true.
   /// If false, the border will be painted behind the child.
   final bool borderOnForeground;
 

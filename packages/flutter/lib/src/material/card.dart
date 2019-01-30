@@ -106,10 +106,10 @@ class Card extends StatelessWidget {
   /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
-  /// Whether to paint the [shape] border in front of the child.
+  /// Whether to paint the [shape] border in front of the [child].
   ///
-  /// This defaults to true.
-  /// If false, the border will be painted behind the child.
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
