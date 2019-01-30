@@ -831,19 +831,20 @@ void main() {
 
     expect(log, hasLength(1));
     expect(
-        log.single,
-        isMethodCall(
-          'TextInput.setEditingState',
-          arguments: const <String, dynamic>{
-            'text': 'Wobble',
-            'selectionBase': -1,
-            'selectionExtent': -1,
-            'selectionAffinity': 'TextAffinity.downstream',
-            'selectionIsDirectional': false,
-            'composingBase': -1,
-            'composingExtent': -1,
-          },
-        ));
+      log.single,
+      isMethodCall(
+        'TextInput.setEditingState',
+        arguments: const <String, dynamic>{
+          'text': 'Wobble',
+          'selectionBase': -1,
+          'selectionExtent': -1,
+          'selectionAffinity': 'TextAffinity.downstream',
+          'selectionIsDirectional': false,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ),
+    );
   });
 
   testWidgets('EditableText identifies as text field (w/ focus) in semantics',
@@ -870,19 +871,19 @@ void main() {
       ),
     );
 
-    expect(semantics,
-        includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
     await tester.pump();
 
     expect(
-        semantics,
-        includesNodeWith(flags: <SemanticsFlag>[
-          SemanticsFlag.isTextField,
-          SemanticsFlag.isFocused
-        ]));
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.isFocused
+      ]),
+    );
 
     semantics.dispose();
   });
@@ -915,11 +916,12 @@ void main() {
     );
 
     expect(
-        semantics,
-        includesNodeWith(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-          value: value1,
-        ));
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+        value: value1,
+      ),
+    );
 
     const String value2 = 'Changed the EditableText content';
     controller.text = value2;
@@ -927,17 +929,17 @@ void main() {
     await tester.pump();
 
     expect(
-        semantics,
-        includesNodeWith(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-          value: value2,
-        ));
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+        value: value2,
+      ),
+    );
 
     semantics.dispose();
   });
 
-  testWidgets('changing selection with keyboard does not show handles',
-      (WidgetTester tester) async {
+  testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
     const String value1 = 'Hello World';
 
     controller.text = value1;
@@ -966,8 +968,9 @@ void main() {
 
     expect(textState.selectionOverlay.handlesAreVisible, isTrue);
     expect(
-        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
-        const TextSelection.collapsed(offset: 4));
+      textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 4),
+    );
 
     // Simulate selection change via keyboard and expect handles to disappear.
     render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render,
@@ -976,8 +979,9 @@ void main() {
 
     expect(textState.selectionOverlay.handlesAreVisible, isFalse);
     expect(
-        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
-        const TextSelection.collapsed(offset: 10));
+      textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 10),
+    );
   });
 
   testWidgets('exposes correct cursor movement semantics',
@@ -997,10 +1001,11 @@ void main() {
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+      ),
+    );
 
     controller.selection =
         TextSelection.collapsed(offset: controller.text.length);
@@ -1008,15 +1013,16 @@ void main() {
 
     // At end, can only go backwards.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     controller.selection =
         TextSelection.collapsed(offset: controller.text.length - 2);
@@ -1024,32 +1030,34 @@ void main() {
 
     // Somewhere in the middle, can go in both directions.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pumpAndSettle();
 
     // At beginning, can only go forward.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1073,14 +1081,15 @@ void main() {
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1097,17 +1106,18 @@ void main() {
     expect(controller.selection.extentOffset, 3);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
@@ -1124,15 +1134,16 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
@@ -1163,14 +1174,15 @@ void main() {
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1187,17 +1199,18 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
@@ -1215,15 +1228,16 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
@@ -1263,14 +1277,15 @@ void main() {
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1287,17 +1302,18 @@ void main() {
     expect(controller.selection.extentOffset, 3);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
@@ -1314,15 +1330,16 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
@@ -1362,14 +1379,15 @@ void main() {
       ));
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+          ],
+        ),
+      );
 
       final RenderEditable render = tester.allRenderObjects
           .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1386,17 +1404,18 @@ void main() {
       expect(controller.selection.extentOffset, 9);
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorForwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.moveCursorForwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
           SemanticsAction.moveCursorBackwardByWord, extendSelection);
@@ -1414,15 +1433,16 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorForwardByCharacter,
-              SemanticsAction.moveCursorForwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
           SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
@@ -1461,32 +1481,34 @@ void main() {
     final String expectedValue = '•' * controller.text.length;
 
     expect(
-        semantics,
-        hasSemantics(
-            TestSemantics(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isObscured
-                          ],
-                          value: expectedValue,
-                          textDirection: TextDirection.ltr,
-                        ),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
+                        SemanticsFlag.isObscured
                       ],
+                      value: expectedValue,
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreTransform: true,
-            ignoreRect: true,
-            ignoreId: true));
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1511,31 +1533,33 @@ void main() {
     const String expectedValue = '••••••••••••••••••••••••';
 
     expect(
-        semantics,
-        hasSemantics(
-            TestSemantics(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                          ],
-                          value: originalText,
-                          textDirection: TextDirection.ltr,
-                        ),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
                       ],
+                      value: originalText,
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreTransform: true,
-            ignoreRect: true,
-            ignoreId: true));
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
 
     // Now change it to make it obscure text.
     await tester.pumpWidget(MaterialApp(
@@ -1552,33 +1576,35 @@ void main() {
     expect(findRenderEditable(tester).text.text, expectedValue);
 
     expect(
-        semantics,
-        hasSemantics(
-            TestSemantics(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isObscured,
-                            SemanticsFlag.isFocused,
-                          ],
-                          value: expectedValue,
-                          textDirection: TextDirection.ltr,
-                        ),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
+                        SemanticsFlag.isObscured,
+                        SemanticsFlag.isFocused,
                       ],
+                      value: expectedValue,
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreTransform: true,
-            ignoreRect: true,
-            ignoreId: true));
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1623,77 +1649,82 @@ void main() {
       await tester.pump();
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.copy,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.copy,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.paste,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.paste,
+          ],
+        ),
+      );
 
       when(controls.canPaste(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.cut,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.cut,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(true);
       when(controls.canCut(any)).thenReturn(true);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.cut,
-              SemanticsAction.copy,
-              SemanticsAction.paste,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
+            SemanticsAction.paste,
+          ],
+        ),
+      );
 
       semantics.dispose();
     });
@@ -1712,44 +1743,46 @@ void main() {
       const int expectedNodeId = 4;
 
       expect(
-          semantics,
-          hasSemantics(
-              TestSemantics.root(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 1,
                 children: <TestSemantics>[
-                  TestSemantics.rootChild(
-                    id: 1,
+                  TestSemantics(
+                    id: 2,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
-                      TestSemantics(
-                        id: 2,
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics.rootChild(
-                            id: expectedNodeId,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isTextField,
-                              SemanticsFlag.isFocused
-                            ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.moveCursorBackwardByCharacter,
-                              SemanticsAction.moveCursorBackwardByWord,
-                              SemanticsAction.setSelection,
-                              SemanticsAction.copy,
-                              SemanticsAction.cut,
-                              SemanticsAction.paste
-                            ],
-                            value: 'test',
-                            textSelection: TextSelection.collapsed(
-                                offset: controller.text.length),
-                            textDirection: TextDirection.ltr,
-                          ),
+                      TestSemantics.rootChild(
+                        id: expectedNodeId,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.isFocused
                         ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.moveCursorBackwardByCharacter,
+                          SemanticsAction.moveCursorBackwardByWord,
+                          SemanticsAction.setSelection,
+                          SemanticsAction.copy,
+                          SemanticsAction.cut,
+                          SemanticsAction.paste
+                        ],
+                        value: 'test',
+                        textSelection: TextSelection.collapsed(
+                            offset: controller.text.length),
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
                 ],
               ),
-              ignoreRect: true,
-              ignoreTransform: true));
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
       verify(controls.handleCopy(any)).called(1);
