@@ -468,6 +468,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_test__watch_test:
+    description: >
+      Ensures that --watch flag to flutter test command works as intended.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   technical_debt__cost:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
