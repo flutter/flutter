@@ -676,7 +676,7 @@ class RenderEditable extends RenderBox {
     assert(value > 0);
     if (minLines == value)
       return;
-    _maxLines = value;
+    _minLines = value;
     markNeedsTextLayout();
   }
 
@@ -1118,22 +1118,30 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
+    /*
+    if (maxLines != null)
+      return preferredLineHeight * maxLines;
+      */
     // If needed, set the height based on minLines and/or maxLines
-    if (expands == false) {
+    if (expands) {
       if (maxLines != null) {
-        return preferredLineHeight * maxLines;
+        if (_textPainter.height > preferredLineHeight * maxLines) {
+          return preferredLineHeight * maxLines;
+        }
       }
       if (minLines != null) {
-        return preferredLineHeight * maxLines;
+        if(_textPainter.height < preferredLineHeight * minLines) {
+          return preferredLineHeight * minLines;
+        }
       }
     } else {
-      if (maxLines != null && _textPainter.height > preferredLineHeight * maxLines) {
+      if (maxLines != null) {
+        // TODO(justinmc): What if needs to be smaller than this due to parent?
         return preferredLineHeight * maxLines;
       }
-      if (_textPainter.height < preferredLineHeight * minLines) {
+      if (minLines > 1 && _textPainter.height < preferredLineHeight * minLines) {
         return preferredLineHeight * minLines;
       }
-      // TODO(justinmc): also size based on Expanded if Expanded is parent?
     }
 
     // Set the height based on the content
