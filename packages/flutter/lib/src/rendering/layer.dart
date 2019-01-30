@@ -48,6 +48,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
+  @visibleForTesting
   void markNeedsAddToScene() {
     _needsAddToScene = true;
   }
@@ -90,6 +91,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// A subtree needs [addToScene] if any of its layer needs [addToScene].
   /// The [ContainerLayer] will override this to respect its children.
   @protected
+  @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
     _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
