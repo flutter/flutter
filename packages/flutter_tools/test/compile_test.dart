@@ -22,36 +22,58 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 
 void main() {
   group(PackageUriMapper, () {
-    const String packagesContents = r'''
+    group('single-root', () {
+      const String packagesContents = r'''
 xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
 yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
 example:file:///example/lib/
 ''';
-    final MockFileSystem mockFileSystem = MockFileSystem();
-    final MockFile mockFile = MockFile();
-    when(mockFileSystem.path).thenReturn(fs.path);
-    when(mockFileSystem.file(any)).thenReturn(mockFile);
-    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MockFile mockFile = MockFile();
+      when(mockFileSystem.path).thenReturn(fs.path);
+      when(mockFileSystem.file(any)).thenReturn(mockFile);
+      when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+      testUsingContext('Can map main.dart to correct package', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
 
-    testUsingContext('Can map main.dart to correct package', () async {
-      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
-      expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => mockFileSystem,
+      testUsingContext('Maps file from other package to null', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/xml/lib/xml.dart'),  null);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
+
+      testUsingContext('Maps non-main file from same package', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/example/lib/src/foo.dart').toString(), 'package:example/src/foo.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
     });
 
-    testUsingContext('Maps file from other package to null', () async {
-      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
-      expect(packageUriMapper.map('/xml/lib/xml.dart'),  null);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => mockFileSystem,
-    });
+    group('multi-root', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MockFile mockFile = MockFile();
+      when(mockFileSystem.path).thenReturn(fs.path);
+      when(mockFileSystem.file(any)).thenReturn(mockFile);
 
-    testUsingContext('Maps non-main file from same package', () async {
-      final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages');
-      expect(packageUriMapper.map('/example/lib/src/foo.dart').toString(), 'package:example/src/foo.dart');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => mockFileSystem,
+      const String multiRootPackagesContents = r'''
+xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
+yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
+example:org-dartlang-app:///lib/
+''';
+      when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(multiRootPackagesContents));
+
+      testUsingContext('Maps main file from same package on multiroot scheme', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example', '/gen']);
+        expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
     });
   });
 
