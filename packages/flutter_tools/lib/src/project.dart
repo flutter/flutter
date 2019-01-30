@@ -89,7 +89,7 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => IosProject._(this);
+  IosProject get ios => IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
   AndroidProject get android => AndroidProject._(this);
@@ -151,7 +151,7 @@ class FlutterProject {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject {
-  IosProject._(this.parent);
+  IosProject.fromFlutter(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
