@@ -1566,8 +1566,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///       ),
 ///     ),
 ///   ),
-/// );
-///
+/// )
 /// ```
 /// {@end-tool}
 ///
