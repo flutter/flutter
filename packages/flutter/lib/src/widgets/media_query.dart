@@ -1,7 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -59,7 +58,7 @@ class MediaQueryData {
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
     this.textScaleFactor = 1.0,
-    this.platformBrightness = ui.PlatformBrightness.no_preference,
+    this.platformBrightness = ui.Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
@@ -118,8 +117,8 @@ class MediaQueryData {
   /// render in a "dark mode". That change is reflected in this property.
   /// 
   /// Not all platforms necessarily support a concept of brightness mode. Those
-  /// platforms will report [PlatformBrightness.no_preference] in this property.
-  final ui.PlatformBrightness platformBrightness;
+  /// platforms will report [Brightness.light] in this property.
+  final ui.Brightness platformBrightness;
 
   /// The parts of the display that are completely obscured by system UI,
   /// typically by the device's keyboard.
@@ -541,9 +540,12 @@ class MediaQuery extends InheritedWidget {
   }
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
-  /// [PlatformBrightness.no_preference], if no such ancestor exists.
-  static ui.PlatformBrightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? ui.PlatformBrightness.no_preference;
+  /// [Brightness.light], if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// any property of the ancestor [MediaQuery] changes.
+  static ui.Brightness platformBrightnessOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? ui.Brightness.light;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery

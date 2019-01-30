@@ -431,8 +431,8 @@ class _MaterialAppState extends State<MaterialApp> {
       builder: (BuildContext context, Widget child) {
         // Use a light theme, dark theme, or fallback theme.
         ThemeData theme;
-        final ui.PlatformBrightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-        if (platformBrightness == ui.PlatformBrightness.dark && widget.darkTheme != null) {
+        final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+        if (platformBrightness == ui.Brightness.dark && widget.darkTheme != null) {
           theme = widget.darkTheme;
         } else if (widget.theme != null) {
           theme = widget.theme;

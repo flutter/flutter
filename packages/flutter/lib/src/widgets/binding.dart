@@ -220,7 +220,7 @@ abstract class WidgetsBindingObserver {
   /// render in a "dark mode". That change is reflected in this property.
   ///
   /// Not all platforms necessarily support a concept of brightness mode. Those
-  /// platforms will report [PlatformBrightness.no_preference] in this property.
+  /// platforms will report [Brightness.light] in this property.
   /// 
   /// See also:
   /// 

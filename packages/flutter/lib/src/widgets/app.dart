@@ -1024,11 +1024,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   // RENDERING
   @override
   void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of ui.window has changed. We reference
-      // ui.window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
+    // No call to setState() is required here because an inherited widget
+    // dependency on MediaQuery already exists, and MediaQuery will rebuild
+    // whenever the platform brightness changes.
   }
 
   // BUILDER
