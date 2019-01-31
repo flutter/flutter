@@ -227,7 +227,7 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     bool tristate,
     Color activeColor,
-    Color this.checkColor,
+    this.checkColor,
     Color inactiveColor,
     BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
