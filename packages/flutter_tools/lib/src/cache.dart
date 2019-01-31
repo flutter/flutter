@@ -390,7 +390,7 @@ class MaterialFonts extends CachedArtifact {
   @override
   Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
-    if (!fs.directory(location).existsSync() || clobber) {
+    if (fs.directory(location).listSync().isEmpty || clobber) {
       await _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
     }
   }
@@ -847,7 +847,7 @@ class GradleWrapper extends CachedArtifact {
   @override
   Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
-    if (!fs.directory(location).existsSync() || clobber) {
+    if (fs.directory(location).listSync().isEmpty || clobber) {
       await _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
         // Delete property file, allowing templates to provide it.
         fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
