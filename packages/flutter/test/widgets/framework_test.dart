@@ -511,7 +511,7 @@ void main() {
     ));
     final MultiChildRenderObjectElement element = key0.currentContext;
     expect(
-      element.children.map((Element element) => element.widget.key), // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+      element.children.map((Element element) => element.widget.key),
       <Key>[null, key1, null, key2, null],
     );
   });

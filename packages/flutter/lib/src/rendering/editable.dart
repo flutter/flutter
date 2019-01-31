@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//ignore: Remove this once Google catches up with dev.4 Dart.
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble;
 
@@ -69,7 +67,7 @@ class TextSelectionPoint {
   ///
   /// The [point] argument must not be null.
   const TextSelectionPoint(this.point, this.direction)
-      : assert(point != null);
+    : assert(point != null);
 
   /// Coordinates of the lower left or lower right corner of the selection,
   /// relative to the top left of the [RenderEditable] object.

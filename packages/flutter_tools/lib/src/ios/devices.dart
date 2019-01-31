@@ -111,7 +111,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, { this.name, String sdkVersion }) : _sdkVersion = sdkVersion, super(id) {
+  IOSDevice(String id, { this.name, String sdkVersion })
+      : _sdkVersion = sdkVersion,
+        super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }
@@ -277,8 +279,10 @@ class IOSDevice extends Device {
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled)
+    if (debuggingOptions.debuggingEnabled) {
       launchArguments.add('--enable-checked-mode');
+      launchArguments.add('--verify-entry-points');
+    }
 
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');

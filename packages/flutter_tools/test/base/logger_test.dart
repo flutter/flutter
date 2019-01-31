@@ -137,11 +137,11 @@ void main() {
             timeout: const Duration(milliseconds: 10),
           )..start();
           doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
-          expect(ansiSpinner.seemsSlow, isFalse); // ignore: invalid_use_of_protected_member
+          expect(ansiSpinner.seemsSlow, isFalse);
           expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
-          expect(ansiSpinner.seemsSlow, isTrue); // ignore: invalid_use_of_protected_member
+          expect(ansiSpinner.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
           ansiSpinner.stop();
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
@@ -231,12 +231,12 @@ void main() {
         await FakeAsync().run((FakeAsync time) async {
           ansiStatus.start();
           doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
-          expect(ansiStatus.seemsSlow, isFalse); // ignore: invalid_use_of_protected_member
+          expect(ansiStatus.seemsSlow, isFalse);
           expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
-          expect(ansiStatus.seemsSlow, isTrue); // ignore: invalid_use_of_protected_member
+          expect(ansiStatus.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
           ansiStatus.stop();
           expect(outputStdout().join('\n'), contains('(!)'));
