@@ -91,6 +91,12 @@ typedef struct {
   BoolCallback clear_current;
   BoolCallback present;
   UIntCallback fbo_callback;
+  // This is an optional callback. Flutter will ask the emebdder to create a GL
+  // context current on a background thread. If the embedder is able to do so,
+  // Flutter will assume that this context is in the same sharegroup as the main
+  // rendering context and use this context for asynchronous texture uploads.
+  // Though optional, it is recommended that all embedders set this callback as
+  // it will lead to better performance in texture handling.
   BoolCallback make_resource_current;
   // By default, the renderer config assumes that the FBO does not change for
   // the duration of the engine run. If this argument is true, the
