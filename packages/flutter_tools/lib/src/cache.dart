@@ -188,7 +188,11 @@ class Cache {
     return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate({@required BuildMode buildMode, @required TargetPlatform targetPlatform}) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform));
+  bool isUpToDate({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+  }) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown));
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
@@ -211,13 +215,13 @@ class Cache {
     return cachedFile.path;
   }
 
-  Future<void> updateAll({@required BuildMode buildMode, @required TargetPlatform targetPlatform}) async {
+  Future<void> updateAll({@required BuildMode buildMode, @required TargetPlatform targetPlatform, @required bool skipUnknown}) async {
     if (!_lockEnabled)
       return;
     try {
       for (CachedArtifact artifact in _artifacts) {
-        if (!artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform))
-          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform);
+        if (!artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown))
+          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
       }
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
@@ -249,19 +253,37 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
-  bool isUpToDate({@required BuildMode buildMode, @required TargetPlatform targetPlatform}) {
-    if (!location.existsSync())
+  bool isUpToDate({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+  }) {
+    if (!location.existsSync()) {
       return false;
-    if (version != cache.getStampFor(name))
+    } if (version != cache.getStampFor(name)) {
       return false;
-    return isUpToDateInner(buildMode: buildMode, targetPlatform: targetPlatform);
+    }
+    return isUpToDateInner(
+      buildMode: buildMode,
+      targetPlatform: targetPlatform,
+      skipUnknown: skipUnknown,
+    );
   }
 
-  Future<void> update({@required BuildMode buildMode, @required TargetPlatform targetPlatform}) async {
-    if (location.existsSync())
+  Future<void> update({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+  }) async {
+    if (location.existsSync()) {
       location.deleteSync(recursive: true);
+    }
     location.createSync(recursive: true);
-    await updateInner(buildMode: buildMode, targetPlatform: targetPlatform);
+    await updateInner(
+      buildMode: buildMode,
+      targetPlatform: targetPlatform,
+      skipUnknown: skipUnknown,
+    );
     cache.setStampFor(name, version);
     _removeDownloadedFiles();
   }
@@ -281,10 +303,10 @@ abstract class CachedArtifact {
   }
 
   /// Hook method for extra checks for being up-to-date.
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform}) => true;
+  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) => true;
 
   /// Template method to perform artifact update.
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform});
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown});
 
   String get _storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
@@ -352,7 +374,7 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
@@ -368,6 +390,7 @@ class FlutterEngine extends CachedArtifact {
   List<List<String>> _getBinaryDirs({
     @required BuildMode buildMode,
     @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
   }) {
     final List<List<String>> binaryDirs = <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
@@ -382,11 +405,13 @@ class FlutterEngine extends CachedArtifact {
     } else if (platform.isWindows) {
       hostPlatform = TargetPlatform.windows_x64;
     }
+    printTrace('skipUnknown: $skipUnknown');
     for (EngineBinary engineBinary in reduceEngineBinaries(
       _binaries,
       buildMode: buildMode,
       targetPlatform: targetPlatform,
       hostPlatform: hostPlatform,
+      skipUnknown: skipUnknown,
     )) {
       binaryDirs.add(engineBinary.toTuple());
     }
@@ -396,7 +421,8 @@ class FlutterEngine extends CachedArtifact {
   Iterable<EngineBinary> reduceEngineBinaries(List<EngineBinary> binaries, {
     BuildMode buildMode,
     TargetPlatform targetPlatform,
-    TargetPlatform hostPlatform
+    TargetPlatform hostPlatform,
+    bool skipUnknown,
   }) sync* {
     for (EngineBinary engineBinary in binaries) {
       if (hostPlatform != null && engineBinary.hostPlatform != null && engineBinary.hostPlatform != hostPlatform) {
@@ -405,13 +431,21 @@ class FlutterEngine extends CachedArtifact {
       // Certain binaries have no restrictions and should always be included.
       if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
         yield engineBinary;
-      }
-      if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
+      } else if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
+        yield engineBinary;
+      } else if (!skipUnknown && buildMode == null && engineBinary.targetPlatform == targetPlatform) {
+        yield engineBinary;
+      } else if (!skipUnknown && targetPlatform == null && engineBinary.buildMode == buildMode) {
+        yield engineBinary;
+      } else if (!skipUnknown && targetPlatform == null && hostPlatform == null) {
         yield engineBinary;
       }
     }
   }
 
+  /// A set of all possible engine artifacts to download.
+  /// A binary without a buildMode or targetPlatform is downloaded
+  /// if the hostPlatform matches.
   List<EngineBinary> get _binaries => const <EngineBinary>[
     EngineBinary(
       name: 'linux-x64',
@@ -653,7 +687,7 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform}) {
+  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
@@ -661,7 +695,7 @@ class FlutterEngine extends CachedArtifact {
         return false;
     }
 
-    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform)) {
+    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
       final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync())
         return false;
@@ -676,7 +710,7 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform}) async {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) async {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -688,11 +722,11 @@ class FlutterEngine extends CachedArtifact {
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
-    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform)) {
+    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
+      await _downloadZipArchive('Downloading $cacheDir/$urlPath tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -729,7 +763,7 @@ class FlutterEngine extends CachedArtifact {
         }
       }
 
-      for (List<String> toolsDir in _getBinaryDirs(buildMode: null, targetPlatform: null)) {
+      for (List<String> toolsDir in _getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false)) {
         final String cacheDir = toolsDir[0];
         final String urlPath = toolsDir[1];
         exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
@@ -768,7 +802,7 @@ class GradleWrapper extends CachedArtifact {
   String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
       // Delete property file, allowing templates to provide it.
@@ -779,7 +813,7 @@ class GradleWrapper extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform}) {
+  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
     final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
     if (!fs.directory(wrapperDir).existsSync())
       return false;

@@ -546,7 +546,18 @@ abstract class FlutterCommand extends Command<void> {
     // package is available in the flutter cache for pub to find.
     final BuildInfo buildInfo = getBuildInfo();
     if (shouldUpdateCache) {
-      await cache.updateAll(buildMode: buildInfo.mode, targetPlatform: buildInfo.targetPlatform);
+      TargetPlatform targetPlatform = buildInfo.targetPlatform;
+      if (targetPlatform == null) {
+        final List<Device> devices = await findAllTargetDevices();
+        if (devices != null && devices.length == 1) {
+          targetPlatform = await devices.first.targetPlatform;
+        }
+      }
+      await cache.updateAll(
+        buildMode: buildInfo.mode,
+        targetPlatform: targetPlatform,
+        skipUnknown: false,
+      );
     }
 
     if (shouldRunPub) {

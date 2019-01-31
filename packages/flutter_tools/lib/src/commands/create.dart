@@ -211,7 +211,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
-    await Cache.instance.updateAll(buildMode: null, targetPlatform: null);
+    await Cache.instance.updateAll(buildMode: null, targetPlatform: null, skipUnknown: true);
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
