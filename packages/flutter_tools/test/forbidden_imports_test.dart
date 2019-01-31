@@ -47,6 +47,28 @@ void main() {
       }
     }
   });
+
+  test('no unauthorized imports of dart:convert', () {
+    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'convert.dart');
+    bool _isNotWhitelisted(FileSystemEntity entity) => entity.path != whitelistedPath;
+
+    for (String dirName in <String>['lib']) {
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotWhitelisted)
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*dart:convert')) &&
+              !line.contains('ignore: dart_convert_import')) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
+          }
+        }
+      }
+    }
+  });
 }
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');

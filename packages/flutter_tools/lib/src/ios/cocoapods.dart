@@ -193,6 +193,12 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfile.path);
     }
+    addPodsDependencyToFlutterXcconfig(iosProject);
+  }
+
+  /// Ensures all `Flutter/Xxx.xcconfig` files for the given iOS sub-project of
+  /// a parent Flutter project include pods configuration.
+  void addPodsDependencyToFlutterXcconfig(IosProject iosProject) {
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }
@@ -237,7 +243,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(IosProject iosProject, String engineDirectory) async {
-    final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Running pod install...', timeout: kSlowOperation);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: iosProject.hostAppRoot.path,

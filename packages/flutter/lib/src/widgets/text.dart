@@ -248,9 +248,9 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }): assert(textSpan != null),
-      data = null,
-      super(key: key);
+  }) : assert(textSpan != null),
+       data = null,
+       super(key: key);
 
   /// The text to display.
   ///

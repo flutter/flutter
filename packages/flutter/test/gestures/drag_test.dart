@@ -58,6 +58,7 @@ void main() {
     tester.route(pointer.move(const Offset(20.0, 30.0))); // moved 10 horizontally and 20 vertically which is 22 total
     expect(didStartPan, isTrue); // 22 > 18
     didStartPan = false;
+    // TODO(jslavitz): revert this testing change.
     expect(updatedScrollDelta, const Offset(10.0, 20.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
@@ -82,7 +83,7 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     bool didStartDrag = false;
     drag.onStart = (_) {
@@ -135,7 +136,7 @@ void main() {
   });
 
   testGesture('Should report original timestamps', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     Duration startTimestamp;
     drag.onStart = (DragStartDetails details) {
@@ -165,9 +166,48 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('Drag with multiple pointers', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer();
+  // TODO(jslavitz): Revert these tests.
+
+  testGesture('Should report initial down point to onStart with a down configuration', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+    Offset updateOffset;
+    Offset updateDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updateOffset = details.globalPosition;
+      updateDelta = details.delta;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+
+    // The drag is horizontal so we're going to ignore the vertical delta position
+    // when calculating the new global position.
+    expect(updateOffset, const Offset(30.0, 10.0));
+    expect(updateDelta, const Offset(20.0, 0.0));
+  });
+
+  testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };
@@ -235,7 +275,7 @@ void main() {
   });
 
   testGesture('Clamp max velocity', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     Velocity velocity;
     double primaryVelocity;
@@ -269,7 +309,7 @@ void main() {
   });
 
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
@@ -303,7 +343,7 @@ void main() {
   /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
   /// events still have a velocity
   testGesture('Quick flicks have velocity', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
@@ -333,16 +373,18 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
     bool didStartDrag = false;
     drag.onStart = (_) {
       didStartDrag = true;
     };
 
-    double updatedDelta;
+    Offset updateDelta;
+    double updatePrimaryDelta;
     drag.onUpdate = (DragUpdateDetails details) {
-      updatedDelta = details.primaryDelta;
+      updateDelta = details.delta;
+      updatePrimaryDelta = details.primaryDelta;
     };
 
     bool didEndDrag = false;
@@ -354,31 +396,39 @@ void main() {
     final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
+
     expect(didStartDrag, isFalse);
-    expect(updatedDelta, isNull);
+    expect(updateDelta, isNull);
+    expect(updatePrimaryDelta, isNull);
     expect(didEndDrag, isFalse);
 
     tester.route(down);
     expect(didStartDrag, isTrue);
-    expect(updatedDelta, isNull);
+    expect(updateDelta, isNull);
+    expect(updatePrimaryDelta, isNull);
     expect(didEndDrag, isFalse);
-
-    tester.route(pointer.move(const Offset(20.0, 25.0)));
-    expect(didStartDrag, isTrue);
     didStartDrag = false;
-    expect(updatedDelta, 10.0);
-    updatedDelta = null;
-    expect(didEndDrag, isFalse);
 
     tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartDrag, isFalse);
-    expect(updatedDelta, 0.0);
-    updatedDelta = null;
+    expect(updateDelta, const Offset(10.0, 0.0));
+    expect(updatePrimaryDelta, 10.0);
     expect(didEndDrag, isFalse);
+    updateDelta = null;
+    updatePrimaryDelta = null;
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updateDelta, const Offset(0.0, 0.0));
+    expect(updatePrimaryDelta, 0.0);
+    expect(didEndDrag, isFalse);
+    updateDelta = null;
+    updatePrimaryDelta = null;
 
     tester.route(pointer.up());
     expect(didStartDrag, isFalse);
-    expect(updatedDelta, isNull);
+    expect(updateDelta, isNull);
+    expect(updatePrimaryDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
@@ -386,20 +436,35 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
 
-    Offset newGlobalPosition;
+    Offset latestGlobalPosition;
+    drag.onStart = (DragStartDetails details) {
+      latestGlobalPosition = details.globalPosition;
+    };
+    Offset latestDelta;
     drag.onUpdate = (DragUpdateDetails details) {
-      newGlobalPosition = details.globalPosition;
+      latestGlobalPosition = details.globalPosition;
+      latestDelta = details.delta;
     };
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
-    tester.route(pointer.move(const Offset(20.0, 25.0)));
     tester.closeArena(5);
+
     tester.route(down);
-    expect(newGlobalPosition, const Offset(20.0, 10.0));
+    expect(latestGlobalPosition, const Offset(10.0, 10.0));
+    expect(latestDelta, isNull);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(latestGlobalPosition, const Offset(20.0, 25.0));
+    expect(latestDelta, const Offset(10.0, 0.0));
+
+    tester.route(pointer.move(const Offset(0.0, 45.0)));
+    expect(latestGlobalPosition, const Offset(0.0, 45.0));
+    expect(latestDelta, const Offset(-20.0, 0.0));
+
     tester.route(pointer.up());
     drag.dispose();
   });

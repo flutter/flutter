@@ -225,6 +225,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// rebuild of the tree, even if [widget] is the same as the previous call.
   /// [pump] will only rebuild the widgets that have changed.
   ///
+  /// This method should not be used as the first parameter to an [expect] or
+  /// [expectLater] call to test that a widget throws an exception. Instead, use
+  /// [TestWidgetsFlutterBinding.takeException].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
+  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(Widget widget, [
@@ -255,6 +268,34 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() => binding.pump(duration, phase));
+  }
+
+  /// Triggers a frame after `duration` amount of time, return as soon as the frame is drawn.
+  ///
+  /// This enables driving an artificially high CPU load by rendering frames in
+  /// a tight loop. It must be used with the frame policy set to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmark].
+  ///
+  /// Similarly to [pump], this doesn't actually wait for `duration`, just
+  /// advances the clock.
+  Future<void> pumpBenchmark(Duration duration) async {
+    assert(() {
+        final TestWidgetsFlutterBinding widgetsBinding = binding;
+        return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+               widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+    }());
+
+    dynamic caughtException;
+    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+
+    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await idle();
+    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await idle();
+
+    if (caughtException != null) {
+      throw caughtException;
+    }
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -334,7 +375,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.

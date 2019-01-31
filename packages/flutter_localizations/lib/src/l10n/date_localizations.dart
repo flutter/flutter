@@ -6,8 +6,8 @@
 // To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
-// ignore_for_file: public_member_api_docs
-
+/// The subset of date symbols supported by the intl package which are also
+/// supported by flutter_localizations.
 const Map<String, dynamic> dateSymbols = <String, dynamic>{
   'ar': <String, dynamic>{
     'NAME': r'''ar''',
@@ -4714,6 +4714,179 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
     'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'à' {0}""",
       r"""{1} 'à' {0}""",
+      r'''{1} {0}''',
+      r'''{1} {0}'''
+    ],
+  },
+  'gl': <String, dynamic>{
+    'NAME': r'''gl''',
+    'ERAS': <dynamic>[r'''a. C.''', r'''d. C.'''],
+    'ERANAMES': <dynamic>[r'''antes de Cristo''', r'''despois de Cristo'''],
+    'NARROWMONTHS': <dynamic>[
+      r'''X''',
+      r'''F''',
+      r'''M''',
+      r'''A''',
+      r'''M''',
+      r'''X''',
+      r'''X''',
+      r'''A''',
+      r'''S''',
+      r'''O''',
+      r'''N''',
+      r'''D'''
+    ],
+    'STANDALONENARROWMONTHS': <dynamic>[
+      r'''X''',
+      r'''F''',
+      r'''M''',
+      r'''A''',
+      r'''M''',
+      r'''X''',
+      r'''X''',
+      r'''A''',
+      r'''S''',
+      r'''O''',
+      r'''N''',
+      r'''D'''
+    ],
+    'MONTHS': <dynamic>[
+      r'''xaneiro''',
+      r'''febreiro''',
+      r'''marzo''',
+      r'''abril''',
+      r'''maio''',
+      r'''xuño''',
+      r'''xullo''',
+      r'''agosto''',
+      r'''setembro''',
+      r'''outubro''',
+      r'''novembro''',
+      r'''decembro'''
+    ],
+    'STANDALONEMONTHS': <dynamic>[
+      r'''xaneiro''',
+      r'''febreiro''',
+      r'''marzo''',
+      r'''abril''',
+      r'''maio''',
+      r'''xuño''',
+      r'''xullo''',
+      r'''agosto''',
+      r'''setembro''',
+      r'''outubro''',
+      r'''novembro''',
+      r'''decembro'''
+    ],
+    'SHORTMONTHS': <dynamic>[
+      r'''xan.''',
+      r'''feb.''',
+      r'''mar.''',
+      r'''abr.''',
+      r'''mai.''',
+      r'''xun.''',
+      r'''xll.''',
+      r'''ago.''',
+      r'''set.''',
+      r'''out.''',
+      r'''nov.''',
+      r'''dec.'''
+    ],
+    'STANDALONESHORTMONTHS': <dynamic>[
+      r'''xan.''',
+      r'''feb.''',
+      r'''mar.''',
+      r'''abr.''',
+      r'''mai.''',
+      r'''xun.''',
+      r'''xll.''',
+      r'''ago.''',
+      r'''set.''',
+      r'''out.''',
+      r'''nov.''',
+      r'''dec.'''
+    ],
+    'WEEKDAYS': <dynamic>[
+      r'''domingo''',
+      r'''luns''',
+      r'''martes''',
+      r'''mércores''',
+      r'''xoves''',
+      r'''venres''',
+      r'''sábado'''
+    ],
+    'STANDALONEWEEKDAYS': <dynamic>[
+      r'''domingo''',
+      r'''luns''',
+      r'''martes''',
+      r'''mércores''',
+      r'''xoves''',
+      r'''venres''',
+      r'''sábado'''
+    ],
+    'SHORTWEEKDAYS': <dynamic>[
+      r'''dom.''',
+      r'''luns''',
+      r'''mar.''',
+      r'''mér.''',
+      r'''xov.''',
+      r'''ven.''',
+      r'''sáb.'''
+    ],
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
+      r'''dom.''',
+      r'''luns''',
+      r'''mar.''',
+      r'''mér.''',
+      r'''xov.''',
+      r'''ven.''',
+      r'''sáb.'''
+    ],
+    'NARROWWEEKDAYS': <dynamic>[
+      r'''D''',
+      r'''L''',
+      r'''M''',
+      r'''M''',
+      r'''X''',
+      r'''V''',
+      r'''S'''
+    ],
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
+      r'''D''',
+      r'''L''',
+      r'''M''',
+      r'''X''',
+      r'''J''',
+      r'''V''',
+      r'''S'''
+    ],
+    'SHORTQUARTERS': <dynamic>[r'''T1''', r'''T2''', r'''T3''', r'''T4'''],
+    'QUARTERS': <dynamic>[
+      r'''1.er trimestre''',
+      r'''2.º trimestre''',
+      r'''3.er trimestre''',
+      r'''4.º trimestre'''
+    ],
+    'AMPMS': <dynamic>[r'''a. m.''', r'''p. m.'''],
+    'DATEFORMATS': <dynamic>[
+      r"""EEEE, d 'de' MMMM 'do' y""",
+      r"""d 'de' MMMM 'do' y""",
+      r'''d MMM y''',
+      r'''d/M/yy'''
+    ],
+    'TIMEFORMATS': <dynamic>[
+      r'''H:mm:ss (zzzz)''',
+      r'''H:mm:ss z''',
+      r'''H:mm:ss''',
+      r'''H:mm'''
+    ],
+    'AVAILABLEFORMATS': null,
+    'FIRSTDAYOFWEEK': 0,
+    'WEEKENDRANGE': <dynamic>[5, 6],
+    'FIRSTWEEKCUTOFFDAY': 3,
+    'DATETIMEFORMATS': <dynamic>[
+      r'''{1}, {0}''',
+      r'''{1}, {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
@@ -11356,6 +11529,9 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
     ],
   },
 };
+
+/// The subset of date patterns supported by the intl package which are also
+/// supported by flutter_localizations.
 const Map<String, Map<String, String>> datePatterns =
     <String, Map<String, String>>{
   'ar': <String, String>{
@@ -12594,6 +12770,53 @@ const Map<String, Map<String, String>> datePatterns =
     'jz': r"""HH 'h' z""",
     'm': r'''m''',
     'ms': r"""mm 'min' ss 's'""",
+    's': r'''s''',
+    'v': r'''v''',
+    'z': r'''z''',
+    'zzzz': r'''zzzz''',
+    'ZZZZ': r'''ZZZZ''',
+  },
+  
+  'gl': <String, String>{
+    'd': r'''d''',
+    'E': r'''ccc''',
+    'EEEE': r'''cccc''',
+    'LLL': r'''LLL''',
+    'LLLL': r'''LLLL''',
+    'M': r'''L''',
+    'Md': r'''d/M''',
+    'MEd': r'''EEE, d/M''',
+    'MMM': r'''LLL''',
+    'MMMd': r'''d MMM''',
+    'MMMEd': r'''EEE, d MMM''',
+    'MMMM': r'''LLLL''',
+    'MMMMd': r"""d 'de' MMMM""",
+    'MMMMEEEEd': r"""EEEE, d 'do' MMMM""",
+    'QQQ': r'''QQQ''',
+    'QQQQ': r'''QQQQ''',
+    'y': r'''y''',
+    'yM': r'''M/y''',
+    'yMd': r'''d/M/y''',
+    'yMEd': r'''EEE, d/M/y''',
+    'yMMM': r'''MMM y''',
+    'yMMMd': r'''d MMM y''',
+    'yMMMEd': r'''EEE, d MMM y''',
+    'yMMMM': r"""MMMM 'do' y""",
+    'yMMMMd': r"""d 'de' MMMM 'do' y""",
+    'yMMMMEEEEd': r"""EEEE, d 'de' MMMM 'do' y""",
+    'yQQQ': r'''QQQ y''',
+    'yQQQQ': r"""QQQQ 'do' y""",
+    'H': r'''H''',
+    'Hm': r'''H:mm''',
+    'Hms': r'''H:mm:ss''',
+    'j': r'''H''',
+    'jm': r'''H:mm''',
+    'jms': r'''H:mm:ss''',
+    'jmv': r'''H:mm v''',
+    'jmz': r'''H:mm z''',
+    'jz': r'''H z''',
+    'm': r'''m''',
+    'ms': r'''mm:ss''',
     's': r'''s''',
     'v': r'''v''',
     'z': r'''z''',

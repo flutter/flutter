@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -60,8 +61,10 @@ abstract class ScrollView extends StatelessWidget {
     this.shrinkWrap = false,
     this.cacheExtent,
     this.semanticChildCount,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(reverse != null),
        assert(shrinkWrap != null),
+       assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
@@ -187,6 +190,9 @@ abstract class ScrollView extends StatelessWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -246,6 +252,7 @@ abstract class ScrollView extends StatelessWidget {
       ? PrimaryScrollController.of(context)
       : controller;
     final Scrollable scrollable = Scrollable(
+      dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
@@ -397,6 +404,7 @@ class CustomScrollView extends ScrollView {
     double cacheExtent,
     this.slivers = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -407,6 +415,7 @@ class CustomScrollView extends ScrollView {
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// The slivers to place inside the viewport.
@@ -439,6 +448,7 @@ abstract class BoxScrollView extends ScrollView {
     this.padding,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -449,6 +459,7 @@ abstract class BoxScrollView extends ScrollView {
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
+    dragStartBehavior: dragStartBehavior,
   );
 
   /// The amount of space by which to inset the children.
@@ -739,23 +750,26 @@ class ListView extends BoxScrollView {
     double cacheExtent,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? children.length,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
   ///
@@ -800,24 +814,27 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? itemCount,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? itemCount,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated
   /// by list item "separators".
@@ -910,18 +927,19 @@ class ListView extends BoxScrollView {
          semanticIndexCallback: (Widget _, int index) {
            return index.isEven ? index ~/ 2 : null;
          }
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: _computeSemanticChildCount(itemCount),
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: _computeSemanticChildCount(itemCount),
+       );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
   ///
@@ -1250,6 +1268,7 @@ class GridView extends BoxScrollView {
     @required this.childrenDelegate,
     double cacheExtent,
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1263,6 +1282,7 @@ class GridView extends BoxScrollView {
          padding: padding,
          cacheExtent: cacheExtent,
          semanticChildCount: semanticChildCount,
+         dragStartBehavior: dragStartBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1298,6 +1318,7 @@ class GridView extends BoxScrollView {
     double cacheExtent,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -1309,18 +1330,20 @@ class GridView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    cacheExtent: cacheExtent,
-    semanticChildCount: semanticChildCount ?? children.length,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         cacheExtent: cacheExtent,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
   /// maximum cross-axis extent.
@@ -1354,6 +1377,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
@@ -1365,17 +1389,19 @@ class GridView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-       ), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-    semanticChildCount: semanticChildCount ?? children.length,
-  );
+       ),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+         semanticChildCount: semanticChildCount ?? children.length,
+         dragStartBehavior: dragStartBehavior,
+       );
 
   /// A delegate that controls the layout of the children within the [GridView].
   ///

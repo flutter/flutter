@@ -55,7 +55,7 @@ class _FakeGenSnapshot implements GenSnapshot {
     String packagesPath,
     String depfilePath,
     IOSArch iosArch,
-    Iterable<String> additionalArgs,
+    Iterable<String> additionalArgs = const <String>[],
   }) async {
     _callCount += 1;
     _snapshotType = snapshotType;

@@ -238,7 +238,7 @@ class SystemChrome {
   /// The empty list causes the application to defer to the operating system
   /// default.
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
     );
@@ -250,7 +250,7 @@ class SystemChrome {
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
   static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
       <String, dynamic>{
         'label': description.label,
@@ -282,7 +282,7 @@ class SystemChrome {
   /// or calling this again. Otherwise, the original UI overlay settings will be
   /// automatically restored only when the application loses and regains focus.
   static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setEnabledSystemUIOverlays',
       _stringify(overlays),
     );
@@ -298,7 +298,7 @@ class SystemChrome {
   /// On Android, the system UI cannot be changed until 1 second after the previous
   /// change. This is to prevent malware from permanently hiding navigation buttons.
   static Future<void> restoreSystemUIOverlays() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
       null,
     );
@@ -333,6 +333,60 @@ class SystemChrome {
   ///   return /* ... */;
   /// }
   /// ```
+  ///
+  /// For more complex control of the system overlay styles, consider using
+  /// an [AnnotatedRegion] widget instead of calling [setSystemUiOverlayStyle]
+  /// directly. This widget places a value directly into the layer tree where
+  /// it can be hit-tested by the framework. On every frame, the framework will
+  /// hit-test and select the annotated region it finds under the status and
+  /// navigation bar and synthesize them into a single style. This can be used
+  /// to configure the system styles when an app bar is not used.
+  ///
+  /// {@tool snippet --template=stateful_widget}
+  /// The following example creates a widget that changes the status bar color
+  /// to a random value on Android.
+  ///
+  /// ```dart imports
+  ///    import 'package:flutter/services.dart';
+  ///    import 'dart:math' as math;
+  /// ```
+  ///
+  /// ```dart
+  ///    final _random = math.Random();
+  ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
+  ///
+  ///    void _changeColor() {
+  ///      final color = Color.fromRGBO(
+  ///        _random.nextInt(255),
+  ///        _random.nextInt(255),
+  ///        _random.nextInt(255),
+  ///        1.0,
+  ///      );
+  ///      setState(() {
+  ///        _currentStyle = SystemUiOverlayStyle.dark.copyWith(
+  ///          statusBarColor: color,
+  ///        );
+  ///      });
+  ///    }
+  ///
+  ///    @override
+  ///    Widget build(BuildContext context) {
+  ///      return Scaffold(
+  ///        body: AnnotatedRegion(
+  ///          value: _currentStyle,
+  ///           child: Center(
+  ///             child: RaisedButton(
+  ///               child: const Text('Change Color'),
+  ///               onPressed: _changeColor,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       );
+  ///     }
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {
@@ -349,7 +403,7 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        SystemChannels.platform.invokeMethod(
+        SystemChannels.platform.invokeMethod<void>(
           'SystemChrome.setSystemUIOverlayStyle',
           _pendingStyle._toMap(),
         );

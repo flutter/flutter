@@ -110,8 +110,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   final double height;
 
   @override
-  // ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
-  bool represents(Null value) => false;
+  bool represents(void value) => false;
 
   @override
   _PopupMenuDividerState createState() => _PopupMenuDividerState();

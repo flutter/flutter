@@ -468,9 +468,9 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 class _AnimationSwap<T> extends CompoundAnimation<T> {
   /// Creates an [_AnimationSwap].
   ///
-  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
+  /// Both arguments must be non-null. Either can be an [_AnimationSwap] itself
   /// to combine multiple animations.
-  _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold): super(first: first, next: next);
+  _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold) : super(first: first, next: next);
 
   final Animation<double> parent;
   final double swapThreshold;

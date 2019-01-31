@@ -200,15 +200,15 @@ class _RenderRadio extends RenderToggleable {
     ValueChanged<bool> onChanged,
     BoxConstraints additionalConstraints,
     @required TickerProvider vsync,
-  }): super(
-    value: value,
-    tristate: false,
-    activeColor: activeColor,
-    inactiveColor: inactiveColor,
-    onChanged: onChanged,
-    additionalConstraints: additionalConstraints,
-    vsync: vsync,
-  );
+  }) : super(
+         value: value,
+         tristate: false,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         onChanged: onChanged,
+         additionalConstraints: additionalConstraints,
+         vsync: vsync,
+       );
 
   @override
   void paint(PaintingContext context, Offset offset) {

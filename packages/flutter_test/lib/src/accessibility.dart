@@ -17,7 +17,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+    : passed = true,
+      reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
