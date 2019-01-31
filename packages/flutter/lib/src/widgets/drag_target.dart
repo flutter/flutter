@@ -384,6 +384,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
+      area: context.ancestorRenderObjectOfType(TypeMatcher<RenderDraggableArea>()),
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
@@ -561,6 +562,30 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   }
 }
 
+class RenderDraggableArea extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+  @override
+  bool get sizedByParent => false;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  RenderDraggableArea([RenderBox child]) {
+    this.child = child;
+  }
+}
+
+class DraggableArea extends SingleChildRenderObjectWidget {
+
+  DraggableArea({Key key, Widget child}): super(key: key, child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderDraggableArea();
+  }
+}
+
 enum _DragEndKind { dropped, canceled }
 typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
 
@@ -577,6 +602,7 @@ class _DragAvatar<T> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
+    this.area,
     this.onDragEnd,
     @required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
@@ -594,6 +620,7 @@ class _DragAvatar<T> extends Drag {
   final Offset dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
+  final RenderObject area;
   final _OnDragEnd onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
@@ -622,8 +649,33 @@ class _DragAvatar<T> extends Drag {
   }
 
   void updateDrag(Offset globalPosition) {
-    _lastOffset = globalPosition - dragStartPoint;
+    RenderBox limiter = area;
+    Offset lastOffset = globalPosition - dragStartPoint;
+
+    if (limiter != null) {
+      RenderDecoratedBox box = null;
+      RenderBox parent = limiter;
+
+      while (box == null && parent != null) {
+        if (parent is RenderDecoratedBox) {
+          box = parent as RenderDecoratedBox;
+          break;
+        }
+        else if (parent.parent is RenderBox) {
+          parent = (parent as RenderBox).parent;
+        }
+      }
+
+      if (box != null) {
+        Offset boxPosition = box.globalToLocal(globalPosition);
+        if (!(Offset.zero & box.size).contains(boxPosition) || !box.hitTestSelf(boxPosition))
+          lastOffset = _lastOffset;
+      }
+    }
+
+    _lastOffset = lastOffset;
     _entry.markNeedsBuild();
+
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTest(result, globalPosition + feedbackOffset);
 
