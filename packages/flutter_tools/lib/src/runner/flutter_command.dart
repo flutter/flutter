@@ -442,7 +442,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       extraFrontEndOptions: extraFrontEndOptions?.join(', '),
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]?.join(', ')
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
         ? argResults['build-shared-library']
@@ -544,19 +544,26 @@ abstract class FlutterCommand extends Command<void> {
     await validateCommand();
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    final BuildInfo buildInfo = getBuildInfo();
     if (shouldUpdateCache) {
+      final BuildInfo buildInfo = getBuildInfo();
+      bool skipUnknown = true;
       TargetPlatform targetPlatform = buildInfo.targetPlatform;
       if (targetPlatform == null) {
-        final List<Device> devices = await findAllTargetDevices();
-        if (devices != null && devices.length == 1) {
+        // Access devices directly since we do not care about doctor
+        // warnings.
+        final List<Device> devices = await deviceManager.getDevices().toList();
+        if (devices.length == 1) {
           targetPlatform = await devices.first.targetPlatform;
+        } else if (devices.length > 1) {
+          // If there is more than one connected device, ensure we download
+          // all necessary binaries.
+          skipUnknown = false;
         }
       }
       await cache.updateAll(
         buildMode: buildInfo.mode,
         targetPlatform: targetPlatform,
-        skipUnknown: true,
+        skipUnknown: skipUnknown,
         clobber: false,
       );
     }

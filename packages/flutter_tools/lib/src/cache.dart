@@ -189,9 +189,9 @@ class Cache {
   }
 
   bool isUpToDate({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
-    @required bool skipUnknown,
+    BuildMode buildMode,
+    TargetPlatform targetPlatform,
+    bool skipUnknown = true,
   }) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown));
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
@@ -216,10 +216,10 @@ class Cache {
   }
 
   Future<void> updateAll({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
-    @required bool skipUnknown,
-    @required bool clobber,
+    BuildMode buildMode,
+    TargetPlatform targetPlatform,
+    bool skipUnknown = true,
+    bool clobber = false,
   }) async {
     if (!_lockEnabled) {
       return;
@@ -261,9 +261,9 @@ abstract class CachedArtifact {
   final List<File> _downloadedFiles = <File>[];
 
   bool isUpToDate({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
-    @required bool skipUnknown,
+    BuildMode buildMode,
+    TargetPlatform targetPlatform,
+    bool skipUnknown = true,
   }) {
     if (!location.existsSync()) {
       return false;
@@ -278,10 +278,10 @@ abstract class CachedArtifact {
   }
 
   Future<void> update({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
-    @required bool skipUnknown,
-    @required bool clobber,
+    BuildMode buildMode,
+    TargetPlatform targetPlatform,
+    bool skipUnknown = true,
+    bool clobber = false,
   }) async {
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
