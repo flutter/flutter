@@ -5063,6 +5063,210 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
 }
+/// The translations for Galician (`gl`).
+class MaterialLocalizationGl extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Galician.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationGl({
+    String localeName = 'gl',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Sobre $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'A.M.';
+
+  @override
+  String get backButtonTooltip => r'Atrás';
+
+  @override
+  String get cancelButtonLabel => r'CANCELAR';
+
+  @override
+  String get closeButtonLabel => r'PECHAR';
+
+  @override
+  String get closeButtonTooltip => r'Pechar';
+
+  @override
+  String get collapsedIconTapHint => r'Amosar';
+
+  @override
+  String get continueButtonLabel => r'CONTINUAR';
+
+  @override
+  String get copyButtonLabel => r'COPIAR';
+
+  @override
+  String get cutButtonLabel => r'CORTAR';
+
+  @override
+  String get deleteButtonTooltip => r'Eliminar';
+
+  @override
+  String get dialogLabel => r'Cadro de diálogo';
+
+  @override
+  String get drawerLabel => r'Menú de navegación';
+
+  @override
+  String get expandedIconTapHint => r'Ocultar';
+
+  @override
+  String get hideAccountsLabel => r'Ocultar contas';
+
+  @override
+  String get licensesPageTitle => r'Licenzas';
+
+  @override
+  String get modalBarrierDismissLabel => r'Pechar';
+
+  @override
+  String get nextMonthTooltip => r'Mes seguinte';
+
+  @override
+  String get nextPageTooltip => r'Páxina seguinte';
+
+  @override
+  String get okButtonLabel => r'ACEPTAR';
+
+  @override
+  String get openAppDrawerTooltip => r'Abrir o menú de navegación';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow‑$lastRow de $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow‑$lastRow de unhas $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'PEGAR';
+
+  @override
+  String get popupMenuLabel => r'Menú emerxente';
+
+  @override
+  String get postMeridiemAbbreviation => r'P.M.';
+
+  @override
+  String get previousMonthTooltip => r'Mes anterior';
+
+  @override
+  String get previousPageTooltip => r'Páxina anterior';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Actualizar';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter.';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
+  String get reorderItemDown => r'Mover abaixo';
+
+  @override
+  String get reorderItemLeft => r'Mover a esquerda';
+
+  @override
+  String get reorderItemRight => r'Mover a dereita';
+
+  @override
+  String get reorderItemToEnd => r'Mover ao fin';
+
+  @override
+  String get reorderItemToStart => r'Mover ao comezo';
+
+  @override
+  String get reorderItemUp => r'Mover arriba';
+
+  @override
+  String get rowsPerPageTitle => r'Ringleiras por páxina:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Buscar';
+
+  @override
+  String get selectAllButtonLabel => r'SELECCIONAR TODO';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 elemento seleccionado';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Non se seleccionaron elementos';
+
+  @override
+  String get showAccountsLabel => r'Amosar contas';
+
+  @override
+  String get showMenuTooltip => r'Amosar menú';
+
+  @override
+  String get signedInLabel => r'Sesión comezada';
+
+  @override
+  String get tabLabelRaw => r'Pestana $tabIndex de $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Seleccionar horas';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Seleccionar minutos';
+
+  @override
+  String get viewLicensesButtonLabel => r'VER LICENZAS';
+}
+
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
 class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
