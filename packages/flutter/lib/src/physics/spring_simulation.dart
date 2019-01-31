@@ -94,8 +94,8 @@ class SpringSimulation extends Simulation {
     double velocity, {
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _endPosition = end,
-      _solution = _SpringSolution(spring, start - end, velocity),
-      super(tolerance: tolerance);
+       _solution = _SpringSolution(spring, start - end, velocity),
+       super(tolerance: tolerance);
 
   final double _endPosition;
   final _SpringSolution _solution;

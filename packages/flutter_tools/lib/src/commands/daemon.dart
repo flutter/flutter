@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -17,6 +16,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../fuchsia/fuchsia_device.dart';
@@ -99,7 +99,7 @@ class Daemon {
       _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
-            _onExitCompleter.complete(0);
+          _onExitCompleter.complete(0);
       }
     );
   }
@@ -187,9 +187,7 @@ abstract class Domain {
   String toString() => name;
 
   void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
-    // Remove 'new' once Google catches up to dev4.0 Dart SDK.
-    //ignore: unnecessary_new
-    new Future<dynamic>.sync(() {
+    Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
@@ -784,7 +782,7 @@ class NotifyingLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
@@ -961,8 +959,8 @@ class _AppRunLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
-    int progressIndicatorPadding = 52,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
     final int id = _nextProgressId++;

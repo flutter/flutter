@@ -140,12 +140,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// of [ExpansionPanelRadio].
   const ExpansionPanelList.radio({
     Key key,
-    List<ExpansionPanelRadio> children = const <ExpansionPanelRadio>[],
+    this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, // ignore: prefer_initializing_formals
-       assert(children != null),
+  }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
        super(key: key);

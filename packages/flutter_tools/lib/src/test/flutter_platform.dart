@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -26,6 +25,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -144,7 +144,7 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
 
@@ -497,7 +497,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // Callback can't throw since it's just setting a variable.
       controller.sink.done.whenComplete(() { // ignore: unawaited_futures
         controllerSinkClosed = true;
-      }); // ignore: unawaited_futures
+      });
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
@@ -926,8 +926,9 @@ class _FlutterPlatform extends PlatformPlugin {
       command.add('--ipv6');
     }
 
-    command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-checked-mode',
+      '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-dart-profiling',

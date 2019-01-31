@@ -20,9 +20,9 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     this.hidUsage = 0,
     this.codePoint = 0,
     this.modifiers = 0,
-  })  : assert(hidUsage != null),
-        assert(codePoint != null),
-        assert(modifiers != null);
+  }) : assert(hidUsage != null),
+       assert(codePoint != null),
+       assert(modifiers != null);
 
   /// The USB HID usage.
   ///
