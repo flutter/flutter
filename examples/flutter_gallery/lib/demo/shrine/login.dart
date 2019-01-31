@@ -31,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.white,
+        brightness: Brightness.light,
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
@@ -84,8 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
                       onPressed: () {
-                        _usernameController.clear();
-                        _passwordController.clear();
+                        Navigator.of(context, rootNavigator: true).pop();
                       },
                     ),
                     RaisedButton(
