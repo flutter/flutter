@@ -220,7 +220,6 @@ class SliderThemeData extends Diagnosticable {
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
     @required this.valueIndicatorTextStyle,
-<<<<<<< HEAD
   })  : assert(trackHeight != null),
         assert(activeTrackColor != null),
         assert(inactiveTrackColor != null),
@@ -241,24 +240,6 @@ class SliderThemeData extends Diagnosticable {
         assert(valueIndicatorShape != null),
         assert(valueIndicatorTextStyle != null),
         assert(showValueIndicator != null);
-=======
-  }) : assert(activeTrackColor != null),
-       assert(inactiveTrackColor != null),
-       assert(disabledActiveTrackColor != null),
-       assert(disabledInactiveTrackColor != null),
-       assert(activeTickMarkColor != null),
-       assert(inactiveTickMarkColor != null),
-       assert(disabledActiveTickMarkColor != null),
-       assert(disabledInactiveTickMarkColor != null),
-       assert(thumbColor != null),
-       assert(disabledThumbColor != null),
-       assert(overlayColor != null),
-       assert(valueIndicatorColor != null),
-       assert(thumbShape != null),
-       assert(valueIndicatorShape != null),
-       assert(valueIndicatorTextStyle != null),
-       assert(showValueIndicator != null);
->>>>>>> master
 
   /// Generates a SliderThemeData from three main colors.
   ///
