@@ -423,7 +423,7 @@ class FlutterEngine extends CachedArtifact {
     } else if (platform.isWindows) {
       hostPlatform = TargetPlatform.windows_x64;
     }
-    for (EngineBinary engineBinary in reduceEngineBinaries(
+    for (EngineBinary engineBinary in _reduceEngineBinaries(
       binaries,
       buildMode: buildMode,
       targetPlatform: targetPlatform,
@@ -435,7 +435,7 @@ class FlutterEngine extends CachedArtifact {
     return binaryDirs;
   }
 
-  Iterable<EngineBinary> reduceEngineBinaries(List<EngineBinary> binaries, {
+  Iterable<EngineBinary> _reduceEngineBinaries(List<EngineBinary> binaries, {
     BuildMode buildMode,
     TargetPlatform targetPlatform,
     TargetPlatform hostPlatform,
@@ -444,6 +444,9 @@ class FlutterEngine extends CachedArtifact {
     for (EngineBinary engineBinary in binaries) {
       if (hostPlatform != null && engineBinary.hostPlatform != null && engineBinary.hostPlatform != hostPlatform) {
         continue;
+      }
+      if (engineBinary.skipChecks) {
+        yield engineBinary;
       }
       // Certain binaries have no restrictions and should always be included.
       if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
@@ -492,6 +495,7 @@ class FlutterEngine extends CachedArtifact {
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.profile,
       hostPlatform: TargetPlatform.linux_x64,
+      skipChecks: true,
     ),
     EngineBinary(
       name: 'android-arm-release/linux-x64',
@@ -553,6 +557,7 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.profile,
+      skipChecks: true
     ),
     EngineBinary(
       name: 'android-arm-release/windows-x64',
@@ -706,6 +711,7 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.profile,
       targetPlatform: TargetPlatform.android_arm,
+      skipChecks: true,
     ),
     EngineBinary(
       name: 'android-arm-release/darwin-x64',
@@ -994,6 +1000,7 @@ class EngineBinary {
     @required this.name,
     @required this.fileName,
     this.hostPlatform,
+    this.skipChecks = false,
   });
 
   final TargetPlatform targetPlatform;
@@ -1001,6 +1008,7 @@ class EngineBinary {
   final BuildMode buildMode;
   final String name;
   final String fileName;
+  final bool skipChecks;
 
   List<String> toTuple() => <String>[name, fileName];
 }
