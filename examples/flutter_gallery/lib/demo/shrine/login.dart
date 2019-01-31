@@ -36,6 +36,9 @@ class _LoginPageState extends State<LoginPage> {
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () {
+            // The login screen is immediately displayed on top of the Shrine
+            // home screen using onGenerateRoute and so rootNavigator must be
+            // set to true in order to get out of Shrine completely.
             Navigator.of(context, rootNavigator: true).pop();
           }
         ),
@@ -85,6 +88,10 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
                       onPressed: () {
+                        // The login screen is immediately displayed on top of
+                        // the Shrine home screen using onGenerateRoute and so
+                        // rootNavigator must be set to true in order to get out
+                        // of Shrine completely.
                         Navigator.of(context, rootNavigator: true).pop();
                       },
                     ),
