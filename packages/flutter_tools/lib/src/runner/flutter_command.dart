@@ -440,7 +440,7 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: extraFrontEndOptions.join(', '),
+      extraFrontEndOptions: extraFrontEndOptions?.join(', '),
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
