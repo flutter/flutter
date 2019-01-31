@@ -287,8 +287,8 @@ void main() {
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
-                height: 1.123,
-                fontSize: 18,
+                height: 1.5,
+                fontSize: 14,
               ),
             ),
           ),
@@ -337,7 +337,7 @@ void main() {
               ),
               textDirection: TextDirection.ltr,
               strutStyle: StrutStyle(
-                fontSize: 18,
+                fontSize: 14,
                 height: 1.1,
                 leading: 0.1,
               ),
@@ -404,7 +404,7 @@ void main() {
                   'Nice Font 4',
                   'ahem'
                 ],
-                fontSize: 25.5,
+                fontSize: 14,
               ),
             ),
           ),
@@ -453,8 +453,8 @@ void main() {
               ),
               textDirection: TextDirection.ltr,
               strutStyle: StrutStyle(
-                fontSize: 18,
-                height: 1.05,
+                fontSize: 14,
+                height: 1.1,
                 forceStrutHeight: true,
               ),
             ),
