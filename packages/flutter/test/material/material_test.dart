@@ -59,7 +59,7 @@ void main() {
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const Material().debugFillProperties(builder);
+    Material().debugFillProperties(builder);
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -73,7 +73,7 @@ void main() {
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const Material(
+    Material(
       type: MaterialType.canvas,
       color: const Color(0xFFFFFFFF),
       textStyle: TextStyle(color: Color(0xff00ff00)),
