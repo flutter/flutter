@@ -91,7 +91,7 @@ class FocusScope extends StatefulWidget {
   /// The [context] argument must not be null.
   static List<FocusScopeNode> ancestorsOf(BuildContext context) {
     assert(context != null);
-    final List<FocusScopeNode> ancestors = [];
+    final List<FocusScopeNode> ancestors = <FocusScopeNode>[];
     while (true) {
       context = context.ancestorInheritedElementForWidgetOfExactType(_FocusScopeMarker);
       if (context == null)
@@ -103,7 +103,6 @@ class FocusScope extends StatefulWidget {
         return false;
       });
     }
-    return ancestors;
   }
 
   @override

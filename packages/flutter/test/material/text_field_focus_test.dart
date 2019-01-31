@@ -309,7 +309,7 @@ void main() {
                 Expanded(
                   child: Navigator(
                     onGenerateRoute: (RouteSettings settings) {
-                      return new MaterialPageRoute(
+                      return MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return TextField(key: textField0);
                         },
@@ -321,7 +321,7 @@ void main() {
                 Expanded(
                   child: Navigator(
                     onGenerateRoute: (RouteSettings settings) {
-                      return new MaterialPageRoute(
+                      return MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return TextField(key: textField1);
                         },
