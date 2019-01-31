@@ -1,7 +1,7 @@
 {
   "scriptCategory": "English-like",
   "timeOfDayFormat": "H:mm",
-  "openAppDrawerTooltip": "Abri-lo menú de navegación",
+  "openAppDrawerTooltip": "Abrir o menú de navegación",
   "backButtonTooltip": "Atrás",
   "closeButtonTooltip": "Pechar",
   "deleteButtonTooltip": "Eliminar",
