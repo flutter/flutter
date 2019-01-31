@@ -556,7 +556,7 @@ abstract class FlutterCommand extends Command<void> {
       await cache.updateAll(
         buildMode: buildInfo.mode,
         targetPlatform: targetPlatform,
-        skipUnknown: false,
+        skipUnknown: true,
         clobber: false,
       );
     }

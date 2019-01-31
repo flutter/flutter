@@ -11,6 +11,8 @@ class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
         help: 'Precache artifacts for all platforms.');
+    argParser.addFlag('force', abbr: 'f', negatable: false,
+        help: 'Force download of new cached artifacts');
   }
 
   @override
@@ -28,7 +30,7 @@ class PrecacheCommand extends FlutterCommand {
       cache.includeAllPlatforms = true;
     }
     // Intentionally set to null to download all artifacts.
-    if (cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false)) {
+    if (cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false) && !argResults['force']) {
       printStatus('Already up-to-date.');
     } else {
       await cache.updateAll(buildMode: null, targetPlatform: null, skipUnknown: false, clobber: true);

@@ -226,8 +226,9 @@ class Cache {
     }
     try {
       for (CachedArtifact artifact in _artifacts) {
-        if (!artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown))
+        if (clobber || !artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
           await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: clobber);
+        }
       }
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
@@ -387,9 +388,11 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
+    if (!fs.directory(location).existsSync() || clobber) {
+      await _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
+    }
   }
 }
 
@@ -409,8 +412,10 @@ class FlutterEngine extends CachedArtifact {
       <String>['common', 'flutter_patched_sdk.zip'],
     ];
     TargetPlatform hostPlatform;
+    List<EngineBinary> binaries = _binaries;
     if (cache.includeAllPlatforms) {
       hostPlatform = null;
+      binaries = _binaries + _dartSdks;
     } if (platform.isMacOS) {
       hostPlatform = TargetPlatform.darwin_x64;
     } else if (platform.isLinux) {
@@ -419,7 +424,7 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform = TargetPlatform.windows_x64;
     }
     for (EngineBinary engineBinary in reduceEngineBinaries(
-      _binaries,
+      binaries,
       buildMode: buildMode,
       targetPlatform: targetPlatform,
       hostPlatform: hostPlatform,
@@ -445,15 +450,32 @@ class FlutterEngine extends CachedArtifact {
         yield engineBinary;
       } else if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
         yield engineBinary;
-      } else if (!skipUnknown && buildMode == null && engineBinary.targetPlatform == targetPlatform) {
-        yield engineBinary;
-      } else if (!skipUnknown && targetPlatform == null && engineBinary.buildMode == buildMode) {
-        yield engineBinary;
-      } else if (!skipUnknown && targetPlatform == null && hostPlatform == null) {
-        yield engineBinary;
+      } else if (!skipUnknown) {
+        // If we don't skip unknown, then assume null matches everything.
+        if (targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode) {
+          yield engineBinary;
+        } else if (buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform) {
+          yield engineBinary;
+        } else {
+          yield engineBinary;
+        }
       }
     }
   }
+  List<EngineBinary> get _dartSdks => const <EngineBinary>[
+    EngineBinary(
+      name: 'darwin-x64',
+      fileName: 'dart-sdk-darwin-x64.zip',
+    ),
+    EngineBinary(
+      name: 'linux-x64',
+      fileName: 'dart-sdk-linux-x64.zip',
+    ),
+    EngineBinary(
+      name: 'windows-x64',
+      fileName: 'dart-sdk-windows-x64.zip',
+    ),
+  ];
 
   /// A set of all possible engine artifacts to download.
   /// A binary without a buildMode or targetPlatform is downloaded
@@ -673,21 +695,6 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform: TargetPlatform.darwin_x64,
       targetPlatform: TargetPlatform.ios,
     ),
-    EngineBinary(
-      name: 'darwin-x64',
-      fileName: 'dart-sdk-darwin-x64.zip',
-      hostPlatform: TargetPlatform.darwin_x64,
-    ),
-    EngineBinary(
-      name: 'linux-x64',
-      fileName: 'dart-sdk-linux-x64.zip',
-      hostPlatform: TargetPlatform.linux_x64,
-    ),
-    EngineBinary(
-      name: 'windows-x64',
-      fileName: 'dart-sdk-windows-x64.zip',
-      hostPlatform: TargetPlatform.windows_x64,
-    ),
   ];
 
   // A list of cache directory paths to which the LICENSE file should be copied.
@@ -757,7 +764,7 @@ class FlutterEngine extends CachedArtifact {
       if (dir.existsSync() && !clobber) {
         continue;
       }
-      await _downloadZipArchive('Downloading $cacheDir/$urlPath tools...', Uri.parse(url + urlPath), dir);
+      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -838,14 +845,16 @@ class GradleWrapper extends CachedArtifact {
   String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
-      // Delete property file, allowing templates to provide it.
-      fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
-      // Remove NOTICE file. Should not be part of the template.
-      fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
-    });
+    if (!fs.directory(location).existsSync() || clobber) {
+      await _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
+        // Delete property file, allowing templates to provide it.
+        fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
+        // Remove NOTICE file. Should not be part of the template.
+        fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
+      });
+    }
   }
 
   @override
