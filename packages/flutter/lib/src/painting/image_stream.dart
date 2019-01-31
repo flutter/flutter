@@ -169,6 +169,16 @@ class ImageStream extends Diagnosticable {
   /// instance of the listener, along with the `onError` listener that was
   /// registered with that first instance. This might not be the instance that
   /// the `addListener` corresponding to this `removeListener` had added.
+  ///
+  /// For example, if one widget calls [addListener] with a global static
+  /// function and a private error handler, and another widget calls
+  /// [addListener] with the same global static function but a different private
+  /// error handler, then the second widget is disposed and removes the image
+  /// listener (the aforementioned global static function), it will remove the
+  /// error handler from the first widget, not the second. If an error later
+  /// occurs, the first widget, which is still supposedly listening, will not
+  /// receive any messages, while the second, which is supposedly disposed, will
+  /// have its callback invoked.
   void removeListener(ImageListener listener) {
     if (_completer != null)
       return _completer.removeListener(listener);
@@ -224,6 +234,24 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   final List<_ImageListenerPair> _listeners = <_ImageListenerPair>[];
   ImageInfo _currentImage;
   FlutterErrorDetails _currentError;
+
+  /// Whether any listeners are currently registered.
+  ///
+  /// Clients should not depend on this value for their behavior, because having
+  /// one listener's logic change when another listener happens to start or stop
+  /// listening will lead to extremely hard-to-track bugs. Subclasses might use
+  /// this information to determine whether to do any work when there are no
+  /// listeners, however; for example, [MultiFrameImageStreamCompleter] uses it
+  /// to determine when to iterate through frames of an animated image.
+  ///
+  /// Typically this is used by overriding [addListener], checking if
+  /// [hasListeners] is false before calling `super.addListener()`, and if so,
+  /// starting whatever work is needed to determine when to call
+  /// [notifyListeners]; and similarly, by overriding [removeListener], checking
+  /// if [hasListeners] is false after calling `super.removeListener()`, and if
+  /// so, stopping that same work.
+  @protected
+  bool get hasListeners => _listeners.isNotEmpty;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
@@ -336,11 +364,12 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// expensive to collect, and thus should only be collected if the error is to
   /// be logged in the first place.
   ///
-  /// The `silent` argument should be set to true if the error is one that is
-  /// expected to be encountered in release builds, for example network errors.
-  /// It causes the exception to not be reported to the logs in release builds,
-  /// if passed to [FlutterError.reportError]. (It is still sent to error
-  /// handlers.)
+  /// The `silent` argument causes the exception to not be reported to the logs
+  /// in release builds, if passed to [FlutterError.reportError]. (It is still
+  /// sent to error handlers.) It should be set to true if the error is one that
+  /// is expected to be encountered in release builds, for example network
+  /// errors. That way, logs on end-user devices will not have spurious
+  /// messages, but errors during development will still be reported.
   ///
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
@@ -513,7 +542,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void _handleAppFrame(Duration timestamp) {
-    if (!_hasActiveListeners)
+    if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
@@ -568,23 +597,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     _framesEmitted += 1;
   }
 
-  int _listenerCount = 0;
-  bool get _hasActiveListeners => _listenerCount > 0;
-
   @override
   void addListener(ImageListener listener, { ImageErrorListener onError }) {
-    if (!_hasActiveListeners && _codec != null) {
+    if (!hasListeners && _codec != null)
       _decodeNextFrameAndSchedule();
-    }
-    _listenerCount += 1;
     super.addListener(listener, onError: onError);
   }
 
   @override
   void removeListener(ImageListener listener) {
     super.removeListener(listener);
-    _listenerCount -= 1;
-    if (!_hasActiveListeners) {
+    if (!hasListeners) {
       _timer?.cancel();
       _timer = null;
     }
