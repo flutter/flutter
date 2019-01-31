@@ -109,7 +109,7 @@ typedef struct {
   ProcResolver gl_proc_resolver;
   // When the embedder specifies that a texture has a frame available, the
   // engine will call this method (on an internal engine managed thread) so that
-  // external texture details can be suppplied to the engine for subsequent
+  // external texture details can be supplied to the engine for subsequent
   // composition.
   TextureFrameCallback gl_external_texture_frame_callback;
 } FlutterOpenGLRendererConfig;
@@ -249,7 +249,7 @@ typedef struct {
   // documentation on the Wiki at
   // https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
   const uint8_t* isolate_snapshot_instructions;
-  // The size of the isoalte snapshot instructions buffer.
+  // The size of the isolate snapshot instructions buffer.
   size_t isolate_snapshot_instructions_size;
 } FlutterProjectArgs;
 
