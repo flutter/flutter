@@ -4,10 +4,17 @@
 
 assert(is_mac || is_ios)
 
+import("framework_shared.gni")
+
 group("darwin") {
   if (is_ios) {
     deps = [
       "ios:flutter_framework",
+    ]
+  }
+  if (is_mac) {
+    deps = [
+      "macos:flutter_framework",
     ]
   }
 }
@@ -38,6 +45,22 @@ source_set("flutter_channels") {
   ]
 
   public_configs = [ "$flutter_root:config" ]
+}
+
+# Framework code shared between iOS and macOS.
+source_set("framework_shared") {
+  set_sources_assignment_filter([])
+  sources = [
+    "ios/framework/Source/FlutterChannels.mm",
+    "ios/framework/Source/FlutterCodecs.mm",
+    "ios/framework/Source/FlutterStandardCodec.mm",
+    "ios/framework/Source/FlutterStandardCodec_Internal.h",
+  ]
+
+  public = framework_shared_headers
+  set_sources_assignment_filter(sources_assignment_filter)
+
+  defines = [ "FLUTTER_FRAMEWORK" ]
 }
 
 executable("flutter_channels_unittests") {

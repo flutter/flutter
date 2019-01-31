@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+framework_shared_headers = get_path_info(
+        [
+          # TODO: Move these files, and their implementations, to a shared
+          # location.
+          "ios/framework/Headers/FlutterMacros.h",
+          "ios/framework/Headers/FlutterBinaryMessenger.h",
+          "ios/framework/Headers/FlutterChannels.h",
+          "ios/framework/Headers/FlutterCodecs.h",
+        ],
+        "abspath")
