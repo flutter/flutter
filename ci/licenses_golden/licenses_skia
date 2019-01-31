@@ -1,4 +1,4 @@
-Signature: 2b63dcfcce51383860e5d143033bfdee
+Signature: 922dfed5a65815e76f694eaba4265b33
 
 UNUSED LICENSES:
 
@@ -5036,6 +5036,7 @@ FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
+FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBaseContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxy.cpp
