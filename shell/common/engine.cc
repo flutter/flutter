@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/common/settings.h"
+#include "flutter/common/version/version.h"
 #include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"

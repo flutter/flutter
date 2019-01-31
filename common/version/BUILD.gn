@@ -11,9 +11,9 @@ source_set("version") {
   ]
 
   defines = [
-    "SHELL_FLUTTER_ENGINE_VERSION=\"$shell_engine_version\"",
-    "SHELL_SKIA_VERSION=\"$shell_skia_version\"",
-    "SHELL_DART_VERSION=\"$shell_dart_version\"",
+    "FLUTTER_ENGINE_VERSION=\"$engine_version\"",
+    "SKIA_VERSION=\"$skia_version\"",
+    "DART_VERSION=\"$dart_version\"",
   ]
 
   public_configs = [ "$flutter_root:config" ]

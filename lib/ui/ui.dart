@@ -34,4 +34,5 @@ part 'plugins.dart';
 part 'pointer.dart';
 part 'semantics.dart';
 part 'text.dart';
+part 'versions.dart';
 part 'window.dart';

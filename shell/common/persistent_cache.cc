@@ -7,13 +7,13 @@
 #include <memory>
 #include <string>
 
+#include "flutter/common/version/version.h"
 #include "flutter/fml/base32.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/version/version.h"
 
 namespace shell {
 

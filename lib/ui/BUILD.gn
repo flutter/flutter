@@ -83,6 +83,8 @@ source_set("ui") {
     "text/text_box.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
+    "versions.cc",
+    "versions.h",
     "window/platform_message.cc",
     "window/platform_message.h",
     "window/platform_message_response.cc",
@@ -104,6 +106,7 @@ source_set("ui") {
   deps = [
     "$flutter_root/assets",
     "$flutter_root/common",
+    "$flutter_root/common/version",
     "$flutter_root/flow",
     "$flutter_root/fml",
     "$flutter_root/runtime:test_font",

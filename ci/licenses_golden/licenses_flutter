@@ -23,6 +23,8 @@ FILE: ../../../flutter/common/settings.cc
 FILE: ../../../flutter/common/settings.h
 FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
+FILE: ../../../flutter/common/version/version.cc
+FILE: ../../../flutter/common/version/version.h
 FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
 FILE: ../../../flutter/flow/debug_print.cc
@@ -307,6 +309,9 @@ FILE: ../../../flutter/lib/ui/text/text_box.h
 FILE: ../../../flutter/lib/ui/ui.dart
 FILE: ../../../flutter/lib/ui/ui_dart_state.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.h
+FILE: ../../../flutter/lib/ui/versions.cc
+FILE: ../../../flutter/lib/ui/versions.dart
+FILE: ../../../flutter/lib/ui/versions.h
 FILE: ../../../flutter/lib/ui/window.dart
 FILE: ../../../flutter/lib/ui/window/platform_message.cc
 FILE: ../../../flutter/lib/ui/window/platform_message.h
@@ -570,8 +575,6 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
 FILE: ../../../flutter/shell/platform/embedder/fixtures/simple_main.dart
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h
-FILE: ../../../flutter/shell/version/version.cc
-FILE: ../../../flutter/shell/version/version.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
 FILE: ../../../flutter/sky/tools/roll/patches/chromium/android_build.patch
 FILE: ../../../flutter/synchronization/pipeline.cc
