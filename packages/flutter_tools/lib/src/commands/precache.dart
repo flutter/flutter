@@ -31,7 +31,7 @@ class PrecacheCommand extends FlutterCommand {
     if (cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false)) {
       printStatus('Already up-to-date.');
     } else {
-      await cache.updateAll(buildMode: null, targetPlatform: null, skipUnknown: false);
+      await cache.updateAll(buildMode: null, targetPlatform: null, skipUnknown: false, clobber: true);
     }
     return const FlutterCommandResult(ExitStatus.success);
   }

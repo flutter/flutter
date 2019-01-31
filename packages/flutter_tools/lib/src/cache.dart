@@ -215,13 +215,19 @@ class Cache {
     return cachedFile.path;
   }
 
-  Future<void> updateAll({@required BuildMode buildMode, @required TargetPlatform targetPlatform, @required bool skipUnknown}) async {
-    if (!_lockEnabled)
+  Future<void> updateAll({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+    @required bool clobber,
+  }) async {
+    if (!_lockEnabled) {
       return;
+    }
     try {
       for (CachedArtifact artifact in _artifacts) {
         if (!artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown))
-          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: clobber);
       }
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
@@ -274,6 +280,7 @@ abstract class CachedArtifact {
     @required BuildMode buildMode,
     @required TargetPlatform targetPlatform,
     @required bool skipUnknown,
+    @required bool clobber,
   }) async {
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
@@ -283,6 +290,7 @@ abstract class CachedArtifact {
       buildMode: buildMode,
       targetPlatform: targetPlatform,
       skipUnknown: skipUnknown,
+      clobber: clobber,
     );
     cache.setStampFor(name, version);
     _removeDownloadedFiles();
@@ -306,7 +314,12 @@ abstract class CachedArtifact {
   bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) => true;
 
   /// Template method to perform artifact update.
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown});
+  Future<void> updateInner({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+    @required bool clobber,
+  });
 
   String get _storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
@@ -374,7 +387,7 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
@@ -405,7 +418,6 @@ class FlutterEngine extends CachedArtifact {
     } else if (platform.isWindows) {
       hostPlatform = TargetPlatform.windows_x64;
     }
-    printTrace('skipUnknown: $skipUnknown');
     for (EngineBinary engineBinary in reduceEngineBinaries(
       _binaries,
       buildMode: buildMode,
@@ -687,7 +699,11 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
+  bool isUpToDateInner({
+    BuildMode buildMode,
+    TargetPlatform targetPlatform,
+    bool skipUnknown,
+  }) {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
@@ -710,22 +726,36 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) async {
+  Future<void> updateInner({
+    @required BuildMode buildMode,
+    @required TargetPlatform targetPlatform,
+    @required bool skipUnknown,
+    @required bool clobber,
+  }) async {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
       final Directory dir = fs.directory(pkgPath);
-      if (dir.existsSync())
+      bool exists = dir.existsSync();
+      if (exists && clobber) {
         dir.deleteSync(recursive: true);
-      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+        exists = false;
+      }
+      if (!exists) {
+        await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+      }
     }
 
     for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
+      // Here we assume if a directory exists, all the files are correct.
+      if (dir.existsSync() && !clobber) {
+        continue;
+      }
       await _downloadZipArchive('Downloading $cacheDir/$urlPath tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
@@ -802,7 +832,7 @@ class GradleWrapper extends CachedArtifact {
   String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
+  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
       // Delete property file, allowing templates to provide it.

@@ -557,6 +557,7 @@ abstract class FlutterCommand extends Command<void> {
         buildMode: buildInfo.mode,
         targetPlatform: targetPlatform,
         skipUnknown: false,
+        clobber: false,
       );
     }
 
