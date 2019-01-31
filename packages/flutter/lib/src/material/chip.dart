@@ -602,7 +602,8 @@ class InputChip extends StatelessWidget
   ///
   /// The [label], [isEnabled], [selected], [pressElevation], [elevation] and
   /// [clipBehavior] arguments must not be null. Additionally, [pressElevation]
-  /// and [elevation] must be non-negative.
+  /// and [elevation] must be non-negative. Typically, [pressElevation] is
+  /// greater than [elevation].
   const InputChip({
     Key key,
     this.avatar,
@@ -778,7 +779,8 @@ class ChoiceChip extends StatelessWidget
   ///
   /// The [label], [selected], [pressElevation], [elevation] and [clipBehavior]
   /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative.
+  /// must be non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -967,7 +969,8 @@ class FilterChip extends StatelessWidget
   ///
   /// The [selected], [label], [pressElevation], [elevation] and [clipBehavior]
   /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative.
+  /// must be non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const FilterChip({
     Key key,
     this.avatar,
@@ -1110,7 +1113,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   ///
   /// The [label], [onPressed], [pressElevation], [elevation] and [clipBehavior]
   /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative.
+  /// must be non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const ActionChip({
     Key key,
     this.avatar,
@@ -1229,7 +1233,8 @@ class RawChip extends StatefulWidget
   ///
   /// The [label], [pressElevation], [elevation], [isEnabled], and
   /// [clipBehavior] arguments must not be null. Additionally, [pressElevation]
-  /// and [elevation] must be non-negative.
+  /// and [elevation] must be non-negative. Typically, [pressElevation] is
+  /// greater than [elevation].
   const RawChip({
     Key key,
     this.avatar,
