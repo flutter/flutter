@@ -246,7 +246,7 @@ void main() {
     );
   }, skip: !Platform.isLinux);
 
-  testWidgets('Strut text', (WidgetTester tester) async {
+  testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -271,7 +271,9 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.1.png'),
     );
+  }, skip: !Platform.isLinux);
 
+  testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -297,7 +299,9 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.2.png'),
     );
+  }, skip: !Platform.isLinux);
 
+  testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -346,7 +350,9 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.3.png'),
     );
+  }, skip: !Platform.isLinux);
 
+  testWidgets('Strut text leading, bold, italic', (WidgetTester tester) async {
     // Tests leading and bold/italic
     await tester.pumpWidget(
       Center(
@@ -374,7 +380,9 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.4.png'),
     );
+  }, skip: !Platform.isLinux);
 
+  testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
     await tester.pumpWidget(
       Center(
@@ -407,7 +415,9 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.5.png'),
     );
+  }, skip: !Platform.isLinux);
 
+  testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
