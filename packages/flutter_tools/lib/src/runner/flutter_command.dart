@@ -442,7 +442,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       extraFrontEndOptions: extraFrontEndOptions?.join(', '),
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]?.join(', ')
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
         ? argResults['build-shared-library']
