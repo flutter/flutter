@@ -196,8 +196,8 @@ class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
-      : assert(connectionState != null),
-        assert(!(data != null && error != null));
+    : assert(connectionState != null),
+      assert(!(data != null && error != null));
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);

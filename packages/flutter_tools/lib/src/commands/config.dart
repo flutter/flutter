@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../usage.dart';
@@ -50,10 +50,10 @@ class ConfigCommand extends FlutterCommand {
     String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
-    if (values.isNotEmpty)
-      values = '\nSettings:\n$values\n\n';
+    if (values.isEmpty)
+      values = '  No settings have been configured.';
     return
-      '$values'
+      '\nSettings:\n$values\n\n'
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 

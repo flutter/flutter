@@ -420,12 +420,12 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
       // Lint ignore to maintain backward compatibility.
-      return _wrapActiveColor(widget.actionsForegroundColor, context, navBar); // ignore: deprecated_member_use
+      return _wrapActiveColor(widget.actionsForegroundColor, context, navBar); // ignore: deprecated_member_use_from_same_package
     }
 
     return _wrapActiveColor(
       // Lint ignore to maintain backward compatibility.
-      widget.actionsForegroundColor, // ignore: deprecated_member_use
+      widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
       context,
       Builder(
         // Get the context that might have a possibly changed CupertinoTheme.
@@ -631,7 +631,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   Widget build(BuildContext context) {
     // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = widget.actionsForegroundColor ?? CupertinoTheme.of(context).primaryColor; // ignore: deprecated_member_use
+    final Color actionsForegroundColor = widget.actionsForegroundColor ?? CupertinoTheme.of(context).primaryColor; // ignore: deprecated_member_use_from_same_package
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -649,7 +649,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
     return _wrapActiveColor(
       // Lint ignore to maintain backward compatibility.
-      widget.actionsForegroundColor, // ignore: deprecated_member_use
+      widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
       context,
       SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
@@ -910,13 +910,13 @@ class _PersistentNavigationBar extends StatelessWidget {
 @immutable
 class _NavigationBarStaticComponentsKeys {
   _NavigationBarStaticComponentsKeys()
-      : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
-        leadingKey = GlobalKey(debugLabel: 'Leading'),
-        backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
-        backLabelKey = GlobalKey(debugLabel: 'Back label'),
-        middleKey = GlobalKey(debugLabel: 'Middle'),
-        trailingKey = GlobalKey(debugLabel: 'Trailing'),
-        largeTitleKey = GlobalKey(debugLabel: 'Large title');
+    : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
+      leadingKey = GlobalKey(debugLabel: 'Leading'),
+      backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
+      backLabelKey = GlobalKey(debugLabel: 'Back label'),
+      middleKey = GlobalKey(debugLabel: 'Middle'),
+      trailingKey = GlobalKey(debugLabel: 'Trailing'),
+      largeTitleKey = GlobalKey(debugLabel: 'Large title');
 
   final GlobalKey navBarBoxKey;
   final GlobalKey leadingKey;

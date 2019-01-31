@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +14,7 @@ import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'base/time.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {
@@ -540,7 +540,12 @@ String _shortGitRevision(String revision) {
 
 class GitTagVersion {
   const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
-  const GitTagVersion.unknown() : x = null, y = null, z = null, commits = 0, hash = '';
+  const GitTagVersion.unknown()
+    : x = null,
+      y = null,
+      z = null,
+      commits = 0,
+      hash = '';
 
   /// The X in vX.Y.Z.
   final int x;

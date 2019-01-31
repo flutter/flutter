@@ -155,6 +155,9 @@ const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 ///
 /// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
 ///
+/// If you are trying to test whether a call to [WidgetTester.pumpWidget]
+/// results in a [FlutterError], see [TestWidgetsFlutterBinding.takeException].
+///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
@@ -165,6 +168,10 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 /// A matcher for functions that throw [AssertionError].
 ///
 /// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+///
+/// If you are trying to test whether a call to [WidgetTester.pumpWidget]
+/// results in an [AssertionError], see
+/// [TestWidgetsFlutterBinding.takeException].
 ///
 /// See also:
 ///
@@ -355,6 +362,8 @@ Matcher matchesSemantics({
   TextDirection textDirection,
   Rect rect,
   Size size,
+  double elevation,
+  double thickness,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -503,6 +512,8 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
+    elevation: elevation,
+    thickness: thickness,
     customActions: customActions,
     hintOverrides: hintOverrides,
     children: children,
@@ -1685,6 +1696,8 @@ class _MatchesSemanticsData extends Matcher {
     this.textDirection,
     this.rect,
     this.size,
+    this.elevation,
+    this.thickness,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1702,6 +1715,8 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final double elevation;
+  final double thickness;
   final List<Matcher> children;
 
   @override
@@ -1727,6 +1742,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with rect: $rect');
     if (size != null)
       description.add(' with size: $size');
+    if (elevation != null)
+      description.add(' with elevation: $elevation');
+    if (thickness != null)
+      description.add(' with thickness: $thickness');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1763,6 +1782,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'rect was: ${data.rect}');
     if (size != null && size != data.rect.size)
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
+    if (elevation != null && elevation != data.elevation)
+      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
+    if (thickness != null && thickness != data.thickness)
+      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)

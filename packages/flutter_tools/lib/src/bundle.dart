@@ -85,7 +85,7 @@ Future<void> build({
 
     } else if (!fs.file(compilationTraceFilePath).existsSync()) {
       // Be forgiving if compilation trace file is missing.
-      printError('Warning: Ignoring missing compilation training file $compilationTraceFilePath.');
+      printStatus('No compilation trace available. To optimize performance, consider using --train.');
       final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
       compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
 
@@ -99,6 +99,7 @@ Future<void> build({
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
