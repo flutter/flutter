@@ -403,7 +403,7 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
-    String extraFrontEndOptions =
+    List<String> extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
             ? argResults[FlutterOptions.kExtraFrontEndOptions]
             : null;
@@ -412,9 +412,9 @@ abstract class FlutterCommand extends Command<void> {
       for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
-          extraFrontEndOptions += ',' + flag;
+          extraFrontEndOptions.add(flag);
         } else {
-          extraFrontEndOptions = flag;
+          extraFrontEndOptions = <String>[flag];
         }
       }
     }
@@ -440,7 +440,7 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: extraFrontEndOptions,
+      extraFrontEndOptions: extraFrontEndOptions.join(', '),
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
