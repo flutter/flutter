@@ -1,4 +1,4 @@
-Signature: 922dfed5a65815e76f694eaba4265b33
+Signature: ac98185e7cc03c1dfdfe89363247082c
 
 UNUSED LICENSES:
 
@@ -2541,7 +2541,6 @@ FILE: ../../../third_party/skia/infra/bots/test_skia_bundled.isolate
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/mac64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
-FILE: ../../../third_party/skia/infra/branch-config/cq.cfg
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
