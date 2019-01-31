@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -56,6 +54,46 @@ class PaintRecorder extends CustomPainter {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/27223
+  testWidgets('default Material debugFillProperties',
+      (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Material().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>['type: canvas']);
+  });
+  // Regression test for https://github.com/flutter/flutter/issues/27223
+  testWidgets('Material implements debugFillProperties',
+      (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Material(
+      type: MaterialType.canvas,
+      color: const Color(0xFFFFFFFF),
+      textStyle: TextStyle(color: Color(0xff00ff00)),
+      borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'type: canvas',
+      'color: Color(0xffffffff)',
+      'textStyle.inherit: true',
+      'textStyle.color: Color(0xff00ff00)',
+      'borderRadius: BorderRadiusDirectional.circular(10.0)'
+    ]);
+  });
+  
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
@@ -544,87 +582,6 @@ void main() {
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
       expect(box, isNot(paints..circle()));
-    });
-
-    testWidgets('border is painted above child by default', (WidgetTester tester) async {
-      final Key painterKey = UniqueKey();
-
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: painterKey,
-            child: Card(
-              child: SizedBox(
-                width: 200,
-                height: 300,
-                child: Material(
-                  clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        color: Colors.green,
-                        height: 150,
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            )
-          )
-        ),
-      ));
-
-      await expectLater(
-        find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_above.png'),
-        skip: !Platform.isLinux,
-      );
-    });
-
-    testWidgets('border is painted below child when specified', (WidgetTester tester) async {
-      final Key painterKey = UniqueKey();
-
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: painterKey,
-            child: Card(
-              child: SizedBox(
-                width: 200,
-                height: 300,
-                child: Material(
-                  clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  borderOnForeground: false,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        color: Colors.green,
-                        height: 150,
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            )
-          )
-        ),
-      ));
-
-      await expectLater(
-        find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_below.png'),
-        skip: !Platform.isLinux,
-      );
     });
   });
 }
