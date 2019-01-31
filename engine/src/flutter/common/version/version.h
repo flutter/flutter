@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_COMMON_VERSION_H_
-#define FLUTTER_SHELL_COMMON_VERSION_H_
+#ifndef FLUTTER_COMMON_VERSION_VERSION_H_
+#define FLUTTER_COMMON_VERSION_VERSION_H_
 
-namespace shell {
+namespace blink {
 
 const char* GetFlutterEngineVersion();
 
@@ -13,6 +13,6 @@ const char* GetSkiaVersion();
 
 const char* GetDartVersion();
 
-}  // namespace shell
+}  // namespace blink
 
-#endif  // FLUTTER_SHELL_COMMON_VERSION_H_
+#endif  // FLUTTER_COMMON_VERSION_VERSION_H_
