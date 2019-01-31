@@ -103,7 +103,11 @@ FLUTTER_EXPORT
  * @param message The message. Must be supported by the codec of this channel.
  * @param callback A callback to be invoked with the message reply from Flutter.
  */
-- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback;
+- (void)sendMessage:(id _Nullable)message
+              reply:(FlutterReply _Nullable)callback
+    // TODO: Add macOS support for replies once
+    // https://github.com/flutter/flutter/issues/18852 is fixed.
+    API_UNAVAILABLE(macos);
 
 /**
  * Registers a message handler with this channel.
@@ -234,7 +238,10 @@ FLUTTER_EXPORT
  */
 - (void)invokeMethod:(NSString*)method
            arguments:(id _Nullable)arguments
-              result:(FlutterResult _Nullable)callback;
+              result:(FlutterResult _Nullable)callback
+    // TODO: Add macOS support for replies once
+    // https://github.com/flutter/flutter/issues/18852 is fixed.
+    API_UNAVAILABLE(macos);
 
 /**
  * Registers a handler for method calls from the Flutter side.
