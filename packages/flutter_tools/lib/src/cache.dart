@@ -695,6 +695,67 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform: TargetPlatform.darwin_x64,
       targetPlatform: TargetPlatform.ios,
     ),
+    EngineBinary(
+      name: 'darwin-x64',
+      fileName: 'darwin-x64/artifacts.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+    ),
+    EngineBinary(
+      name: 'android-arm-profile/darwin-x64',
+      fileName: 'android-arm-profile/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.profile,
+      targetPlatform: TargetPlatform.android_arm,
+    ),
+    EngineBinary(
+      name: 'android-arm-release/darwin-x64',
+      fileName: 'android-arm-release/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.release,
+      targetPlatform: TargetPlatform.android_arm,
+    ),
+    EngineBinary(
+      name: 'android-arm64-profile/darwin-x64',
+      fileName: 'android-arm64-profile/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.profile,
+      targetPlatform: TargetPlatform.android_arm64,
+    ),
+    EngineBinary(
+      name: 'android-arm64-release/darwin-x64',
+      fileName: 'android-arm64-release/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.release,
+      targetPlatform: TargetPlatform.android_arm64,
+    ),
+    EngineBinary(
+      name: 'android-arm-dynamic-profile/darwin-x64',
+      fileName: 'android-arm-dynamic-profile/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.dynamicProfile,
+      targetPlatform: TargetPlatform.android_arm,
+    ),
+    EngineBinary(
+      name: 'android-arm-dynamic-release/darwin-x64',
+      fileName: 'android-arm-dynamic-release/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.dynamicRelease,
+      targetPlatform: TargetPlatform.android_arm,
+    ),
+    EngineBinary(
+      name: 'android-arm64-dynamic-profile/darwin-x64',
+      fileName: 'android-arm64-dynamic-profile/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.dynamicProfile,
+      targetPlatform: TargetPlatform.android_arm64,
+    ),
+    EngineBinary(
+      name: 'android-arm64-dynamic-release/darwin-x64',
+      fileName: 'android-arm64-dynamic-release/darwin-x64.zip',
+      hostPlatform: TargetPlatform.darwin_x64,
+      buildMode: BuildMode.dynamicRelease,
+      targetPlatform: TargetPlatform.android_arm64,
+    ),
   ];
 
   // A list of cache directory paths to which the LICENSE file should be copied.
