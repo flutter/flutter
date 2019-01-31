@@ -5220,7 +5220,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  String get searchFieldLabel => r'Buscar';
+  String get searchFieldLabel => r'Procurar';
 
   @override
   String get selectAllButtonLabel => r'SELECCIONAR TODO';
