@@ -771,10 +771,12 @@ class FlutterEngine extends CachedArtifact {
 
     final File licenseSource = fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
     for (String licenseDir in _getLicenseDirs()) {
-      if (!licenseSource.existsSync()) {
+      final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
+      // If the destination does not exist, we did not download the artifact to
+      // perform this operation.
+      if (!fs.directory(fs.path.join(location.path, licenseDir)).existsSync()) {
         continue;
       }
-      final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
       await licenseSource.copy(licenseDestinationPath);
     }
   }
