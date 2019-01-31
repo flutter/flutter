@@ -227,22 +227,21 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     bool tristate,
     Color activeColor,
-    Color checkColor,
+    Color this.checkColor,
     Color inactiveColor,
     BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }): _oldValue = value,
-      checkColor = checkColor,
-      super(
-        value: value,
-        tristate: tristate,
-        activeColor: activeColor,
-        inactiveColor: inactiveColor,
-        onChanged: onChanged,
-        additionalConstraints: additionalConstraints,
-        vsync: vsync,
-      );
+  }) : _oldValue = value,
+       super(
+         value: value,
+         tristate: tristate,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         onChanged: onChanged,
+         additionalConstraints: additionalConstraints,
+         vsync: vsync,
+       );
 
   bool _oldValue;
   Color checkColor;
@@ -347,7 +346,7 @@ class _RenderCheckbox extends RenderToggleable {
     if (_oldValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final RRect outer = _outerRectAt(origin, t);
-      Paint paint = Paint()..color = _colorAt(t);
+      final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
         _drawBorder(canvas, outer, t, paint);
@@ -363,7 +362,7 @@ class _RenderCheckbox extends RenderToggleable {
       }
     } else { // Two cases: null to true, true to null
       final RRect outer = _outerRectAt(origin, 1.0);
-      Paint paint = Paint() ..color = _colorAt(1.0);
+      final Paint paint = Paint() ..color = _colorAt(1.0);
       canvas.drawRRect(outer, paint);
 
       _initStrokePaint(paint);
