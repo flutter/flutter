@@ -157,9 +157,11 @@ void main() {
 
     expect(renderEditable.cursorColor.alpha, 255);
 
+    // Trigger initial timer. When focusing the first time, the cursor shows
+    // for slightly longer than the average on time.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    // Start timing cursor show period.
+    // Start timing standard cursor show period.
     expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
@@ -213,7 +215,12 @@ void main() {
     expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
-    await tester.pump(const Duration(milliseconds: 500));
+    // Android cursor goes from exactly on to exactly off on the 500ms dot.
+    await tester.pump(const Duration(milliseconds: 499));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+
+    await tester.pump(const Duration(milliseconds: 1));
     expect(renderEditable.cursorColor.alpha, 0);
     // Don't try to draw the cursor.
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
@@ -254,6 +261,7 @@ void main() {
     expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
+    // Cursor draw never changes.
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
@@ -262,6 +270,47 @@ void main() {
     await tester.pumpAndSettle();
     expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
+
+    EditableText.debugDeterministicCursor = false;
+  });
+
+  testWidgets(
+      'Cursor does not animate on Android when debugDeterministicCursor is set',
+      (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+
+    const Widget widget = MaterialApp(
+      home: Material(
+        child: TextField(
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    await tester.pump();
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+
+    // Cursor draw never changes.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+
+    // No more transient calls.
+    await tester.pumpAndSettle();
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     EditableText.debugDeterministicCursor = false;
   });
