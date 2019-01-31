@@ -27,11 +27,12 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms'])
       cache.includeAllPlatforms = true;
 
-    if (cache.isUpToDate())
+    // Intentionally set to null to download all artifacts.
+    if (cache.isUpToDate(buildMode: null, targetPlatform: null)) {
       printStatus('Already up-to-date.');
-    else
-      await cache.updateAll();
-
-    return null;
+    } else {
+      await cache.updateAll(buildMode: null, targetPlatform: null);
+    }
+    return const FlutterCommandResult(ExitStatus.success);
   }
 }
