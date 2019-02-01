@@ -243,5 +243,4 @@ class TestWindow implements Window {
   set onPlatformMessage(PlatformMessageCallback callback) {
     _window.onPlatformMessage = callback;
   }
-
 }
