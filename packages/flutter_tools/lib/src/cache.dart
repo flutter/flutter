@@ -283,10 +283,12 @@ abstract class CachedArtifact {
     bool skipUnknown = true,
     bool clobber = false,
   }) async {
-    if (location.existsSync()) {
+    if (location.existsSync() && clobber) {
       location.deleteSync(recursive: true);
     }
-    location.createSync(recursive: true);
+    if (!location.existsSync()) {
+      location.createSync(recursive: true);
+    }
     await updateInner(
       buildMode: buildMode,
       targetPlatform: targetPlatform,
@@ -447,10 +449,8 @@ class FlutterEngine extends CachedArtifact {
       }
       if (engineBinary.skipChecks) {
         yield engineBinary;
-        continue;
-      }
-      // Certain binaries have no restrictions and should always be included.
-      if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
+      } else if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
+        // Certain binaries have no restrictions and should always be included.
         yield engineBinary;
       } else if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
         yield engineBinary;
