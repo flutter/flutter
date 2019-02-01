@@ -4296,7 +4296,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// children are placed in a new run vertically adjacent to the previous run.
   final Axis direction;
 
-  /// How the children within a run should be places in the main axis.
+  /// How the children within a run should be placed in the main axis.
   ///
   /// For example, if [alignment] is [WrapAlignment.center], the children in
   /// each run are grouped together in the center of their run in the main axis.
