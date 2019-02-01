@@ -72,7 +72,7 @@ void main() {
       child: Scaffold(
         appBar: AppBar(title: const Text('Title')),
         body: Container(key: bodyKey),
-        resizeToAvoidBottomPadding: false, // ignore: deprecated_member_use
+        resizeToAvoidBottomPadding: false,
       ),
     )));
 

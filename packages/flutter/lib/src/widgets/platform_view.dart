@@ -201,8 +201,7 @@ class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
   /// {@macro flutter.widgets.platformViews.constructorParams}
-  UiKitView({ // ignore: prefer_const_constructors_in_immutables
-    // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
+  const UiKitView({
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
