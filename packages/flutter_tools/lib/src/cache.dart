@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
@@ -14,6 +13,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'build_info.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
