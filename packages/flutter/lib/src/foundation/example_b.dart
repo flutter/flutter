@@ -1,2 +1,2 @@
 /// An example.
-final int a = 2;
+const int a = 2;
