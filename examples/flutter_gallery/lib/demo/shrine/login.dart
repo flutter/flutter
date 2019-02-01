@@ -31,10 +31,14 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.white,
+        brightness: Brightness.light,
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () {
+            // The login screen is immediately displayed on top of the Shrine
+            // home screen using onGenerateRoute and so rootNavigator must be
+            // set to true in order to get out of Shrine completely.
             Navigator.of(context, rootNavigator: true).pop();
           }
         ),
@@ -84,8 +88,11 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
                       onPressed: () {
-                        _usernameController.clear();
-                        _passwordController.clear();
+                        // The login screen is immediately displayed on top of
+                        // the Shrine home screen using onGenerateRoute and so
+                        // rootNavigator must be set to true in order to get out
+                        // of Shrine completely.
+                        Navigator.of(context, rootNavigator: true).pop();
                       },
                     ),
                     RaisedButton(
