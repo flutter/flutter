@@ -208,7 +208,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
     if (reverseCrossAxis)
       return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent;
-    return crossAxisStart;
+    return crossAxisStart + (crossAxisStride - childCrossAxisExtent);
   }
 
   @override
@@ -325,7 +325,7 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid());
-    final double usableCrossAxisExtent = constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1);
+    final double usableCrossAxisExtent = constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount + 1);
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent = childCrossAxisExtent / childAspectRatio;
     return SliverGridRegularTileLayout(
