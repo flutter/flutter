@@ -3435,6 +3435,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       widget.debugFillProperties(properties);
     }
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
+    if (_dependencies != null && _dependencies.isNotEmpty) {
+      properties.add(DiagnosticsDependenciesProperty(_dependencies));
+    }
   }
 
   @override

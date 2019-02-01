@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:meta/meta.dart';
 
 import 'print.dart';
@@ -2515,4 +2516,15 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
+}
+
+/// A description of the [InheritedWidget]s depended on.
+class DiagnosticsDependenciesProperty extends DiagnosticsProperty<List<DiagnosticsNode>> {
+  /// Creates a [DiagnosticsDependenciesProperty].
+  ///
+  /// The provided `value` must not be null.
+  DiagnosticsDependenciesProperty(Set<InheritedElement> value) : super(
+    'dependenices',
+    value.map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse)).toList(),
+  );
 }
