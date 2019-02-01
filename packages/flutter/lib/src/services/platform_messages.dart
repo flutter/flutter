@@ -7,8 +7,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show WidgetsBinding;
 
+import 'binding.dart' show ServicesBinding;
 import 'platform_channel.dart';
 
 typedef _MessageHandler = Future<ByteData> Function(ByteData message);
@@ -37,7 +37,7 @@ class BinaryMessages {
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
-    WidgetsBinding.instance.window.sendPlatformMessage(channel, message, (ByteData reply) {
+    ServicesBinding.instance.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {

@@ -19,10 +19,15 @@ mixin ServicesBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
+    _instance = this;
     window
       ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
     initLicenses();
   }
+
+  /// The current [ServicesBinding], if one has been created.
+  static ServicesBinding get instance => _instance;
+  static ServicesBinding _instance;
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///

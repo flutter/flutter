@@ -437,10 +437,10 @@ void main() {
   });
 
   testWidgets('Temp fake window test', (WidgetTester tester) async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
-    final TestWidgetsFlutterBinding binding = WidgetsBinding.instance;
-    binding.window.textScaleFactorTestValue = 20.0;
+    final WidgetsBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    assert(binding is TestWidgetsFlutterBinding);
+    final TestWidgetsFlutterBinding testBinding = binding;
+    testBinding.window.textScaleFactorTestValue = 20.0;
 
     double textScaleFactorInMaterialApp;
 
