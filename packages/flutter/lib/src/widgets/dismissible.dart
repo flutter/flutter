@@ -225,7 +225,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
 
 enum _FlingGestureKind { none, forward, reverse }
 
-class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin { // ignore: MIXIN_INFERENCE_INCONSISTENT_MATCHING_CLASSES
+class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();

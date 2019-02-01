@@ -336,4 +336,32 @@ void main() {
     expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
   });
 
+  testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+    Widget buildFrame(Color color) {
+      return Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Checkbox(
+              value: true,
+              checkColor: color,
+              onChanged: (bool value) { },
+            );
+          },
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+    }
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+
+    await tester.pumpWidget(buildFrame(const Color(0xFF000000)));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+  });
+
 }

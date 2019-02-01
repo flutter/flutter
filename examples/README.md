@@ -15,7 +15,7 @@ Available examples include:
 
 - **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
   Flutter's widgets, including its implementation of [material
-  design](https://material.google.com/).
+  design](https://material.io/design/).
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
   in the Flutter framework. For details, see the [layers
