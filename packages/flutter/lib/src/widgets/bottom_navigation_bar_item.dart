@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Color;
-import 'package:flutter/material.dart';
 
 import 'framework.dart';
 
@@ -28,9 +27,8 @@ class BottomNavigationBarItem {
     this.title,
     Widget activeIcon,
     this.backgroundColor,
-  })  : activeIcon = activeIcon ?? icon,
-        assert(icon != null),
-        assert(title != null);
+  }) : activeIcon = activeIcon ?? icon,
+       assert(icon != null);
 
   /// The icon of the item.
   ///
