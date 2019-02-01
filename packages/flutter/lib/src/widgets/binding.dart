@@ -140,7 +140,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = window.physicalSize; });
+  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
   ///   }
   ///
   ///   @override
@@ -196,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
   ///   }
   ///
   ///   @override
