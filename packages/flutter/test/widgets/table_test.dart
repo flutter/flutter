@@ -796,7 +796,7 @@ void main() {
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'Table-[GlobalKey#00000](dependencies: [Directionality], d: [Directionality], renderObject: RenderTable#00000)\n'
+        'Table-[GlobalKey#00000](dependencies: [Directionality], renderObject: RenderTable#00000)\n'
         '├Text("A")\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("B")\n'
