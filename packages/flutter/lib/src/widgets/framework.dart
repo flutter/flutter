@@ -3436,7 +3436,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
     if (_dependencies != null && _dependencies.isNotEmpty) {
-      properties.add(DiagnosticsDependenciesProperty(_dependencies));
+      final List<DiagnosticsNode> diagnosticsDependencies = _dependencies
+        .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
+        .toList();
+      properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
     }
   }
 
