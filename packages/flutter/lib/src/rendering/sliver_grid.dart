@@ -215,7 +215,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   SliverGridGeometry getGeometryForChildIndex(int index) {
     final double crossAxisStart = (index % crossAxisCount) * crossAxisStride;
     return SliverGridGeometry(
-      scrollOffset: (index ~/ crossAxisCount) * mainAxisStride,
+      scrollOffset: (index ~/ crossAxisCount) * mainAxisStride + (mainAxisStride - childMainAxisExtent),
       crossAxisOffset: _getOffsetFromStartInCrossAxis(crossAxisStart),
       mainAxisExtent: childMainAxisExtent,
       crossAxisExtent: childCrossAxisExtent,
@@ -227,7 +227,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
     assert(childCount != null);
     final int mainAxisCount = ((childCount - 1) ~/ crossAxisCount) + 1;
     final double mainAxisSpacing = mainAxisStride - childMainAxisExtent;
-    return mainAxisStride * mainAxisCount - mainAxisSpacing;
+    return mainAxisStride * mainAxisCount + mainAxisSpacing;
   }
 }
 
@@ -599,7 +599,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final int lastIndex = indexOf(lastChild);
 
-    assert(childScrollOffset(firstChild) <= scrollOffset);
+    // assert(childScrollOffset(firstChild) <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
