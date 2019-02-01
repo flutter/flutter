@@ -86,7 +86,7 @@ typedef SemanticFormatterCallback = String Function(double value);
 ///    the visual appearance of the slider.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
-///  * <https://material.google.com/components/sliders.html>
+///  * <https://material.io/design/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
 class Slider extends StatefulWidget {
   /// Creates a material design slider.

@@ -57,7 +57,7 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -132,7 +132,7 @@ abstract class ChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -234,7 +234,7 @@ abstract class DeletableChipAttributes {
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -335,7 +335,7 @@ abstract class SelectableChipAttributes {
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -382,7 +382,7 @@ abstract class DisabledChipAttributes {
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -463,7 +463,7 @@ abstract class TappableChipAttributes {
 ///  * [CircleAvatar], which shows images or initials of entities.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
@@ -587,7 +587,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class InputChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -769,7 +769,7 @@ class InputChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -959,7 +959,7 @@ class ChoiceChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -1107,7 +1107,7 @@ class FilterChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
@@ -1218,7 +1218,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class RawChip extends StatefulWidget
     implements
         ChipAttributes,
