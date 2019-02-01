@@ -34,8 +34,8 @@ import 'toggleable.dart';
 ///  * [Switch], a widget with semantics similar to [Checkbox].
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
-///  * <https://material.google.com/components/selection-controls.html#selection-controls-checkbox>
-///  * <https://material.google.com/components/lists-controls.html#lists-controls-types-of-list-controls>
+///  * <https://material.io/design/components/selection-controls.html#checkboxes>
+///  * <https://material.io/design/components/lists.html#types>
 class Checkbox extends StatefulWidget {
   /// Creates a material design checkbox.
   ///
