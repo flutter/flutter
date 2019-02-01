@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' show saveCompilationTrace;
+import 'dart:ui' as ui show saveCompilationTrace, Window, window;
 
 import 'package:meta/meta.dart';
 
@@ -66,6 +66,8 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
+  ui.Window get window => ui.window;
+
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
   /// "super.initInstances()".
@@ -122,7 +124,7 @@ abstract class BindingBase {
         name: 'saveCompilationTrace',
         callback: (Map<String, String> parameters) async {
           return <String, dynamic> {
-            'value': saveCompilationTrace(),
+            'value': ui.saveCompilationTrace(),
           };
         }
       );

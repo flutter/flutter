@@ -62,7 +62,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onPointerDataPacket = _handlePointerDataPacket;
+    window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   @override
@@ -80,7 +80,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
     if (!locked)
       _flushPointerEventQueue();
   }

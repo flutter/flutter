@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 
 import 'platform_channel.dart';
 
@@ -36,7 +37,7 @@ class BinaryMessages {
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
-    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
+    RendererBinding.instance.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -53,7 +54,7 @@ class BinaryMessages {
 
   /// Calls the handler registered for the given channel.
   ///
-  /// Typically called by [ServicesBinding] to handle platform messages received
+  /// Typically called by [RendererBinding] to handle platform messages received
   /// from [Window.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].

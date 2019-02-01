@@ -10,6 +10,7 @@ import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
+import 'package:flutter/semantics.dart' show SemanticsBinding;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -2473,7 +2474,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    ui.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.window.updateSemantics(builder.build());
     notifyListeners();
   }
 

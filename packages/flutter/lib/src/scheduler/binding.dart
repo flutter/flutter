@@ -191,8 +191,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onBeginFrame = _handleBeginFrame;
-    ui.window.onDrawFrame = _handleDrawFrame;
+    window.onBeginFrame = _handleBeginFrame;
+    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
   }
 
@@ -682,7 +682,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -713,7 +713,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

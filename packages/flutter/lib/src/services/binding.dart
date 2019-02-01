@@ -20,7 +20,7 @@ mixin ServicesBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
-    ui.window
+    window
       ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
     initLicenses();
   }

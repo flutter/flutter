@@ -21,7 +21,7 @@ mixin SemanticsBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// Called when the platform accessibility features change.
@@ -29,7 +29,7 @@ mixin SemanticsBinding on BindingBase {
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// The currently active set of [AccessibilityFeatures].

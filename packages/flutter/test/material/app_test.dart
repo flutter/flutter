@@ -435,4 +435,27 @@ void main() {
     // Default Cupertino US "select all" text.
     expect(find.text('Select All'), findsOneWidget);
   });
+
+  testWidgets('Temp fake window test', (WidgetTester tester) async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
+    final TestWidgetsFlutterBinding binding = WidgetsBinding.instance;
+    binding.window.textScaleFactorTestValue = 20.0;
+
+    double textScaleFactorInMaterialApp;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            textScaleFactorInMaterialApp = MediaQuery.of(context).textScaleFactor;
+
+            return SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(textScaleFactorInMaterialApp, 20.0);
+  });
 }
