@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Unsupported.
-int get kMaxUnsignedSMI => throw UnsupportedError('');
+int get kMaxUnsignedSMI => throw UnsupportedError('Not supported in environments without 64 bit ints');
 
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 62 values of the enum can be used as indices.
@@ -25,7 +25,7 @@ class BitField<T extends dynamic> {
 
   /// Returns whether the bit with the given index is set to one.
   bool operator [](T index) {
-    throw UnsupportedError('');
+    throw UnsupportedError('Not supported in environments without 64 bit ints');
   }
 
   /// Sets the bit with the given index to the given value.
@@ -33,7 +33,7 @@ class BitField<T extends dynamic> {
   /// If value is true, the bit with the given index is set to one. Otherwise,
   /// the bit is set to zero.
   void operator []=(T index, bool value) {
-    throw UnsupportedError('');
+    throw UnsupportedError('Not supported in environments without 64 bit ints');
   }
 
   /// Sets all the bits to the given value.
@@ -41,6 +41,6 @@ class BitField<T extends dynamic> {
   /// If the value is true, the bits are all set to one. Otherwise, the bits are
   /// all set to zero. Defaults to setting all the bits to zero.
   void reset([ bool value = false ]) {
-    throw UnsupportedError('');
+    throw UnsupportedError('Not supported in environments without 64 bit ints');
   }
 }
