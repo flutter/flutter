@@ -851,6 +851,47 @@ void main() {
           ])));
     }, throwsA(isInstanceOf<AssertionError>()));
   });
+
+  testWidgets('BottomNavigationBar item showLabel=false, expect that there is no rendered text',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              bottomNavigationBar: RepaintBoundary(
+                showLabel: false,
+                child: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  currentIndex: _currentIndex,
+                  onTap: (int index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      title: Text('Red'),
+                      backgroundColor: Colors.red,
+                      icon: Icon(Icons.dashboard),
+                    ),
+                    BottomNavigationBarItem(
+                      title: Text('Green'),
+                      backgroundColor: Colors.green,
+                      icon: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    
+    expect(find.text('Red', findsNothing));
+    expect(find.text('Green', findsNothing));
+  });
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
