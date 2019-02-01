@@ -66,7 +66,7 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
-  // The window to which this binding is bound.
+  /// The window to which this binding is bound.
   ui.Window get window => ui.window;
 
   /// The initialization method. Subclasses override this method to hook into

@@ -97,7 +97,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  /// TODO(mattcarroll): find a way to use super.window instead of ui.window
+  // TODO(mattcarroll): find a way to use super.window instead of ui.window
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
