@@ -23,6 +23,8 @@ group("flutter") {
       public_deps += [
         "$flutter_root/frontend_server",
         "//third_party/dart:create_sdk",
+        "//third_party/dart:dart2js",
+        "//third_party/dart/utils/bazel:kernel_worker",
       ]
     }
   }
