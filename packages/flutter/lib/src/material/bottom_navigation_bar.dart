@@ -244,7 +244,7 @@ class _BottomNavigationTile extends StatelessWidget {
       case BottomNavigationBarType.fixed:
         size = 1;
         label = Opacity(
-            opacity: this.showLabel ? 1.0 : 0.0,
+            opacity: showLabel ? 1.0 : 0.0,
             alwaysIncludeSemantics: true,
             child: _FixedLabel(colorTween: colorTween, animation: animation, item: item),
         );
@@ -252,7 +252,7 @@ class _BottomNavigationTile extends StatelessWidget {
       case BottomNavigationBarType.shifting:
         size = (flex * 1000.0).round();
         label = Opacity(
-          opacity: this.showLabel ? 1.0 : 0.0,
+          opacity: showLabel ? 1.0 : 0.0,
           alwaysIncludeSemantics: true,
           child: _ShiftingLabel(animation: animation, item: item),
         );
