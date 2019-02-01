@@ -241,6 +241,11 @@ class Cubic extends Curve {
     assert(t >= 0.0 && t <= 1.0);
     double start = 0.0;
     double end = 1.0;
+    if (t == 0.0 || t == 1.0) {
+      // otherwise values off by a small fraction will be returned, since they
+      // are within the threshold of _cubicErrorBound
+      return t;
+    }
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
