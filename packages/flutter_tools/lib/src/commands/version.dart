@@ -31,7 +31,7 @@ class VersionCommand extends FlutterCommand {
 
   // The first version of Flutter which includes the flutter version command. Switching to older
   // versions will require the user to manually upgrade.
-  Version minSupportedVersion = Version.parse('1.1.10');
+  Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
     final RunResult runResult = await runCheckedAsync(
