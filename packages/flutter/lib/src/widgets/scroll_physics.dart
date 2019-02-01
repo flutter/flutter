@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
+import 'binding.dart' show WidgetsBinding;
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
