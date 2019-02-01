@@ -3,8 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'example_a.dart'
+  if (dart.html) 'example_b.dart';
 
 import 'print.dart';
+
+/// Set this.
+const int t = a;
 
 // Examples can assume:
 // int rows, columns;
