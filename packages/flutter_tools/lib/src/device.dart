@@ -25,21 +25,20 @@ DeviceManager get deviceManager => context[DeviceManager];
 
 /// A class to get all available devices.
 class DeviceManager {
+
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
-  DeviceManager() {
-    // Register the known discoverers.
-    _deviceDiscoverers.add(AndroidDevices());
-    _deviceDiscoverers.add(IOSDevices());
-    _deviceDiscoverers.add(IOSSimulators());
-    _deviceDiscoverers.add(FuchsiaDevices());
-    _deviceDiscoverers.add(FlutterTesterDevices());
-    _deviceDiscoverers.add(MacOSDevices());
-    _deviceDiscoverers.add(LinuxDevices());
-    _deviceDiscoverers.add(WindowsDevices());
-  }
-
-  final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
+  List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
+  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+    AndroidDevices(),
+    IOSDevices(),
+    IOSSimulators(),
+    FuchsiaDevices(),
+    FlutterTesterDevices(),
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+  ]);
 
   String _specifiedDeviceId;
 
@@ -91,7 +90,7 @@ class DeviceManager {
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
-    return _deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+    return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all connected devices.
