@@ -444,6 +444,7 @@ class JITSnapshotter {
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
+      '--no-use-bare-instructions',
     ];
     if (buildMode == BuildMode.debug) {
       genSnapshotArgs.add('--enable_asserts');
