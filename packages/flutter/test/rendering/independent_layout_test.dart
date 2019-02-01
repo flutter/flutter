@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
@@ -44,7 +45,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -73,7 +74,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;

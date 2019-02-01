@@ -450,7 +450,7 @@ void main() {
           builder: (BuildContext context) {
             textScaleFactorInMaterialApp = MediaQuery.of(context).textScaleFactor;
 
-            return SizedBox();
+            return const SizedBox();
           },
         ),
       ),

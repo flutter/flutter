@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;

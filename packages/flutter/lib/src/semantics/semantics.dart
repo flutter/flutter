@@ -10,14 +10,15 @@ import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
-import 'package:flutter/semantics.dart' show SemanticsBinding;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
 export 'semantics_event.dart';
+
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///
