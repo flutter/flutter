@@ -447,6 +447,7 @@ class FlutterEngine extends CachedArtifact {
       }
       if (engineBinary.skipChecks) {
         yield engineBinary;
+        continue;
       }
       // Certain binaries have no restrictions and should always be included.
       if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
@@ -813,10 +814,12 @@ class FlutterEngine extends CachedArtifact {
     for (String pkgName in _getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
       final Directory dir = fs.directory(pkgPath);
-      bool exists = dir.existsSync();
-      if (exists && clobber) {
+      final bool exists = dir.existsSync();
+      if (exists && !clobber) {
+        continue;
+      }
+      if (exists) {
         dir.deleteSync(recursive: true);
-        exists = false;
       }
       if (!exists) {
         await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
@@ -832,7 +835,6 @@ class FlutterEngine extends CachedArtifact {
         continue;
       }
       await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
-
       _makeFilesExecutable(dir);
 
       final File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
