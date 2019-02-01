@@ -402,22 +402,15 @@ class MaterialFonts extends CachedArtifact {
 class FlutterEngine extends CachedArtifact {
   FlutterEngine(Cache cache) : super('engine', cache);
 
-  List<String> _getPackageDirs() => const <String>['sky_engine'];
-
   // Return a list of (cache directory path, download URL path) tuples.
-  List<List<String>> _getBinaryDirs({
+  List<RawArtifact> _getBinaryDirs({
     @required BuildMode buildMode,
     @required TargetPlatform targetPlatform,
     @required bool skipUnknown,
   }) {
-    final List<List<String>> binaryDirs = <List<String>>[
-      <String>['common', 'flutter_patched_sdk.zip'],
-    ];
     TargetPlatform hostPlatform;
-    List<EngineBinary> binaries = _binaries;
     if (cache.includeAllPlatforms) {
       hostPlatform = null;
-      binaries = _binaries + _dartSdks;
     } if (platform.isMacOS) {
       hostPlatform = TargetPlatform.darwin_x64;
     } else if (platform.isLinux) {
@@ -425,25 +418,25 @@ class FlutterEngine extends CachedArtifact {
     } else if (platform.isWindows) {
       hostPlatform = TargetPlatform.windows_x64;
     }
-    for (EngineBinary engineBinary in _reduceEngineBinaries(
-      binaries,
+    final List<RawArtifact> results = _reduceEngineBinaries(
       buildMode: buildMode,
       targetPlatform: targetPlatform,
       hostPlatform: hostPlatform,
       skipUnknown: skipUnknown,
-    )) {
-      binaryDirs.add(engineBinary.toTuple());
+    ).toList();
+    if (cache.includeAllPlatforms) {
+      return results + _dartSdks;
     }
-    return binaryDirs;
+    return results;
   }
 
-  Iterable<EngineBinary> _reduceEngineBinaries(List<EngineBinary> binaries, {
+  Iterable<RawArtifact> _reduceEngineBinaries({
     BuildMode buildMode,
     TargetPlatform targetPlatform,
     TargetPlatform hostPlatform,
     bool skipUnknown,
   }) sync* {
-    for (EngineBinary engineBinary in binaries) {
+    for (RawArtifact engineBinary in _binaries) {
       if (hostPlatform != null && engineBinary.hostPlatform != null && engineBinary.hostPlatform != hostPlatform) {
         continue;
       }
@@ -466,31 +459,41 @@ class FlutterEngine extends CachedArtifact {
       }
     }
   }
-  List<EngineBinary> get _dartSdks => const <EngineBinary>[
-    EngineBinary(
+
+  List<RawArtifact> get _packages => const <RawArtifact>[
+    RawArtifact(
+      name: 'sky_engine',
+      fileName: 'sky_engine'
+    ),
+  ];
+
+  List<RawArtifact> get _dartSdks => const <RawArtifact>[
+    RawArtifact(
       name: 'darwin-x64',
       fileName: 'dart-sdk-darwin-x64.zip',
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'linux-x64',
       fileName: 'dart-sdk-linux-x64.zip',
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'windows-x64',
       fileName: 'dart-sdk-windows-x64.zip',
     ),
   ];
 
-  /// A set of all possible engine artifacts to download.
-  /// A binary without a buildMode or targetPlatform is downloaded
-  /// if the hostPlatform matches.
-  List<EngineBinary> get _binaries => const <EngineBinary>[
-    EngineBinary(
+  /// A set of all possible artifacts to download.
+  List<RawArtifact> get _binaries => const <RawArtifact>[
+    RawArtifact(
+      name: 'common',
+      fileName: 'flutter_patched_sdk.zip',
+    ),
+    RawArtifact(
       name: 'linux-x64',
       fileName: 'linux-x64/artifacts.zip',
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-profile/linux-x64',
       fileName: 'android-arm-profile/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm,
@@ -498,61 +501,61 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform: TargetPlatform.linux_x64,
       skipChecks: true,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-release/linux-x64',
       fileName: 'android-arm-release/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.release,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-profile/linux-x64',
       fileName: 'android-arm64-profile/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.profile,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-release/linux-x64',
       fileName: 'android-arm64-release/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.release,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-profile/linux-x64',
       fileName: 'android-arm-dynamic-profile/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.dynamicProfile,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-release/linux-x64',
       fileName:  'android-arm-dynamic-release/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.dynamicRelease,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-profile/linux-x64',
       fileName: 'android-arm64-dynamic-profile/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.dynamicProfile,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-release/linux-x64',
       fileName: 'android-arm64-dynamic-release/linux-x64.zip',
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.dynamicRelease,
       hostPlatform: TargetPlatform.linux_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'windows-x64',
       fileName: 'windows-x64/artifacts.zip',
       hostPlatform: TargetPlatform.windows_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-profile/windows-x64',
       fileName: 'android-arm-profile/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
@@ -560,153 +563,153 @@ class FlutterEngine extends CachedArtifact {
       buildMode: BuildMode.profile,
       skipChecks: true
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-release/windows-x64',
       fileName: 'android-arm-release/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.release,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-profile/windows-x64',
       fileName: 'android-arm64-profile/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.profile,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-release/windows-x64',
       fileName: 'android-arm64-release/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.release,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-profile/windows-x64',
       fileName: 'android-arm-dynamic-profile/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.dynamicProfile,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-release/windows-x64',
       fileName: 'android-arm-dynamic-release/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm,
       buildMode: BuildMode.dynamicRelease,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-profile/windows-x64',
       fileName: 'android-arm64-dynamic-profile/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.dynamicProfile,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-release/windows-x64',
       fileName: 'android-arm64-dynamic-release/windows-x64.zip',
       hostPlatform: TargetPlatform.windows_x64,
       targetPlatform: TargetPlatform.android_arm64,
       buildMode: BuildMode.dynamicRelease,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-x86',
       fileName: 'android-x86/artifacts.zip',
       buildMode: BuildMode.debug,
       targetPlatform: TargetPlatform.android_x86,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-x64',
       fileName: 'android-x64/artifacts.zip',
       buildMode: BuildMode.debug,
       targetPlatform: TargetPlatform.android_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm',
       fileName: 'android-arm/artifacts.zip',
       buildMode: BuildMode.debug,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-profile',
       fileName: 'android-arm-profile/artifacts.zip',
       buildMode: BuildMode.profile,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-release',
       fileName: 'android-arm-release/artifacts.zip',
       buildMode: BuildMode.release,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64',
       fileName: 'android-arm64/artifacts.zip',
       buildMode: BuildMode.debug,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-profile',
       fileName: 'android-arm64-profile/artifacts.zip',
       buildMode: BuildMode.profile,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-release',
       fileName: 'android-arm64-release/artifacts.zip',
       buildMode: BuildMode.release,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-profile',
       fileName: 'android-arm-dynamic-profile/artifacts.zip',
       buildMode: BuildMode.dynamicProfile,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-release',
       fileName: 'android-arm-dynamic-release/artifacts.zip',
       buildMode: BuildMode.dynamicRelease,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-profile',
       fileName: 'android-arm64-dynamic-profile/artifacts.zip',
       buildMode: BuildMode.dynamicProfile,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-release',
       fileName: 'android-arm64-dynamic-release/artifacts.zip',
       buildMode: BuildMode.dynamicRelease,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'ios', fileName: 'ios/artifacts.zip',
       buildMode: BuildMode.debug,
       hostPlatform: TargetPlatform.darwin_x64,
       targetPlatform: TargetPlatform.ios,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'ios-profile',
       fileName: 'ios-profile/artifacts.zip',
       buildMode: BuildMode.profile,
       hostPlatform: TargetPlatform.darwin_x64,
       targetPlatform: TargetPlatform.ios,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'ios-release',
       fileName: 'ios-release/artifacts.zip',
       buildMode: BuildMode.release,
       hostPlatform: TargetPlatform.darwin_x64,
       targetPlatform: TargetPlatform.ios,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'darwin-x64',
       fileName: 'darwin-x64/artifacts.zip',
       hostPlatform: TargetPlatform.darwin_x64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-profile/darwin-x64',
       fileName: 'android-arm-profile/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
@@ -714,49 +717,49 @@ class FlutterEngine extends CachedArtifact {
       targetPlatform: TargetPlatform.android_arm,
       skipChecks: true,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-release/darwin-x64',
       fileName: 'android-arm-release/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.release,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-profile/darwin-x64',
       fileName: 'android-arm64-profile/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.profile,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-release/darwin-x64',
       fileName: 'android-arm64-release/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.release,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-profile/darwin-x64',
       fileName: 'android-arm-dynamic-profile/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.dynamicProfile,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm-dynamic-release/darwin-x64',
       fileName: 'android-arm-dynamic-release/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.dynamicRelease,
       targetPlatform: TargetPlatform.android_arm,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-profile/darwin-x64',
       fileName: 'android-arm64-dynamic-profile/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
       buildMode: BuildMode.dynamicProfile,
       targetPlatform: TargetPlatform.android_arm64,
     ),
-    EngineBinary(
+    RawArtifact(
       name: 'android-arm64-dynamic-release/darwin-x64',
       fileName: 'android-arm64-dynamic-release/darwin-x64.zip',
       hostPlatform: TargetPlatform.darwin_x64,
@@ -780,21 +783,15 @@ class FlutterEngine extends CachedArtifact {
     bool skipUnknown,
   }) {
     final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in _getPackageDirs()) {
-      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
-      if (!fs.directory(pkgPath).existsSync())
+    for (RawArtifact packageArtifact in _packages) {
+      final Directory packageDirectory = packageArtifact.artifactLocation(pkgDir);
+      if (!packageDirectory.existsSync()) {
         return false;
+      }
     }
-
-    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
-      final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
-      if (!dir.existsSync())
-        return false;
-    }
-
-    for (String licenseDir in _getLicenseDirs()) {
-      final File file = fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
-      if (!file.existsSync()) {
+    for (RawArtifact toolsArtifact in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
+      final Directory dir = toolsArtifact.artifactLocation(location);
+      if (!dir.existsSync()) {
         return false;
       }
     }
@@ -809,37 +806,34 @@ class FlutterEngine extends CachedArtifact {
     @required bool clobber,
   }) async {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
-
-    final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in _getPackageDirs()) {
-      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
+    final Directory packageDirectory = cache.getCacheDir('pkg');
+    for (RawArtifact rawArtifact in _packages) {
+      final String pkgPath = fs.path.join(packageDirectory.path, rawArtifact.name);
       final Directory dir = fs.directory(pkgPath);
       final bool exists = dir.existsSync();
-      if (exists && !clobber) {
-        continue;
-      }
       if (exists) {
+        if (!clobber) {
+          continue;
+        }
         dir.deleteSync(recursive: true);
       }
-      if (!exists) {
-        await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
-      }
+      final Uri uri = Uri.parse('$url${rawArtifact.name}.zip');
+      await _downloadZipArchive('Downloading package ${rawArtifact.name}...', uri, packageDirectory);
     }
 
-    for (List<String> toolsDir in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
-      final String cacheDir = toolsDir[0];
-      final String urlPath = toolsDir[1];
-      final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      // Here we assume if a directory exists, all the files are correct.
-      if (dir.existsSync() && !clobber) {
+    final List<RawArtifact> rawArtifacts = _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+    for (RawArtifact rawArtifact in rawArtifacts) {
+      final Directory artifactDirectory = rawArtifact.artifactLocation(location);
+      if (artifactDirectory.existsSync() && !clobber) {
         continue;
       }
-      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
-      _makeFilesExecutable(dir);
+      final Uri uri = rawArtifact.artifactRemoteLocation(url);
+      await _downloadZipArchive('Downloading ${rawArtifact.name} tools...', uri, artifactDirectory);
+      _makeFilesExecutable(artifactDirectory);
 
-      final File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
+      final File frameworkZip = fs.file(fs.path.join(artifactDirectory.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
-        final Directory framework = fs.directory(fs.path.join(dir.path, 'Flutter.framework'));
+        final Directory framework = fs.directory(fs.path.join(artifactDirectory.path, 'Flutter.framework'));
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
@@ -857,39 +851,34 @@ class FlutterEngine extends CachedArtifact {
     }
   }
 
-  Future<bool> areRemoteArtifactsAvailable({String engineVersion,
-                                            bool includeAllPlatforms = true}) async {
-    final bool includeAllPlatformsState = cache.includeAllPlatforms;
+  // Checks whether the remote artifacts for `engineVersion` are availible in storage.
+  Future<bool> areRemoteArtifactsAvailable({
+    String engineVersion,
+    bool includeAllPlatforms = true,
+  }) async {
+    final bool includeAllPlatforms = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
-
-    Future<bool> checkForArtifacts(String engineVersion) async {
-      engineVersion ??= version;
-      final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
-
-      bool exists = false;
-      for (String pkgName in _getPackageDirs()) {
-        exists = await _doesRemoteExist('Checking package $pkgName is available...',
-            Uri.parse(url + pkgName + '.zip'));
+    engineVersion ??= version;
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+    final bool result = await () async {
+      for (RawArtifact packageArtifact in _packages) {
+        final Uri uri = Uri.parse('$url${packageArtifact.name}.zip');
+        final bool exists = await _doesRemoteExist('Checking package ${packageArtifact.name} is available...', uri);
         if (!exists) {
           return false;
         }
       }
-
-      for (List<String> toolsDir in _getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false)) {
-        final String cacheDir = toolsDir[0];
-        final String urlPath = toolsDir[1];
-        exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
-            Uri.parse(url + urlPath));
+      final List<RawArtifact> rawArtifacts = _getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false);
+      for (RawArtifact rawArtifact in rawArtifacts) {
+        final Uri uri = Uri.parse('$url${rawArtifact.fileName}');
+        final bool exists = await _doesRemoteExist('Checking ${rawArtifact.name} tools are available...', uri);
         if (!exists) {
           return false;
         }
       }
-
       return true;
-    }
-
-    final bool result = await checkForArtifacts(engineVersion);
-    cache.includeAllPlatforms = includeAllPlatformsState;
+    }();
+    cache.includeAllPlatforms = includeAllPlatforms;
     return result;
   }
 
@@ -898,8 +887,9 @@ class FlutterEngine extends CachedArtifact {
     for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
         final String name = fs.path.basename(entity.path);
-        if (name == 'flutter_tester')
+        if (name == 'flutter_tester') {
           os.makeExecutable(entity);
+        }
       }
     }
   }
@@ -995,8 +985,8 @@ void _ensureExists(Directory directory) {
     directory.createSync(recursive: true);
 }
 
-class EngineBinary {
-  const EngineBinary({
+class RawArtifact {
+  const RawArtifact({
     this.targetPlatform,
     this.buildMode,
     @required this.name,
@@ -1012,5 +1002,13 @@ class EngineBinary {
   final String fileName;
   final bool skipChecks;
 
-  List<String> toTuple() => <String>[name, fileName];
+  /// The location where this artifact will be cached.
+  Directory artifactLocation(Directory location) {
+    return fs.directory(fs.path.join(location.path, name));
+  }
+
+  /// The remote location where this artifact can be downloaded.
+  Uri artifactRemoteLocation(String baseUrl) {
+    return Uri.parse('$baseUrl$fileName');
+  }
 }
