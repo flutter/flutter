@@ -1,5 +1,5 @@
 import 'dart:ui' as ui show window;
-import 'dart:ui' show Size, Locale;
+import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter_test/flutter_test.dart';
@@ -34,35 +34,33 @@ void main() {
     );
   });
 
-  // testWidgets('TestWindow can fake view insets', (WidgetTester tester) async {
-  //   await verifyThatTestWindowCanFakeProperty<WindowPadding>(
-  //     tester: tester,
-  //     realPropertyValue: ui.window.viewInsets,
-  //     fakePropertyValue: const WindowPadding(),
-  //     propertyRetriever: (BuildContext context) {
-  //       EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio)
-  //       return MediaQuery.of(context).viewInsets;
-  //     },
-  //     propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
-  //       binding.window.viewInsetsTestValue = fakeValue;
-  //     }
-  //   );
-  // });
+  testWidgets('TestWindow can fake view insets', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<WindowPadding>(
+      tester: tester,
+      realValue: ui.window.viewInsets,
+      fakeValue: const FakeWindowPadding(),
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.viewInsets;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+        binding.window.viewInsetsTestValue = fakeValue;
+      }
+    );
+  });
 
-  // testWidgets('TestWindow can fake padding', (WidgetTester tester) async {
-  //   await verifyThatTestWindowCanFakeProperty<WindowPadding>(
-  //     tester: tester,
-  //     realPropertyValue: ui.window.padding,
-  //     fakePropertyValue: const WindowPadding(50, 50),
-  //     propertyRetriever: (BuildContext context) {
-  //       final Size physicalSize = MediaQuery.of(context).size * MediaQuery.of(context).devicePixelRatio;
-  //       return physicalSize;
-  //     },
-  //     propertyFaker: (TestWidgetsFlutterBinding binding, Size fakeValue) {
-  //       binding.window.physicalSizeTestValue = fakeValue;
-  //     }
-  //   );
-  // });
+  testWidgets('TestWindow can fake padding', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<WindowPadding>(
+      tester: tester,
+      realValue: ui.window.padding,
+      fakeValue: const FakeWindowPadding(),
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.padding;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+        binding.window.paddingTestValue = fakeValue;
+      }
+    );
+  });
 
   testWidgets('TestWindow can fake locale', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<Locale>(
@@ -148,19 +146,19 @@ void main() {
     );
   });
 
-  // testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
-  //   verifyThatTestWindowCanFakeProperty<AccessibilityFeatures>(
-  //     tester: tester,
-  //     realValue: ui.window.accessibilityFeatures,
-  //     fakeValue: AccessibilityFeatures(),
-  //     propertyRetriever: () {
-  //       return WidgetsBinding.instance.window.semanticsEnabled;
-  //     },
-  //     propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
-  //       binding.window.semanticsEnabledTestValue = fakeValue;
-  //     }
-  //   );
-  // });
+  testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<AccessibilityFeatures>(
+      tester: tester,
+      realValue: ui.window.accessibilityFeatures,
+      fakeValue: const FakeAccessibilityFeatures(),
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.accessibilityFeatures;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
+        binding.window.accessibilityFeaturesTestValue = fakeValue;
+      }
+    );
+  });
 
   testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
@@ -205,4 +203,50 @@ TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   assert(binding is TestWidgetsFlutterBinding);
   final TestWidgetsFlutterBinding testBinding = binding;
   return testBinding;
+}
+
+class FakeWindowPadding implements WindowPadding {
+  const FakeWindowPadding({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  });
+
+  @override
+  final double left;
+
+  @override
+  final double top;
+
+  @override
+  final double right;
+
+  @override
+  final double bottom;
+}
+
+class FakeAccessibilityFeatures implements AccessibilityFeatures {
+  const FakeAccessibilityFeatures({
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
+    this.boldText = false,
+    this.reduceMotion = false,
+  });
+
+  @override
+  final bool accessibleNavigation;
+  
+  @override
+  final bool invertColors;
+  
+  @override
+  final bool disableAnimations;
+  
+  @override
+  final bool boldText;
+
+  @override
+  final bool reduceMotion;
 }

@@ -24,12 +24,12 @@ import 'package:meta/meta.dart';
 ///   final WidgetsBinding binding = tester.binding;
 ///   assert(binding is TestWidgetsFlutterBinding);
 ///   final TestWidgetsFlutterBinding testBinding = binding;
-/// 
+///
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
 ///   testBinding.window.textScaleFactorFakeValue = 2.5;
-/// 
+///
 ///   // Test code that depends on text scale factor here.
 /// });
 /// ```
