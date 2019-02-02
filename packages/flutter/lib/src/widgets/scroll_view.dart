@@ -55,6 +55,8 @@ abstract class ScrollView extends StatelessWidget {
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
   /// The [scrollDirection], [reverse], and [shrinkWrap] arguments must not be null.
+  ///
+  /// The [anchor] argument must be non-null and in the range 0.0 to 1.0.
   const ScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
@@ -64,6 +66,7 @@ abstract class ScrollView extends StatelessWidget {
     ScrollPhysics physics,
     this.shrinkWrap = false,
     this.center,
+    this.anchor = 0.0,
     this.cacheExtent,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.down,
@@ -76,6 +79,8 @@ abstract class ScrollView extends StatelessWidget {
            'You cannot both set primary to true and pass an explicit controller.'
        ),
        assert(!shrinkWrap || center == null),
+       assert(anchor != null),
+       assert(anchor >= 0.0 && anchor <= 1.0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
@@ -190,7 +195,20 @@ abstract class ScrollView extends StatelessWidget {
   /// Of the built-in subclasses of [ScrollView], only [CustomScrollView]
   /// supports [center]; for that class, the given key must be the key of one of
   /// the slivers in the [CustomScrollView.slivers] list.
+  ///
+  /// See also:
+  ///
+  ///  * [anchor], which controls where the [center] as aligned in the viewport.
   final Key center;
+
+  /// The relative position of the zero scroll offset.
+  ///
+  /// For example, if [anchor] is 0.5 and the [axisDirection] is
+  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
+  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
+  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
+  /// on the left edge of the viewport.
+  final double anchor;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
@@ -269,6 +287,7 @@ abstract class ScrollView extends StatelessWidget {
       slivers: slivers,
       cacheExtent: cacheExtent,
       center: center,
+      anchor: anchor,
     );
   }
 
@@ -421,7 +440,7 @@ abstract class ScrollView extends StatelessWidget {
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
-  /// If the [primary] argument is true, the [controller] must be null.
+  /// See the [new ScrollView] constructor for more details on these arguments.
   const CustomScrollView({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -431,6 +450,7 @@ class CustomScrollView extends ScrollView {
     ScrollPhysics physics,
     bool shrinkWrap = false,
     Key center,
+    double anchor = 0.0,
     double cacheExtent,
     this.slivers = const <Widget>[],
     int semanticChildCount,
@@ -444,6 +464,7 @@ class CustomScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     center: center,
+    anchor: anchor,
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
     dragStartBehavior: dragStartBehavior,

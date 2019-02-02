@@ -55,4 +55,37 @@ void main() {
       Rect.fromLTRB(0.0, 0.0, 800.0, 100.0),
     );
   });
+
+  testWidgets('CustomScrollView.anchor', (WidgetTester tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
+          SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
+        ],
+        center: Key('b'),
+        anchor: 1.0,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(
+        find.descendant(
+          of: find.byKey(const Key('a')),
+          matching: find.byType(SizedBox),
+        ),
+      ),
+      Rect.fromLTRB(0.0, 500.0, 800.0, 600.0),
+    );
+    expect(
+      tester.getRect(
+        find.descendant(
+          of: find.byKey(const Key('b'), skipOffstage: false),
+          matching: find.byType(SizedBox, skipOffstage: false),
+        ),
+      ),
+      Rect.fromLTRB(0.0, 600.0, 800.0, 700.0),
+    );
+  });
 }
