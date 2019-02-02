@@ -237,13 +237,13 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 
   @override
   final bool accessibleNavigation;
-  
+
   @override
   final bool invertColors;
-  
+
   @override
   final bool disableAnimations;
-  
+
   @override
   final bool boldText;
 
