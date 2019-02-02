@@ -1319,7 +1319,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
-  TestViewConfiguration({ 
+  TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.Window window,
   })

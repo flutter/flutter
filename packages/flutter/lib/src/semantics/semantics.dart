@@ -19,7 +19,6 @@ import 'semantics_event.dart';
 export 'dart:ui' show SemanticsAction;
 export 'semantics_event.dart';
 
-
 /// Signature for a function that is called for each [SemanticsNode].
 ///
 /// Return false to stop visiting nodes.

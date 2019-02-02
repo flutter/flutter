@@ -9,15 +9,15 @@ import 'package:meta/meta.dart';
 
 /// [Window] that wraps another [Window] and allows faking of some properties
 /// for testing purposes.
-/// 
+///
 /// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
 /// properties of a [Window]. [TestWindow] facilitates the faking of these properties
 /// by overidding the properties of a real [Window] with desired fake values. The
 /// binding used within tests, [TestWidgetsFlutterBinding], contains a [TestWindow]
-/// that is used by all tests.  
-/// 
+/// that is used by all tests.
+///
 /// A test can utilize a [TestWindow] in the following way:
-/// 
+///
 /// ```dart
 /// testWidgets('your test name here', (WidgetTester tester) async {
 ///   // Retrieve the TestWidgetsFlutterBinding.
@@ -33,15 +33,15 @@ import 'package:meta/meta.dart';
 ///   // Test code that depends on text scale factor here.
 /// });
 /// ```
-/// 
+///
 /// The [TestWidgetsFlutterBinding] is recreated for each test and
 /// therefore any fake values defined in one test will not persist
 /// to the next.
-/// 
+///
 /// If a test needs to override a real [Window] property and then later
 /// return to using the real [Window] property, [TestWindow] provides
 /// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
-/// 
+///
 /// To clear all fake test values in a [TestWindow], consider using [clearAllTestValues()].
 class TestWindow implements Window {
   /// Constructs a [TestWindow] that defers all behavior to the given [window] unless
@@ -284,7 +284,7 @@ class TestWindow implements Window {
 
   /// Delete any test value properties that have been set on this [TestWindow]
   /// and return to reporting the real [Window] values for all [Window] properties.
-  /// 
+  ///
   /// If desired, clearing of properties can be done on an individual basis, e.g.,
   /// [clearLocaleTestValue()].
   void clearAllTestValues() {
