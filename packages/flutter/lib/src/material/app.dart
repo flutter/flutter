@@ -316,7 +316,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://material.google.com/layout/metrics-keylines.html>
+  ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
   @override
@@ -411,10 +411,8 @@ class _MaterialAppState extends State<MaterialApp> {
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
         navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          MaterialPageRoute<dynamic>(settings: settings, builder: builder),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+          MaterialPageRoute<T>(settings: settings, builder: builder),
         home: widget.home,
         routes: widget.routes,
         initialRoute: widget.initialRoute,

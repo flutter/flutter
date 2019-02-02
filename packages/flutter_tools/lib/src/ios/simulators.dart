@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import '../application_package.dart';
@@ -17,6 +16,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -320,7 +320,10 @@ class IOSSimulator extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
-        args.add('--enable-checked-mode');
+        args.addAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points'
+        ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
       if (debuggingOptions.skiaDeterministicRendering)

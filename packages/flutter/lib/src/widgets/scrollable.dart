@@ -81,7 +81,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -182,6 +182,7 @@ class Scrollable extends StatefulWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildCount;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// {@template flutter.widgets.scrollable.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -193,7 +194,7 @@ class Scrollable extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///
@@ -524,21 +525,29 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(position != null);
-    // TODO(ianh): Having all these global keys is sad.
-    Widget result = RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.opaque,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      child: Semantics(
-        explicitChildNodes: !widget.excludeFromSemantics,
-        child: IgnorePointer(
-          key: _ignorePointerKey,
-          ignoring: _shouldIgnorePointer,
-          ignoringSemantics: false,
-          child: _ScrollableScope(
-            scrollable: this,
-            position: position,
+    // _ScrollableScope must be placed above the BuildContext returned by notificationContext
+    // so that we can get this ScrollableState by doing the following:
+    //
+    // ScrollNotification notification;
+    // Scrollable.of(notification.context)
+    //
+    // Since notificationContext is pointing to _gestureDetectorKey.context, _ScrollableScope
+    // must be placed above the widget using it: RawGestureDetector
+    Widget result = _ScrollableScope(
+      scrollable: this,
+      position: position,
+      // TODO(ianh): Having all these global keys is sad.
+      child: RawGestureDetector(
+        key: _gestureDetectorKey,
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: widget.excludeFromSemantics,
+        child: Semantics(
+          explicitChildNodes: !widget.excludeFromSemantics,
+          child: IgnorePointer(
+            key: _ignorePointerKey,
+            ignoring: _shouldIgnorePointer,
+            ignoringSemantics: false,
             child: widget.viewportBuilder(context, position),
           ),
         ),
@@ -586,7 +595,8 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.allowImplicitScrolling,
     @required this.semanticChildCount,
     Widget child
-  }) : assert(position != null), super(key: key, child: child);
+  }) : assert(position != null),
+       super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -619,7 +629,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
        _semanticChildCount = semanticChildCount,
-       assert(position != null), super(child) {
+       assert(position != null),
+       super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 

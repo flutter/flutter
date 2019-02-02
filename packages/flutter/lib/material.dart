@@ -10,7 +10,7 @@
 ///
 ///  * [flutter.io/widgets](https://flutter.io/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
-///  * [material.google.com](https://material.google.com/)
+///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
 library material;
 
@@ -18,15 +18,18 @@ export 'src/material/about.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
+export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/back_button.dart';
 export 'src/material/bottom_app_bar.dart';
+export 'src/material/bottom_app_bar_theme.dart';
 export 'src/material/bottom_navigation_bar.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
+export 'src/material/card_theme.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/chip.dart';

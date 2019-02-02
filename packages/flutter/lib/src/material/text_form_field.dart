@@ -55,7 +55,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/text-fields.html>
+///  * <https://material.io/design/components/text-fields.html>
 ///  * [TextField], which is the underlying text field without the [Form]
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
@@ -101,6 +101,7 @@ class TextFormField extends FormField<String> {
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
+    InputCounterWidgetBuilder buildCounter,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -150,6 +151,7 @@ class TextFormField extends FormField<String> {
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,
+        buildCounter: buildCounter,
       );
     },
   );

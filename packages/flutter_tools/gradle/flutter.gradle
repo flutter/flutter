@@ -285,6 +285,22 @@ class FlutterPlugin implements Plugin<Project> {
         return "release"
     }
 
+    /**
+     * Returns a Flutter Jar file path suitable for the specified Android buildMode.
+     */
+    private File flutterJarFor(buildMode) {
+        if (buildMode == "profile") {
+            return profileFlutterJar
+        } else if (buildMode == "dynamicProfile") {
+            return dynamicProfileFlutterJar
+        } else if (buildMode == "dynamicRelease") {
+            return dynamicReleaseFlutterJar
+        } else if (buildMode == "debug") {
+            return debugFlutterJar
+        }
+        return releaseFlutterJar
+    }
+
     private void addFlutterTask(Project project) {
         if (project.state.failure) {
             return
@@ -389,16 +405,40 @@ class FlutterPlugin implements Plugin<Project> {
             // We know that the flutter app is a subproject in another Android app when these tasks exist.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
-                dependsOn packageAssets ? packageAssets : variant.mergeAssets
-                dependsOn cleanPackageAssets ? cleanPackageAssets : "clean${variant.mergeAssets.name.capitalize()}"
-                into packageAssets ? packageAssets.outputDir : variant.mergeAssets.outputDir
+                if (packageAssets && cleanPackageAssets) {
+                    dependsOn packageAssets
+                    dependsOn cleanPackageAssets
+                    into packageAssets.outputDir
+
+                    File chosenFlutterJar = flutterJarFor(flutterBuildMode)
+                    Task copySharedFlutterAssetsTask = project.tasks.create(name: "copySharedFlutterAssets${variant.name.capitalize()}", type: Copy) {
+                        from(project.zipTree(chosenFlutterJar))
+                        include 'assets/flutter_shared/*'
+                        into "src/${variant.name}"
+                    }
+                    dependsOn copySharedFlutterAssetsTask
+                } else {
+                    dependsOn variant.mergeAssets
+                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
+                    into variant.mergeAssets.outputDir
+                }
                 with flutterTask.assets
             }
+
             if (packageAssets) {
+                String mainModuleName = "app"
+                try {
+                    String tmpModuleName = project.rootProject.ext.mainModuleName
+                    if (tmpModuleName != null && !tmpModuleName.empty) {
+                        mainModuleName = tmpModuleName
+                    }
+                } catch (Exception e) {
+                }
                 // Only include configurations that exist in parent project.
-                Task mergeAssets = project.tasks.findByPath(":app:merge${variant.name.capitalize()}Assets")
+                Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${variant.name.capitalize()}Assets")
                 if (mergeAssets) {
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }

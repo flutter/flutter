@@ -21,7 +21,7 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -40,6 +40,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    _mouseTracker = _createMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -134,6 +135,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
     renderView.scheduleInitialFrame();
   }
 
+  /// The object that manages state about currently connected mice, for hover
+  /// notification.
+  MouseTracker get mouseTracker => _mouseTracker;
+  MouseTracker _mouseTracker;
+
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics
   PipelineOwner get pipelineOwner => _pipelineOwner;
@@ -184,6 +190,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
 
   SemanticsHandle _semanticsHandle;
 
+  // Creates a [MouseTracker] which manages state about currently connected
+  // mice, for hover notification.
+  MouseTracker _createMouseTracker() {
+    return MouseTracker(pointerRouter, (Offset offset) {
+      // Layer hit testing is done using device pixels, so we have to convert
+      // the logical coordinates of the event location back to device pixels
+      // here.
+      return renderView.layer
+          .find<MouseTrackerAnnotation>(offset * ui.window.devicePixelRatio);
+    });
+  }
+
   void _handleSemanticsEnabledChanged() {
     setSemanticsEnabled(ui.window.semanticsEnabled);
   }
@@ -222,8 +240,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
-  /// frame.
+  /// automatically by the engine when it is time to lay out and paint a frame.
   ///
   /// Each frame consists of the following phases:
   ///
@@ -302,8 +319,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);
-    // This super call is safe since it will be bound to a mixed-in declaration.
-    super.hitTest(result, position); // ignore: abstract_super_member_reference
+    super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {

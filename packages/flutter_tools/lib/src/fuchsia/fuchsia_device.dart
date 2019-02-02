@@ -115,6 +115,9 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = await fuchsiaSdk.listDevices();
+    if (text == null) {
+      return <Device>[];
+    }
     final List<FuchsiaDevice> devices = parseListDevices(text);
     return devices;
   }
@@ -182,7 +185,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool applicationNeedsRebuild = false,
-    bool usesTerminalUi = false,
+    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
 
@@ -322,7 +325,7 @@ class FuchsiaIsolateDiscoveryProtocol {
     }
     _status ??= logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
-      expectSlowOperation: true,
+      timeout: null, // could take an arbitrary amount of time
     );
     _pollingTimer ??= Timer(_pollDuration, _findIsolate);
     return _foundUri.future.then((Uri uri) {

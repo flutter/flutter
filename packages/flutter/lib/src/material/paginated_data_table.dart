@@ -74,7 +74,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     @required this.source
   }) : assert(columns != null),
        assert(dragStartBehavior != null),
