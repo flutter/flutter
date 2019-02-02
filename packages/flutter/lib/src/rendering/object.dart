@@ -649,18 +649,32 @@ class SemanticsHandle {
   }
 }
 
+/// Stores the [elevation], rendering [area], and rendering [path] (and the
+/// number of contours it has) for the [object].
+///
+/// Decouples the elevation and clip path notions from [RenderPhysicalModel] and
+/// [RenderPhysicalShape]. If other render objects wish to implement elevation,
+/// they would need to be able to supply these paraemters as well.
 @immutable
 class _ElevationData {
-  const _ElevationData(this.elevation, this.area, this.path, this.object)
-      : assert(elevation != null),
-        assert(area != null),
-        assert(path != null),
-        assert(object != null);
+  const _ElevationData(
+    this.elevation,
+    this.area,
+    this.path,
+    this.pathContours,
+    this.object,
+  ) : assert(elevation != null),
+      assert(area != null),
+      assert(path != null),
+      assert(pathContours != null),
+      assert(pathContours > 0),
+      assert(object != null);
 
   final double elevation;
   final Rect area;
   final Path path;
   final RenderObject object;
+  final int pathContours;
 }
 
 /// The pipeline owner manages the rendering pipeline.
@@ -837,22 +851,9 @@ class PipelineOwner {
   /// The maximum number of iterations to use when checking for potential
   /// incorrect uses of elevation on a [RenderPhysicalModel] or
   /// [RenderPhysicalShape] with regard to painting order. This number is not
-  /// the same as the number of total [RenderObject]s in the tree, but rather the
-  /// total number of [RenderPhysicalModel] or [RenderPhysicalShape]s to check.
-  ///
-  /// This property is only used when asserts are enabled (e.g. debug mode).
-  ///
-  /// The default value is 10.
-  ///
-  /// See also [debugCheckElevationData].
-  int get maxElevationObjectsToCheck => _maxElevationObjectsToCheck;
-  int _maxElevationObjectsToCheck = 10;
-
-  /// Sets the maximum number of iterations to use when checking for potential
-  /// incorrect uses of elevation on a [RenderPhysicalModel] or
-  /// [RenderPhysicalShape] with regard to painting order. This number is not
-  /// the same as the number of total [RenderObject]s in the tree, but rather the
-  /// total number of [RenderPhysicalModel] or [RenderPhysicalShape]s to check.
+  /// the same as the number of total [RenderObject]s in the tree, but rather
+  /// the total number of [RenderPhysicalModel] or [RenderPhysicalShape]s to
+  /// check.
   ///
   /// Setting this number too high will degrade performance if many render
   /// objects using elevation are present in the tree all are used correctly.
@@ -866,20 +867,33 @@ class PipelineOwner {
   /// This value must be >= 0 and must not be null. Setting it to 0 will
   /// disable the check, and a warning will be printed once if there are more
   /// objects available than actually being checked.
+  ///
+  /// See also: [debugCheckElevationData].
+  int get maxElevationObjectsToCheck => _maxElevationObjectsToCheck;
+  int _maxElevationObjectsToCheck = 10;
   set maxElevationObjectsToCheck(int value) {
     assert(value != null);
     assert(value >= 0);
     _maxElevationObjectsToCheck = value;
   }
 
+  /// This map scopes the check in [debugCheckElevationData]. The key is the
+  /// [elevationSubtreeRoot], the values are a collection of [RenderObject]s
+  /// with their desired elevations, areas of the screen to paint in, and the
+  /// actual [Path] they wish to paint.
   Map<RenderObject, List<_ElevationData>> _elevations;
-  Path _translatePath(Path p, Offset offset) {
-    final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
-    return p.transform(matrix.storage);
-  }
-  bool _printedExceededmaxElevationObjectsToCheckWarning = false;
 
-  /// Checks for elevation consistency with regard to painting order.
+  // A flag to ensure we don't spam the debug logs with warnings about there
+  // being more elevation objects than we're checking.
+  bool _printedExceededMaxElevationObjectsToCheckWarning = false;
+
+  /// Checks that two overlapping objects that specify elevation are painted in
+  /// ascending order of elevation.
+  ///
+  /// For example, a [Stack] that pains multiple [Material] children could
+  /// potentially paint them out of elevation order. Some implementations would
+  /// render the children in paint order, while others would render them in
+  /// elevation order, leading to inconsistent user experience.
   ///
   /// This method is only meant for debug builds, and should only be called from
   /// an `assert` from within the framework. All of the parameters must not be
@@ -888,14 +902,21 @@ class PipelineOwner {
   /// The [elevation] refers to the elevation specified on the
   /// [RenderPhysicalModel] or [RenderPhysicalShape]. The [area] parameter
   /// specifies the [Rect] on the screen in which the physical model will be
-  /// drawn, and the [path] parameter specifies the actual [Path] to be drawn.
-  /// The path is expected to be smaller than the area.
+  /// drawn, and the [path] parameter specifies the actual [Path] to be drawn,
+  /// with the corret paint translations already applied. The path may be
+  /// smaller than the area, e.g. for a non-rectangular shape. The [object]
+  /// parameter is the [RenderObject] actually being checked, e.g.
+  /// a [RenderPhysicalModel] or a [RenderPhysicalShape]. The
+  /// [elevationSubtreeRoot] parameter allows the caller to scope this check to
+  /// a specific part of the render tree rather than going all the way to the
+  /// root.
   ///
-  /// If the durrent paint cycle results in drawing a shape at an elevation
+  /// If the current paint cycle results in drawing a shape at an elevation
   /// lower than another shape already drawn in this area, a [Path] will be
   /// returned describing the boundary of the conflicting shapes. Callers can
   /// use this path to highlight the area of the screen where the conflict
-  /// occurs.
+  /// occurs. If this shape's painting order is consistent with its elevation,
+  /// `null` will be returned.
   ///
   /// This check has worst case performance of O(Σn) time, which is better than
   /// O(n^2) but worse than O(n log(n)) (its curve is similar to O(n^1.8)). If
@@ -903,22 +924,24 @@ class PipelineOwner {
   /// setting [maxElevationObjectsToCheck] to a lower number, or to 0 to disable
   /// it completely. The number can still be set higher in unit tests, where
   /// performance is less critical.
-  Path debugCheckElevationData(
-    double elevation,
-    Rect area,
-    Path path,
-    RenderObject object,
-    RenderObject lastCommonAncestor,
-  ) {
+  Path debugCheckElevationData({
+    @required double elevation,
+    @required Rect area,
+    @required Path path,
+    @required RenderObject object,
+    @required RenderObject elevationSubtreeRoot,
+  }) {
     assert(elevation != null);
     assert(area != null);
     assert(path != null);
     assert(object != null);
-    _elevations[lastCommonAncestor] ??= <_ElevationData>[];
+    assert(elevationSubtreeRoot != null);
+    _elevations[elevationSubtreeRoot] ??= <_ElevationData>[];
+    final int newPathContours = path.computeMetrics().length;
     // Check in reverse order - we're more likely to fail on a closer node
     // if we're going to fail at all. Take only _maxElevationObjectsToCheck
     // to avoid this taking too long in the paint cycle.
-    final Iterable<_ElevationData> elevationsToCheck = _elevations[lastCommonAncestor]
+    final Iterable<_ElevationData> elevationsToCheck = _elevations[elevationSubtreeRoot]
         .reversed
         .take(_maxElevationObjectsToCheck)
         .where((_ElevationData elevationData) {
@@ -929,19 +952,12 @@ class PipelineOwner {
       final Path difference = Path.combine(
         PathOperation.union,
         path,
-        _translatePath(elevationData.path, elevationData.area.topLeft - area.topLeft),
+        elevationData.path,
       );
       // Check if the union created a path with a single segment. If so, the
       // paths overlap.
-      // This will not work if we're dealing with input paths that are already
-      // multi-segment shape, but checking for the segments of the incoming paths
-      // adds complexity and cost for an unusual case.
-      final ui.PathMetrics differenceMetrics = difference.computeMetrics();
-      // Don't use `PathMetrics.length`, we don't actually want to iterate the
-      // whole set. Instead, just make sure we've ended up with one distinct
-      // contour.
-      differenceMetrics.iterator.moveNext();
-      if (!differenceMetrics.iterator.moveNext()) {
+      final int contourCount = difference.computeMetrics().length;
+      if (contourCount != newPathContours + elevationData.pathContours) {
         object._debugReportException(
           'paint',
           'An attempt was made to paint a $object with an '
@@ -952,7 +968,7 @@ class PipelineOwner {
           'elevations in a Stack or CustomMultiChildLayout widget and '
           'painting them out of order with respect to their elevations.\n\n'
           'This is not a valid use of elevation, and will cause rendering '
-          'inconsistencies on platforms that use the elevation property to '
+          'inconsistencies on platforms that use the elevation property '
           'in ways that affect painting order.',
           null, // The StackTrace is very unhelpful here.
           relatedObject: elevationData.object,
@@ -960,7 +976,7 @@ class PipelineOwner {
         return difference;
       }
     }
-    if (!_printedExceededmaxElevationObjectsToCheckWarning &&
+    if (!_printedExceededMaxElevationObjectsToCheckWarning &&
          _elevations.length - _maxElevationObjectsToCheck > 0) {
       debugPrint('Skipped checking ${_elevations.length - _maxElevationObjectsToCheck} '
                  'objects with elevation.\n'
@@ -968,9 +984,9 @@ class PipelineOwner {
                  '.maxElevationObjectsToCheck to a higher value. This warning '
                  'will not be printed again until a hot reload or app restart '
                  'occurs.');
-      _printedExceededmaxElevationObjectsToCheckWarning = true;
+      _printedExceededMaxElevationObjectsToCheckWarning = true;
     }
-    _elevations[lastCommonAncestor].add(_ElevationData(elevation, area, path, object));
+    _elevations[elevationSubtreeRoot].add(_ElevationData(elevation, area, path, newPathContours, object));
     return null;
   }
 
@@ -3770,4 +3786,3 @@ class _SemanticsGeometry {
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
 }
-

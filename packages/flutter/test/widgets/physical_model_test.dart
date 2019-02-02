@@ -1,3 +1,5 @@
+import 'dart:math' as math show pi;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -227,6 +229,72 @@ void main() {
       await _testStackChildren(tester, children, 0);
       expect(find.byType(Material), findsNWidgets(2));
       tester.binding.pipelineOwner.maxElevationObjectsToCheck = previousMax;
+    });
+
+    testWidgets('with a RenderTransform, non-overlapping', (WidgetTester tester) async {
+      final List<Widget> children = <Widget>[
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(140, 100, 140, 150),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: Transform.rotate(
+              angle: math.pi / 180 * 15,
+              child: const Material(
+                elevation: 3.0,
+                color: Colors.brown,
+              ),
+            ),
+          ),
+        ),
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(50, 50, 100, 100),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: const Material(
+                elevation: 2.0,
+                color: Colors.red,
+                shape: CircleBorder()),
+          ),
+        ),
+      ];
+
+      await _testStackChildren(tester, children, 0);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
+    testWidgets('with a RenderTransform, overlapping', (WidgetTester tester) async {
+      final List<Widget> children = <Widget>[
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(140, 100, 140, 150),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: Transform.rotate(
+              angle: math.pi / 180 * 8,
+              child: const Material(
+                elevation: 3.0,
+                color: Colors.brown,
+              ),
+            ),
+          ),
+        ),
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(50, 50, 100, 100),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: const Material(
+                elevation: 2.0,
+                color: Colors.red,
+                shape: CircleBorder()),
+          ),
+        ),
+      ];
+
+      await _testStackChildren(tester, children, 1);
+      expect(find.byType(Material), findsNWidgets(2));
     });
   });
 }

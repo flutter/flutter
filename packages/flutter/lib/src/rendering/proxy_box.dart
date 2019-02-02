@@ -18,6 +18,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'view.dart';
 
 export 'package:flutter/gestures.dart' show
   PointerEvent,
@@ -1592,6 +1593,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     description.add(DiagnosticsProperty<Color>('shadowColor', color));
   }
 
+  /// The [Path] that will describe the final area drawn for this shape.
   @protected
   Path get clipPath;
 
@@ -1599,13 +1601,22 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   @mustCallSuper
   void paint(PaintingContext context, Offset offset) {
     assert(() {
-      RenderObject ancestor = parent;
+      AbstractNode ancestor = parent;
+      RenderObject rootRenderObject = this;
+      final Matrix4 transform = Matrix4.identity()..translate(offset.dx, offset.dy);
       while (ancestor != null) {
         if (ancestor is _RenderPhysicalModelBase) {
           // We're the direct child of another physical model. That is the one
           // that needs to be checked, as it has established a new elevation
           // context for us.
           return true;
+        }
+        if (ancestor is RenderObject) {
+          // We don't want the devicePixelRatio included in this transform.
+          if (ancestor is! RenderView) {
+            ancestor.applyPaintTransform(rootRenderObject, transform);
+          }
+          rootRenderObject = ancestor;
         }
         if (ancestor is RenderOffstage) {
           // Keep the RenderOffstage to pass to the check, which (at least for
@@ -1618,17 +1629,18 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
         }
         ancestor = ancestor.parent;
       }
+      assert(rootRenderObject != null);
+      transform.translate(-offset.dx, -offset.dy);
       final Path diff = owner.debugCheckElevationData(
-        elevation,
-        Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-        clipPath,
-        this,
-        ancestor,
+        elevation: elevation,
+        area: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+        path: clipPath.transform(transform.storage),
+        object: this,
+        elevationSubtreeRoot: rootRenderObject,
       );
       if (diff != null) {
-        final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
         context.canvas.drawPath(
-          diff.transform(matrix.storage),
+          diff,
           Paint()..color = const Color(0xFFAA0000)
                  ..style = PaintingStyle.stroke
                  ..strokeWidth = 5,
