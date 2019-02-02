@@ -244,7 +244,8 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     try {
       bytes = await content.contentsAsBytes();
     } catch (e) {
-      return e;
+      printError('Caught error while trying to convert $fsName to bytes for devfs sync.');
+      rethrow;
     }
     final String fileContents = base64.encode(bytes);
     try {
@@ -329,17 +330,18 @@ class _DevFSHttpWriter {
       await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
-      if (!_completer.isCompleted)
+      if (!_completer.isCompleted) {
         _completer.completeError(socketException, stackTrace);
+      }
       return;
-    } catch (e) {
+    } catch (error) {
       if (retry < kMaxRetries) {
-        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
+        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $error');
         // Synchronization is handled by the _completer below.
         _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
         return;
       } else {
-        printError('Error writing "$deviceUri" to DevFS: $e');
+        printError('Error writing "$deviceUri" to DevFS: $error');
       }
     }
     _inFlight--;
@@ -576,35 +578,34 @@ class DevFS {
         }
       }
     }
-    if (dirtyEntries.isNotEmpty) {
-      printTrace('Updating files');
-      if (_httpWriter != null) {
-        try {
-          await _httpWriter.write(dirtyEntries);
-        } on SocketException catch (socketException, stackTrace) {
-          printTrace('DevFS sync failed. Lost connection to device: $socketException');
-          throw DevFSException('Lost connection to device.', socketException, stackTrace);
-        } catch (exception, stackTrace) {
-          printError('Could not update files on device: $exception');
-          throw DevFSException('Sync failed', exception, stackTrace);
-        }
-      } else {
-        // Make service protocol requests for each.
-        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
-          final Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, deviceUri, content)
-                  .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
-          if (operation != null)
-            _pendingOperations.add(operation);
-        });
-        await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
-        _pendingOperations.clear();
-      }
-    }
+    // if (dirtyEntries.isNotEmpty) {
+    //   printTrace('Updating files');
+    //   if (_httpWriter != null) {
+    //     try {
+    //       await _httpWriter.write(dirtyEntries);
+    //     } on SocketException catch (socketException, stackTrace) {
+    //       printTrace('DevFS sync failed. Lost connection to device: $socketException');
+    //       throw DevFSException('Lost connection to device.', socketException, stackTrace);
+    //     } catch (exception, stackTrace) {
+    //       printError('Could not update files on device: $exception');
+    //       throw DevFSException('Sync failed', exception, stackTrace);
+    //     }
+    //   } else {
+    //     // Make service protocol requests for each.
+    //     dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
+    //       final Future<Map<String, dynamic>> operation =
+    //           _operations.writeFile(fsName, deviceUri, content)
+    //               .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
+    //       if (operation != null)
+    //         _pendingOperations.add(operation);
+    //     });
+    //     await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
+    //     _pendingOperations.clear();
+    //   }
+    // }
 
     printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-        invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(success: true, syncedBytes: syncedBytes, invalidatedSourcesCount: invalidatedFiles.length);
   }
 
   void _scanFile(Uri deviceUri, FileSystemEntity file) {
@@ -622,13 +623,11 @@ class DevFS {
   }
 
   bool _shouldIgnore(Uri deviceUri) {
-    final List<String> ignoredUriPrefixes = <String>['android/',
-                                               _asUriPath(getBuildDirectory()),
-                                               'ios/',
-                                               '.pub/'];
+    final List<String> ignoredUriPrefixes = <String>['android/', _asUriPath(getBuildDirectory()), 'ios/', '.pub/', '.dart_tool/'];
     for (String ignoredUriPrefix in ignoredUriPrefixes) {
-      if (deviceUri.path.startsWith(ignoredUriPrefix))
+      if (deviceUri.path.startsWith(ignoredUriPrefix)) {
         return true;
+      }
     }
     return false;
   }
@@ -671,8 +670,7 @@ class DevFS {
                                       Directory directory,
                                       {Uri directoryUriOnDevice,
                                        bool ignoreDotFiles = true}) async {
-    directoryUriOnDevice =
-        _directoryUriOnDevice(directoryUriOnDevice, directory);
+    directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
       final String absoluteDirectoryPath = canonicalizePath(directory.path);
       // For each file in the file filter.
