@@ -437,7 +437,7 @@ void main() {
   });
 
   testWidgets('Temp fake window test', (WidgetTester tester) async {
-    final WidgetsBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final WidgetsBinding binding = tester.binding;
     assert(binding is TestWidgetsFlutterBinding);
     final TestWidgetsFlutterBinding testBinding = binding;
     testBinding.window.textScaleFactorTestValue = 20.0;
@@ -449,7 +449,6 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             textScaleFactorInMaterialApp = MediaQuery.of(context).textScaleFactor;
-
             return const SizedBox();
           },
         ),

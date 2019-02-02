@@ -97,7 +97,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  // TODO(mattcarroll): find a way to use super.window instead of ui.window
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
@@ -106,7 +105,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   TestWindow get window => _window;
-  TestWindow _window;
+  final TestWindow _window;
 
   /// The value to set [debugPrint] to while tests are running.
   ///
@@ -1328,7 +1327,6 @@ class TestViewConfiguration extends ViewConfiguration {
       _hitTestMatrix = _getMatrix(size, 1.0, window),
       super(size: size);
 
-  // TODO(mattcarroll): comment for PR - what is going on with devicePixelRatio? it's the same value used twice...
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.Window window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
     final double actualWidth = window.physicalSize.width * inverseRatio;

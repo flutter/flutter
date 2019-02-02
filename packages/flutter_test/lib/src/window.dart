@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' hide window;
 
@@ -5,6 +9,40 @@ import 'package:meta/meta.dart';
 
 /// [Window] that wraps another [Window] and allows faking of some properties
 /// for testing purposes.
+/// 
+/// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
+/// properties of a [Window]. [TestWindow] facilitates the faking of these properties
+/// by overidding the properties of a real [Window] with desired fake values. The
+/// binding used within tests, [TestWidgetsFlutterBinding], contains a [TestWindow]
+/// that is used by all tests.  
+/// 
+/// A test can utilize a [TestWindow] in the following way:
+/// 
+/// ```dart
+/// testWidgets('your test name here', (WidgetTester tester) async {
+///   // Retrieve the TestWidgetsFlutterBinding.
+///   final WidgetsBinding binding = tester.binding;
+///   assert(binding is TestWidgetsFlutterBinding);
+///   final TestWidgetsFlutterBinding testBinding = binding;
+/// 
+///   // Fake the desired properties of the TestWindow. All code running
+///   // within this test will perceive the following fake text scale
+///   // factor as the real text scale factor of the window.
+///   testBinding.window.textScaleFactorFakeValue = 2.5;
+/// 
+///   // Test code that depends on text scale factor here.
+/// });
+/// ```
+/// 
+/// The [TestWidgetsFlutterBinding] is recreated for each test and
+/// therefore any fake values defined in one test will not persist
+/// to the next.
+/// 
+/// If a test needs to override a real [Window] property and then later
+/// return to using the real [Window] property, [TestWindow] provides
+/// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
+/// 
+/// To clear all fake test values in a [TestWindow], consider using [clearAllTestValues()].
 class TestWindow implements Window {
   /// Constructs a [TestWindow] that defers all behavior to the given [window] unless
   /// explicitly overidden for test purposes.
@@ -29,9 +67,9 @@ class TestWindow implements Window {
 
   @override
   Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
-  double _physicalSizeTestValue;
+  Size _physicalSizeTestValue;
   /// Hides the real physical size and reports the given [physicalSizeTestValue] instead.
-  set physicalSizeTestValue (double physicalSizeTestValue) {
+  set physicalSizeTestValue (Size physicalSizeTestValue) {
     _physicalSizeTestValue = physicalSizeTestValue;
   }
   /// Deletes any existing test physical size and returns to using the real physical size.
@@ -242,5 +280,24 @@ class TestWindow implements Window {
   @override
   set onPlatformMessage(PlatformMessageCallback callback) {
     _window.onPlatformMessage = callback;
+  }
+
+  /// Delete any test value properties that have been set on this [TestWindow]
+  /// and return to reporting the real [Window] values for all [Window] properties.
+  /// 
+  /// If desired, clearing of properties can be done on an individual basis, e.g.,
+  /// [clearLocaleTestValue()].
+  void clearAllTestValues() {
+    clearAccessibilityFeaturesTestValue();
+    clearAlwaysUse24HourTestValue();
+    clearDefaultRouteNameTestValue();
+    clearDevicePixelRatioTestValue();
+    clearLocaleTestValue();
+    clearLocalesTestValue();
+    clearPaddingTestValue();
+    clearPhysicalSizeTestValue();
+    clearSemanticsEnabledTestValue();
+    clearTextScaleFactorTestValue();
+    clearViewInsetsTestValue();
   }
 }
