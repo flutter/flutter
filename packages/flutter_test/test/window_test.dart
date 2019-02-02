@@ -1,7 +1,7 @@
 import 'dart:ui' as ui show window;
-import 'dart:ui' show Size, WindowPadding, Locale, AccessibilityFeatures;
+import 'dart:ui' show Size, Locale;
 
-import 'package:flutter/widgets.dart' show WidgetsBinding, Builder, WidgetBuilder, BuildContext, MediaQuery, SizedBox;
+import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
