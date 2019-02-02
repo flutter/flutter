@@ -421,6 +421,74 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
+
+    group('connect to remote device', () {
+      const int hostPort = 42;
+      MockAndroidDevice device;
+      MockPortForwarder portForwarder;
+      final MockDeviceFactory mockDeviceFactory = MockDeviceFactory();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+
+      setUp(() {
+        device = MockAndroidDevice();
+        portForwarder = MockPortForwarder();
+
+        when(device.portForwarder).thenReturn(portForwarder);
+        when(portForwarder.forwardedPorts)
+          .thenReturn(<ForwardedPort>[]);
+        when(mockDeviceFactory.createDeviceFromType('android')).thenReturn(device);
+
+        when(mockHotRunner.attach())
+          .thenAnswer((_) async => 0);
+        when(mockHotRunnerFactory.build(
+          any,
+          target: anyNamed('target'),
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          usesTerminalUI: anyNamed('usesTerminalUI'),
+          projectRootPath: anyNamed('projectRootPath'),
+          dillOutputPath: anyNamed('dillOutputPath'),
+          ipv6: anyNamed('ipv6'),
+          restartAfterAttach: anyNamed('restartAfterAttach'),
+        )).thenReturn(mockHotRunner);
+      });
+
+      testUsingContext('without restart after attach', () async {
+        const String url = 'http://127.0.0.1:$hostPort/';
+
+        await createTestCommandRunner(AttachCommand(
+          deviceFactory: mockDeviceFactory,
+          hotRunnerFactory: mockHotRunnerFactory,
+        ))
+          .run(<String>['attach', '--device', 'android', '--url', url]);
+
+        final VerificationResult verificationResult = verify(
+          mockHotRunnerFactory.build(
+            captureAny,
+            target: anyNamed('target'),
+            debuggingOptions: anyNamed('debuggingOptions'),
+            packagesFilePath: anyNamed('packagesFilePath'),
+            usesTerminalUI: anyNamed('usesTerminalUI'),
+            projectRootPath: anyNamed('projectRootPath'),
+            dillOutputPath: anyNamed('dillOutputPath'),
+            ipv6: anyNamed('ipv6'),
+            restartAfterAttach: anyNamed('restartAfterAttach'),
+          ),
+        )..called(1);
+
+        // Verify observatoryUri.
+        final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
+        expect(flutterDevices, hasLength(1));
+
+        final FlutterDevice flutterDevice = flutterDevices.first;
+        expect(flutterDevice.observatoryUris, hasLength(1));
+        expect(flutterDevice.observatoryUris[0].toString(), equals(url));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+    });
+
   });
 }
 
@@ -508,4 +576,7 @@ Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logge
   } on ToolExit catch (error) {
     expect(error.exitCode, 2); // ...with exit code 2.
   }
+}
+
+class MockDeviceFactory extends Mock implements DeviceFactory {
 }

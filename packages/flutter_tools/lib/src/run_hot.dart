@@ -70,6 +70,8 @@ class HotRunner extends ResidentRunner {
     bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
+    // Restart fully after attach
+    this.restartAfterAttach = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -86,6 +88,7 @@ class HotRunner extends ResidentRunner {
   bool _didAttach = false;
   Set<String> _dartDependencies;
   final String dillOutputPath;
+  final bool restartAfterAttach;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -259,6 +262,10 @@ class HotRunner extends ResidentRunner {
       final File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
+    }
+
+    if (restartAfterAttach) {
+      await restart(fullRestart: true);
     }
 
     int result = 0;

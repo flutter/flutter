@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -14,6 +15,8 @@ import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
+import '../ios/devices.dart';
+import '../ios/simulators.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -23,6 +26,10 @@ import '../runner/flutter_command.dart';
 final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
 final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+
+const String kAndroidDevice = 'android';
+const String kIOSDevice = 'ios';
+const String kIOSSimulatorDevice = 'ios-sim';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -43,8 +50,12 @@ final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
 ///
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
-class AttachCommand extends FlutterCommand {
-  AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
+class  AttachCommand extends FlutterCommand {
+  AttachCommand({
+    bool verboseHelp = false,
+    this.hotRunnerFactory,
+    this.deviceFactory,
+  }) {
     addBuildModeFlags(defaultToRelease: false);
     usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
@@ -69,11 +80,23 @@ class AttachCommand extends FlutterCommand {
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
+      )..addOption(
+        'url',
+        help: 'Observatory remote url, such as http://x.x.x.x:xxxx.',
+      )..addOption(
+        'device',
+        help: 'Device type.',
+        allowed: <String>[kAndroidDevice, kIOSDevice, kIOSSimulatorDevice],
+      )..addFlag(
+        'restart',
+        help: 'Restart after attached.',
       );
     hotRunnerFactory ??= HotRunnerFactory();
+    deviceFactory ??= DeviceFactory();
   }
 
   HotRunnerFactory hotRunnerFactory;
+  DeviceFactory deviceFactory;
 
   @override
   final String name = 'attach';
@@ -95,9 +118,9 @@ class AttachCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
-    if (await findTargetDevice() == null)
+    if (argResults['device'] == null && await findTargetDevice() == null) {
       throwToolExit(null);
-    debugPort;
+    }
     if (debugPort == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port is unknown, this command determines '
@@ -120,7 +143,7 @@ class AttachCommand extends FlutterCommand {
 
     writePidFile(argResults['pid-file']);
 
-    final Device device = await findTargetDevice();
+    final Device device = deviceFactory.createDeviceFromType(argResults['device']) ?? await findTargetDevice();
     final int devicePort = debugPort;
 
     final Daemon daemon = argResults['machine']
@@ -131,7 +154,11 @@ class AttachCommand extends FlutterCommand {
     Uri observatoryUri;
     bool usesIpv6 = false;
     bool attachLogger = false;
-    if (devicePort == null) {
+    final String observatoryUrl = argResults['url'];
+
+    if (observatoryUrl != null && observatoryUrl.isNotEmpty) {
+      observatoryUri = Uri.parse(observatoryUrl);
+    } else if (devicePort == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
@@ -199,6 +226,7 @@ class AttachCommand extends FlutterCommand {
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
+            restartAfterAttach: argResults['restart'],
           )
         : ColdRunner(
             flutterDevices,
@@ -258,6 +286,7 @@ class HotRunnerFactory {
       String dillOutputPath,
       bool stayResident = true,
       bool ipv6 = false,
+      bool restartAfterAttach,
   }) => HotRunner(
     devices,
     target: target,
@@ -271,5 +300,31 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    restartAfterAttach: restartAfterAttach,
   );
+}
+
+class DeviceFactory {
+  Device createDeviceFromType(String deviceType) {
+    if (deviceType == null || deviceType.isEmpty) {
+      return null;
+    }
+    const String remoteDeviceId = 'remote-device';
+    switch (deviceType) {
+      case kAndroidDevice:
+        return createAndroidDevice(remoteDeviceId);
+      case kIOSDevice:
+        return createIOSDevice(remoteDeviceId);
+      case kIOSSimulatorDevice:
+        return createIOSSimulatorDevice(remoteDeviceId);
+      default:
+        return null;
+    }
+  }
+
+  Device createAndroidDevice(String id) => AndroidDevice(id);
+
+  Device createIOSDevice(String id) => IOSDevice(id);
+
+  Device createIOSSimulatorDevice(String id) => IOSSimulator(id);
 }
