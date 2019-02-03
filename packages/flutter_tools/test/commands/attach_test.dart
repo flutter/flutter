@@ -120,6 +120,7 @@ void main() {
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
             ipv6: false,
+            restartAfterAttach: anyNamed('restartAfterAttach'),
           ),
         ).thenReturn(mockHotRunner);
 
@@ -151,6 +152,7 @@ void main() {
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
             ipv6: false,
+            restartAfterAttach: anyNamed('restartAfterAttach'),
           ),
         )..called(1);
 
@@ -225,6 +227,7 @@ void main() {
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
         ipv6: false,
+        restartAfterAttach: anyNamed('restartAfterAttach'),
       )).thenReturn(mockHotRunner);
 
       testDeviceManager.addDevice(device);
@@ -254,6 +257,7 @@ void main() {
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
         ipv6: false,
+        restartAfterAttach: anyNamed('restartAfterAttach'),
       )).called(1);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
