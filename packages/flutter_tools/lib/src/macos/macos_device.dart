@@ -23,6 +23,11 @@ class MacOSDevice extends Device {
   void clearLogs() {}
 
   @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) {
+    return Future<void>.error(UnsupportedError('MacOS does not support automatic observatory discovery.'));
+  }
+
+  @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('macos');
 
   // Since the host and target devices are the same, no work needs to be done

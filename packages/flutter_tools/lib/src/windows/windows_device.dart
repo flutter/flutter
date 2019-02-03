@@ -17,6 +17,11 @@ class WindowsDevice extends Device {
   void clearLogs() {}
 
   @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) {
+    return Future<void>.error(UnsupportedError('Windows does not support automatic observatory discovery.'));
+  }
+
+  @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('windows');
 
   @override
