@@ -177,6 +177,28 @@ class FuchsiaDevice extends Device {
   bool isSupported() => true;
 
   @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) async {
+    final String module = config['module'];
+    if (module == null) {
+      throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+    }
+    FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
+    try {
+      isolateDiscoveryProtocol = getIsolateDiscoveryProtocol(module);
+      final Uri observatoryUri = await isolateDiscoveryProtocol.uri;
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+      return DiscoveredObservatory(observatoryUri, ipv6);
+    } catch (_) {
+      isolateDiscoveryProtocol?.dispose();
+      final List<ForwardedPort> ports = portForwarder.forwardedPorts.toList();
+      for (ForwardedPort port in ports) {
+        await portForwarder.unforward(port);
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String mainPath,

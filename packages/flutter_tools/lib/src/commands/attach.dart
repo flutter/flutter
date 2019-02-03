@@ -12,9 +12,6 @@ import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
-import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart';
-import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -127,46 +124,14 @@ class AttachCommand extends FlutterCommand {
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
             notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
-
     Uri observatoryUri;
     bool usesIpv6 = false;
-    bool attachLogger = false;
     if (devicePort == null) {
-      if (device is FuchsiaDevice) {
-        attachLogger = true;
-        final String module = argResults['module'];
-        if (module == null)
-          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
-        usesIpv6 = device.ipv6;
-        FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
-        try {
-          isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          observatoryUri = await isolateDiscoveryProtocol.uri;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
-        } catch (_) {
-          isolateDiscoveryProtocol?.dispose();
-          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-          for (ForwardedPort port in ports) {
-            await device.portForwarder.unforward(port);
-          }
-          rethrow;
-        }
-      } else {
-        ProtocolDiscovery observatoryDiscovery;
-        try {
-          observatoryDiscovery = ProtocolDiscovery.observatory(
-            device.getLogReader(),
-            portForwarder: device.portForwarder,
-          );
-          printStatus('Waiting for a connection from Flutter on ${device.name}...');
-          observatoryUri = await observatoryDiscovery.uri;
-          // Determine ipv6 status from the scanned logs.
-          usesIpv6 = observatoryDiscovery.ipv6;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
-        } finally {
-          await observatoryDiscovery?.cancel();
-        }
-      }
+      final DiscoveredObservatory discoveredObservatory = await device.discoverObservatory(<String, Object>{
+        'module': argResults['module'],
+      });
+      usesIpv6 = discoveredObservatory.ipv6;
+      observatoryUri = discoveredObservatory.uri;
     } else {
       usesIpv6 = ipv6;
       final int localPort = observatoryPort
@@ -186,7 +151,7 @@ class AttachCommand extends FlutterCommand {
         viewFilter: argResults['isolate-filter'],
         targetModel: TargetModel(argResults['target-model']),
       );
-      flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
+      flutterDevice.observatoryUris = <Uri>[observatoryUri];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
       final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
       final ResidentRunner runner = useHot ?
@@ -206,9 +171,6 @@ class AttachCommand extends FlutterCommand {
             debuggingOptions: debuggingOptions,
             ipv6: usesIpv6,
           );
-      if (attachLogger) {
-        flutterDevice.startEchoingDeviceLog();
-      }
 
       int result;
       if (daemon != null) {

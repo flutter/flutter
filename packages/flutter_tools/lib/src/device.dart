@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/protocol_discovery.dart';
+
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/context.dart';
@@ -231,6 +233,24 @@ abstract class Device {
 
   /// Uninstall an app package from the current device
   Future<bool> uninstallApp(ApplicationPackage app);
+
+  /// Attempt to discover an observatory from the device.
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) async {
+    ProtocolDiscovery observatoryDiscovery;
+    try {
+      observatoryDiscovery = ProtocolDiscovery.observatory(
+        getLogReader(),
+        portForwarder: portForwarder,
+      );
+      printStatus('Waiting for a connection from Flutter on $name...');
+      final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Determine ipv6 status from the scanned logs.
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+      return DiscoveredObservatory(observatoryUri, observatoryDiscovery.ipv6);
+    } finally {
+      await observatoryDiscovery?.cancel();
+    }
+  }
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -478,4 +498,11 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {}
+}
+
+class DiscoveredObservatory {
+  const DiscoveredObservatory(this.uri, this.ipv6);
+
+  final bool ipv6;
+  final Uri uri;
 }
