@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/protocol_discovery.dart';
-
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/context.dart';
@@ -20,6 +18,7 @@ import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'protocol_discovery.dart';
 import 'tester/flutter_tester.dart';
 import 'windows/windows_device.dart';
 
