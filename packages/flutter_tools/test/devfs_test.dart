@@ -114,7 +114,7 @@ void main() {
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-      devFS = DevFS.operations(devFSOperations, 'test', tempDir);
+      devFS = DevFS('test', tempDir, devFSOperations: devFSOperations);
       await devFS.create();
       devFSOperations.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -474,7 +474,7 @@ void main() {
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-      devFS = DevFS(vmService, 'test', tempDir);
+      devFS = DevFS('test', tempDir, vmService: vmService);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -513,7 +513,7 @@ void main() {
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-      devFS = DevFS(vmService, 'test', tempDir);
+      devFS = DevFS('test', tempDir, vmService: vmService);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);

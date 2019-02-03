@@ -426,7 +426,7 @@ class BasicMock {
   }
 }
 
-class MockDevFSOperations extends BasicMock implements DevFSOperations {
+class MockDevFSOperations extends BasicMock implements ServiceProtocolDevFSOperations {
   Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
 
   @override
@@ -448,12 +448,6 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
     }
     messages.add(message);
     devicePathToContent[deviceUri] = content;
-  }
-
-  @override
-  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
-    messages.add('deleteFile $fsName $deviceUri');
-    devicePathToContent.remove(deviceUri);
   }
 }
 

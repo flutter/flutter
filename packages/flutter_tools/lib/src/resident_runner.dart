@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:watcher/watcher.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -141,14 +142,16 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(String fsName,
     Directory rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
+    Watcher watcher,
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      vmServices[0],
       fsName,
       rootDirectory,
-      packagesFilePath: packagesFilePath
+      packagesFilePath: packagesFilePath,
+      watcher: watcher,
+      vmService: vmServices[0],
     );
     return devFS.create();
   }
@@ -172,8 +175,7 @@ class FlutterDevice {
   }
 
   Future<void> resetAssetDirectory() async {
-    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
-        fs.path.toUri(getAssetBuildDirectory()));
+    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
     await Future.wait<void>(views.map<Future<void>>(
       (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
@@ -183,8 +185,7 @@ class FlutterDevice {
   // Lists program elements changed in the most recent reload that have not
   // since executed.
   Future<List<ProgramElement>> unusedChangesInLastReload() async {
-    final List<Future<List<ProgramElement>>> reports =
-      <Future<List<ProgramElement>>>[];
+    final List<Future<List<ProgramElement>>> reports = <Future<List<ProgramElement>>>[];
     for (FlutterView view in views)
       reports.add(view.uiIsolate.getUnusedChangesInLastReload());
     final List<ProgramElement> elements = <ProgramElement>[];

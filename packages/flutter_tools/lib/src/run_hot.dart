@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:watcher/watcher.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -14,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/dependencies.dart';
@@ -337,13 +338,15 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<List<Uri>> _initDevFS() async {
+    final DirectoryWatcher watcher = DirectoryWatcher(projectRootPath);
     final String fsName = fs.path.basename(projectRootPath);
     final List<Uri> devFSUris = <Uri>[];
     for (FlutterDevice device in flutterDevices) {
       final Uri uri = await device.setupDevFS(
         fsName,
         fs.directory(projectRootPath),
-        packagesFilePath: packagesFilePath
+        packagesFilePath: packagesFilePath,
+        watcher: watcher,
       );
       devFSUris.add(uri);
     }
@@ -447,8 +450,7 @@ class HotRunner extends ResidentRunner {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(entryUri));
       final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
-      final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
-        fs.path.toUri(getAssetBuildDirectory()));
+      final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
       futures.add(_launchInView(device,
                           deviceEntryUri,
                           devicePackagesUri,
@@ -491,8 +493,9 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
-      if (device.generator != null)
+      if (device.generator != null) {
         device.generator.accept();
+      }
     }
     // Check if the isolate is paused and resume it.
     final List<Future<void>> futures = <Future<void>>[];
