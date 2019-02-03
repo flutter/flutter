@@ -149,8 +149,8 @@ class FlutterDevice {
     devFS = DevFS(
       fsName,
       rootDirectory,
+      watcher,
       packagesFilePath: packagesFilePath,
-      watcher: watcher,
       vmService: vmServices[0],
     );
     return devFS.create();
@@ -391,10 +391,8 @@ class FlutterDevice {
     String mainPath,
     String target,
     AssetBundle bundle,
-    DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
-    Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
@@ -409,10 +407,9 @@ class FlutterDevice {
         mainPath: mainPath,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
+        //firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
-        fileFilter: fileFilter,
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
