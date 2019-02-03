@@ -15,9 +15,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -368,6 +370,24 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) async {
+    ProtocolDiscovery observatoryDiscovery;
+    try {
+      observatoryDiscovery = ProtocolDiscovery.observatory(
+        getLogReader(),
+        portForwarder: portForwarder,
+      );
+      printStatus('Waiting for a connection from Flutter on $name...');
+      final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Determine ipv6 status from the scanned logs.
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+      return DiscoveredObservatory(observatoryUri, observatoryDiscovery.ipv6);
+    } finally {
+      await observatoryDiscovery?.cancel();
+    }
+  }
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
@@ -376,6 +396,24 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) async {
+    ProtocolDiscovery observatoryDiscovery;
+    try {
+      observatoryDiscovery = ProtocolDiscovery.observatory(
+        getLogReader(),
+        portForwarder: portForwarder,
+      );
+      printStatus('Waiting for a connection from Flutter on $name...');
+      final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Determine ipv6 status from the scanned logs.
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+      return DiscoveredObservatory(observatoryUri, observatoryDiscovery.ipv6);
+    } finally {
+      await observatoryDiscovery?.cancel();
+    }
+  }
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
@@ -384,6 +422,24 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
 
   @override
   bool isSupported() => true;
+
+  @override
+  Future<DiscoveredObservatory> discoverObservatory(Map<String, Object> config) async {
+    ProtocolDiscovery observatoryDiscovery;
+    try {
+      observatoryDiscovery = ProtocolDiscovery.observatory(
+        getLogReader(),
+        portForwarder: portForwarder,
+      );
+      printStatus('Waiting for a connection from Flutter on $name...');
+      final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Determine ipv6 status from the scanned logs.
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+      return DiscoveredObservatory(observatoryUri, observatoryDiscovery.ipv6);
+    } finally {
+      await observatoryDiscovery?.cancel();
+    }
+  }
 }
 
 class MockDeviceLogReader extends DeviceLogReader {
