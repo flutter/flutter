@@ -285,14 +285,14 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-    this.extendedBody = false,
+    this.extendBody = false,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
-  final bool extendedBody;
+  final bool extendBody;
   final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
@@ -347,7 +347,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
-      if (extendedBody) {
+      if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
       }
 
@@ -804,7 +804,7 @@ class Scaffold extends StatefulWidget {
     this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
     this.primary = true,
-    this.extendedBody = false,
+    this.extendBody = false,
     this.drawerDragStartBehavior = DragStartBehavior.down,
   }) : assert(primary != null),
        assert(drawerDragStartBehavior != null),
@@ -813,7 +813,7 @@ class Scaffold extends StatefulWidget {
   /// If true and a [bottomNavigationBar] is specified then the body
   /// extends to the bottom of the Scaffold, instead of only extending
   /// to the top of the [bottomNavigationBar].
-  final bool extendedBody;
+  final bool extendBody;
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -1826,8 +1826,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
     );
 
-    // extendedBody locked when keyboard is open
-    final bool _extendedBody = minInsets.bottom > 0 ? false : widget.extendedBody;
+    // extendBody locked when keyboard is open
+    final bool _extendBody = minInsets.bottom > 0 ? false : widget.extendBody;
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -1840,7 +1840,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return CustomMultiChildLayout(
               children: children,
               delegate: _ScaffoldLayout(
-                extendedBody: _extendedBody,
+                extendBody: _extendBody,
                 minInsets: minInsets,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
