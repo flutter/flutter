@@ -1816,7 +1816,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
-    if (oldRoute == newRoute) // ignore: unrelated_type_equality_checks, https://github.com/dart-lang/sdk/issues/32522
+    if (oldRoute == newRoute)
       return;
     assert(() { _debugLocked = true; return true; }());
     assert(oldRoute._navigator == this);

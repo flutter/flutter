@@ -428,11 +428,11 @@ class FlutterDevice {
     return report;
   }
 
-  void updateReloadStatus(bool wasReloadSuccessful) {
+  Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
     if (wasReloadSuccessful)
       generator?.accept();
     else
-      generator?.reject();
+      await generator?.reject();
   }
 }
 
