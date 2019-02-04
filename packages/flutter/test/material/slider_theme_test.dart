@@ -30,32 +30,15 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    Widget buildSlider(SliderThemeData data) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: const Slider(
-                  value: 0.5,
-                  label: '0.5',
-                  onChanged: null,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildSlider(sliderTheme));
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveTrackColor)..rect(color: sliderTheme.disabledInactiveTrackColor));
+    expect(
+      sliderBox,
+      paints
+        ..rect(color: sliderTheme.disabledActiveTrackColor)
+        ..rect(color: sliderTheme.disabledInactiveTrackColor),
+    );
   });
 
   testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
@@ -69,35 +52,15 @@ void main() {
       inactiveTrackColor: Colors.purple.withAlpha(0x3d),
     );
 
-    Widget buildSlider(SliderThemeData data) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: SliderTheme(
-                  data: customTheme,
-                  child: const Slider(
-                    value: 0.5,
-                    label: '0.5',
-                    onChanged: null,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildSlider(sliderTheme));
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: customTheme.disabledActiveTrackColor)..rect(color: customTheme.disabledInactiveTrackColor));
+    expect(
+      sliderBox,
+      paints
+        ..rect(color: customTheme.disabledActiveTrackColor)
+        ..rect(color: customTheme.disabledInactiveTrackColor),
+    );
   });
 
   testWidgets('SliderThemeData assigns the correct default shapes', (WidgetTester tester) async {
@@ -180,31 +143,8 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
-    double value = 0.25;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: SliderTheme(
-                data: sliderTheme,
-                child: Slider(
-                  value: value,
-                  label: '$value',
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
@@ -214,8 +154,9 @@ void main() {
         ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor)
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+
     // The disabled thumb is smaller so the track has to paint longer to get
     // to the edge.
     expect(
@@ -232,31 +173,8 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
-    double value = 0.25;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: SliderTheme(
-                data: sliderTheme,
-                child: Slider(
-                  value: value,
-                  label: '$value',
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // With no touch, paints only the thumb.
@@ -296,6 +214,7 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
+
     // After the gesture is up and complete, it again paints only the thumb.
     expect(
       sliderBox,
@@ -315,45 +234,20 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
-    double value = 0.45;
-    Widget buildApp({
-      int divisions,
-      bool enabled = true,
-    }) {
-      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: SliderTheme(
-                data: sliderTheme,
-                child: Slider(
-                  value: value,
-                  label: '$value',
-                  divisions: divisions,
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 6.0));
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+
     expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor, radius: 4.0));
 
-    await tester.pumpWidget(buildApp(divisions: 3));
-    await tester.pumpAndSettle(); // wait for disable animation
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3));
+    await tester.pumpAndSettle(); // wait for enable animation
+
     expect(
       sliderBox,
       paints
@@ -364,8 +258,9 @@ void main() {
         ..circle(color: sliderTheme.thumbColor, radius: 6.0)
     );
 
-    await tester.pumpWidget(buildApp(divisions: 3, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+
     expect(
       sliderBox,
       paints
@@ -551,28 +446,8 @@ void main() {
 
   testWidgets('The slider track height can be overriden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
-    double value = 0.25;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled
-          ? (double d) => value = d
-          : null;
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SliderTheme(
-              data: sliderTheme,
-              child: Slider(
-                value: value,
-                label: '$value',
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
@@ -584,8 +459,9 @@ void main() {
         ..rect(rect: Rect.fromLTRB(208.0, 292.0, 784.0, 308.0), color: sliderTheme.inactiveTrackColor)
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+
     // The disabled thumb is smaller so the active track has to paint longer to
     // get to the edge.
     expect(
@@ -603,29 +479,8 @@ void main() {
           disabledThumbRadius: 11,
         ),
     );
-    double value = 0.25;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled
-          ? (double d) => value = d
-          : null;
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SliderTheme(
-              data: sliderTheme,
-              child: Slider(
-                value: value,
-                label: '$value',
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
@@ -633,8 +488,9 @@ void main() {
       paints..circle(x: 208, y: 300, radius: 7, color: sliderTheme.thumbColor)
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+
     expect(
       sliderBox,
       paints..circle(x: 208, y: 300, radius: 11, color: sliderTheme.disabledThumbColor)
@@ -647,29 +503,8 @@ void main() {
         enabledThumbRadius: 9,
       ),
     );
-    double value = 0.25;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled
-          ? (double d) => value = d
-          : null;
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SliderTheme(
-              data: sliderTheme,
-              child: Slider(
-                value: value,
-                label: '$value',
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
@@ -677,7 +512,7 @@ void main() {
       paints..circle(x: 208, y: 300, radius: 9, color: sliderTheme.thumbColor)
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
     // Radius should be 6, or 2/3 of 9. 2/3 because the default disabled thumb
     // radius us 4 and the default enabled thumb radius is 6.
@@ -694,34 +529,13 @@ void main() {
       tickMarkShape: const RoundSliderTickMarkShape(
         tickMarkRadius: 5
       ),
-      activeTickMarkColor: const Color(0xff00ff00),
-      inactiveTickMarkColor: const Color(0xffff0000),
-      disabledActiveTickMarkColor: const Color(0xff0000ff),
-      disabledInactiveTickMarkColor: const Color(0xffffff00),
+      activeTickMarkColor: const Color(0xfadedead),
+      inactiveTickMarkColor: const Color(0xfadebeef),
+      disabledActiveTickMarkColor: const Color(0xfadecafe),
+      disabledInactiveTickMarkColor: const Color(0xfadeface),
     );
-    double value = 0.5;
-    Widget buildApp({ bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled
-          ? (double d) => value = d
-          : null;
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SliderTheme(
-              data: sliderTheme,
-              child: Slider(
-                value: value,
-                label: '$value',
-                onChanged: onChanged,
-                divisions: 2,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
@@ -733,7 +547,7 @@ void main() {
         ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor)
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false));
     await tester.pumpAndSettle();
 
     expect(
@@ -752,26 +566,8 @@ void main() {
         overlayRadius: uniqueOverlayRadius,
       ),
     );
-    double value = 0.5;
-    Widget buildApp() {
-      final ValueChanged<double> onChanged = (double d) => value = d;
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SliderTheme(
-              data: sliderTheme,
-              child: Slider(
-                value: value,
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
-    await tester.pumpWidget(buildApp());
-
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
     // Tap center and wait for animation.
     final Offset center = tester.getCenter(find.byType(Slider));
     await tester.startGesture(center);
@@ -788,4 +584,28 @@ void main() {
       )
     );
   });
+}
+
+Widget _buildApp(
+  SliderThemeData sliderTheme, {
+  double value = 0.0,
+  bool enabled = true,
+  int divisions,
+}) {
+  final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: SliderTheme(
+          data: sliderTheme,
+          child: Slider(
+            value: value,
+            label: '$value',
+            onChanged: onChanged,
+            divisions: divisions,
+          ),
+        ),
+      ),
+    ),
+  );
 }
