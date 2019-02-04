@@ -346,6 +346,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   void didUpdateWidget(FormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.initialValue != oldWidget.initialValue)
       _value = widget.initialValue;
   }
