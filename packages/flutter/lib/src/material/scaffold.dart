@@ -1341,7 +1341,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Color _bodyScrimColor;
 
   void _maybeBuildPersistentBottomSheet() {
-    if (widget.bottomSheet != null) {
+    if (widget.bottomSheet != null && _currentBottomSheet == null) {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
@@ -1383,6 +1383,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       return true;
     }());
 
+    final bool isPersistent = !isLocalHistoryEntry;
+    LocalHistoryEntry persistentSheetHistoryEntry;
     _bottomSheetScrollController = BottomSheet.createScrollController(
       initialHeightPercentage: initialHeight,
       minTop: clampTop ? initialHeight : 0.0,
@@ -1400,6 +1402,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
         );
       _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
+
+      // Check if we're a persistent bottom sheet.
+      // We need to add an artificial route here for a11y purposes. If a blind user
+      // were to scroll the bottom sheet up, there would be no clear way to get
+      // back to the state where the rest of the screen is visible.
+      if (isPersistent) {
+        if (_bottomSheetScrollController.top < _bottomSheetScrollController.initialTop) {
+          if (persistentSheetHistoryEntry == null) {
+            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+              _bottomSheetScrollController.reset();
+              persistentSheetHistoryEntry = null;
+            });
+            ModalRoute.of(context).addLocalHistoryEntry(persistentSheetHistoryEntry);
+          }
+        } else if (persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context).removeLocalHistoryEntry(persistentSheetHistoryEntry);
+          persistentSheetHistoryEntry = null;
+        }
+      }
     }));
 
     final Completer<T> completer = Completer<T>();

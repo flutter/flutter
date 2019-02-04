@@ -122,6 +122,9 @@ class BottomSheetScrollController extends ScrollController {
   /// When this value reaches [minTop], the controller will allow the content of
   /// the child to scroll.
   double get top => _position?.top ?? math.max(_initialTop, maxTop);
+
+  /// The position that was originally requested as the top for this sheet.
+  double get initialTop => _initialTop;
   final double _initialTop;
 
   /// The minimum allowable value for [top].
@@ -136,11 +139,27 @@ class BottomSheetScrollController extends ScrollController {
   /// The [AnimationStatus] of the [AnimationController] for the [top].
   AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
-  /// Animate the [top] value to [maxTop].
+  /// Animate the [top] value to [maxTop] for non-persistent bottom sheets, or
+  /// [reset] the top and scroll position for persistent bottom sheets.
+  ///
+  /// The [isPersistent] property determines whether this is for a persistent
+  /// bottom sheet or not.
   Future<void> dismiss() {
-    if (!isPersistent)
+    if (!isPersistent) {
       return _position?.dismiss();
-    return null;
+    }
+    return reset();
+  }
+
+  /// Reset the [top] value to [initialTop], and any jump any child scroll
+  /// position to 0.0.
+  ///
+  /// See also:
+  ///
+  ///   * [dismiss]: Animates a non-persistent bottom sheet off the screen, or
+  ///     performs this operation for persistent bottom sheets.
+  Future<void> reset() {
+    return _position?.reset();
   }
 
   @override
@@ -250,6 +269,7 @@ class BottomSheetScrollController extends ScrollController {
     description.add('minTop: $minTop');
     description.add('top: $top');
     description.add('maxTop: $maxTop');
+    description.add('initialTop: $initialTop');
   }
 }
 
@@ -287,6 +307,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
         assert(minTop > 0 || maxTop > 0),
         assert(context != null),
         assert(animateIn != null),
+        _initialTop = top,
         super(
           physics: physics,
           context: context,
@@ -301,8 +322,9 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
       duration: const Duration(milliseconds: 200),
       debugLabel: 'BottomSheetScrollPositoinTopAnimationController',
     )..addListener(notifier);
-    if (animateIn)
+    if (animateIn) {
       _topAnimationController.animateTo(top / maxTop);
+    }
   }
 
   /// Whether the [top] will be animated initially.
@@ -313,6 +335,8 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
   /// The current vertical offset.
   double get top => _topAnimationController.value * maxTop;
+
+  final double _initialTop;
 
   /// The minimum allowable vertical offset.
   final double minTop;
@@ -335,8 +359,18 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   /// Animate the [top] value to [maxTop].
+  ///
+  /// This method does not alter the scroll position. See [reset] if you wish
+  /// to also reset scroll position to 0.0.
   Future<void> dismiss() {
     return _topAnimationController.forward();
+  }
+
+  /// Reset the [top] value to [initialTop] and [jumpTo] 0.0 for the scroll
+  /// position.
+  Future<void> reset() {
+    super.jumpTo(0.0);
+    return _topAnimationController.animateTo(_initialTop);
   }
 
   @override
