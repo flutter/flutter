@@ -1603,13 +1603,13 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     assert(() {
       AbstractNode ancestor = parent;
       RenderObject rootRenderObject = this;
+      double totalElevation = elevation;
       final Matrix4 transform = Matrix4.identity()..translate(offset.dx, offset.dy);
       while (ancestor != null) {
         if (ancestor is _RenderPhysicalModelBase) {
-          // We're the direct child of another physical model. That is the one
-          // that needs to be checked, as it has established a new elevation
-          // context for us.
-          return true;
+          // We're the direct child of another physical model. We need to add
+          // its elevation to ours.
+          totalElevation += ancestor.elevation;
         }
         if (ancestor is RenderObject) {
           // We don't want the devicePixelRatio included in this transform.
@@ -1632,7 +1632,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
       assert(rootRenderObject != null);
       transform.translate(-offset.dx, -offset.dy);
       final Path diff = owner.debugCheckElevationData(
-        elevation: elevation,
+        elevation: totalElevation,
         area: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
         path: clipPath.transform(transform.storage),
         object: this,

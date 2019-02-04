@@ -196,6 +196,43 @@ void main() {
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+    testWidgets('child partially overlapping, wrong painting order', (WidgetTester tester) async {
+      final List<Widget> children = <Widget>[
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(150, 150, 150, 150),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: const Material(
+              elevation: 1.0,
+              color: Colors.brown,
+              child: Padding(
+                padding: EdgeInsets.all(30.0),
+                child: Material(
+                  elevation: 2.0,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned.fromRect(
+          rect: Rect.fromLTWH(30, 20, 180, 180),
+          child: Container(
+            width: 300,
+            height: 300,
+            child: const Material(
+              elevation: 2.0,
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ];
+
+      await _testStackChildren(tester, children, 1);
+      expect(find.byType(Material), findsNWidgets(3));
+    });
+
     testWidgets('non-rect partially overlapping, wrong painting order, max to check is 0', (WidgetTester tester) async {
       final int previousMax = tester.binding.pipelineOwner.maxElevationObjectsToCheck;
       tester.binding.pipelineOwner.maxElevationObjectsToCheck = 0; // disables the check.
