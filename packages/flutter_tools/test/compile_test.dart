@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -20,6 +21,72 @@ import 'src/context.dart';
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
+  group(PackageUriMapper, () {
+    group('single-root', () {
+      const String packagesContents = r'''
+xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
+yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
+example:file:///example/lib/
+''';
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MockFile mockFile = MockFile();
+      when(mockFileSystem.path).thenReturn(fs.path);
+      when(mockFileSystem.file(any)).thenReturn(mockFile);
+      when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+      testUsingContext('Can map main.dart to correct package', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
+
+      testUsingContext('Maps file from other package to null', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/xml/lib/xml.dart'),  null);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
+
+      testUsingContext('Maps non-main file from same package', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', null, null);
+        expect(packageUriMapper.map('/example/lib/src/foo.dart').toString(), 'package:example/src/foo.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
+    });
+
+    group('multi-root', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final MockFile mockFile = MockFile();
+      when(mockFileSystem.path).thenReturn(fs.path);
+      when(mockFileSystem.file(any)).thenReturn(mockFile);
+
+      const String multiRootPackagesContents = r'''
+xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
+yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
+example:org-dartlang-app:///lib/
+''';
+      when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(multiRootPackagesContents));
+
+      testUsingContext('Maps main file from same package on multiroot scheme', () async {
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example', '/gen']);
+        expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => mockFileSystem,
+      });
+    });
+  });
+
+  test(StdoutHandler, () async {
+    final StdoutHandler stdoutHandler = StdoutHandler();
+    stdoutHandler.handler('result 12345');
+    expect(stdoutHandler.boundaryKey, '12345');
+    stdoutHandler.handler('12345 message 0');
+    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+    expect(output.errorCount, 0);
+    expect(output.outputFilename, 'message');
+  });
+
   group('batch compile', () {
     ProcessManager mockProcessManager;
     MockProcess mockFrontendServer;
@@ -50,6 +117,7 @@ void main() {
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
             ))
           ));
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -73,7 +141,7 @@ void main() {
               'result abc\nline1\nline2\nabc'
             ))
           ));
-
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -99,7 +167,7 @@ void main() {
               'result abc\nline1\nline2\nabc'
           ))
       ));
-
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(
         sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
@@ -206,13 +274,27 @@ void main() {
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
+      // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generator, mockFrontendServerStdIn, '');
+      await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
+
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+
+      await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
+
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+          'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
+          '^reject\\n\$');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
         '\nCompiler message:\nline0\nline1\n'
+        '\nCompiler message:\nline1\nline2\n'
         '\nCompiler message:\nline1\nline2\n'
       ));
     }, overrides: <Type, Generator>{
@@ -436,6 +518,34 @@ Future<void> _recompile(StreamController<List<int>> streamController,
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
+Future<void> _accept(StreamController<List<int>> streamController,
+    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
+    String expected) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  generator.accept();
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
+  mockFrontendServerStdIn._stdInWrites.clear();
+}
+
+Future<void> _reject(StreamController<List<int>> streamController,
+    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
+    String mockCompilerOutput, String expected) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  scheduleMicrotask(() {
+    streamController.add(utf8.encode(mockCompilerOutput));
+  });
+  final CompilerOutput output = await generator.reject();
+  expect(output, isNull);
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
+  mockFrontendServerStdIn._stdInWrites.clear();
+}
+
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
@@ -458,3 +568,5 @@ class MockStdIn extends Mock implements IOSink {
     _stdInWrites.writeln(o);
   }
 }
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFile extends Mock implements File {}

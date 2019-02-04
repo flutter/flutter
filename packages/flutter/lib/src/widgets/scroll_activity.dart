@@ -425,7 +425,8 @@ class DragScrollActivity extends ScrollActivity {
   DragScrollActivity(
     ScrollActivityDelegate delegate,
     ScrollDragController controller,
-  ) : _controller = controller, super(delegate);
+  ) : _controller = controller,
+      super(delegate);
 
   ScrollDragController _controller;
 

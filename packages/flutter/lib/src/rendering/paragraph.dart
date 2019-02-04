@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -45,6 +46,7 @@ class RenderParagraph extends RenderBox {
     double textScaleFactor = 1.0,
     int maxLines,
     Locale locale,
+    StrutStyle strutStyle,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -63,6 +65,7 @@ class RenderParagraph extends RenderBox {
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
+         strutStyle: strutStyle,
        );
 
   final TextPainter _textPainter;
@@ -190,6 +193,17 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.locale == value)
       return;
     _textPainter.locale = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  /// The value may be null.
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
   }

@@ -13,7 +13,6 @@
 		74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786D215AB9E9005A0F04 /* Assets.xcassets */; };
 		74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */; };
 		74F97874215AB9E9005A0F04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97873215AB9E9005A0F04 /* main.m */; };
-		74F978AB215AD6DC005A0F04 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 74F978AA215AD6DC005A0F04 /* flutter_assets */; };
 		74F978AF215AD6F9005A0F04 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 74F978AC215AD6E8005A0F04 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DAEA7B95412864C7F3A4AE98 /* libPods-Host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2499C53F0BD30E24745E2F6B /* libPods-Host.a */; };
 /* End PBXBuildFile section */
@@ -47,7 +46,6 @@
 		74F9787B215ABA08005A0F04 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		74F9787C215ABA73005A0F04 /* Flutter.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter.xcconfig; sourceTree = "<group>"; };
 		74F9787D215ABA9D005A0F04 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		74F978AA215AD6DC005A0F04 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = ../../hello/.ios/Flutter/flutter_assets; sourceTree = "<group>"; };
 		74F978AC215AD6E8005A0F04 /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = ../../hello/.ios/Flutter/App.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -121,7 +119,6 @@
 			isa = PBXGroup;
 			children = (
 				74F978AC215AD6E8005A0F04 /* App.framework */,
-				74F978AA215AD6DC005A0F04 /* flutter_assets */,
 			);
 			path = Flutter;
 			sourceTree = "<group>";
@@ -196,7 +193,6 @@
 			files = (
 				74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */,
 				74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */,
-				74F978AB215AD6DC005A0F04 /* flutter_assets in Resources */,
 				74F9786C215AB9E8005A0F04 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

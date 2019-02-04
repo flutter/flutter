@@ -292,7 +292,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerMinuteSemanticsLabel(int minute) {
     if (minute == 1)
-       return '1 minute';
+      return '1 minute';
     return minute.toString() + ' minutes';
   }
 

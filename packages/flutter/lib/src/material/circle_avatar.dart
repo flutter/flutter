@@ -49,7 +49,7 @@ import 'theme_data.dart';
 ///  * [Chip], for representing users or concepts in long form.
 ///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with
 ///    some text for a fixed height list entry.
-///  * <https://material.google.com/components/chips.html#chips-contact-chips>
+///  * <https://material.io/design/components/chips.html#input-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
   const CircleAvatar({
@@ -61,8 +61,8 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-  })  : assert(radius == null || (minRadius == null && maxRadius == null)),
-        super(key: key);
+  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

@@ -60,8 +60,8 @@ typedef TextInputFormatFunction = TextEditingValue Function(
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction) :
-    assert(formatFunction != null);
+  _SimpleTextInputFormatter(this.formatFunction)
+    : assert(formatFunction != null);
 
   final TextInputFormatFunction formatFunction;
 
@@ -215,8 +215,8 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that allows only the insertion of whitelisted characters patterns.
   ///
   /// The [whitelistedPattern] must not be null.
-  WhitelistingTextInputFormatter(this.whitelistedPattern) :
-    assert(whitelistedPattern != null);
+  WhitelistingTextInputFormatter(this.whitelistedPattern)
+    : assert(whitelistedPattern != null);
 
   /// A [Pattern] to extract all instances of allowed characters.
   ///

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -17,6 +16,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'dart/dependencies.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
@@ -436,7 +436,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
     final Completer<void> completer = Completer<void>();
-    Future.wait(futures).whenComplete(() { completer.complete(null); }); // ignore: unawaited_futures
+    Future.wait(futures).whenComplete(() { completer.complete(null); });
     return completer.future;
   }
 
@@ -483,7 +483,7 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       for (FlutterDevice device in flutterDevices) {
         if (device.generator != null)
-          device.generator.reject();
+          await device.generator.reject();
       }
       return OperationResult(1, 'DevFS synchronization failed');
     }
@@ -681,13 +681,13 @@ class HotRunner extends ResidentRunner {
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause
         );
-        Future.wait(reportFutures).then((List<Map<String, dynamic>> reports) { // ignore: unawaited_futures
+        Future.wait(reportFutures).then((List<Map<String, dynamic>> reports) async { // ignore: unawaited_futures
           // TODO(aam): Investigate why we are validating only first reload report,
           // which seems to be current behavior
           final Map<String, dynamic> firstReport = reports.first;
           // Don't print errors because they will be printed further down when
           // `validateReloadReport` is called again.
-          device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
+          await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
           completer.complete(DeviceReloadReport(device, reports));
         });
       }
