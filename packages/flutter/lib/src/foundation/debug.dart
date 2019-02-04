@@ -8,6 +8,16 @@ import 'assertions.dart';
 import 'platform.dart';
 import 'print.dart';
 
+/// A constant that is true if the application was compiled in release mode.
+///
+/// More specifically, this is a constant that is true if the application was
+/// compiled in Dart with the '--product' flag. For Flutter, this indicates that
+/// this application was compiled for release.
+///
+/// This flag is useful for indicating code blocks that should be removed by
+/// tree shaking in release mode.
+const bool kReleaseMode = bool.fromEnvironment('dart.vm.product');
+
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
 ///

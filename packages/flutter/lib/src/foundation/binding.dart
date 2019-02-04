@@ -131,8 +131,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,
