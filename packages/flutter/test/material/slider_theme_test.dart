@@ -548,4 +548,244 @@ void main() {
     );
     await gesture.up();
   });
+
+  testWidgets('The slider track height can be overriden', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
+    double value = 0.25;
+    Widget buildApp({ bool enabled = true }) {
+      final ValueChanged<double> onChanged = enabled
+          ? (double d) => value = d
+          : null;
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: sliderTheme,
+              child: Slider(
+                value: value,
+                label: '$value',
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Top and bottom are centerY (300) + and - trackRadius (8).
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: Rect.fromLTRB(16.0, 292.0, 208.0, 308.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 292.0, 784.0, 308.0), color: sliderTheme.inactiveTrackColor)
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle(); // wait for disable animation
+    // The disabled thumb is smaller so the active track has to paint longer to
+    // get to the edge.
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: Rect.fromLTRB(16.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 292.0, 784.0, 308.0), color: sliderTheme.disabledInactiveTrackColor)
+    );
+  });
+
+  testWidgets('The default slider thumb shape sizes can be overriden', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+        thumbShape: const RoundSliderThumbShape(
+          enabledThumbRadius: 7,
+          disabledThumbRadius: 11,
+        ),
+    );
+    double value = 0.25;
+    Widget buildApp({ bool enabled = true }) {
+      final ValueChanged<double> onChanged = enabled
+          ? (double d) => value = d
+          : null;
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: sliderTheme,
+              child: Slider(
+                value: value,
+                label: '$value',
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints..circle(x: 208, y: 300, radius: 7, color: sliderTheme.thumbColor)
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle(); // wait for disable animation
+    expect(
+      sliderBox,
+      paints..circle(x: 208, y: 300, radius: 11, color: sliderTheme.disabledThumbColor)
+    );
+  });
+
+  testWidgets('The default slider thumb shape disabled size can be inferred from the enabled size', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      thumbShape: const RoundSliderThumbShape(
+        enabledThumbRadius: 9,
+      ),
+    );
+    double value = 0.25;
+    Widget buildApp({ bool enabled = true }) {
+      final ValueChanged<double> onChanged = enabled
+          ? (double d) => value = d
+          : null;
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: sliderTheme,
+              child: Slider(
+                value: value,
+                label: '$value',
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints..circle(x: 208, y: 300, radius: 9, color: sliderTheme.thumbColor)
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle(); // wait for disable animation
+    // Radius should be 6, or 2/3 of 9. 2/3 because the default disabled thumb
+    // radius us 4 and the default enabled thumb radius is 6.
+    // TODO(clocksmith): This ratio will change once thumb sizes are updated to spec.
+    expect(
+      sliderBox,
+      paints..circle(x: 208, y: 300, radius: 6, color: sliderTheme.disabledThumbColor)
+    );
+  });
+
+
+  testWidgets('The default slider tick mark shape size cen be overriden', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      tickMarkShape: RoundSliderTickMarkShape(
+        tickMarkRadius: 5
+      ),
+      activeTickMarkColor: Color(0xff00ff00),
+      inactiveTickMarkColor: Color(0xffff0000),
+      disabledActiveTickMarkColor: Color(0xff0000ff),
+      disabledInactiveTickMarkColor: Color(0xffffff00),
+    );
+    double value = 0.5;
+    Widget buildApp({ bool enabled = true }) {
+      final ValueChanged<double> onChanged = enabled
+          ? (double d) => value = d
+          : null;
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: sliderTheme,
+              child: Slider(
+                value: value,
+                label: '$value',
+                onChanged: onChanged,
+                divisions: 2,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints
+        ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
+        ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor)
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      sliderBox,
+      paints
+        ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor)
+    );
+  });
+
+  testWidgets('The default slider overlay shape size cen be overriden', (WidgetTester tester) async {
+    const double uniqueOverlayRadius = 23;
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      overlayShape: const RoundSliderOverlayShape(
+        overlayRadius: uniqueOverlayRadius,
+      ),
+    );
+    double value = 0.5;
+    Widget buildApp() {
+      final ValueChanged<double> onChanged = (double d) => value = d;
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: sliderTheme,
+              child: Slider(
+                value: value,
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    // Tap center and wait for animation.
+    Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    expect(
+      sliderBox,
+      paints..circle(
+        x: center.dx,
+        y: center.dy,
+        radius: uniqueOverlayRadius,
+        color: sliderTheme.overlayColor,
+      )
+    );
+  });
 }
