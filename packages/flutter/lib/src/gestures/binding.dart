@@ -16,6 +16,47 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
+///
+/// ## Lifecycle of pointer events and the gesture arena
+///
+/// ### [PointerDownEvent]
+///
+/// When a [PointerDownEvent] is received by the [GestureBinding] (from
+/// [Window.onPointerDataPacket], as interpreted by the
+/// [PointerEventConverter]), a [hitTest] is performed to determine which
+/// [HitTestTarget] nodes are affected. (Other bindings are expected to
+/// implement [hitTest] to defer to [HitTestable] objects. For example, the
+/// rendering layer defers to the [RenderView] and the rest of the render object
+/// hierarchy.)
+///
+/// The affected nodes then are given the event to handle ([dispatchEvent] calls
+/// [HitTestTarget.handleEvent] for each affected node). If any have relevant
+/// [GestureRecognizer]s, they provide the event to them using
+/// [GestureRecognizer.addPointer]. This typically causes the recognizer to
+/// register with the [PointerRouter] to receive notifications regarding the
+/// pointer in question.
+///
+/// Once the hit test and dispatching logic is complete, the event is then
+/// passed to the aforementioned [PointerRouter], which passes it to any objects
+/// that have registered interest in that event.
+///
+/// Finally, the [gestureArena] is closed for the given pointer
+/// ([GestureArenaManager.close]), which begins the process of selecting a
+/// gesture to win that pointer.
+///
+/// ### Other events
+///
+/// A pointer that is [PointerEvent.down] may send further events, such as
+/// [PointerMoveEvent], [PointerUpEvent], or [PointerCancelEvent]. These are
+/// sent to the same [HitTestTarget] nodes as were found when the down event was
+/// received (even if they have since been disposed; it is the responsibility of
+/// those objects to be aware of that possibility).
+///
+/// Then, the events are routed to any still-registered entrants in the
+/// [PointerRouter]'s table for that pointer.
+///
+/// When a [PointerUpEvent] is received, the [GestureArenaManager.sweep] method
+/// is invoked to force the gesture arena logic to terminate if necessary.
 mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
