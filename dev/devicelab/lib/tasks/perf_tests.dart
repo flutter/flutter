@@ -30,6 +30,14 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createHomeScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'test_driver/scroll_perf.dart',
+    'home_scroll_perf',
+  ).run;
+}
+
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
