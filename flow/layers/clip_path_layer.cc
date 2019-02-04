@@ -13,7 +13,9 @@
 namespace flow {
 
 ClipPathLayer::ClipPathLayer(Clip clip_behavior)
-    : clip_behavior_(clip_behavior) {}
+    : clip_behavior_(clip_behavior) {
+  FML_DCHECK(clip_behavior != Clip::none);
+}
 
 ClipPathLayer::~ClipPathLayer() = default;
 
