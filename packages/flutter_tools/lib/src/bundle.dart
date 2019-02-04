@@ -48,7 +48,7 @@ const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 
 Future<void> build({
   TargetPlatform platform,
-  BuildMode buildMode,
+  @required BuildMode buildMode,
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
   String applicationKernelFilePath,
@@ -98,6 +98,10 @@ Future<void> build({
   if (!precompiledSnapshot) {
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
+
+    extraFrontEndOptions = <String>['-Dflutter.buildMode.${getModeType(buildMode)}=true']
+      ..addAll(extraFrontEndOptions ?? <String>[]);
+
     ensureDirectoryExists(applicationKernelFilePath);
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
     final CompilerOutput compilerOutput = await kernelCompiler.compile(

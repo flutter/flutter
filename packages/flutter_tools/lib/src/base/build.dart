@@ -302,6 +302,9 @@ class AOTSnapshotter {
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
+    extraFrontEndOptions = <String>['-Dflutter.buildMode.${getModeType(buildMode)}=true']
+      ..addAll(extraFrontEndOptions ?? <String>[]);
+
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
     final CompilerOutput compilerOutput = await kernelCompiler.compile(

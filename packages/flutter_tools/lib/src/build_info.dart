@@ -137,11 +137,32 @@ enum BuildMode {
   debug,
   profile,
   release,
+
+  // TODO(gspencer): The concept of "dynamic" should be factored out of
+  // BuildMode. They're orthogonal axes, and it leads to a bunch of convoluted
+  // and error-prone logic to test for the right build mode.
   dynamicProfile,
   dynamicRelease
 }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
+
+/// Returns the type of mode (build, profile, release) based on the build mode,
+/// since there are multiple kinds of "release" and "profile".
+String getModeType(BuildMode mode) {
+  assert(mode != null);
+  switch (mode) {
+    case BuildMode.debug:
+      return 'debug';
+    case BuildMode.dynamicRelease:
+    case BuildMode.release:
+      return 'release';
+    case BuildMode.dynamicProfile:
+    case BuildMode.profile:
+      return 'profile';
+  }
+  return null;
+}
 
 String getFriendlyModeName(BuildMode mode) {
   return snakeCase(getModeName(mode)).replaceAll('_', ' ');

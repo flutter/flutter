@@ -133,6 +133,7 @@ class FlutterTesterDevice extends Device {
     );
     await bundle.build(
       mainPath: mainPath,
+      buildMode: buildInfo.mode,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
       precompiledSnapshot: false,

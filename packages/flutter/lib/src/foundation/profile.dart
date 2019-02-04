@@ -4,7 +4,7 @@
 
 import 'dart:ui' show VoidCallback;
 
-import 'debug.dart';
+import 'constants.dart';
 
 /// When running in profile mode (or debug mode), invoke the given function.
 ///

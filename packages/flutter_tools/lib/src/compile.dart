@@ -490,6 +490,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=$_targetModel',
+      '-Dflutter.buildMode.debug=true',
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
