@@ -16,9 +16,9 @@ import 'package:meta/meta.dart';
 /// binding used within tests, [TestWidgetsFlutterBinding], contains a [TestWindow]
 /// that is used by all tests.
 ///
-/// A test can utilize a [TestWindow] in the following way:
-///
 /// ## Sample Code
+///
+/// A test can utilize a [TestWindow] in the following way:
 ///
 /// ```dart
 /// testWidgets('your test name here', (WidgetTester tester) async {
