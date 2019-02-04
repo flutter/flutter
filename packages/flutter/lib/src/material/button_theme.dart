@@ -265,6 +265,7 @@ class ButtonThemeData extends Diagnosticable {
 
   /// Simply a convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object:
+  ///
   /// ```dart
   /// return BoxConstraints(
   ///   minWidth: minWidth,
@@ -443,11 +444,11 @@ class ButtonThemeData extends Diagnosticable {
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
-  /// (when MaterialButton.enabled is false).
+  /// (when [MaterialButton.enabled] is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   ///
-  /// Otherwise the the value of the `disabledColor` constructor parameter
+  /// Otherwise the value of the `disabledColor` constructor parameter
   /// is returned, if it is non-null.
   ///
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned

@@ -12,16 +12,16 @@ import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-      : super(devices);
+    : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 
   @override
-  Future<void> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() async { }
 
   @override
-  Future<void> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() async { }
 
   @override
   Future<void> handleTerminalCommand(String code) async {
@@ -39,7 +39,13 @@ class TestRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true,
-  }) => null;
+  }) async => null;
+
+  @override
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async => null;
 }
 
 void main() {

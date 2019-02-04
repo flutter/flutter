@@ -27,7 +27,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({DiagnosticLevel minLevel}) => '$index $alive';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
@@ -499,5 +499,38 @@ void main() {
     );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
+  });
+
+  testWidgets('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              itemExtent: 100.0,
+              children: <Widget>[
+                Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          children: <Matcher>[
+            matchesSemantics(hasImplicitScrolling: true)
+          ],
+        ),
+      ],
+    ));
+    handle.dispose();
   });
 }

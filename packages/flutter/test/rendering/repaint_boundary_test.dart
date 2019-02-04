@@ -34,4 +34,21 @@ void main() {
     c.opacity = 0.7;
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
+
+  test('Repaint boundary can get new parent after markNeedsCompositingBitsUpdate', () {
+    // Regression test for https://github.com/flutter/flutter/issues/24029.
+
+    final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
+    layout(repaintBoundary, phase: EnginePhase.flushSemantics);
+
+    repaintBoundary.markNeedsCompositingBitsUpdate();
+
+    renderer.renderView.child = null;
+    final RenderPadding padding = RenderPadding(
+      padding: const EdgeInsets.all(50),
+    );
+    renderer.renderView.child = padding;
+    padding.child = repaintBoundary;
+    pumpFrame(phase: EnginePhase.flushSemantics);
+  });
 }

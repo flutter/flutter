@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'dialog.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
@@ -111,8 +112,8 @@ class _TimePickerHeaderFragment {
     @required this.widget,
     this.startMargin = 0.0,
   }) : assert(layoutId != null),
-        assert(widget != null),
-        assert(startMargin != null);
+       assert(widget != null),
+       assert(startMargin != null);
 
   /// Identifier used by the custom layout to refer to the widget.
   final _TimePickerHeaderId layoutId;
@@ -139,9 +140,9 @@ class _TimePickerHeaderPiece {
   /// All arguments must be non-null. If the piece does not contain a pivot
   /// fragment, use the value -1 as a convention.
   const _TimePickerHeaderPiece(this.pivotIndex, this.fragments, { this.bottomMargin = 0.0 })
-      : assert(pivotIndex != null),
-        assert(fragments != null),
-        assert(bottomMargin != null);
+    : assert(pivotIndex != null),
+      assert(fragments != null),
+      assert(bottomMargin != null);
 
   /// Index into the [fragments] list, pointing at the fragment that's centered
   /// horizontally.
@@ -174,8 +175,8 @@ class _TimePickerHeaderPiece {
 /// to the left or right of it.
 class _TimePickerHeaderFormat {
   const _TimePickerHeaderFormat(this.centrepieceIndex, this.pieces)
-      : assert(centrepieceIndex != null),
-        assert(pieces != null);
+    : assert(centrepieceIndex != null),
+      assert(pieces != null);
 
   /// Index into the [pieces] list pointing at the piece that contains the
   /// pivot fragment.
@@ -1664,14 +1665,15 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///
 /// See also:
 ///
-///  * [showDatePicker]
-///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
+///  * [showDatePicker], which shows a dialog that contains a material design
+///    date picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(debugCheckHasMaterialLocalizations(context));
 
   return await showDialog<TimeOfDay>(
     context: context,

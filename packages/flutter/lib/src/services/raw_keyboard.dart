@@ -6,9 +6,94 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'raw_keyboard_android.dart';
+import 'raw_keyboard_fuschia.dart';
 import 'system_channels.dart';
 
-/// Base class for platform specific key event data.
+/// An enum describing the side of the keyboard that a key is on, to allow
+/// discrimination between which key is pressed (e.g. the left or right SHIFT
+/// key).
+///
+/// See also:
+///
+///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
+///    argument.
+enum KeyboardSide {
+  /// Matches if either the left, right or both versions of the key are pressed.
+  any,
+
+  /// Matches the left version of the key.
+  left,
+
+  /// Matches the right version of the key.
+  right,
+
+  /// Matches the left and right version of the key pressed simultaneously.
+  all,
+}
+
+/// An enum describing the type of modifier key that is being pressed.
+///
+/// See also:
+///
+///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
+///    argument.
+enum ModifierKey {
+  /// The CTRL modifier key.
+  ///
+  /// Typically, there are two of these.
+  controlModifier,
+
+  /// The SHIFT modifier key.
+  ///
+  /// Typically, there are two of these.
+  shiftModifier,
+
+  /// The ALT modifier key.
+  ///
+  /// Typically, there are two of these.
+  altModifier,
+
+  /// The META modifier key.
+  ///
+  /// Typically, there are two of these. This is, for example, the Windows key
+  /// on Windows (⊞), the Command (⌘) key on macOS and iOS, and the Search (🔍)
+  /// key on Android.
+  metaModifier,
+
+  /// The CAPS LOCK modifier key.
+  ///
+  /// Typically, there is one of these. Only shown as "pressed" when the caps
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
+  capsLockModifier,
+
+  /// The NUM LOCK modifier key.
+  ///
+  /// Typically, there is one of these. Only shown as "pressed" when the num
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
+  numLockModifier,
+
+  /// The SCROLL LOCK modifier key.
+  ///
+  /// Typically, there is one of these.  Only shown as "pressed" when the scroll
+  /// lock is on, so on a key up when the mode is turned on, on each key press
+  /// when it's enabled, and on a key down when it is turned off.
+  scrollLockModifier,
+
+  /// The FUNCTION (Fn) modifier key.
+  ///
+  /// Typically, there is one of these.
+  functionModifier,
+
+  /// The SYMBOL modifier key.
+  ///
+  /// Typically, there is one of these.
+  symbolModifier,
+}
+
+/// Base class for platform-specific key event data.
 ///
 /// This base class exists to have a common type to use for each of the
 /// target platform's key event data structures.
@@ -22,99 +107,79 @@ import 'system_channels.dart';
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
 abstract class RawKeyEventData {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// Abstract const constructor.
+  ///
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const RawKeyEventData();
-}
 
-/// Platform-specific key event data for Android.
-///
-/// This object contains information about key events obtained from Android's
-/// `KeyEvent` interface.
-///
-/// See also:
-///
-///  * [RawKeyboard], which uses this interface to expose key data.
-class RawKeyEventDataAndroid extends RawKeyEventData {
-  /// Creates a key event data structure specific for Android.
+  /// Returns true if the given [ModifierKey] was pressed at the time of this
+  /// event.
   ///
-  /// The [flags], [codePoint], [keyCode], [scanCode], and [metaState] arguments
-  /// must not be null.
-  const RawKeyEventDataAndroid({
-    this.flags = 0,
-    this.codePoint = 0,
-    this.keyCode = 0,
-    this.scanCode = 0,
-    this.metaState = 0,
-  }) : assert(flags != null),
-       assert(codePoint != null),
-       assert(keyCode != null),
-       assert(scanCode != null),
-       assert(metaState != null);
+  /// If [side] is specified, then this restricts its check to the specified
+  /// side of the keyboard. Defaults to checking for the key being down on
+  /// either side of the keyboard. If there is only one instance of the key on
+  /// the keyboard, then [side] is ignored.
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
 
-  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getFlags()>
-  final int flags;
-
-  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getUnicodeChar()>
-  final int codePoint;
-
-  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getKeyCode()>
-  final int keyCode;
-
-  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getScanCode()>
-  final int scanCode;
-
-  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getMetaState()>
-  final int metaState;
-}
-
-/// Platform-specific key event data for Fuchsia.
-///
-/// This object contains information about key events obtained from Fuchsia's
-/// `KeyData` interface.
-///
-/// See also:
-///
-///  * [RawKeyboard], which uses this interface to expose key data.
-class RawKeyEventDataFuchsia extends RawKeyEventData {
-  /// Creates a key event data structure specific for Fuchsia.
+  /// Returns a [KeyboardSide] enum value that describes which side or sides of
+  /// the given keyboard modifier key were pressed at the time of this event.
   ///
-  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
-  const RawKeyEventDataFuchsia({
-    this.hidUsage = 0,
-    this.codePoint = 0,
-    this.modifiers = 0,
-  }) : assert(hidUsage != null),
-       assert(codePoint != null),
-       assert(modifiers != null);
+  /// If the modifier key wasn't pressed at the time of this event, returns
+  /// null. If the given key only appears in one place on the keyboard, returns
+  /// [KeyboardSide.all] if pressed. Never returns [KeyboardSide.any], because
+  /// that doesn't make sense in this context.
+  KeyboardSide getModifierSide(ModifierKey key);
 
-  /// The USB HID usage.
+  /// Returns true if a CTRL modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on.
   ///
-  /// See <http://www.usb.org/developers/hidpage/Hut1_12v2.pdf>
-  final int hidUsage;
+  /// Use [isModifierPressed] if you need to know which control key was pressed.
+  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier, side: KeyboardSide.any);
 
-  /// The Unicode code point represented by the key event, if any.
+  /// Returns true if a SHIFT modifier key was pressed at the time of this
+  /// event, regardless of which side of the keyboard it is on.
   ///
-  /// If there is no Unicode code point, this value is zero.
-  final int codePoint;
+  /// Use [isModifierPressed] if you need to know which shift key was pressed.
+  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.any);
 
-  /// The modifiers that we present when the key event occurred.
+  /// Returns true if a ALT modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on.
   ///
-  /// See <https://fuchsia.googlesource.com/garnet/+/master/public/fidl/fuchsia.ui.input/input_event_constants.fidl>
-  /// for the numerical values of the modifiers.
-  final int modifiers;
+  /// Use [isModifierPressed] if you need to know which alt key was pressed.
+  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier, side: KeyboardSide.any);
+
+  /// Returns true if a META modifier key was pressed at the time of this event,
+  /// regardless of which side of the keyboard it is on.
+  ///
+  /// Use [isModifierPressed] if you need to know which meta key was pressed.
+  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
+
+  /// Returns a map of modifier keys that were pressed at the time of this
+  /// event, and the keyboard side or sides that the key was on.
+  Map<ModifierKey, KeyboardSide> get modifiersPressed {
+    final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
+    for (ModifierKey key in ModifierKey.values) {
+      if (isModifierPressed(key)) {
+        result[key] = getModifierSide(key);
+      }
+    }
+    return result;
+  }
 }
 
 /// Base class for raw key events.
 ///
 /// Raw key events pass through as much information as possible from the
-/// underlying platform's key events, which makes they provide a high level of
-/// fidelity but a low level of portability.
+/// underlying platform's key events, which allows them to provide a high level
+/// of fidelity but a low level of portability.
 ///
 /// See also:
 ///
-///  * [RawKeyDownEvent], a specialization for events representing the user pressing a key.
-///  * [RawKeyUpEvent], a specialization for events representing the user releasing a key.
+///  * [RawKeyDownEvent], a specialization for events representing the user
+///    pressing a key.
+///  * [RawKeyUpEvent], a specialization for events representing the user
+///    releasing a key.
 ///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
@@ -148,8 +213,9 @@ abstract class RawKeyEvent {
         );
         break;
       default:
-        // We don't yet implement raw key events on iOS, but we don't hit this
-        // exception because the engine never sends us these messages.
+        // We don't yet implement raw key events on iOS or other platforms, but
+        // we don't hit this exception because the engine never sends us these
+        // messages.
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
@@ -234,13 +300,17 @@ class RawKeyboard {
   }
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    if (_listeners.isEmpty)
+    if (_listeners.isEmpty) {
       return;
+    }
     final RawKeyEvent event = RawKeyEvent.fromMessage(message);
-    if (event == null)
+    if (event == null) {
       return;
-    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners))
-      if (_listeners.contains(listener))
+    }
+    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+      if (_listeners.contains(listener)) {
         listener(event);
+      }
+    }
   }
 }

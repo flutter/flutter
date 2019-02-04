@@ -140,10 +140,10 @@ class _LineBetweenPointers{
 /// Recognizes a scale gesture.
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
-/// calculates their focal point, indicated scale and rotation. When a focal pointer is
-/// established, the recognizer calls [onStart]. As the focal point, scale, rotation
-/// change, the recognizer calls [onUpdate]. When the pointers are no longer in
-/// contact with the screen, the recognizer calls [onEnd].
+/// calculates their focal point, indicated scale, and rotation. When a focal
+/// pointer is established, the recognizer calls [onStart]. As the focal point,
+/// scale, rotation change, the recognizer calls [onUpdate]. When the pointers
+/// are no longer in contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ScaleGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
@@ -168,7 +168,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   _LineBetweenPointers _initialLine;
   _LineBetweenPointers _currentLine;
   Map<int, Offset> _pointerLocations;
-  List<int> _pointerQueue; /// A queue to sort pointers in order of entrance
+  List<int> _pointerQueue; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;

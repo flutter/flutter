@@ -78,10 +78,10 @@ Color _colorFromHue(
 ///
 /// See also:
 ///
-///   * [HSLColor], a color that uses a color space based on human perception of
-///     colored light.
-///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
-///     article, which this implementation is based upon.
+///  * [HSLColor], a color that uses a color space based on human perception of
+///    colored light.
+///  * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///    article, which this implementation is based upon.
 @immutable
 class HSVColor {
   /// Creates a color.
@@ -89,18 +89,18 @@ class HSVColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-      : assert(alpha != null),
-        assert(hue != null),
-        assert(saturation != null),
-        assert(value != null),
-        assert(alpha >= 0.0),
-        assert(alpha <= 1.0),
-        assert(hue >= 0.0),
-        assert(hue <= 360.0),
-        assert(saturation >= 0.0),
-        assert(saturation <= 1.0),
-        assert(value >= 0.0),
-        assert(value <= 1.0);
+    : assert(alpha != null),
+      assert(hue != null),
+      assert(saturation != null),
+      assert(value != null),
+      assert(alpha >= 0.0),
+      assert(alpha <= 1.0),
+      assert(hue >= 0.0),
+      assert(hue <= 360.0),
+      assert(saturation >= 0.0),
+      assert(saturation <= 1.0),
+      assert(value >= 0.0),
+      assert(value <= 1.0);
 
   /// Creates an [HSVColor] from an RGB [Color].
   ///
@@ -249,10 +249,10 @@ class HSVColor {
 ///
 /// See also:
 ///
-///   * [HSVColor], a color that uses a color space based on human perception of
-///     pigments (e.g. paint and printer's ink).
-///   * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
-///     article, which this implementation is based upon.
+///  * [HSVColor], a color that uses a color space based on human perception of
+///    pigments (e.g. paint and printer's ink).
+///  * [HSV and HSL](https://en.wikipedia.org/wiki/HSL_and_HSV) Wikipedia
+///    article, which this implementation is based upon.
 @immutable
 class HSLColor {
   /// Creates a color.

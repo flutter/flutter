@@ -83,6 +83,9 @@ void main(List<String> args) {
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
+  // Remove the (flutter_gallery specific) analysis_options.yaml file.
+  _file(out, 'analysis_options.yaml').deleteSync();
+
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.

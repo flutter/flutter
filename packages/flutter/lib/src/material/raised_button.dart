@@ -39,12 +39,13 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], and
-  /// [clipBehavior] arguments must not be null.
+  /// [clipBehavior] arguments must not be null. Additionally,  [elevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,
@@ -123,11 +124,10 @@ class RaisedButton extends MaterialButton {
     @required Widget label,
   }) = _RaisedButtonWithIcon;
 
- @override
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,

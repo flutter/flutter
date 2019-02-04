@@ -57,7 +57,7 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -109,8 +109,15 @@ abstract class ChipAttributes {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   MaterialTapTargetSize get materialTapTargetSize;
+
+  /// Elevation to be applied on the chip relative to its parent.
+  ///
+  /// This controls the size of the shadow below the chip.
+  ///
+  /// Defaults to 0. The value is always non-negative.
+  double get elevation;
 }
 
 /// An interface for material design chips that can be deleted.
@@ -125,7 +132,7 @@ abstract class ChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -227,7 +234,7 @@ abstract class DeletableChipAttributes {
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -287,10 +294,12 @@ abstract class SelectableChipAttributes {
   /// {@end-tool}
   ValueChanged<bool> get onSelected;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Color to be used for the chip's background, indicating that it is
@@ -302,6 +311,14 @@ abstract class SelectableChipAttributes {
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
   String get tooltip;
+
+  /// The shape of the translucent highlight painted over the avatar when the
+  /// [selected] property is true.
+  ///
+  /// Only the outer path of the shape is used.
+  ///
+  /// Defaults to [CircleBorder].
+  ShapeBorder get avatarBorder;
 }
 
 /// An interface for material design chips that can be enabled and disabled.
@@ -318,7 +335,7 @@ abstract class SelectableChipAttributes {
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -365,7 +382,7 @@ abstract class DisabledChipAttributes {
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly.
@@ -377,7 +394,7 @@ abstract class TappableChipAttributes {
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
@@ -394,12 +411,15 @@ abstract class TappableChipAttributes {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   VoidCallback get onPressed;
 
-  /// Elevation to be applied on the chip during the press motion.
+  /// Elevation to be applied on the chip relative to its parent during the
+  /// press motion.
+  ///
   /// This controls the size of the shadow below the chip.
   ///
-  /// Defaults to 8.
+  /// Defaults to 8. The value is always non-negative.
   double get pressElevation;
 
   /// Tooltip string to be used for the body area (where the label and avatar
@@ -418,7 +438,7 @@ abstract class TappableChipAttributes {
 /// Requires one of its ancestors to be a [Material] widget. The [label]
 /// and [clipBehavior] arguments must not be null.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Chip(
@@ -429,6 +449,7 @@ abstract class TappableChipAttributes {
 ///   label: Text('Aaron Burr'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -442,11 +463,12 @@ abstract class TappableChipAttributes {
 ///  * [CircleAvatar], which shows images or initials of entities.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
   /// The [label] and [clipBehavior] arguments must not be null.
+  /// The [elevation] must be null or non-negative.
   const Chip({
     Key key,
     this.avatar,
@@ -462,9 +484,11 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+    this.elevation,
+  }) : assert(label != null),
+       assert(clipBehavior != null),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -492,6 +516,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final String deleteButtonTooltipMessage;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -511,6 +537,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
+      elevation: elevation,
       isEnabled: true,
     );
   }
@@ -534,7 +561,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// InputChip(
@@ -548,6 +575,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///   }
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -559,7 +587,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class InputChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -573,7 +601,8 @@ class InputChip extends StatelessWidget
   /// the same time.
   ///
   /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
-  /// not be null.
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     Key key,
     this.avatar,
@@ -588,7 +617,7 @@ class InputChip extends StatelessWidget
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
     this.onPressed,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -597,11 +626,15 @@ class InputChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(selected != null),
-        assert(isEnabled != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+    this.elevation,
+    this.avatarBorder = const CircleBorder(),
+  }) : assert(selected != null),
+       assert(isEnabled != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -645,6 +678,10 @@ class InputChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -671,7 +708,9 @@ class InputChip extends StatelessWidget
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
+      elevation: elevation,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -684,7 +723,7 @@ class InputChip extends StatelessWidget
 /// Requires one of its ancestors to be a [Material] widget. The [selected] and
 /// [label] arguments must not be null.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
@@ -716,6 +755,7 @@ class InputChip extends StatelessWidget
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -728,7 +768,7 @@ class InputChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -736,7 +776,9 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [label], [selected], and [clipBehavior] attributes must not be null.
+  /// The [label], [selected], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -744,7 +786,7 @@ class ChoiceChip extends StatelessWidget
     this.labelStyle,
     this.labelPadding,
     this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     @required this.selected,
     this.selectedColor,
     this.disabledColor,
@@ -754,10 +796,14 @@ class ChoiceChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+    this.elevation,
+    this.avatarBorder = const CircleBorder(),
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -789,6 +835,10 @@ class ChoiceChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -816,6 +866,8 @@ class ChoiceChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
+      elevation: elevation,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -830,7 +882,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class ActorFilterEntry {
@@ -891,6 +943,7 @@ class ChoiceChip extends StatelessWidget
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -904,7 +957,7 @@ class ChoiceChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
@@ -912,7 +965,9 @@ class FilterChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
-  /// The [selected] and [label] attributes must not be null.
+  /// The [selected], [label], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const FilterChip({
     Key key,
     this.avatar,
@@ -921,7 +976,7 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     @required this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -930,10 +985,14 @@ class FilterChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        super(key: key);
+    this.elevation,
+    this.avatarBorder = const CircleBorder(),
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -965,6 +1024,10 @@ class FilterChip extends StatelessWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
+  @override
+  final ShapeBorder avatarBorder;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -989,6 +1052,8 @@ class FilterChip extends StatelessWidget
       padding: padding,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
+      elevation: elevation,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1012,7 +1077,7 @@ class FilterChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// ActionChip(
@@ -1026,6 +1091,7 @@ class FilterChip extends StatelessWidget
 ///   }
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1038,11 +1104,13 @@ class FilterChip extends StatelessWidget
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed], and [clipBehavior] arguments must not be null.
+  /// The [label], [onPressed] and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const ActionChip({
     Key key,
     this.avatar,
@@ -1050,20 +1118,23 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.labelStyle,
     this.labelPadding,
     @required this.onPressed,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-  })  : assert(label != null),
-        assert(
-          onPressed != null,
-          'Rather than disabling an ActionChip by setting onPressed to null, '
-          'remove it from the interface entirely.',
-        ),
-        super(key: key);
+    this.elevation,
+  }) : assert(label != null),
+       assert(
+         onPressed != null,
+         'Rather than disabling an ActionChip by setting onPressed to null, '
+         'remove it from the interface entirely.',
+       ),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -1089,6 +1160,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -1106,7 +1179,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
-      materialTapTargetSize: materialTapTargetSize
+      materialTapTargetSize: materialTapTargetSize,
+      elevation: elevation,
     );
   }
 }
@@ -1140,7 +1214,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
-///  * <https://material.google.com/components/chips.html>
+///  * <https://material.io/design/components/chips.html>
 class RawChip extends StatefulWidget
     implements
         ChipAttributes,
@@ -1154,6 +1228,8 @@ class RawChip extends StatefulWidget
   /// the same time.
   ///
   /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const RawChip({
     Key key,
     this.avatar,
@@ -1167,7 +1243,7 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.tapEnabled = true,
     this.selected,
     this.showCheckmark = true,
@@ -1179,11 +1255,15 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
-  })  : assert(label != null),
-        assert(isEnabled != null),
-        assert(clipBehavior != null),
-        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
-        super(key: key);
+    this.elevation,
+    this.avatarBorder = const CircleBorder(),
+  }) : assert(label != null),
+       assert(isEnabled != null),
+       assert(clipBehavior != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
+       super(key: key);
 
   @override
   final Widget avatar;
@@ -1227,6 +1307,10 @@ class RawChip extends StatefulWidget
   final EdgeInsetsGeometry padding;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
+  @override
+  final double elevation;
+  @override
+  final CircleBorder avatarBorder;
 
   /// Whether or not to show a check mark when [selected] is true.
   ///
@@ -1463,6 +1547,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
+  static const double _defaultElevation = 0.0;
+  static const double _defaultPressElevation = 8.0;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1474,10 +1561,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
-
+    final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
+    final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
 
     Widget result = Material(
-      elevation: isTapping ? widget.pressElevation : 0.0,
+      elevation: isTapping ? pressElevation : elevation,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,
@@ -1532,6 +1620,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
               avatarDrawerAnimation: avatarDrawerAnimation,
               deleteDrawerAnimation: deleteDrawerAnimation,
               isEnabled: widget.isEnabled,
+              avatarBorder: widget.avatarBorder,
             ),
           ),
         ),
@@ -1612,8 +1701,9 @@ class _ChipRenderWidget extends RenderObjectWidget {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-  })  : assert(theme != null),
-        super(key: key);
+    this.avatarBorder,
+  }) : assert(theme != null),
+       super(key: key);
 
   final _ChipRenderTheme theme;
   final bool value;
@@ -1622,6 +1712,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
   final Animation<double> avatarDrawerAnimation;
   final Animation<double> deleteDrawerAnimation;
   final Animation<double> enableAnimation;
+  final ShapeBorder avatarBorder;
 
   @override
   _RenderChipElement createElement() => _RenderChipElement(this);
@@ -1636,7 +1727,8 @@ class _ChipRenderWidget extends RenderObjectWidget {
       ..checkmarkAnimation = checkmarkAnimation
       ..avatarDrawerAnimation = avatarDrawerAnimation
       ..deleteDrawerAnimation = deleteDrawerAnimation
-      ..enableAnimation = enableAnimation;
+      ..enableAnimation = enableAnimation
+      ..avatarBorder = avatarBorder;
   }
 
   @override
@@ -1650,6 +1742,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
       avatarDrawerAnimation: avatarDrawerAnimation,
       deleteDrawerAnimation: deleteDrawerAnimation,
       enableAnimation: enableAnimation,
+      avatarBorder: avatarBorder,
     );
   }
 }
@@ -1837,10 +1930,11 @@ class _RenderChip extends RenderBox {
     this.avatarDrawerAnimation,
     this.deleteDrawerAnimation,
     this.enableAnimation,
-  })  : assert(theme != null),
-        assert(textDirection != null),
-        _theme = theme,
-        _textDirection = textDirection {
+    this.avatarBorder,
+  }) : assert(theme != null),
+       assert(textDirection != null),
+       _theme = theme,
+       _textDirection = textDirection {
     checkmarkAnimation.addListener(markNeedsPaint);
     avatarDrawerAnimation.addListener(markNeedsLayout);
     deleteDrawerAnimation.addListener(markNeedsLayout);
@@ -1858,6 +1952,7 @@ class _RenderChip extends RenderBox {
   Animation<double> avatarDrawerAnimation;
   Animation<double> deleteDrawerAnimation;
   Animation<double> enableAnimation;
+  ShapeBorder avatarBorder;
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
@@ -2345,7 +2440,8 @@ class _RenderChip extends RenderBox {
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)
           ..blendMode = BlendMode.srcATop;
-        context.canvas.drawRect(avatarRect, darkenPaint);
+        final Path path =  avatarBorder.getOuterPath(avatarRect);
+        context.canvas.drawPath(path, darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;

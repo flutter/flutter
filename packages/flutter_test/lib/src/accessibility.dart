@@ -17,7 +17,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+    : passed = true,
+      reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -142,7 +144,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
         result += traverse(child);
         return true;
       });
-      if (node.isMergedIntoParent)
+      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden))
         return result;
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
@@ -203,9 +205,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     });
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
+      Evaluation result = const Evaluation.pass();
+      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
+        return result;
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];
-      Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
         children.add(child);
         return true;

@@ -20,12 +20,6 @@ import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
-///
-/// Example:
-///
-/// ```
-///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
-/// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
@@ -66,6 +60,14 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       )
       ..addFlag(
+        'consumer-only',
+        help: 'Only prints the dependency graph that is the transitive closure'
+              'that a consumer of the Flutter SDK will observe (When combined '
+              'with transitive-closure)',
+        defaultsTo: false,
+        negatable: false,
+      )
+      ..addFlag(
         'verify-only',
         help: 'verifies the package checksum without changing or updating deps',
         defaultsTo: false,
@@ -85,7 +87,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      expectSlowOperation: true,
+      timeout: kSlowOperation,
     );
     final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
@@ -107,6 +109,24 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintPaths = argResults['paths'];
     final bool isPrintTransitiveClosure = argResults['transitive-closure'];
     final bool isVerifyOnly = argResults['verify-only'];
+    final bool isConsumerOnly = argResults['consumer-only'];
+
+    // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
+    if (isConsumerOnly) {
+      if (!isPrintTransitiveClosure) {
+        throwToolExit(
+          '--consumer-only can only be used with the --transitive-closure flag'
+        );
+      }
+      // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'flutter_build'];
+      // ensure we only get flutter/packages
+      packages.retainWhere((Directory directory) {
+        return consumerPackages.any((String package) {
+          return directory.path.endsWith('packages${fs.path.separator}$package');
+        });
+      });
+    }
 
     // The dev/integration_tests/android_views integration test depends on an assets
     // package that is in the goldens repository. We need to make sure that the goldens
@@ -342,7 +362,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (path != null)
           buf.write(' <- ');
       }
-      printStatus(buf.toString());
+      printStatus(buf.toString(), wrap: false);
     }
 
     if (paths.isEmpty) {
@@ -620,7 +640,6 @@ class PubspecYaml {
         // place to insert our transitive dependencies.
         if (section == Section.dependencies)
           endOfDirectDependencies = output.length;
-          endOfDevDependencies = output.length;
         if (section == Section.devDependencies)
           endOfDevDependencies = output.length;
         section = data.section; // track which section we're now in.
@@ -884,7 +903,8 @@ class PubspecDependency extends PubspecLine {
     DependencyKind kind,
     this.version,
     this.sourcePath,
-  }) : _kind = kind, super(line);
+  }) : _kind = kind,
+       super(line);
 
   static PubspecDependency parse(String line, { @required String filename }) {
     // We recognize any line that:

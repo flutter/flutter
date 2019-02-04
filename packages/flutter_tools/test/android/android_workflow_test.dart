@@ -9,6 +9,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -16,6 +19,8 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+
+class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
   AndroidSdk sdk;
@@ -172,4 +177,57 @@ void main() {
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
+
+  testUsingContext('detects minium required SDK and buildtools', () async {
+    final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
+
+    // Test with invalid SDK and build tools
+    when(mockSdkVersion.sdkLevel).thenReturn(26);
+    when(mockSdkVersion.buildToolsVersion).thenReturn(Version(26, 0, 3));
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    when(sdk.latestVersion).thenReturn(mockSdkVersion);
+    when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
+    final String errorMessage = userMessages.androidSdkBuildToolsOutdated(
+      sdk.sdkManagerPath,
+      kAndroidSdkMinVersion,
+      kAndroidSdkBuildToolsMinVersion.toString(),
+    );
+
+    ValidationResult validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.missing);
+    expect(
+      validationResult.messages.last.message,
+      errorMessage,
+    );
+
+    // Test with valid SDK but invalid build tools
+    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 2));
+
+    validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.missing);
+    expect(
+      validationResult.messages.last.message,
+      errorMessage,
+    );
+
+    // Test with valid SDK and valid build tools
+    // Will still be partial because AnroidSdk.findJavaBinary is static :(
+    when(mockSdkVersion.sdkLevel).thenReturn(kAndroidSdkMinVersion);
+    when(mockSdkVersion.buildToolsVersion).thenReturn(kAndroidSdkBuildToolsMinVersion);
+
+    validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.partial); // No Java binary
+    expect(
+      validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
+      isFalse,
+    );
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
 }

@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Desplega",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 caràcter",
-  "remainingTextFieldCharacterCountOther": "Queden $remainingCount caràcters"
+  "remainingTextFieldCharacterCountOther": "Queden $remainingCount caràcters",
+  "refreshIndicatorSemanticLabel": "Actualitza"
 }

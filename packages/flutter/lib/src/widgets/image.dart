@@ -71,7 +71,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// See also:
 ///
-///   * [ImageCache], which holds images that may be reused.
+///  * [ImageCache], which holds images that may be reused.
 Future<void> precacheImage(
   ImageProvider provider,
   BuildContext context, {
@@ -83,9 +83,11 @@ Future<void> precacheImage(
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
+    stream.removeListener(listener);
   }
   void errorListener(dynamic exception, StackTrace stackTrace) {
     completer.complete();
+    stream.removeListener(listener);
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
@@ -99,7 +101,6 @@ Future<void> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -298,7 +299,7 @@ class Image extends StatefulWidget {
   /// which corresponds to bilinear interpolation, rather than the default
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
   ///
@@ -309,6 +310,7 @@ class Image extends StatefulWidget {
   ///     - images/2x/cat.png
   ///     - images/3.5x/cat.png
   /// ```
+  /// {@end-tool}
   ///
   /// On a screen with a device pixel ratio of 2.0, the following widget would
   /// render the `images/2x/cat.png` file:
@@ -336,11 +338,13 @@ class Image extends StatefulWidget {
   /// must be provided. For instance, suppose a package called `my_icons` has
   /// `icons/heart.png` .
   ///
+  /// {@tool sample}
   /// Then to display the image, use:
   ///
   /// ```dart
   /// Image.asset('icons/heart.png', package: 'my_icons')
   /// ```
+  /// {@end-tool}
   ///
   /// Assets used by the package itself should also be displayed using the
   /// [package] argument as above.
@@ -358,14 +362,14 @@ class Image extends StatefulWidget {
   /// lib/backgrounds/background1.png
   /// lib/backgrounds/background2.png
   /// lib/backgrounds/background3.png
-  ///```
+  /// ```
   ///
   /// To include, say the first image, the `pubspec.yaml` of the app should
   /// specify it in the assets section:
   ///
   /// ```yaml
-  ///  assets:
-  ///    - packages/fancy_backgrounds/backgrounds/background1.png
+  ///   assets:
+  ///     - packages/fancy_backgrounds/backgrounds/background1.png
   /// ```
   ///
   /// The `lib/` is implied, so it should not be included in the asset path.

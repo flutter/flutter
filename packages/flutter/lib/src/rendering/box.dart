@@ -109,10 +109,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.tightFor({
     double width,
     double height
-  }): minWidth = width != null ? width : 0.0,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : 0.0,
-      maxHeight = height != null ? height : double.infinity;
+  }) : minWidth = width != null ? width : 0.0,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : 0.0,
+       maxHeight = height != null ? height : double.infinity;
 
   /// Creates box constraints that require the given width or height, except if
   /// they are infinite.
@@ -124,10 +124,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
     double height = double.infinity
-  }): minWidth = width != double.infinity ? width : 0.0,
-      maxWidth = width != double.infinity ? width : double.infinity,
-      minHeight = height != double.infinity ? height : 0.0,
-      maxHeight = height != double.infinity ? height : double.infinity;
+  }) : minWidth = width != double.infinity ? width : 0.0,
+       maxWidth = width != double.infinity ? width : double.infinity,
+       minHeight = height != double.infinity ? height : 0.0,
+       maxHeight = height != double.infinity ? height : double.infinity;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -143,10 +143,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.expand({
     double width,
     double height
-  }): minWidth = width != null ? width : double.infinity,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : double.infinity,
-      maxHeight = height != null ? height : double.infinity;
+  }) : minWidth = width != null ? width : double.infinity,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : double.infinity,
+       maxHeight = height != null ? height : double.infinity;
 
   /// The minimum width that satisfies the constraints.
   final double minWidth;
@@ -615,8 +615,8 @@ class BoxHitTestEntry extends HitTestEntry {
   ///
   /// The [localPosition] argument must not be null.
   const BoxHitTestEntry(RenderBox target, this.localPosition)
-      : assert(localPosition != null),
-        super(target);
+    : assert(localPosition != null),
+      super(target);
 
   @override
   RenderBox get target => super.target;
@@ -845,7 +845,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// The declaration of the `RenderFoo` class itself would thus look like this:
 ///
 /// ```dart
-/// class RenderFlex extends RenderBox with
+/// class RenderFoo extends RenderBox with
 ///   ContainerRenderObjectMixin<RenderBox, FooParentData>,
 ///   RenderBoxContainerDefaultsMixin<RenderBox, FooParentData> {
 ///   // ...
@@ -1736,7 +1736,7 @@ abstract class RenderBox extends RenderObject {
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
           information.write('  ');
           information.writeln(node.toStringShallow(joiner: '\n  '));
-         }
+        }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
@@ -1766,7 +1766,7 @@ abstract class RenderBox extends RenderObject {
           'Constraints: $constraints\n'
           'Size: $_size\n'
           'If you are not writing your own RenderBox subclass, then this is not '
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
         );
       }
       if (debugCheckIntrinsicSizes) {
@@ -1815,7 +1815,7 @@ abstract class RenderBox extends RenderObject {
             'The following ${failureCount > 1 ? "failures" : "failure"} was detected:\n'
             '$failures'
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }
       }
@@ -1834,7 +1834,7 @@ abstract class RenderBox extends RenderObject {
       // notify them again.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
-       if (parent is RenderObject) {
+      if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
       }

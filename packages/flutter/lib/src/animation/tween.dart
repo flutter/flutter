@@ -12,6 +12,7 @@ import 'curves.dart';
 
 // Examples can assume:
 // Animation<Offset> _animation;
+// AnimationController _controller;
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.
@@ -127,7 +128,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// which results in two separate [Animation] objects, each configured with a
 /// single [Tween].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
 /// [Animation<Offset>] that is controlled by that controller, and save it in
@@ -141,6 +142,8 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 ///   ),
 /// );
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// ```dart
 /// _animation = Tween<Offset>(
@@ -148,6 +151,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 ///   end: const Offset(200.0, 300.0),
 /// ).animate(_controller);
 /// ```
+/// {@end-tool}
 ///
 /// In both cases, the `_animation` variable holds an object that, over the
 /// lifetime of the `_controller`'s animation, returns a value
@@ -263,7 +267,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
 /// A [Tween] that evaluates its [parent] in reverse.
 class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
-  ReverseTween(this.parent) : assert(parent != null), super(begin: parent.end, end: parent.begin);
+  ReverseTween(this.parent)
+    : assert(parent != null),
+      super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -407,16 +413,17 @@ class ConstantTween<T> extends Tween<T> {
 /// curves when the animation is going forward vs when it is going backward,
 /// which can be useful in some scenarios.)
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
 /// animation produced by an [AnimationController] `controller`:
 ///
 /// ```dart
-/// final Animation<double> animation = controller.drive(
+/// final Animation<double> animation = _controller.drive(
 ///   CurveTween(curve: Curves.ease),
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -253,12 +253,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  ///  * The method [correctBy], which is a method of [ViewportOffset] used
+  ///  * [correctBy], which is a method of [ViewportOffset] used
   ///    by viewport render objects to correct the offset during layout
   ///    without notifying its listeners.
-  ///  * The method [jumpTo], for making changes to position while not in the
+  ///  * [jumpTo], for making changes to position while not in the
   ///    middle of layout and applying the new position immediately.
-  ///  * The method [animateTo], which is like [jumpTo] but animating to the
+  ///  * [animateTo], which is like [jumpTo] but animating to the
   ///    distination offset.
   void correctPixels(double value) {
     _pixels = value;
@@ -473,11 +473,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  /// * [applyViewportDimension], which is called when new
-  ///   viewport dimensions are established.
-  /// * [applyContentDimensions], which is called after new
-  ///   viewport dimensions are established, and also if new content dimensions
-  ///   are established, and which calls [ScrollPosition.applyNewDimensions].
+  ///  * [applyViewportDimension], which is called when new
+  ///    viewport dimensions are established.
+  ///  * [applyContentDimensions], which is called after new
+  ///    viewport dimensions are established, and also if new content dimensions
+  ///    are established, and which calls [ScrollPosition.applyNewDimensions].
   @protected
   @mustCallSuper
   void applyNewDimensions() {
@@ -562,6 +562,28 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
+  /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
+  /// [animateTo] is called.
+  ///
+  /// If [clamp] is true (the default) then [to] is adjusted to prevent over or
+  /// underscroll.
+  ///
+  /// If [animateTo] is called then [curve] defaults to [Curves.ease].
+  @override
+  Future<void> moveTo(double to, {
+    Duration duration,
+    Curve curve,
+    bool clamp = true,
+  }) {
+    assert(to != null);
+    assert(clamp != null);
+
+    if (clamp)
+      to = to.clamp(minScrollExtent, maxScrollExtent);
+
+    return super.moveTo(to, duration: duration, curve: curve);
+  }
+
   @override
   bool get allowImplicitScrolling => physics.allowImplicitScrolling;
 
@@ -587,6 +609,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Call [beginActivity] to change the current activity.
   @protected
+  @visibleForTesting
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 

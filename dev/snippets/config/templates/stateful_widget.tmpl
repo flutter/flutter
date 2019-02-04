@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 
+{{code-imports}}
+
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -13,20 +15,20 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: '{{id}} Sample'),
+      home: new MyStatefulWidget(),
     );
   }
 }
 
 {{code-preamble}}
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key}) : super(key: key);
+class MyStatefulWidget extends StatefulWidget {
+  MyStatefulWidget({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyStatefulWidgetState createState() => new _MyStatefulWidgetState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   {{code}}
 }

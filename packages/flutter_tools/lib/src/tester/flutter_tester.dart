@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +14,7 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -27,8 +27,8 @@ class FlutterTesterApp extends ApplicationPackage {
   }
 
   FlutterTesterApp._(Directory directory)
-      : _directory = directory,
-        super(id: directory.path);
+    : _directory = directory,
+      super(id: directory.path);
 
   final Directory _directory;
 
@@ -245,5 +245,5 @@ class _NoopPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) => null;
+  Future<void> unforward(ForwardedPort forwardedPort) async { }
 }

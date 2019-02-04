@@ -34,6 +34,7 @@ Future<int> run(
   bool verboseHelp = false,
   bool reportCrashes,
   String flutterVersion,
+  Map<Type, Generator> overrides,
 }) {
   reportCrashes ??= !isRunningOnBot;
 
@@ -63,7 +64,7 @@ Future<int> run(
       return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
     }
     return 0;
-  });
+  }, overrides: overrides);
 }
 
 Future<int> _handleToolError(

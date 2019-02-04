@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
+import '../convert.dart';
 import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -148,7 +148,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
         if (trace)
           printTrace(message);
         else
-          printStatus(message);
+          printStatus(message, wrap: false);
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
@@ -159,7 +159,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null)
-        printError('$prefix$line');
+        printError('$prefix$line', wrap: false);
     });
 
   // Wait for stdout to be fully processed
@@ -201,14 +201,6 @@ Future<int> runInteractively(List<String> command, {
     stderr.addStream(process.stderr),
   ]);
   return await process.exitCode;
-}
-
-Future<void> runAndKill(List<String> cmd, Duration timeout) {
-  final Future<Process> proc = runDetached(cmd);
-  return Future<void>.delayed(timeout, () async {
-    printTrace('Intentionally killing ${cmd[0]}');
-    processManager.killPid((await proc).pid);
-  });
 }
 
 Future<Process> runDetached(List<String> cmd) {
@@ -369,7 +361,9 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
+  RunResult(this.processResult, this._command)
+    : assert(_command != null),
+      assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -389,8 +383,8 @@ class RunResult {
     return out.toString().trimRight();
   }
 
- /// Throws a [ProcessException] with the given `message`.
- void throwException(String message) {
+  /// Throws a [ProcessException] with the given `message`.
+  void throwException(String message) {
     throw ProcessException(
       _command.first,
       _command.skip(1).toList(),

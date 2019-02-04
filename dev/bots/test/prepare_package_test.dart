@@ -38,7 +38,9 @@ void main() {
   for (String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
-      environment: <String, String>{},
+      environment: <String, String>{
+        'DEPOT_TOOLS': path.join('D:', 'depot_tools'),
+      },
     );
     group('ProcessRunner for $platform', () {
       test('Returns stdout', () async {
@@ -221,7 +223,7 @@ void main() {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
-        final String gsArchivePath = 'gs://flutter_infra/releases/release/$platformName/$archiveName';
+        final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''{
@@ -247,21 +249,24 @@ void main() {
     },
     {
       "hash": "$testRef",
-      "channel": "release",
+      "channel": "stable",
       "version": "v0.0.0",
       "release_date": "2018-03-20T01:47:02.851729Z",
-      "archive": "release/$platformName/flutter_${platformName}_v0.0.0-dev.zip"
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip"
     }
   ]
 }
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
+        final String gsutilCall = platform.isWindows
+            ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+            : 'gsutil.py';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'gsutil rm $gsArchivePath': null,
-          'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          'gsutil cp $gsJsonPath $jsonPath': null,
-          'gsutil rm $gsJsonPath': null,
-          'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
@@ -269,7 +274,7 @@ void main() {
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
-          Branch.release,
+          Branch.stable,
           'v1.2.3',
           outputFile,
           processManager: processManager,
@@ -284,8 +289,8 @@ void main() {
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
         expect(contents, contains('"hash": "$testRef"'));
-        expect(contents, contains('"channel": "release"'));
-        expect(contents, contains('"archive": "release/$platformName/$archiveName"'));
+        expect(contents, contains('"channel": "stable"'));
+        expect(contents, contains('"archive": "stable/$platformName/$archiveName"'));
         // Make sure existing entries are preserved.
         expect(contents, contains('"hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"'));
         expect(contents, contains('"hash": "b9bd51cc36b706215915711e580851901faebb40"'));

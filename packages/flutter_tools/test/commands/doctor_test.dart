@@ -4,16 +4,36 @@
 
 import 'dart:async';
 
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
+final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorOutputPlatform
+};
+
 void main() {
+  MockProcessManager mockProcessManager;
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+  });
+
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
@@ -34,7 +54,7 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, contains('Flutter plugin version 0.1.3'));
       expect(message.message, contains('recommended minimum version'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
@@ -49,7 +69,8 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
-    });
+      expect(message.isError, isFalse);
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
@@ -65,7 +86,7 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
@@ -80,6 +101,96 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, startsWith('Flutter extension not installed'));
+      expect(message.isError, isTrue);
+    }, overrides: noColorTerminalOverride);
+  });
+
+  group('proxy validator', () {
+    testUsingContext('does not show if HTTP_PROXY is not set', () {
+      expect(ProxyValidator.shouldShow, isFalse);
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()..environment = <String, String>{},
+    });
+
+    testUsingContext('does not show if HTTP_PROXY is only whitespace', () {
+      expect(ProxyValidator.shouldShow, isFalse);
+    }, overrides: <Type, Generator>{
+      Platform: () =>
+          FakePlatform()..environment = <String, String>{'HTTP_PROXY': ' '},
+    });
+
+    testUsingContext('shows when HTTP_PROXY is set', () {
+      expect(ProxyValidator.shouldShow, isTrue);
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
+    });
+
+    testUsingContext('shows when http_proxy is set', () {
+      expect(ProxyValidator.shouldShow, isTrue);
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
+    });
+
+    testUsingContext('reports success when NO_PROXY is configured correctly',
+        () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(0));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': 'localhost,127.0.0.1'
+        },
+    });
+
+    testUsingContext('reports success when no_proxy is configured correctly',
+        () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(0));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'http_proxy': 'fakeproxy.local',
+          'no_proxy': 'localhost,127.0.0.1'
+        },
+    });
+
+    testUsingContext('reports issues when NO_PROXY is missing localhost',
+        () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, isNot(hasLength(0)));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': '127.0.0.1'
+        },
+    });
+
+    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1',
+        () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, isNot(hasLength(0)));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': 'localhost'
+        },
     });
   });
 
@@ -95,7 +206,8 @@ void main() {
               '• No issues found!\n'
       ));
     }, overrides: <Type, Generator>{
-      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider()
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+      Platform: _kNoColorOutputPlatform,
     });
   });
 
@@ -112,7 +224,7 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
@@ -123,7 +235,7 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await FakePassingDoctor().diagnose(verbose: false), isTrue);
@@ -139,7 +251,7 @@ void main() {
               '\n'
               '! Doctor found issues in 2 categories.\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format', () async {
       expect(await FakeDoctor().diagnose(verbose: false), isFalse);
@@ -160,7 +272,7 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate verbose output format', () async {
       expect(await FakeDoctor().diagnose(verbose: true), isFalse);
@@ -190,6 +302,29 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('gen_snapshot does not work', () async {
+      when(mockProcessManager.runSync(
+        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(101, 1, '', ''));
+
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+      final List<String> statusLines = testLogger.statusText.split('\n');
+      for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+        expect(statusLines, contains(contains(msg)));
+      }
+      if (platform.isLinux) {
+        for (String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+          expect(statusLines, contains(contains(msg)));
+        }
+      }
+    }, overrides: <Type, Generator>{
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+      ProcessManager: () => mockProcessManager,
+      Platform: _kNoColorOutputPlatform,
     });
   });
 
@@ -224,6 +359,7 @@ void main() {
     ));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 30),
+    Platform: _kNoColorOutputPlatform,
   });
 
   testUsingContext('validate verbose output wrapping', () async {
@@ -268,6 +404,7 @@ void main() {
     ));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 30),
+    Platform: _kNoColorOutputPlatform,
   });
 
 
@@ -285,7 +422,7 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
       // There are two subvalidators. Only the second contains statusInfo.
@@ -297,7 +434,7 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
-    });
+    }, overrides: noColorTerminalOverride);
   });
 
 
@@ -309,47 +446,47 @@ void main() {
     testUsingContext('validate installed + installed = installed', () async {
       expect(await FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[✓]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + missing = missing', () async {
       expect(await FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
       expect(testLogger.statusText, startsWith('[✗]'));
-    });
+    }, overrides: noColorTerminalOverride);
   });
 }
 
@@ -376,7 +513,7 @@ class PassingValidator extends DoctorValidator {
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator(): super('Missing Validator');
+  MissingValidator() : super('Missing Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -389,7 +526,7 @@ class MissingValidator extends DoctorValidator {
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator(): super('Not Available Validator');
+  NotAvailableValidator() : super('Not Available Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -521,7 +658,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name): super(name);
+  MissingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -532,7 +669,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name): super(name);
+  PartialGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -586,6 +723,15 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }
 }
 
+class FlutterValidatorDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    _validators ??= <DoctorValidator>[FlutterValidator()];
+    return _validators;
+  }
+}
+
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
@@ -601,7 +747,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-      : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
@@ -616,3 +762,5 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}

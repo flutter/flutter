@@ -12,7 +12,7 @@
 ///
 /// See also:
 ///
-///   * [listEquals], which does something similar for lists.
+///  * [listEquals], which does something similar for lists.
 bool setEquals<T>(Set<T> a, Set<T> b) {
   if (a == null)
     return b == null;
@@ -33,7 +33,7 @@ bool setEquals<T>(Set<T> a, Set<T> b) {
 ///
 /// See also:
 ///
-///   * [setEquals], which does something similar for sets.
+///  * [setEquals], which does something similar for sets.
 bool listEquals<T>(List<T> a, List<T> b) {
   if (a == null)
     return b == null;

@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Maximieren",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Noch 1 Zeichen",
-  "remainingTextFieldCharacterCountOther": "Noch $remainingCount Zeichen"
+  "remainingTextFieldCharacterCountOther": "Noch $remainingCount Zeichen",
+  "refreshIndicatorSemanticLabel": "Aktualisieren"
 }

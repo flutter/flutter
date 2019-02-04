@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
+import 'theme.dart';
 
 // Minimum padding from horizontal edges of segmented control to edges of
 // encompassing widget.
@@ -56,9 +56,8 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 ///
 /// A segmented control may optionally be created with custom colors. The
 /// [unselectedColor], [selectedColor], [borderColor], and [pressedColor]
-/// arguments can be used to change the segmented control's colors from
-/// [CupertinoColors.activeBlue] and [CupertinoColors.white] to a custom
-/// configuration.
+/// arguments can be used to override the segmented control's colors from
+/// [CupertinoTheme] defaults.
 ///
 /// See also:
 ///
@@ -66,8 +65,7 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
-  /// The [children], [onValueChanged], [unselectedColor], [selectedColor],
-  /// [borderColor], and [pressedColor] arguments must not be null. The
+  /// The [children] and [onValueChanged] arguments must not be null. The
   /// [children] argument must be an ordered [Map] such as a [LinkedHashMap].
   /// Further, the length of the [children] list must be greater than one.
   ///
@@ -85,20 +83,18 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
     @required this.children,
     @required this.onValueChanged,
     this.groupValue,
-    this.unselectedColor = CupertinoColors.white,
-    this.selectedColor = CupertinoColors.activeBlue,
-    this.borderColor = CupertinoColors.activeBlue,
-    this.pressedColor = const Color(0x33007AFF),
-  })  : assert(children != null),
-        assert(children.length >= 2),
-        assert(onValueChanged != null),
-        assert(groupValue == null || children.keys.any((T child) => child == groupValue),
-        'The groupValue must be either null or one of the keys in the children map.'),
-        assert(unselectedColor != null),
-        assert(selectedColor != null),
-        assert(borderColor != null),
-        assert(pressedColor != null),
-        super(key: key);
+    this.unselectedColor,
+    this.selectedColor,
+    this.borderColor,
+    this.pressedColor,
+  }) : assert(children != null),
+       assert(children.length >= 2),
+       assert(onValueChanged != null),
+       assert(
+         groupValue == null || children.keys.any((T child) => child == groupValue),
+         'The groupValue must be either null or one of the keys in the children map.',
+       ),
+       super(key: key);
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -125,7 +121,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// the parent [StatefulWidget] using the [State.setState] method, so that
   /// the parent gets rebuilt; for example:
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
@@ -157,41 +153,30 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   final ValueChanged<T> onValueChanged;
 
   /// The color used to fill the backgrounds of unselected widgets and as the
   /// text color of the selected widget.
   ///
-  /// This attribute must not be null.
-  ///
-  /// If this attribute is unspecified, this color will default to
-  /// [CupertinoColors.white].
+  /// Defaults to [CupertinoTheme]'s `primaryContrastingColor` if null.
   final Color unselectedColor;
 
   /// The color used to fill the background of the selected widget and as the text
   /// color of unselected widgets.
   ///
-  /// This attribute must not be null.
-  ///
-  /// If this attribute is unspecified, this color will default to
-  /// [CupertinoColors.activeBlue].
+  /// Defaults to [CupertinoTheme]'s `primaryColor` if null.
   final Color selectedColor;
 
   /// The color used as the border around each widget.
   ///
-  /// This attribute must not be null.
-  ///
-  /// If this attribute is unspecified, this color will default to
-  /// [CupertinoColors.activeBlue].
+  /// Defaults to [CupertinoTheme]'s `primaryColor` if null.
   final Color borderColor;
 
   /// The color used to fill the background of the widget the user is
   /// temporarily interacting with through a long press or drag.
   ///
-  /// This attribute must not be null.
-  ///
-  /// If this attribute is unspecified, this color will default to
-  /// `Color(0x33007AFF)`, a light, partially-transparent blue color.
+  /// Defaults to the selectedColor at 20% opacity if null.
   final Color pressedColor;
 
   @override
@@ -209,21 +194,68 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   ColorTween _reverseBackgroundColorTween;
   ColorTween _textColorTween;
 
-  @override
-  void initState() {
-    super.initState();
+  Color _selectedColor;
+  Color _unselectedColor;
+  Color _borderColor;
+  Color _pressedColor;
+
+  AnimationController createAnimationController() {
+    return AnimationController(
+      duration: _kFadeDuration,
+      vsync: this,
+    )..addListener(() {
+        setState(() {
+          // State of background/text colors has changed
+        });
+      });
+  }
+
+  bool _updateColors() {
+    assert(mounted, 'This should only be called after didUpdateDependencies');
+    bool changed = false;
+    final Color selectedColor = widget.selectedColor ?? CupertinoTheme.of(context).primaryColor;
+    if (_selectedColor != selectedColor) {
+      changed = true;
+      _selectedColor = selectedColor;
+    }
+    final Color unselectedColor = widget.unselectedColor ?? CupertinoTheme.of(context).primaryContrastingColor;
+    if (_unselectedColor != unselectedColor) {
+      changed = true;
+      _unselectedColor = unselectedColor;
+    }
+    final Color borderColor = widget.borderColor ?? CupertinoTheme.of(context).primaryColor;
+    if (_borderColor != borderColor) {
+      changed = true;
+      _borderColor = borderColor;
+    }
+    final Color pressedColor = widget.pressedColor ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+    if (_pressedColor != pressedColor) {
+      changed = true;
+      _pressedColor = pressedColor;
+    }
+
     _forwardBackgroundColorTween = ColorTween(
-      begin: widget.pressedColor,
-      end: widget.selectedColor,
+      begin: _pressedColor,
+      end: _selectedColor,
     );
     _reverseBackgroundColorTween = ColorTween(
-      begin: widget.unselectedColor,
-      end: widget.selectedColor,
+      begin: _unselectedColor,
+      end: _selectedColor,
     );
     _textColorTween = ColorTween(
-      begin: widget.selectedColor,
-      end: widget.unselectedColor,
+      begin: _selectedColor,
+      end: _unselectedColor,
     );
+    return changed;
+  }
+
+  void _updateAnimationControllers() {
+    assert(mounted, 'This should only be called after didUpdateDependencies');
+    for (AnimationController controller in _selectionControllers) {
+      controller.dispose();
+    }
+    _selectionControllers.clear();
+    _childTweens.clear();
 
     for (T key in widget.children.keys) {
       final AnimationController animationController = createAnimationController();
@@ -237,15 +269,36 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     }
   }
 
-  AnimationController createAnimationController() {
-    return AnimationController(
-      duration: _kFadeDuration,
-      vsync: this,
-    )..addListener(() {
-        setState(() {
-          // State of background/text colors has changed
-        });
-      });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_updateColors()) {
+      _updateAnimationControllers();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (_updateColors() || oldWidget.children.length != widget.children.length) {
+      _updateAnimationControllers();
+    }
+
+    if (oldWidget.groupValue != widget.groupValue) {
+      int index = 0;
+      for (T key in widget.children.keys) {
+        if (widget.groupValue == key) {
+          _childTweens[index] = _forwardBackgroundColorTween;
+          _selectionControllers[index].forward();
+        } else {
+          _childTweens[index] = _reverseBackgroundColorTween;
+          _selectionControllers[index].reverse();
+        }
+        index += 1;
+      }
+    }
   }
 
   @override
@@ -255,6 +308,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     }
     super.dispose();
   }
+
 
   void _onTapDown(T currentKey) {
     if (_pressedKey == null && currentKey != widget.groupValue) {
@@ -281,53 +335,18 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     if (_selectionControllers[index].isAnimating)
       return _textColorTween.evaluate(_selectionControllers[index]);
     if (widget.groupValue == currentKey)
-      return widget.unselectedColor;
-    return widget.selectedColor;
+      return _unselectedColor;
+    return _selectedColor;
   }
 
   Color getBackgroundColor(int index, T currentKey) {
     if (_selectionControllers[index].isAnimating)
       return _childTweens[index].evaluate(_selectionControllers[index]);
     if (widget.groupValue == currentKey)
-      return widget.selectedColor;
+      return _selectedColor;
     if (_pressedKey == currentKey)
-      return widget.pressedColor;
-    return widget.unselectedColor;
-  }
-
-  void updateAnimationControllers() {
-    if (_selectionControllers.length > widget.children.length) {
-      _selectionControllers.length = widget.children.length;
-      _childTweens.length = widget.children.length;
-    } else {
-      for (int index = _selectionControllers.length; index < widget.children.length; index += 1) {
-        _selectionControllers.add(createAnimationController());
-        _childTweens.add(_reverseBackgroundColorTween);
-      }
-    }
-  }
-
-  @override
-  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.children.length != widget.children.length) {
-      updateAnimationControllers();
-    }
-
-    if (oldWidget.groupValue != widget.groupValue) {
-      int index = 0;
-      for (T key in widget.children.keys) {
-        if (widget.groupValue == key) {
-          _childTweens[index] = _forwardBackgroundColorTween;
-          _selectionControllers[index].forward();
-        } else {
-          _childTweens[index] = _reverseBackgroundColorTween;
-          _selectionControllers[index].reverse();
-        }
-        index += 1;
-      }
-    }
+      return _pressedColor;
+    return _unselectedColor;
   }
 
   @override
@@ -384,7 +403,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: _backgroundColors,
-      borderColor: widget.borderColor,
+      borderColor: _borderColor,
     );
 
     return Padding(
@@ -453,12 +472,12 @@ class _RenderSegmentedControl<T> extends RenderBox
     @required TextDirection textDirection,
     @required List<Color> backgroundColors,
     @required Color borderColor,
-  })  : assert(textDirection != null),
-        _textDirection = textDirection,
-        _selectedIndex = selectedIndex,
-        _pressedIndex = pressedIndex,
-        _backgroundColors = backgroundColors,
-        _borderColor = borderColor {
+  }) : assert(textDirection != null),
+       _textDirection = textDirection,
+       _selectedIndex = selectedIndex,
+       _pressedIndex = pressedIndex,
+       _backgroundColors = backgroundColors,
+       _borderColor = borderColor {
     addAll(children);
   }
 

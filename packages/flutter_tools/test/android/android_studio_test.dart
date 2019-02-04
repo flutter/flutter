@@ -41,7 +41,8 @@ void main() {
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      // Note that custom home paths are not supported on macOS nor Windows yet:
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
       Platform: () => linuxPlatform(),
     });
   });

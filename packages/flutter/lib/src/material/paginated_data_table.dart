@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
 import 'button_theme.dart';
@@ -74,9 +75,11 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
+    this.dragStartBehavior = DragStartBehavior.down,
     @required this.source
   }) : assert(header != null),
        assert(columns != null),
+       assert(dragStartBehavior != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
@@ -140,8 +143,8 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [onRowsPerPageChanged]
-  /// * [defaultRowsPerPage]
+  ///  * [onRowsPerPageChanged]
+  ///  * [defaultRowsPerPage]
   final int rowsPerPage;
 
   /// The default value for [rowsPerPage].
@@ -169,6 +172,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// [PaginatedDataTable] widget itself; it should be reused each time the
   /// [PaginatedDataTable] constructor is called.
   final DataTableSource source;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -392,7 +398,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             child: DefaultTextStyle(
               // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
               // list and then tweak them appropriately.
-              // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+              // See https://material.io/design/components/data-tables.html#tables-within-cards
               style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
                                            : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
               child: IconTheme.merge(
@@ -417,6 +423,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            dragStartBehavior: widget.dragStartBehavior,
             child: DataTable(
               key: _tableKey,
               columns: widget.columns,
@@ -435,6 +442,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               child: Container(
                 height: 56.0,
                 child: SingleChildScrollView(
+                  dragStartBehavior: widget.dragStartBehavior,
                   scrollDirection: Axis.horizontal,
                   reverse: true,
                   child: Row(

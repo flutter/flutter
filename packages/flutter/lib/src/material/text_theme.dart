@@ -93,7 +93,7 @@ import 'typography.dart';
 ///  * [Typography], the class that generates [TextTheme]s appropriate for a platform.
 ///  * [Theme], for other aspects of a material design application that can be
 ///    globally adjusted, such as the color scheme.
-///  * <http://material.google.com/style/typography.html>
+///  * <https://material.io/design/typography/>
 @immutable
 class TextTheme extends Diagnosticable {
   /// Creates a text theme that uses the given values.
@@ -102,7 +102,7 @@ class TextTheme extends Diagnosticable {
   /// or [Typography.white], which implement the typography styles in the
   /// material design specification:
   ///
-  /// <https://material.google.com/style/typography.html#typography-styles>
+  /// <https://material.io/design/typography/#type-scale>
   ///
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].
@@ -176,7 +176,7 @@ class TextTheme extends Diagnosticable {
   /// the typography styles in the material design specification, as a starting
   /// point.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -203,11 +203,12 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///   * [merge] is used instead of [copyWith] when you want to merge all
-  ///     of the fields of a TextTheme instead of individual fields.
+  ///  * [merge] is used instead of [copyWith] when you want to merge all
+  ///    of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
     TextStyle display4,
     TextStyle display3,
@@ -259,7 +260,7 @@ class TextTheme extends Diagnosticable {
   /// [TextTheme] has only some fields defined, and you want to define the rest
   /// by merging it with a default theme.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -284,12 +285,13 @@ class TextTheme extends Diagnosticable {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///   * [copyWith] is used instead of [merge] when you wish to override
-  ///     individual fields in the [TextTheme] instead of merging all of the
-  ///     fields of two [TextTheme]s.
+  ///  * [copyWith] is used instead of [merge] when you wish to override
+  ///    individual fields in the [TextTheme] instead of merging all of the
+  ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme other) {
     if (other == null)
       return this;
@@ -453,27 +455,23 @@ class TextTheme extends Diagnosticable {
 
   /// Linearly interpolate between two text themes.
   ///
-  /// The arguments must not be null.
-  ///
   /// {@macro flutter.material.themeData.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
-    assert(a != null);
-    assert(b != null);
     assert(t != null);
     return TextTheme(
-      display4: TextStyle.lerp(a.display4, b.display4, t),
-      display3: TextStyle.lerp(a.display3, b.display3, t),
-      display2: TextStyle.lerp(a.display2, b.display2, t),
-      display1: TextStyle.lerp(a.display1, b.display1, t),
-      headline: TextStyle.lerp(a.headline, b.headline, t),
-      title: TextStyle.lerp(a.title, b.title, t),
-      subhead: TextStyle.lerp(a.subhead, b.subhead, t),
-      body2: TextStyle.lerp(a.body2, b.body2, t),
-      body1: TextStyle.lerp(a.body1, b.body1, t),
-      caption: TextStyle.lerp(a.caption, b.caption, t),
-      button: TextStyle.lerp(a.button, b.button, t),
-      subtitle: TextStyle.lerp(a.subtitle, b.subtitle, t),
-      overline: TextStyle.lerp(a.overline, b.overline, t),
+      display4: TextStyle.lerp(a?.display4, b?.display4, t),
+      display3: TextStyle.lerp(a?.display3, b?.display3, t),
+      display2: TextStyle.lerp(a?.display2, b?.display2, t),
+      display1: TextStyle.lerp(a?.display1, b?.display1, t),
+      headline: TextStyle.lerp(a?.headline, b?.headline, t),
+      title: TextStyle.lerp(a?.title, b?.title, t),
+      subhead: TextStyle.lerp(a?.subhead, b?.subhead, t),
+      body2: TextStyle.lerp(a?.body2, b?.body2, t),
+      body1: TextStyle.lerp(a?.body1, b?.body1, t),
+      caption: TextStyle.lerp(a?.caption, b?.caption, t),
+      button: TextStyle.lerp(a?.button, b?.button, t),
+      subtitle: TextStyle.lerp(a?.subtitle, b?.subtitle, t),
+      overline: TextStyle.lerp(a?.overline, b?.overline, t),
     );
   }
 

@@ -68,6 +68,8 @@ const TextStyle _errorTextStyle = TextStyle(
 ///  * [Navigator], which is used to manage the app's stack of pages.
 ///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
 ///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
+///  * The Flutter Internationalization Tutorial,
+///    <https://flutter.io/tutorials/internationalization/>.
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
@@ -96,6 +98,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.debugShowMaterialGrid = false,
@@ -171,6 +174,33 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   ///
+  /// Internationalized apps that require translations for one of the locales
+  /// listed in [GlobalMaterialLocalizations] should specify this paramter
+  /// and list the [supportedLocales] that the application can handle.
+  ///
+  /// ```dart
+  /// import 'package:flutter_localizations/flutter_localizations.dart';
+  /// MaterialApp(
+  ///   localizationsDelegates: [
+  ///     // ... app-specific localization delegate[s] here
+  ///     GlobalMaterialLocalizations.delegate,
+  ///     GlobalWidgetsLocalizations.delegate,
+  ///   ],
+  ///   supportedLocales: [
+  ///     const Locale('en', 'US'), // English
+  ///     const Locale('he', 'IL'), // Hebrew
+  ///     // ... other locales the app supports
+  ///   ],
+  ///   // ...
+  /// )
+  /// ```
+  ///
+  /// ## Adding localizations for a new locale
+  ///
+  /// The information that follows applies to the unusual case of an app
+  /// adding translations for a language not already supported by
+  /// [GlobalMaterialLocalizations].
+  ///
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
   /// localizations by creating implementations of
@@ -225,7 +255,20 @@ class MaterialApp extends StatefulWidget {
   ///   // ...
   /// )
   /// ```
+  /// See also:
+  ///
+  ///  * [supportedLocales], which must be specified along with
+  ///    [localizationsDelegates].
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.io/tutorials/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -236,26 +279,14 @@ class MaterialApp extends StatefulWidget {
   ///
   /// It is passed along unmodified to the [WidgetsApp] built by this widget.
   ///
-  /// The material widgets include translations for locales with the following
-  /// language codes:
-  /// ```
-  /// ar - Arabic
-  /// de - German
-  /// en - English
-  /// es - Spanish
-  /// fa - Farsi (Persian)
-  /// fr - French
-  /// he - Hebrew
-  /// it - Italian
-  /// ja - Japanese
-  /// ps - Pashto
-  /// pt - Portugese
-  /// ro - Romanian
-  /// ru - Russian
-  /// sd - Sindhi
-  /// ur - Urdu
-  /// zh - Chinese (simplified)
-  /// ```
+  /// See also:
+  ///
+  ///  * [localizationsDelegates], which must be specified for localized
+  ///    applications.
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.io/tutorials/internationalization/>.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -285,7 +316,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://material.google.com/layout/metrics-keylines.html>
+  ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
   @override
@@ -380,10 +411,8 @@ class _MaterialAppState extends State<MaterialApp> {
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
         navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          MaterialPageRoute<dynamic>(settings: settings, builder: builder),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+          MaterialPageRoute<T>(settings: settings, builder: builder),
         home: widget.home,
         routes: widget.routes,
         initialRoute: widget.initialRoute,
@@ -398,6 +427,7 @@ class _MaterialAppState extends State<MaterialApp> {
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
@@ -411,7 +441,7 @@ class _MaterialAppState extends State<MaterialApp> {
             mini: true,
           );
         },
-      )
+      ),
     );
 
     assert(() {

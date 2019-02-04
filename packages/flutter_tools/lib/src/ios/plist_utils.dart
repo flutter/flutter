@@ -7,6 +7,7 @@ import '../base/process.dart';
 
 const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
 const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+const String kCFBundleExecutable = 'CFBundleExecutable';
 
 // Prefer using [iosWorkflow.getPlistValueFromFile] to enable mocking.
 String getValueFromFile(String plistFilePath, String key) {

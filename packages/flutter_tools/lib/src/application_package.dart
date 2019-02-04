@@ -10,6 +10,7 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
@@ -17,8 +18,43 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+
+class ApplicationPackageFactory {
+  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+
+  Future<ApplicationPackage> getPackageForPlatform(
+      TargetPlatform platform,
+      {File applicationBinary}) async {
+    switch (platform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        return applicationBinary == null
+            ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
+            : AndroidApk.fromApk(applicationBinary);
+      case TargetPlatform.ios:
+        return applicationBinary == null
+            ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+            : IOSApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.tester:
+        return FlutterTesterApp.fromCurrentDirectory();
+      case TargetPlatform.darwin_x64:
+        return applicationBinary != null
+          ? MacOSApp.fromPrebuiltApp(applicationBinary)
+          : null;
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
+        return null;
+    }
+    assert(platform != null);
+    return null;
+  }
+}
 
 abstract class ApplicationPackage {
   ApplicationPackage({ @required this.id })
@@ -41,6 +77,7 @@ class AndroidApk extends ApplicationPackage {
   AndroidApk({
     String id,
     @required this.file,
+    @required this.versionCode,
     @required this.launchActivity
   }) : assert(file != null),
        assert(launchActivity != null),
@@ -78,6 +115,7 @@ class AndroidApk extends ApplicationPackage {
     return AndroidApk(
       id: data.packageName,
       file: apk,
+      versionCode: int.tryParse(data.versionCode),
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
     );
   }
@@ -87,6 +125,9 @@ class AndroidApk extends ApplicationPackage {
 
   /// The path to the activity that should be launched.
   final String launchActivity;
+
+  /// The version code of the APK.
+  final int versionCode;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
@@ -138,6 +179,7 @@ class AndroidApk extends ApplicationPackage {
     return AndroidApk(
       id: packageId,
       file: apkFile,
+      versionCode: null,
       launchActivity: launchActivity
     );
   }
@@ -269,33 +311,6 @@ class PrebuiltIOSApp extends IOSApp {
   String get deviceBundlePath => _bundlePath;
 
   String get _bundlePath => bundleDir.path;
-}
-
-Future<ApplicationPackage> getApplicationPackageForPlatform(
-    TargetPlatform platform,
-    {File applicationBinary}) async {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      return applicationBinary == null
-          ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
-          : AndroidApk.fromApk(applicationBinary);
-    case TargetPlatform.ios:
-      return applicationBinary == null
-          ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
-          : IOSApp.fromPrebuiltApp(applicationBinary);
-    case TargetPlatform.tester:
-      return FlutterTesterApp.fromCurrentDirectory();
-    case TargetPlatform.darwin_x64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.fuchsia:
-      return null;
-  }
-  assert(platform != null);
-  return null;
 }
 
 class ApplicationPackageStore {
@@ -449,8 +464,25 @@ class ApkManifestData {
     final String activityName = nameAttribute
         .value.substring(1, nameAttribute.value.indexOf('" '));
 
+    // Example format: (type 0x10)0x1
+    final _Attribute versionCodeAttr = manifest.firstAttribute('android:versionCode');
+    if (versionCodeAttr == null) {
+      printError('Error running $packageName. Manifest versionCode not found');
+      return null;
+    }
+    if (!versionCodeAttr.value.startsWith('(type 0x10)')) {
+      printError('Error running $packageName. Manifest versionCode invalid');
+      return null;
+    }
+    final int versionCode = int.tryParse(versionCodeAttr.value.substring(11));
+    if (versionCode == null) {
+      printError('Error running $packageName. Manifest versionCode invalid');
+      return null;
+    }
+
     final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
     map['package'] = <String, String>{'name': packageName};
+    map['version-code'] = <String, String>{'name': versionCode.toString()};
     map['launchable-activity'] = <String, String>{'name': activityName};
 
     return ApkManifestData._(map);
@@ -463,6 +495,8 @@ class ApkManifestData {
       UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
+
+  String get versionCode => _data['version-code'] == null ? null : _data['version-code']['name'];
 
   String get launchableActivityName {
     return _data['launchable-activity'] == null ? null : _data['launchable-activity']['name'];

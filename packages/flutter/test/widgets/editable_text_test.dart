@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -36,17 +37,21 @@ void main() {
     String serializedActionName,
   }) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            textInputAction: action,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              textInputAction: action,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -63,13 +68,17 @@ void main() {
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
         ),
       ),
     );
@@ -84,16 +93,19 @@ void main() {
 
   testWidgets('cursor has expected width and radius',
       (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+        MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
         textDirection: TextDirection.ltr,
         child: EditableText(
+          backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: cursorColor,
           cursorWidth: 10.0,
           cursorRadius: const Radius.circular(2.0),
-        )));
+        ))));
 
     final EditableText editableText =
         tester.firstWidget(find.byType(EditableText));
@@ -104,16 +116,20 @@ void main() {
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -265,17 +281,21 @@ void main() {
   testWidgets('multiline keyboard is requested when set explicitly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            keyboardType: TextInputType.multiline,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -294,17 +314,21 @@ void main() {
 
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            maxLines: null,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              maxLines: null,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -323,18 +347,22 @@ void main() {
 
   testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            maxLines: null,
-            keyboardType: TextInputType.text,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: null,
+              keyboardType: TextInputType.text,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -355,18 +383,22 @@ void main() {
       'Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            keyboardType: TextInputType.phone,
-            maxLines: 3,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              keyboardType: TextInputType.phone,
+              maxLines: 3,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -386,17 +418,21 @@ void main() {
   testWidgets('multiline keyboard is requested when set implicitly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            maxLines: 3, // Sets multiline keyboard implicitly.
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 3, // Sets multiline keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -416,17 +452,21 @@ void main() {
   testWidgets('single line inputs have correct default keyboard',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            maxLines: 1, // Sets text keyboard implicitly.
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -451,6 +491,7 @@ void main() {
     String changedValue;
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
@@ -494,6 +535,7 @@ void main() {
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
         child: EditableText(
+          backgroundCursorColor: Colors.grey,
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
@@ -526,6 +568,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 
@@ -544,6 +588,7 @@ void main() {
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
         child: EditableText(
+          backgroundCursorColor: Colors.grey,
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
@@ -577,6 +622,8 @@ void main() {
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(changedValue, clipboardContent);
 
@@ -594,6 +641,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -628,6 +676,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -669,6 +718,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -713,6 +763,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -757,6 +808,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -789,6 +841,118 @@ void main() {
     // and onSubmission callbacks.
   });
 
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    const Widget widget =
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            maxLines: 3,
+          )
+        ),
+      );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 16);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+    const Widget widget =
+      MaterialApp(
+        home: Material(
+            child: TextField(
+              maxLines: 3,
+            )
+        ),
+      );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    const Widget widget =
+      MaterialApp(
+        home: Material(
+            child: TextField(
+              maxLines: 3,
+            )
+        ),
+      );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
 testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
       (WidgetTester tester) async {
@@ -801,6 +965,7 @@ testWidgets(
 
     final Widget widget = MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
@@ -848,21 +1013,25 @@ testWidgets(
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: EditableText(
-                  key: editableTextKey,
-                  controller: currentController,
-                  focusNode: FocusNode(),
-                  style: Typography(platform: TargetPlatform.android)
-                      .black
-                      .subhead,
-                  cursorColor: Colors.blue,
-                  selectionControls: materialTextSelectionControls,
-                  keyboardType: TextInputType.text,
-                  onChanged: (String value) {},
+          return MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    backgroundCursorColor: Colors.grey,
+                    key: editableTextKey,
+                    controller: currentController,
+                    focusNode: FocusNode(),
+                    style: Typography(platform: TargetPlatform.android)
+                        .black
+                        .subhead,
+                    cursorColor: Colors.blue,
+                    selectionControls: materialTextSelectionControls,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) {},
+                  ),
                 ),
               ),
             ),
@@ -906,16 +1075,20 @@ testWidgets(
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      Directionality(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
         textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -947,15 +1120,19 @@ testWidgets(
     controller.text = value1;
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
           ),
         ),
       ),
@@ -992,6 +1169,7 @@ testWidgets(
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
+          backgroundCursorColor: Colors.grey,
           controller: controller,
           selectionControls: materialTextSelectionControls,
           focusNode: focusNode,
@@ -1034,6 +1212,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1109,6 +1288,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1198,6 +1378,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1297,6 +1478,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1395,6 +1577,7 @@ testWidgets(
 
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
+          backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -1490,6 +1673,7 @@ testWidgets(
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
+        backgroundCursorColor: Colors.grey,
         obscureText: true,
         controller: controller,
         focusNode: focusNode,
@@ -1536,6 +1720,7 @@ testWidgets(
         MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
+          backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -1737,24 +1922,346 @@ testWidgets(
     final FocusNode focusNode = FocusNode();
 
     controller.text = text;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: FocusScope(
-        node: focusScopeNode,
-        autofocus: true,
-        child: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          autofocus: true,
-          style: textStyle,
-          cursorColor: cursorColor,
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: true,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
+  });
+
+  RenderEditable findRenderEditable(WidgetTester tester) {
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    expect(root, isNotNull);
+
+    RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable, isNotNull);
+    return renderEditable;
+  }
+
+  testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+      offset: const Offset(20, 20)));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Moves the cursor right a few characters.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+      offset: const Offset(-250, 20)));
+
+    // But we have not yet set the offset because the user is not done placing the cursor.
+    expect(controller.selection.baseOffset, 29);
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
+    // The cursor has been set.
+    expect(controller.selection.baseOffset, 10);
+  });
+
+  testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(20, 20)));
+
+    expect(controller.selection.baseOffset, 29);
+
+    // Moves the cursor super far right
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(2090, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(2100, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(2090, 20)));
+
+    // After peaking the cursor, we move in the opposite direction.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(1400, 20)));
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
+    // The cursor has been set.
+    expect(controller.selection.baseOffset, 8);
+
+    // Go in the other direction.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    // Sets the origin.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(20, 20)));
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(-5000, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(-5010, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(-5000, 20)));
+
+    // Move back in the opposite direction only a few hundred.
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
+        offset: const Offset(-4850, 20)));
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 10);
+  });
+
+  testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
+    int called = 0;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      called += 1;
+      return newValue;
+    });
+    final TextEditingController controller = TextEditingController();
+    final MediaQuery mediaQuery = MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: EditableText(
+        controller: controller,
+        backgroundCursorColor: Colors.red,
+        cursorColor: Colors.red,
+        focusNode: FocusNode(),
+        style: textStyle,
+        inputFormatters: <TextInputFormatter>[
+          formatter,
+        ],
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.pumpWidget(mediaQuery);
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(called, 1);
+    // same value.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(called, 1);
+    // same value with different selection.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+      selection: TextSelection.collapsed(offset: 1),
+    ));
+    // different value.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'b',
+    ));
+    expect(called, 2);
+  });
+
+  testWidgets('default keyboardAppearance is respected', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/22212.
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardAppearance: Brightness.dark,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setClient = log.first;
+    expect(setClient.method, 'TextInput.setClient');
+    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+  });
+
+  testWidgets(
+      'Composing text is underlined and underline is cleared when losing focus',
+      (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+    );
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(MaterialApp( // So we can show overlays.
+      home: EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        key: editableTextKey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onEditingComplete: () {
+          // This prevents the default focus change behavior on submission.
+        },
+      ),
+    ));
+
+    assert(focusNode.hasFocus);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    // The actual text span is split into 3 parts with the middle part underlined.
+    expect(renderEditable.text.children.length, 3);
+    expect(renderEditable.text.children[1].text, 'composing');
+    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    expect(renderEditable.text.children, isNull);
+    // Everything's just formated the same way now.
+    expect(renderEditable.text.text, 'text composing text');
+    expect(renderEditable.text.style.decoration, isNull);
   });
 }
 
@@ -1769,6 +2276,7 @@ class CustomStyleEditableText extends EditableText {
   }) : super(
           controller: controller,
           cursorColor: cursorColor,
+          backgroundCursorColor: Colors.grey,
           focusNode: focusNode,
           style: style,
         );

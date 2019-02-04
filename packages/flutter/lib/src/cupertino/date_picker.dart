@@ -77,7 +77,7 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
-///  of the iOS-style date picker.
+///    of the iOS-style date picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 enum CupertinoDatePickerMode {
   /// Mode that shows the date in hour, minute, and (optional) an AM/PM designation.
@@ -168,7 +168,6 @@ class CupertinoDatePicker extends StatefulWidget {
   CupertinoDatePicker({
     this.mode = CupertinoDatePickerMode.dateAndTime,
     @required this.onDateTimeChanged,
-    // ignore: always_require_non_null_named_parameters
     DateTime initialDateTime,
     this.minimumDate,
     this.maximumDate,
@@ -179,32 +178,33 @@ class CupertinoDatePicker extends StatefulWidget {
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
-       assert(initialDateTime != null),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !initialDateTime.isBefore(minimumDate),
-         'initial date is before minimum date',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !initialDateTime.isAfter(maximumDate),
-         'initial date is after maximum date',
-       ),
        assert(minimumYear != null),
-       assert(
-         mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && initialDateTime.year >= minimumYear),
-         'initial year is not greater than minimum year, or mininum year is not positive',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.date || maximumYear == null || initialDateTime.year <= maximumYear,
-         'initial year is not smaller than maximum year',
-       ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
-       ),
-       assert(
-         initialDateTime.minute % minuteInterval == 0,
-         'initial minute is not divisible by minute interval',
-       );
+       ) {
+    assert(this.initialDateTime != null);
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate),
+      'initial date is before minimum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !this.initialDateTime.isAfter(maximumDate),
+      'initial date is after maximum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
+      'initial year is not greater than minimum year, or mininum year is not positive',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear,
+      'initial year is not smaller than maximum year',
+    );
+    assert(
+      this.initialDateTime.minute % minuteInterval == 0,
+      'initial minute is not divisible by minute interval',
+    );
+  }
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode].
   /// Defaults to [CupertinoDatePickerMode.dateAndTime]. Cannot be null and
@@ -915,15 +915,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 enum CupertinoTimerPickerMode {
   /// Mode that shows the timer duration in hour and minute.
   ///
-  /// Examples: [16 hours | 14 min].
+  /// Examples: 16 hours | 14 min.
   hm,
   /// Mode that shows the timer duration in minute and second.
   ///
-  /// Examples: [14 min | 43 sec].
+  /// Examples: 14 min | 43 sec.
   ms,
   /// Mode that shows the timer duration in hour, minute, and second.
   ///
-  /// Examples: [16 hours | 14 min | 43 sec].
+  /// Examples: 16 hours | 14 min | 43 sec.
   hms,
 }
 
@@ -937,7 +937,7 @@ enum CupertinoTimerPickerMode {
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
-///  of the iOS-style date picker.
+///    of the iOS-style date picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 class CupertinoTimerPicker extends StatefulWidget {
   /// Constructs an iOS style countdown timer picker.

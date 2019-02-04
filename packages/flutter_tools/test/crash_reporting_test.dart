@@ -107,6 +107,7 @@ void main() {
       expect(fields['osVersion'], 'fake OS name and version');
       expect(fields['type'], 'DartError');
       expect(fields['error_runtime_type'], 'StateError');
+      expect(fields['error_message'], 'Bad state: Test bad state error');
 
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
@@ -215,10 +216,10 @@ class _NoopIOSink implements IOSink {
   void write(_) {}
 
   @override
-  void writeAll(_, [__]) {}
+  void writeAll(_, [__ = '']) {}
 
   @override
-  void writeln([_]) {}
+  void writeln([_ = '']) {}
 
   @override
   void writeCharCode(_) {}

@@ -26,7 +26,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }
@@ -86,7 +86,7 @@ class TestAssetBundle extends CachingAssetBundle {
   Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'AssetManifest.json')
       return SynchronousFuture<String>(manifest);
-    return null;
+    return SynchronousFuture<String>(null);
   }
 
   @override

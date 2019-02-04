@@ -20,13 +20,13 @@ const Duration requiredLifespan = Duration(seconds: 5);
 void main() {
   group('flutter run', () {
     final BasicProject _project = BasicProject();
-    FlutterTestDriver _flutter;
+    FlutterRunTestDriver _flutter;
     Directory tempDir;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync();
+      tempDir = createResolvedTempDirectorySync('lifetime_test.');
       await _project.setUpIn(tempDir);
-      _flutter = FlutterTestDriver(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -45,5 +45,5 @@ void main() {
       await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

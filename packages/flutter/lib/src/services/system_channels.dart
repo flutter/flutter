@@ -208,9 +208,9 @@ class SystemChannels {
   ///
   /// See also:
   ///
-  /// * [SemanticsEvent] and its subclasses for a list of valid accessibility
-  ///   events that can be sent over this channel.
-  /// * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
+  ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
+  ///    events that can be sent over this channel.
+  ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
   static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
     'flutter/accessibility',
     StandardMessageCodec(),
@@ -224,4 +224,15 @@ class SystemChannels {
     StandardMethodCodec(),
   );
 
+  /// A [MethodChannel] for configuring the Skia graphics library.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Skia.setResourceCacheMaxBytes`: Set the maximum number of bytes that
+  ///    can be held in the GPU resource cache.
+  static const MethodChannel skia = MethodChannel(
+    'flutter/skia',
+    JSONMethodCodec(),
+  );
 }

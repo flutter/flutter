@@ -48,7 +48,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class OutlineButton extends MaterialButton {
   /// Create a filled button.
   ///
@@ -316,6 +316,27 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   @override
+  void didUpdateWidget(_OutlineButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_pressed && !widget.enabled) {
+      _pressed = false;
+      _controller.reverse();
+    }
+  }
+
+  void _handleHighlightChanged(bool value) {
+    if (_pressed == value)
+      return;
+    setState(() {
+      _pressed = value;
+      if (value)
+        _controller.forward();
+      else
+        _controller.reverse();
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -375,15 +396,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           elevation: 0.0,
           disabledElevation: 0.0,
           highlightElevation: _getHighlightElevation(),
-          onHighlightChanged: (bool value) {
-            setState(() {
-              _pressed = value;
-              if (value)
-                _controller.forward();
-              else
-                _controller.reverse();
-            });
-          },
+          onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
           shape: _OutlineBorder(
             shape: widget.shape,
