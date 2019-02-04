@@ -84,7 +84,7 @@ static bool IsPictureWorthRasterizing(SkPicture* picture,
 
   // TODO(abarth): We should find a better heuristic here that lets us avoid
   // wasting memory on trivial layers that are easy to re-rasterize every frame.
-  return picture->approximateOpCount() > 10;
+  return picture->approximateOpCount() > 5;
 }
 
 static RasterCacheResult Rasterize(
