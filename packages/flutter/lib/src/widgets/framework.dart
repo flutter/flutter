@@ -138,7 +138,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   const GlobalKey.constructor() : super.empty();
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
-  static final Set<GlobalKey> _removedKeys = HashSet<GlobalKey>();
   static final Set<Element> _debugIllFatedElements = HashSet<Element>();
   static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
 
@@ -164,10 +163,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       }
       return true;
     }());
-    if (_registry[this] == element) {
+    if (_registry[this] == element)
       _registry.remove(this);
-      _removedKeys.add(this);
-    }
   }
 
   void _debugReserveFor(Element parent) {
