@@ -846,10 +846,10 @@ abstract class SliderComponentShape {
 ///  * [SliderTrackShape] Base component for creating other custom track
 ///    shapes.
 class RectangularSliderTrackShape extends SliderTrackShape {
-  /// Create a slider track that draws a circle 2 rectangles.
+  /// Create a slider track that draws 2 rectangles.
   const RectangularSliderTrackShape({this.disabledThumbGap});
 
-  /// Spacing, or gap, between disabled thumb and the track.
+  /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
   /// This is only used when the thumb is disabled. The material spec defaults
   /// it to 2, which is half of its disabled thumb radius, which is 4.
