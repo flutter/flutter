@@ -852,7 +852,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
   /// This is only used when the thumb is disabled. The Material spec defaults
-  /// it to 2, which is half of its disabled thumb radius, which is 4.
+  /// to 2, which is half of the disabled thumb radius.
   final double disabledThumbGap;
   double get _disabledThumbGap => disabledThumbGap ?? _defaultDisabledThumbGap;
 
@@ -1010,8 +1010,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius = getPreferredSize(
-        isEnabled: isEnabled,
-        sliderTheme: sliderTheme
+      isEnabled: isEnabled,
+      sliderTheme: sliderTheme,
     ).width / 2;
     context.canvas.drawCircle(center, tickMarkRadius, paint);
   }
@@ -1026,7 +1026,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///    sliders in a widget subtree.
 class RoundSliderThumbShape extends SliderComponentShape {
   /// Create a slider thumb that draws a circle.
-  const RoundSliderThumbShape({this.enabledThumbRadius, this.disabledThumbRadius});
+  // TODO(clocksmith): This needs to be changed to 10 according to spec.
+  const RoundSliderThumbShape({this.enabledThumbRadius = 6.0, this.disabledThumbRadius});
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
@@ -1037,24 +1038,18 @@ class RoundSliderThumbShape extends SliderComponentShape {
   ///
   /// If it is not provided, then the material default is used.
   final double disabledThumbRadius;
-
-  double get _enabledThumbRadius =>  enabledThumbRadius ?? _defaultEnabledThumbRadius;
-
   // If no disabledRadius is provided, use a default that is derived from the
   // actual thumb radius and has the same ratio as the default disabled to
   // enabled thumb radius.
-  double get _disabledThumbRadius =>  disabledThumbRadius ?? _enabledThumbRadius * _defaultDisabledThumbRadius / _defaultEnabledThumbRadius;
-
-  // TODO(clocksmith): This needs to be changed to 10 according to spec.
-  // The Material spec default.
-  static const double _defaultEnabledThumbRadius = 6.0;
+  // TODO(clocksmith): This needs to be updated once the thumb size is updated.
+  double get _disabledThumbRadius =>  disabledThumbRadius ?? enabledThumbRadius * 2 / 3;
 
   // The Material spec default.
   static const double _defaultDisabledThumbRadius = 4.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled ? _enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -1073,7 +1068,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: _disabledThumbRadius,
-      end: _enabledThumbRadius,
+      end: enabledThumbRadius,
     );
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -1104,21 +1099,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///    sliders in a widget subtree.
 class RoundSliderOverlayShape extends SliderComponentShape {
   /// Create a slider thumb overlay that draws a circle.
-  const RoundSliderOverlayShape({this.overlayRadius});
+  // TODO(clocksmith): This needs to be changed to 24 according to spec.
+  const RoundSliderOverlayShape({this.overlayRadius = 16.0});
 
   /// The preferred radius of the round thumb shape when enabled.
   ///
   /// If it is not provided, then half of the track height is used.
   final double overlayRadius;
-  double get _overlayRadius =>  overlayRadius ?? _defaultOverlayRadius;
-
-  // TODO(clocksmith): This needs to be changed to 24 according to spec.
-  // The Material spec default.
-  static const double _defaultOverlayRadius = 16.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(_overlayRadius);
+    return Size.fromRadius(overlayRadius);
   }
 
   @override
@@ -1137,7 +1128,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: 0.0,
-      end: _overlayRadius,
+      end: overlayRadius,
     );
 
     // TODO(gspencer): We don't really follow the spec here for overlays.
