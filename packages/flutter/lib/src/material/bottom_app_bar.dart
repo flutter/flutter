@@ -156,19 +156,20 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
 
   @override
   Path getClip(Size size) {
-    final Rect appBar = Offset.zero & size;
-    if (geometry.value.floatingActionButtonArea == null) {
-      return Path()..addRect(appBar);
-    }
-
     // button is the floating action button's bounding rectangle in the
-    // coordinate system that origins at the appBar's top left corner.
-    final Rect button = geometry.value.floatingActionButtonArea
-      .translate(0.0, geometry.value.bottomNavigationBarTop * -1.0);
-
-    return shape.getOuterPath(appBar, button.inflate(notchMargin));
+    // coordinate system whose origin is at the appBar's top left corner,
+    // or null if there is no floating action button.
+    final Rect button = geometry.value.floatingActionButtonArea?.translate(
+      0.0,
+      geometry.value.bottomNavigationBarTop * -1.0,
+    );
+    return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
   }
 
   @override
-  bool shouldReclip(_BottomAppBarClipper oldClipper) => oldClipper.geometry != geometry;
+  bool shouldReclip(_BottomAppBarClipper oldClipper) {
+    return oldClipper.geometry != geometry
+        || oldClipper.shape != shape
+        || oldClipper.notchMargin != notchMargin;
+  }
 }
