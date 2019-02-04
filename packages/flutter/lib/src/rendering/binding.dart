@@ -240,8 +240,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
-  /// frame.
+  /// automatically by the engine when it is time to lay out and paint a frame.
   ///
   /// Each frame consists of the following phases:
   ///

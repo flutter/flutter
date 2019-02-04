@@ -483,7 +483,7 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       for (FlutterDevice device in flutterDevices) {
         if (device.generator != null)
-          device.generator.reject();
+          await device.generator.reject();
       }
       return OperationResult(1, 'DevFS synchronization failed');
     }
@@ -681,13 +681,13 @@ class HotRunner extends ResidentRunner {
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause
         );
-        Future.wait(reportFutures).then((List<Map<String, dynamic>> reports) { // ignore: unawaited_futures
+        Future.wait(reportFutures).then((List<Map<String, dynamic>> reports) async { // ignore: unawaited_futures
           // TODO(aam): Investigate why we are validating only first reload report,
           // which seems to be current behavior
           final Map<String, dynamic> firstReport = reports.first;
           // Don't print errors because they will be printed further down when
           // `validateReloadReport` is called again.
-          device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
+          await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
           completer.complete(DeviceReloadReport(device, reports));
         });
       }
