@@ -345,6 +345,12 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   @override
+  void didUpdateWidget(FormField oldWidget) {
+    if (widget.initialValue != oldWidget.initialValue)
+      _value = widget.initialValue;
+  }
+
+  @override
   void deactivate() {
     Form.of(context)?._unregister(this);
     super.deactivate();
