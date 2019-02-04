@@ -691,13 +691,13 @@ void main() {
 
   testWidgets('The default slider tick mark shape size cen be overriden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-      tickMarkShape: RoundSliderTickMarkShape(
+      tickMarkShape: const RoundSliderTickMarkShape(
         tickMarkRadius: 5
       ),
-      activeTickMarkColor: Color(0xff00ff00),
-      inactiveTickMarkColor: Color(0xffff0000),
-      disabledActiveTickMarkColor: Color(0xff0000ff),
-      disabledInactiveTickMarkColor: Color(0xffffff00),
+      activeTickMarkColor: const Color(0xff00ff00),
+      inactiveTickMarkColor: const Color(0xffff0000),
+      disabledActiveTickMarkColor: const Color(0xff0000ff),
+      disabledInactiveTickMarkColor: const Color(0xffffff00),
     );
     double value = 0.5;
     Widget buildApp({ bool enabled = true }) {
@@ -773,7 +773,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // Tap center and wait for animation.
-    Offset center = tester.getCenter(find.byType(Slider));
+    final Offset center = tester.getCenter(find.byType(Slider));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
