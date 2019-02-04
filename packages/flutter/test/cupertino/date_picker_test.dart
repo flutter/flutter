@@ -8,6 +8,67 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
+  testWidgets('picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
+    DateTime date;
+    final CupertinoPickerController controller = CupertinoPickerController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              CupertinoButton(
+                child: const Text('Reset Picker'),
+                onPressed: () { controller.reset(); },
+              ),
+              Container(
+                height: 300,
+                child: CupertinoDatePicker(
+                  controller: controller,
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: DateTime(2018, 3, 20),
+                  onDateTimeChanged: (DateTime newDate){
+                    date = newDate;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('20'), const Offset(0.0, 60.0));
+    await tester.drag(find.text('March'), const Offset(0.0, 60.0));
+    await tester.drag(find.text('2018'), const Offset(0.0, 60.0));
+
+    expect(
+      tester.getTopLeft(find.text('2016')).dy,
+      tester.getTopLeft(find.text('18')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('2016')).dy,
+      tester.getTopLeft(find.text('January')).dy,
+    );
+
+    await tester.pumpAndSettle();
+    controller.reset();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('March')).dy,
+      tester.getTopLeft(find.text('20')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('March')).dy,
+      tester.getTopLeft(find.text('2018')).dy,
+    );
+  });
+
   group('Countdown timer picker', () {
     testWidgets('onTimerDurationChanged is not null', (WidgetTester tester) async {
       expect(
@@ -225,7 +286,6 @@ void main() {
       final CupertinoDatePicker picker = CupertinoDatePicker(
         onDateTimeChanged: (_) {},
       );
-      print('aljsdflkajklsdf' + picker.initialDateTime.toIso8601String());
       expect(picker.initialDateTime, isNotNull);
     });
 
@@ -643,71 +703,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
-    DateTime date;
-    final CupertinoPickerController controller = CupertinoPickerController();
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            children: <Widget>[
-              CupertinoButton(
-                child: const Text('Reset Picker'),
-                onPressed: () { controller.reset(); },
-              ),
-              Container(
-                height: 300,
-                child: CupertinoDatePicker(
-                  controller: controller,
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: DateTime(2018, 3, 20),
-                  onDateTimeChanged: (DateTime time){},
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.drag(find.text('20'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('March'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('2018'), const Offset(0.0, 60.0));
-
-
-    expect(tester.firstWidget(find.text('May')), findsOneWidget);
-    expect(tester.firstWidget(find.text('10')), findsOneWidget);
-    expect(tester.firstWidget(find.text('2001')), findsOneWidget);
-
-    expect(
-      tester.getTopLeft(find.text('2001')).dy,
-      tester.getTopLeft(find.text('10')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('2001')).dy,
-      tester.getTopLeft(find.text('10')).dy,
-    );
-
-    await tester.pump();
-
-    expect(date, DateTime(2018, 5, 10));
-
-    controller.reset();
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.getTopLeft(find.text('March')).dy,
-      tester.getTopLeft(find.text('20')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('March')).dy,
-      tester.getTopLeft(find.text('2018')).dy,
-    );
-  });
 }
 
 Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {

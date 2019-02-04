@@ -835,6 +835,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     dayController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
     monthController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
     yearController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
+
   }
 
   Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
