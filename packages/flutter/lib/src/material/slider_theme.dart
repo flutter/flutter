@@ -851,12 +851,12 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
-  /// This is only used when the thumb is disabled. The material spec defaults
+  /// This is only used when the thumb is disabled. The Material spec defaults
   /// it to 2, which is half of its disabled thumb radius, which is 4.
   final double disabledThumbGap;
   double get _disabledThumbGap => disabledThumbGap ?? _defaultDisabledThumbGap;
 
-  // The material spec default which is a difference of the radii from the gray
+  // The Material spec default which is a difference of the radii from the gray
   // circle and the thumb.
   static const double _defaultDisabledThumbGap = 2.0;
 
@@ -920,7 +920,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     // If the slider is enabled, the track can be drawn beneath the thumb
     // without gaps. But when the slider is disabled, the track is shortened
     // and this gap helps determine how much shorter it should be.
-    // TODO(clocksmith): The new material spec has a gray circle in place of this gap.
+    // TODO(clocksmith): The new Material spec has a gray circle in place of this gap.
     double horizontalAdjustment = 0.0;
     if (!isEnabled) {
       final double disabledThumbRadius = sliderTheme.thumbShape.getPreferredSize(false, isDiscrete).width / 2.0;
@@ -1046,10 +1046,10 @@ class RoundSliderThumbShape extends SliderComponentShape {
   double get _disabledThumbRadius =>  disabledThumbRadius ?? _enabledThumbRadius * _defaultDisabledThumbRadius / _defaultEnabledThumbRadius;
 
   // TODO(clocksmith): This needs to be changed to 10 according to spec.
-  // The material spec default.
+  // The Material spec default.
   static const double _defaultEnabledThumbRadius = 6.0;
 
-  // The material spec default.
+  // The Material spec default.
   static const double _defaultDisabledThumbRadius = 4.0;
 
   @override
@@ -1113,7 +1113,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   double get _overlayRadius =>  overlayRadius ?? _defaultOverlayRadius;
 
   // TODO(clocksmith): This needs to be changed to 24 according to spec.
-  // The material spec default.
+  // The Material spec default.
   static const double _defaultOverlayRadius = 16.0;
 
   @override
