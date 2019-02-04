@@ -8,9 +8,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
-  testWidgets('picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
-    DateTime date;
+  testWidgets('date picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
     final CupertinoPickerController controller = CupertinoPickerController();
 
     await tester.pumpWidget(
@@ -29,9 +27,7 @@ void main() {
                   controller: controller,
                   mode: CupertinoDatePickerMode.date,
                   initialDateTime: DateTime(2018, 3, 20),
-                  onDateTimeChanged: (DateTime newDate){
-                    date = newDate;
-                  },
+                  onDateTimeChanged: (DateTime newDate) {},
                 ),
               ),
             ],
@@ -67,6 +63,101 @@ void main() {
       tester.getTopLeft(find.text('March')).dy,
       tester.getTopLeft(find.text('2018')).dy,
     );
+  });
+
+  testWidgets('date time picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
+    final CupertinoPickerController controller = CupertinoPickerController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              CupertinoButton(
+                child: const Text('Reset Picker'),
+                onPressed: () { controller.reset(); },
+              ),
+              Container(
+                height: 300,
+                child: CupertinoDatePicker(
+                  controller: controller,
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  initialDateTime: DateTime(2018, 3, 20),
+                  onDateTimeChanged: (DateTime newDate) {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('12'), const Offset(0.0, 60.0));
+    await tester.drag(find.text('Tue Mar 20'), const Offset(0.0, 60.0));
+    await tester.drag(find.text('00'), const Offset(0.0, 60.0));
+    await tester.drag(find.text('AM'), const Offset(0.0, -60.0));
+
+    expect(
+      tester.getTopLeft(find.text('Sun Mar 18')).dy,
+      tester.getTopLeft(find.text('10')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('10')).dy,
+      tester.getTopLeft(find.text('58')).dy,
+    );
+
+    await tester.pumpAndSettle();
+    controller.reset();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('Tue Mar 20')).dy,
+      tester.getTopLeft(find.text('00')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('00')).dy,
+      tester.getTopLeft(find.text('12')).dy,
+    );
+  });
+
+  testWidgets('time picker scrolls to 00:00:00 after reset', (WidgetTester tester) async {
+    final CupertinoPickerController controller = CupertinoPickerController();
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              CupertinoButton(
+                child: const Text('Reset Picker'),
+                onPressed: () { controller.reset(); },
+              ),
+              Container(
+                height: 300,
+                child: CupertinoTimerPicker(
+                  controller: controller,
+                  onTimerDurationChanged: (Duration dur) { duration = dur;},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('0').first, const Offset(0.0, -60.0));
+    await tester.drag(find.text('0').at(1), const Offset(0.0, -90.0));
+    await tester.drag(find.text('0').last, const Offset(0.0, -120.0));
+
+    expect(duration, const Duration(hours: 2, minutes: 3, seconds: 4));
+
+    controller.reset();
+    await tester.pumpAndSettle();
+
+    expect(duration, const Duration());
   });
 
   group('Countdown timer picker', () {

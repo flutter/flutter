@@ -832,10 +832,21 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   /// Resets the picker to the initial date time as originally specified upon
   /// creation of the [CupertionDatePicker] widget.
   void reset(Duration resetDuration) {
-    dayController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    monthController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    yearController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-
+    dayController.animateToItem(
+      widget.initialDateTime.day - 1,
+      duration: resetDuration,
+      curve: Curves.easeOut,
+    );
+    monthController.animateToItem(
+      widget.initialDateTime.month - 1,
+      duration: resetDuration,
+      curve: Curves.easeOut,
+    );
+    yearController.animateToItem(
+      widget.initialDateTime.year,
+      duration: resetDuration,
+      curve: Curves.easeOut,
+    );
   }
 
   Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
