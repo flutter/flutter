@@ -225,6 +225,7 @@ void main() {
       final CupertinoDatePicker picker = CupertinoDatePicker(
         onDateTimeChanged: (_) {},
       );
+      print('aljsdflkajklsdf' + picker.initialDateTime.toIso8601String());
       expect(picker.initialDateTime, isNotNull);
     });
 
@@ -642,7 +643,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('picker scrolls to 3/30/18 after reset', (WidgetTester tester) async {
+  testWidgets('picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
     DateTime date;
     final CupertinoPickerController controller = CupertinoPickerController();
 
@@ -660,7 +661,8 @@ void main() {
                 height: 300,
                 child: CupertinoDatePicker(
                   controller: controller,
-                  initialDateTime: DateTime(2018, 3, 30),
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: DateTime(2018, 3, 20),
                   onDateTimeChanged: (DateTime time){},
                 ),
               ),
@@ -670,23 +672,40 @@ void main() {
       ),
     );
 
+    await tester.drag(find.text('20'), const Offset(0.0, 60.0));
     await tester.drag(find.text('March'), const Offset(0.0, 60.0));
-    // Momentarily, the 2018 and the incorrect 30 of February is aligned.
-    expect(
-      tester.getTopLeft(find.text('2018')).dy,
-      tester.getTopLeft(find.text('30')).dy,
-    );
-    await tester.pump(); // Once to trigger the post frame animate call.
-    await tester.pump(); // Once to start the DrivenScrollActivity.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.drag(find.text('2018'), const Offset(0.0, 60.0));
+
+
+    expect(tester.firstWidget(find.text('May')), findsOneWidget);
+    expect(tester.firstWidget(find.text('10')), findsOneWidget);
+    expect(tester.firstWidget(find.text('2001')), findsOneWidget);
 
     expect(
-      date,
-      DateTime(2018, 3, 30),
+      tester.getTopLeft(find.text('2001')).dy,
+      tester.getTopLeft(find.text('10')).dy,
     );
+
     expect(
+      tester.getTopLeft(find.text('2001')).dy,
+      tester.getTopLeft(find.text('10')).dy,
+    );
+
+    await tester.pump();
+
+    expect(date, DateTime(2018, 5, 10));
+
+    controller.reset();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('March')).dy,
+      tester.getTopLeft(find.text('20')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('March')).dy,
       tester.getTopLeft(find.text('2018')).dy,
-      tester.getTopLeft(find.text('30')).dy,
     );
   });
 }
