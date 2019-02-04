@@ -10656,6 +10656,210 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'VISA LICENSER';
 }
 
+/// The translations for Swahili (`sw`).
+class MaterialLocalizationSw extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Swahili.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSw({
+    String localeName = 'sw',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Kuhusu $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Tahadhari';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Rudi';
+
+  @override
+  String get cancelButtonLabel => r'AHIRISHA';
+
+  @override
+  String get closeButtonLabel => r'FUNGA';
+
+  @override
+  String get closeButtonTooltip => r'Funga';
+
+  @override
+  String get collapsedIconTapHint => r'Panua';
+
+  @override
+  String get continueButtonLabel => r'ENDELEA';
+
+  @override
+  String get copyButtonLabel => r'NAKIRI';
+
+  @override
+  String get cutButtonLabel => r'KATA';
+
+  @override
+  String get deleteButtonTooltip => r'Futa';
+
+  @override
+  String get dialogLabel => r'Kisanduku';
+
+  @override
+  String get drawerLabel => r'Menyu ya urambazaji';
+
+  @override
+  String get expandedIconTapHint => r'Funga';
+
+  @override
+  String get hideAccountsLabel => r'Ficha akaunti';
+
+  @override
+  String get licensesPageTitle => r'Leseni';
+
+  @override
+  String get modalBarrierDismissLabel => r'Ahirisha';
+
+  @override
+  String get nextMonthTooltip => r'Mwezi ujao';
+
+  @override
+  String get nextPageTooltip => r'Ukurasa unaofuata';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'Fungua sanduku';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow wa $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow wa kama $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'PASTE';
+
+  @override
+  String get popupMenuLabel => r'Menyu ya kujitokeza';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Mwezi ulio pita';
+
+  @override
+  String get previousPageTooltip => r'Ukurasa uliopita';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Refresh';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Herufi 1 imebaki';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'herufi $remainingCount zimebaki';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'Hapana herufi zilizo baki';
+
+  @override
+  String get reorderItemDown => r'Peleka chini';
+
+  @override
+  String get reorderItemLeft => r'Peleka kushoto';
+
+  @override
+  String get reorderItemRight => r'Peleka kulia';
+
+  @override
+  String get reorderItemToEnd => r'Peleka mwishoni';
+
+  @override
+  String get reorderItemToStart => r'Peleka mwanzoni';
+
+  @override
+  String get reorderItemUp => r'Peleka juu';
+
+  @override
+  String get rowsPerPageTitle => r'Mistari kwa kila ukurasa:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Tafuta';
+
+  @override
+  String get selectAllButtonLabel => r'CHAGUA VYOTE';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'Kitu kimoja kimechaguliwa';
+
+  @override
+  String get selectedRowCountTitleOther => r'Vitu vi$selectedRowCount vimechaguliwa';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Hamna kilicho chaguliwa';
+
+  @override
+  String get showAccountsLabel => r'Onyesha akaunti';
+
+  @override
+  String get showMenuTooltip => r'Onyesha menyu';
+
+  @override
+  String get signedInLabel => r'Imeingia';
+
+  @override
+  String get tabLabelRaw => r'Kipengele $tabIndex cha $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Chagua masaa';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Chagua dakika';
+
+  @override
+  String get viewLicensesButtonLabel => r'ONYESHA LESENI';
+}
+
 /// The translations for Tamil (`ta`).
 class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Tamil.
@@ -12575,6 +12779,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'sl', // Slovenian
   'sr', // Serbian
   'sv', // Swedish
+  'sw', // Swahili
   'ta', // Tamil
   'th', // Thai
   'tl', // Tagalog
@@ -12636,6 +12841,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `sl` - Slovenian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
+///  * `sw` - Swahili
 ///  * `ta` - Tamil
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
@@ -12824,6 +13030,8 @@ GlobalMaterialLocalizations getTranslation(
     }
     case 'sv':
       return MaterialLocalizationSv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'sw':
+      return MaterialLocalizationSw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ta':
       return MaterialLocalizationTa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
