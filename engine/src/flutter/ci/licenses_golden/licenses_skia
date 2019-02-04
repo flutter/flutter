@@ -1,4 +1,4 @@
-Signature: f062937692335a9be503b3b81928e6ba
+Signature: 36c4a454b9ac0cbe7ed95735c8186d70
 
 UNUSED LICENSES:
 
@@ -1678,6 +1678,7 @@ FILE: ../../../third_party/skia/bench/JSONBench.cpp
 FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
 FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
+FILE: ../../../third_party/skia/bench/TypefaceBench.cpp
 FILE: ../../../third_party/skia/experimental/nima/NimaActor.cpp
 FILE: ../../../third_party/skia/experimental/nima/NimaActor.h
 FILE: ../../../third_party/skia/experimental/pvg/draw_msg.proto
