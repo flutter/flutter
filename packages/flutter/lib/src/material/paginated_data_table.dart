@@ -74,7 +74,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     @required this.source
   }) : assert(columns != null),
        assert(dragStartBehavior != null),
@@ -298,7 +298,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
     if (_selectedRowCount == 0) {
-      if (widget.header != null){
+      if (widget.header != null) {
         headerWidgets.add(Expanded(child: widget.header));
         if (widget.header is ButtonBar) {
           // We adjust the padding when a button bar is present, because the
@@ -387,75 +387,81 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
-    // The header will be visible only if the headerWidgets collection is not empty
-    final Semantics headerRow = Semantics(
-      container: true,
-      child: DefaultTextStyle(
-        // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-        // list and then tweak them appropriately.
-        // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
-        style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
-            : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-        child: IconTheme.merge(
-          data: const IconThemeData(
-              opacity: 0.54
-          ),
-          child: ButtonTheme.bar(
-            child: Ink(
-              height: 64.0,
-              color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-              child: Padding(
-                padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: headerWidgets
+    List<Widget> cardWidgets = new List<Widget>();
+
+    if (headerWidgets.isNotEmpty) {
+      // The header will be visible only if the headerWidgets collection is not empty
+      final Semantics headerRow = Semantics(
+        container: true,
+        child: DefaultTextStyle(
+          // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+          // list and then tweak them appropriately.
+          // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+          style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+              : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+          child: IconTheme.merge(
+            data: const IconThemeData(
+                opacity: 0.54
+            ),
+            child: ButtonTheme.bar(
+              child: Ink(
+                height: 64.0,
+                color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: headerWidgets
+                  ),
                 ),
               ),
             ),
           ),
         ),
+      );
+
+      cardWidgets.add(headerRow);
+    }
+
+    cardWidgets.add(SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        dragStartBehavior: widget.dragStartBehavior,
+        child: DataTable(
+            key: _tableKey,
+            columns: widget.columns,
+            sortColumnIndex: widget.sortColumnIndex,
+            sortAscending: widget.sortAscending,
+            onSelectAll: widget.onSelectAll,
+            rows: _getRows(_firstRowIndex, widget.rowsPerPage)
+        )
+    ));
+
+    cardWidgets.add(DefaultTextStyle(
+      style: footerTextStyle,
+      child: IconTheme.merge(
+        data: const IconThemeData(
+            opacity: 0.54
+        ),
+        child: Container(
+          height: 56.0,
+          child: SingleChildScrollView(
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: Row(
+              children: footerWidgets,
+            ),
+          ),
+        ),
       ),
-    );
+    ));
 
     // CARD
     return Card(
       semanticContainer: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          headerWidgets.isNotEmpty ? headerRow : Container(),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            dragStartBehavior: widget.dragStartBehavior,
-            child: DataTable(
-              key: _tableKey,
-              columns: widget.columns,
-              sortColumnIndex: widget.sortColumnIndex,
-              sortAscending: widget.sortAscending,
-              onSelectAll: widget.onSelectAll,
-              rows: _getRows(_firstRowIndex, widget.rowsPerPage)
-            )
-          ),
-          DefaultTextStyle(
-            style: footerTextStyle,
-            child: IconTheme.merge(
-              data: const IconThemeData(
-                opacity: 0.54
-              ),
-              child: Container(
-                height: 56.0,
-                child: SingleChildScrollView(
-                  dragStartBehavior: widget.dragStartBehavior,
-                  scrollDirection: Axis.horizontal,
-                  reverse: true,
-                  child: Row(
-                    children: footerWidgets,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        children: cardWidgets,
       ),
     );
   }
