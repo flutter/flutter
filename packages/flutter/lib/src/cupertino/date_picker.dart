@@ -434,8 +434,6 @@ class CupertinoDatePicker extends StatefulWidget {
 
 typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
 
-/// State for a [CupertinoDatePicker] initialized with the mode
-/// [CupertinoDatePickerMode.time] or [CupertinoDatePickerMode.dateAndTime].
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   int textDirectionFactor;
   CupertinoLocalizations localizations;
@@ -773,8 +771,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 }
 
-/// State for a [CupertinoDatePicker] initialized with the mode
-/// [CupertinoDatePickerMode.date].
 class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   int textDirectionFactor;
   CupertinoLocalizations localizations;
@@ -1134,7 +1130,6 @@ class CupertinoTimerPicker extends StatefulWidget {
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
 }
 
-/// A state for a [CupertinoTimePicker].
 class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   int textDirectionFactor;
   CupertinoLocalizations localizations;
