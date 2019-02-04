@@ -532,6 +532,9 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Whether to defensively download artifcts when either targetPlatform or buildMode are unknown.
+  bool get skipUnknownArtifacts => true;
+
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -546,24 +549,10 @@ abstract class FlutterCommand extends Command<void> {
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
       final BuildInfo buildInfo = getBuildInfo();
-      bool skipUnknown = true;
-      TargetPlatform targetPlatform = buildInfo.targetPlatform;
-      if (targetPlatform == null) {
-        // Access devices directly since we do not care about doctor
-        // warnings.
-        final List<Device> devices = await deviceManager.getDevices().toList();
-        if (devices.length == 1) {
-          targetPlatform = await devices.first.targetPlatform;
-        } else if (devices.length > 1) {
-          // If there is more than one connected device, ensure we download
-          // all necessary binaries.
-          skipUnknown = false;
-        }
-      }
       await cache.updateAll(
         buildMode: buildInfo.mode,
-        targetPlatform: targetPlatform,
-        skipUnknown: skipUnknown,
+        targetPlatform: buildInfo.targetPlatform,
+        skipUnknown: skipUnknownArtifacts,
         clobber: false,
       );
     }

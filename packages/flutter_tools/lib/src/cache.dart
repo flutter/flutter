@@ -447,15 +447,12 @@ class FlutterEngine extends CachedArtifact {
         yield engineBinary;
       } else if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
         yield engineBinary;
-      } else if (!skipUnknown) {
-        // If we don't skip unknown, then assume null matches everything.
-        if (targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode) {
-          yield engineBinary;
-        } else if (buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform) {
-          yield engineBinary;
-        } else {
-          yield engineBinary;
-        }
+      } else if (!skipUnknown && targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode) {
+        yield engineBinary;
+      } else if (!skipUnknown && buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform) {
+        yield engineBinary;
+      } else if (!skipUnknown && buildMode == null && targetPlatform == null) {
+        yield engineBinary;
       }
     }
   }

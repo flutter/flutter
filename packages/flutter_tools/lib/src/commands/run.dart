@@ -61,6 +61,9 @@ abstract class RunCommandBase extends FlutterCommand {
 
   bool get traceStartup => argResults['trace-startup'];
   String get route => argResults['route'];
+
+  @override
+  bool get skipUnknownArtifacts => false;
 }
 
 class RunCommand extends RunCommandBase {

@@ -29,6 +29,9 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
+  bool get skipUnknownArtifacts => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async => null;
 }
 
