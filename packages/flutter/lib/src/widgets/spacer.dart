@@ -43,9 +43,9 @@ class Spacer extends StatelessWidget {
   ///
   /// The [flex] parameter may not be null or less than one.
   const Spacer({Key key, this.flex = 1})
-      : assert(flex != null),
-        assert(flex > 0),
-        super(key: key);
+    : assert(flex != null),
+      assert(flex > 0),
+      super(key: key);
 
   /// The flex factor to use in determining how much space to take up.
   ///

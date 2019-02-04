@@ -225,6 +225,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// rebuild of the tree, even if [widget] is the same as the previous call.
   /// [pump] will only rebuild the widgets that have changed.
   ///
+  /// This method should not be used as the first parameter to an [expect] or
+  /// [expectLater] call to test that a widget throws an exception. Instead, use
+  /// [TestWidgetsFlutterBinding.takeException].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
+  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(Widget widget, [
@@ -362,7 +375,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.

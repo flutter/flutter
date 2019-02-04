@@ -48,7 +48,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class OutlineButton extends MaterialButton {
   /// Create a filled button.
   ///
