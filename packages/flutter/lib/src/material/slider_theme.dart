@@ -1031,16 +1031,13 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The preferred radius of the round thumb shape when the slider is disabled.
   ///
-  /// If it is not provided, then the material default is used.
+  /// If no disabledRadius is provided, then it is is derived from the enabled
+  /// thumb radius and has the same ratio of enabled size to disabled size as
+  /// the Material spec. The default resolves to 4, which is 2 / 3 of the
+  /// default enabled thumb.
   final double disabledThumbRadius;
-  // If no disabledRadius is provided, use a default that is derived from the
-  // actual thumb radius and has the same ratio as the default disabled to
-  // enabled thumb radius.
-  // TODO(clocksmith): This needs to be updated once the thumb size is updated.
+  // TODO(clocksmith): This needs to be updated once the thumb size is updated to the Material spec.
   double get _disabledThumbRadius =>  disabledThumbRadius ?? enabledThumbRadius * 2 / 3;
-
-  // The Material spec default.
-  static const double _defaultDisabledThumbRadius = 4.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
