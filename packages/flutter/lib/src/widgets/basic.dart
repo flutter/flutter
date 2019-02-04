@@ -4599,6 +4599,7 @@ class RichText extends LeafRenderObjectWidget {
     this.textScaleFactor = 1.0,
     this.maxLines,
     this.locale,
+    this.strutStyle,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -4660,6 +4661,9 @@ class RichText extends LeafRenderObjectWidget {
   /// See [RenderParagraph.locale] for more information.
   final Locale locale;
 
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  final StrutStyle strutStyle;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4670,6 +4674,7 @@ class RichText extends LeafRenderObjectWidget {
       overflow: overflow,
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
+      strutStyle: strutStyle,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4685,6 +4690,7 @@ class RichText extends LeafRenderObjectWidget {
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
+      ..strutStyle = strutStyle
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
