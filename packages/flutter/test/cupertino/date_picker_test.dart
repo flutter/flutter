@@ -641,6 +641,54 @@ void main() {
     expect(lastSelectedItem, 1);
     handle.dispose();
   });
+
+  testWidgets('picker scrolls to 3/30/18 after reset', (WidgetTester tester) async {
+    DateTime date;
+    final CupertinoPickerController controller = CupertinoPickerController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              CupertinoButton(
+                child: const Text('Reset Picker'),
+                onPressed: () { controller.reset(); },
+              ),
+              Container(
+                height: 300,
+                child: CupertinoDatePicker(
+                  controller: controller,
+                  initialDateTime: DateTime(2018, 3, 30),
+                  onDateTimeChanged: (DateTime time){},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('March'), const Offset(0.0, 60.0));
+    // Momentarily, the 2018 and the incorrect 30 of February is aligned.
+    expect(
+      tester.getTopLeft(find.text('2018')).dy,
+      tester.getTopLeft(find.text('30')).dy,
+    );
+    await tester.pump(); // Once to trigger the post frame animate call.
+    await tester.pump(); // Once to start the DrivenScrollActivity.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      date,
+      DateTime(2018, 3, 30),
+    );
+    expect(
+      tester.getTopLeft(find.text('2018')).dy,
+      tester.getTopLeft(find.text('30')).dy,
+    );
+  });
 }
 
 Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {

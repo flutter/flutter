@@ -463,7 +463,6 @@ class CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // Estimated width of columns.
   final Map<int, double> _estimatedColumnWidths = <int, double>{};
-
   @override
   void initState() {
     super.initState();
@@ -516,9 +515,10 @@ class CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   /// creation of the [CupertionDatePicker] widget.
   void reset(Duration resetDuration) {
     _dateController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    _amPmController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    _hourController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
+    _amPmController?.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
     _minuteController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
+    if (_hourController.selectedItem != 12)
+      _hourController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
   }
 
   // Lazily calculate the column width of the column being displayed only.
@@ -1189,7 +1189,7 @@ class CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  /// Resets the picker to 00:00:00.
+  /// Resets the picker to be the initial time.
   void reset(Duration resetDuration) {
     _hourController.animateTo(0, duration: resetDuration, curve: Curves.easeOut);
     _minuteController.animateTo(0, duration: resetDuration, curve: Curves.easeOut);
