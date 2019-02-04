@@ -18,12 +18,12 @@ import 'package:meta/meta.dart';
 ///
 /// A test can utilize a [TestWindow] in the following way:
 ///
+/// ## Sample Code
+///
 /// ```dart
 /// testWidgets('your test name here', (WidgetTester tester) async {
 ///   // Retrieve the TestWidgetsFlutterBinding.
-///   final WidgetsBinding binding = tester.binding;
-///   assert(binding is TestWidgetsFlutterBinding);
-///   final TestWidgetsFlutterBinding testBinding = binding;
+///   final TestWidgetsFlutterBinding testBinding = tester.binding;
 ///
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
