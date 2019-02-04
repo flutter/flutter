@@ -198,17 +198,15 @@ class _SliderDemoState extends State<SliderDemo> {
                         child: TextField(
                           onSubmitted: (String value) {
                             final double myDouble = double.tryParse(value);
-                            if (myDouble != null &&
-                                myDouble >= 0 &&
-                                myDouble <= 100) {
+                            if (myDouble != null) {
                               setState(() {
-                                _value = myDouble;
+                                _value = myDouble.clamp(0, 100);
                               });
                             }
                           },
                           keyboardType: TextInputType.number,
                           controller: TextEditingController(
-                            text: _value.toStringAsFixed(1),
+                            text: _value.toStringAsFixed(0),
                           ),
                         ),
                       ),
