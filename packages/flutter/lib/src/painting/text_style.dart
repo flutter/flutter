@@ -852,6 +852,7 @@ class TextStyle extends Diagnosticable {
     return StrutStyle(
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
+      fontSize: fontSize,
       height: height,
       // Leading goes here once implemented in TextStyle
       fontWeight: fontWeight,

@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'text_style.dart';
 
 /// Defines the strut, which sets the minimum height a line can be
 /// relative to the baseline. Strut applies to all lines in the pararaph.
@@ -281,17 +282,26 @@ class StrutStyle extends Diagnosticable {
        assert(leading == null || leading >= 0),
        assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
 
+  const StrutStyle.fromTextStyle(TextStyle textStyle, {this.forceStrutHeight = false,})
+    : fontFamily = textStyle.fontFamily,
+      _fontFamilyFallback = textStyle.fontFamilyFallback,
+      height = textStyle.height,
+      fontSize = textStyle.fontSize,
+      fontWeight = textStyle.fontWeight,
+      fontStyle = textStyle.fontStyle,
+      debugLabel = textStyle.debugLabel,
+      _package = textStyle._package,
+      leading = null;
+
   /// A [StrutStyle] that will have no impact on the text layout.
   /// 
   /// Equivalent to having no strut at all. All lines will be laid out according to
   /// the properties defined in [TextStyle].
   ///
   /// Default strut is not the same as [disabled].
-  static const StrutStyle disabled = StrutStyle(
-    fontSize: 0,
-    height: 0,
-    leading: 0,
-  );
+  // const StrutStyle.disabled() : fontSize = 0,
+  //                             height = 0,
+  //                             leading = 0;
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
