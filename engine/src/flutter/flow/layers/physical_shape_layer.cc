@@ -66,7 +66,21 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
 void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
   FML_DCHECK(needs_system_composite());
 
-  SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_);
+  // Retained rendering: speedup by reusing a retained entity node if possible.
+  // When an entity node is reused, no paint layer is added to the frame so we
+  // won't call PhysicalShapeLayer::Paint.
+  LayerRasterCacheKey key(this, context.Matrix());
+  if (context.HasRetainedNode(key)) {
+    const scenic::EntityNode& retained_node = context.GetRetainedNode(key);
+    FML_DCHECK(context.top_entity());
+    FML_DCHECK(retained_node.session() == context.session());
+    context.top_entity()->entity_node().AddChild(retained_node);
+    return;
+  }
+
+  // If we can't find an existing retained surface, create one.
+  SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_,
+                                  this);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
       frame.AddPaintLayer(layer.get());

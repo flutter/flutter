@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/flow/compositor_context.h"
+#include "flutter/flow/raster_cache_key.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/logging.h"
@@ -50,8 +51,19 @@ class SceneUpdateContext {
    public:
     virtual ~SurfaceProducer() = default;
 
+    // The produced surface owns the entity_node and has a layer_key for
+    // retained rendering. The surface will only be retained if the layer_key
+    // has a non-null layer pointer (layer_key.id()).
     virtual std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
-        const SkISize& size) = 0;
+        const SkISize& size,
+        const LayerRasterCacheKey& layer_key,
+        std::unique_ptr<scenic::EntityNode> entity_node) = 0;
+
+    // Query a retained entity node (owned by a retained surface) for retained
+    // rendering.
+    virtual bool HasRetainedNode(const LayerRasterCacheKey& key) const = 0;
+    virtual const scenic::EntityNode& GetRetainedNode(
+        const LayerRasterCacheKey& key) = 0;
 
     virtual void SubmitSurface(
         std::unique_ptr<SurfaceProducerSurface> surface) = 0;
@@ -63,13 +75,16 @@ class SceneUpdateContext {
     ~Entity();
 
     SceneUpdateContext& context() { return context_; }
-    scenic::EntityNode& entity_node() { return entity_node_; }
+    scenic::EntityNode& entity_node() { return *entity_node_ptr_; }
+    std::unique_ptr<scenic::EntityNode>& entity_node_ptr() {
+      return entity_node_ptr_;
+    }
 
    private:
     SceneUpdateContext& context_;
     Entity* const previous_entity_;
 
-    scenic::EntityNode entity_node_;
+    std::unique_ptr<scenic::EntityNode> entity_node_ptr_;
   };
 
   class Clip : public Entity {
@@ -96,10 +111,15 @@ class SceneUpdateContext {
 
   class Frame : public Entity {
    public:
+    // When layer is not nullptr, the frame is associated with a layer subtree
+    // rooted with that layer. The frame may then create a surface that will be
+    // retained for that layer.
     Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
-          float elevation);
+          float elevation,
+          Layer* layer = nullptr);
+
     ~Frame();
 
     void AddPaintLayer(Layer* layer);
@@ -110,6 +130,7 @@ class SceneUpdateContext {
 
     std::vector<Layer*> paint_layers_;
     SkRect paint_bounds_;
+    Layer* layer_;
   };
 
   SceneUpdateContext(scenic::Session* session,
@@ -118,6 +139,8 @@ class SceneUpdateContext {
   ~SceneUpdateContext();
 
   scenic::Session* session() { return session_; }
+
+  Entity* top_entity() { return top_entity_; }
 
   bool has_metrics() const { return !!metrics_; }
   void set_metrics(fuchsia::ui::gfx::MetricsPtr metrics) {
@@ -147,6 +170,20 @@ class SceneUpdateContext {
   std::vector<std::unique_ptr<SurfaceProducerSurface>> ExecutePaintTasks(
       CompositorContext::ScopedFrame& frame);
 
+  float ScaleX() const { return metrics_->scale_x * top_scale_x_; }
+  float ScaleY() const { return metrics_->scale_y * top_scale_y_; }
+
+  // The transformation matrix of the current context. It's used to construct
+  // the LayerRasterCacheKey for a given layer.
+  SkMatrix Matrix() const { return SkMatrix::MakeScale(ScaleX(), ScaleY()); }
+
+  bool HasRetainedNode(const LayerRasterCacheKey& key) const {
+    return surface_producer_->HasRetainedNode(key);
+  }
+  const scenic::EntityNode& GetRetainedNode(const LayerRasterCacheKey& key) {
+    return surface_producer_->GetRetainedNode(key);
+  }
+
  private:
   struct PaintTask {
     std::unique_ptr<SurfaceProducerSurface> surface;
@@ -158,23 +195,35 @@ class SceneUpdateContext {
     std::vector<Layer*> layers;
   };
 
-  void CreateFrame(scenic::EntityNode& entity_node,
+  // Setup the entity_node as a frame that materialize all the paint_layers. In
+  // most cases, this creates a VulkanSurface (SurfaceProducerSurface) by
+  // calling SetShapeTextureOrColor and GenerageImageIfNeeded. Such surface will
+  // own the associated entity_node. If the layer pointer isn't nullptr, the
+  // surface (and thus the entity_node) will be retained for that layer to
+  // improve the performance.
+  void CreateFrame(std::unique_ptr<scenic::EntityNode> entity_node,
                    const SkRRect& rrect,
                    SkColor color,
                    const SkRect& paint_bounds,
-                   std::vector<Layer*> paint_layers);
+                   std::vector<Layer*> paint_layers,
+                   Layer* layer);
   void SetShapeTextureOrColor(scenic::ShapeNode& shape_node,
                               SkColor color,
                               SkScalar scale_x,
                               SkScalar scale_y,
                               const SkRect& paint_bounds,
-                              std::vector<Layer*> paint_layers);
+                              std::vector<Layer*> paint_layers,
+                              Layer* layer,
+                              std::unique_ptr<scenic::EntityNode> entity_node);
   void SetShapeColor(scenic::ShapeNode& shape_node, SkColor color);
-  scenic::Image* GenerateImageIfNeeded(SkColor color,
-                                       SkScalar scale_x,
-                                       SkScalar scale_y,
-                                       const SkRect& paint_bounds,
-                                       std::vector<Layer*> paint_layers);
+  scenic::Image* GenerateImageIfNeeded(
+      SkColor color,
+      SkScalar scale_x,
+      SkScalar scale_y,
+      const SkRect& paint_bounds,
+      std::vector<Layer*> paint_layers,
+      Layer* layer,
+      std::unique_ptr<scenic::EntityNode> entity_node);
 
   Entity* top_entity_ = nullptr;
   float top_scale_x_ = 1.f;

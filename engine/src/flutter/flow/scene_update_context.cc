@@ -40,13 +40,15 @@ void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
   export_nodes_.erase(export_node);
 }
 
-void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
-                                     const SkRRect& rrect,
-                                     SkColor color,
-                                     const SkRect& paint_bounds,
-                                     std::vector<Layer*> paint_layers) {
+void SceneUpdateContext::CreateFrame(
+    std::unique_ptr<scenic::EntityNode> entity_node,
+    const SkRRect& rrect,
+    SkColor color,
+    const SkRect& paint_bounds,
+    std::vector<Layer*> paint_layers,
+    Layer* layer) {
   // Frames always clip their children.
-  entity_node.SetClip(0u, true /* clip to self */);
+  entity_node->SetClip(0u, true /* clip to self */);
 
   // We don't need a shape if the frame is zero size.
   if (rrect.isEmpty())
@@ -70,7 +72,7 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),
                             0.f);
-  entity_node.AddPart(shape_node);
+  entity_node->AddPart(shape_node);
 
   // Check whether the painted layers will be visible.
   if (paint_bounds.isEmpty() || !paint_bounds.intersects(shape_bounds))
@@ -83,8 +85,8 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
   }
 
   // Apply current metrics and transformation scale factors.
-  const float scale_x = metrics_->scale_x * top_scale_x_;
-  const float scale_y = metrics_->scale_y * top_scale_y_;
+  const float scale_x = ScaleX();
+  const float scale_y = ScaleY();
 
   // If the painted area only covers a portion of the frame then we can
   // reduce the texture size by drawing just that smaller area.
@@ -100,15 +102,17 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
     inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
                               inner_bounds.height() * 0.5f + inner_bounds.top(),
                               0.f);
-    entity_node.AddPart(inner_node);
+    entity_node->AddPart(inner_node);
     SetShapeTextureOrColor(inner_node, color, scale_x, scale_y, inner_bounds,
-                           std::move(paint_layers));
+                           std::move(paint_layers), layer,
+                           std::move(entity_node));
     return;
   }
 
   // Apply a texture to the whole shape.
   SetShapeTextureOrColor(shape_node, color, scale_x, scale_y, shape_bounds,
-                         std::move(paint_layers));
+                         std::move(paint_layers), layer,
+                         std::move(entity_node));
 }
 
 void SceneUpdateContext::SetShapeTextureOrColor(
@@ -117,9 +121,12 @@ void SceneUpdateContext::SetShapeTextureOrColor(
     SkScalar scale_x,
     SkScalar scale_y,
     const SkRect& paint_bounds,
-    std::vector<Layer*> paint_layers) {
+    std::vector<Layer*> paint_layers,
+    Layer* layer,
+    std::unique_ptr<scenic::EntityNode> entity_node) {
   scenic::Image* image = GenerateImageIfNeeded(
-      color, scale_x, scale_y, paint_bounds, std::move(paint_layers));
+      color, scale_x, scale_y, paint_bounds, std::move(paint_layers), layer,
+      std::move(entity_node));
   if (image != nullptr) {
     scenic::Material material(session_);
     material.SetTexture(*image);
@@ -146,7 +153,9 @@ scenic::Image* SceneUpdateContext::GenerateImageIfNeeded(
     SkScalar scale_x,
     SkScalar scale_y,
     const SkRect& paint_bounds,
-    std::vector<Layer*> paint_layers) {
+    std::vector<Layer*> paint_layers,
+    Layer* layer,
+    std::unique_ptr<scenic::EntityNode> entity_node) {
   // Bail if there's nothing to paint.
   if (paint_layers.empty())
     return nullptr;
@@ -158,7 +167,10 @@ scenic::Image* SceneUpdateContext::GenerateImageIfNeeded(
     return nullptr;
 
   // Acquire a surface from the surface producer and register the paint tasks.
-  auto surface = surface_producer_->ProduceSurface(physical_size);
+  std::unique_ptr<SurfaceProducerSurface> surface =
+      surface_producer_->ProduceSurface(physical_size,
+                                        LayerRasterCacheKey(layer, Matrix()),
+                                        std::move(entity_node));
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not acquire a surface from the surface producer "
@@ -210,11 +222,10 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
 }
 
 SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
-    : context_(context),
-      previous_entity_(context.top_entity_),
-      entity_node_(context.session()) {
+    : context_(context), previous_entity_(context.top_entity_) {
+  entity_node_ptr_ = std::make_unique<scenic::EntityNode>(context.session());
   if (previous_entity_)
-    previous_entity_->entity_node_.AddChild(entity_node_);
+    previous_entity_->entity_node_ptr_->AddChild(*entity_node_ptr_);
   context.top_entity_ = this;
 }
 
@@ -292,18 +303,20 @@ SceneUpdateContext::Transform::~Transform() {
 SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
                                  const SkRRect& rrect,
                                  SkColor color,
-                                 float elevation)
+                                 float elevation,
+                                 Layer* layer)
     : Entity(context),
       rrect_(rrect),
       color_(color),
-      paint_bounds_(SkRect::MakeEmpty()) {
+      paint_bounds_(SkRect::MakeEmpty()),
+      layer_(layer) {
   if (elevation != 0.0)
     entity_node().SetTranslation(0.f, 0.f, elevation);
 }
 
 SceneUpdateContext::Frame::~Frame() {
-  context().CreateFrame(entity_node(), rrect_, color_, paint_bounds_,
-                        std::move(paint_layers_));
+  context().CreateFrame(std::move(entity_node_ptr()), rrect_, color_,
+                        paint_bounds_, std::move(paint_layers_), layer_);
 }
 
 void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
