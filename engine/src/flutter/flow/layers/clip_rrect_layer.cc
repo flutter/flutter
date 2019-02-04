@@ -7,7 +7,9 @@
 namespace flow {
 
 ClipRRectLayer::ClipRRectLayer(Clip clip_behavior)
-    : clip_behavior_(clip_behavior) {}
+    : clip_behavior_(clip_behavior) {
+  FML_DCHECK(clip_behavior != Clip::none);
+}
 
 ClipRRectLayer::~ClipRRectLayer() = default;
 
