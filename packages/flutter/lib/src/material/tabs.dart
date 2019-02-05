@@ -490,7 +490,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
       // effect without this guard because the super call below would starts a
       // ballistic scroll activity.
       assert(viewportDimension != null);
-      _hadNonZeroDimension = _hadNonZeroDimension || viewportDimension != 0.0;
+      _hadNonZeroDimension = viewportDimension != 0.0;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
     }
