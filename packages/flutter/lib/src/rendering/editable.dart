@@ -45,6 +45,10 @@ enum SelectionChangedCause {
   /// location of the cursor) to change.
   longPress,
 
+  /// The user force-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  forcePress,
+
   /// The user used the keyboard to change the selection or the location of the
   /// cursor.
   ///
