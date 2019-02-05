@@ -77,16 +77,16 @@ class BuildRunner {
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String packagesPath = flutterProject.packagesFile.absolute.path;
     final String buildScript = flutterProject
-      .dartTool
-      .childDirectory('build')
-      .childDirectory('entrypoint')
-      .childFile('build.dart')
-      .path;
+        .dartTool
+        .childDirectory('build')
+        .childDirectory('entrypoint')
+        .childFile('build.dart')
+        .path;
     final String scriptPackagesPath = flutterProject
-      .dartTool
-      .childDirectory('flutter_tool')
-      .childFile('.packages')
-      .path;
+        .dartTool
+        .childDirectory('flutter_tool')
+        .childFile('.packages')
+        .path;
     final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
     final Status status = logger.startProgress('running builders...', timeout: null);
     final Process buildProcess = await processManager.start(<String>[
@@ -107,26 +107,29 @@ class BuildRunner {
       '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
     ]);
     buildProcess
-      .stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printStatus);
+        .stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printStatus);
     buildProcess
-      .stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    await buildProcess.exitCode;
-    status.stop();
+        .stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printError);
+    try {
+      await buildProcess.exitCode;
+    } finally {
+      status.stop();
+    }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
     final Directory dartTool = flutterProject.dartTool;
     final String projectName = flutterProject.manifest.appName;
     final Directory generatedDirectory = dartTool
-      .absolute
-      .childDirectory('build')
-      .childDirectory('generated')
-      .childDirectory(projectName);
+        .absolute
+        .childDirectory('build')
+        .childDirectory('generated')
+        .childDirectory(projectName);
     if (!generatedDirectory.existsSync()) {
       throw Exception('build_runner cannot find generated directory');
     }
@@ -150,9 +153,9 @@ class BuildRunner {
   Future<void> invalidateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final File buildScript = flutterProject.dartTool
-      .absolute
-      .childDirectory('flutter_tool')
-      .childFile('build.dart');
+        .absolute
+        .childDirectory('flutter_tool')
+        .childFile('build.dart');
     if (!buildScript.existsSync()) {
       return;
     }
@@ -192,8 +195,11 @@ class BuildRunner {
     );
     final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
     final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
-    await buildScriptGenerator.generateBuildScript();
-    status.stop();
+    try {
+      await buildScriptGenerator.generateBuildScript();
+    } finally {
+      status.stop();
+    }
   }
 }
 
