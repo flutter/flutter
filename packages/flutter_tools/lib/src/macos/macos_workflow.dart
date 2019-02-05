@@ -10,7 +10,7 @@ import '../doctor.dart';
 /// The [MacOSWorkflow] instance.
 MacOSWorkflow get macOSWorkflow => context[MacOSWorkflow];
 
-/// The macos-specific implementation of a [Workflow].
+/// The macOS-specific implementation of a [Workflow].
 ///
 /// This workflow requires the flutter-desktop-embedding as a sibling
 /// repository to the flutter repo.

@@ -124,7 +124,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       process.stdin.write('q');
       await process.stdin.flush();
       // Also send a kill signal in case the `q` above didn't work.
-      process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
+      process.kill(ProcessSignal.sigint);
       try {
         completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {

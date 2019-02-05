@@ -7,10 +7,15 @@ import 'dart:typed_data';
 
 // TODO(abarth): Consider using vector_math.
 class _Vector {
-  _Vector(int size) : _offset = 0, _length = size, _elements = Float64List(size);
+  _Vector(int size)
+    : _offset = 0,
+      _length = size,
+      _elements = Float64List(size);
 
   _Vector.fromVOL(List<double> values, int offset, int length)
-    : _offset = offset, _length = length, _elements = values;
+    : _offset = offset,
+      _length = length,
+      _elements = values;
 
   final int _offset;
 
@@ -36,8 +41,8 @@ class _Vector {
 // TODO(abarth): Consider using vector_math.
 class _Matrix {
   _Matrix(int rows, int cols)
-  : _columns = cols,
-    _elements = Float64List(rows * cols);
+    : _columns = cols,
+      _elements = Float64List(rows * cols);
 
   final int _columns;
   final List<double> _elements;

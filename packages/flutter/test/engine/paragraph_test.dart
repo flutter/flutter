@@ -20,9 +20,7 @@ void main() {
       ));
       builder.addText('Test');
       final Paragraph paragraph = builder.build();
-      // TODO(cbracken): use const constructor. https://github.com/flutter/flutter/issues/26390
-      // ignore:prefer_const_constructors
-      paragraph.layout(ParagraphConstraints(width: 400.0));
+      paragraph.layout(const ParagraphConstraints(width: 400.0));
 
       expect(paragraph.height, closeTo(fontSize, 0.001));
       expect(paragraph.width, closeTo(400.0, 0.001));

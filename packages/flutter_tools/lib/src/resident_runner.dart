@@ -35,6 +35,7 @@ class FlutterDevice {
     this.fileSystemScheme,
     this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
+    List<String> experimentalFlags,
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
@@ -43,6 +44,7 @@ class FlutterDevice {
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
+	 experimentalFlags: experimentalFlags,
        );
 
   final Device device;
@@ -426,11 +428,11 @@ class FlutterDevice {
     return report;
   }
 
-  void updateReloadStatus(bool wasReloadSuccessful) {
+  Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
     if (wasReloadSuccessful)
       generator?.accept();
     else
-      generator?.reject();
+      await generator?.reject();
   }
 }
 
@@ -508,7 +510,9 @@ abstract class ResidentRunner {
   bool get supportsRestart => false;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
-    throw 'unsupported';
+    final String mode = isRunningProfile ? 'profile' :
+        isRunningRelease ? 'release' : 'this';
+    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
   Future<void> stop() async {

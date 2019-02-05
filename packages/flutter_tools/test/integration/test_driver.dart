@@ -82,11 +82,11 @@ abstract class FlutterTestDriver {
   }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger)
-        arguments.add('--start-paused');
+      arguments.add('--start-paused');
     if (_printDebugOutputToStdOut)
-        arguments.add('--verbose');
+      arguments.add('--verbose');
     if (pidFile != null) {
-        arguments.addAll(<String>['--pid-file', pidFile.path]);
+      arguments.addAll(<String>['--pid-file', pidFile.path]);
     }
     if (script != null) {
       arguments.add(script);
@@ -590,8 +590,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix}):
-    super(_projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix})
+    : super(_projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',
