@@ -515,7 +515,7 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
     // Radius should be 6, or 2/3 of 9. 2/3 because the default disabled thumb
-    // radius us 4 and the default enabled thumb radius is 6.
+    // radius is 4 and the default enabled thumb radius is 6.
     // TODO(clocksmith): This ratio will change once thumb sizes are updated to spec.
     expect(
       sliderBox,
