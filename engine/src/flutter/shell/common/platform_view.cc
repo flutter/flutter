@@ -68,8 +68,10 @@ void PlatformView::NotifyDestroyed() {
 }
 
 sk_sp<GrContext> PlatformView::CreateResourceContext() const {
+#ifndef OS_FUCHSIA
   FML_DLOG(WARNING) << "This platform does not setup the resource "
                        "context on the IO thread for async texture uploads.";
+#endif  // OS_FUCHSIA
   return nullptr;
 }
 

@@ -53,9 +53,11 @@ IOManager::IOManager(sk_sp<GrContext> resource_context,
           fml::TimeDelta::FromMilliseconds(250))),
       weak_factory_(this) {
   if (!resource_context_) {
+#ifndef OS_FUCHSIA
     FML_DLOG(WARNING) << "The IO manager was initialized without a resource "
                          "context. Async texture uploads will be disabled. "
                          "Expect performance degradation.";
+#endif  // OS_FUCHSIA
   }
 }
 
