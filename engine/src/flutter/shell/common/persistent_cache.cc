@@ -40,8 +40,16 @@ PersistentCache* PersistentCache::GetCacheForProcess() {
   return gPersistentCache.get();
 }
 
-PersistentCache::PersistentCache() {
-  // TODO(chinmaygarde): Reenable caching, avoiding the windows crasher.
+PersistentCache::PersistentCache()
+    : cache_directory_(std::make_shared<fml::UniqueFD>(
+          CreateDirectory(fml::paths::GetCachesDirectory(),
+                          {
+                              "flutter_engine",                  //
+                              blink::GetFlutterEngineVersion(),  //
+                              "skia",                            //
+                              blink::GetSkiaVersion()            //
+                          },
+                          fml::FilePermission::kReadWrite))) {
   if (!IsValid()) {
     FML_LOG(WARNING) << "Could not acquire the persistent cache directory. "
                         "Caching of GPU resources on disk is disabled.";
