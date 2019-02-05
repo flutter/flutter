@@ -62,7 +62,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                         onChanged: null,
                       ),
                       Text(
-                        'Disabled'
+                        'Enabled'
                       ),
                     ],
                   ),
