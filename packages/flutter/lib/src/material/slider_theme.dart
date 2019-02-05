@@ -957,7 +957,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 ///    sliders in a widget subtree.
 class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// Create a slider tick mark that draws a circle.
-  const RoundSliderTickMarkShape({this.tickMarkRadius});
+  const RoundSliderTickMarkShape({ this.tickMarkRadius });
 
   /// The preferred radius of the round tick mark.
   ///
@@ -1022,7 +1022,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 class RoundSliderThumbShape extends SliderComponentShape {
   /// Create a slider thumb that draws a circle.
   // TODO(clocksmith): This needs to be changed to 10 according to spec.
-  const RoundSliderThumbShape({this.enabledThumbRadius = 6.0, this.disabledThumbRadius});
+  const RoundSliderThumbShape({
+    this.enabledThumbRadius = 6.0,
+    this.disabledThumbRadius
+  });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
@@ -1092,7 +1095,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 class RoundSliderOverlayShape extends SliderComponentShape {
   /// Create a slider thumb overlay that draws a circle.
   // TODO(clocksmith): This needs to be changed to 24 according to spec.
-  const RoundSliderOverlayShape({this.overlayRadius = 16.0});
+  const RoundSliderOverlayShape({ this.overlayRadius = 16.0 });
 
   /// The preferred radius of the round thumb shape when enabled.
   ///
