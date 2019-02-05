@@ -403,11 +403,11 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
     final Process process = await processManager.start(command);
-    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+    unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
       }
-    });
+    }));
     _processes[hostPort] = process;
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;
