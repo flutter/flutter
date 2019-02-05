@@ -27,7 +27,7 @@ const double _kFontSize = 14.0;
 ///
 ///  * [BottomNavigationBar]
 ///  * [BottomNavigationBarItem]
-///  * <https://material.google.com/components/bottom-navigation.html#bottom-navigation-specs>
+///  * <https://material.io/design/components/bottom-navigation.html#specs>
 enum BottomNavigationBarType {
   /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
   /// display their text labels, and do not shift when tapped.
@@ -126,7 +126,7 @@ enum BottomNavigationBarType {
 ///
 ///  * [BottomNavigationBarItem]
 ///  * [Scaffold]
-///  * <https://material.google.com/components/bottom-navigation.html>
+///  * <https://material.io/design/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.

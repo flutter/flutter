@@ -59,6 +59,11 @@ class FlutterErrorDetails {
 
   /// A human-readable description of where the error was caught (as opposed to
   /// where it was thrown).
+  ///
+  /// The string should be in a form that will make sense in English when
+  /// following the word "thrown", as in "thrown while obtaining the image from
+  /// the network" (for the context "while obtaining the image from the
+  /// network").
   final String context;
 
   /// A callback which filters the [stack] trace. Receives an iterable of

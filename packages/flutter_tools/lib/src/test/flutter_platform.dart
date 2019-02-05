@@ -497,7 +497,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // Callback can't throw since it's just setting a variable.
       controller.sink.done.whenComplete(() { // ignore: unawaited_futures
         controllerSinkClosed = true;
-      }); // ignore: unawaited_futures
+      });
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
