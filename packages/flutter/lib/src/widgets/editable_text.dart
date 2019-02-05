@@ -969,6 +969,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           newCaretRect.right + widget.scrollPadding.right,
           newCaretRect.bottom + widget.scrollPadding.bottom
       );
+      print('showing caret on screen');
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,

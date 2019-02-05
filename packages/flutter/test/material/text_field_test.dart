@@ -1006,23 +1006,32 @@ void main() {
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
 
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     await gesture.moveBy(const Offset(0.0, -1000.0));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     await tester.pump(const Duration(seconds: 1));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     print('moved the first time');
     // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
     // (No idea why this is necessary, but the bug wouldn't repro without it.)
     await gesture.moveBy(const Offset(0.0, -1000.0));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     await tester.pump(const Duration(seconds: 1));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     print('moved the second time');
     await gesture.up();
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     await tester.pump();
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     print('up');
 
     // Now the first line is scrolled up, and the fourth line is visible.
     Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
 
     expect(newFirstPos.dy, lessThan(firstPos.dy));
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
@@ -1032,13 +1041,18 @@ void main() {
 
     // Long press the 'i' in 'Fourth line' to select the word.
     await tester.pump(const Duration(seconds: 1));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
     final Offset selectedWordPos = textOffsetToPosition(
       tester,
       kMoreThanFourLines.indexOf('Fourth line') + 8,
     );
 
     ready = true;
-    debugDumpApp();
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
+    debugDumpRenderTree();
+    print(tester.getRect(find.byType(TextField)));
+    print(textOffsetToPosition(tester,kMoreThanFourLines.indexOf('Fourth line') + 8));
+    print(selectedWordPos);
     print(tester.hitTestOnBinding(selectedWordPos));
     gesture = await tester.startGesture(selectedWordPos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
