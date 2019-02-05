@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures;
+import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter_test/flutter_test.dart';
@@ -160,6 +160,20 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
         binding.window.accessibilityFeaturesTestValue = fakeValue;
+      }
+    );
+  });
+
+  testWidgets('TestWindow can fake platform brightness', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<Brightness>(
+      tester: tester,
+      realValue: Brightness.light,
+      fakeValue: Brightness.dark,
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.platformBrightness;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
+        binding.window.platformBrightnessTestValue = fakeValue;
       }
     );
   });
