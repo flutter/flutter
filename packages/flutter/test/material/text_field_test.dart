@@ -177,7 +177,7 @@ void main() {
 
   final Key textFieldKey = UniqueKey();
   Widget textFieldBuilder({
-    int maxLines,
+    int maxLines = 1,
     int minLines = 1,
     bool expands = false,
   }) {
@@ -820,19 +820,22 @@ void main() {
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
+    // Even when entering multiline text, TextField doesn't grow
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(textFieldBuilder());
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+
+    // maxLines: 3 makes the TextField 3 lines tall
     await tester.pumpWidget(textFieldBuilder(maxLines: 3));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
+    expect(inputBox.size.height, greaterThan(emptyInputSize.height));
 
     final Size threeLineInputSize = inputBox.size;
 
+    // Filling with 3 lines of text stays the same size
     await tester.enterText(find.byType(TextField), kThreeLines);
-    await tester.pumpWidget(textFieldBuilder());
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
-
-    await tester.enterText(find.byType(TextField), kThreeLines);
-    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
@@ -846,14 +849,26 @@ void main() {
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pumpWidget(textFieldBuilder(maxLines: 4));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(threeLineInputSize));
+    expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
 
     final Size fourLineInputSize = inputBox.size;
 
     // Now it won't max out until the end
-    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpWidget(textFieldBuilder(maxLines: 1, minLines: 1, expands: false));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(fourLineInputSize));
+    expect(inputBox.size, emptyInputSize);
+
+    // With maxLines: null, it grows to fit its contents
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpWidget(textFieldBuilder(maxLines: null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pump();
+    expect(inputBox.size, equals(threeLineInputSize));
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(inputBox.size.height, greaterThan(fourLineInputSize.height));
   });
 
   testWidgets('Multiline text min and max when expands is false', (WidgetTester tester) async {
@@ -869,13 +884,19 @@ void main() {
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
+    // min and max set to same value locks height to value
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 3));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
+    expect(inputBox.size.height, greaterThan(emptyInputSize.height));
 
     final Size threeLineInputSize = inputBox.size;
 
-    // minLines is overridden by maxLines when expands is false.
+    // maxLines: null with minLines set locks height to minLines
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, threeLineInputSize);
+
+    // minLines is overridden by maxLines
     await tester.pumpWidget(textFieldBuilder(minLines: 2, maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
@@ -883,6 +904,9 @@ void main() {
     // minLines can't be greater than maxLines
     expect(() async {
       await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 2));
+    }, throwsAssertionError);
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(minLines: 3));
     }, throwsAssertionError);
   });
 
@@ -894,35 +918,43 @@ void main() {
     final RenderBox inputBox = findInputBox();
     final Size emptyInputSize = inputBox.size;
 
+    // Size matches the content up to any height when maxLines: null
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpWidget(textFieldBuilder(expands: true, maxLines: null));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
-
-    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
-
-    final Size threeLineInputSize = inputBox.size;
-
-    // The size will be equal to lines as expands is set to true
-    await tester.pumpWidget(textFieldBuilder(maxLines: 4, minLines: 1 , expands: true));
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, emptyInputSize);
     await tester.enterText(find.byType(TextField), kThreeLines);
     await tester.pump();
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, threeLineInputSize);
+    expect(inputBox.size.height, greaterThan(emptyInputSize.height));
+    final Size threeLineInputSize = inputBox.size;
+    await tester.enterText(find.byType(TextField), kThreeLines + '\nfourth line');
+    await tester.pump();
+    expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    final Size fourLineInputSize = inputBox.size;
 
-    // An empty input starts at minLines
+    // The height expands between min and max
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(textFieldBuilder(maxLines: 4, minLines: 3 , expands: true));
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 4, expands: true));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, threeLineInputSize);
+    expect(inputBox.size, equals(threeLineInputSize));
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(inputBox.size, fourLineInputSize);
 
-    // Can't grow beyond maxLines
+    // maxLines defaults to 1 and can't be less than minLines
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(minLines: 3, expands: true));
+    }, throwsAssertionError);
+
+    // Setting expands to true with min and max at 1 gives no room to expand and
+    // is an error
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(expands: true));
+    }, throwsAssertionError);
+
+    // Not setting minLines just defaults it to 1
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(textFieldBuilder(maxLines: 3, minLines: 1 , expands: true));
+    await tester.pumpWidget(textFieldBuilder(maxLines: 3, expands: true));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, emptyInputSize);
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
