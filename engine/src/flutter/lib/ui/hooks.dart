@@ -86,6 +86,7 @@ void _updateUserSettingsData(String jsonData) {
   }
   _updateTextScaleFactor(data['textScaleFactor'].toDouble());
   _updateAlwaysUse24HourFormat(data['alwaysUse24HourFormat']);
+  _updatePlatformBrightness(data['platformBrightness']);
 }
 
 void _updateTextScaleFactor(double textScaleFactor) {
@@ -95,6 +96,11 @@ void _updateTextScaleFactor(double textScaleFactor) {
 
 void _updateAlwaysUse24HourFormat(bool alwaysUse24HourFormat) {
   window._alwaysUse24HourFormat = alwaysUse24HourFormat;
+}
+
+void _updatePlatformBrightness(String brightnessName) {
+  window._platformBrightness = brightnessName == 'dark' ? Brightness.dark : Brightness.light;
+  _invoke(window.onPlatformBrightnessChanged, window._onPlatformBrightnessChangedZone);
 }
 
 @pragma('vm:entry-point')

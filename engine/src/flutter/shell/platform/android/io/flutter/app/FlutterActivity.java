@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import io.flutter.app.FlutterActivityDelegate.ViewFactory;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterNativeView;
@@ -18,6 +20,8 @@ import io.flutter.view.FlutterView;
  * Base class for activities that use Flutter.
  */
 public class FlutterActivity extends Activity implements FlutterView.Provider, PluginRegistry, ViewFactory {
+    private static final String TAG = "FlutterActivity";
+    
     private final FlutterActivityDelegate delegate = new FlutterActivityDelegate(this, this);
 
     // These aliases ensure that the methods we forward to the delegate adhere
@@ -129,7 +133,7 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     }
 
     // @Override - added in API level 23
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         eventDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 

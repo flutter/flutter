@@ -26,6 +26,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import io.flutter.app.FlutterPluginRegistry;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.*;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -78,6 +80,7 @@ public class FlutterView extends SurfaceView
         int physicalViewInsetLeft = 0;
     }
 
+    private final DartExecutor dartExecutor;
     private final InputMethodManager mImm;
     private final TextInputPlugin mTextInputPlugin;
     private final SurfaceHolder.Callback mSurfaceCallback;
@@ -88,7 +91,7 @@ public class FlutterView extends SurfaceView
     private final BasicMessageChannel<Object> mFlutterKeyEventChannel;
     private final BasicMessageChannel<String> mFlutterLifecycleChannel;
     private final BasicMessageChannel<Object> mFlutterSystemChannel;
-    private final BasicMessageChannel<Object> mFlutterSettingsChannel;
+    private final SettingsChannel settingsChannel;
     private final List<ActivityLifecycleListener> mActivityLifecycleListeners;
     private final List<FirstFrameListener> mFirstFrameListeners;
     private final AtomicLong nextTextureId = new AtomicLong(0L);
@@ -114,6 +117,7 @@ public class FlutterView extends SurfaceView
         } else {
             mNativeView = nativeView;
         }
+        dartExecutor = new DartExecutor(mNativeView.getFlutterJNI());
         mIsSoftwareRenderingEnabled = mNativeView.getFlutterJNI().nativeGetIsSoftwareRenderingEnabled();
         mAnimationScaleObserver = new AnimationScaleObserver(new Handler());
         mMetrics = new ViewportMetrics();
@@ -155,7 +159,7 @@ public class FlutterView extends SurfaceView
         mFlutterKeyEventChannel = new BasicMessageChannel<>(this, "flutter/keyevent", JSONMessageCodec.INSTANCE);
         mFlutterLifecycleChannel = new BasicMessageChannel<>(this, "flutter/lifecycle", StringCodec.INSTANCE);
         mFlutterSystemChannel = new BasicMessageChannel<>(this, "flutter/system", JSONMessageCodec.INSTANCE);
-        mFlutterSettingsChannel = new BasicMessageChannel<>(this, "flutter/settings", JSONMessageCodec.INSTANCE);
+        settingsChannel = new SettingsChannel(dartExecutor);
 
         PlatformPlugin platformPlugin = new PlatformPlugin(activity);
         MethodChannel flutterPlatformChannel = new MethodChannel(this, "flutter/platform", JSONMethodCodec.INSTANCE);
@@ -166,7 +170,7 @@ public class FlutterView extends SurfaceView
 
 
         setLocales(getResources().getConfiguration());
-        setUserSettings();
+        sendUserPlatformSettingsToDart();
     }
 
     private void encodeKeyEvent(KeyEvent event, Map<String, Object> message) {
@@ -304,11 +308,19 @@ public class FlutterView extends SurfaceView
         mFlutterNavigationChannel.invokeMethod("popRoute", null);
     }
 
-    private void setUserSettings() {
-        Map<String, Object> message = new HashMap<>();
-        message.put("textScaleFactor", getResources().getConfiguration().fontScale);
-        message.put("alwaysUse24HourFormat", DateFormat.is24HourFormat(getContext()));
-        mFlutterSettingsChannel.send(message);
+    private void sendUserPlatformSettingsToDart() {
+        // Lookup the current brightness of the Android OS.
+        boolean isNightModeOn = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        SettingsChannel.PlatformBrightness brightness = isNightModeOn
+            ? SettingsChannel.PlatformBrightness.dark
+            : SettingsChannel.PlatformBrightness.light;
+
+        settingsChannel
+            .startMessage()
+            .setTextScaleFactor(getResources().getConfiguration().fontScale)
+            .setUse24HourFormat(DateFormat.is24HourFormat(getContext()))
+            .setPlatformBrightness(brightness)
+            .send();
     }
 
     private void setLocales(Configuration config) {
@@ -344,7 +356,7 @@ public class FlutterView extends SurfaceView
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setLocales(newConfig);
-        setUserSettings();
+        sendUserPlatformSettingsToDart();
     }
 
     float getDevicePixelRatio() {

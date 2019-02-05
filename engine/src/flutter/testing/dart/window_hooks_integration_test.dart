@@ -246,5 +246,25 @@ void main() {
       expect(runZone, same(innerZone));
       expect(textScaleFactor, equals(0.5));
     });
+
+    test('onThemeBrightnessMode preserves callback zone', () {
+      Zone innerZone;
+      Zone runZone;
+      Brightness platformBrightness;
+
+      runZoned(() {
+        innerZone = Zone.current;
+        window.onPlatformBrightnessChanged = () {
+          runZone = Zone.current;
+          platformBrightness = window.platformBrightness;
+        };
+      });
+
+      window.onPlatformBrightnessChanged();
+      _updatePlatformBrightness('dark');
+      expect(runZone, isNotNull);
+      expect(runZone, same(innerZone));
+      expect(platformBrightness, equals(Brightness.dark));
+    });
   });
 }

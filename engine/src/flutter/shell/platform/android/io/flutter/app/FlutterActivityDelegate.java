@@ -8,6 +8,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.Application;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -283,8 +284,7 @@ public final class FlutterActivityDelegate
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-    }
+    public void onConfigurationChanged(Configuration newConfig) {}
 
     private static String[] getArgsFromIntent(Intent intent) {
         // Before adding more entries to this list, consider that arbitrary
@@ -399,7 +399,7 @@ public final class FlutterActivityDelegate
         if (!activity.getTheme().resolveAttribute(
             android.R.attr.windowBackground,
             typedValue,
-            true)) {;
+            true)) {
             return null;
         }
         if (typedValue.resourceId == 0) {
