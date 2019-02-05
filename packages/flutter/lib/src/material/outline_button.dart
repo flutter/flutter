@@ -343,6 +343,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color _getFillColor() {
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+      return Colors.transparent;
     final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
@@ -351,29 +353,12 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
-  BorderSide _getOutline() {
-    final bool isDark = widget.brightness == Brightness.dark;
-    if (widget.borderSide?.style == BorderStyle.none)
-      return widget.borderSide;
-
-    final Color color = widget.enabled
-      ? (_pressed
-         ? widget.highlightedBorderColor
-         : (widget.borderSide?.color ??
-            (isDark ? Colors.grey[600] : Colors.grey[200])))
-      : (widget.disabledBorderColor ??
-         (isDark ? Colors.grey[800] : Colors.grey[100]));
-
-    return BorderSide(
-      color: color,
-      width: widget.borderSide?.width ?? 2.0,
-    );
-  }
-
   double _getHighlightElevation() {
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+      return 0.0;
     return Tween<double>(
       begin: 0.0,
-      end: widget.highlightElevation ?? 2.0,
+      end: widget.highlightElevation,
     ).evaluate(_elevationAnimation);
   }
 
@@ -397,7 +382,10 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           padding: widget.padding,
           shape: _OutlineBorder(
             shape: widget.shape,
-            side: _getOutline(),
+            side: widget.borderSide ?? BorderSide(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+              width: 1.0,
+            ),
           ),
           clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,
