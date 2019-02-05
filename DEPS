@@ -369,6 +369,9 @@ deps = {
   'src/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
 
+  'src/third_party/wuffs':
+   Var('fuchsia_git') + '/third_party/wuffs' + '@' + 'a71538baa8f1f4053176c0d9f31bc12fd4e8e71b',
+
   'src/third_party/gyp':
    Var('chromium_git') + '/external/gyp.git' + '@' + '4801a5331ae62da9769a327f11c4213d32fb0dad',
 

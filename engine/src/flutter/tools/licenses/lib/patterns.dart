@@ -651,7 +651,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
       r'^\1\2you may not use this file except in compliance with the License\. *\n'
       r'^\1\2You may obtain a copy of the License at *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
-      r'^\1\2 *(http://www\.apache\.org/licenses/LICENSE-2\.0) *\n'
+      r'^\1\2 *(https?://www\.apache\.org/licenses/LICENSE-2\.0) *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2Unless required by applicable law or agreed to in writing, software *\n'
       r'^\1\2distributed under the License is distributed on an "AS IS" BASIS, *\n'

@@ -1639,6 +1639,7 @@ class _RepositorySkiaThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
     return entry.name != 'giflib' // contains nothing that ends up in the binary executable
         && entry.name != 'freetype' // we use our own version
         && entry.name != 'freetype2' // we use our own version
+        && entry.name != 'gif' // not linked in
         && entry.name != 'icu' // we use our own version
         && entry.name != 'libjpeg-turbo' // we use our own version
         && entry.name != 'libpng' // we use our own version
@@ -1687,6 +1688,23 @@ class _RepositoryVulkanDirectory extends _RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     // Flutter only uses the headers in the include directory.
     return entry.name == 'include'
+        && super.shouldRecurse(entry);
+  }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src')
+      return _RepositoryExcludeSubpathDirectory(this, entry, const <String>['spec']);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryWuffsDirectory extends _RepositoryDirectory {
+  _RepositoryWuffsDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'CONTRIBUTORS' // not linked in
         && super.shouldRecurse(entry);
   }
 
@@ -1764,6 +1782,8 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       return _RepositoryPkgDirectory(this, entry);
     if (entry.name == 'vulkan')
       return _RepositoryVulkanDirectory(this, entry);
+    if (entry.name == 'wuffs')
+      return _RepositoryWuffsDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 }
