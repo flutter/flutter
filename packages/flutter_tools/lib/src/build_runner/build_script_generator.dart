@@ -10,7 +10,6 @@ import 'package:build_config/build_config.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:graphs/graphs.dart';
-import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -48,7 +47,7 @@ class BuildScriptGenerator {
     ]));
     final DartEmitter emitter = DartEmitter(Allocator.simplePrefixing());
     try {
-      final String location = path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
+      final String location = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
       final String result = DartFormatter().format('''
         // ignore_for_file: directives_ordering
         ${library.accept(emitter)}''');
@@ -217,15 +216,9 @@ class BuildScriptGenerator {
   String _buildScriptImport(String import) {
     if (import.startsWith('package:')) {
       return import;
-    } else if (import.startsWith('../') || import.startsWith('/')) {
-      throwToolExit('The `../` import syntax in build.yaml is now deprecated, '
-          'instead do a normal relative import as if it was from the root of '
-          'the package. Found `$import` in your `build.yaml` file.');
-      return import;
-    } else {
-      final String location = path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
-      return path.url.relative(import, from: path.url.dirname(location));
     }
+    throwToolExit('non-package import syntax in build.yaml is not supported');
+    return null;
   }
 
   Expression _findToExpression(BuilderDefinition definition) {
