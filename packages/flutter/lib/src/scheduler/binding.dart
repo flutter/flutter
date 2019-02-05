@@ -5,11 +5,13 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState;
+import 'dart:ui' show AppLifecycleState, Image, Offset, PaintingStyle, Picture, RRect, Rect;
+import 'dart:ui' show PictureRecorder, Canvas, Path, Paint;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/colors.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -718,6 +720,49 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
+  void _warmUpSkiaShaderCompilations() {
+    final Path path = Path();
+    path.moveTo(20, 60);
+    path.quadraticBezierTo(60, 20, 60, 60);
+    path.close();
+    path.moveTo(60, 20);
+    path.quadraticBezierTo(60, 60, 20, 60);
+
+    final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
+    final Path rrectPath = Path()..addRRect(rrect);
+
+    final Path circlePath = Path()..addOval(Rect.fromCircle(center: const Offset(40, 40), radius: 20));
+
+    final List<Path> paths = <Path>[path, rrectPath, circlePath];
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    final Paint paint = Paint();
+    paint.strokeWidth = 10;
+    paint.isAntiAlias = true;
+
+    for (Path path in paths) {
+      canvas.save();
+      for (PaintingStyle paintingStyle in PaintingStyle.values) {
+        paint.style = paintingStyle;
+        canvas.drawPath(path, paint);
+        canvas.translate(80, 0);
+      }
+      canvas.restore();
+      canvas.translate(0, 80);
+    }
+
+    canvas.drawShadow(rrectPath, Colors.black, 10.0, true);
+    canvas.translate(80, 0);
+    canvas.drawShadow(rrectPath, Colors.black, 10.0, false);
+
+    final Picture picture = recorder.endRecording();
+    picture.toImage(1000, 1000).then((Image image){
+      print('image generated!');
+    });
+  }
+
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
@@ -736,6 +781,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void scheduleWarmUpFrame() {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
+
+    _warmUpSkiaShaderCompilations();
 
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');
