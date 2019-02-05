@@ -275,6 +275,12 @@ class _MulticastCanvas implements Canvas {
   }
 
   @override
+  void setMatrix(Float64List matrix4) {
+    _main.setMatrix(matrix4);
+    _screenshot.setMatrix(matrix4);
+  }
+
+  @override
   void translate(double dx, double dy) {
     _main.translate(dx, dy);
     _screenshot.translate(dx, dy);

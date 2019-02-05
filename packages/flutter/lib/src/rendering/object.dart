@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show PictureRecorder, PathMetric;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -661,20 +661,16 @@ class _ElevationData {
     this.elevation,
     this.area,
     this.path,
-    this.pathContours,
     this.object,
   ) : assert(elevation != null),
       assert(area != null),
       assert(path != null),
-      assert(pathContours != null),
-      assert(pathContours > 0),
       assert(object != null);
 
   final double elevation;
   final Rect area;
   final Path path;
   final RenderObject object;
-  final int pathContours;
 
   bool objectIsNotDescendantOf(RenderObject maybeAncestor) {
     AbstractNode ancestor = object.parent;
@@ -948,7 +944,6 @@ class PipelineOwner {
     assert(object != null);
     assert(elevationSubtreeRoot != null);
     _elevations[elevationSubtreeRoot] ??= <_ElevationData>[];
-    final int newPathContours = path.computeMetrics().length;
     // Check in reverse order - we're more likely to fail on a closer node
     // if we're going to fail at all. Take only _maxElevationObjectsToCheck
     // to avoid this taking too long in the paint cycle.
@@ -966,15 +961,15 @@ class PipelineOwner {
                  elevationData.objectIsNotDescendantOf(object);
         });
     for (final _ElevationData elevationData in elevationsToCheck) {
-      final Path difference = Path.combine(
-        PathOperation.union,
+      final Path intersection = Path.combine(
+        PathOperation.intersect,
         path,
         elevationData.path,
       );
-      // Check if the union created a path with a single segment. If so, the
+
+      // Check if the intersection created a path. If so, the
       // paths overlap.
-      final int contourCount = difference.computeMetrics().length;
-      if (contourCount != newPathContours + elevationData.pathContours) {
+      if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
         object._debugReportException(
           'paint',
           'An attempt was made to paint a $object with a total '
@@ -990,7 +985,7 @@ class PipelineOwner {
           null, // The StackTrace is very unhelpful here.
           relatedObject: elevationData.object,
         );
-        return difference;
+        return intersection;
       }
     }
     if (!_printedExceededMaxElevationObjectsToCheckWarning &&
@@ -1003,7 +998,7 @@ class PipelineOwner {
                  'occurs.');
       _printedExceededMaxElevationObjectsToCheckWarning = true;
     }
-    _elevations[elevationSubtreeRoot].add(_ElevationData(elevation, area, path, newPathContours, object));
+    _elevations[elevationSubtreeRoot].add(_ElevationData(elevation, area, path, object));
     return null;
   }
 

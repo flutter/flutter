@@ -1641,12 +1641,15 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
         elevationSubtreeRoot: rootRenderObject,
       );
       if (diff != null) {
+        context.canvas.save();
+        context.canvas.setMatrix(Matrix4.identity().storage);
         context.canvas.drawPath(
           diff,
           Paint()..color = const Color(0xFFAA0000)
                  ..style = PaintingStyle.stroke
                  ..strokeWidth = 5,
         );
+        context.canvas.restore();
       }
       return true;
     }());
