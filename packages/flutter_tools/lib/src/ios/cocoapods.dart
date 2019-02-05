@@ -91,6 +91,9 @@ class CocoaPods {
   ///
   /// A user can override the default location via the CP_REPOS_DIR environment
   /// variable.
+  ///
+  /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
+  /// for details of this variable.
   Future<bool> get isCocoaPodsInitialized {
     final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
     return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
