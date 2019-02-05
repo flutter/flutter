@@ -186,6 +186,68 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('Tab sizing - icon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))))),
+    );
+    expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
+  });
+
+  testWidgets('Tab sizing - child', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Center(child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0))))),
+    );
+    expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
+  });
+
+  testWidgets('Tab sizing - text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(text: 'x')))),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
+  });
+
+  testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
+  });
+
+  testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
+  });
+
+  testWidgets('Tab color - normal', (WidgetTester tester) async {
+    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: TabController(length: 1, vsync: tester));
+    await tester.pumpWidget(
+      MaterialApp(home: Material(child: tabBar)),
+    );
+    expect(find.byType(TabBar), paints..line(color: Colors.blue[500]));
+  });
+
+  testWidgets('Tab color - match', (WidgetTester tester) async {
+    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: TabController(length: 1, vsync: tester));
+    await tester.pumpWidget(
+      MaterialApp(home: Material(color: const Color(0xff2196f3), child: tabBar)),
+    );
+    expect(find.byType(TabBar), paints..line(color: Colors.white));
+  });
+
+  testWidgets('Tab color - transparency', (WidgetTester tester) async {
+    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: TabController(length: 1, vsync: tester));
+    await tester.pumpWidget(
+      MaterialApp(home: Material(type: MaterialType.transparency, child: tabBar)),
+    );
+    expect(find.byType(TabBar), paints..line(color: Colors.blue[500]));
+  });
+
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
 

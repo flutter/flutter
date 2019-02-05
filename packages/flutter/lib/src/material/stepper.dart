@@ -73,7 +73,7 @@ const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(
 /// See also:
 ///
 ///  * [Stepper]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 @immutable
 class Step {
   /// Creates a step for a [Stepper].
@@ -123,7 +123,7 @@ class Step {
 /// See also:
 ///
 ///  * [Step]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 class Stepper extends StatefulWidget {
   /// Creates a stepper from a list of steps.
   ///
@@ -676,7 +676,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         throw FlutterError(
           'Steppers must not be nested. The material specification advises '
           'that one should avoid embedding steppers within steppers. '
-          'https://material.google.com/components/steppers.html#steppers-usage\n'
+          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
         );
       return true;
     }());

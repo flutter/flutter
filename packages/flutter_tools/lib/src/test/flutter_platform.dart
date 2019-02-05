@@ -502,7 +502,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // Callback can't throw since it's just setting a variable.
       controller.sink.done.whenComplete(() { // ignore: unawaited_futures
         controllerSinkClosed = true;
-      }); // ignore: unawaited_futures
+      });
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
@@ -935,8 +935,9 @@ class _FlutterPlatform extends PlatformPlugin {
       command.add('--ipv6');
     }
 
-    command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-checked-mode',
+      '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-dart-profiling',

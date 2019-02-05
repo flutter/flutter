@@ -221,28 +221,11 @@ void main() {
       );
     });
 
-    testWidgets('initial date time is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
-            initialDateTime: null,
-          );
-        },
-        throwsAssertionError,
+    testWidgets('initial date is set to default value', (WidgetTester tester) async {
+      final CupertinoDatePicker picker = CupertinoDatePicker(
+        onDateTimeChanged: (_) {},
       );
-    });
-
-    testWidgets('initial date time is not null', (WidgetTester tester) async {
-      expect(
-            () {
-          CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
-            initialDateTime: null,
-          );
-        },
-        throwsAssertionError,
-      );
+      expect(picker.initialDateTime, isNotNull);
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {

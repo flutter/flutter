@@ -1578,7 +1578,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     // Create the button backgrounds path and paint it.
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest)
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
       ..addRect(verticalDivider);
 
     for (int i = 0; i < pressedButtonRects.length; i += 1) {
@@ -1616,7 +1616,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest);
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
 
     final Path pressedBackgroundFillPath = Path();
 

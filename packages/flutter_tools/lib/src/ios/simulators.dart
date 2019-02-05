@@ -320,7 +320,10 @@ class IOSSimulator extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
-        args.add('--enable-checked-mode');
+        args.addAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points'
+        ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
       if (debuggingOptions.skiaDeterministicRendering)

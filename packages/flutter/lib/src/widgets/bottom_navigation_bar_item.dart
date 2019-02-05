@@ -15,7 +15,7 @@ import 'framework.dart';
 /// See also:
 ///
 ///  * [BottomNavigationBar]
-///  * <https://material.google.com/components/bottom-navigation.html>
+///  * <https://material.io/design/components/bottom-navigation.html>
 ///  * [CupertinoTabBar]
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/bars/tab-bars>
 class BottomNavigationBarItem {

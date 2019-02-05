@@ -431,8 +431,10 @@ class AndroidDevice extends Device {
     if (debuggingOptions.traceSystrace)
       cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildInfo.isDebug)
+      if (debuggingOptions.buildInfo.isDebug) {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
+        cmd.addAll(<String>['--ez', 'verify-entry-points', 'true']);
+      }
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.useTestFonts)

@@ -54,7 +54,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 }
 
 // TODO(eseidel): Toolbar needs to change size based on orientation:
-// http://material.google.com/layout/structure.html#structure-app-bar
+// https://material.io/design/components/app-bars-top.html#specs
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
@@ -127,7 +127,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -829,7 +829,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   ///

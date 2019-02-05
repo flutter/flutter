@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
@@ -191,8 +190,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onBeginFrame = _handleBeginFrame;
-    ui.window.onDrawFrame = _handleDrawFrame;
+    window.onBeginFrame = _handleBeginFrame;
+    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
   }
 
@@ -684,7 +683,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -715,7 +714,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test_api/test_api.dart' as test_package;
@@ -96,11 +97,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() {
+  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
+
+  @override
+  TestWindow get window => _window;
+  final TestWindow _window;
 
   /// The value to set [debugPrint] to while tests are running.
   ///
@@ -221,9 +226,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
   /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
   /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
-  Future<T> runAsync<T>(
-    Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
@@ -266,8 +270,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.window.devicePixelRatio;
-    final Size size = _surfaceSize ?? ui.window.physicalSize / devicePixelRatio;
+    final double devicePixelRatio = window.devicePixelRatio;
+    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -671,8 +675,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
+    window.onBeginFrame = null;
+    window.onDrawFrame = null;
   }
 
   FakeAsync _currentFakeAsync; // set in runTest; cleared in postTest
@@ -725,9 +729,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(
-    Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
     assert(() {
@@ -1154,7 +1157,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-      ui.window.scheduleFrame();
+      window.scheduleFrame();
     }
   }
 
@@ -1164,6 +1167,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
+      window: window,
     );
     renderView.scheduleInitialFrame();
   }
@@ -1233,9 +1237,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(
-    Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+  Future<T> runAsync<T>(Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
       if (!_runningAsyncTasks)
@@ -1298,7 +1301,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return TestViewConfiguration(size: _surfaceSize ?? _kDefaultTestViewportSize);
+    return TestViewConfiguration(
+      size: _surfaceSize ?? _kDefaultTestViewportSize,
+      window: window,
+    );
   }
 
   @override
@@ -1322,15 +1328,18 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
-  TestViewConfiguration({ Size size = _kDefaultTestViewportSize })
-    : _paintMatrix = _getMatrix(size, ui.window.devicePixelRatio),
-      _hitTestMatrix = _getMatrix(size, 1.0),
+  TestViewConfiguration({
+    Size size = _kDefaultTestViewportSize,
+    ui.Window window,
+  })
+    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
+      _hitTestMatrix = _getMatrix(size, 1.0, window),
       super(size: size);
 
-  static Matrix4 _getMatrix(Size size, double devicePixelRatio) {
-    final double inverseRatio = devicePixelRatio / ui.window.devicePixelRatio;
-    final double actualWidth = ui.window.physicalSize.width * inverseRatio;
-    final double actualHeight = ui.window.physicalSize.height * inverseRatio;
+  static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.Window window) {
+    final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
+    final double actualWidth = window.physicalSize.width * inverseRatio;
+    final double actualHeight = window.physicalSize.height * inverseRatio;
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;
@@ -1389,7 +1398,8 @@ class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
     ViewConfiguration configuration,
     this.onNeedPaint,
-  }) : super(configuration: configuration);
+    @required ui.Window window,
+  }) : super(configuration: configuration, window: window);
 
   @override
   TestViewConfiguration get configuration => super.configuration;
