@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_runner/build_script_generator.dart';
-
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -24,6 +22,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_runner/build_runner.dart';
+import 'build_runner/build_script_generator.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
