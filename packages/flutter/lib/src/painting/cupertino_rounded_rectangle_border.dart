@@ -380,7 +380,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
 
     // The multiplier used to describe the minimum radius for the dynamic shape
     // round option.
-    const double dynamicShapeMinMultiplier = 0.76435;
+    const double dynamicShapeMinMultiplier = 0.32708;
 
     // The multiplier used to describe the minimum radius for the dynamic radius
     // round option.
@@ -392,8 +392,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
 
     switch(mode) {
       case RoundedRectCornerMode.dynamicShape:
-        final double min = math.min(radius, math.min(rrect.width, rrect.height));
-        limitedRadius = min * dynamicShapeMinMultiplier;
+        limitedRadius = math.min(radius, math.min(rrect.width, rrect.height) * dynamicShapeMinMultiplier);
         if (width > maxMultiplier * radius && height > maxMultiplier * radius)
           return roundedRect1();
         else if (width > maxMultiplier * radius)
@@ -412,12 +411,12 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
         // roundness. As the edge length approaches 200, the limitedRadius
         // approaches ~3, the radius value where the resulting shape is
         // perfectly concave at any dimension.
-        final double maxMultiplier = ui.lerpDouble(
+        final double multiplier = ui.lerpDouble(
           dynamicRadiusMinMultiplier,
           maxMultiplier,
           min / minRadiusEdgeLength
         );
-        limitedRadius = math.min(radius, min / maxMultiplier);
+        limitedRadius = math.min(radius, min / multiplier);
         return roundedRect1();
     }
     return Path();
@@ -464,6 +463,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
     if (a is CupertinoRoundedRectangleBorder) {
+      assert(a.mode == mode);
       return CupertinoRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
@@ -477,6 +477,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
     if (b is CupertinoRoundedRectangleBorder) {
+      assert(b.mode == mode);
       return CupertinoRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
@@ -491,14 +492,15 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final CupertinoRoundedRectangleBorder typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius;
+    return side == typedOther.side && borderRadius == typedOther.borderRadius &&
+           typedOther.mode == mode;
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius);
+  int get hashCode => hashValues(side, borderRadius, mode);
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '$runtimeType($side, $borderRadius, $mode)';
   }
 }
