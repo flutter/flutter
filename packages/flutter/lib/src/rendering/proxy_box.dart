@@ -2635,11 +2635,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
-    return super.hitTest(result, position: position);
-  }
-
-  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     // The onPointerEnter, onPointerHover, and onPointerExit events are are
