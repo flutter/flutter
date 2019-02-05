@@ -378,11 +378,11 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
     // any dimension.
     const double maxMultiplier = 3.0573;
 
-    // The multipier used to describe the minimum radius for the dynamic shape
+    // The multiplier used to describe the minimum radius for the dynamic shape
     // round option.
     const double dynamicShapeMinMultiplier = 0.76435;
 
-    // The multiplier used to describe the minimum radius for the dyanmic radius
+    // The multiplier used to describe the minimum radius for the dynamic radius
     // round option.
     const double dynamicRadiusMinMultiplier = 2.0;
 
@@ -392,7 +392,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
 
     switch(mode) {
       case RoundedRectCornerMode.dynamicShape:
-        final double min = math.min(radius, math.min(rrect.width, rrect.height);
+        final double min = math.min(radius, math.min(rrect.width, rrect.height));
         limitedRadius = min * dynamicShapeMinMultiplier;
         if (width > maxMultiplier * radius && height > maxMultiplier * radius)
           return roundedRect1();
