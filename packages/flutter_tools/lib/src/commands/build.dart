@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import '../build_info.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
@@ -29,14 +31,26 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
-  bool get skipUnknownArtifacts => false;
-
-  @override
   Future<FlutterCommandResult> runCommand() async => null;
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand() {
     requiresPubspecYaml();
+  }
+
+  @override
+  Future<void> updateCache() async {
+    final BuildInfo buildInfo = getBuildInfo();
+    bool skipUnknown = false;
+    if (buildInfo.mode == null || buildInfo.targetPlatform == null) {
+      skipUnknown = true;
+    }
+    await cache.updateAll(
+      buildMode: buildInfo.mode,
+      targetPlatform: buildInfo.targetPlatform,
+      clobber: false,
+      skipUnknown: skipUnknown,
+    );
   }
 }

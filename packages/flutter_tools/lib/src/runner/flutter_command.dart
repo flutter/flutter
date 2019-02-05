@@ -532,8 +532,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  /// Whether to defensively download artifcts when either targetPlatform or buildMode are unknown.
-  bool get skipUnknownArtifacts => true;
+  /// A hook called to populate the cache with a particular target platform
+  /// or build mode.
+  ///
+  /// If a command requires specific artifacts, it is it's responsibility to
+  /// request them here.
+  Future<void> updateCache() async {
+    // Only download the minimum set of binaries.
+    await cache.updateAll(
+      clobber: false,
+      skipUnknown: true,
+    );
+  }
 
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
@@ -548,13 +558,7 @@ abstract class FlutterCommand extends Command<void> {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
-      final BuildInfo buildInfo = getBuildInfo();
-      await cache.updateAll(
-        buildMode: buildInfo.mode,
-        targetPlatform: buildInfo.targetPlatform,
-        skipUnknown: skipUnknownArtifacts,
-        clobber: false,
-      );
+      await updateCache();
     }
 
     if (shouldRunPub) {

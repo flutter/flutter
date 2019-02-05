@@ -61,9 +61,6 @@ abstract class RunCommandBase extends FlutterCommand {
 
   bool get traceStartup => argResults['trace-startup'];
   String get route => argResults['route'];
-
-  @override
-  bool get skipUnknownArtifacts => false;
 }
 
 class RunCommand extends RunCommandBase {
@@ -260,6 +257,36 @@ class RunCommand extends RunCommandBase {
         traceSystrace: argResults['trace-systrace'],
         observatoryPort: observatoryPort,
       );
+    }
+  }
+
+  @override
+  Future<void> updateCache() async {
+    final BuildInfo buildInfo = getBuildInfo();
+    final BuildMode buildMode = buildInfo.mode ?? BuildMode.debug;
+    final List<TargetPlatform> targetPlatforms = <TargetPlatform>[];
+    if (buildInfo.targetPlatform != null) {
+      targetPlatforms.add(buildInfo.targetPlatform);
+    }
+    await for (Device device in deviceManager.getAllConnectedDevices()) {
+      targetPlatforms.add(await device.targetPlatform);
+    }
+    if (targetPlatforms.isEmpty) {
+      await cache.updateAll(
+        buildMode: buildMode,
+        targetPlatform: buildInfo.targetPlatform,
+        clobber: false,
+        skipUnknown: false,
+      );
+    } else {
+      for (TargetPlatform targetPlatform in targetPlatforms) {
+        await cache.updateAll(
+          buildMode: buildMode,
+          targetPlatform: targetPlatform,
+          clobber: false,
+          skipUnknown: true,
+        );
+      }
     }
   }
 

@@ -302,6 +302,9 @@ abstract class CachedArtifact {
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
     for (File f in _downloadedFiles) {
+      if (!f.existsSync()) {
+        continue;
+      }
       f.deleteSync();
       for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
@@ -440,18 +443,12 @@ class FlutterEngine extends CachedArtifact {
       if (hostPlatform != null && engineBinary.hostPlatform != null && engineBinary.hostPlatform != hostPlatform) {
         continue;
       }
-      if (engineBinary.skipChecks) {
-        yield engineBinary;
-      } else if (engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
-        // Certain binaries have no restrictions and should always be included.
-        yield engineBinary;
-      } else if (engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform) {
-        yield engineBinary;
-      } else if (!skipUnknown && targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode) {
-        yield engineBinary;
-      } else if (!skipUnknown && buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform) {
-        yield engineBinary;
-      } else if (!skipUnknown && buildMode == null && targetPlatform == null) {
+      if (engineBinary.skipChecks
+        || engineBinary.buildMode == null && engineBinary.targetPlatform == null // match if artifact has no restrictions.
+        || engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform // match is artifact exactly matches requiremnets.
+        || skipUnknown && buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform // match if target platform matches but build mode is null
+        || skipUnknown && targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode // match is build mode matches but target platform is unknown)
+        || !skipUnknown && buildMode == null && targetPlatform == null) { // match if neither are provided but skipUnknown flag is provided.
         yield engineBinary;
       }
     }
@@ -464,6 +461,7 @@ class FlutterEngine extends CachedArtifact {
     ),
   ];
 
+  /// This lives separately since we only download it when includeAllPlatforms is true.
   List<RawArtifact> get _dartSdks => const <RawArtifact>[
     RawArtifact(
       name: 'darwin-x64',
@@ -480,6 +478,25 @@ class FlutterEngine extends CachedArtifact {
   ];
 
   /// A set of all possible artifacts to download.
+  ///
+  /// Adding a new artifact:
+  ///
+  /// To ensure that we do not waste a user's time/data/storage, the flutter
+  /// tool should only binaries when they are required. These can be requested
+  /// in [FlutterCommand.updateCache].
+  ///
+  /// An artifact should have the following features to prevent unecessary download:
+  ///
+  ///   * `hostPlatform` should be one of `TargetPlatform.linux_x64`,
+  ///   `TargetPlatform.darwin_x64`, or `TargetPlatfrom.windows_x64`. In the
+  ///   case where there is no restriction it can be left as null.
+  ///   * `buildMode` should be one of `BuildMode.debug`, `BuildMode.profile`,
+  ///   `BuildMode.release`, `BuildMode.dynamicRelease`, or 
+  ///   `BuildMode.dynamicProfile`. In the case where it is required regardless
+  ///   of buildMode, it can be left null.
+  ///   * `targetPlatform` should be one of the supported target platforms.
+  ///   * If, despite the restrictions above the artifact should still be
+  ///   downloaded, `skipChecks` can be set to true.
   List<RawArtifact> get _binaries => const <RawArtifact>[
     RawArtifact(
       name: 'common',
@@ -1008,4 +1025,7 @@ class RawArtifact {
   Uri artifactRemoteLocation(String baseUrl) {
     return Uri.parse('$baseUrl$fileName');
   }
+
+  @override
+  String toString() => name;
 }
