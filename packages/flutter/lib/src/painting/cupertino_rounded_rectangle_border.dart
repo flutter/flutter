@@ -46,7 +46,7 @@ enum RoundedRectCornerMode {
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     shape: CupertinoRoundedRectangleBorder(
-///       borderRadius: BorderRadius.circular(28.0),
+///       borderRadius: 28.0,
 ///     ),
 ///   );
 /// }
