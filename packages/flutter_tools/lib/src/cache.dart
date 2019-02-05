@@ -1028,5 +1028,5 @@ class RawArtifact {
   }
 
   @override
-  String toString() => name;
+  String toString() => '$name/$fileName';
 }
