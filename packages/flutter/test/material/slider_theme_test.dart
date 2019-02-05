@@ -444,7 +444,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The slider track height can be overriden', (WidgetTester tester) async {
+  testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
@@ -472,7 +472,7 @@ void main() {
     );
   });
 
-  testWidgets('The default slider thumb shape sizes can be overriden', (WidgetTester tester) async {
+  testWidgets('The default slider thumb shape sizes can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
         thumbShape: const RoundSliderThumbShape(
           enabledThumbRadius: 7,
@@ -524,7 +524,7 @@ void main() {
   });
 
 
-  testWidgets('The default slider tick mark shape size cen be overriden', (WidgetTester tester) async {
+  testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       tickMarkShape: const RoundSliderTickMarkShape(
         tickMarkRadius: 5
@@ -559,7 +559,7 @@ void main() {
     );
   });
 
-  testWidgets('The default slider overlay shape size cen be overriden', (WidgetTester tester) async {
+  testWidgets('The default slider overlay shape size can be overridden', (WidgetTester tester) async {
     const double uniqueOverlayRadius = 23;
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       overlayShape: const RoundSliderOverlayShape(
