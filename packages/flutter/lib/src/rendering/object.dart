@@ -675,6 +675,17 @@ class _ElevationData {
   final Path path;
   final RenderObject object;
   final int pathContours;
+
+  bool objectIsNotDescendantOf(RenderObject maybeAncestor) {
+    AbstractNode ancestor = object.parent;
+    while (ancestor != null) {
+      if (ancestor == maybeAncestor) {
+        return false;
+      }
+      ancestor = ancestor.parent;
+    }
+    return true;
+  }
 }
 
 /// The pipeline owner manages the rendering pipeline.
@@ -946,7 +957,13 @@ class PipelineOwner {
         .take(_maxElevationObjectsToCheck)
         .where((_ElevationData elevationData) {
           return elevation < elevationData.elevation &&
-                 area.overlaps(elevationData.area);
+                 // optimization: do quick check to see if we should bother
+                 // doing the more expensive path comparison
+                 area.overlaps(elevationData.area) &&
+                 // ignore PhysicalModels that are direct descendants of this
+                 // one, in case a parent is getting checked after its children
+                 // TODO(dnfield): verify that this is valid in Fuchsia.
+                 elevationData.objectIsNotDescendantOf(object);
         });
     for (final _ElevationData elevationData in elevationsToCheck) {
       final Path difference = Path.combine(
@@ -960,10 +977,10 @@ class PipelineOwner {
       if (contourCount != newPathContours + elevationData.pathContours) {
         object._debugReportException(
           'paint',
-          'An attempt was made to paint a $object with an '
-          'elevation of $elevation after a ${elevationData.object} with an '
-          'elevation of ${elevationData.elevation} in the same area of the '
-          'screen.\n\n'
+          'An attempt was made to paint a $object with a total '
+          'elevation of $elevation after a ${elevationData.object} with a '
+          'total elevation of ${elevationData.elevation} in the same area of '
+          'the screen.\n\n'
           'This can happen when placing multiple children that have '
           'elevations in a Stack or CustomMultiChildLayout widget and '
           'painting them out of order with respect to their elevations.\n\n'

@@ -1625,6 +1625,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
           // transitions, and is probably not an entirely valid way of checking
           // this.  Need more input to determine the right way to handle
           // transitions involving elevations.
+          // TODO(dnfield): Verify correct behavior for route transitions in
+          // Fucshsia.
           break;
         }
         ancestor = ancestor.parent;

@@ -53,6 +53,26 @@ void main() {
       expect(count, expectedErrorCount);
     }
 
+    testWidgets('entirely overlapping, direct child', (WidgetTester tester) async {
+      final List<Widget> children = <Widget>[
+        Container(
+          width: 300,
+          height: 300,
+          child: const Material(
+            elevation: 1.0,
+            color: Colors.green,
+            child: Material(
+              elevation: 2.0,
+              color: Colors.red,
+            )
+          ),
+        ),
+      ];
+
+      await _testStackChildren(tester, children, 0);
+      expect(find.byType(Material), findsNWidgets(2));
+    });
+
     testWidgets('entirely overlapping, correct painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Container(
