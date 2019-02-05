@@ -1516,7 +1516,7 @@ class RenderEditable extends RenderBox {
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_selection != null && !_floatingCursorOn) {
-      if (_selection.isCollapsed && cursorColor != null && _hasFocus) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
         _paintCaret(context.canvas, effectiveOffset, _selection.extent);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
