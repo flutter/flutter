@@ -83,9 +83,6 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await buildRunnerFactory.create().build(
-      aot: false, extraFrontEndOptions: <String>[], linkPlatformKernelIn: null, mainPath: null, targetProductVm: null, trackWidgetCreation: null,
-    );
     if (argResults['watch']) {
       await AnalyzeContinuously(
         argResults,
