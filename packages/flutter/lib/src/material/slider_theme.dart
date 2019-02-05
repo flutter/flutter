@@ -625,7 +625,7 @@ class SliderThemeData extends Diagnosticable {
 ///
 /// See also:
 ///
-///  * [RectangularSliderTrackShape], which is the the default track shape.
+///  * [RectangularSliderTrackShape], which is the default track shape.
 ///  * [SliderTickMarkShape], which is the default tick mark shape.
 ///  * [SliderComponentShape], which is the base class for custom a component
 ///    shape.
