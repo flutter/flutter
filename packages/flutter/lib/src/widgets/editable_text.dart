@@ -873,10 +873,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   void requestKeyboard() {
-    if (_hasFocus)
+    if (_hasFocus) {
       _openInputConnection();
-    else
+    } else {
+      final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
+      for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
+        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
       FocusScope.of(context).requestFocus(widget.focusNode);
+    }
   }
 
   void _hideSelectionOverlayIfNeeded() {
