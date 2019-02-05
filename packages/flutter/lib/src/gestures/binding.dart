@@ -15,6 +15,8 @@ import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
 
+bool ready = false;
+
 /// A binding for the gesture subsystem.
 ///
 /// ## Lifecycle of pointer events and the gesture arena
@@ -165,6 +167,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
     assert(!locked);
+    if (ready) {
+      print(hitTestResult);
+    }
     // No hit test information implies that this is a hover or pointer
     // add/remove event.
     if (hitTestResult == null) {
