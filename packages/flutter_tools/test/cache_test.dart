@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
@@ -132,6 +133,77 @@ void main() {
         );
       }
     });
+
+    final MockPlatform macos = MockPlatform();
+    final MockPlatform windows = MockPlatform();
+    final MockPlatform linux = MockPlatform();
+    when(macos.isMacOS).thenReturn(true);
+    when(macos.isLinux).thenReturn(false);
+    when(macos.isWindows).thenReturn(false);
+    when(windows.isMacOS).thenReturn(false);
+    when(windows.isLinux).thenReturn(false);
+    when(windows.isWindows).thenReturn(true);
+    when(linux.isMacOS).thenReturn(false);
+    when(linux.isLinux).thenReturn(true);
+    when(linux.isWindows).thenReturn(false);
+
+    testUsingContext('Engine cache filtering - macOS', () {
+      final FlutterEngine flutterEngine = FlutterEngine(MockCache());
+      expect(flutterEngine.getBinaryDirs(
+        buildMode: BuildMode.release,
+        targetPlatform: TargetPlatform.android_arm,
+        skipUnknown: true,
+      ), unorderedEquals(const <RawArtifact>[
+        RawArtifact(
+          name: 'common',
+          fileName: 'flutter_patched_sdk.zip',
+        ),
+        RawArtifact(
+          name: 'android-arm-release',
+          fileName: 'android-arm-release/artifacts.zip',
+          buildMode: BuildMode.release,
+          targetPlatform: TargetPlatform.android_arm,
+        ),
+        RawArtifact(
+          name: 'android-arm-profile',
+          fileName: 'android-arm-profile/artifacts.zip',
+          buildMode: BuildMode.profile,
+          targetPlatform: TargetPlatform.android_arm,
+          skipChecks: true,
+        ),
+        RawArtifact(
+          name: 'darwin-x64',
+          fileName: 'darwin-x64/artifacts.zip',
+          hostPlatform: TargetPlatform.darwin_x64,
+        ),
+      ]));
+    }, overrides: <Type, Generator>{
+      Platform: () => macos,
+    });
+
+    testUsingContext('Engine cache filtering - Windows', () {
+      final FlutterEngine flutterEngine = FlutterEngine(MockCache());
+      expect(flutterEngine.getBinaryDirs(
+        buildMode: BuildMode.release,
+        targetPlatform: TargetPlatform.android_arm,
+        skipUnknown: true,
+      ), const <RawArtifact>[
+      ]);
+    }, overrides: <Type, Generator>{
+      Platform: () => windows,
+    });
+
+    testUsingContext('Engine cache filtering - linux', () {
+      final FlutterEngine flutterEngine = FlutterEngine(MockCache());
+      expect(flutterEngine.getBinaryDirs(
+        buildMode: BuildMode.release,
+        targetPlatform: TargetPlatform.android_arm,
+        skipUnknown: true,
+      ), const <RawArtifact>[
+      ]);
+    }, overrides: <Type, Generator>{
+      Platform: () => linux,
+    });
   });
 
   testUsingContext('flattenNameSubdirs', () {
@@ -163,3 +235,4 @@ class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
+class MockPlatform extends Mock implements Platform {}

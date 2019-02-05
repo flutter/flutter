@@ -406,7 +406,8 @@ class FlutterEngine extends CachedArtifact {
   FlutterEngine(Cache cache) : super('engine', cache);
 
   // Return a list of (cache directory path, download URL path) tuples.
-  List<RawArtifact> _getBinaryDirs({
+  @visibleForTesting
+  List<RawArtifact> getBinaryDirs({
     @required BuildMode buildMode,
     @required TargetPlatform targetPlatform,
     @required bool skipUnknown,
@@ -803,7 +804,7 @@ class FlutterEngine extends CachedArtifact {
         return false;
       }
     }
-    for (RawArtifact toolsArtifact in _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
+    for (RawArtifact toolsArtifact in getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
       final Directory dir = toolsArtifact.artifactLocation(location);
       if (!dir.existsSync()) {
         return false;
@@ -835,7 +836,7 @@ class FlutterEngine extends CachedArtifact {
       await _downloadZipArchive('Downloading package ${rawArtifact.name}...', uri, packageDirectory);
     }
 
-    final List<RawArtifact> rawArtifacts = _getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+    final List<RawArtifact> rawArtifacts = getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
     for (RawArtifact rawArtifact in rawArtifacts) {
       final Directory artifactDirectory = rawArtifact.artifactLocation(location);
       if (artifactDirectory.existsSync() && !clobber) {
@@ -882,7 +883,7 @@ class FlutterEngine extends CachedArtifact {
           return false;
         }
       }
-      final List<RawArtifact> rawArtifacts = _getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false);
+      final List<RawArtifact> rawArtifacts = getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false);
       for (RawArtifact rawArtifact in rawArtifacts) {
         final Uri uri = Uri.parse('$url${rawArtifact.fileName}');
         final bool exists = await _doesRemoteExist('Checking ${rawArtifact.name} tools are available...', uri);
