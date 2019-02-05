@@ -687,6 +687,7 @@ class RenderEditable extends RenderBox {
   }
 
   // TODO(justinmc): document
+  /// Docs coming soon!
   int get minLines => _minLines;
   int _minLines;
   /// The value must be greater than zero and cannot be null.
@@ -1173,27 +1174,25 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    /*
-    if (maxLines != null)
-      return preferredLineHeight * maxLines;
-      */
     // If needed, set the height based on minLines and/or maxLines
     if (expands) {
       if (maxLines != null) {
+        _layoutText(width);
         if (_textPainter.height > preferredLineHeight * maxLines) {
           return preferredLineHeight * maxLines;
         }
       }
       if (minLines != null) {
+        _layoutText(width);
         if(_textPainter.height < preferredLineHeight * minLines) {
           return preferredLineHeight * minLines;
         }
       }
     } else {
       if (maxLines != null) {
-        // TODO(justinmc): What if needs to be smaller than this due to parent?
         return preferredLineHeight * maxLines;
       }
+      _layoutText(width);
       if (minLines > 1 && _textPainter.height < preferredLineHeight * minLines) {
         return preferredLineHeight * minLines;
       }

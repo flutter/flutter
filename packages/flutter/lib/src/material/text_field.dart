@@ -834,7 +834,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
-            // TODO(justinmc) is this right?
+            // TODO(justinmc): is this right?
             expands: widget.expands && widget.maxLines == null,
             child: child,
           );

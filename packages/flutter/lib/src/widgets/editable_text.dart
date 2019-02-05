@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/widgets.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -396,7 +395,7 @@ class EditableText extends StatefulWidget {
   /// widget.
   ///
   /// If true, TextField will increase its height as content is entered by the
-  /// user. If [maxLines] is set, it will stop expanding at that number of 
+  /// user. If [maxLines] is set, it will stop expanding at that number of
   /// lines.
 
   /// If set to true and wrapped in an [Expanded] widget, the TextField will
