@@ -53,7 +53,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * <https://material.google.com/components/tabs.html>
+///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab. At least one of [text], [icon],
   /// and [child] must be non-null. The [text] and [child] arguments must not be
@@ -95,7 +95,7 @@ class Tab extends StatelessWidget {
     if (icon == null) {
       height = _kTabHeight;
       label = _buildLabelText();
-    } else if (text == null) {
+    } else if (text == null && child == null) {
       height = _kTabHeight;
       label = icon;
     } else {
@@ -730,7 +730,10 @@ class _TabBarState extends State<TabBar> {
     // When that happens, automatic transitions of the theme will likely look
     // ugly as the indicator color suddenly snaps to white at one end, but it's
     // not clear how to avoid that any further.
-    if (color.value == Material.of(context).color.value)
+    //
+    // The material's color might be null (if it's a transparency). In that case
+    // there's no good way for us to find out what the color is so we don't.
+    if (color.value == Material.of(context).color?.value)
       color = Colors.white;
 
     return UnderlineTabIndicator(

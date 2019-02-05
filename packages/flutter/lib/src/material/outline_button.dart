@@ -48,7 +48,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class OutlineButton extends MaterialButton {
   /// Create a filled button.
   ///
@@ -343,10 +343,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color _getFillColor() {
-    final bool themeIsDark = widget.brightness == Brightness.dark;
-    final Color color = widget.color ?? (themeIsDark
-      ? const Color(0x00000000)
-      : const Color(0x00FFFFFF));
+    final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),

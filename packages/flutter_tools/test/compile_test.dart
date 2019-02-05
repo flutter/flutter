@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -274,13 +275,27 @@ example:org-dartlang-app:///lib/
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
+      // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generator, mockFrontendServerStdIn, '');
+      await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
+
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+
+      await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
+
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+          'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
+          '^reject\\n\$');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
         '\nCompiler message:\nline0\nline1\n'
+        '\nCompiler message:\nline1\nline2\n'
         '\nCompiler message:\nline1\nline2\n'
       ));
     }, overrides: <Type, Generator>{
@@ -431,23 +446,26 @@ example:org-dartlang-app:///lib/
           ]));
 
       // The test manages timing via completers.
-      generator.recompile( // ignore: unawaited_futures
-        '/path/to/main.dart',
-        null, /* invalidatedFiles */
-        outputPath: '/build/',
-      ).then((CompilerOutput outputCompile) {
-        expect(logger.errorText,
-            equals('\nCompiler message:\nline1\nline2\n'));
-        expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
+      unawaited(
+        generator.recompile(
+          '/path/to/main.dart',
+          null, /* invalidatedFiles */
+          outputPath: '/build/',
+        ).then((CompilerOutput outputCompile) {
+          expect(logger.errorText,
+              equals('\nCompiler message:\nline1\nline2\n'));
+          expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
-        compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
-            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
-        )));
-      });
+          compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
+              'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+          )));
+        }),
+      );
 
       // The test manages timing via completers.
       final Completer<bool> lastExpressionCompleted = Completer<bool>();
-      generator.compileExpression('0+1', null, null, null, null, false).then( // ignore: unawaited_futures
+      unawaited(
+        generator.compileExpression('0+1', null, null, null, null, false).then(
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,
@@ -456,17 +474,22 @@ example:org-dartlang-app:///lib/
             compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
                 'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
             )));
-          });
+          },
+        ),
+      );
 
       // The test manages timing via completers.
-      generator.compileExpression('1+1', null, null, null, null, false).then( // ignore: unawaited_futures
+      unawaited(
+        generator.compileExpression('1+1', null, null, null, null, false).then(
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,
                 equals('/path/to/main.dart.dill.incremental'));
             expect(outputExpression.errorCount, 0);
             lastExpressionCompleted.complete(true);
-          });
+          },
+        )
+      );
 
       compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
           'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
@@ -501,6 +524,34 @@ Future<void> _recompile(StreamController<List<int>> streamController,
   expect(commands, matches(re));
   final Match match = re.firstMatch(commands);
   expect(match[1] == match[2], isTrue);
+  mockFrontendServerStdIn._stdInWrites.clear();
+}
+
+Future<void> _accept(StreamController<List<int>> streamController,
+    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
+    String expected) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  generator.accept();
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
+  mockFrontendServerStdIn._stdInWrites.clear();
+}
+
+Future<void> _reject(StreamController<List<int>> streamController,
+    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
+    String mockCompilerOutput, String expected) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  scheduleMicrotask(() {
+    streamController.add(utf8.encode(mockCompilerOutput));
+  });
+  final CompilerOutput output = await generator.reject();
+  expect(output, isNull);
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 

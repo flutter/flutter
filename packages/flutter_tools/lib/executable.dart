@@ -33,6 +33,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
@@ -77,6 +78,7 @@ Future<void> main(List<String> args) async {
     TraceCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
+    VersionCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp);
