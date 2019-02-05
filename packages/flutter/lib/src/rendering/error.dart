@@ -51,7 +51,9 @@ class RenderErrorBox extends RenderBox {
         );
         _paragraph = builder.build();
       }
-    } catch (e) { } // ignore: empty_catches
+    } catch (e) {
+      // Intentionally left empty.
+    }
   }
 
   /// The message to attempt to display at paint time.
@@ -93,7 +95,7 @@ class RenderErrorBox extends RenderBox {
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = ui.ParagraphStyle(
-    lineHeight: 1.0,
+    height: 1.0,
   );
 
   @override
@@ -114,6 +116,8 @@ class RenderErrorBox extends RenderBox {
 
         context.canvas.drawParagraph(_paragraph, offset);
       }
-    } catch (e) { } // ignore: empty_catches
+    } catch (e) {
+      // Intentionally left empty.
+    }
   }
 }

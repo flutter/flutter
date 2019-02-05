@@ -163,7 +163,7 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
-        // Ignore: return null below.
+        // Ignored, return null below.
       }
     }
     return _xcodeSelectPath;
@@ -480,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }

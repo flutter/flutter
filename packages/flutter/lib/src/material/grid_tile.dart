@@ -15,7 +15,7 @@ import 'package:flutter/widgets.dart';
 ///  * [GridView], which is a scrollable grid of tiles.
 ///  * [GridTileBar], which is typically used in either the [header] or
 ///    [footer].
-///  * <https://material.google.com/components/grid-lists.html>
+///  * <https://material.io/design/components/image-lists.html>
 class GridTile extends StatelessWidget {
   /// Creates a grid tile.
   ///

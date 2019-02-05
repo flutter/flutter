@@ -87,14 +87,14 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
     this.selectedColor,
     this.borderColor,
     this.pressedColor,
-  })  : assert(children != null),
-        assert(children.length >= 2),
-        assert(onValueChanged != null),
-        assert(
-          groupValue == null || children.keys.any((T child) => child == groupValue),
-          'The groupValue must be either null or one of the keys in the children map.',
-        ),
-        super(key: key);
+  }) : assert(children != null),
+       assert(children.length >= 2),
+       assert(onValueChanged != null),
+       assert(
+         groupValue == null || children.keys.any((T child) => child == groupValue),
+         'The groupValue must be either null or one of the keys in the children map.',
+       ),
+       super(key: key);
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -472,12 +472,12 @@ class _RenderSegmentedControl<T> extends RenderBox
     @required TextDirection textDirection,
     @required List<Color> backgroundColors,
     @required Color borderColor,
-  })  : assert(textDirection != null),
-        _textDirection = textDirection,
-        _selectedIndex = selectedIndex,
-        _pressedIndex = pressedIndex,
-        _backgroundColors = backgroundColors,
-        _borderColor = borderColor {
+  }) : assert(textDirection != null),
+       _textDirection = textDirection,
+       _selectedIndex = selectedIndex,
+       _pressedIndex = pressedIndex,
+       _backgroundColors = backgroundColors,
+       _borderColor = borderColor {
     addAll(children);
   }
 

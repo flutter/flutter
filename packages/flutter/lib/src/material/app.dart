@@ -351,7 +351,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://material.google.com/layout/metrics-keylines.html>
+  ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
   @override

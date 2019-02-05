@@ -187,9 +187,7 @@ abstract class Domain {
   String toString() => name;
 
   void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
-    // Remove 'new' once Google catches up to dev4.0 Dart SDK.
-    //ignore: unnecessary_new
-    new Future<dynamic>.sync(() {
+    Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
@@ -423,23 +421,24 @@ class AppDomain extends Domain {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
-      connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) { // ignore: unawaited_futures
-        final Map<String, dynamic> params = <String, dynamic>{
-          'port': info.httpUri.port,
-          'wsUri': info.wsUri.toString(),
-        };
-        if (info.baseUri != null)
-          params['baseUri'] = info.baseUri;
-        _sendAppEvent(app, 'debugPort', params);
-      });
+      unawaited(connectionInfoCompleter.future.then<void>(
+        (DebugConnectionInfo info) {
+          final Map<String, dynamic> params = <String, dynamic>{
+            'port': info.httpUri.port,
+            'wsUri': info.wsUri.toString(),
+          };
+          if (info.baseUri != null)
+            params['baseUri'] = info.baseUri;
+          _sendAppEvent(app, 'debugPort', params);
+        },
+      ));
     }
     final Completer<void> appStartedCompleter = Completer<void>();
     // We don't want to wait for this future to complete, and callbacks won't fail,
     // as it just writes to stdout.
-    appStartedCompleter.future // ignore: unawaited_futures
-      .then<void>((void value) {
-        _sendAppEvent(app, 'started');
-      });
+    unawaited(appStartedCompleter.future.then<void>((void value) {
+      _sendAppEvent(app, 'started');
+    }));
 
     await app._runInZone<void>(this, () async {
       try {
@@ -784,7 +783,7 @@ class NotifyingLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
@@ -961,8 +960,8 @@ class _AppRunLogger extends Logger {
     String message, {
     @required Duration timeout,
     String progressId,
-    bool multilineOutput,
-    int progressIndicatorPadding = 52,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(timeout != null);
     final int id = _nextProgressId++;

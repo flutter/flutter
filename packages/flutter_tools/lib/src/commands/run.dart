@@ -339,6 +339,12 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
+    List<String> expFlags;
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
+      expFlags = argResults[FlutterOptions.kEnableExperiment];
+    }
+
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -347,6 +353,7 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        experimentalFlags: expFlags,
       );
     }).toList();
 
@@ -391,9 +398,9 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
+    unawaited(appStartedTimeRecorder.future.then<void>(
       (_) { appStartedTime = systemClock.now(); }
-    );
+    ));
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,

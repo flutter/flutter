@@ -53,7 +53,7 @@ class SyntaxHighlighterStyle {
   final TextStyle constantStyle;
 }
 
-abstract class SyntaxHighlighter { // ignore: one_member_abstracts
+abstract class SyntaxHighlighter {
   TextSpan format(String src);
 }
 

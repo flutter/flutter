@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
@@ -104,10 +105,10 @@ abstract class FlutterTestDriver {
 
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
-    _process.exitCode.then((int code) { // ignore: unawaited_futures
+    unawaited(_process.exitCode.then((int code) {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
-    });
+    }));
     transformToLines(_process.stdout).listen((String line) => _stdout.add(line));
     transformToLines(_process.stderr).listen((String line) => _stderr.add(line));
 
@@ -590,8 +591,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix}):
-    super(_projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix})
+    : super(_projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',

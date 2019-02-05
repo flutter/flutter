@@ -20,9 +20,20 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
-KernelCompiler get kernelCompiler => context[KernelCompiler];
+KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
 
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
+
+/// Injectable factory to allow async construction of a [KernelCompiler].
+class KernelCompilerFactory {
+  const KernelCompilerFactory();
+
+  /// Return the correct [KernelCompiler] instance for the given project
+  /// configuration.
+  FutureOr<KernelCompiler> create() async {
+    return const KernelCompiler();
+  }
+}
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -78,8 +89,7 @@ class StdoutHandler {
 
   void handler(String message) {
     const String kResultPrefix = 'result ';
-    if (boundaryKey == null) {
-      if (message.startsWith(kResultPrefix))
+    if (boundaryKey == null && message.startsWith(kResultPrefix)) {
         boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
@@ -112,36 +122,45 @@ class StdoutHandler {
 
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath) {
+  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
 
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
+      if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
+        _packageName = packageName;
+        _uriPrefixes = fileSystemRoots
+          .map((String name) => Uri.file('$name/lib/', windows: platform.isWindows).toString())
+          .toList();
+        return;
+      }
       if (scriptUri.startsWith(prefix)) {
         _packageName = packageName;
-        _uriPrefix = prefix;
+        _uriPrefixes = <String>[prefix];
         return;
       }
     }
   }
 
   String _packageName;
-  String _uriPrefix;
+  List<String> _uriPrefixes;
 
   Uri map(String scriptPath) {
-    if (_packageName == null)
+    if (_packageName == null) {
       return null;
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    if (scriptUri.startsWith(_uriPrefix)) {
-      return Uri.parse('package:$_packageName/${scriptUri.substring(_uriPrefix.length)}');
     }
-
+    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+    for (String uriPrefix in _uriPrefixes) {
+      if (scriptUri.startsWith(uriPrefix)) {
+        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
+      }
+    }
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath) {
-    return PackageUriMapper(scriptPath, packagesPath).map(scriptPath);
+  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
+    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
 }
 
@@ -223,7 +242,7 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath);
+      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
@@ -256,7 +275,7 @@ class KernelCompiler {
 
     server.stderr
       .transform<String>(utf8.decoder)
-      .listen((String message) { printError(message); });
+      .listen(printError);
     server.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -286,9 +305,13 @@ abstract class _CompilationRequest {
 }
 
 class _RecompileRequest extends _CompilationRequest {
-  _RecompileRequest(Completer<CompilerOutput> completer, this.mainPath,
-      this.invalidatedFiles, this.outputPath, this.packagesFilePath) :
-      super(completer);
+  _RecompileRequest(
+    Completer<CompilerOutput> completer,
+    this.mainPath,
+    this.invalidatedFiles,
+    this.outputPath,
+    this.packagesFilePath,
+  ) : super(completer);
 
   String mainPath;
   List<String> invalidatedFiles;
@@ -301,9 +324,15 @@ class _RecompileRequest extends _CompilationRequest {
 }
 
 class _CompileExpressionRequest extends _CompilationRequest {
-  _CompileExpressionRequest(Completer<CompilerOutput> completer, this.expression, this.definitions,
-      this.typeDefinitions, this.libraryUri, this.klass, this.isStatic) :
-      super(completer);
+  _CompileExpressionRequest(
+    Completer<CompilerOutput> completer,
+    this.expression,
+    this.definitions,
+    this.typeDefinitions,
+    this.libraryUri,
+    this.klass,
+    this.isStatic
+  ) : super(completer);
 
   String expression;
   List<String> definitions;
@@ -315,6 +344,14 @@ class _CompileExpressionRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
       compiler._compileExpression(this);
+}
+
+class _RejectRequest extends _CompilationRequest {
+  _RejectRequest(Completer<CompilerOutput> completer): super(completer);
+
+  @override
+  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+      compiler._reject();
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -331,7 +368,8 @@ class ResidentCompiler {
     CompilerMessageConsumer compilerMessageConsumer = printError,
     String initializeFromDill,
     TargetModel targetModel = TargetModel.flutter,
-    bool unsafePackageSerialization
+    bool unsafePackageSerialization,
+    List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
@@ -341,7 +379,8 @@ class ResidentCompiler {
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
-       _unsafePackageSerialization = unsafePackageSerialization {
+       _unsafePackageSerialization = unsafePackageSerialization,
+       _experimentalFlags = experimentalFlags {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -357,6 +396,8 @@ class ResidentCompiler {
   final StdoutHandler _stdoutHandler;
   String _initializeFromDill;
   bool _unsafePackageSerialization;
+  final List<String> _experimentalFlags;
+  bool _compileRequestNeedsConfirmation = false;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -387,15 +428,22 @@ class ResidentCompiler {
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
-    if (request.packagesFilePath != null) {
-      packageUriMapper = PackageUriMapper(request.mainPath, request.packagesFilePath);
+    if (request.packagesFilePath != null || _packagesPath != null) {
+      packageUriMapper = PackageUriMapper(
+        request.mainPath,
+        request.packagesFilePath ?? _packagesPath,
+        _fileSystemScheme,
+        _fileSystemRoots,
+      );
     }
+
+    _compileRequestNeedsConfirmation = true;
 
     if (_server == null) {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath, /* packageUriMapper= */ null)
+          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null)
       );
     }
 
@@ -469,6 +517,10 @@ class ResidentCompiler {
     if (_unsafePackageSerialization == true) {
       command.add('--unsafe-package-serialization');
     }
+    if ((_experimentalFlags != null) && _experimentalFlags.isNotEmpty) {
+      final String expFlags = _experimentalFlags.join(',');
+      command.add('--enable-experiment=$expFlags');
+    }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
@@ -535,14 +587,33 @@ class ResidentCompiler {
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
   void accept() {
-    _server.stdin.writeln('accept');
+    if (_compileRequestNeedsConfirmation) {
+      _server.stdin.writeln('accept');
+    }
+    _compileRequestNeedsConfirmation = false;
   }
 
   /// Should be invoked when results of compilation are rejected by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
-  void reject() {
+  Future<CompilerOutput> reject() {
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    _controller.add(_RejectRequest(completer));
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _reject() {
+    if (!_compileRequestNeedsConfirmation) {
+      return Future<CompilerOutput>.value(null);
+    }
+    _stdoutHandler.reset();
     _server.stdin.writeln('reject');
+    _compileRequestNeedsConfirmation = false;
+    return _stdoutHandler.compilerOutput.future;
   }
 
   /// Should be invoked when frontend server compiler should forget what was
