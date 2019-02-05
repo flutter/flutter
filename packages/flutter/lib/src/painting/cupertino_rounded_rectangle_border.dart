@@ -90,6 +90,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
     final double centerY = rrect.center.dy;
     final double originX = centerX - width / 2;
     final double originY = centerY - height / 2;
+    final double radius = math.max(1, borderRadius);
 
     double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
     double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
@@ -329,7 +330,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
             rightMidX(0), centerY)
         ..cubicTo(rightMidX(0), centerY,
             rightMidX(0), centerY,
-            rightMidX(0e), centerY)
+            rightMidX(0), centerY)
         ..lineTo(rightMidX(0), centerY)
         ..cubicTo(rightMidX(0), centerY,
             rightMidX(0), centerY,
@@ -388,7 +389,6 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
     // The edge length at which the corner radius must be at its maximum so as to
     // maintain a the appearance of a completely concave shape.
     const double minRadiusEdgeLength = 200.0;
-    final double radius = math.max(1, borderRadius);
 
     switch(mode) {
       case RoundedRectCornerMode.dynamicShape:
