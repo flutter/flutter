@@ -282,4 +282,81 @@ void main() {
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
   });
+
+  testWidgets('PaginatedDataTable header is null without actions', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+
+    final PaginatedDataTable table = PaginatedDataTable(
+      header: null,
+      source: source,
+      rowsPerPage: 5,
+      // dragStartBehavior: DragStartBehavior.down,
+      availableRowsPerPage: const <int>[ 5 ],
+      onRowsPerPageChanged: (int rowsPerPage) { },
+      columns: const <DataColumn>[
+        DataColumn(label: Text('COL1')),
+        DataColumn(label: Text('COL2')),
+        DataColumn(label: Text('COL3')),
+      ],
+    );
+
+    expect(table.header, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100.0,
+            child: table,
+          ),
+        ),
+      ),
+    );
+
+    final Card dataTableCard = find.byType(Card).evaluate().first.widget;
+    final Column column = dataTableCard.child;
+    // if the header row isn't visible the column contains 2 elements
+    expect(column.children.length, 2);
+  });
+
+  testWidgets('PaginatedDataTable header is null with actions', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+
+    final List<Widget> actions = <Widget>[const Icon(Icons.add)];
+
+    final PaginatedDataTable table = PaginatedDataTable(
+      header: null,
+      source: source,
+      rowsPerPage: 5,
+      actions: actions,
+      // dragStartBehavior: DragStartBehavior.down,
+      availableRowsPerPage: const <int>[ 5 ],
+      onRowsPerPageChanged: (int rowsPerPage) { },
+      columns: const <DataColumn>[
+        DataColumn(label: Text('COL1')),
+        DataColumn(label: Text('COL2')),
+        DataColumn(label: Text('COL3')),
+      ],
+    );
+
+    expect(table.header, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100.0,
+            child: table,
+          ),
+        ),
+      ),
+    );
+
+    final Card dataTableCard = find.byType(Card).evaluate().first.widget;
+    final Column column = dataTableCard.child;
+    // if the header row is visible the column contains 3 elements
+    expect(column.children.length, 3);
+  });
 }
