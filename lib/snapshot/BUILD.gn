@@ -79,18 +79,18 @@ compiled_action("generate_snapshot_bin") {
 template("bin_to_assembly") {
   assert(defined(invoker.deps), "Must define deps")
   assert(defined(invoker.input), "Must define input binary file")
-  assert(defined(invoker.output), "Must define output assembly file")
   assert(defined(invoker.symbol), "Must define symbol name")
   assert(defined(invoker.executable), "Must define boolean executable")
 
   action(target_name) {
     deps = invoker.deps
     script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
+    output = invoker.input + ".S"
     args = [
       "--input",
       rebase_path(invoker.input),
       "--output",
-      rebase_path(invoker.output),
+      rebase_path(output),
       "--symbol_name",
       invoker.symbol,
       "--target_os",
@@ -104,64 +104,116 @@ template("bin_to_assembly") {
       invoker.input,
     ]
     outputs = [
-      invoker.output,
+      output,
     ]
   }
 }
 
-bin_to_assembly("vm_snapshot_data_assembly") {
+# Generates an object file defining a given symbol with the bytes from a
+# binary file. Places the symbol in the read-only data section.
+template("bin_to_coff") {
+  assert(defined(invoker.deps), "Must define deps")
+  assert(defined(invoker.input), "Must define input binary file")
+  assert(defined(invoker.symbol), "Must define symbol name")
+  assert(defined(invoker.executable), "Must define executable")
+
+  action(target_name) {
+    deps = invoker.deps
+    script = "//third_party/dart/runtime/tools/bin_to_coff.py"
+    output = invoker.input + ".o"
+    args = [
+      "--input",
+      rebase_path(invoker.input),
+      "--output",
+      rebase_path(output),
+      "--symbol_name",
+      invoker.symbol,
+    ]
+
+    if (defined(invoker.size_symbol)) {
+      args += [
+        "--size_symbol_name",
+        invoker.size_symbol,
+      ]
+    }
+
+    if (invoker.executable) {
+      args += [ "--executable" ]
+    }
+
+    if (current_cpu == "x64") {
+      args += [ "--64-bit" ]
+    }
+    inputs = [
+      invoker.input,
+    ]
+    outputs = [
+      output,
+    ]
+  }
+}
+
+template("bin_to_linkable") {
+  assert(defined(invoker.deps), "Must define deps")
+  assert(defined(invoker.input), "Must define input binary file")
+  assert(defined(invoker.symbol), "Must define symbol name")
+  target_type = "bin_to_assembly"
+  if (is_win) {
+    target_type = "bin_to_coff"
+  }
+
+  target(target_type, target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+
+bin_to_linkable("vm_snapshot_data_linkable") {
   deps = [
     ":generate_snapshot_bin",
   ]
   input = "$target_gen_dir/vm_isolate_snapshot.bin"
-  output = "$target_gen_dir/vm_snapshot_data.S"
   symbol = "kDartVmSnapshotData"
   executable = false
 }
 
-bin_to_assembly("vm_snapshot_instructions_assembly") {
+bin_to_linkable("vm_snapshot_instructions_linkable") {
   deps = [
     ":generate_snapshot_bin",
   ]
   input = "$target_gen_dir/vm_snapshot_instructions.bin"
-  output = "$target_gen_dir/vm_snapshot_instructions.S"
   symbol = "kDartVmSnapshotInstructions"
   executable = true
 }
 
-bin_to_assembly("isolate_snapshot_data_assembly") {
+bin_to_linkable("isolate_snapshot_data_linkable") {
   deps = [
     ":generate_snapshot_bin",
   ]
   input = "$target_gen_dir/isolate_snapshot.bin"
-  output = "$target_gen_dir/isolate_snapshot_data.S"
   symbol = "kDartIsolateSnapshotData"
   executable = false
 }
 
-bin_to_assembly("isolate_snapshot_instructions_assembly") {
+bin_to_linkable("isolate_snapshot_instructions_linkable") {
   deps = [
     ":generate_snapshot_bin",
   ]
   input = "$target_gen_dir/isolate_snapshot_instructions.bin"
-  output = "$target_gen_dir/isolate_snapshot_instructions.S"
   symbol = "kDartIsolateSnapshotInstructions"
   executable = true
 }
 
 source_set("snapshot") {
   deps = [
-    ":isolate_snapshot_data_assembly",
-    ":isolate_snapshot_instructions_assembly",
-    ":vm_snapshot_data_assembly",
-    ":vm_snapshot_instructions_assembly",
+    ":isolate_snapshot_data_linkable",
+    ":isolate_snapshot_instructions_linkable",
+    ":vm_snapshot_data_linkable",
+    ":vm_snapshot_instructions_linkable",
   ]
-  sources = [
-    "$target_gen_dir/isolate_snapshot_data.S",
-    "$target_gen_dir/isolate_snapshot_instructions.S",
-    "$target_gen_dir/vm_snapshot_data.S",
-    "$target_gen_dir/vm_snapshot_instructions.S",
-  ]
+  sources = get_target_outputs(":isolate_snapshot_data_linkable") +
+    get_target_outputs(":isolate_snapshot_instructions_linkable") +
+    get_target_outputs(":vm_snapshot_data_linkable") +
+    get_target_outputs(":vm_snapshot_instructions_linkable")
 }
 
 compile_platform("non_strong_platform") {
