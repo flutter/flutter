@@ -152,6 +152,24 @@ class TestWindow implements Window {
   }
 
   @override
+  Brightness get platformBrightness => _platformBrightnessTestValue ?? _window.platformBrightness;
+  Brightness _platformBrightnessTestValue;
+  @override
+  VoidCallback get onPlatformBrightnessChanged => _window.onPlatformBrightnessChanged;
+  @override
+  set onPlatformBrightnessChanged(VoidCallback callback) {
+    _window.onPlatformBrightnessChanged =callback;
+  }
+  /// Hides the real text scale factor and reports the given [platformBrightnessTestValue] instead.
+  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
+    _platformBrightnessTestValue = platformBrightnessTestValue;
+  }
+  /// Deletes any existing test platform brightness and returns to using the real platform brightness.
+  void clearPlatformBrightnessTestValue() {
+    _platformBrightnessTestValue = null;
+  }
+
+  @override
   bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _window.alwaysUse24HourFormat;
   bool _alwaysUse24HourFormatTestValue;
   /// Hides the real clock format and reports the given [alwaysUse24HourFormatTestValue] instead.
@@ -292,6 +310,7 @@ class TestWindow implements Window {
     clearAlwaysUse24HourTestValue();
     clearDefaultRouteNameTestValue();
     clearDevicePixelRatioTestValue();
+    clearPlatformBrightnessTestValue();
     clearLocaleTestValue();
     clearLocalesTestValue();
     clearPaddingTestValue();
