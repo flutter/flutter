@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_runner/build_runner.dart';
+
 import '../base/file_system.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
@@ -81,6 +83,9 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    await buildRunnerFactory.create().build(
+      aot: false, extraFrontEndOptions: <String>[], linkPlatformKernelIn: null, mainPath: null, targetProductVm: null, trackWidgetCreation: null,
+    );
     if (argResults['watch']) {
       await AnalyzeContinuously(
         argResults,

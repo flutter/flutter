@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -15,11 +15,11 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../cache.dart';
-import '../commands/update_packages.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
+import 'build_script_generator.dart';
 
 /// The [BuildRunnerFactory] instance.
 BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
@@ -30,14 +30,7 @@ BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
 /// 'FLUTTER_EXPERIMENTAL_BUILD' and that the project itself has a
 /// dependency on the package 'flutter_build' and 'build_runner.'
 FutureOr<bool> get experimentalBuildEnabled async {
-  if (_experimentalBuildEnabled != null) {
-    return _experimentalBuildEnabled;
-  }
-  final bool flagEnabled = platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
-  if (!flagEnabled) {
-    return _experimentalBuildEnabled = false;
-  }
-  return true;
+  return _experimentalBuildEnabled ??= platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
 }
 bool _experimentalBuildEnabled;
 
@@ -101,17 +94,17 @@ class BuildRunner {
       '--packages=$scriptPackagesPath',
       buildScript,
       'build',
-      '--define', 'flutter_tools|kernel=disabled=true',
-      '--define', 'flutter_tools|kernel=aot=$aot',
-      '--define', 'flutter_tools|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-      '--define', 'flutter_tools|kernel=trackWidgetCreation=$trackWidgetCreation',
-      '--define', 'flutter_tools|kernel=targetProductVm=$targetProductVm',
-      '--define', 'flutter_tools|kernel=mainPath=$mainPath',
-      '--define', 'flutter_tools|kernel=packagesPath=$packagesPath',
-      '--define', 'flutter_tools|kernel=sdkRoot=$sdkRoot',
-      '--define', 'flutter_tools|kernel=frontendServerPath=$frontendServerPath',
-      '--define', 'flutter_tools|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-      '--define', 'flutter_tools|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
+      '--define', 'flutter_build|kernel=disabled=true',
+      '--define', 'flutter_build|kernel=aot=$aot',
+      '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
+      '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
+      '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
+      '--define', 'flutter_build|kernel=mainPath=$mainPath',
+      '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
+      '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
+      '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
+      '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
+      '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
     ]);
     buildProcess
       .stdout
@@ -134,7 +127,7 @@ class BuildRunner {
       .childDirectory('build')
       .childDirectory('generated')
       .childDirectory(projectName);
-    if (!await generatedDirectory.exists()) {
+    if (!generatedDirectory.existsSync()) {
       throw Exception('build_runner cannot find generated directory');
     }
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
@@ -144,7 +137,7 @@ class BuildRunner {
     final File dillFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
-    if (!await packagesFile.exists() || !await dillFile.exists()) {
+    if (!packagesFile.existsSync() || !dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
     return BuildResult(packagesFile, dillFile);
@@ -160,46 +153,35 @@ class BuildRunner {
       .absolute
       .childDirectory('flutter_tool')
       .childFile('build.dart');
-    if (!await buildScript.exists()) {
+    if (!buildScript.existsSync()) {
       return;
     }
     await buildScript.delete();
   }
 
-  // Generates a synthetic package script under .dart_tool/flutter_tool.
-  // This is in turn used to generate a build script, which is coppied to the
-  // correct location in the original package and patched to correctly refer
-  // to the synthetic .packages file and pubspec.
+  // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
+  // used to generate a build script.
   Future<void> generateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
-    final String generatedBuildSnapshot = fs.path.join(generatedDirectory, '.dart_tool', 'build', 'entrypoint', 'build.dart');
     final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
-    if (await fs.file(resultScriptPath).exists()) {
+    if (fs.file(resultScriptPath).existsSync()) {
       return;
     }
     final Status status = logger.startProgress('generating build script...', timeout: null);
-    await fs.directory(generatedDirectory).create(recursive: true);
+    fs.directory(generatedDirectory).createSync(recursive: true);
 
-    final PubspecYaml pubspec = PubspecYaml(flutterProject.directory);
     final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
     final StringBuffer stringBuffer = StringBuffer();
-    // Give generated pubspec the same name to trick build_runner into thinking
-    // that it is the root package.
-    stringBuffer.writeln('name: ${flutterProject.manifest.appName}');
+
+    stringBuffer.writeln('name: synthetic_example');
     stringBuffer.writeln('dependencies:');
-    for (PubspecDependency pubspecDependency in pubspec.allDependencies) {
-      if (pubspecDependency.pointsToSdk) {
-        stringBuffer.writeln('  ${pubspecDependency.name}:');
-        stringBuffer.writeln('    sdk: flutter');
-      } else {
-        stringBuffer.writeln('  ${pubspecDependency.name}: ${pubspecDependency.version}');
-      }
+    for (String builder in await flutterProject.getBuilders()) {
+      stringBuffer.writeln('  $builder: any');
     }
     stringBuffer.writeln('  build_runner: any');
-    final String flutterToolsLocation = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
-    stringBuffer.writeln('  flutter_tools:');
-    stringBuffer.writeln('    path: $flutterToolsLocation');
+    stringBuffer.writeln('  flutter_build:');
+    stringBuffer.writeln('    sdk: flutter');
     await syntheticPubspec.writeAsString(stringBuffer.toString());
 
     await pubGet(
@@ -208,88 +190,10 @@ class BuildRunner {
       upgrade: false,
       checkLastModified: false,
     );
-    final String pubExecutable = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk','bin', 'pub');
-    await processManager.run(<String>[
-      pubExecutable,
-      'run',
-      'build_runner',
-      'generate-build-script',
-    ], workingDirectory: generatedDirectory);
-
-    if (!await fs.file(generatedBuildSnapshot).exists()) {
-      throwToolExit('Failed to generate build script');
-    }
-    final File result = await fs.file(resultScriptPath).create(recursive: true);
-    final String buildScriptSource = await fs.file(generatedBuildSnapshot).readAsString();
-    final String modifiedBuildScriptSource = _updateBuildScript(buildScriptSource);
-    await result.writeAsString(modifiedBuildScriptSource);
+    final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
+    final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
+    await buildScriptGenerator.generateBuildScript();
     status.stop();
-  }
-
-  // Patches the build script so that the packageGraph is created from the synthetic
-  // pubspec.yaml
-  String _updateBuildScript(String source) {
-    const String imports = r'''
-import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path; // ignore: ignore: package_path_import
-import 'package:build_runner_core/build_runner_core.dart';
-import 'package:build_runner/src/entrypoint/build.dart';
-import 'package:build_runner/src/entrypoint/clean.dart';
-import 'package:build_runner/src/entrypoint/daemon.dart';
-import 'package:build_runner/src/entrypoint/serve.dart';
-import 'package:build_runner/src/entrypoint/test.dart';
-import 'package:build_runner/src/entrypoint/watch.dart';
-import 'package:build_runner/src/entrypoint/runner.dart';
-''';
-    const String body = r'''
-void main(List<String> args, [_i5.SendPort sendPort]) async {
-  var runner = FlutterBuildCommandRunner(_builders);
-  var result = 0;
-  try {
-    result = await runner.run(args);
-  } catch (err) {
-    print(err);
-    result = 1;
-  }
-  sendPort?.send(result);
-}
-
-class FlutterBuildCommandRunner extends CommandRunner<int> implements BuildCommandRunner {
-  final List<BuilderApplication> builderApplications;
-
-  PackageGraph get packageGraph => _packageGraph;
-  PackageGraph _packageGraph;
-
-  FlutterBuildCommandRunner(List<BuilderApplication> builderApplications)
-      : builderApplications = List.unmodifiable(builderApplications),
-        super('build_runner', 'Unified interface for running Dart builds.') {
-       final packageGraph  = PackageGraph.forPath(path.join('.dart_tool', 'flutter_tool'));
-       final PackageNode rootNode = packageGraph.root;
-       final PackageNode newRootNode = PackageNode(
-         rootNode.name,
-         path.current,
-         rootNode.dependencyType,
-         isRoot: true,
-       );
-       newRootNode.dependencies.addAll(rootNode.dependencies);
-       _packageGraph = PackageGraph.fromRoot(newRootNode);
-    addCommand(DaemonCommand());
-    addCommand(BuildCommand());
-    addCommand(WatchCommand());
-    addCommand(ServeCommand());
-    addCommand(TestCommand(packageGraph));
-    addCommand(CleanCommand());
-  }
-
-  String get usageWithoutDescription => '';
-}
-''';
-    const String mainPattern = r'main(List<String> args';
-    final StringBuffer buffer = StringBuffer();
-    buffer.write(imports);
-    buffer.write(source.split(mainPattern).first);
-    buffer.write(body);
-    return buffer.toString();
   }
 }
 

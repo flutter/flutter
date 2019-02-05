@@ -23,17 +23,17 @@ class BuildScriptGeneratorFactory {
   const BuildScriptGeneratorFactory();
 
   /// Creates a [BuildScriptGenerator] for the current flutter project.
-  Future<BuildScriptGenerator> create() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
-    return BuildScriptGenerator(flutterProject);
+  BuildScriptGenerator create(FlutterProject flutterProject, PackageGraph packageGraph) {
+    return BuildScriptGenerator(flutterProject, packageGraph);
   }
 }
 
 /// Generates a build_script for the current flutter project.
 class BuildScriptGenerator {
-  const BuildScriptGenerator(this.flutterProject);
+  const BuildScriptGenerator(this.flutterProject, this.packageGraph);
 
   final FlutterProject flutterProject;
+  final PackageGraph packageGraph;
 
   /// Generate a build script for the curent flutter project.
   ///
@@ -68,7 +68,6 @@ class BuildScriptGenerator {
   /// which has a `build.yaml`.
   Future<Iterable<Expression>> _findBuilderApplications() async {
     final List<Expression> builderApplications = <Expression>[];
-    final PackageGraph packageGraph = await flutterProject.packageGraph();
     final Iterable<PackageNode> orderedPackages = stronglyConnectedComponents<PackageNode>(
       <PackageNode>[packageGraph.root],
       (PackageNode node) => node.dependencies,
@@ -95,7 +94,7 @@ class BuildScriptGenerator {
       })
       .toList();
 
-    final List<BuilderDefinition> orderedBuilders = findBuilderOrder(builderDefinitions).toList();
+    final List<BuilderDefinition> orderedBuilders = _findBuilderOrder(builderDefinitions).toList();
     builderApplications.addAll(orderedBuilders.map(_applyBuilder));
 
     final List<PostProcessBuilderDefinition> postProcessBuilderDefinitions = orderedConfigs
@@ -125,7 +124,7 @@ class BuildScriptGenerator {
     ..optionalParameters.add(Parameter((ParameterBuilder parameterBuilder) => parameterBuilder
       ..name = 'sendPort'
       ..type = refer('SendPort', 'dart:isolate')))
-    ..body = Block.of(<Block>[
+    ..body = Block.of(<Code>[
       refer('run', 'package:build_runner/build_runner.dart')
           .call(<Expression>[refer('args'), refer('_builders')])
           .awaited
@@ -261,7 +260,7 @@ class BuildScriptGenerator {
   ///
   /// Builders will be ordered such that their `required_inputs` and `runs_before`
   /// constraints are met, but the rest of the ordering is arbitrary.
-  Iterable<BuilderDefinition> findBuilderOrder(Iterable<BuilderDefinition> builders) {
+  Iterable<BuilderDefinition> _findBuilderOrder(Iterable<BuilderDefinition> builders) {
     Iterable<BuilderDefinition> dependencies(BuilderDefinition parent) {
       return builders.where((BuilderDefinition child) => _hasInputDependency(parent, child) || _mustRunBefore(parent, child));
     }

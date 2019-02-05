@@ -156,6 +156,9 @@ class FlutterProject {
   Future<List<String>> getBuilders() async {
     final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
     final YamlList builders = pubspec['builders'];
+    if (builders == null) {
+      return <String>[];
+    }
     return builders.map<String>((Object node) {
       return node.toString();
     }).toList();
