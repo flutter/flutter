@@ -423,9 +423,12 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActi
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/OnFirstFrameRenderedListener.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SettingsChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/ActivityLifecycleListener.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
