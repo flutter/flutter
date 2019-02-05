@@ -19,6 +19,8 @@ import 'theme.dart';
 const double _kTopMargin = 6.0;
 const double _kBottomMargin = 8.0;
 
+const double _kFontSize = 14.0;
+
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
 /// See also:
@@ -291,11 +293,14 @@ class _TileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color iconColor;
+    double tweenStart;
     switch (type) {
       case BottomNavigationBarType.fixed:
+        tweenStart = 6.0;
         iconColor = colorTween.evaluate(animation);
         break;
       case BottomNavigationBarType.shifting:
+        tweenStart = 16.0;
         iconColor = Colors.white;
         break;
     }
@@ -303,7 +308,12 @@ class _TileIcon extends StatelessWidget {
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: Container(
-        margin: const EdgeInsets.only(top: _kTopMargin),
+        margin: EdgeInsets.only(
+          top: Tween<double>(
+            begin: tweenStart,
+            end: _kTopMargin,
+          ).evaluate(animation),
+        ),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor,
@@ -336,7 +346,10 @@ class _FixedLabel extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: _kBottomMargin),
         child: DefaultTextStyle.merge(
-          style: TextStyle(color: colorTween.evaluate(animation)),
+          style: TextStyle(
+            color: colorTween.evaluate(animation),
+            fontSize: _kFontSize,
+          ),
           child: item.title,
         ),
       ),
@@ -374,7 +387,7 @@ class _ShiftingLabel extends StatelessWidget {
           alwaysIncludeSemantics: true,
           opacity: animation,
           child: DefaultTextStyle.merge(
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white, fontSize: _kFontSize),
             child: item.title,
           ),
         ),
