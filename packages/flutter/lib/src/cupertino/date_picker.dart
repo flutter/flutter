@@ -356,8 +356,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // The current selection of the hour picker.
   //
-  // If [widget.use24hFormat] is true, values range from 1-12. Otherwise values
-  // range from 1-24.
+  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
+  // range from 1-12.
   int selectedHour;
 
   // The previous selection index of the hour column.
