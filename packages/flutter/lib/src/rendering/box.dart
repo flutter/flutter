@@ -1806,7 +1806,6 @@ abstract class RenderBox extends RenderObject {
         }
         if (constraints.hasBoundedHeight) {
           testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', 100);
         }
 
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
