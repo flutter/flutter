@@ -38,16 +38,16 @@ void main() {
     when(mockHelper.builder(
             any, any, any, any, any))
         .thenAnswer((Invocation i) {
-      final RefreshIndicatorMode refreshState = i.positionalArguments[1];
+      // final RefreshIndicatorMode refreshState = i.positionalArguments[1];
       final double pulledExtent = i.positionalArguments[2];
       final double refreshTriggerPullDistance = i.positionalArguments[3];
       final double refreshIndicatorExtent = i.positionalArguments[4];
-      if (refreshState == RefreshIndicatorMode.inactive) {
-        throw TestFailure(
-          'RefreshControlIndicatorBuilder should never be called with the '
-          "inactive state because there's nothing to build in that case"
-        );
-      }
+      // if (refreshState == RefreshIndicatorMode.inactive) {
+      //   throw TestFailure(
+      //     'RefreshControlIndicatorBuilder should never be called with the '
+      //     "inactive state because there's nothing to build in that case"
+      //   );
+      // }
       if (pulledExtent < 0.0) {
         throw TestFailure('The pulledExtent should never be less than 0.0');
       }
@@ -1108,6 +1108,58 @@ void main() {
         expect(
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.inactive,
+        );
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
+
+    testWidgets(
+      'builder not called when lastIndicatorExtent is less than 0',
+      (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+        refreshIndicator = const Center(child: Text('-1'));
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverRefreshControl(
+                  builder: builder,
+                  onRefresh: onRefresh,
+                ),
+                buildAListOfStuff(),
+              ],
+            ),
+          ),
+        );
+
+        // Ensure that in inactive state builder was not called
+        expect(
+          find.widgetWithText(Center, '-1'),
+          findsNothing,
+        );
+
+        // Scrolling down to ensure builder was called and refreshIndicator
+        // is present
+        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        await gesture.moveBy(const Offset(0.0, 150.0));
+        await tester.pump();
+
+        expect(
+          find.widgetWithText(Center, '-1'),
+          findsOneWidget,
+        );
+
+        // Scrolling up to ensure that builder is not called
+        await gesture.moveBy(const Offset(0.0, -235.0));
+        await tester.pump();
+
+        expect(
+          find.widgetWithText(Center, '-1'),
+          findsNothing,
         );
 
         debugDefaultTargetPlatformOverride = null;
