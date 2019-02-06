@@ -19,14 +19,14 @@ void main() {
     });
     testUsingContext('is enabled if environment variable is enabled', () async {
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_EXPERIMENTAL_BUILD': 'true'});
-      expect(await experimentalBuildEnabled, true);
+      expect(experimentalBuildEnabled, true);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
     });
 
     testUsingContext('is not enabed if environment varable is not enabled', () async {
       when(mockPlatform.environment).thenReturn(<String, String>{});
-      expect(await experimentalBuildEnabled, false);
+      expect(experimentalBuildEnabled, false);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
     });

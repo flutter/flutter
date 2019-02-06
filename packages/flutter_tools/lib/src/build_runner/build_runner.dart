@@ -29,7 +29,7 @@ BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
 /// This requires both an experimental opt in via the environment variable
 /// 'FLUTTER_EXPERIMENTAL_BUILD' and that the project itself has a
 /// dependency on the package 'flutter_build' and 'build_runner.'
-FutureOr<bool> get experimentalBuildEnabled async {
+bool get experimentalBuildEnabled {
   return _experimentalBuildEnabled ??= platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
 }
 bool _experimentalBuildEnabled;
@@ -89,34 +89,34 @@ class BuildRunner {
         .path;
     final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
     final Status status = logger.startProgress('running builders...', timeout: null);
-    final Process buildProcess = await processManager.start(<String>[
-      dartPath,
-      '--packages=$scriptPackagesPath',
-      buildScript,
-      'build',
-      '--define', 'flutter_build|kernel=disabled=true',
-      '--define', 'flutter_build|kernel=aot=$aot',
-      '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-      '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-      '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-      '--define', 'flutter_build|kernel=mainPath=$mainPath',
-      '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-      '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-      '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-      '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-      '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
-    ]);
-    buildProcess
-        .stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printStatus);
-    buildProcess
-        .stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
     try {
+      final Process buildProcess = await processManager.start(<String>[
+        dartPath,
+        '--packages=$scriptPackagesPath',
+        buildScript,
+        'build',
+        '--define', 'flutter_build|kernel=disabled=false',
+        '--define', 'flutter_build|kernel=aot=$aot',
+        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
+        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
+        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
+        '--define', 'flutter_build|kernel=mainPath=$mainPath',
+        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
+        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
+        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
+        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
+        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
+      ]);
+      buildProcess
+          .stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(printStatus);
+      buildProcess
+          .stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(printError);
       await buildProcess.exitCode;
     } finally {
       status.stop();
@@ -172,30 +172,30 @@ class BuildRunner {
       return;
     }
     final Status status = logger.startProgress('generating build script...', timeout: null);
-    fs.directory(generatedDirectory).createSync(recursive: true);
-
-    final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
-    final StringBuffer stringBuffer = StringBuffer();
-
-    stringBuffer.writeln('name: synthetic_example');
-    stringBuffer.writeln('dependencies:');
-    for (String builder in await flutterProject.getBuilders()) {
-      stringBuffer.writeln('  $builder: any');
-    }
-    stringBuffer.writeln('  build_runner: any');
-    stringBuffer.writeln('  flutter_build:');
-    stringBuffer.writeln('    sdk: flutter');
-    await syntheticPubspec.writeAsString(stringBuffer.toString());
-
-    await pubGet(
-      context: PubContext.pubGet,
-      directory: generatedDirectory,
-      upgrade: false,
-      checkLastModified: false,
-    );
-    final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
-    final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
     try {
+      fs.directory(generatedDirectory).createSync(recursive: true);
+
+      final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
+      final StringBuffer stringBuffer = StringBuffer();
+
+      stringBuffer.writeln('name: synthetic_example');
+      stringBuffer.writeln('dependencies:');
+      for (String builder in await flutterProject.getBuilders()) {
+        stringBuffer.writeln('  $builder: any');
+      }
+      stringBuffer.writeln('  build_runner: any');
+      stringBuffer.writeln('  flutter_build:');
+      stringBuffer.writeln('    sdk: flutter');
+      await syntheticPubspec.writeAsString(stringBuffer.toString());
+
+      await pubGet(
+        context: PubContext.pubGet,
+        directory: generatedDirectory,
+        upgrade: false,
+        checkLastModified: false,
+      );
+      final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
+      final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
     } finally {
       status.stop();

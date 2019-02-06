@@ -148,12 +148,12 @@ class FlutterProject {
   }
 
   /// Return the build_runner [PackageGraph] for this package.
-  Future<PackageGraph> packageGraph() async {
+  Future<PackageGraph> get packageGraph async {
     return PackageGraph.forPath(directory.path);
   }
 
   /// Return the set of builders used by this package.
-  Future<List<String>> getBuilders() async {
+  Future<List<String>> get builders async {
     final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
     final YamlList builders = pubspec['builders'];
     if (builders == null) {
