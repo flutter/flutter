@@ -854,11 +854,6 @@ void main() {
     final Size fourLineInputSize = inputBox.size;
 
     // Now it won't max out until the end
-    await tester.pumpWidget(textFieldBuilder(maxLines: 1, minLines: 1, expands: false));
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, emptyInputSize);
-
-    // With maxLines: null, it grows to fit its contents
     await tester.enterText(find.byType(TextField), '');
     await tester.pumpWidget(textFieldBuilder(maxLines: null));
     expect(findInputBox(), equals(inputBox));
@@ -892,11 +887,15 @@ void main() {
     final Size threeLineInputSize = inputBox.size;
 
     // maxLines: null with minLines set locks height to minLines
+    // TODO(justinmc): if you want to make expands nullable, this would grow
+    // beyond minLines.
     await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: null));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // minLines is overridden by maxLines
+    // TODO(justinmc): if you want to make expands nullable, maybe this would
+    // be ok and still expand.
     await tester.pumpWidget(textFieldBuilder(minLines: 2, maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
@@ -919,6 +918,8 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     // Size matches the content up to any height when maxLines: null
+    // TODO(justinmc): if you want to make expands nullable, this case would
+    // work whether expands is null or true.
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
     await tester.pumpWidget(textFieldBuilder(expands: true, maxLines: null));
     expect(findInputBox(), equals(inputBox));
