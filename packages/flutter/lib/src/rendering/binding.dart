@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -31,7 +30,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    ui.window
+    window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
@@ -131,7 +130,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
-    renderView = RenderView(configuration: createViewConfiguration());
+    renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.scheduleInitialFrame();
   }
 
@@ -181,9 +180,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final double devicePixelRatio = window.devicePixelRatio;
     return ViewConfiguration(
-      size: ui.window.physicalSize / devicePixelRatio,
+      size: window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -198,12 +197,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // the logical coordinates of the event location back to device pixels
       // here.
       return renderView.layer
-          .find<MouseTrackerAnnotation>(offset * ui.window.devicePixelRatio);
+          .find<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
     });
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(ui.window.semanticsEnabled);
+    setSemanticsEnabled(window.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree
