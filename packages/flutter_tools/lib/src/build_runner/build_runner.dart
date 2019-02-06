@@ -61,12 +61,13 @@ class BuildRunner {
   /// The defines of the build command are the arguments required in the
   /// flutter_build kernel builder.
   Future<BuildResult> build({
+    @required String mainPath,
     @required bool aot,
     @required bool linkPlatformKernelIn,
     @required bool trackWidgetCreation,
     @required bool targetProductVm,
-    @required String mainPath,
-    @required List<String> extraFrontEndOptions,
+    List<String> extraFrontEndOptions = const <String>[],
+    bool disableKernelGeneration = false,
   }) async {
     await generateBuildScript();
     final FlutterProject flutterProject = await FlutterProject.current();
@@ -95,7 +96,7 @@ class BuildRunner {
         '--packages=$scriptPackagesPath',
         buildScript,
         'build',
-        '--define', 'flutter_build|kernel=disabled=false',
+        '--define', 'flutter_build|kernel=disabled=$disableKernelGeneration',
         '--define', 'flutter_build|kernel=aot=$aot',
         '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
         '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
