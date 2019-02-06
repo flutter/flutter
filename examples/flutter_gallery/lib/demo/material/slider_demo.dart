@@ -183,10 +183,10 @@ class _SliderDemoState extends State<SliderDemo> {
                         height: 48,
                         child: TextField(
                           onSubmitted: (String value) {
-                            final double myDouble = double.tryParse(value);
-                            if (myDouble != null) {
+                            final double newValue = double.tryParse(value);
+                            if (newValue != null && newValue != _value) {
                               setState(() {
-                                _value = myDouble.clamp(0, 100);
+                                _value = newValue.clamp(0, 100);
                               });
                             }
                           },
