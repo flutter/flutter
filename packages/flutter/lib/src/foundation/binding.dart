@@ -446,24 +446,27 @@ abstract class BindingBase {
   ///
   /// {@tool sample}
   /// The following code registers a service extension that is only included in
-  /// debug builds:
+  /// debug builds.
   ///
   /// ```dart
-  /// assert(() {
-  ///   // Register your service extension here.
-  ///   return true;
-  /// }());
-  ///
+  /// void myRegistrationFunction() {
+  ///   assert(() {
+  ///     // Register your service extension here.
+  ///     return true;
+  ///   }());
+  /// }
   /// ```
   /// {@end-tool}
   ///
   /// {@tool sample}
   /// A service extension registered with the following code snippet is
-  /// available in debug and profile mode:
+  /// available in debug and profile mode.
   ///
   /// ```dart
-  /// if (!kReleaseMode) {
-  ///   // Register your service extension here.
+  /// void myRegistrationFunction() {
+  ///   if (!kReleaseMode) {
+  ///     // Register your service extension here.
+  ///   }
   /// }
   /// ```
   /// {@end-tool}

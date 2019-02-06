@@ -5,26 +5,9 @@
 /// A constant that is true if the application was compiled in release mode.
 ///
 /// More specifically, this is a constant that is true if the application was
-/// compiled in Dart with the '-Dflutter.buildMode.release=true' flag, which the
-/// `flutter` tool does.
-const bool kReleaseMode = bool.fromEnvironment('flutter.buildMode.release', defaultValue: false);
-
-/// A constant that is true if the application was compiled in profile mode.
+/// compiled in Dart with the '-Ddart.vm.product=true' flag.
 ///
-/// More specifically, this is a constant that is true if the application was
-/// compiled in Dart with the '-Dflutter.buildMode.profile=true' flag, which the
-/// `flutter` tool does.
-///
-/// This flag is useful for indicating code blocks that should be removed by
-/// tree shaking in release mode.
-const bool kProfileMode = bool.fromEnvironment('flutter.buildMode.profile', defaultValue: false);
-
-/// A constant that is true if the application was compiled in debug mode.
-///
-/// More specifically, this is a constant that is true if the application was
-/// compiled in Dart with the '-Dflutter.buildMode.debug=true' flag, which the
-/// `flutter` tool does.
-///
-/// This flag is useful for indicating code blocks that should be removed by
-/// tree shaking in release mode.
-const bool kDebugMode = bool.fromEnvironment('flutter.buildMode.debug', defaultValue: false);
+/// Since this is a const value, it can be used to indicate to the compiler that
+/// a particular block of code will not be executed in release mode, and hence
+/// can be removed.
+const bool kReleaseMode = bool.fromEnvironment('dart.vm.product', defaultValue: false);

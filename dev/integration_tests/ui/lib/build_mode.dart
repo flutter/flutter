@@ -8,8 +8,6 @@ import 'package:flutter/widgets.dart';
 
 Future<void> main() async {
   print('>>> Release: $kReleaseMode <<<');
-  print('>>> Debug: $kDebugMode <<<');
-  print('>>> Profile: $kProfileMode <<<');
   print('>>> FINISHED <<<');
   stdout.flush();
   runApp(const Text('Hello, world!', textDirection: TextDirection.ltr));

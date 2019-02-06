@@ -17,7 +17,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   print('run: starting...');
   final Process run = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['run', '--suppress-analytics', '--verbose']..addAll(args),
+    <String>['run', '--suppress-analytics']..addAll(args),
     isBot: false, // we just want to test the output, not have any debugging info
   );
   final List<String> stdout = <String>[];
@@ -58,7 +58,7 @@ void main() {
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
-    Future<void> checkMode(String mode, {bool releaseExpected = false, bool debugExpected= false, bool profileExpected = false, bool dynamic = false}) async {
+    Future<void> checkMode(String mode, {bool releaseExpected = false, bool dynamic = false}) async {
       await inDirectory(appDir, () async {
         print('run: starting $mode test...');
         final List<String> args = <String>['--$mode']..addAll(dynamic ? <String>['--dynamic'] : const <String>[]);
@@ -67,19 +67,13 @@ void main() {
         if (!stdout.contains('>>> Release: $releaseExpected <<<')) {
           throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kReleaseMode properly";
         }
-        if (!stdout.contains('>>> Debug: $debugExpected <<<')) {
-          throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kDebugMode properly";
-        }
-        if (!stdout.contains('>>> Profile: $profileExpected <<<')) {
-          throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kProfileMode properly";
-        }
       });
     }
-    await checkMode('debug', debugExpected: true);
+    await checkMode('debug', releaseExpected: false);
+    await checkMode('profile', releaseExpected: false);
+    await checkMode('profile', releaseExpected: false, dynamic: true);
     await checkMode('release', releaseExpected: true);
-    await checkMode('profile', profileExpected: true);
     await checkMode('release', releaseExpected: true, dynamic: true);
-    await checkMode('profile', profileExpected: true, dynamic: true);
     return TaskResult.success(null);
   });
 }
