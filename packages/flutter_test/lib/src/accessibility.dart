@@ -108,11 +108,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
-        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
         return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
+      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'

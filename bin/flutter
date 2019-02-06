@@ -162,7 +162,7 @@ if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
   echo "Error: The Flutter directory is not a clone of the GitHub project."
   echo "       The flutter tool requires Git in order to operate properly;"
   echo "       to set up Flutter, run the following command:"
-  echo "       git clone -b beta https://github.com/flutter/flutter.git"
+  echo "       git clone -b stable https://github.com/flutter/flutter.git"
   exit 1
 fi
 

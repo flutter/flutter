@@ -495,9 +495,9 @@ class _FlutterPlatform extends PlatformPlugin {
     bool controllerSinkClosed = false;
     try {
       // Callback can't throw since it's just setting a variable.
-      controller.sink.done.whenComplete(() { // ignore: unawaited_futures
+      unawaited(controller.sink.done.whenComplete(() {
         controllerSinkClosed = true;
-      });
+      }));
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
@@ -653,7 +653,7 @@ class _FlutterPlatform extends PlatformPlugin {
               shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
-          controller.sink.close(); // ignore: unawaited_futures
+          unawaited(controller.sink.close());
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
@@ -666,7 +666,7 @@ class _FlutterPlatform extends PlatformPlugin {
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
-          controller.sink.close(); // ignore: unawaited_futures
+          unawaited(controller.sink.close());
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher
@@ -748,7 +748,7 @@ class _FlutterPlatform extends PlatformPlugin {
                   shellPath);
               controller.sink.addError(message);
               // Awaited for with 'sink.done' below.
-              controller.sink.close(); // ignore: unawaited_futures
+              unawaited(controller.sink.close());
               printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;
@@ -792,7 +792,7 @@ class _FlutterPlatform extends PlatformPlugin {
       }
       if (!controllerSinkClosed) {
         // Waiting below with await.
-        controller.sink.close(); // ignore: unawaited_futures
+        unawaited(controller.sink.close());
         printTrace('test $ourTestCount: waiting for controller sink to close');
         await controller.sink.done;
       }

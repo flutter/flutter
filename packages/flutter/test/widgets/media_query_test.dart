@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -39,10 +37,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
+    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -50,7 +48,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -65,7 +63,7 @@ void main() {
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(ui.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
       size: const Size(3.14, 2.72),
       devicePixelRatio: 1.41,

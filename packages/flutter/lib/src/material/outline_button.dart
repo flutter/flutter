@@ -343,10 +343,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color _getFillColor() {
-    final bool themeIsDark = widget.brightness == Brightness.dark;
-    final Color color = widget.color ?? (themeIsDark
-      ? const Color(0x00000000)
-      : const Color(0x00FFFFFF));
+    final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
