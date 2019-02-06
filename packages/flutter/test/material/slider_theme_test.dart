@@ -662,27 +662,20 @@ void main() {
     // 5 tick marks and 1 thumb.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
 
+    // Tap the center of the track and wait for animations to finish.
     final Offset center = tester.getCenter(find.byType(Slider));
-
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Tapping the center would usually produce an overlay and a value
     // indicator. However, these shapes are currently removed, so no extra
-    // paint methods are expected.
+    // paint shapes are expected, and there are still the same number of
+    // shapes on the screen.
 
     // 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
     // 5 tick marks and 1 thumb.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
-    await tester.pumpWidget(_buildApp(
-        ThemeData().sliderTheme.copyWith(
-          overlayShape: SliderComponentShape.noOverlay,
-          showValueIndicator: ShowValueIndicator.always,
-        ),
-        value: 0.5,
-        divisions: 4
-    ));
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -698,6 +691,9 @@ void main() {
 
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
+
+    // Now that there is a tap, and the overlay is not the empty shape,
+    // an extra circle is expected to be painted.
 
     // 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
@@ -719,6 +715,9 @@ void main() {
 
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
+
+    // Now that there is a tap, and the value indicator is specified to be
+    // , shown an path is expected to be painted.
 
     // 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));

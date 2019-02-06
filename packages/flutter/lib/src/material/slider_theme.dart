@@ -781,9 +781,9 @@ abstract class SliderTickMarkShape {
 /// A special version of [SliderTickMarkShape] that has a zero size and paints
 /// nothing.
 ///
-/// This shape is used to create a special instance of a [SliderTickMarkShape]
-/// that is available as a static variable and can be used to skip over
-/// a tick mark shape, or paint nothing.
+/// This class is used to create a special instance of a [SliderTickMarkShape]
+/// that can be specified in order to skip over, or paint nothing for, a
+/// a tick mark shape.
 class EmptySliderTickMarkShape extends SliderTickMarkShape {
   Size getPreferredSize({
     SliderThemeData sliderTheme,
@@ -881,9 +881,9 @@ abstract class SliderComponentShape {
 /// A special version of [SliderComponentShape] that has a zero size and paints
 /// nothing.
 ///
-/// This shape is used to create a special instance of a [SliderComponentShape]
-/// that is available as a static variable and can be used to skip over
-/// a specific component shape, or paint nothing.
+/// This class is used to create a special instance of a [SliderComponentShape]
+/// that can be specified in order to skip over, or paint nothing for, a
+/// a specific component shape.
 class EmptySliderComponentShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size.zero;
@@ -900,7 +900,7 @@ class EmptySliderComponentShape extends SliderComponentShape {
     TextDirection textDirection,
     double value,
   }) {
-    // no-op
+    // no-op.
   }
 }
 
@@ -975,8 +975,8 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     bool isDiscrete,
     bool isEnabled,
   }) {
-    // If the slider track height is 0, then it makes no difference if anything
-    // is painted, so the painting can be a no-op.
+    // If the slider track height is 0, then it makes no difference whether the
+    // track is painted or not, therefore the painting can be a no-op.
     if (sliderTheme.trackHeight == 0) {
       return;
     }
