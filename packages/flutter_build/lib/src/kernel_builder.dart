@@ -141,6 +141,9 @@ class FlutterKernelBuilder implements Builder {
     }
     if (targetProductVm) {
       arguments.add('-Ddart.vm.product=true');
+      arguments.add('-Dflutter.buildMode.release=true');
+    } else {
+      arguments.add('-Dflutter.buildMode.debug=true');
     }
     if (incrementalCompilerByteStorePath != null) {
       arguments.add('--incremental');

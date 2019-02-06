@@ -65,13 +65,13 @@ void main() {
         args.addAll(<String>['-d', device.deviceId, 'lib/build_mode.dart']);
         final String stdout = await runFlutterAndQuit(args, device);
         if (!stdout.contains('>>> Release: $releaseExpected <<<')) {
-          throw "flutter run --$mode didn't set kReleaseMode properly";
+          throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kReleaseMode properly";
         }
         if (!stdout.contains('>>> Debug: $debugExpected <<<')) {
-          throw "flutter run --$mode didn't set kDebugMode properly";
+          throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kDebugMode properly";
         }
         if (!stdout.contains('>>> Profile: $profileExpected <<<')) {
-          throw "flutter run --$mode didn't set kProfileMode properly";
+          throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kProfileMode properly";
         }
       });
     }

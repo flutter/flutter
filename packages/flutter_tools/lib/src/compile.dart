@@ -235,6 +235,9 @@ class KernelCompiler {
     }
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
+      command.add('-Dflutter.buildMode.release=true');
+    } else {
+      command.add('-Dflutter.buildMode.debug=true');
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');

@@ -444,8 +444,7 @@ abstract class BindingBase {
   /// not wrapped in a guard that allows the tree shaker to remove it (see
   /// sample code below).
   ///
-  /// ## Sample Code
-  ///
+  /// {@tool sample}
   /// The following code registers a service extension that is only included in
   /// debug builds:
   ///
@@ -456,15 +455,18 @@ abstract class BindingBase {
   /// }());
   ///
   /// ```
+  /// {@end-tool}
   ///
+  /// {@tool sample}
   /// A service extension registered with the following code snippet is
   /// available in debug and profile mode:
   ///
   /// ```dart
-  /// if (!const bool.fromEnvironment('dart.vm.product')) {
-  //   // Register your service extension here.
-  // }
+  /// if (!kReleaseMode) {
+  ///   // Register your service extension here.
+  /// }
   /// ```
+  /// {@end-tool}
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.
