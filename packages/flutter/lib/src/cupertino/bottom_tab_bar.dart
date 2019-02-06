@@ -75,7 +75,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The index into [items] of the current active item.
   ///
-  /// Must not be null.
+  /// Must not be null and must inclusively be between 0 and the number of tabs
+  /// minus 1.
   final int currentIndex;
 
   /// The background color of the tab bar. If it contains transparency, the

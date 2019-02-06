@@ -395,6 +395,72 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
+
+  testWidgets('Deleting tabs after selecting them works', (WidgetTester tester) async {
+    final List<int> tabsBuilt = <int>[];
+
+    BottomNavigationBarItem tabGenerator(int index) {
+      return BottomNavigationBarItem(
+        icon: const ImageIcon(TestImageProvider(24, 24)),
+        title: Text('Tab ${index + 1}'),
+      );
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(4, tabGenerator),
+            onTap: (int newTab) => selectedTabs.add(newTab),
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            tabsBuilt.add(index);
+            return Text('Page ${index + 1}');
+          },
+        ),
+      ),
+    );
+
+    expect(tabsBuilt, <int>[0]);
+    // We never manually tapped anything.
+    expect(selectedTabs, <int>[]);
+
+    await tester.tap(find.text('Tab 4'));
+    await tester.pump();
+
+    // Both tabs are built but only one is onstage.
+    expect(tabsBuilt, <int>[0, 0, 3]);
+    expect(selectedTabs, <int>[3]);
+    expect(find.text('Page 1', skipOffstage: false), isOffstage);
+    expect(find.text('Page 4'), findsOneWidget);
+
+    // Delete 2 tabs.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            onTap: (int newTab) => selectedTabs.add(newTab),
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            tabsBuilt.add(index);
+            // Change the builder too.
+            return Text('Different page ${index + 1}');
+          },
+        ),
+      ),
+    );
+
+    expect(tabsBuilt, <int>[0, 0, 3, 0, 1]);
+    // We didn't manually tap anything here either.
+    expect(selectedTabs, <int>[3]);
+    expect(find.text('Different page 1', skipOffstage: false), isOffstage);
+    expect(find.text('Different page 2'), findsOneWidget);
+    expect(find.text('Different page 4', skipOffstage: false), findsNothing);
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+    expect(find.text('Page 4', skipOffstage: false), findsNothing);
+  });
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
