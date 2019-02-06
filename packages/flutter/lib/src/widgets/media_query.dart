@@ -1,7 +1,9 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:ui' as ui;
+import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
 
@@ -58,7 +60,7 @@ class MediaQueryData {
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
     this.textScaleFactor = 1.0,
-    this.platformBrightness = ui.Brightness.light,
+    this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
@@ -114,11 +116,11 @@ class MediaQueryData {
   /// The current brightness mode of the host platform.
   /// 
   /// For example, starting in Android Pie, battery saver mode asks all apps to
-  /// render in a "dark mode". That change is reflected in this property.
+  /// render in a "dark mode".
   /// 
   /// Not all platforms necessarily support a concept of brightness mode. Those
   /// platforms will report [Brightness.light] in this property.
-  final ui.Brightness platformBrightness;
+  final Brightness platformBrightness;
 
   /// The parts of the display that are completely obscured by system UI,
   /// typically by the device's keyboard.
@@ -214,7 +216,7 @@ class MediaQueryData {
     Size size,
     double devicePixelRatio,
     double textScaleFactor,
-    ui.Brightness platformBrightness,
+    Brightness platformBrightness,
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
@@ -545,8 +547,8 @@ class MediaQuery extends InheritedWidget {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// any property of the ancestor [MediaQuery] changes.
-  static ui.Brightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? ui.Brightness.light;
+  static Brightness platformBrightnessOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Brightness;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -45,7 +46,7 @@ void main() {
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
-    expect(data.platformBrightness, ui.Brightness.light);
+    expect(data.platformBrightness, Brightness.light);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -77,7 +78,7 @@ void main() {
       invertColors: true,
       disableAnimations: true,
       boldText: true,
-      platformBrightness: ui.Brightness.dark,
+      platformBrightness: Brightness.dark,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -89,7 +90,7 @@ void main() {
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
     expect(copied.boldText, true);
-    expect(copied.platformBrightness, ui.Brightness.dark);
+    expect(copied.platformBrightness, Brightness.dark);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -228,8 +229,8 @@ void main() {
  });
 
   testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
-    ui.Brightness outsideBrightness;
-    ui.Brightness insideBrightness;
+    Brightness outsideBrightness;
+    Brightness insideBrightness;
 
     await tester.pumpWidget(
       Builder(
@@ -237,7 +238,7 @@ void main() {
           outsideBrightness = MediaQuery.platformBrightnessOf(context);
           return MediaQuery(
             data: const MediaQueryData(
-              platformBrightness: ui.Brightness.dark,
+              platformBrightness: Brightness.dark,
             ),
             child: Builder(
               builder: (BuildContext context) {
@@ -250,8 +251,8 @@ void main() {
       ),
     );
 
-    expect(outsideBrightness, ui.Brightness.light);
-    expect(insideBrightness, ui.Brightness.dark);
+    expect(outsideBrightness, Brightness.light);
+    expect(insideBrightness, Brightness.dark);
   });
 
   testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {

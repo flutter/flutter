@@ -166,39 +166,43 @@ class MaterialApp extends StatefulWidget {
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
 
-  /// The [ThemeData] to use when the platform's requested brightness is [Brightness.light] or undefined.
+  /// Default visual properties, like colors fonts and shapes, for this app's
+  /// material widgets.
   ///
-  /// Host platforms such as Android Pie can request a system-wide "dark mode" when entering battery saver mode.
+  /// A second [darkTheme] [ThemeData] value, which is used when the underlying
+  /// platform requests a "dark mode" UI, can also be specified.
   ///
-  /// When the host platform requests a [Brightness.light] mode, you may want to supply a [ThemeData.brightness]
-  /// that's also [Brightness.light].
-  ///
-  /// Defaults to a light [ThemeData.fallback] theme when null.
+  /// The default value of this property is [ThemeData.light()].
   ///
   /// See also:
   ///
-  /// * [MediaQueryData.platformBrightness], which indicates the platform's desired brightness and is used to
-  ///    automatically toggle between [theme] and [darkTheme] in [MaterialApp].
-  /// * [ThemeData.brightness], which indicates the [Brightness] of a [ThemeData] you may want to use as a
-  ///    consequence of the platform requesting a light or dark mode.
+  /// * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  /// * [ThemeData.brightness], which indicates the [Brightness] of a theme's
+  ///    colors.
   final ThemeData theme;
 
-  /// The [ThemeData] to use when the platform specifically requests a dark themed UI.
+  /// The [ThemeData] to use when the platform specifically requests a dark
+  /// themed UI.
   ///
-  /// Host platforms such as Android Pie can request a system-wide "dark mode" when entering battery saver mode.
+  /// Host platforms such as Android Pie can request a system-wide "dark mode"
+  /// when entering battery saver mode.
   ///
-  /// When the host platform requests a [Brightness.dark] mode, you may want to supply a [ThemeData.brightness]
-  /// that's also [Brightness.dark].
+  /// When the host platform requests a [Brightness.dark] mode, you may want to
+  /// supply a [ThemeData.brightness] that's also [Brightness.dark].
   ///
-  /// Uses [theme] instead when null. Defaults to a light [ThemeData.fallback] theme when both [darkTheme] and
-  /// [theme] are null.
+  /// Uses [theme] instead when null. Defaults to a light [ThemeData.fallback]
+  /// theme when both [darkTheme] and [theme] are null.
   ///
   /// See also:
   ///
-  /// * [MediaQueryData.platformBrightness], which indicates the platform's desired brightness and is used to
-  ///    automatically toggle between [theme] and [darkTheme] in [MaterialApp].
-  /// * [ThemeData.brightness], which indicates the [Brightness] of a [ThemeData] you may want to use as a
-  ///    consequence of the platform requesting a light or dark mode.
+  /// * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  /// * [ThemeData.brightness], which indicates the [Brightness] of a
+  ///    [ThemeData] you may want to use as a consequence of the platform
+  ///    requesting a light or dark mode.
   final ThemeData darkTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}

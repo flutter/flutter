@@ -213,18 +213,33 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
-  /// Called when the platform's desired brightness changes.
+  /// Called when the platform brightness changes.
   ///
-  /// For example, starting in Android Pie, battery saver mode asks all apps to
-  /// render in a "dark mode". That change is reflected in this property.
+  /// The current platform brightness can be queried either from a Flutter
+  /// binding, or from a [MediaQuery] widget.
   ///
-  /// Not all platforms necessarily support a concept of brightness mode. Those
-  /// platforms will report [Brightness.light] in this property.
-  /// 
-  /// See also:
-  /// 
-  ///  * [MediaQuery.of], which provides a similar service with less
-  ///    boilerplate.
+  /// ## Sample Code
+  ///
+  /// Querying [Window.platformBrightness]:
+  ///
+  /// ```dart
+  /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
+  /// ```
+  ///
+  /// Querying [MediaQuery] directly:
+  ///
+  /// ```dart
+  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  /// ```
+  ///
+  /// Querying [MediaQueryData]:
+  ///
+  /// ```dart
+  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+  /// final Brightness brightness = mediaQueryData.platformBrightness;
+  /// ```
+  ///
+  /// See [Window.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
   
   /// Called when the system tells the app that the user's locale has
