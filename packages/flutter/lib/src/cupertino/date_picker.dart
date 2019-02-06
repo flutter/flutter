@@ -500,10 +500,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           // Automatically scrolls the am/pm column when the hour column value
           // goes far enough.
 
-          if (
-            ((previousHourIndex >= 0 && previousHourIndex <= 11) && (index >= 12 && index <= 23)) ||
-            ((previousHourIndex >= 12 && previousHourIndex <= 23) && (index >= 0 && index <= 11))
-          ) {
+          final bool wasAm = previousHourIndex >=0 && previousHourIndex <= 11;
+          final bool isAm = index >= 0 && index <= 11;
+
+          if (wasAm != isAm) {
               // Animation values obtained by comparing with iOS version.
               amPmController.animateToItem(
                 1 - amPmController.selectedItem,
