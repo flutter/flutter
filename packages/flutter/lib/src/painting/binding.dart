@@ -84,10 +84,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     _kDecodedCacheRatioCap = value;
   }
 
-  // ignore: deprecated_member_use
+  // ignore: deprecated_member_use_from_same_package
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
   Future<ui.Codec> instantiateImageCodec(Uint8List list) {
-    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use
+    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
   }
 
   @override

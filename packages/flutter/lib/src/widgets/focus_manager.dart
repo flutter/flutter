@@ -140,9 +140,22 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   FocusScopeNode _lastChild;
 
   FocusNode _focus;
+  List<FocusScopeNode> _focusPath;
 
   /// Whether this scope is currently active in its parent scope.
   bool get isFirstFocus => _parent == null || _parent._firstChild == this;
+
+  // Returns this FocusScopeNode's ancestors, starting with the node
+  // below the FocusManager's rootScope.
+  List<FocusScopeNode> _getFocusPath() {
+    final List<FocusScopeNode> nodes = <FocusScopeNode>[this];
+    FocusScopeNode node = _parent;
+    while(node != null && node != _manager?.rootScope) {
+      nodes.add(node);
+      node = node._parent;
+    }
+    return nodes;
+  }
 
   void _prepend(FocusScopeNode child) {
     assert(child != this);
@@ -246,7 +259,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   /// has received the overall focus in a microtask.
   void requestFocus(FocusNode node) {
     assert(node != null);
-    if (_focus == node)
+    if (_focus == node && listEquals<FocusScopeNode>(_focusPath, _manager?._getCurrentFocusPath()))
       return;
     _focus?.unfocus();
     node._hasKeyboardToken = true;
@@ -292,6 +305,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
     _focus._parent = this;
     _focus._manager = _manager;
     _focus._hasKeyboardToken = true;
+    _focusPath = _getFocusPath();
     _didChangeFocusChain();
   }
 
@@ -412,7 +426,7 @@ class FocusManager {
 
   /// The root [FocusScopeNode] in the focus tree.
   ///
-  /// This field is rarely used direction. Instead, to find the
+  /// This field is rarely used directly. Instead, to find the
   /// [FocusScopeNode] for a given [BuildContext], use [FocusScope.of].
   final FocusScopeNode rootScope = FocusScopeNode();
 
@@ -449,6 +463,8 @@ class FocusManager {
     previousFocus?._notify();
     _currentFocus?._notify();
   }
+
+  List<FocusScopeNode> _getCurrentFocusPath() => _currentFocus?._parent?._getFocusPath();
 
   @override
   String toString() {

@@ -14,6 +14,7 @@ import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
 
 Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {

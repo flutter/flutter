@@ -57,7 +57,9 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
   output.createSync(recursive: true);
 
   for (ArchiveFile af in archive) {
-    if (af.isFile) {
+    // TODO(dnfield): Archive changed their API so that isFile now returns true
+    // for directories.
+    if (!af.name.endsWith('/')) {
       final File file = File('${output.path}/${af.name}');
       file.createSync(recursive: true);
       file.writeAsBytesSync(af.content);
