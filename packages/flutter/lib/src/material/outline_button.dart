@@ -183,10 +183,10 @@ class OutlineButton extends MaterialButton {
   }
 }
 
-// The type of of OutlineButtons created with [OutlineButton.icon].
+// The type of of OutlineButtons created with OutlineButton.icon.
 //
-// This class only exists to give OutlineButtons created with [OutlineButton.icon]
-// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+// This class only exists to give OutlineButtons created with OutlineButton.icon
+// a distinct class for the sake of ButtonTheme. It can not be instantiated.
 class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMixin {
   _OutlineButtonWithIcon({
     Key key,
@@ -355,7 +355,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     );
     return colorTween.evaluate(_fillAnimation);
   }
-
 
   BorderSide _getOutline() {
     if (widget.borderSide?.style == BorderStyle.none)
