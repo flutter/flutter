@@ -35,6 +35,7 @@ group("flutter") {
       public_deps += [
         "$flutter_root/frontend_server",
         "//third_party/dart:create_sdk",
+        "$flutter_root/lib/stub_ui:stub_ui",
       ]
       foreach(snapshot, _flutter_sdk_snapshots) {
         public_deps += [ ":copy_flutter_${snapshot[0]}_snapshot" ]
