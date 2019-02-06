@@ -56,7 +56,7 @@ void main() {
                 bottomNavigationBar: BottomAppBar(
                   shape: AutomaticNotchedShape(
                     BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    SuperEllipseRoundedRectangleBorder(borderRadius: 30.0),
+                    ContinuousCornerRectangleBorder(borderRadius: 30.0),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,

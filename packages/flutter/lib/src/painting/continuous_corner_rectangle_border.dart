@@ -9,43 +9,64 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// The corner mode of a Cupertino Rounded Rectangle.
+/// The corner mode for a [ContinuousCornerRectangleBorder].
 ///
-/// In the event that the height or width of the rectangle is less than 3x its
-/// radius, either the shape of the rectangle or the radius of each corner can
-/// be changed to accommodate the given rounded rectangle parameters.
+/// In the event that the height or width of the rectangle is less than ~3x its
+/// radius, either the shape of the rectangle or the radius of each corner must
+/// be changed to accommodate the radius and extents of the desired rectangle.
+/// When 3 * radius is more than the width or height of the rectangle,
+/// the curve parameters begins to generate a lozenge, instead of a super ellipse.
+/// As such, the shape or radius of the rectangle must be changed to maintain
+/// the desired super elliptical shape.
 enum RoundedRectCornerMode {
-  /// In an attempt to keep the corner radius of a given rectangle roughly the
-  /// same regardless of dimension, the shape of the rect corners will
-  /// change when the height or width is less than 3x the radius.
+  /// In an attempt to keep the corner radius of the rectangle roughly the
+  /// same regardless of dimension, the shape of the rectangle's corners will
+  /// change when its height or width is less than ~3x its radius.
   ///
   /// This option is best used in scenarios when a rectangle is static and a smooth
-  /// transition between different rect sizes is not necessary.
+  /// transition between different extent dimensions is not necessary.
+  ///
+  /// When the height or width is greater than 3x the radius, the shape will appear
+  /// to be a rounded rect, with 4 linear edges and 4 90º curves. When the
+  /// height or width is less than 3x the radius, the shape will appear to be
+  /// stadium shaped where the resulting shape has 2 linear edges and 2 180º
+  /// curves.
+  ///
+  /// If animating radii or side length with this option, at certain parameter
+  /// boundaries the rectangle will pop from one shape to the other.
   dynamicShape,
 
   /// In an attempt to keep the shape of the rectangle the same regardless of its
   /// dimension, the radius will automatically be lessened to maximize the
   /// roundness of the resulting rectangle if its width or height is less than
-  /// 3x the radius.
+  /// ~3x the radius.
   ///
-  /// This option is best used in scenarios where a rectangle will be animated
-  /// between various different dimensions.
+  /// This option is best used in scenarios where a rectangle is not static and
+  /// will be animated between various different dimensions.
+  ///
+  /// This shape will always have 4 linear edges and 4 90º curves. However, at
+  /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
+  /// just 2 edges and 2 180º curves.
   dynamicRadius,
 }
 
-/// Creates a Cupertino styled rounded rectangle - a shape similar to a rounded
-/// rectangle, but with a smoother transition from the sides to the rounded
-/// corners.
+/// Creates a continuous cornered rounded rectangle.
 ///
-/// In this shape, the curvature of each corner over the arc is approximately
-/// a gaussian curve instead of a step function as with a traditional quarter
-/// circle round.
+/// A shape similar to a rounded rectangle, but with a smoother transition from
+/// the sides to the rounded corners.
+///
+/// The rendered shape roughly approximates that of a super ellipse. In this
+/// shape, the curvature of each corner over the arc is approximately a gaussian
+/// curve instead of a step function as with a traditional quarter circle round.
+/// The rendered rectangle in dynamic radius mode is roughly a super ellipse with
+/// an n value of 5. In dynamic shape mode, the n value is approximately 5 or 2
+/// depending on the desired corner radius and aspect ratio of the rectangle.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: CupertinoRoundedRectangleBorder(
+///     shape: SuperEllipseRoundedRectangleBorder(
 ///       borderRadius: 28.0,
 ///     ),
 ///   );
@@ -55,36 +76,48 @@ enum RoundedRectCornerMode {
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] Which creates a rectangle whose corners are
+/// * [RoundedRectangleBorder] which creates a rectangle whose corners are
 ///   precisely quarter circles.
-class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
-  /// Creates a Cupertino Rounded Rectangle Border.
+class ContinuousCornerRectangleBorder extends ShapeBorder {
+  /// Creates a Continuous Cornered Rectangle Border.
   ///
   /// The [side], [mode] and [borderRadius] arguments must not be null.
-  const SuperEllipseRoundedRectangleBorder({
+  const ContinuousCornerRectangleBorder({
     this.side = BorderSide.none,
-    this.borderRadius = 0.0,
+    this.borderRadius = 1.0,
     this.mode = RoundedRectCornerMode.dynamicShape,
   }) : assert(side != null),
-       assert(mode != null);
+       assert(mode != null),
+       assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
-  /// The radius must be greater than or equal to 1.0.
+  /// The radius will be clamped to 1 if a value less than 1 is entered as the
+  /// radius.
+  ///
+  /// By default the radius is 1.0. This value must not be null.
+  ///
+  /// Unlike [RoundedRectangleBorder], there is only a single border radius used
+  /// to describe the radius for every corner.
   final double borderRadius;
 
   /// The style of this border.
+  ///
+  /// By default this value is [BorderSide.none]. It also must not be null.
   final BorderSide side;
 
   /// The corner mode of the rectangle.
   ///
   /// Whether or not the shape or radius will by dynamic in the event that the
   /// width or height is smaller than 3x the radius.
+  ///
+  /// By default, this value is [RoundedRectCornerMode.dynamicShape]. It also
+  /// must not be null.
   final RoundedRectCornerMode mode;
 
   Path _getPath(RRect rrect) {
     // The radius multiplier where the resulting shape will perfectly concave at
-    // any dimension.
+    // with a height and width of any value.
     const double maxMultiplier = 3.0573;
 
     double limitedRadius;
@@ -96,6 +129,8 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
     final double originY = centerY - height / 2;
     final double radius = math.max(1, borderRadius);
 
+    // These equations give the x and y values for each of the 8 mid and corner
+    // points on a rectangle.
     double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
     double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
     double topY(double y) { return centerY + y * limitedRadius - height / 2; }
@@ -105,6 +140,9 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
     double leftMidX(double x) { return originX + x * height; }
     double rightMidX(double x) { return originX + width - x * limitedRadius; }
 
+    // Renders the default super elliptical rounded rect shape where there are
+    // 4 straight edges and 4 90º corners. Approximately renders a super ellipse
+    // with n value of 5.
     Path roundedRect1 () {
       return Path()
         ..moveTo(leftX(1.52866483), topY(0))
@@ -155,6 +193,9 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The secondary super elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The width is greater than the height. Approximately
+    // renders a super ellipse with an n value of 2.
     Path roundedRect2a () {
       return Path()
         ..moveTo(leftX(2.00593972), topY(0))
@@ -207,6 +248,9 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The secondary super elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The height is greater than the width. Approximately
+    // renders a super ellipse with an n value of 2.
     Path roundedRect2b () {
       return Path()
         ..moveTo(centerX, topY(0))
@@ -258,6 +302,10 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The third super elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The height is greater than the width. Approximately
+    // renders a super ellipse with an n value of 2. Only used in cases where
+    // the width:height aspect ratio is close to 1.
     Path roundedRect3a () {
       return Path()
         ..moveTo(centerX, topMidY(0))
@@ -318,6 +366,10 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The third super elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The width is greater than the height. Approximately
+    // renders a super ellipse with an n value of 2. Only used in cases where
+    // the width:height aspect ratio is close to 1.
     Path roundedRect3b () {
       return Path()
         ..moveTo(centerX, topMidY(0))
@@ -379,16 +431,17 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
     }
 
 
-    // The multiplier used to describe the minimum radius for the dynamic shape
-    // round option.
+    // The multiplier of the radius in comparison to the smallest edge length
+    // used to describe the minimum radius for the dynamic shape option.
     const double dynamicShapeMinMultiplier = 0.32708;
 
-    // The multiplier used to describe the minimum radius for the dynamic radius
-    // round option.
+    // The multiplier of the radius in comparison to the smallest edge length
+    // used to describe the minimum radius for the dynamic radius round option.
     const double dynamicRadiusMinMultiplier = 2.0;
 
-    // The edge length at which the corner radius must be at its maximum so as to
-    // maintain a the appearance of a completely concave shape.
+    // The edge length at which the corner radius multiplier must be at its
+    // maximum so as to maintain a the appearance of a perfectly concave,
+    // non-lozenge shape.
     const double minRadiusEdgeLength = 200.0;
 
     // The maximum difference of the aspect ratio of the width and height of
@@ -416,8 +469,8 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
         // As the minimum side edge length (where the round is occurring)
         // approaches 0, the limitedRadius approaches 2.0 so as to maximize
         // roundness. As the edge length approaches 200, the limitedRadius
-        // approaches ~3, the radius value where the resulting shape is
-        // perfectly concave at any dimension.
+        // approaches ~3 –- the multiplier of the radius value where the
+        // resulting shape is perfectly concave at any dimension.
         final double multiplier = ui.lerpDouble(
           dynamicRadiusMinMultiplier,
           maxMultiplier,
@@ -459,7 +512,7 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return SuperEllipseRoundedRectangleBorder(
+    return ContinuousCornerRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
       mode: mode,
@@ -469,8 +522,8 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is SuperEllipseRoundedRectangleBorder) {
-      return SuperEllipseRoundedRectangleBorder(
+    if (a is ContinuousCornerRectangleBorder) {
+      return ContinuousCornerRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
         mode: a.mode,
@@ -482,8 +535,8 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is SuperEllipseRoundedRectangleBorder) {
-      return SuperEllipseRoundedRectangleBorder(
+    if (b is ContinuousCornerRectangleBorder) {
+      return ContinuousCornerRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
         mode: b.mode,
@@ -496,7 +549,7 @@ class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
   bool operator == (dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final SuperEllipseRoundedRectangleBorder typedOther = other;
+    final ContinuousCornerRectangleBorder typedOther = other;
     return side == typedOther.side && borderRadius == typedOther.borderRadius &&
            typedOther.mode == mode;
   }
