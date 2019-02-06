@@ -70,7 +70,7 @@ Future<TestRunnerProcess> startTestRunner() async {
     ],
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
-  
+
   final TestRunnerProcess testRunner = TestRunnerProcess(process);
   await testRunner.waitForLine(rerunLine);
   return testRunner;
@@ -138,8 +138,8 @@ void main() {
 
       if (!result.succeeded) {
         return result;
-      } 
-      
+      }
+
       await nodeSourceFile.writeAsString( // only change implementation
         originalSource
           .replaceAll('_owner', '_xyzzy')
@@ -157,7 +157,7 @@ void main() {
       if (!result.succeeded) {
         return result;
       }
-      
+
       await nodeSourceFile.writeAsString( // change interface as well
         originalSource
           .replaceAll('_owner', '_xyzzy')

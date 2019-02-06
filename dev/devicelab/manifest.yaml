@@ -473,6 +473,7 @@ tasks:
       Ensures that --watch flag to flutter test command works as intended.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   technical_debt__cost:
     description: >

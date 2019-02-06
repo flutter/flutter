@@ -132,6 +132,20 @@ class TestCommand extends FlutterCommand {
 
     final bool watchTests = argResults['watch'];
 
+    if (watchTests) {
+      if(startPaused) {
+        throwToolExit('The --watch flag cannot be used with --start-paused');
+      }
+
+      if (argResults['coverage'] || argResults['merge-coverage']) {
+        throwToolExit('The --watch flag cannot be used with --coverage or --merge-coverage');
+      }
+
+      if (argResults['update-goldens']) {
+        throwToolExit('The --watch flag cannot be used with --update-goldens');
+      }
+    }
+
     Directory workDir;
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
@@ -184,7 +198,7 @@ class TestCommand extends FlutterCommand {
     );
 
     if (collector != null) {
-      if(!await collector.collectCoverageData(
+      if (!await collector.collectCoverageData(
           argResults['coverage-path'],
           mergeCoverageData: argResults['merge-coverage']))
         throwToolExit(null);

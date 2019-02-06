@@ -49,7 +49,7 @@ Future<int> runTests(
   if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
   } else {
-    testArgs.addAll(<String>['-r', 'compact']);
+    testArgs.addAll(<String>['-r', 'expanded']);
   }
 
   testArgs.add('--concurrency=$concurrency');
@@ -76,7 +76,7 @@ Future<int> runTests(
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  final Function compileTestFiles = () async {
+  Future<void> compileTestFiles() async {
     int index = 0;
     final Map<String, String> precompiledDillFiles = <String, String>{};
     final Map<String, List<Finalizer>> finalizers = <String, List<Finalizer>>{};
@@ -113,7 +113,8 @@ Future<int> runTests(
       projectRootDirectory: projectRootDirectory,
       fileFinalizers: finalizers,
     );
-  };
+  }
+
   await compileTestFiles();
 
   // Make the global packages path absolute.
@@ -124,12 +125,12 @@ Future<int> runTests(
   // Call package:test's main method in the appropriate directory.
   final Directory saved = fs.currentDirectory;
 
-  final Function printReloadMessage = () {
+  void printReloadMessage() {
     printStatus(
       "Press 'r' to rerun your tests, 'q' to quit",
       color: TerminalColor.red
     );
-  };
+  }
 
   try {
     if (workDir != null) {
@@ -141,7 +142,6 @@ Future<int> runTests(
     await test.runTests(testArgs);
 
     if (watchTests) {
-      final Completer<void> completer = Completer<void>();
       final DirectoryWatcher directoryWatcher = DirectoryWatcher(saved.path);
 
       directoryWatcher.events.listen((WatchEvent event) {
@@ -150,29 +150,24 @@ Future<int> runTests(
         }
       });
 
-      terminal.singleCharMode = true;
-      terminal.keystrokes.asBroadcastStream().listen((String char) async {
-        switch(char) {
-          case 'r':
-            final Status status =
-                logger.startProgress('Recompiling test files...\n', timeout: null);
-            await compileTestFiles();
-            status.stop();
-
-            await test.runTests(testArgs);
-
-            printReloadMessage();
-            break;
-          case 'q':
-            completer.complete();
-        }
-      }, onDone: completer.complete);
-
-      await directoryWatcher.ready;
-
       printReloadMessage();
 
-      await completer.future;
+      terminal.singleCharMode = true;
+      await for (String char in terminal.keystrokes.asBroadcastStream()){
+        if (char == 'r') {
+          final Status status = logger.startProgress('Recompiling test files...\n', timeout: null);
+          await compileTestFiles();
+          status.stop();
+
+          await test.runTests(testArgs);
+
+          printReloadMessage();
+        } else if (char == 'q') {
+          break;
+        }
+      }
+
+      await directoryWatcher.ready;
     }
 
     try {
