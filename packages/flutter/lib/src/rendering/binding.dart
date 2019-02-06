@@ -93,8 +93,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
       registerSignalServiceExtension(
         name: 'debugDumpRenderTree',
