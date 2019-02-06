@@ -133,6 +133,9 @@ List<FuchsiaDevice> parseListDevices(String text) {
     final String line = rawLine.trim();
     // ['ip', 'device name']
     final List<String> words = line.split(' ');
+    if (words.length < 2) {
+      continue;
+    }
     final String name = words[1];
     final String id = words[0];
     devices.add(FuchsiaDevice(id, name: name));
