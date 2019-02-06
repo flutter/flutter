@@ -143,7 +143,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.textStyle.color, const Color(0xdd000000));
-      expect(raw.fillColor, const Color(0x00ffffff));
+      expect(raw.fillColor, const Color(0x00fafafa));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
       expect(raw.elevation, 0.0);

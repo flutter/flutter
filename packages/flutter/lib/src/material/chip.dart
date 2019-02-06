@@ -467,8 +467,8 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label], [elevation], and [clipBehavior] arguments must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [label] and [clipBehavior] arguments must not be null.
+  /// The [elevation] must be null or non-negative.
   const Chip({
     Key key,
     this.avatar,
@@ -484,10 +484,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
   }) : assert(label != null),
        assert(clipBehavior != null),
-       assert(elevation != null && elevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -600,10 +600,9 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [pressElevation], [elevation] and
-  /// [clipBehavior] arguments must not be null. Additionally, [pressElevation]
-  /// and [elevation] must be non-negative. Typically, [pressElevation] is
-  /// greater than [elevation].
+  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     Key key,
     this.avatar,
@@ -618,7 +617,7 @@ class InputChip extends StatelessWidget
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
     this.onPressed,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -627,14 +626,14 @@ class InputChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(isEnabled != null),
        assert(label != null),
        assert(clipBehavior != null),
-       assert(pressElevation != null && pressElevation >= 0.0),
-       assert(elevation != null && elevation >= 0.0),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -777,10 +776,9 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [label], [selected], [pressElevation], [elevation] and [clipBehavior]
-  /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [label], [selected], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -788,7 +786,7 @@ class ChoiceChip extends StatelessWidget
     this.labelStyle,
     this.labelPadding,
     this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     @required this.selected,
     this.selectedColor,
     this.disabledColor,
@@ -798,13 +796,13 @@ class ChoiceChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
-       assert(pressElevation != null && pressElevation >= 0.0),
-       assert(elevation != null && elevation >= 0.0),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -967,10 +965,9 @@ class FilterChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
-  /// The [selected], [label], [pressElevation], [elevation] and [clipBehavior]
-  /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [selected], [label], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const FilterChip({
     Key key,
     this.avatar,
@@ -979,7 +976,7 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     @required this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
@@ -988,13 +985,13 @@ class FilterChip extends StatelessWidget
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
-       assert(pressElevation != null && pressElevation >= 0.0),
-       assert(elevation != null && elevation >= 0.0),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -1111,10 +1108,9 @@ class FilterChip extends StatelessWidget
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed], [pressElevation], [elevation] and [clipBehavior]
-  /// arguments must not be null. Additionally, [pressElevation] and [elevation]
-  /// must be non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [label], [onPressed] and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const ActionChip({
     Key key,
     this.avatar,
@@ -1122,22 +1118,22 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.labelStyle,
     this.labelPadding,
     @required this.onPressed,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
   }) : assert(label != null),
        assert(
          onPressed != null,
          'Rather than disabling an ActionChip by setting onPressed to null, '
          'remove it from the interface entirely.',
        ),
-       assert(pressElevation != null && pressElevation >= 0.0),
-       assert(elevation != null && elevation >= 0.0),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   @override
@@ -1231,10 +1227,9 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [pressElevation], [elevation], [isEnabled], and
-  /// [clipBehavior] arguments must not be null. Additionally, [pressElevation]
-  /// and [elevation] must be non-negative. Typically, [pressElevation] is
-  /// greater than [elevation].
+  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const RawChip({
     Key key,
     this.avatar,
@@ -1248,7 +1243,7 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
-    this.pressElevation = 8.0,
+    this.pressElevation,
     this.tapEnabled = true,
     this.selected,
     this.showCheckmark = true,
@@ -1260,13 +1255,13 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
-    this.elevation = 0.0,
+    this.elevation,
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
        assert(clipBehavior != null),
-       assert(pressElevation != null && pressElevation >= 0.0),
-       assert(elevation != null && elevation >= 0.0),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
        super(key: key);
 
@@ -1552,6 +1547,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
+  static const double _defaultElevation = 0.0;
+  static const double _defaultPressElevation = 8.0;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1563,10 +1561,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
-
+    final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
+    final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
 
     Widget result = Material(
-      elevation: isTapping ? widget.pressElevation : widget.elevation,
+      elevation: isTapping ? pressElevation : elevation,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,
