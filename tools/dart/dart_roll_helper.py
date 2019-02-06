@@ -198,12 +198,25 @@ def update_licenses():
     print_error('Unknown license script error: {}. Aborting roll.'
                 .format(result))
     sys.exit(ERROR_LICENSE_SCRIPT_FAILED)
+
   # Ignore 'licenses_skia' as they shouldn't change during a Dart SDK roll.
   src_files = ['licenses_flutter', 'licenses_third_party', 'tool_signature']
   for f in src_files:
     path = os.path.join(license_script_output_path(), f)
     if os.path.isfile(path):
       shutil.copy(path, engine_golden_licenses_path())
+  p = subprocess.Popen(['pub', 'get'], cwd=engine_license_script_package_path())
+  p.wait()
+  gclient_sync()
+
+  # Update the LICENSE file.
+  with open(sky_license_file_path(), 'w') as sky_license:
+    p = subprocess.Popen(['dart', os.path.join('lib', 'main.dart'),
+                          '--release', '--src', ENGINE_HOME,
+                          '--out', engine_license_script_output_path()],
+                          cwd=engine_license_script_package_path(),
+                          stdout=sky_license)
+    p.wait()
 
 
 def get_commit_range(start, finish):

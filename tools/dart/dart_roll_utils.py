@@ -66,6 +66,18 @@ def engine_license_script_path():
   return os.path.join(ENGINE_HOME, 'flutter', 'ci', 'licenses.sh')
 
 
+def engine_license_script_dart_path():
+  return os.path.join(engine_license_script_package_path(), 'lib', 'main.dart')
+
+
+def engine_license_script_package_path():
+  return os.path.join(ENGINE_HOME, 'flutter', 'tools', 'licenses')
+
+
+def engine_license_script_output_path():
+  return os.path.join(ENGINE_HOME, 'out', 'licenses')
+
+
 def engine_flutter_path():
   return os.path.join(ENGINE_HOME, 'flutter')
 
@@ -84,6 +96,10 @@ def license_script_output_path():
 
 def package_flutter_path():
   return os.path.join(FLUTTER_HOME, 'packages', 'flutter')
+
+
+def sky_license_file_path():
+  return os.path.join(ENGINE_HOME, 'flutter', 'sky', 'packages', 'sky_engine', 'LICENSE')
 
 
 def update_dart_deps_path():

@@ -48,6 +48,8 @@ class BuildStatus:
       return True
     except KeyError:
       return False
+    except TypeError:
+      return False
 
 
   def is_completed(self):
@@ -159,7 +161,7 @@ def get_most_recent_green_build(success_threshold=0.95):
 
     # Ignore revisions that returned bad state. This could be due to the bots
     # being purple or some other infrastructure issues.
-    valid_states = bool(reduce(lambda x, prev: x.is_valid_status() and prev, commit_states))
+    valid_states = bool(reduce(lambda x, y: x and y.is_valid_status(), commit_states))
     if not valid_states:
       continue
 
