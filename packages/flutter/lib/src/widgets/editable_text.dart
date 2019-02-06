@@ -202,7 +202,7 @@ class EditableText extends StatefulWidget {
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
-    this.strutStyle,
+    StrutStyle strutStyle,
     @required this.cursorColor,
     @required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
@@ -246,6 +246,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -289,14 +290,15 @@ class EditableText extends StatefulWidget {
   /// is enabled to lock all lines to the height of the base [TextStyle], provided by
   /// [style].
   ///
-  /// If null, the default value is derived from the [style] and has
+  /// If null, the default value is inherited from the [style] and has
   /// [StrutStyle.forceStrutHeight] set to true.
   ///
   /// To disable strut-based vertical alignment and allow dynamic vertical layout depending
   /// on the user's text input, passing [StrutStyle.disabled] will make strut take no
   /// effect.
   /// {@endtemplate}
-  final StrutStyle strutStyle;
+  get strutStyle => _strutStyle ?? (style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled());
+  final StrutStyle _strutStyle;
 
   /// {@template flutter.widgets.editableText.textAlign}
   /// How the text should be aligned horizontally.

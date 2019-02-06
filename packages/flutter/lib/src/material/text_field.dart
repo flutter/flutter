@@ -133,7 +133,7 @@ class TextField extends StatefulWidget {
     TextInputType keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
-    TextStyle style,
+    this.style,
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textDirection,
@@ -167,8 +167,6 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       style = style,
-       strutStyle = strutStyle ?? (style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled()),
        super(key: key);
 
   /// Controls the text being edited.

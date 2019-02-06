@@ -282,26 +282,53 @@ class StrutStyle extends Diagnosticable {
        assert(leading == null || leading >= 0),
        assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
 
-  const StrutStyle.fromTextStyle(TextStyle textStyle, {this.forceStrutHeight = false,})
-    : fontFamily = textStyle.fontFamily,
-      _fontFamilyFallback = textStyle.fontFamilyFallback,
-      height = textStyle.height,
-      fontSize = textStyle.fontSize,
-      fontWeight = textStyle.fontWeight,
-      fontStyle = textStyle.fontStyle,
-      debugLabel = textStyle.debugLabel,
-      _package = textStyle._package,
-      leading = null;
+  /// Builds a StrutStyle that contains values of the equivalent properties in
+  /// the provided [textStyle] unless it is explicitly provided.
+  ///
+  /// The [textStyle] parameter must not be null.
+  StrutStyle.fromTextStyle(TextStyle textStyle, {
+    String fontFamily,
+    List<String> fontFamilyFallback,
+    double fontSize,
+    double height,
+    this.leading, // TextStyle does not have an equivalent (yet).
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    this.forceStrutHeight,
+    String debugLabel,
+    String package,
+  }) : assert(textStyle != null),
+       assert(fontSize == null || fontSize > 0),
+       assert(leading == null || leading >= 0),
+       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
+       _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
+       height = height ?? textStyle.height,
+       fontSize = fontSize ?? textStyle.fontSize,
+       fontWeight = fontWeight ?? textStyle.fontWeight,
+       fontStyle = fontStyle ?? textStyle.fontStyle,
+       debugLabel = debugLabel ?? textStyle.debugLabel,
+       _package = package;
 
   /// A [StrutStyle] that will have no impact on the text layout.
   /// 
   /// Equivalent to having no strut at all. All lines will be laid out according to
   /// the properties defined in [TextStyle].
   ///
-  /// Default strut is not the same as [disabled].
-  // const StrutStyle.disabled() : fontSize = 0,
-  //                             height = 0,
-  //                             leading = 0;
+  /// Default strut is not the same as [StrutStyle.disabled].
+  const StrutStyle.disabled()
+    : fontSize = 0,
+      height = 0,
+      leading = 0,
+      fontFamily = null,
+      _fontFamilyFallback = null,
+      fontWeight = null,
+      fontStyle = null,
+      debugLabel = null,
+      forceStrutHeight = null,
+      _package = null;
+
+  // static const disabled = StrutStyle(fontSize: 0, height: 0, leading: 0);
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
