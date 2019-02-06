@@ -292,7 +292,8 @@ class EditableText extends StatefulWidget {
   /// [style]. This ensures the typed text fits within the alotted space.
   ///
   /// If null, the strut will is inherit values from the [style] and has
-  /// [StrutStyle.forceStrutHeight] set to true.
+  /// [StrutStyle.forceStrutHeight] set to true. When no [style] is passed,
+  /// the theme's [TextStyle] will be used to generate [strutStyle] instead.
   ///
   /// To disable strut-based vertical alignment and allow dynamic vertical layout based
   /// on the glyphs typed, passing [StrutStyle.disabled] will make strut take no

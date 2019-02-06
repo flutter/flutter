@@ -315,7 +315,7 @@ class StrutStyle extends Diagnosticable {
        _package = package;
 
   /// A [StrutStyle] that will have no impact on the text layout.
-  /// 
+  ///
   /// Equivalent to having no strut at all. All lines will be laid out according to
   /// the properties defined in [TextStyle].
   ///
