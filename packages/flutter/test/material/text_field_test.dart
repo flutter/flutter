@@ -946,10 +946,13 @@ void main() {
       await tester.pumpWidget(textFieldBuilder(minLines: 3, expands: true));
     }, throwsAssertionError);
 
-    // Setting expands to true with min and max at 1 gives no room to expand and
-    // is an error
+    // Setting expands to true with min and max equal gives no room to expand
+    // and is an error
     expect(() async {
       await tester.pumpWidget(textFieldBuilder(expands: true));
+    }, throwsAssertionError);
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(expands: true, minLines: 5, maxLines: 5));
     }, throwsAssertionError);
 
     // Not setting minLines just defaults it to 1

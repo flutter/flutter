@@ -174,8 +174,8 @@ class TextField extends StatefulWidget {
        ),
        assert(expands != null),
        assert(
-         !(expands == true && maxLines == 1),
-         'Cannot expand when maxLines is 1',
+         !(expands == true && minLines == maxLines),
+         'Cannot expand when minLines and maxLines are the same',
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),

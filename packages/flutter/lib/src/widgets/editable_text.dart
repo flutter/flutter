@@ -251,8 +251,8 @@ class EditableText extends StatefulWidget {
        ),
        assert(expands != null),
        assert(
-         !(expands == true && maxLines == 1),
-         'Cannot expand when maxLines is 1',
+         !(expands == true && minLines == maxLines),
+         'Cannot expand when minLines and maxLines are the same',
        ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),

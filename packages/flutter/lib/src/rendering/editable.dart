@@ -166,8 +166,8 @@ class RenderEditable extends RenderBox {
        ),
        assert(expands != null),
        assert(
-         !(expands == true && maxLines == 1),
-         'Cannot expand when maxLines is 1',
+         !(expands == true && minLines == maxLines),
+         'Cannot expand when minLines and maxLines are the same',
        ),
        assert(textScaleFactor != null),
        assert(offset != null),
