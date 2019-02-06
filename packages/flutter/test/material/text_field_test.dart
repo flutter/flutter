@@ -180,18 +180,23 @@ void main() {
     int maxLines = 1,
     int minLines = 1,
     bool expands = false,
+    bool wrapInExpanded = false,
   }) {
-    return boilerplate(
-      child: TextField(
-        key: textFieldKey,
-        style: const TextStyle(color: Colors.black, fontSize: 34.0),
-        maxLines: maxLines,
-        minLines: minLines,
-        expands: expands,
-        decoration: const InputDecoration(
-          hintText: 'Placeholder',
-        ),
+    Widget child = TextField(
+      key: textFieldKey,
+      style: const TextStyle(color: Colors.black, fontSize: 34.0),
+      maxLines: maxLines,
+      minLines: minLines,
+      expands: expands,
+      decoration: const InputDecoration(
+        hintText: 'Placeholder',
       ),
+    );
+    if (wrapInExpanded) {
+      child = Expanded(child: child);
+    }
+    return boilerplate(
+      child: child,
     );
   }
 
@@ -967,7 +972,62 @@ void main() {
     expect(inputBox.size, threeLineInputSize);
   });
 
-  // TODO(justinmc): test input expanding to fill parent Expanded widget.
+  testWidgets('Multiline text when wrapped in Expanded', (WidgetTester tester) async {
+    Widget expandedTextFieldBuilder({
+      int maxLines = 1,
+      int minLines = 1,
+      bool expands = false,
+    }) {
+      return boilerplate(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                key: textFieldKey,
+                style: const TextStyle(color: Colors.black, fontSize: 34.0),
+                maxLines: maxLines,
+                minLines: minLines,
+                expands: expands,
+                decoration: const InputDecoration(
+                  hintText: 'Placeholder',
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(expandedTextFieldBuilder());
+
+    RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
+
+    // Without expanded: true and maxLines: null, the TextField does not expand
+    // to fill its parent when wrapped in an Expanded widget.
+    final RenderBox editableText = findEditableText();
+    final Size unexpandedInputSize = editableText.size;
+
+    // It does expand to fill its parent when expands: true, maxLines: null, and
+    // it's wrapped in an Expanded widget.
+    await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: null));
+    expect(findEditableText(), equals(editableText));
+    expect(editableText.size.height, greaterThan(unexpandedInputSize.height));
+    final Size expandedInputSize = editableText.size;
+
+    // Wrapping in Expanded has no effect when expands, minLines, and maxLines
+    // are all set.
+    // TODO(justinmc): Should the height be the lesser of lines and parent?
+    await tester.pumpWidget(expandedTextFieldBuilder(expands: true, minLines: 2, maxLines: 4));
+    expect(findEditableText(), equals(editableText));
+    expect(editableText.size.height, greaterThan(unexpandedInputSize.height));
+    expect(editableText.size.height, lessThan(expandedInputSize.height));
+    final Size twoLineSize = editableText.size;
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(editableText.size.height, greaterThan(twoLineSize.height));
+    expect(editableText.size.height, lessThan(expandedInputSize.height));
+  });
 
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
