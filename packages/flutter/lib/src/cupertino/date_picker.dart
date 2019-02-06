@@ -360,7 +360,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // range from 1-24.
   int selectedHour;
 
-  // The previous selection index of the hour column
+  // The previous selection index of the hour column.
+  //
+  // This ranges from 0-23 even if [widget.use24hFormat] is false. As a result,
+  // it can be used for determining if we just changed from AM -> PM or vice
+  // versa.
   int previousHourIndex;
 
   // The current selection of the minute picker. Values range from 0 to 59.
