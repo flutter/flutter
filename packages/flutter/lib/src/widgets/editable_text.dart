@@ -1151,7 +1151,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows the selection toolbar at the location of the current cursor.
   ///
   /// Returns `false` if a toolbar couldn't be shown such as when no text
-  /// selection currently exist.
+  /// selection currently exists.
   bool showToolbar() {
     if (_selectionOverlay == null)
       return false;

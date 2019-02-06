@@ -501,6 +501,7 @@ void main() {
     expect(find.text('PASTE'), findsNothing);
 
     controller.text = 'blah';
+    await tester.pump();
     expect(state.showToolbar(), false);
     await tester.pump();
     expect(find.text('PASTE'), findsNothing);
@@ -510,6 +511,7 @@ void main() {
       from: const Offset(0, 0),
       cause: SelectionChangedCause.tap,
     );
+    await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
