@@ -1802,12 +1802,10 @@ abstract class RenderBox extends RenderObject {
         testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
         if (constraints.hasBoundedWidth) {
           testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
-          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', 0);
           testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', 100);
         }
         if (constraints.hasBoundedHeight) {
           testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', 0);
           testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', 100);
         }
 
