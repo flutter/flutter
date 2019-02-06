@@ -30,22 +30,20 @@ import 'package:flutter/foundation.dart';
 class LogicalKeyboardKey extends Diagnosticable {
   /// Defines a KeyboardKey value and optional debug name.
   ///
-  /// To save executable size, it is recommended that the [debugName] be null in
-  /// release mode. You can do this using the [kReleaseMode] constant:
-  ///
   /// {@tool sample}
-  /// const LogicalKeyboardKey mySpecialKey = LogicalKeyboardKey(
-  ///   0x0010000000a,
-  ///   debugName: kReleaseMode ? null : 'Special Key',
-  /// );
+  /// To save executable size, it is recommended that the [debugName] be null in
+  /// release mode. You can do this using the [kReleaseMode] constant.
+  ///
+  /// ```dart
+  /// const LogicalKeyboardKey(0x0010000000a, debugName: kReleaseMode ? null : 'Special Key')
+  /// ```
   /// {@end-tool}
   const LogicalKeyboardKey(this.keyId, {this.debugName, this.keyLabel});
 
   /// A unique code representing this key.
   ///
-  /// This is an opaque identifier, and should not be unpacked to derive
-  /// information from it, as the representation of the code could change at any
-  /// time.
+  /// This is an opaque code, and should not be unpacked to derive information
+  /// from it, as the representation of the code could change at any time.
   final int keyId;
 
   /// The debug string to print for this keyboard key, which will be null in
@@ -176,17 +174,15 @@ class LogicalKeyboardKey extends Diagnosticable {
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 class PhysicalKeyboardKey extends Diagnosticable {
-  /// Defines a KeyboardKey value and optional debug name. The debug name must
-  /// be null in release mode.
-  ///
-  /// To save executable size, it is recommended that the [debugName] be null in
-  /// release mode. You can do this using the [kReleaseMode] constant:
+  /// Defines a KeyboardKey value and optional debug name.
   ///
   /// {@tool sample}
-  /// const PhysicalKeyboardKey mySpecialPhysicalKey = PhysicalKeyboardKey(
-  ///   0x0010000000a,
-  ///   debugName: kReleaseMode ? null : 'Special Key',
-  /// );
+  /// To save executable size, it is recommended that the [debugName] be null in
+  /// release mode. You can do this using the [kReleaseMode] constant.
+  ///
+  /// ```dart
+  /// const PhysicalKeyboardKey(0x0000ffff, debugName: kReleaseMode ? null : 'Special Key')
+  /// ```
   /// {@end-tool}
   const PhysicalKeyboardKey(this.usbHidUsage, {this.debugName});
 
