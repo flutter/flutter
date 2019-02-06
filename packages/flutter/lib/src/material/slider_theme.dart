@@ -847,13 +847,15 @@ abstract class SliderComponentShape {
 ///    shapes.
 class RectangularSliderTrackShape extends SliderTrackShape {
   /// Create a slider track that draws 2 rectangles.
-  const RectangularSliderTrackShape({this.disabledThumbGap = 2.0});
+  const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
-  /// This is only used when the thumb is disabled. The Material spec defaults
-  /// to 2, which is half of the disabled thumb radius.
-  final double disabledThumbGap;
+  /// This is only used when the slider is disabled. There is no gap around
+  /// the thumb and any part of the track when the slider is enabled. The
+  /// Material spec defaults this gap width 2, which is half of the disabled
+  /// thumb radius.
+  final double disabledThumbGapWidth;
 
   @override
   Rect getPreferredRect({
@@ -913,13 +915,13 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 
     // Used to create a gap around the thumb iff the slider is disabled.
     // If the slider is enabled, the track can be drawn beneath the thumb
-    // without gaps. But when the slider is disabled, the track is shortened
+    // without a gap. But when the slider is disabled, the track is shortened
     // and this gap helps determine how much shorter it should be.
     // TODO(clocksmith): The new Material spec has a gray circle in place of this gap.
     double horizontalAdjustment = 0.0;
     if (!isEnabled) {
       final double disabledThumbRadius = sliderTheme.thumbShape.getPreferredSize(false, isDiscrete).width / 2.0;
-      final double gap = disabledThumbGap * (1.0 - enableAnimation.value);
+      final double gap = disabledThumbGapWidth * (1.0 - enableAnimation.value);
       horizontalAdjustment = disabledThumbRadius + gap;
     }
 

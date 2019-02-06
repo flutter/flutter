@@ -147,6 +147,8 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
+    // The enabled slider thumb has track segments that extend to and from
+    // the center of the thumb.
     expect(
       sliderBox,
       paints
@@ -157,8 +159,12 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    // The disabled thumb is smaller so the track has to paint longer to get
-    // to the edge.
+    // The disabled slider thumb has a horizontal gap between itself and the
+    // track segments. Therefore, the track segments are shorter since they do
+    // not extend to the center of the thumb, but rather the outer edge of th
+    // gap. As a result, the `right` value of the first segment is less than it
+    // is above, and the `left` value of the second segment is more than it is
+    // above.
     expect(
       sliderBox,
       paints
