@@ -34,7 +34,7 @@ To run the `gen_keycodes` tool using the checked in `key_data.json` file, run
 it like so:
 
 ```bash
-dart bin/gen_keycodes.dart
+$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart bin/gen_keycodes.dart
 ```
 
 This will rengerate the `keyboard_key.dart` and `keyboard_maps.dart` files in

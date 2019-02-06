@@ -75,7 +75,8 @@ class LogicalKeyboardKey extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return keyId == other.keyId;
+    final LogicalKeyboardKey typedOther = other;
+    return keyId == typedOther.keyId;
   }
 
   /// Finds the [LogicalKeyboardKey] that matches the given ID.
@@ -208,16 +209,15 @@ class PhysicalKeyboardKey extends Diagnosticable {
   static PhysicalKeyboardKey findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
 
   @override
-  int get hashCode {
-    return usbHidUsage.hashCode;
-  }
+  int get hashCode => usbHidUsage.hashCode;
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return usbHidUsage == other.usbHidUsage;
+    final PhysicalKeyboardKey typedOther = other;
+    return usbHidUsage == typedOther.usbHidUsage;
   }
 
   @override

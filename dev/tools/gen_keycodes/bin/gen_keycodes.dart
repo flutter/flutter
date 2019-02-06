@@ -119,39 +119,40 @@ Future<void> main(List<String> rawArguments) async {
     if (parsedArguments['chromium-hid-codes'] == null) {
       hidCodes = await getChromiumConversions();
     } else {
-      hidCodes = await File(parsedArguments['chromium-hid-codes']).readAsString();
+      hidCodes = File(parsedArguments['chromium-hid-codes']).readAsStringSync();
     }
 
     String androidKeyCodes;
     if (parsedArguments['android-keycodes'] == null) {
       androidKeyCodes = await getAndroidKeyCodes();
     } else {
-      androidKeyCodes = await File(parsedArguments['android-keycodes']).readAsString();
+      androidKeyCodes = File(parsedArguments['android-keycodes']).readAsStringSync();
     }
 
     String androidScanCodes;
     if (parsedArguments['android-scancodes'] == null) {
       androidScanCodes = await getAndroidScanCodes();
     } else {
-      androidScanCodes = await File(parsedArguments['android-scancodes']).readAsString();
+      androidScanCodes = File(parsedArguments['android-scancodes']).readAsStringSync();
     }
 
-    final String androidToDomKey = await File(parsedArguments['android-domkey']).readAsString();
+    final String androidToDomKey = File(parsedArguments['android-domkey']).readAsStringSync();
     data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey);
 
-    File(parsedArguments['data']).writeAsStringSync(data.toJson());
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    File(parsedArguments['data']).writeAsStringSync(encoder.convert(data.toJson()));
   } else {
-    data = KeyData.fromJson(await File(parsedArguments['data']).readAsString());
+    data = KeyData.fromJson(json.decode(await File(parsedArguments['data']).readAsString()));
   }
 
   final File codeFile = File(parsedArguments['code']);
   if (!codeFile.existsSync()) {
-    await codeFile.create(recursive: true);
+    codeFile.createSync(recursive: true);
   }
 
   final File mapsFile = File(parsedArguments['maps']);
   if (!mapsFile.existsSync()) {
-    await mapsFile.create(recursive: true);
+    mapsFile.createSync(recursive: true);
   }
 
   final CodeGenerator generator = CodeGenerator(data);

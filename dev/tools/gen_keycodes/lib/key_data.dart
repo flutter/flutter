@@ -40,17 +40,16 @@ class KeyData {
   }
 
   /// Parses the given JSON data and populates the data structure from it.
-  KeyData.fromJson(String jsonFile) {
-    final Map<String, dynamic> contentMap = json.decode(jsonFile);
+  KeyData.fromJson(Map<String, dynamic> contentMap) {
     data = <Key>[];
     for (String key in contentMap.keys) {
-      data.add(Key.fromJson(key, contentMap[key]));
+      data.add(Key.fromJsonMapEntry(key, contentMap[key]));
     }
   }
 
-  /// Converts the data structure into a JSON file that can be parsed by
+  /// Converts the data structure into a JSON structure that can be parsed by
   /// [KeyData.fromJson].
-  String toJson() {
+  Map<String, dynamic> toJson() {
     for (Key entry in data) {
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
@@ -67,12 +66,11 @@ class KeyData {
       }
     }
 
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final Map<String, dynamic> outputMap = <String, dynamic>{};
     for (Key entry in data) {
       outputMap[entry.constantName] = entry.toJson();
     }
-    return encoder.convert(outputMap);
+    return outputMap;
   }
 
   /// The list of keys.
@@ -195,7 +193,7 @@ class KeyData {
 
 /// A single entry in the key data structure.
 ///
-/// Can be read from JSON with the [Key.fromJson] constructor, or
+/// Can be read from JSON with the [Key..fromJsonMapEntry] constructor, or
 /// written with the [toJson] method.
 class Key {
   /// Creates a single key entry from available data.
@@ -218,7 +216,7 @@ class Key {
         _constantName = enumName;
 
   /// Populates the key from a JSON map.
-  factory Key.fromJson(String name, Map<String, dynamic> map) {
+  factory Key.fromJsonMapEntry(String name, Map<String, dynamic> map) {
     return Key(
       enumName: name,
       name: map['names']['domkey'],
@@ -299,7 +297,7 @@ class Key {
   }
 
   /// Gets the name of the key suitable for placing in comments.
-  /// 
+  ///
   /// Takes the [constantName] and converts it from lower camel case to capitalized
   /// separate words (e.g. "wakeUp" converts to "Wake Up").
   String get commentName {
@@ -310,7 +308,7 @@ class Key {
 
   /// Gets the named used for the key constant in the definitions in
   /// keyboard_keys.dart.
-  /// 
+  ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
