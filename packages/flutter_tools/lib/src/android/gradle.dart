@@ -432,14 +432,18 @@ Future<void> _buildGradleProjectV2(
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
+    // TODO(mklim): if AndroidX warnings are no longer required, this
+    // mapFunction and all its associated variabled can be replaced with just
+    // `filter: ndkMessagefilter`.
     mapFunction: (String line) {
-      if (androidXFailureRegex.hasMatch(line)) {
+      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
+      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
         potentialAndroidXFailure = true;
       }
       // Always print the full line in verbose mode.
       if (logger.isVerbose) {
         return line;
-      } else if (androidXPluginWarningRegex.hasMatch(line) || !ndkMessageFilter.hasMatch(line)) {
+      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
         return null;
       }
 
@@ -452,7 +456,7 @@ Future<void> _buildGradleProjectV2(
     if (potentialAndroidXFailure) {
       printError('*******************************************************************************************');
       printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
-      printError('See [WIP link] for more information on the problem and how to fix it.');
+      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
       printError('*******************************************************************************************');
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
