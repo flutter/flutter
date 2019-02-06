@@ -9,15 +9,15 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a superellipse - a shape similar to a rounded rectangle, but with
-/// a smoother transition from the sides to the rounded corners and greater
-/// curve continuity.
+/// Creates a rectangle with continuous rounded corners - a shape similar
+/// to a rounded rectangle, but with a smoother transition from the sides
+/// to the rounded corners and greater curve continuity.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: SuperellipseShape(
+///     shape: ContinuousCornerBorder(
 ///       borderRadius: BorderRadius.circular(28.0),
 ///     ),
 ///   );
@@ -29,14 +29,14 @@ import 'edge_insets.dart';
 ///
 /// * [RoundedRectangleBorder] Which creates a square with rounded corners,
 ///   however it doesn't allow the corners to bend the sides of the square
-///   like a superellipse, resulting in a more square shape.
-class SuperellipseShape extends ShapeBorder {
+///   like [ContinuousCornerBorder], resulting in a more square shape.
+class ContinuousCornerBorder extends ShapeBorder {
   /// The arguments must not be null.
-  const SuperellipseShape({
+  const ContinuousCornerBorder({
     this.side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  })  : assert(side != null),
+        assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
@@ -52,7 +52,7 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return SuperellipseShape(
+    return ContinuousCornerBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
     );
@@ -61,10 +61,11 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is SuperellipseShape) {
-      return SuperellipseShape(
+    if (a is ContinuousCornerBorder) {
+      return ContinuousCornerBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius:
+            BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -73,10 +74,11 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is SuperellipseShape) {
-      return SuperellipseShape(
+    if (b is ContinuousCornerBorder) {
+      return ContinuousCornerBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius:
+            BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -94,21 +96,21 @@ class SuperellipseShape extends ShapeBorder {
     //  Radii will be clamped to the value of the shortest side
     /// of [rrect] to avoid strange tie-fighter shapes.
     final double tlRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
+        math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
     final double tlRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
+        math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
     final double trRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
+        math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
     final double trRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
+        math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
     final double blRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
+        math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
     final double blRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
+        math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
     final double brRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
+        math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
     final double brRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
+        math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
 
     return Path()
       ..moveTo(left, top + tlRadiusX)
@@ -124,7 +126,8 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+    return _getPath(
+        borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
@@ -134,11 +137,10 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
-    if (rect.isEmpty)
-      return;
+    if (rect.isEmpty) return;
     switch (side.style) {
       case BorderStyle.none:
-      break;
+        break;
       case BorderStyle.solid:
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint();
@@ -149,11 +151,9 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
-      return false;
-    final SuperellipseShape typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    if (runtimeType != other.runtimeType) return false;
+    final ContinuousCornerBorder typedOther = other;
+    return side == typedOther.side && borderRadius == typedOther.borderRadius;
   }
 
   @override
