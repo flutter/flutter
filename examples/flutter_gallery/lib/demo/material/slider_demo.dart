@@ -21,11 +21,9 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
   final double halfSide = size / 2.0;
   final double centerHeight = size * height / 3.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(
-      thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
-  thumbPath.lineTo(
-      thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
   thumbPath.close();
   return thumbPath;
 }
@@ -36,9 +34,7 @@ class _CustomThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return isEnabled
-        ? const Size.fromRadius(_thumbSize)
-        : const Size.fromRadius(_disabledThumbSize);
+    return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
   static final Animatable<double> sizeTween = Tween<double>(
@@ -66,8 +62,7 @@ class _CustomThumbShape extends SliderComponentShape {
     );
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     final Path thumbPath = _triangle(size, thumbCenter);
-    canvas.drawPath(
-        thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
+    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
   }
 }
 
@@ -109,16 +104,13 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       end: _slideUpHeight,
     );
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
-    final Offset slideUpOffset =
-        Offset(0.0, -slideUpTween.evaluate(activationAnimation));
+    final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _triangle(
       size,
       thumbCenter + slideUpOffset,
       invert: true,
     );
-    final Color paintColor = enableColor
-        .evaluate(enableAnimation)
-        .withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor = enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,
@@ -130,11 +122,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
           ..color = paintColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0);
-    labelPainter.paint(
-        canvas,
-        thumbCenter +
-            slideUpOffset +
-            Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
+    labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
 
@@ -148,9 +136,7 @@ class _SliderDemoState extends State<SliderDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sliders'),
-        actions: <Widget>[
-          MaterialDemoDocumentationButton(SliderDemo.routeName)
-        ],
+        actions: <Widget>[MaterialDemoDocumentationButton(SliderDemo.routeName)],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -255,16 +241,14 @@ class _SliderDemoState extends State<SliderDemo> {
                     valueIndicatorColor: Colors.deepPurpleAccent,
                     thumbShape: _CustomThumbShape(),
                     valueIndicatorShape: _CustomValueIndicatorShape(),
-                    valueIndicatorTextStyle: theme.accentTextTheme.body2
-                        .copyWith(color: Colors.black87),
+                    valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
                   ),
                   child: Slider(
                     value: _discreteValue,
                     min: 0.0,
                     max: 200.0,
                     divisions: 5,
-                    semanticFormatterCallback: (double value) =>
-                        value.round().toString(),
+                    semanticFormatterCallback: (double value) => value.round().toString(),
                     label: '${_discreteValue.round()}',
                     onChanged: (double value) {
                       setState(() {
