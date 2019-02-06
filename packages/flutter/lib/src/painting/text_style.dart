@@ -848,19 +848,6 @@ class TextStyle extends Diagnosticable {
     );
   }
 
-  StrutStyle getStrutStyle({bool forceStrutHeight = false}) {
-    return StrutStyle(
-      fontFamily: fontFamily,
-      fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize,
-      height: height,
-      // Leading goes here once implemented in TextStyle
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      forceStrutHeight: forceStrutHeight,
-    );
-  }
-
   /// Describe the difference between this style and another, in terms of how
   /// much damage it will make to the rendering.
   ///

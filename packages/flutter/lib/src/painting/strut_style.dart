@@ -283,9 +283,13 @@ class StrutStyle extends Diagnosticable {
        assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
 
   /// Builds a StrutStyle that contains values of the equivalent properties in
-  /// the provided [textStyle] unless it is explicitly provided.
+  /// the provided [textStyle].
   ///
   /// The [textStyle] parameter must not be null.
+  ///
+  /// Specific properties can be overrided by explicitly providing them. Since
+  /// TextStyle does not contain [leading] or [forceStrutHeight], these values
+  /// will take on default values (null and false) unless otherwise specified.
   StrutStyle.fromTextStyle(TextStyle textStyle, {
     String fontFamily,
     List<String> fontFamilyFallback,
