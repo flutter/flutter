@@ -734,9 +734,9 @@ void main() {
     // Change the theme.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(
+        theme: const CupertinoThemeData(
           brightness: Brightness.dark,
-          textTheme: const CupertinoTextThemeData(
+          textTheme: CupertinoTextThemeData(
             textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
           ),
         ),
