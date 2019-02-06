@@ -10,8 +10,11 @@ void main() {
   final String flutterTools = fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
 
   test('no unauthorized imports of dart:io', () {
-    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart');
-    bool _isNotWhitelisted(FileSystemEntity entity) => entity.path != whitelistedPath;
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart'),
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
     for (String dirName in <String>['lib', 'bin']) {
       final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
@@ -32,14 +35,17 @@ void main() {
   });
 
   test('no unauthorized imports of package:path', () {
+    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart');
     for (String dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
+        .where((FileSystemEntity entity) => entity.path != whitelistedPath)
         .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*package:path/path.dart'))) {
+          if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
+              !line.contains('ignore: package_path_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:path/path.dart'; use 'fs.path' instead");
           }
@@ -49,8 +55,11 @@ void main() {
   });
 
   test('no unauthorized imports of dart:convert', () {
-    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'convert.dart');
-    bool _isNotWhitelisted(FileSystemEntity entity) => entity.path != whitelistedPath;
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart'),
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
     for (String dirName in <String>['lib']) {
       final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
