@@ -85,7 +85,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   @override
-  void scheduleWarmUpFrame() {
+  void scheduleWarmUpFrame({void customShaderWarmUp(Canvas canvas)}) {
     expect(pendingReassemble, isTrue);
     pendingReassemble = false;
   }

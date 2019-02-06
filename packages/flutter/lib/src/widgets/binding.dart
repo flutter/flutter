@@ -757,6 +757,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
+/// Provide [customShaderWarmUp] if some specific Skia shaders need to be
+/// compiled during the startup time to reduce animation janks later when the
+/// app is running. An empty function can be provided if no warm up is desired.
+///
 /// See also:
 ///
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
@@ -765,10 +769,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///    element for the element hierarchy.
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
-void runApp(Widget app) {
+///  * [defaultShaderWarmUp], which will be used to warm up Skia shader
+///    compilations if [customShaderWarmUp] is null.
+void runApp(Widget app, {void customShaderWarmUp(Canvas canvas)}) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..scheduleWarmUpFrame();
+    ..scheduleWarmUpFrame(customShaderWarmUp: customShaderWarmUp);
 }
 
 /// Print a string representation of the currently running app.

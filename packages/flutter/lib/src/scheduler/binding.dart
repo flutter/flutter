@@ -5,13 +5,12 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState, Image, Offset, PaintingStyle, Picture, RRect, Rect;
-import 'dart:ui' show PictureRecorder, Canvas, Path, Paint;
+import 'dart:ui' show AppLifecycleState, Canvas, Image, Picture, PictureRecorder;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show defaultShaderWarmUp;
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/colors.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -720,42 +719,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
-  void _warmUpSkiaShaderCompilations() {
-    final Path path = Path();
-    path.moveTo(20, 60);
-    path.quadraticBezierTo(60, 20, 60, 60);
-    path.close();
-    path.moveTo(60, 20);
-    path.quadraticBezierTo(60, 60, 20, 60);
-
-    final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
-    final Path rrectPath = Path()..addRRect(rrect);
-
-    final Path circlePath = Path()..addOval(Rect.fromCircle(center: const Offset(40, 40), radius: 20));
-
-    final List<Path> paths = <Path>[path, rrectPath, circlePath];
-
+  void _warmUpSkiaShaderCompilations({void customShaderWarmUp(Canvas canvas)}) {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
-    final Paint paint = Paint();
-    paint.strokeWidth = 10;
-    paint.isAntiAlias = true;
-
-    for (Path path in paths) {
-      canvas.save();
-      for (PaintingStyle paintingStyle in PaintingStyle.values) {
-        paint.style = paintingStyle;
-        canvas.drawPath(path, paint);
-        canvas.translate(80, 0);
-      }
-      canvas.restore();
-      canvas.translate(0, 80);
+    if (customShaderWarmUp != null) {
+      customShaderWarmUp(canvas);
+    } else {
+      defaultShaderWarmUp(canvas);
     }
-
-    canvas.drawShadow(rrectPath, Colors.black, 10.0, true);
-    canvas.translate(80, 0);
-    canvas.drawShadow(rrectPath, Colors.black, 10.0, false);
 
     final Picture picture = recorder.endRecording();
     picture.toImage(1000, 1000).then((Image image){
@@ -769,6 +741,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// This is used during application startup so that the first frame (which is
   /// likely to be quite expensive) gets a few extra milliseconds to run.
   ///
+  /// This also warms up the Skia shader compilation cache by
+  /// either [defaultShaderWarmUp], or [customShaderWarmUp] if it's not null.
+  ///
   /// Locks events dispatching until the scheduled frame has completed.
   ///
   /// If a frame has already been scheduled with [scheduleFrame] or
@@ -778,11 +753,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [scheduleWarmUpFrame] was already called, this call will be ignored.
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
-  void scheduleWarmUpFrame() {
+  void scheduleWarmUpFrame({void customShaderWarmUp(Canvas canvas)}) {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
 
-    _warmUpSkiaShaderCompilations();
+    _warmUpSkiaShaderCompilations(customShaderWarmUp: customShaderWarmUp);
 
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');
