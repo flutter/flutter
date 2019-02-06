@@ -508,12 +508,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           final bool isAm = index >= 0 && index <= 11;
 
           if (wasAm != isAm) {
-              // Animation values obtained by comparing with iOS version.
-              amPmController.animateToItem(
-                1 - amPmController.selectedItem,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
+            // Animation values obtained by comparing with iOS version.
+            amPmController.animateToItem(
+              1 - amPmController.selectedItem,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
           }
           else {
             widget.onDateTimeChanged(_getDateTime());
