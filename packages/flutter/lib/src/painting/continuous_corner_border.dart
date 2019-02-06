@@ -137,7 +137,8 @@ class ContinuousCornerBorder extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
-    if (rect.isEmpty) return;
+    if (rect.isEmpty)
+      return;
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -151,7 +152,8 @@ class ContinuousCornerBorder extends ShapeBorder {
 
   @override
   bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType) return false;
+    if (runtimeType != other.runtimeType)
+      return false;
     final ContinuousCornerBorder typedOther = other;
     return side == typedOther.side && borderRadius == typedOther.borderRadius;
   }
