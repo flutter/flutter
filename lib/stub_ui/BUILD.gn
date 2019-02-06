@@ -1,0 +1,41 @@
+# Copyright 2019 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+copy("stub_ui") {
+  sources = [
+    "compositing.dart",
+    "geometry.dart",
+    "hash_codes.dart",
+    "hooks.dart",
+    "isolate_name_server.dart",
+    "lerp.dart",
+    "natives.dart",
+    "painting.dart",
+    "plugins.dart",
+    "pointer.dart",
+    "semantics.dart",
+    "text.dart",
+    "ui.dart",
+    "versions.dart",
+    "window.dart",
+  ]
+
+  deps = [
+    ":stub_libraries"
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_patched_sdk/stub_ui/{{source_file_part}}"
+  ]
+}
+
+copy("stub_libraries") {
+  sources = [
+    "$flutter_root/lib/snapshot/libraries.json"
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_patched_sdk/libraries.json"
+  ]
+}
