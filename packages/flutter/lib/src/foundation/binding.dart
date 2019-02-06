@@ -464,6 +464,7 @@ abstract class BindingBase {
   ///
   /// ```dart
   /// void myRegistrationFunction() {
+  ///   // kReleaseMode is defined in the 'flutter/foundation.dart' package.
   ///   if (!kReleaseMode) {
   ///     // Register your service extension here.
   ///   }
