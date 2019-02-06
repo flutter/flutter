@@ -312,7 +312,8 @@ class StrutStyle extends Diagnosticable {
        fontWeight = fontWeight ?? textStyle.fontWeight,
        fontStyle = fontStyle ?? textStyle.fontStyle,
        debugLabel = debugLabel ?? textStyle.debugLabel,
-       _package = package;
+       _package = package ?? null; // the textStyle._package data is embedded in the fontFamily names,
+                                   // so we no longer need it.
 
   /// A [StrutStyle] that will have no impact on the text layout.
   ///
@@ -331,8 +332,6 @@ class StrutStyle extends Diagnosticable {
       debugLabel = null,
       forceStrutHeight = null,
       _package = null;
-
-  // static const disabled = StrutStyle(fontSize: 0, height: 0, leading: 0);
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
