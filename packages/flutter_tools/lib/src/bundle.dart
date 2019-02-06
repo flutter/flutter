@@ -100,7 +100,7 @@ Future<void> build({
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
     extraFrontEndOptions = <String>['-Dflutter.buildMode.${getModeType(buildMode)}=true']
-      ..addAll(extraFrontEndOptions ?? <String>[]);
+      ..addAll(extraFrontEndOptions ?? const <String>[]);
 
     ensureDirectoryExists(applicationKernelFilePath);
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();

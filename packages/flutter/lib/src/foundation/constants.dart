@@ -27,8 +27,4 @@ const bool kProfileMode = bool.fromEnvironment('flutter.buildMode.profile', defa
 ///
 /// This flag is useful for indicating code blocks that should be removed by
 /// tree shaking in release mode.
-// TODO(gspencer): This shouldn't need to have the fallback condition that debug
-// is the same as not profile and not release. We should remove the fallback
-// when it's enforced that all compilation paths include the appropriate
-// definition.
-const bool kDebugMode = bool.fromEnvironment('flutter.buildMode.debug', defaultValue: false) || (!kProfileMode && !kReleaseMode);
+const bool kDebugMode = bool.fromEnvironment('flutter.buildMode.debug', defaultValue: false);
