@@ -251,6 +251,9 @@ typedef struct {
   const uint8_t* isolate_snapshot_instructions;
   // The size of the isolate snapshot instructions buffer.
   size_t isolate_snapshot_instructions_size;
+  // The callback invoked by the engine in root isolate scope. Called
+  // immediately after the root isolate has been created and marked runnable.
+  VoidCallback root_isolate_create_callback;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT

@@ -29,10 +29,16 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = testing::GetFixturesPath();
+  args.root_isolate_create_callback = [](void* data) {
+    std::string str_data = reinterpret_cast<char*>(data);
+    ASSERT_EQ(str_data, "Data");
+  };
 
+  std::string str_data = "Data";
+  void* user_data = const_cast<char*>(str_data.c_str());
   FlutterEngine engine = nullptr;
   FlutterEngineResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config,
-                                                &args, nullptr, &engine);
+                                                &args, user_data, &engine);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
 
   result = FlutterEngineShutdown(engine);
