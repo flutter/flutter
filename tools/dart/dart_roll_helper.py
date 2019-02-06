@@ -233,7 +233,7 @@ def git_commit(original_revision, updated_revision):
   commit_msg = ('Roll src/third_party/dart {}..{} ({} commits)'
                 .format(get_short_rev(original_revision),
                         get_short_rev(updated_revision), num_commits))
-  commit_msg += '\n' + sdk_log
+  commit_msg += '\n\n' + sdk_log
   commit_cmd = ['git', 'commit', '-a', '-m', commit_msg]
   p = subprocess.Popen(commit_cmd, cwd=engine_flutter_path())
   p.wait()
