@@ -1,4 +1,4 @@
-Signature: fa3191bf0bd21c1eda6617b0ad4d47ea
+Signature: 7eb43a71ab47ddd84407142d2b672c29
 
 UNUSED LICENSES:
 
@@ -1149,6 +1149,7 @@ FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/c/sk_colorspace.h
 FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
+FILE: ../../../third_party/skia/include/core/SkContourMeasure.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
 FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
@@ -1258,6 +1259,7 @@ FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
+FILE: ../../../third_party/skia/src/core/SkContourMeasure.cpp
 FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
 FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicMap.h
