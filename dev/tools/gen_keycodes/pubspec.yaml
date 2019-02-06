@@ -1,0 +1,12 @@
+name: gen_keycodes
+description: Generates keycode source files from various resources.
+
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  args: 1.5.1
+  http: 0.12.0
+  path: 1.6.2
+  platform: 2.2.0
