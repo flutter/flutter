@@ -59,6 +59,7 @@ void main() {
         ' │ cursorColor: null\n'
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
         ' │ maxLines: 1\n'
+        ' │ minLines: 1\n'
         ' │ expands: false\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
