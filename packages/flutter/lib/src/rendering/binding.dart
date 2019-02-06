@@ -169,7 +169,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// See [Window.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
-  
+
   /// Called when the platform brightness changes.
   ///
   /// The current platform brightness can be queried either from a Flutter
@@ -195,7 +195,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
   /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
-  /// 
+  ///
   /// See [Window.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() { }

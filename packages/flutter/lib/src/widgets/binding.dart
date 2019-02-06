@@ -241,7 +241,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// See [Window.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
-  
+
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
@@ -436,7 +436,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeTextScaleFactor();
   }
-  
+
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();

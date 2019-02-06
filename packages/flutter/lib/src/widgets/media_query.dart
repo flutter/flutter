@@ -112,12 +112,12 @@ class MediaQueryData {
   ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
   ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
-  
+
   /// The current brightness mode of the host platform.
-  /// 
+  ///
   /// For example, starting in Android Pie, battery saver mode asks all apps to
   /// render in a "dark mode".
-  /// 
+  ///
   /// Not all platforms necessarily support a concept of brightness mode. Those
   /// platforms will report [Brightness.light] in this property.
   final Brightness platformBrightness;
