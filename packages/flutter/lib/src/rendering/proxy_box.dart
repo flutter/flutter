@@ -1642,7 +1642,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
       );
       if (diff != null) {
         context.canvas.save();
-        context.canvas.setMatrix(Matrix4.identity().storage);
+        // TODO(dnfield): Move this to a widget that doesn't get impacted by current canvas transforms
+        // context.canvas.setMatrix(Matrix4.identity().storage);
         context.canvas.drawPath(
           diff,
           Paint()..color = const Color(0xFFAA0000)
