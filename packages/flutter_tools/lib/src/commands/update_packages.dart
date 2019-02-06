@@ -504,6 +504,11 @@ class PubspecYaml {
             seenDev = true;
           }
           result.add(header);
+        } else if (section == Section.builders) {
+          // Do nothing.
+          // This line isn't a section header, and we're not in a section we care about.
+          // We just stick the line into the output unmodified.
+          result.add(PubspecLine(line));
         } else if (section == Section.other) {
           if (line.contains(kDependencyChecksum)) {
             // This is the pubspec checksum. After computing it, we remove it from the output data
