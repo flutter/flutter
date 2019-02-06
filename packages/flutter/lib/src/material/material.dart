@@ -368,7 +368,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
 
     final ShapeBorder shape = _getShape();
-    print(shape);
 
     if (widget.type == MaterialType.transparency) {
       return _transparentInterior(

@@ -57,11 +57,11 @@ enum RoundedRectCornerMode {
 ///
 /// * [RoundedRectangleBorder] Which creates a rectangle whose corners are
 ///   precisely quarter circles.
-class CupertinoRoundedRectangleBorder extends ShapeBorder {
+class SuperEllipseRoundedRectangleBorder extends ShapeBorder {
   /// Creates a Cupertino Rounded Rectangle Border.
   ///
   /// The [side], [mode] and [borderRadius] arguments must not be null.
-  const CupertinoRoundedRectangleBorder({
+  const SuperEllipseRoundedRectangleBorder({
     this.side = BorderSide.none,
     this.borderRadius = 0.0,
     this.mode = RoundedRectCornerMode.dynamicShape,
@@ -83,6 +83,10 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   final RoundedRectCornerMode mode;
 
   Path _getPath(RRect rrect) {
+    // The radius multiplier where the resulting shape will perfectly concave at
+    // any dimension.
+    const double maxMultiplier = 3.0573;
+
     double limitedRadius;
     final double width = rrect.width;
     final double height = rrect.height;
@@ -374,9 +378,6 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
         ..close();
     }
 
-    // The radius multiplier where the resulting shape will perfectly concave at
-    // any dimension.
-    const double maxMultiplier = 3.0573;
 
     // The multiplier used to describe the minimum radius for the dynamic shape
     // round option.
@@ -390,14 +391,20 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
     // maintain a the appearance of a completely concave shape.
     const double minRadiusEdgeLength = 200.0;
 
+    // The maximum difference of the aspect ratio of the width and height of
+    // the rectangle and 1 before shape 3 is rendered.
+    const double maxAspectRatioDifferenceForShape2 = 0.3;
+
     switch(mode) {
       case RoundedRectCornerMode.dynamicShape:
+        final double aspectRatio = width / height;
+        final bool aspectRatioInRangeForShape2 = (aspectRatio - 1).abs() > maxAspectRatioDifferenceForShape2;
         limitedRadius = math.min(radius, math.min(rrect.width, rrect.height) * dynamicShapeMinMultiplier);
         if (width > maxMultiplier * radius && height > maxMultiplier * radius)
           return roundedRect1();
-        else if (width > maxMultiplier * radius)
+        else if (width > maxMultiplier * radius || (width > height && aspectRatioInRangeForShape2))
           return roundedRect2a();
-        else if (height > maxMultiplier * radius)
+        else if (height > maxMultiplier * radius || (height > width && aspectRatioInRangeForShape2))
           return roundedRect2b();
         else if (height > width)
           return roundedRect3a();
@@ -452,7 +459,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return CupertinoRoundedRectangleBorder(
+    return SuperEllipseRoundedRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
       mode: mode,
@@ -462,9 +469,8 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is CupertinoRoundedRectangleBorder) {
-      assert(a.mode == mode);
-      return CupertinoRoundedRectangleBorder(
+    if (a is SuperEllipseRoundedRectangleBorder) {
+      return SuperEllipseRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
         mode: a.mode,
@@ -476,9 +482,8 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is CupertinoRoundedRectangleBorder) {
-      assert(b.mode == mode);
-      return CupertinoRoundedRectangleBorder(
+    if (b is SuperEllipseRoundedRectangleBorder) {
+      return SuperEllipseRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
         mode: b.mode,
@@ -491,7 +496,7 @@ class CupertinoRoundedRectangleBorder extends ShapeBorder {
   bool operator == (dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final CupertinoRoundedRectangleBorder typedOther = other;
+    final SuperEllipseRoundedRectangleBorder typedOther = other;
     return side == typedOther.side && borderRadius == typedOther.borderRadius &&
            typedOther.mode == mode;
   }
