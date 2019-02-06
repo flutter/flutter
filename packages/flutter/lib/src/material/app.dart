@@ -172,14 +172,14 @@ class MaterialApp extends StatefulWidget {
   /// A second [darkTheme] [ThemeData] value, which is used when the underlying
   /// platform requests a "dark mode" UI, can also be specified.
   ///
-  /// The default value of this property is a light [ThemeData.fallback].
+  /// The default value of this property is the value of [ThemeData.light()].
   ///
   /// See also:
   ///
-  /// * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
   ///    desired brightness and is used to automatically toggle between [theme]
   ///    and [darkTheme] in [MaterialApp].
-  /// * [ThemeData.brightness], which indicates the [Brightness] of a theme's
+  ///  * [ThemeData.brightness], which indicates the [Brightness] of a theme's
   ///    colors.
   final ThemeData theme;
 
@@ -192,17 +192,16 @@ class MaterialApp extends StatefulWidget {
   /// When the host platform requests a [Brightness.dark] mode, you may want to
   /// supply a [ThemeData.brightness] that's also [Brightness.dark].
   ///
-  /// Uses [theme] instead when null. Defaults to a light [ThemeData.fallback]
-  /// theme when both [darkTheme] and [theme] are null.
+  /// Uses [theme] instead when null. Defaults to the value of
+  /// [ThemeData.light()] when both [darkTheme] and [theme] are null.
   ///
   /// See also:
   ///
-  /// * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
   ///    desired brightness and is used to automatically toggle between [theme]
   ///    and [darkTheme] in [MaterialApp].
-  /// * [ThemeData.brightness], which indicates the [Brightness] of a
-  ///    [ThemeData] you may want to use as a consequence of the platform
-  ///    requesting a light or dark mode.
+  ///  * [ThemeData.brightness], which is typically set to the value of
+  ///    [MediaQueryData.platformBrightness].
   final ThemeData darkTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}
