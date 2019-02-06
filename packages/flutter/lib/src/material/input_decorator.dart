@@ -711,7 +711,7 @@ class _RenderDecoration extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  final bool expands;
+  bool expands;
 
   @override
   void attach(PipelineOwner owner) {
@@ -1408,6 +1408,7 @@ class _Decorator extends RenderObjectWidget {
      ..decoration = decoration
      ..textDirection = textDirection
      ..textBaseline = textBaseline
+     ..expands = expands
      ..isFocused = isFocused;
   }
 }
