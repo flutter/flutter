@@ -45,6 +45,10 @@ enum SelectionChangedCause {
   /// location of the cursor) to change.
   longPress,
 
+  /// The user force-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  forcePress,
+
   /// The user used the keyboard to change the selection or the location of the
   /// cursor.
   ///
@@ -737,12 +741,12 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
-  ///{@template flutter.rendering.editable.paintCursorOnTop}
+  /// {@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
-  /// {@end template}
+  /// {@endtemplate}
   bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
   set paintCursorAboveText(bool value) {
@@ -759,7 +763,7 @@ class RenderEditable extends RenderBox {
   /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
   /// platforms. The origin from where the offset is applied to is the arbitrary
   /// location where the cursor ends up being rendered from by default.
-  /// {@end template}
+  /// {@endtemplate}
   Offset get cursorOffset => _cursorOffset;
   Offset _cursorOffset;
   set cursorOffset(Offset value) {
@@ -1233,6 +1237,15 @@ class RenderEditable extends RenderBox {
   }
 
   /// Move selection to the location of the last tap down.
+  ///
+  /// {@template flutter.rendering.editable.select}
+  /// This method is mainly used to translate user inputs in global positions
+  /// into a [TextSelection]. When used in conjunction with a [EditableText],
+  /// the selection change is fed back into [TextEditingController.selection].
+  ///
+  /// If you have a [TextEditingController], it's generally easier to
+  /// programmatically manipulate its `value` or `selection` directly.
+  /// {@endtemplate}
   void selectPosition({@required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
@@ -1244,6 +1257,8 @@ class RenderEditable extends RenderBox {
   }
 
   /// Select a word around the location of the last tap down.
+  ///
+  /// {@macro flutter.rendering.editable.select}
   void selectWord({@required SelectionChangedCause cause}) {
     selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
@@ -1252,6 +1267,8 @@ class RenderEditable extends RenderBox {
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
+  ///
+  /// {@macro flutter.rendering.editable.select}
   void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
@@ -1272,6 +1289,8 @@ class RenderEditable extends RenderBox {
   }
 
   /// Move the selection to the beginning or end of a word.
+  ///
+  /// {@macro flutter.rendering.editable.select}
   void selectWordEdge({@required SelectionChangedCause cause}) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);

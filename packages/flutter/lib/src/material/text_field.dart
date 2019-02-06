@@ -582,11 +582,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    if (cause == SelectionChangedCause.longPress)
-      Feedback.forLongPress(context);
-  }
-
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -630,9 +625,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleForcePressStarted(ForcePressDetails details) {
     if (widget.selectionEnabled) {
-      // The cause is not technically double tap, but we would like to show
-      // the toolbar.
-      _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+      _renderEditable.selectWordsInRange(
+        from: details.globalPosition,
+        cause: SelectionChangedCause.forcePress,
+      );
+      _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -667,14 +664,19 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          Feedback.forLongPress(context);
           break;
       }
+      _editableTextKey.currentState.showToolbar();
     }
     _confirmCurrentSplash();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
-    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+    if (widget.selectionEnabled) {
+      _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+      _editableTextKey.currentState.showToolbar();
+    }
   }
 
   void _startSplash(TapDownDetails details) {
@@ -784,7 +786,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
