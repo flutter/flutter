@@ -353,6 +353,23 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
+
+  BorderSide _getOutline() {
+    if (widget.borderSide?.style == BorderStyle.none)
+      return widget.borderSide;
+
+    final Color specifiedColor = widget.enabled
+      ? (_pressed ? widget.highlightedBorderColor : null) ?? widget.borderSide?.color
+      : widget.disabledBorderColor;
+
+    final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+
+    return BorderSide(
+      color: specifiedColor ?? themeColor,
+      width: widget.borderSide?.width ?? 1.0,
+    );
+  }
+
   double _getHighlightElevation() {
     if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
       return 0.0;
@@ -382,10 +399,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           padding: widget.padding,
           shape: _OutlineBorder(
             shape: widget.shape,
-            side: widget.borderSide ?? BorderSide(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-              width: 1.0,
-            ),
+            side: _getOutline(),
           ),
           clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,
