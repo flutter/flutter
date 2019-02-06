@@ -170,6 +170,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleTextScaleFactorChanged() { }
 
+  /// {@template on_platform_brightness_change}
   /// Called when the platform brightness changes.
   ///
   /// The current platform brightness can be queried either from a Flutter
@@ -197,6 +198,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   ///
   /// See [Window.onPlatformBrightnessChanged].
+  /// {@endtemplate}
   @protected
   void handlePlatformBrightnessChanged() { }
 
