@@ -180,7 +180,7 @@ class BuildRunner {
 
       stringBuffer.writeln('name: synthetic_example');
       stringBuffer.writeln('dependencies:');
-      for (String builder in await flutterProject.getBuilders()) {
+      for (String builder in await flutterProject.builders) {
         stringBuffer.writeln('  $builder: any');
       }
       stringBuffer.writeln('  build_runner: any');
