@@ -12,6 +12,8 @@ import 'edge_insets.dart';
 /// Creates a rectangle with continuous rounded corners - a shape similar
 /// to a rounded rectangle, but with a smoother transition from the sides
 /// to the rounded corners and greater curve continuity.
+/// 
+/// This shape is also known as a squircle, or in some cases a superellipse.
 ///
 /// {@tool sample}
 /// ```dart
