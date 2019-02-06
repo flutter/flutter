@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import '../artifacts.dart';
 import '../base/context.dart';
@@ -122,6 +123,9 @@ class BuildRunner {
     } finally {
       status.stop();
     }
+    if (disableKernelGeneration) {
+      return const BuildResult(null, null);
+    }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
     final Directory dartTool = flutterProject.dartTool;
@@ -181,8 +185,10 @@ class BuildRunner {
 
       stringBuffer.writeln('name: synthetic_example');
       stringBuffer.writeln('dependencies:');
-      for (String builder in await flutterProject.builders) {
-        stringBuffer.writeln('  $builder: any');
+      final YamlMap builders = await flutterProject.builders;
+      for (String name in builders.keys) {
+        final YamlNode node = builders[name];
+        stringBuffer.writeln('  $name: $node');
       }
       stringBuffer.writeln('  build_runner: any');
       stringBuffer.writeln('  flutter_build:');
