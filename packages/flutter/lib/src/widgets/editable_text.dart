@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -285,19 +286,24 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.strutStyle}
   /// The strut style used for the vertical layout.
   ///
-  /// Strut is used to establish a predicable vertical layout. Since the font may
-  /// vary depending on user input due to font fallback, [StrutStyle.forceStrutHeight]
-  /// is enabled to lock all lines to the height of the base [TextStyle], provided by
-  /// [style].
+  /// Strut is used to establish a predictable vertical layout. Since fonts may
+  /// vary depending on user input and due to font fallback, [StrutStyle.forceStrutHeight]
+  /// is enabled by default to lock all lines to the height of the base [TextStyle], provided by
+  /// [style]. This ensures the typed text fits within the alotted space.
   ///
-  /// If null, the default value is inherited from the [style] and has
+  /// If null, the strut will is inherit values from the [style] and has
   /// [StrutStyle.forceStrutHeight] set to true.
   ///
-  /// To disable strut-based vertical alignment and allow dynamic vertical layout depending
-  /// on the user's text input, passing [StrutStyle.disabled] will make strut take no
+  /// To disable strut-based vertical alignment and allow dynamic vertical layout based
+  /// on the glyphs typed, passing [StrutStyle.disabled] will make strut take no
   /// effect.
   /// {@endtemplate}
-  get strutStyle => _strutStyle ?? (style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled());
+  StrutStyle get strutStyle {
+    if (_strutStyle == null) {
+      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : const StrutStyle.disabled();
+    }
+    return _strutStyle;
+  }
   final StrutStyle _strutStyle;
 
   /// {@template flutter.widgets.editableText.textAlign}
