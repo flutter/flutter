@@ -168,7 +168,8 @@ abstract class RawKeyEventData {
     return result;
   }
 
-  /// Returns an object representing the physical location of this key.
+  /// Returns an object representing the physical location of this key on a
+  /// QWERTY keyboard.
   ///
   /// {@macro flutter.services.RawKeyEvent.physicalKey}
   ///
