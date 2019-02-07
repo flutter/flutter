@@ -520,7 +520,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
         builder: (BuildContext context, BoxConstraints constraints) {
           latestIndicatorBoxExtent = constraints.maxHeight;
           refreshState = transitionNextState();
-          if (widget.builder != null && lastIndicatorExtent > 0) {
+          if (widget.builder != null && latestIndicatorBoxExtent > 0) {
             return widget.builder(
               context,
               refreshState,
