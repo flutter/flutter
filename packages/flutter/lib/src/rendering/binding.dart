@@ -33,6 +33,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
@@ -167,6 +168,38 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// See [Window.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
+
+  /// {@template on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// The current platform brightness can be queried either from a Flutter
+  /// binding, or from a [MediaQuery] widget.
+  ///
+  /// ## Sample Code
+  ///
+  /// Querying [Window.platformBrightness]:
+  ///
+  /// ```dart
+  /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
+  /// ```
+  ///
+  /// Querying [MediaQuery] directly:
+  ///
+  /// ```dart
+  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  /// ```
+  ///
+  /// Querying [MediaQueryData]:
+  ///
+  /// ```dart
+  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+  /// final Brightness brightness = mediaQueryData.platformBrightness;
+  /// ```
+  ///
+  /// See [Window.onPlatformBrightnessChanged].
+  /// {@endtemplate}
+  @protected
+  void handlePlatformBrightnessChanged() { }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
