@@ -1,4 +1,4 @@
-Signature: a7e934aefd676fac1ba45d5773925b60
+Signature: 36a800b4fd73b99bfa7017a2123c2129
 
 UNUSED LICENSES:
 
@@ -4405,7 +4405,6 @@ FILE: ../../../third_party/skia/include/core/SkGraphics.h
 FILE: ../../../third_party/skia/include/core/SkMaskFilter.h
 FILE: ../../../third_party/skia/include/core/SkMath.h
 FILE: ../../../third_party/skia/include/core/SkMatrix.h
-FILE: ../../../third_party/skia/include/core/SkMetaData.h
 FILE: ../../../third_party/skia/include/core/SkPaint.h
 FILE: ../../../third_party/skia/include/core/SkPath.h
 FILE: ../../../third_party/skia/include/core/SkPathEffect.h
@@ -4477,7 +4476,6 @@ FILE: ../../../third_party/skia/src/core/SkGraphics.cpp
 FILE: ../../../third_party/skia/src/core/SkMask.h
 FILE: ../../../third_party/skia/src/core/SkMaskFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrix.cpp
-FILE: ../../../third_party/skia/src/core/SkMetaData.cpp
 FILE: ../../../third_party/skia/src/core/SkModeColorFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkOSFile.h
 FILE: ../../../third_party/skia/src/core/SkPaint.cpp
@@ -4536,6 +4534,8 @@ FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShader.cpp
 FILE: ../../../third_party/skia/src/utils/SkBase64.cpp
 FILE: ../../../third_party/skia/src/utils/SkBase64.h
 FILE: ../../../third_party/skia/src/utils/SkCamera.cpp
+FILE: ../../../third_party/skia/src/utils/SkMetaData.cpp
+FILE: ../../../third_party/skia/src/utils/SkMetaData.h
 FILE: ../../../third_party/skia/src/utils/SkParse.cpp
 FILE: ../../../third_party/skia/src/utils/SkParseColor.cpp
 FILE: ../../../third_party/skia/src/xml/SkDOM.cpp
