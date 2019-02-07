@@ -9,7 +9,7 @@ import 'dart:ui' show AppLifecycleState, Canvas, Image, Picture, PictureRecorder
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart' show defaultShaderWarmUp;
+import 'package:flutter/painting.dart' show ShaderWarmUp, defaultShaderWarmUp;
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -719,7 +719,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
-  void _warmUpSkiaShaderCompilations({void customShaderWarmUp(Canvas canvas)}) {
+  void _warmUpSkiaShaderCompilations({ShaderWarmUp customShaderWarmUp}) {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
@@ -731,7 +731,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
     final Picture picture = recorder.endRecording();
     picture.toImage(1000, 1000).then((Image image){
-      print('image generated!');
+      print('image generated!');  // TODO(liyuqian): TODO TEST REMOVE
     });
   }
 
@@ -753,7 +753,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [scheduleWarmUpFrame] was already called, this call will be ignored.
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
-  void scheduleWarmUpFrame({void customShaderWarmUp(Canvas canvas)}) {
+  void scheduleWarmUpFrame({ShaderWarmUp customShaderWarmUp}) {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
 

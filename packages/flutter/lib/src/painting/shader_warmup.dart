@@ -2,18 +2,28 @@ import 'dart:ui' show Canvas, Offset, Paint, PaintingStyle, Path, PictureRecorde
 
 import 'package:flutter/src/material/colors.dart';
 
-/// Trigger common draw operations to warm up Skia shader compilation cache.
+/// Signature to warm up GPU shader compilation cache.
 ///
-/// When Skia first sees a certain type of draw operation, it needs to compile
-/// the corresponding shader. The compilation can be slow (20ms-200ms). Having
-/// that time as a startup latency is much better than having a jank in the
-/// middle of an animation.
+/// To warm up shaders for a specific draw function, call it with the provided
+/// [canvas]. For example, to warm up path rendering shaders, call
+/// `canvas.drawPath` with desired paths. Assume that [canvas] has a size of
+/// 1000x1000. Drawing outside the range may be clipped.
+///
+/// See also [defaultShaderWarmUp].
+typedef ShaderWarmUp = void Function(Canvas canvas);
+
+/// Trigger common draw operations to warm up GPU shader compilation cache.
+///
+/// When Skia first sees a certain type of draw operations on GPU, it needs to
+/// compile the corresponding shader. The compilation can be slow (20ms-200ms).
+/// Having that time as a startup latency is much better than having a jank in
+/// the middle of an animation.
 ///
 /// Therefore we use this (by default) in [SchedulerBinding.scheduleWarmUpFrame]
 /// to move common shader compilations from animation time to startup time.
 /// Alternatively, [customShaderWarmUp] can be provided to [runApp] to replace
 /// this default warm up function.
-void defaultShaderWarmUp(Canvas canvas) {
+ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   final Path path = Path();
   path.moveTo(20, 60);
   path.quadraticBezierTo(60, 20, 60, 60);
@@ -49,5 +59,5 @@ void defaultShaderWarmUp(Canvas canvas) {
   canvas.drawShadow(rrectPath, Colors.black, 10.0, true);
   canvas.translate(80, 0);
   canvas.drawShadow(rrectPath, Colors.black, 10.0, false);
-}
+};
 

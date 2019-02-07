@@ -771,7 +771,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///    ensure the widget, element, and render trees are all built.
 ///  * [defaultShaderWarmUp], which will be used to warm up Skia shader
 ///    compilations if [customShaderWarmUp] is null.
-void runApp(Widget app, {void customShaderWarmUp(Canvas canvas)}) {
+void runApp(Widget app, {ShaderWarmUp customShaderWarmUp}) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
     ..scheduleWarmUpFrame(customShaderWarmUp: customShaderWarmUp);
