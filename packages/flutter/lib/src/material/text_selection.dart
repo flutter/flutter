@@ -37,6 +37,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+  
     if (handleCut != null)
       items.add(FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut));
     if (handleCopy != null)
@@ -45,6 +46,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
     if (handleSelectAll != null)
       items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
+
     return Material(
       elevation: 1.0,
       child: Container(
