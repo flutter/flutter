@@ -180,7 +180,7 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),

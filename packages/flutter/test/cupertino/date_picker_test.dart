@@ -247,7 +247,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 50.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -268,7 +268,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('9'), const Offset(0.0, 50.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -454,7 +454,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('March'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('March'), const Offset(0.0, 60.0));
       // Momentarily, the 2018 and the incorrect 30 of February is aligned.
       expect(
         tester.getTopLeft(find.text('2018')).dy,

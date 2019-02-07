@@ -562,7 +562,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -1057,7 +1057,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);

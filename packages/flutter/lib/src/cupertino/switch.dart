@@ -60,7 +60,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(dragStartBehavior != null),
        super(key: key);
 
@@ -149,7 +149,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeColor,
     this.onChanged,
     this.vsync,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final bool value;
@@ -202,7 +202,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),

@@ -796,7 +796,7 @@ class Scaffold extends StatefulWidget {
     this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
     this.primary = true,
-    this.drawerDragStartBehavior = DragStartBehavior.down,
+    this.drawerDragStartBehavior = DragStartBehavior.start,
   }) : assert(primary != null),
        assert(drawerDragStartBehavior != null),
        super(key: key);

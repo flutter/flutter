@@ -91,7 +91,7 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        assert(dragStartBehavior != null),

@@ -81,7 +81,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),

@@ -230,7 +230,7 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(context != null),
        _value = value {
@@ -468,7 +468,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
     @required this.selectionControls,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final TextSelection selection;
