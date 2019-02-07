@@ -547,6 +547,7 @@ class RenderEditable extends RenderBox {
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
+    markNeedsTextLayout();
     markNeedsPaint();
   }
 
@@ -600,6 +601,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.strutStyle = value;
     markNeedsTextLayout();
+    markNeedsPaint();
   }
 
   /// The color to use when painting the cursor.
