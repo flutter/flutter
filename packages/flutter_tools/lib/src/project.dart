@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:build_runner_core/build_runner_core.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -157,6 +159,43 @@ class FlutterProject {
     final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
     return pubspec['builders'];
   }
+
+//   /// Return the set of all libraries in this project.
+//   List<String> allLibraries(PackageGraph packageGraph, Map<String, Uri> packages, {bool testDir = false}) {
+//     final List<String> result = <String>[];
+//     void traverseSources(Directory directory, String name) {
+//       for (FileSystemEntity entity in directory.listSync(recursive: true)) {
+//         if (entity is File && fs.path.extension(entity.path) == '.dart') {
+//           final Uri uri = packages[name];
+//           if (uri == null) {
+//             continue;
+//           }
+//           final String rootPath = uri.toFilePath();
+//           final String relativeLib = entity.path.substring(rootPath.length);
+//           result.add(relativeLib);
+//         }
+//       }
+//     }
+//     traverseSources(directory.childDirectory('lib'), manifest.appName);
+//     if (testDir) {
+//       traverseSources(directory.childDirectory('test'), manifest.appName);
+//     }
+//     final PackageGraph packageGraph = PackageGraph.forPath(directory.path);
+//     final List<PackageNode> nodes = <PackageNode>[];
+//     final Set<String> visited = Set<String>();
+//     nodes.addAll(packageGraph.allPackages.values);
+//     while (nodes.isNotEmpty) {
+//       final PackageNode node = nodes.removeLast();
+//       if (visited.contains(node.name)) {
+//         continue;
+//       }
+//       visited.add(node.name);
+//       nodes.addAll(node.dependencies);
+//       traverseSources(fs.directory(fs.path.join(node.path, 'lib')), node.name);
+//     }
+//     printTrace(result.join(', '));
+//     return result;
+//   }
 }
 
 /// Represents the iOS sub-project of a Flutter project.

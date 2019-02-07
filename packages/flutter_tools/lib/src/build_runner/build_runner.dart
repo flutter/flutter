@@ -193,6 +193,10 @@ class BuildRunner {
       stringBuffer.writeln('  build_runner: any');
       stringBuffer.writeln('  flutter_build:');
       stringBuffer.writeln('    sdk: flutter');
+      stringBuffer.writeln('dependency_overrides:');
+      stringBuffer.writeln('  build_runner_core:');
+      stringBuffer.writeln('    path: /Users/jonahwilliams/Documents/build/build_runner_core');
+      stringBuffer.writeln('  analyzer: ^0.35.0');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -202,7 +206,7 @@ class BuildRunner {
         checkLastModified: false,
       );
       final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
-      final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
+      final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
     } finally {
       status.stop();
