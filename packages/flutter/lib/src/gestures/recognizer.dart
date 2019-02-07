@@ -354,13 +354,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     assert(state != GestureRecognizerState.ready);
     if (event.pointer == primaryPointer) {
       final bool isPreAcceptSlopPastTolerance =
-          state == GestureRecognizerState.possible
-          && preAcceptSlopTolerance != null
-          && _getDistance(event) > preAcceptSlopTolerance;
+          state == GestureRecognizerState.possible &&
+          preAcceptSlopTolerance != null &&
+          _getDistance(event) > preAcceptSlopTolerance;
       final bool isPostAcceptSlopPastTolerance =
-          state == GestureRecognizerState.accepted
-          && postAcceptSlopTolerance != null
-          && _getDistance(event) > postAcceptSlopTolerance;
+          state == GestureRecognizerState.accepted &&
+          postAcceptSlopTolerance != null &&
+          _getDistance(event) > postAcceptSlopTolerance;
 
       if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
         resolve(GestureDisposition.rejected);
@@ -395,11 +395,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void rejectGesture(int pointer) {
-    // Ignore state ready here because that would happen if this recognizer won
-    // by a sweep.
     if (pointer == primaryPointer
-        && (state == GestureRecognizerState.possible
-            || state == GestureRecognizerState.accepted)) {
+        && (state == GestureRecognizerState.possible ||
+            state == GestureRecognizerState.accepted)) {
       _stopTimer();
       state = GestureRecognizerState.defunct;
     }
