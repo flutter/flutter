@@ -665,16 +665,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
     if (widget.selectionEnabled) {
-      // We can't break the API for SelectionChangedCause now.
-      // The various SelectionChangedCause.tap below are really meant to imply
-      // "don't show the text selection toolbar" in
-      // EditableTextState._handleSelectionChanged while the cursor is still
-      // being dragged around.
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
           _renderEditable.selectPositionAt(
             from: details.globalPosition,
-            cause: SelectionChangedCause.tap,
+            cause: SelectionChangedCause.longPress,
           );
           break;
         case TargetPlatform.android:
@@ -694,11 +689,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         case TargetPlatform.iOS:
           _renderEditable.selectPositionAt(
             from: details.globalPosition,
-            // We can't break the API for SelectionChangedCause now.
-            // SelectionChangedCause.tap is really meant to imply "don't show the text
-            // selection toolbar" in EditableTextState._handleSelectionChanged
-            // while the cursor is still being dragged around.
-            cause: SelectionChangedCause.tap,
+            cause: SelectionChangedCause.longPress,
           );
           break;
         case TargetPlatform.android:
@@ -711,10 +702,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
     if (widget.selectionEnabled) {
-      // We can't break the API for SelectionChangedCause now.
-      // The various SelectionChangedCause.longPress below are really meant to
-      // imply "show the text selection toolbar" in
-      // EditableTextState._handleSelectionChanged once the drag is finished.
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
           _renderEditable.selectPositionAt(
