@@ -24,6 +24,13 @@ typedef ShaderWarmUp = void Function(Canvas canvas);
 /// Alternatively, [customShaderWarmUp] can be provided to [runApp] to replace
 /// this default warm up function.
 ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
+  final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
+  final Path rrectPath = Path()..addRRect(rrect);
+
+  final Path circlePath = Path()..addOval(
+    Rect.fromCircle(center: const Offset(40, 40), radius: 20)
+  );
+
   // The following path is copied from
   // https://skia.org/user/api/SkCanvas_Reference#SkCanvas_drawPath
   final Path path = Path();
@@ -33,24 +40,26 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   path.moveTo(60, 20);
   path.quadraticBezierTo(60, 60, 20, 60);
 
-  final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
-  final Path rrectPath = Path()..addRRect(rrect);
+  final List<Path> paths = <Path>[rrectPath, circlePath, path];
 
-  final Path circlePath = Path()..addOval(
-    Rect.fromCircle(center: const Offset(40, 40), radius: 20)
-  );
-
-  final List<Path> paths = <Path>[path, rrectPath, circlePath];
-
-  final Paint paint = Paint();
-  paint.strokeWidth = 10;
-  paint.isAntiAlias = true;
+  final List<Paint> paints = <Paint>[
+    Paint()
+      ..isAntiAlias = true
+      ..style = PaintingStyle.fill,
+    Paint()
+      ..isAntiAlias = true
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10,
+    Paint()
+      ..isAntiAlias = true
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.1  // hairline
+  ];
 
   // Warm up path stroke and fill shaders.
   for (Path path in paths) {
     canvas.save();
-    for (PaintingStyle paintingStyle in PaintingStyle.values) {
-      paint.style = paintingStyle;
+    for (Paint paint in paints) {
       canvas.drawPath(path, paint);
       canvas.translate(80, 0);
     }
@@ -71,7 +80,7 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
     ParagraphStyle(textDirection: TextDirection.ltr),
   )..pushStyle(TextStyle(color: Colors.black))..addText('Hello, world.');
   final Paragraph paragraph = paragraphBuilder.build()
-    ..layout(const ParagraphConstraints(width: 1000));
+    ..layout(const ParagraphConstraints(width: 60));
   canvas.drawParagraph(paragraph, const Offset(20, 20));
 };
 
