@@ -815,7 +815,11 @@ class _RenderDecoration extends RenderBox {
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     BoxConstraints boxConstraints = expands
-      ? layoutConstraints : layoutConstraints.loosen();
+      ? layoutConstraints.deflate(EdgeInsets.only(
+          top: contentPadding.top,
+          bottom: contentPadding.bottom,
+        ))
+      : layoutConstraints.loosen();
     double aboveBaseline = 0.0;
     double belowBaseline = 0.0;
     void layoutLineBox(RenderBox box) {
