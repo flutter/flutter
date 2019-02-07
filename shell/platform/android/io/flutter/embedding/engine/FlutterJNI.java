@@ -199,7 +199,7 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   private void handlePlatformMessage(final String channel, byte[] message, final int replyId) {
     if (platformMessageHandler != null) {
-      platformMessageHandler.handlePlatformMessage(channel, message, replyId);
+      platformMessageHandler.handleMessageFromDart(channel, message, replyId);
     }
     // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
   }

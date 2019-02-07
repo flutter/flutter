@@ -179,7 +179,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     private final class PlatformMessageHandlerImpl implements PlatformMessageHandler {
         // Called by native to send us a platform message.
-        public void handlePlatformMessage(final String channel, byte[] message, final int replyId) {
+        public void handleMessageFromDart(final String channel, byte[] message, final int replyId) {
             assertAttached();
             BinaryMessageHandler handler = mMessageHandlers.get(channel);
             if (handler != null) {
@@ -190,7 +190,7 @@ public class FlutterNativeView implements BinaryMessenger {
                         @Override
                         public void reply(ByteBuffer reply) {
                             if (!isAttached()) {
-                                Log.d(TAG, "handlePlatformMessage replying ot a detached view, channel=" + channel);
+                                Log.d(TAG, "handleMessageFromDart replying ot a detached view, channel=" + channel);
                                 return;
                             }
                             if (done.getAndSet(true)) {
