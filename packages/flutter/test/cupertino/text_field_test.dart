@@ -1199,6 +1199,52 @@ void main() {
   );
 
   testWidgets(
+    'toolbar does not show the paste menu if the clipboard is empty', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+
+      Clipboard.setData(const ClipboardData(text: null));
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 1 button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
+
+      Clipboard.setData(const ClipboardData(text: 'alright now there is some text!'));
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 2 buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
+    },
+  );
+
+  testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -37,19 +37,24 @@ class Clipboard {
   ///
   /// If the user has recently started their device and the user has not yet
   /// copied anything, this value will be true.
-  static bool get isEmpty  => _isEmpty;
+  static bool get isEmpty => _isEmpty;
   static bool _isEmpty;
 
 
   /// Initializes the [isEmpty] variable with whether or not the clipboard is
   /// currently empty.
   ///
+  /// Returns the value of [isEmpty].
   static Future<void> queryEmpty() async {
     final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
       kTextPlain,
     );
     _isEmpty = result == null;
+    if (result != null) {
+      String text = result['text'];
+      _isEmpty = text == null || text == '';
+    }
     return isEmpty;
   }
 
