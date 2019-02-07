@@ -386,23 +386,26 @@ class EditableText extends StatefulWidget {
   /// The minimum number of lines to occupy when the content spans fewer lines.
   ///
   /// Unlike [maxLines], this cannot be null.
+  ///
+  /// When [expands] is true, this can be used to set a minimum number of lines
+  /// for the input to expand from as content is entered.  If [maxLines] is not
+  /// null, then the input will grow between the min and max.
   /// {@endtemplate}
-  // TODO(justinmc): improve documentation
   final int minLines;
 
   /// {@template flutter.widgets.editableText.expands}
   /// Whether this widget can be sized based on its content or a parent Expanded
   /// widget.
   ///
-  /// If true, TextField will increase its height as content is entered by the
-  /// user. If [maxLines] is set, it will stop expanding at that number of
-  /// lines.
-
-  /// If set to true and wrapped in an [Expanded] widget, the TextField will
-  /// size itself based on the parent widget.
+  /// If set to true and wrapped in an [Expanded] widget, the input will expand
+  /// its height to fill the parent.
+  ///
+  /// If not wrapped in an [Expanded] widget, the input will increase its height
+  /// as content is entered. It will respect [minLines] and [maxLines] if set.
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
+  // TODO(justinmc): Should this be nullable?
   final bool expands;
 
   /// {@template flutter.widgets.editableText.autofocus}

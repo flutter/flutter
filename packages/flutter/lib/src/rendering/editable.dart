@@ -686,8 +686,9 @@ class RenderEditable extends RenderBox {
     markNeedsTextLayout();
   }
 
-  // TODO(justinmc): document
-  /// Docs coming soon!
+  // TODO(justinmc): Is it ok to use the editableText docs here? I guess
+  // maxLines did not so that it can add the part about the render object height
+  /// {@macro flutter.widgets.editableText.minLines}
   int get minLines => _minLines;
   int _minLines;
   /// The value must be greater than zero and cannot be null.
@@ -699,14 +700,9 @@ class RenderEditable extends RenderBox {
     markNeedsTextLayout();
   }
 
-  /// Whether this text field should increase its height incrementally until
-  /// reach the [maxLines].
-  ///
-  /// If true, the text field will increase its height until reach the max lines.
-  /// Otherwise, the text field will start its height respecting [maxLines] size.
+  /// {@macro flutter.widgets.editableText.expands}
   bool get expands => _expands;
   bool _expands;
-  /// The value may be null. If it is not null, then it must be greater than zero.
   set expands(bool value) {
     assert(value != null);
     if (expands == value)
