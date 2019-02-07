@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
+
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -30,14 +32,15 @@ class PrecacheCommand extends FlutterCommand {
       cache.includeAllPlatforms = true;
     }
     // Intentionally set to null to download all artifacts.
-    if (cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false) && !argResults['force']) {
+    final UpdateResult result = cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false);
+    if (result.isUpToDate && !result.clobber && !argResults['force']) {
       printStatus('Already up-to-date.');
     } else {
       await cache.updateAll(
         buildMode: null,
         targetPlatform: null,
         skipUnknown: false,
-        clobber: argResults['force'],
+        clobber: argResults['force'] || result.clobber,
       );
     }
     return const FlutterCommandResult(ExitStatus.success);

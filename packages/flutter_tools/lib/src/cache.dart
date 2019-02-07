@@ -188,11 +188,20 @@ class Cache {
     return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate({
+  UpdateResult isUpToDate({
     BuildMode buildMode,
     TargetPlatform targetPlatform,
     bool skipUnknown = true,
-  }) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown));
+  }) {
+    bool isUpToDate = true;
+    bool clobber = false;
+    for (CachedArtifact artifact in _artifacts) {
+      final UpdateResult result =  artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+      isUpToDate &= result.isUpToDate;
+      clobber |= result.clobber;
+    }
+    return UpdateResult(isUpToDate: isUpToDate, clobber: clobber);
+  }
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
@@ -226,8 +235,14 @@ class Cache {
     }
     try {
       for (CachedArtifact artifact in _artifacts) {
-        if (clobber || !artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
-          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: clobber);
+        bool localClobber = clobber;
+        if (localClobber) {
+          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: localClobber);
+        }
+        final UpdateResult result = artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+        localClobber |= result.clobber;
+        if (localClobber || !result.isUpToDate) {
+          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: localClobber);
         }
       }
     } on SocketException catch (e) {
@@ -242,6 +257,13 @@ class Cache {
       rethrow;
     }
   }
+}
+
+class UpdateResult {
+  const UpdateResult({this.isUpToDate, this.clobber});
+
+  final bool isUpToDate;
+  final bool clobber;
 }
 
 /// An artifact managed by the cache.
@@ -260,21 +282,22 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
-  bool isUpToDate({
+  UpdateResult isUpToDate({
     BuildMode buildMode,
     TargetPlatform targetPlatform,
     bool skipUnknown = true,
   }) {
     if (!location.existsSync()) {
-      return false;
+      return const UpdateResult(isUpToDate: false, clobber: false);
     } if (version != cache.getStampFor(name)) {
-      return false;
+      return const UpdateResult(isUpToDate: false, clobber: true);
     }
-    return isUpToDateInner(
+    final bool result = isUpToDateInner(
       buildMode: buildMode,
       targetPlatform: targetPlatform,
       skipUnknown: skipUnknown,
     );
+    return UpdateResult(isUpToDate: result, clobber: false);
   }
 
   Future<void> update({
