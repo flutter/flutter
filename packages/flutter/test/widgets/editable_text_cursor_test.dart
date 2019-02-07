@@ -71,6 +71,7 @@ void main() {
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -125,6 +126,7 @@ void main() {
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pump();
 
     await tester.tap(find.text('PASTE'));
