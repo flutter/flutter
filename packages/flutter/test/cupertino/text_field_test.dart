@@ -67,7 +67,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 32), // 29 is the height of the default font + padding etc.
+        const Size(200, 29), // 29 is the height of the default font + padding etc.
       );
     },
   );
@@ -112,7 +112,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 72),
+        const Size(200, 63),
       );
     },
   );
@@ -519,7 +519,7 @@ void main() {
         100.0 + 20.0,
       );
 
-      expect(tester.getTopLeft(find.byType(EditableText)).dy, 290.0);
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.5);
 
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
@@ -545,7 +545,7 @@ void main() {
 
       // Since the highest component, the prefix box, is higher than
       // the text + paddings, the text's vertical position isn't affected.
-      expect(tester.getTopLeft(find.byType(EditableText)).dy, 290.0);
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.5);
 
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
@@ -745,7 +745,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
-        32.0,
+        29.0,
       );
 
       await tester.pumpWidget(
@@ -763,7 +763,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
-        69.0,
+        62.0,
       );
     },
   );
@@ -842,7 +842,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
-        32.0, // Initially one line high.
+        29.0, // Initially one line high.
       );
 
       await tester.enterText(find.byType(CupertinoTextField), '\n');
@@ -850,7 +850,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
-        52.0, // Initially one line high.
+        46.0, // Initially one line high.
       );
     },
   );

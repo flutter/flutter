@@ -2766,8 +2766,8 @@ void main() {
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
     // Strut is not vertically rounded, so use actual values here instead of rowBottomY
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(312.4326171875, 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(314.64892578125, 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 

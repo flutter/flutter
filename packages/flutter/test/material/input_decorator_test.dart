@@ -323,8 +323,8 @@ void main() {
     // alignLabelWithHint: false centers the label in the TextField
     await tester.pumpWidget(buildFrame(false));
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 84.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 100.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
 
     // alignLabelWithHint: true aligns the label with the hint.
     await tester.pumpWidget(buildFrame(true));
