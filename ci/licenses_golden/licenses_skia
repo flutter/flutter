@@ -1,4 +1,4 @@
-Signature: f4ff8040dcefe800abe8f206b00e11a4
+Signature: 4429bc6b2c346cb26cff0ef1e4042cf7
 
 UNUSED LICENSES:
 
@@ -695,8 +695,6 @@ FILE: ../../../third_party/skia/src/gpu/GrAppliedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBitmapTextureMaker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBitmapTextureMaker.h
-FILE: ../../../third_party/skia/src/gpu/GrBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/GrBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.cpp
 FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.h
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.cpp
@@ -4350,9 +4348,13 @@ FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBaseContextPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxy.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContext_Base.cpp
+FILE: ../../../third_party/skia/src/gpu/GrCpuBuffer.h
+FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
