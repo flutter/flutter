@@ -123,7 +123,7 @@ void main() {
       );
 
       // Drag down but not enough to trigger the refresh.
-      await tester.drag(find.text('0'), const Offset(0.0, 50.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 68.0));
       await tester.pump();
 
       // The function is referenced once while passing into CupertinoSliverRefreshControl
