@@ -408,11 +408,15 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
     options.fFrameIndex = nextFrameIndex_;
     const int requiredFrameIndex = frameInfos_[nextFrameIndex_].fRequiredFrame;
     if (requiredFrameIndex != SkCodec::kNoFrame) {
-      if (lastRequiredFrame_ == nullptr ||
-          lastRequiredFrameIndex_ != requiredFrameIndex) {
+      if (lastRequiredFrame_ == nullptr) {
         FML_LOG(ERROR) << "Frame " << nextFrameIndex_ << " depends on frame "
-                       << requiredFrameIndex << " which has not been cached.";
+                       << requiredFrameIndex
+                       << " and no required frames are cached.";
         return NULL;
+      } else if (lastRequiredFrameIndex_ != requiredFrameIndex) {
+        FML_DLOG(INFO) << "Required frame " << requiredFrameIndex
+                       << " is not cached. Using " << lastRequiredFrameIndex_
+                       << " instead";
       }
 
       if (lastRequiredFrame_->getPixels() &&
