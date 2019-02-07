@@ -9,7 +9,7 @@ package io.flutter.embedding.engine.dart;
  * IF YOU USE IT, WE WILL BREAK YOU.
  */
 public interface PlatformMessageHandler {
-  void handlePlatformMessage(final String channel, byte[] message, final int replyId);
+  void handleMessageFromDart(final String channel, byte[] message, final int replyId);
 
   void handlePlatformMessageResponse(int replyId, byte[] reply);
 }

@@ -11,6 +11,11 @@ import java.nio.ByteBuffer;
  * The Flutter Dart code should use
  * <a href="https://docs.flutter.io/flutter/services/BinaryMessages-class.html">BinaryMessages</a>
  * to participate.
+ * <p>
+ * {@code BinaryMessenger} is expected to be utilized from a single thread throughout the duration
+ * of its existence. If created on the main thread, then all invocations should take place on the
+ * main thread. If created on a background thread, then all invocations should take place on that
+ * background thread.
  *
  * @see BasicMessageChannel , which supports message passing with Strings and semi-structured messages.
  * @see MethodChannel , which supports communication using asynchronous method invocation.

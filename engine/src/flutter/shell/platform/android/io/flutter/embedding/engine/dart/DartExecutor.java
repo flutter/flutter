@@ -37,29 +37,33 @@ import io.flutter.view.FlutterCallbackInformation;
  */
 public class DartExecutor implements BinaryMessenger {
   private static final String TAG = "DartExecutor";
-  
+
+  @NonNull
   private final FlutterJNI flutterJNI;
+  @NonNull
   private final DartMessenger messenger;
   private boolean isApplicationRunning = false;
-  
+
   public DartExecutor(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.messenger = new DartMessenger(flutterJNI);
   }
-  
+
   /**
    * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this
    * {@link DartExecutor} attaches to JNI.
    * <p>
    * When attached to JNI, this {@link DartExecutor} begins handling 2-way communication to/from
    * the Dart execution context. This communication is facilitate via 2 APIs:
-   * - {@link BinaryMessenger}, which sends messages to Dart
-   * - {@link PlatformMessageHandler}, which receives messages from Dart
+   * <ul>
+   *  <li>{@link BinaryMessenger}, which sends messages to Dart</li>
+   *  <li>{@link PlatformMessageHandler}, which receives messages from Dart</li>
+   * </ul>
    */
   public void onAttachedToJNI() {
     flutterJNI.setPlatformMessageHandler(messenger);
   }
-  
+
   /**
    * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this
    * {@link DartExecutor} detaches from JNI.
@@ -70,7 +74,7 @@ public class DartExecutor implements BinaryMessenger {
   public void onDetachedFromJNI() {
     flutterJNI.setPlatformMessageHandler(null);
   }
-  
+
   /**
    * Is this {@link DartExecutor} currently executing Dart code?
    *
@@ -79,7 +83,7 @@ public class DartExecutor implements BinaryMessenger {
   public boolean isExecutingDart() {
     return isApplicationRunning;
   }
-  
+
   /**
    * Starts executing Dart code based on the given {@code dartEntrypoint}.
    * <p>
@@ -87,12 +91,12 @@ public class DartExecutor implements BinaryMessenger {
    *
    * @param dartEntrypoint specifies which Dart function to run, and where to find it
    */
-  public void executeDartEntrypoint(DartEntrypoint dartEntrypoint) {
+  public void executeDartEntrypoint(@NonNull DartEntrypoint dartEntrypoint) {
     if (isApplicationRunning) {
       Log.w(TAG, "Attempted to run a DartExecutor that is already running.");
       return;
     }
-    
+
     flutterJNI.runBundleAndSnapshotFromLibrary(
         new String[]{
             dartEntrypoint.pathToPrimaryBundle,
@@ -102,10 +106,10 @@ public class DartExecutor implements BinaryMessenger {
         null,
         dartEntrypoint.androidAssetManager
     );
-    
+
     isApplicationRunning = true;
   }
-  
+
   /**
    * Starts executing Dart code based on the given {@code dartCallback}.
    * <p>
@@ -113,12 +117,12 @@ public class DartExecutor implements BinaryMessenger {
    *
    * @param dartCallback specifies which Dart callback to run, and where to find it
    */
-  public void executeDartCallback(DartCallback dartCallback) {
+  public void executeDartCallback(@NonNull DartCallback dartCallback) {
     if (isApplicationRunning) {
       Log.w(TAG, "Attempted to run a DartExecutor that is already running.");
       return;
     }
-    
+
     flutterJNI.runBundleAndSnapshotFromLibrary(
         new String[]{
             dartCallback.pathToPrimaryBundle,
@@ -128,12 +132,12 @@ public class DartExecutor implements BinaryMessenger {
         dartCallback.callbackHandle.callbackLibraryPath,
         dartCallback.androidAssetManager
     );
-    
+
     isApplicationRunning = true;
   }
-  
+
   //------ START BinaryMessenger -----
-  
+
   /**
    * Sends the given {@code message} from Android to Dart over the given {@code channel}.
    *
@@ -141,10 +145,10 @@ public class DartExecutor implements BinaryMessenger {
    * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
    */
   @Override
-  public void send(String channel, ByteBuffer message) {
+  public void send(@NonNull String channel, @Nullable ByteBuffer message) {
     messenger.send(channel, message, null);
   }
-  
+
   /**
    * Sends the given {@code messages} from Android to Dart over the given {@code channel} and
    * then has the provided {@code callback} invoked when the Dart side responds.
@@ -155,10 +159,10 @@ public class DartExecutor implements BinaryMessenger {
    * @param callback a callback invoked when the Dart application responds to the message
    */
   @Override
-  public void send(String channel, ByteBuffer message, BinaryMessenger.BinaryReply callback) {
+  public void send(@NonNull String channel, @Nullable ByteBuffer message, @Nullable BinaryMessenger.BinaryReply callback) {
     messenger.send(channel, message, callback);
   }
-  
+
   /**
    * Sets the given {@link io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler} as the
    * singular handler for all incoming messages received from the Dart side of this Dart execution
@@ -168,11 +172,11 @@ public class DartExecutor implements BinaryMessenger {
    * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
    */
   @Override
-  public void setMessageHandler(String channel, BinaryMessenger.BinaryMessageHandler handler) {
+  public void setMessageHandler(@NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
     messenger.setMessageHandler(channel, handler);
   }
   //------ END BinaryMessenger -----
-  
+
   /**
    * Configuration options that specify which Dart entrypoint function is executed and where
    * to find that entrypoint and other assets required for Dart execution.
@@ -181,23 +185,27 @@ public class DartExecutor implements BinaryMessenger {
     /**
      * Standard Android AssetManager, provided from some {@code Context} or {@code Resources}.
      */
+    @NonNull
     public final AssetManager androidAssetManager;
-    
+
     /**
      * The first place that Dart will look for a given function or asset.
      */
+    @NonNull
     public final String pathToPrimaryBundle;
-    
+
     /**
      * A secondary fallback location that Dart will look for a given function or asset.
      */
+    @Nullable
     public final String pathToFallbackBundle;
-    
+
     /**
      * The name of a Dart function to execute.
      */
+    @NonNull
     public final String dartEntrypointFunctionName;
-    
+
     public DartEntrypoint(
         @NonNull AssetManager androidAssetManager,
         @NonNull String pathToBundle,
@@ -210,7 +218,7 @@ public class DartExecutor implements BinaryMessenger {
           dartEntrypointFunctionName
       );
     }
-    
+
     public DartEntrypoint(
         @NonNull AssetManager androidAssetManager,
         @NonNull String pathToPrimaryBundle,
@@ -223,7 +231,7 @@ public class DartExecutor implements BinaryMessenger {
       this.dartEntrypointFunctionName = dartEntrypointFunctionName;
     }
   }
-  
+
   /**
    * Configuration options that specify which Dart callback function is executed and where
    * to find that callback and other assets required for Dart execution.
@@ -233,22 +241,22 @@ public class DartExecutor implements BinaryMessenger {
      * Standard Android AssetManager, provided from some {@code Context} or {@code Resources}.
      */
     public final AssetManager androidAssetManager;
-    
+
     /**
      * The first place that Dart will look for a given function or asset.
      */
     public final String pathToPrimaryBundle;
-    
+
     /**
      * A secondary fallback location that Dart will look for a given function or asset.
      */
     public final String pathToFallbackBundle;
-    
+
     /**
      * A Dart callback that was previously registered with the Dart VM.
      */
     public final FlutterCallbackInformation callbackHandle;
-    
+
     public DartCallback(
         @NonNull AssetManager androidAssetManager,
         @NonNull String pathToPrimaryBundle,
@@ -261,7 +269,7 @@ public class DartExecutor implements BinaryMessenger {
           callbackHandle
       );
     }
-    
+
     public DartCallback(
         @NonNull AssetManager androidAssetManager,
         @NonNull String pathToPrimaryBundle,
