@@ -32,6 +32,27 @@ class Clipboard {
   /// Used with [getData].
   static const String kTextPlain = 'text/plain';
 
+
+  /// Whether or not the clipboard is empty.
+  ///
+  /// If the user has recently started their device and the user has not yet
+  /// copied anything, this value will be true.
+  static bool get isEmpty  => _isEmpty;
+  static bool _isEmpty;
+
+
+  /// Initializes the [isEmpty] variable with whether or not the clipboard is
+  /// currently empty.
+  ///
+  static Future<void> queryEmpty() async {
+    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
+      'Clipboard.getData',
+      kTextPlain,
+    );
+    _isEmpty = result == null;
+    return isEmpty;
+  }
+
   /// Stores the given clipboard data on the clipboard.
   static Future<void> setData(ClipboardData data) async {
     await SystemChannels.platform.invokeMethod<void>(
@@ -40,6 +61,8 @@ class Clipboard {
         'text': data.text,
       },
     );
+    if (data?.text != null)
+      _isEmpty = false;
   }
 
   /// Retrieves data from the clipboard that matches the given format.

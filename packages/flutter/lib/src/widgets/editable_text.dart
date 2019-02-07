@@ -605,6 +605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
+    Clipboard.queryEmpty();
   }
 
   @override

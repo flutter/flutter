@@ -112,8 +112,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the paste
   /// functionality to the user.
   bool canPaste(TextSelectionDelegate delegate) {
-    // TODO(goderbauer): return false when clipboard is empty, https://github.com/flutter/flutter/issues/11254
-    return true;
+    return !Clipboard.isEmpty;
   }
 
   /// Whether the current selection of the text field managed by the given
