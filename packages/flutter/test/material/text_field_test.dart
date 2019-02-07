@@ -4132,6 +4132,56 @@ void main() {
     },
   );
 
+  testWidgets('toolbar does not show the paste menu if the clipboard is empty',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+
+      Clipboard.setData(const ClipboardData(text: null));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 1 button.
+      expect(find.byType(FlatButton), findsNWidgets(2));
+
+      Clipboard.setData(const ClipboardData(text: 'alright now there is some text!'));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 2 buttons.
+      expect(find.byType(FlatButton), findsNWidgets(3));
+    },
+  );
+
   testWidgets(
     'long press tap is not a double tap (iOS)',
     (WidgetTester tester) async {

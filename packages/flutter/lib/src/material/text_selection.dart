@@ -133,6 +133,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    print('can cut' + canCut(delegate).toString());
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
