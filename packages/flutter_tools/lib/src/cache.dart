@@ -492,7 +492,7 @@ class FlutterEngine extends CachedArtifact {
   ///   `TargetPlatform.darwin_x64`, or `TargetPlatfrom.windows_x64`. In the
   ///   case where there is no restriction it can be left as null.
   ///   * `buildMode` should be one of `BuildMode.debug`, `BuildMode.profile`,
-  ///   `BuildMode.release`, `BuildMode.dynamicRelease`, or 
+  ///   `BuildMode.release`, `BuildMode.dynamicRelease`, or
   ///   `BuildMode.dynamicProfile`. In the case where it is required regardless
   ///   of buildMode, it can be left null.
   ///   * `targetPlatform` should be one of the supported target platforms.
