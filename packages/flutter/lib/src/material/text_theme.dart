@@ -93,7 +93,7 @@ import 'typography.dart';
 ///  * [Typography], the class that generates [TextTheme]s appropriate for a platform.
 ///  * [Theme], for other aspects of a material design application that can be
 ///    globally adjusted, such as the color scheme.
-///  * <http://material.google.com/style/typography.html>
+///  * <https://material.io/design/typography/>
 @immutable
 class TextTheme extends Diagnosticable {
   /// Creates a text theme that uses the given values.
@@ -102,7 +102,7 @@ class TextTheme extends Diagnosticable {
   /// or [Typography.white], which implement the typography styles in the
   /// material design specification:
   ///
-  /// <https://material.google.com/style/typography.html#typography-styles>
+  /// <https://material.io/design/typography/#type-scale>
   ///
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].

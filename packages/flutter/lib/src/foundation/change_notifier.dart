@@ -195,6 +195,7 @@ class ChangeNotifier implements Listenable {
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
   @protected
+  @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {

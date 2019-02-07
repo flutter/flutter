@@ -10,7 +10,7 @@
 ///
 ///  * [flutter.io/widgets](https://flutter.io/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
-///  * [material.google.com](https://material.google.com/)
+///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
 library material;
 
@@ -29,6 +29,7 @@ export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
+export 'src/material/card_theme.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/chip.dart';

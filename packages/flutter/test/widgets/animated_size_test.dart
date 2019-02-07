@@ -10,9 +10,9 @@ class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-    void noSuchMethod(Invocation invocation) {
-      invocations.add(invocation);
-    }
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }
 
 void main() {

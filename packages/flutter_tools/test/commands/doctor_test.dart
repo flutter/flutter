@@ -4,10 +4,17 @@
 
 import 'dart:async';
 
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
@@ -21,6 +28,12 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 };
 
 void main() {
+  MockProcessManager mockProcessManager;
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+  });
+
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
@@ -290,6 +303,29 @@ void main() {
               '! Doctor found issues in 4 categories.\n'
       ));
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('gen_snapshot does not work', () async {
+      when(mockProcessManager.runSync(
+        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(101, 1, '', ''));
+
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+      final List<String> statusLines = testLogger.statusText.split('\n');
+      for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+        expect(statusLines, contains(contains(msg)));
+      }
+      if (platform.isLinux) {
+        for (String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+          expect(statusLines, contains(contains(msg)));
+        }
+      }
+    }, overrides: <Type, Generator>{
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+      ProcessManager: () => mockProcessManager,
+      Platform: _kNoColorOutputPlatform,
+    });
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
@@ -477,7 +513,7 @@ class PassingValidator extends DoctorValidator {
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator(): super('Missing Validator');
+  MissingValidator() : super('Missing Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -490,7 +526,7 @@ class MissingValidator extends DoctorValidator {
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator(): super('Not Available Validator');
+  NotAvailableValidator() : super('Not Available Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -622,7 +658,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name): super(name);
+  MissingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -633,7 +669,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name): super(name);
+  PartialGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -687,6 +723,15 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }
 }
 
+class FlutterValidatorDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    _validators ??= <DoctorValidator>[FlutterValidator()];
+    return _validators;
+  }
+}
+
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
@@ -702,7 +747,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-      : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
@@ -717,3 +762,5 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}

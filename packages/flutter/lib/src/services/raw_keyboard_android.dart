@@ -23,11 +23,11 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode = 0,
     this.scanCode = 0,
     this.metaState = 0,
-  })  : assert(flags != null),
-        assert(codePoint != null),
-        assert(keyCode != null),
-        assert(scanCode != null),
-        assert(metaState != null);
+  }) : assert(flags != null),
+       assert(codePoint != null),
+       assert(keyCode != null),
+       assert(scanCode != null),
+       assert(metaState != null);
 
   /// The current set of additional flags for this event.
   ///

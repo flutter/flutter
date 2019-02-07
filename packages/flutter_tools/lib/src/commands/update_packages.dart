@@ -640,7 +640,6 @@ class PubspecYaml {
         // place to insert our transitive dependencies.
         if (section == Section.dependencies)
           endOfDirectDependencies = output.length;
-          endOfDevDependencies = output.length;
         if (section == Section.devDependencies)
           endOfDevDependencies = output.length;
         section = data.section; // track which section we're now in.
@@ -904,7 +903,8 @@ class PubspecDependency extends PubspecLine {
     DependencyKind kind,
     this.version,
     this.sourcePath,
-  }) : _kind = kind, super(line);
+  }) : _kind = kind,
+       super(line);
 
   static PubspecDependency parse(String line, { @required String filename }) {
     // We recognize any line that:

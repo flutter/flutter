@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -20,6 +19,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -163,7 +163,7 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
-        // Ignore: return null below.
+        // Ignored, return null below.
       }
     }
     return _xcodeSelectPath;
@@ -480,13 +480,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Starting Xcode build...', timeout: kFastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: kFastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,

@@ -145,6 +145,17 @@ void main() {
       expect(_pointerDown, isTrue);
     });
   });
+
+  test('UnconstrainedBox toString', () {
+    expect(
+      const UnconstrainedBox(constrainedAxis: Axis.vertical,).toString(),
+      equals('UnconstrainedBox(alignment: center, constrainedAxis: vertical)'),
+    );
+    expect(
+      const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
+      equals('UnconstrainedBox(alignment: topRight, constrainedAxis: horizontal, textDirection: rtl)'),
+    );
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
