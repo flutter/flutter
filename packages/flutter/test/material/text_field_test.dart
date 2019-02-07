@@ -898,6 +898,7 @@ void main() {
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
+          strutStyle: StrutStyle.disabled(),
         ),
       ),
     );
@@ -1508,6 +1509,7 @@ void main() {
           decoration: InputDecoration.collapsed(
             hintText: 'hint',
           ),
+          strutStyle: StrutStyle.disabled(),
         ),
       ),
     );
@@ -2122,6 +2124,7 @@ void main() {
             child: TextField(
               controller: controller,
               maxLines: 3,
+              strutStyle: StrutStyle.disabled(),
             ),
           ) ,
         ),
@@ -2663,7 +2666,7 @@ void main() {
     expect(controller.selection.baseOffset, 0);
   });
 
-  testWidgets('TextField baseline alignment', (WidgetTester tester) async {
+  testWidgets('TextField baseline alignment no-strut', (WidgetTester tester) async {
     final TextEditingController controllerA = TextEditingController(text: 'A');
     final TextEditingController controllerB = TextEditingController(text: 'B');
     final Key keyA = UniqueKey();
@@ -2681,6 +2684,59 @@ void main() {
                 decoration: null,
                 controller: controllerA,
                 style: const TextStyle(fontSize: 10.0),
+                strutStyle: StrutStyle.disabled(),
+              )
+            ),
+            const Text(
+              'abc',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            Expanded(
+              child: TextField(
+                key: keyB,
+                decoration: null,
+                controller: controllerB,
+                style: const TextStyle(fontSize: 30.0),
+                strutStyle: StrutStyle.disabled(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
+
+    final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
+  });
+
+  testWidgets('TextField baseline alignment', (WidgetTester tester) async {
+    final TextEditingController controllerA = TextEditingController(text: 'A');
+    final TextEditingController controllerB = TextEditingController(text: 'B');
+    final Key keyA = UniqueKey();
+    final Key keyB = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                key: keyA,
+                decoration: null,
+                controller: controllerA,
+                style: const TextStyle(fontSize: 10.0,),
               )
             ),
             const Text(
@@ -2709,8 +2765,9 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
+    // Strut is not vertically rounded, so use actual values here instead of rowBottomY
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(312.4326171875, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(314.64892578125, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 

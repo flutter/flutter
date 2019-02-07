@@ -591,6 +591,17 @@ class RenderEditable extends RenderBox {
     markNeedsTextLayout();
   }
 
+  /// Used by the renderer's internal [TextPainter] to determine the strut to use.
+  ///
+  /// See [StrutStyle].
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
+    markNeedsTextLayout();
+  }
+
   /// The color to use when painting the cursor.
   Color get cursorColor => _cursorColor;
   Color _cursorColor;

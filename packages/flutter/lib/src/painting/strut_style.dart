@@ -494,6 +494,9 @@ class StrutStyle extends Diagnosticable {
     );
   }
 
+  @override
+  String toStringShort() => '$runtimeType';
+
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
@@ -506,7 +509,7 @@ class StrutStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      weightDescription = '${fontWeight.index + 1}00';
+      weightDescription = 'w${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

@@ -31,6 +31,27 @@ void main() {
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   testWidgets(
+    'takes available space horizontally and takes intrinsic space vertically no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(strutStyle: StrutStyle.disabled()),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 29), // 29 is the height of the default font + padding etc.
+      );
+    },
+  );
+
+  testWidgets(
     'takes available space horizontally and takes intrinsic space vertically',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -46,7 +67,31 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 29), // 29 is the height of the default font + padding etc.
+        const Size(200, 32), // 29 is the height of the default font + padding etc.
+      );
+    },
+  );
+
+  testWidgets(
+    'multi-lined text fields are intrinsically taller no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                strutStyle: StrutStyle.disabled(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 63),
       );
     },
   );
@@ -67,7 +112,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 63),
+        const Size(200, 72),
       );
     },
   );
@@ -396,7 +441,7 @@ void main() {
   );
 
   testWidgets(
-    'padding is in between prefix and suffix',
+    'padding is in between prefix and suffix no-strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -405,6 +450,7 @@ void main() {
               padding: EdgeInsets.all(20.0),
               prefix: SizedBox(height: 100.0, width: 100.0),
               suffix: SizedBox(height: 50.0, width: 50.0),
+              strutStyle: StrutStyle.disabled(),
             ),
           ),
         ),
@@ -430,6 +476,7 @@ void main() {
               padding: EdgeInsets.all(30.0),
               prefix: SizedBox(height: 100.0, width: 100.0),
               suffix: SizedBox(height: 50.0, width: 50.0),
+              strutStyle: StrutStyle.disabled(),
             ),
           ),
         ),
@@ -443,6 +490,62 @@ void main() {
       // Since the highest component, the prefix box, is higher than
       // the text + paddings, the text's vertical position isn't affected.
       expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.5);
+
+      expect(
+        tester.getTopRight(find.byType(EditableText)).dx,
+        800.0 - 50.0 - 30.0,
+      );
+    },
+  );
+
+  testWidgets(
+    'padding is in between prefix and suffix',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.all(20.0),
+              prefix: SizedBox(height: 100.0, width: 100.0),
+              suffix: SizedBox(height: 50.0, width: 50.0),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dx,
+        // Size of prefix + padding.
+        100.0 + 20.0,
+      );
+
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 290.0);
+
+      expect(
+        tester.getTopRight(find.byType(EditableText)).dx,
+        800.0 - 50.0 - 20.0,
+      );
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.all(30.0),
+              prefix: SizedBox(height: 100.0, width: 100.0),
+              suffix: SizedBox(height: 50.0, width: 50.0),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dx,
+        100.0 + 30.0,
+      );
+
+      // Since the highest component, the prefix box, is higher than
+      // the text + paddings, the text's vertical position isn't affected.
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 290.0);
 
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
@@ -591,12 +694,14 @@ void main() {
   );
 
   testWidgets(
-    'font style controls intrinsic height',
+    'font style controls intrinsic height no-strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
-            child: CupertinoTextField(),
+            child: CupertinoTextField(
+              strutStyle: StrutStyle.disabled(),
+            ),
           ),
         ),
       );
@@ -614,6 +719,7 @@ void main() {
                 // A larger font.
                 fontSize: 50.0,
               ),
+              strutStyle: StrutStyle.disabled(),
             ),
           ),
         ),
@@ -622,6 +728,42 @@ void main() {
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
         62.0,
+      );
+    },
+  );
+
+  testWidgets(
+    'font style controls intrinsic height',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        32.0,
+      );
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              style: TextStyle(
+                // A larger font.
+                fontSize: 50.0,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        69.0,
       );
     },
   );
@@ -657,13 +799,14 @@ void main() {
   );
 
   testWidgets(
-    'text fields with no max lines can grow',
+    'text fields with no max lines can grow no-strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
             child: CupertinoTextField(
               maxLines: null,
+              strutStyle: StrutStyle.disabled(),
             ),
           ),
         ),
@@ -680,6 +823,34 @@ void main() {
       expect(
         tester.getSize(find.byType(CupertinoTextField)).height,
         46.0, // Initially one line high.
+      );
+    },
+  );
+
+  testWidgets(
+    'text fields with no max lines can grow',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              maxLines: null,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        32.0, // Initially one line high.
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), '\n');
+      await tester.pump();
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        52.0, // Initially one line high.
       );
     },
   );

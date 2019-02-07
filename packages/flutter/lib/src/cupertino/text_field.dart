@@ -615,7 +615,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = widget.style ?? themeData.textTheme.textStyle;
+    final TextStyle textStyle = widget.style != null ? themeData.textTheme.textStyle.merge(widget.style) : themeData.textTheme.textStyle;
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
 
     final Widget paddedEditable = Padding(
