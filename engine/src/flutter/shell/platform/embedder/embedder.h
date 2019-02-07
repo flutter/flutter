@@ -218,6 +218,14 @@ typedef struct {
   // The command line arguments used to initialize the project. The strings can
   // be collected after the call to |FlutterEngineRun| returns. The strings must
   // be NULL terminated.
+  // Note: The first item in the command line (if specificed at all) is
+  // interpreted as the executable name. So if an engine flag needs to be passed
+  // into the same, it needs to not be the very first item in the list. The set
+  // of engine flags are only meant to control unstable features in the engine.
+  // Deployed applications should not pass any command line arguments at all as
+  // they may affect engine stability at runtime in the presence of unsanitized
+  // input. The list of currently recognized engine flags and their descriptions
+  // can be retrieved from the |switches.h| engine source file.
   const char* const* command_line_argv;
   // The callback invoked by the engine in order to give the embedder the chance
   // to respond to platform messages from the Dart application. The callback
