@@ -106,7 +106,7 @@ Future<GradleProject> _readGradleProject() async {
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:tasks', '--all'],
+      <String>[gradle, 'app:tasks', '--all', '--console=auto'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );

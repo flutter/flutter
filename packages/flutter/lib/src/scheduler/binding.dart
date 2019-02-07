@@ -203,8 +203,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerNumericServiceExtension(
         name: 'timeDilation',
         getter: () async => timeDilation,
