@@ -6,7 +6,7 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "lib/ui/scenic/fidl_helpers.h"  // nogncheck
+#include "lib/ui/scenic/cpp/commands.h"
 
 #endif  // defined(OS_FUCHSIA)
 
