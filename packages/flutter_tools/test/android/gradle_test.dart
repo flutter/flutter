@@ -73,8 +73,7 @@ void main() {
       final List<String> matchingLines = <String>[
         '*********************************************************************************************************************************',
         "WARNING: This version of image_picker will break your Android build if it or its dependencies aren't compatible with AndroidX.",
-        'https://goo.gl/y9dCcU describes AndroidX and how to migrate to it using Android Studio.',
-        "https://goo.gl/n2E4mD describes how to open a Flutter app's Android files for refactoring in Android Studio.",
+        'See https://goo.gl/CP92wY for more information on the problem and how to fix it.',
         'This warning prints for all Android build failures. The real root cause of the error may be unrelated.',
       ];
       for (String m in nonMatchingLines) {
