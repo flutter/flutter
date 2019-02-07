@@ -161,11 +161,28 @@ class AndroidApk extends ApplicationPackage {
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
-    for (xml.XmlElement category in document.findAllElements('category')) {
-      if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
-        final xml.XmlElement activity = category.parent.parent;
-        final String enabled = activity.getAttribute('android:enabled');
-        if (enabled == null || enabled == 'true') {
+    for (xml.XmlElement activity in document.findAllElements('activity')) {
+      final String enabled = activity.getAttribute('android:enabled');
+      if (enabled != null && enabled == 'false') {
+        continue;
+      }
+
+      for (xml.XmlElement element in activity.findElements('intent-filter')) {
+        String actionName = '';
+        String categoryName = '';
+        for (xml.XmlNode node in element.children) {
+          if (!(node is xml.XmlElement)) {
+            continue;
+          }
+          final xml.XmlElement xmlElement = node;
+          final String name = xmlElement.getAttribute('android:name');
+          if (name == 'android.intent.action.MAIN') {
+            actionName = name;
+          } else if (name == 'android.intent.category.LAUNCHER') {
+            categoryName = name;
+          }
+        }
+        if (actionName.isNotEmpty && categoryName.isNotEmpty) {
           final String activityName = activity.getAttribute('android:name');
           launchActivity = '$packageId/$activityName';
           break;
@@ -444,8 +461,33 @@ class ApkManifestData {
     _Element launchActivity;
     for (_Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
-      if (enabled == null || enabled.value.contains('0xffffffff')) {
-        launchActivity = activity;
+      final Iterable<_Element> intentFilters = activity
+          .allElements('intent-filter')
+          .cast<_Element>();
+      final bool isEnabledByDefault = enabled == null;
+      final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
+      if (!(isEnabledByDefault || isExplicitlyEnabled)) {
+        continue;
+      }
+
+      for (_Element element in intentFilters) {
+        final _Element action = element.firstElement('action');
+        final _Element category = element.firstElement('category');
+        final String actionAttributeValue = action
+            ?.firstAttribute('android:name')
+            ?.value;
+        final String categoryAttributeValue =
+            category?.firstAttribute('android:name')?.value;
+        final bool isMainAction = actionAttributeValue != null &&
+            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
+        final bool isLauncherCategory = categoryAttributeValue != null &&
+            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
+        if (isMainAction && isLauncherCategory) {
+          launchActivity = activity;
+          break;
+        }
+      }
+      if (launchActivity != null) {
         break;
       }
     }
