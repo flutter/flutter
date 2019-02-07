@@ -1160,14 +1160,14 @@ void main() {
 
       expect(lastCharEndpoint.length, 1);
       // The last character is now on screen.
-      expect(lastCharEndpoint[0].point.dx, 786);
+      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73486328125));
 
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // Last character's position.
+      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 0), // First character's position.
       );
-      expect(lastCharEndpoint.length, 1);
+      expect(firstCharEndpoint.length, 1);
       // The first character is now offscreen to the left.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(-308.93986327946186));
+      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20499999821186));
   });
 
   testWidgets(

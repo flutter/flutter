@@ -503,7 +503,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    if (selection.isCollapsed) {
+    if (cause == SelectionChangedCause.longPress) {
       _editableTextKey.currentState?.bringIntoView(selection.base);
     }
   }
