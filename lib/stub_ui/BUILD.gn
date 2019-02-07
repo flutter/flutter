@@ -22,7 +22,7 @@ copy("stub_ui") {
   ]
 
   deps = [
-    ":stub_libraries"
+    ":stub_libraries",
   ]
 
   outputs = [
