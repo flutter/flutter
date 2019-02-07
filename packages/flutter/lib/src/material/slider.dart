@@ -601,7 +601,7 @@ class _RenderSlider extends RenderBox {
     _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.tickMarkShape.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
   ];
-  double get _minPreferredTrackHeight =>_sliderTheme.trackHeight;
+  double get _minPreferredTrackHeight => _sliderTheme.trackHeight;
 
   _SliderState _state;
   Animation<double> _overlayAnimation;

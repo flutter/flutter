@@ -478,6 +478,45 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  testWidgets('can only show toolbar when there is text and a selection',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(state.showToolbar(), false);
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    controller.text = 'blah';
+    await tester.pump();
+    expect(state.showToolbar(), false);
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -513,6 +552,7 @@ void main() {
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pump();
 
     await tester.tap(find.text('PASTE'));
