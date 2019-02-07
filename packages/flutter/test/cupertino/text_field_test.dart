@@ -118,6 +118,61 @@ void main() {
   );
 
   testWidgets(
+    'strut height override',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                strutStyle: StrutStyle(
+                  fontSize: 8,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 36),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut forces field taller',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                style: TextStyle(fontSize: 10),
+                strutStyle: StrutStyle(
+                  fontSize: 18,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 66),
+      );
+    },
+  );
+
+  testWidgets(
     'default text field has a border',
     (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -4512,4 +4512,180 @@ void main() {
       'selection disabled'
     ]);
   });
+
+  testWidgets(
+    'strut basic single line',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 40),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut TextStyle increases height',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                style: TextStyle(fontSize: 20,),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 44),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut basic multi line',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 120),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut no force small strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+                strutStyle: StrutStyle(
+                  // The small strut is overtaken by the larger
+                  // TextStyle fontSize.
+                  fontSize: 5,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 120),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut no force large strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+                strutStyle: StrutStyle(
+                  fontSize: 25,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 174),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut height override',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                maxLines: 3,
+                strutStyle: StrutStyle(
+                  fontSize: 8,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 48),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut forces field taller',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: Material(
+            child: Center(
+              child: TextField(
+                maxLines: 3,
+                style: TextStyle(fontSize: 10),
+                strutStyle: StrutStyle(
+                  fontSize: 18,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        const Size(800, 78),
+      );
+    },
+  );
 }
