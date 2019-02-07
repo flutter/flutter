@@ -467,7 +467,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
-  Offset _longPressStartPosition;
 
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
@@ -681,7 +680,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           break;
       }
     }
-    _longPressStartPosition = details.globalPosition;
     _confirmCurrentSplash();
   }
 
@@ -697,7 +695,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           _renderEditable.selectWordsInRange(
-            from: _longPressStartPosition,
+            from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
@@ -707,7 +705,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
-    _longPressStartPosition = null;
     _editableTextKey.currentState.showToolbar();
   }
 
