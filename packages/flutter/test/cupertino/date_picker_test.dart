@@ -227,9 +227,8 @@ void main() {
 
     expect(
       duration,
-      Duration(hours: 10, minutes: 50, seconds: 30),
+      const Duration(hours: 10, minutes: 50, seconds: 30),
     );
-
   });
 
   group('Date picker', () {
