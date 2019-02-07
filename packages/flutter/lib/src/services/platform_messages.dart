@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart' show ServicesBinding;
 import 'platform_channel.dart';
 
 typedef _MessageHandler = Future<ByteData> Function(ByteData message);
@@ -36,6 +37,12 @@ class BinaryMessages {
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
+    // ui.window is accessed directly instead of using ServicesBinding.instance.window
+    // because this method might be invoked before any binding is initialized.
+    // This issue was reported in #27541. It is not ideal to statically access
+    // ui.window because the Window may be dependency injected elsewhere with
+    // a different instance. However, static access at this location seems to be
+    // the least bad option.
     ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
