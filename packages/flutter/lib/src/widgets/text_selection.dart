@@ -738,6 +738,11 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       widget.onForcePressStart(details);
   }
 
+  void _forcePressEnded(ForcePressDetails details) {
+    if (widget.onForcePressEnd != null)
+      widget.onForcePressEnd(details);
+  }
+
   void _handleLongDragStart(GestureLongPressDragStartDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
       widget.onSingleLongTapStart(details);

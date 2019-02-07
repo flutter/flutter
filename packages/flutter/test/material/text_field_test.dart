@@ -1006,7 +1006,7 @@ void main() {
     await tester.pump();
     await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 1));
-     // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
+    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
     // (No idea why this is necessary, but the bug wouldn't repro without it.)
     await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 1));
@@ -1034,9 +1034,6 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-
-    expect(controller.selection.base.offset, 91);
-    expect(controller.selection.extent.offset, 94);
 
     expect(controller.selection.base.offset, 91);
     expect(controller.selection.extent.offset, 94);
