@@ -422,17 +422,20 @@ void main() {
     );
 
     expect(tabsBuilt, <int>[0]);
-    // We never manually tapped anything.
+    // selectedTabs list is appended to on onTap callbacks. We didn't tap
+    // any tabs yet.
     expect(selectedTabs, <int>[]);
+    tabsBuilt.clear();
 
     await tester.tap(find.text('Tab 4'));
     await tester.pump();
 
-    // Both tabs are built but only one is onstage.
-    expect(tabsBuilt, <int>[0, 0, 3]);
+    // Tabs 1 and 4 are built but only one is onstage.
+    expect(tabsBuilt, <int>[0, 3]);
     expect(selectedTabs, <int>[3]);
     expect(find.text('Page 1', skipOffstage: false), isOffstage);
     expect(find.text('Page 4'), findsOneWidget);
+    tabsBuilt.clear();
 
     // Delete 2 tabs.
     await tester.pumpWidget(
@@ -451,12 +454,19 @@ void main() {
       ),
     );
 
-    expect(tabsBuilt, <int>[0, 0, 3, 0, 1]);
-    // We didn't manually tap anything here either.
+    expect(tabsBuilt, <int>[0, 1]);
+    // We didn't tap on any additional tabs to invoke the onTap callback. We
+    // just deleted a tab.
     expect(selectedTabs, <int>[3]);
+    // Tab 1 was previously built so it's rebuilt again, albeit offstage.
     expect(find.text('Different page 1', skipOffstage: false), isOffstage);
+    // Since all the tabs after tab 2 are deleted, tab 2 is now the last tab and
+    // the actively shown tab.
     expect(find.text('Different page 2'), findsOneWidget);
+    // No more tab 4 since it's deleted.
     expect(find.text('Different page 4', skipOffstage: false), findsNothing);
+    // We also changed the builder so no tabs should be built with the old
+    // builder.
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);

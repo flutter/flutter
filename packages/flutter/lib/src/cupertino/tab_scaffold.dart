@@ -171,7 +171,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // Clip down to an acceptable range.
       _currentPage = widget.tabBar.items.length - 1;
       // Sanity check, since CupertinoTabBar.items's minimum length is 2.
-      assert(_currentPage >= 0);
+      assert(
+        _currentPage >= 0,
+        'CupertinoTabBar is expected to keep at least 2 tabs after updating',
+      );
     }
     // The user can still specify an exact desired index.
     if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
