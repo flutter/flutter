@@ -84,6 +84,11 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    // Do not resolve dependencies if this does not correspond to the main
+    // entrypoint.
+    if (!mainPath.contains(buildStep.inputId.path)) {
+      return;
+    }
     final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
     final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
@@ -97,9 +102,8 @@ class FlutterKernelBuilder implements Builder {
       return;
     }
 
-    // Do not generate kernel if it has been disabled or if this asset does not
-    // correspond to the current entrypoint.
-    if (disabled || !mainPath.contains(buildStep.inputId.path)) {
+    // Do not generate kernel if it has been disabled.
+    if (disabled) {
       return;
     }
 
