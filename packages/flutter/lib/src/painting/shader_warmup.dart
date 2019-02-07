@@ -38,9 +38,6 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
 
   final List<Path> paths = <Path>[path, rrectPath, circlePath];
 
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-
   final Paint paint = Paint();
   paint.strokeWidth = 10;
   paint.isAntiAlias = true;
