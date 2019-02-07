@@ -62,7 +62,6 @@ Future<int> runTests(
   // (Makes sure it still works after we change the current directory.)
   PackageMap.globalPackagesPath =
       fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
-  print(PackageMap.globalPackagesPath);
   // Call package:test's main method in the appropriate directory.
   final Directory saved = fs.currentDirectory;
 
@@ -96,7 +95,6 @@ Future<int> runTests(
     }
 
     printTrace('running test package with arguments: $testArgs');
-    print(PackageMap.globalPackagesPath);
     await test.runTests(testArgs);
 
     if (watchTests) {
