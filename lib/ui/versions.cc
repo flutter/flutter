@@ -25,7 +25,7 @@ void GetVersions(Dart_NativeArguments args) {
 }
 
 void Versions::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"Versions_getVersions", GetVersions, 1, true}});
+  natives->Register({{"Versions_getVersions", GetVersions, 0, true}});
 }
 
 }  // namespace blink

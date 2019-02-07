@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// HACK: pretend to be dart.ui in order to access its internals
-library dart.ui;
+import 'dart:ui';
 
 import 'package:test/test.dart';
-
-part '../../lib/ui/versions.dart';
 
 bool _isNotEmpty(String s) {
   if (s == null || s.isEmpty) {
