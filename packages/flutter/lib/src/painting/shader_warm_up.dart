@@ -1,4 +1,4 @@
-import 'dart:ui' show Canvas, Offset, Paint, PaintingStyle, Path, PictureRecorder, RRect, Rect;
+import 'dart:ui';
 
 import 'package:flutter/src/material/colors.dart';
 
@@ -24,6 +24,8 @@ typedef ShaderWarmUp = void Function(Canvas canvas);
 /// Alternatively, [customShaderWarmUp] can be provided to [runApp] to replace
 /// this default warm up function.
 ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
+  // The following path is copied from
+  // https://skia.org/user/api/SkCanvas_Reference#SkCanvas_drawPath
   final Path path = Path();
   path.moveTo(20, 60);
   path.quadraticBezierTo(60, 20, 60, 60);
@@ -34,7 +36,9 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
   final Path rrectPath = Path()..addRRect(rrect);
 
-  final Path circlePath = Path()..addOval(Rect.fromCircle(center: const Offset(40, 40), radius: 20));
+  final Path circlePath = Path()..addOval(
+    Rect.fromCircle(center: const Offset(40, 40), radius: 20)
+  );
 
   final List<Path> paths = <Path>[path, rrectPath, circlePath];
 
@@ -42,6 +46,7 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   paint.strokeWidth = 10;
   paint.isAntiAlias = true;
 
+  // Warm up path stroke and fill shaders.
   for (Path path in paths) {
     canvas.save();
     for (PaintingStyle paintingStyle in PaintingStyle.values) {
@@ -53,8 +58,20 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
     canvas.translate(0, 80);
   }
 
+  // Warm up shadow shaders.
+  canvas.save();
   canvas.drawShadow(rrectPath, Colors.black, 10.0, true);
   canvas.translate(80, 0);
   canvas.drawShadow(rrectPath, Colors.black, 10.0, false);
+  canvas.restore();
+
+  // Warm up text shaders.
+  canvas.translate(0, 80);
+  final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+    ParagraphStyle(textDirection: TextDirection.ltr),
+  )..pushStyle(TextStyle(color: Colors.black))..addText('Hello, world.');
+  final Paragraph paragraph = paragraphBuilder.build()
+    ..layout(const ParagraphConstraints(width: 1000));
+  canvas.drawParagraph(paragraph, const Offset(20, 20));
 };
 
