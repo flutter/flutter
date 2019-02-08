@@ -193,7 +193,7 @@ class KeyData {
 
 /// A single entry in the key data structure.
 ///
-/// Can be read from JSON with the [Key..fromJsonMapEntry] constructor, or
+/// Can be read from JSON with the [Key.fromJsonMapEntry] constructor, or
 /// written with the [toJson] method.
 class Key {
   /// Creates a single key entry from available data.
