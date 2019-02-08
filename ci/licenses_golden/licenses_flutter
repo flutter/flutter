@@ -57,6 +57,7 @@ FILE: ../../../flutter/flow/layers/opacity_layer.cc
 FILE: ../../../flutter/flow/layers/opacity_layer.h
 FILE: ../../../flutter/flow/layers/performance_overlay_layer.cc
 FILE: ../../../flutter/flow/layers/performance_overlay_layer.h
+FILE: ../../../flutter/flow/layers/performance_overlay_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/physical_shape_layer.cc
 FILE: ../../../flutter/flow/layers/physical_shape_layer.h
 FILE: ../../../flutter/flow/layers/picture_layer.cc
