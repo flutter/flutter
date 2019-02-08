@@ -28,13 +28,31 @@ abstract class Curve {
   /// const constructors so that they can be used in const expressions.
   const Curve();
 
-  /// Returns the value of the curve at point `t`.
+  /// Returns the value of the curve at point [t].
   ///
-  /// The value of `t` must be between 0.0 and 1.0, inclusive. Subclasses should
-  /// assert that this is true.
+  /// This function must ensure the following:
+  /// - The value of [t] must be between 0.0 and 1.0
+  /// - Values of [t]=0.0 and [t]=1.0 must be mapped to 0.0 and 1.0,
+  /// respectively.
   ///
-  /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
-  double transform(double t);
+  /// It is recommended that subclasses override [transformInternal] instead of
+  /// this function, as the above cases are already handled in the default
+  /// implementation of [transform]. [transform] delegates the remaining logic
+  /// to [transformInternal], reducing boilerplate code.
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    if (t == 0.0 || t == 1.0) {
+      return t;
+    }
+    return transformInternal(t);
+  }
+
+  /// Returns the value of the curve at point [t], in cases where
+  /// 1.0 > [t] > 0.0.
+  @protected
+  double transformInternal(double t) {
+    throw UnimplementedError();
+  }
 
   /// Returns a new curve that is the reversed inversion of this one.
   ///
