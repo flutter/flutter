@@ -137,7 +137,7 @@ class RenderEditable extends RenderBox {
     bool hasFocus,
     int maxLines = 1,
     int minLines = 1,
-    bool expands = null,
+    bool expands,
     Color selectionColor,
     double textScaleFactor = 1.0,
     TextSelection selection,

@@ -210,7 +210,7 @@ class EditableText extends StatefulWidget {
     this.textScaleFactor,
     this.maxLines = 1,
     this.minLines = 1,
-    this.expands = null,
+    this.expands,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,

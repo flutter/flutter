@@ -141,7 +141,7 @@ class TextField extends StatefulWidget {
     this.autocorrect = true,
     this.maxLines = 1,
     this.minLines = 1,
-    this.expands = null,
+    this.expands,
     this.maxLength,
     this.maxLengthEnforced = true,
     this.onChanged,
