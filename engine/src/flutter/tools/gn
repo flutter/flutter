@@ -43,7 +43,7 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
-    return os.path.join('out', '_'.join(target_dir))
+    return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
     def merge(key, value):
@@ -270,6 +270,8 @@ def parse_args(args):
   parser.add_argument('--embedder-for-target', dest='embedder_for_target', action='store_true', default=False)
 
   parser.add_argument('--coverage', default=False, action='store_true')
+
+  parser.add_argument('--out-dir', default='', type=str)
 
   return parser.parse_args(args)
 
