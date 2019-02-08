@@ -846,9 +846,16 @@ abstract class SliderComponentShape {
 ///  * [SliderTrackShape] Base component for creating other custom track
 ///    shapes.
 class RectangularSliderTrackShape extends SliderTrackShape {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const RectangularSliderTrackShape();
+  /// Create a slider track that draws 2 rectangles.
+  const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
+
+  /// Horizontal spacing, or gap, between the disabled thumb and the track.
+  ///
+  /// This is only used when the slider is disabled. There is no gap around
+  /// the thumb and any part of the track when the slider is enabled. The
+  /// Material spec defaults this gap width 2, which is half of the disabled
+  /// thumb radius.
+  final double disabledThumbGapWidth;
 
   @override
   Rect getPreferredRect({
@@ -874,8 +881,6 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 
-  // Spacing for disabled slider state.
-  static const double _thumbGap = 2.0;
 
   @override
   void paint(
@@ -909,11 +914,15 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     }
 
     // Used to create a gap around the thumb iff the slider is disabled.
+    // If the slider is enabled, the track can be drawn beneath the thumb
+    // without a gap. But when the slider is disabled, the track is shortened
+    // and this gap helps determine how much shorter it should be.
+    // TODO(clocksmith): The new Material spec has a gray circle in place of this gap.
     double horizontalAdjustment = 0.0;
     if (!isEnabled) {
-      final double thumbRadius = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete).width / 2.0;
-      final double gap = _thumbGap * (1.0 - enableAnimation.value);
-      horizontalAdjustment = thumbRadius + gap;
+      final double disabledThumbRadius = sliderTheme.thumbShape.getPreferredSize(false, isDiscrete).width / 2.0;
+      final double gap = disabledThumbGapWidth * (1.0 - enableAnimation.value);
+      horizontalAdjustment = disabledThumbRadius + gap;
     }
 
     final Rect trackRect = getPreferredRect(
@@ -949,16 +958,22 @@ class RectangularSliderTrackShape extends SliderTrackShape {
 ///  * [SliderTheme], which can be used to configure the tick mark shape of all
 ///    sliders in a widget subtree.
 class RoundSliderTickMarkShape extends SliderTickMarkShape {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const RoundSliderTickMarkShape();
+  /// Create a slider tick mark that draws a circle.
+  const RoundSliderTickMarkShape({ this.tickMarkRadius });
+
+  /// The preferred radius of the round tick mark.
+  ///
+  /// If it is not provided, then half of the track height is used.
+  final double tickMarkRadius;
 
   @override
   Size getPreferredSize({
     bool isEnabled,
     SliderThemeData sliderTheme,
   }) {
-    return Size.fromRadius(sliderTheme.trackHeight / 2);
+    // The tick marks are tiny circles. If no radius is provided, then they are
+    // defaulted to be the same height as the track.
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 2);
   }
 
   @override
@@ -991,7 +1006,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation);
 
     // The tick marks are tiny circles that are the same height as the track.
-    final double tickMarkRadius = sliderTheme.trackHeight / 2;
+    final double tickMarkRadius = getPreferredSize(
+      isEnabled: isEnabled,
+      sliderTheme: sliderTheme,
+    ).width / 2;
     context.canvas.drawCircle(center, tickMarkRadius, paint);
   }
 }
@@ -1005,14 +1023,30 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///    sliders in a widget subtree.
 class RoundSliderThumbShape extends SliderComponentShape {
   /// Create a slider thumb that draws a circle.
-  const RoundSliderThumbShape();
+  // TODO(clocksmith): This needs to be changed to 10 according to spec.
+  const RoundSliderThumbShape({
+    this.enabledThumbRadius = 6.0,
+    this.disabledThumbRadius
+  });
 
-  static const double _thumbRadius = 6.0;
-  static const double _disabledThumbRadius = 4.0;
+  /// The preferred radius of the round thumb shape when the slider is enabled.
+  ///
+  /// If it is not provided, then the material default is used.
+  final double enabledThumbRadius;
+
+  /// The preferred radius of the round thumb shape when the slider is disabled.
+  ///
+  /// If no disabledRadius is provided, then it is is derived from the enabled
+  /// thumb radius and has the same ratio of enabled size to disabled size as
+  /// the Material spec. The default resolves to 4, which is 2 / 3 of the
+  /// default enabled thumb.
+  final double disabledThumbRadius;
+  // TODO(clocksmith): This needs to be updated once the thumb size is updated to the Material spec.
+  double get _disabledThumbRadius =>  disabledThumbRadius ?? enabledThumbRadius * 2 / 3;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled ? _thumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -1031,7 +1065,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: _disabledThumbRadius,
-      end: _thumbRadius,
+      end: enabledThumbRadius,
     );
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -1062,13 +1096,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///    sliders in a widget subtree.
 class RoundSliderOverlayShape extends SliderComponentShape {
   /// Create a slider thumb overlay that draws a circle.
-  const RoundSliderOverlayShape();
+  // TODO(clocksmith): This needs to be changed to 24 according to spec.
+  const RoundSliderOverlayShape({ this.overlayRadius = 16.0 });
 
-  static const double _overlayRadius = 16.0;
+  /// The preferred radius of the round thumb shape when enabled.
+  ///
+  /// If it is not provided, then half of the track height is used.
+  final double overlayRadius;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return const Size.fromRadius(_overlayRadius);
+    return Size.fromRadius(overlayRadius);
   }
 
   @override
@@ -1087,7 +1125,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
       begin: 0.0,
-      end: _overlayRadius,
+      end: overlayRadius,
     );
 
     // TODO(gspencer): We don't really follow the spec here for overlays.
