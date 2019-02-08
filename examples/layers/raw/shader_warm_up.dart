@@ -7,7 +7,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart' show defaultShaderWarmUp;
+import 'package:flutter/foundation.dart' show defaultShaderWarmUp;
 
 void beginFrame(Duration timeStamp) {
   // PAINT

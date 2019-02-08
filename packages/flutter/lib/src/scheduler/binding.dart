@@ -9,7 +9,7 @@ import 'dart:ui' show AppLifecycleState, Canvas, Image, Picture, PictureRecorder
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart' show ShaderWarmUp, defaultShaderWarmUp;
+import 'package:flutter/foundation.dart' show ShaderWarmUp, defaultShaderWarmUp;
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
