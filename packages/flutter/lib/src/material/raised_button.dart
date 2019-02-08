@@ -37,37 +37,39 @@ import 'theme_data.dart';
 /// and lastly a RaisedButton with gradient background.
 ///
 /// ```dart
-/// Scaffold(
-///   body: Center(
-///     child: Column(
-///       mainAxisSize: MainAxisSize.min,
-///       children: <Widget>[
-///         RaisedButton(
-///           onPressed: null,
-///           child: const Text('Disabled Button'),
-///         ),
-///         RaisedButton(
-///           onPressed: () {},
-///           child: const Text('Enabled Button'),
-///         ),
-///         RaisedButton(
-///           onPressed: () {},
-///           textColor: Colors.white,
-///           padding: const EdgeInsets.all(0.0),
-///           child: Container(
-///             decoration: const BoxDecoration(
-///               gradient: LinearGradient(
-///                 colors: <Color>[Colors.red, Colors.green, Colors.blue],
-///               ),
-///             ),
-///             padding: const EdgeInsets.all(10.0),
-///             child: Text('Gradient Button'),
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           RaisedButton(
+///             onPressed: null,
+///             child: const Text('Disabled Button'),
 ///           ),
-///         ),
-///       ],
+///           RaisedButton(
+///             onPressed: () {},
+///             child: const Text('Enabled Button'),
+///           ),
+///           RaisedButton(
+///             onPressed: () {},
+///             textColor: Colors.white,
+///             padding: const EdgeInsets.all(0.0),
+///             child: Container(
+///               decoration: const BoxDecoration(
+///                 gradient: LinearGradient(
+///                   colors: <Color>[Colors.red, Colors.green, Colors.blue],
+///                 ),
+///               ),
+///               padding: const EdgeInsets.all(10.0),
+///               child: Text('Gradient Button'),
+///             ),
+///           ),
+///         ],
+///       ),
 ///     ),
-///   ),
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
