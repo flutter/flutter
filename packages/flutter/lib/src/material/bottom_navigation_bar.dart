@@ -141,7 +141,8 @@ class BottomNavigationBar extends StatefulWidget {
     this.onTap,
     this.currentIndex = 0,
     BottomNavigationBarType type,
-    @Deprecated('Use selectedItemColor.') this.fixedColor,
+    this.fixedColor,
+    this.backgroundColor,
     this.iconSize = 24.0,
     this.selectedItemColor,
     this.unselectedItemColor,
@@ -156,6 +157,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null && iconSize >= 8.0),
+       assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
        assert(showUnselectedLabels != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
@@ -180,6 +182,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// of different types.
   final BottomNavigationBarType type;
 
+  /// Deprecated, use [selectedItemColor].
+  ///
   /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   ///
@@ -188,34 +192,40 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   ///
   /// If [selectedItemColor] is provided, it will be used over this.
-  @Deprecated('Use selectedItemColor instead.')
   final Color fixedColor;
+
+  /// The color of the [BottomNavigationBar] itself.
+  ///
+  /// If [type] is [BottomNavigationBarType.shifting] and the
+  /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
+  /// backgroundColor will splash and overwrite this color.
+  final Color backgroundColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
-  /// The color of the selected [BottomNavigationBarItem].
+  /// The color of the selected [BottomNavigationBarItem.icon] + [BottomNavigationBarItem.label].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   ///
   /// If provided, this will take precedence over [fixedColor].
   final Color selectedItemColor;
 
-  /// The color of the selected [BottomNavigationBarItem].
+  /// The color of the unselected [BottomNavigationBarItem.icon] + [BottomNavigationBarItem.label]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
 
   /// The font size of the [BottomNavigationBarItem] labels when they are selected.
   ///
-  /// If null, defaults to `14.0`.
+  /// Defaults to `14.0`.
   final double selectedFontSize;
 
   /// The font size of the [BottomNavigationBarItem] label when they are not selected.
   ///
-  /// If null, defaults to `12.0`.
+  /// Defaults to `12.0`.
   final double unselectedFontSize;
 
   /// Whether the labels are shown for all [BottomNavigationBarItem]s, or just
@@ -272,6 +282,23 @@ class _BottomNavigationTile extends StatelessWidget {
     int size;
     Widget label;
 
+    /// Defines the padding for the animating icons + labels.
+    ///
+    /// The animations go from "Unselected":
+    /// =======
+    /// |      <-- Padding equal to the text height.
+    /// |  ☆
+    /// | text <-- Invisible text.
+    /// =======
+    ///
+    /// To "Selected":
+    ///
+    /// =======
+    /// |      <-- Padding equal to 1/2 text height.
+    /// |  ☆
+    /// | text
+    /// |      <-- Padding equal to 1/2 text height.
+    /// =======
     double bottomPadding = Tween<double>(
       begin: 0.0,
       end: selectedFontSize / 2.0,
@@ -637,6 +664,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
+        backgroundColor = widget.backgroundColor;
         break;
       case BottomNavigationBarType.shifting:
         backgroundColor = _backgroundColor;

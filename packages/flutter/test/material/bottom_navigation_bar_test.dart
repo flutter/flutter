@@ -91,7 +91,7 @@ void main() {
       )
     );
 
-    const double labelBottomMargin = 8.0; // _kBottomMargin in implementation.
+    const double labelBottomMargin = 7.0; // Default selectedFontSize / 2.0.
     const double additionalPadding = 40.0 - labelBottomMargin;
     const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
@@ -393,7 +393,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(68.0));
+    expect(box.size.height, equals(66.0));
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -827,7 +827,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
 	      skip: !Platform.isLinux,
       );
     }
