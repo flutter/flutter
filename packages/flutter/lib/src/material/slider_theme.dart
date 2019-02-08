@@ -716,15 +716,14 @@ abstract class SliderTrackShape {
 /// This is a simplified version of [SliderComponentShape] with a
 /// [SliderThemeData] passed when getting the preferred size.
 ///
-/// The tick mark painting can also be skipped by specifying [noTickMark].
+/// The tick mark painting can be skipped by specifying [noTickMark] for
+/// [SliderThemeData.tickMarkShape].
 ///
 /// See also:
 ///
 ///  * [RoundSliderTickMarkShape] for a simple example of a tick mark shape.
 ///  * [SliderTrackShape] for the base class for custom a track shape.
 ///  * [SliderComponentShape] for the base class for custom a component shape.
-///  * [EmptySliderTickMarkShape], which is the empty component shape for the
-///    tick marks.
 abstract class SliderTickMarkShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -775,16 +774,22 @@ abstract class SliderTickMarkShape {
   });
 
   /// Special instance of [SliderTickMarkShape] to skip the thumb painting.
-  static SliderTickMarkShape noTickMark = EmptySliderTickMarkShape();
+  ///
+  /// See also:
+  ///
+  /// * [SliderThemeData.tickMarkShape], which is the shape that the [Slider]
+  /// uses when painting tick marks.
+  static SliderTickMarkShape noTickMark = _EmptySliderTickMarkShape();
 }
 
 /// A special version of [SliderTickMarkShape] that has a zero size and paints
 /// nothing.
 ///
 /// This class is used to create a special instance of a [SliderTickMarkShape]
-/// that can be specified in order to skip over, or paint nothing for, a
-/// a tick mark shape.
-class EmptySliderTickMarkShape extends SliderTickMarkShape {
+/// that will not paint any tick mark shape. A static reference is stored in
+/// [SliderTickMarkShape.noTickMark]. When this value  is specified for
+/// [SliderThemeData.tickMarkShape], the tick mark painting is skipped.
+class _EmptySliderTickMarkShape extends SliderTickMarkShape {
   Size getPreferredSize({
     SliderThemeData sliderTheme,
     bool isEnabled,
@@ -811,9 +816,11 @@ class EmptySliderTickMarkShape extends SliderTickMarkShape {
 /// All shapes are painted to the same canvas and ordering is important.
 /// The overlay is painted first, then the value indicator, then the thumb.
 ///
-/// The thumb painting can also be skipped by specifying [noThumb].
+/// The thumb painting can be skipped by specifying [noThumb] for
+/// [SliderThemeData.thumbShape].
 ///
-/// The overlay painting can also be skipped by specifying [noOverlay].
+/// The overlay painting can be skipped by specifying [noOverlay] for
+/// [SliderThemeData.overlayShape].
 ///
 /// See also:
 ///
@@ -821,8 +828,6 @@ class EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///  * [RoundSliderOverlayShape], which is the the default overlay shape.
 ///  * [PaddleSliderValueIndicatorShape], which is the the default value
 ///    indicator shape.
-///  * [EmptySliderComponentShape], which is the empty component shape for the
-///    thumb and the overlay.
 abstract class SliderComponentShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -872,19 +877,32 @@ abstract class SliderComponentShape {
   });
 
   /// Special instance of [SliderComponentShape] to skip the thumb drawing.
-  static SliderComponentShape noThumb = EmptySliderComponentShape();
+  ///
+  /// See also:
+  ///
+  /// * [SliderThemeData.thumbShape], which is the shape that the [Slider]
+  /// uses when painting the thumb.
+  static SliderComponentShape noThumb = _EmptySliderComponentShape();
 
   /// Special instance of [SliderComponentShape] to skip the overlay drawing.
-  static SliderComponentShape noOverlay = EmptySliderComponentShape();
+  ///
+  /// See also:
+  ///
+  /// * [SliderThemeData.overlayShape], which is the shape that the [Slider]
+  /// uses when painting the overlay.
+  static SliderComponentShape noOverlay = _EmptySliderComponentShape();
 }
 
 /// A special version of [SliderComponentShape] that has a zero size and paints
 /// nothing.
 ///
 /// This class is used to create a special instance of a [SliderComponentShape]
-/// that can be specified in order to skip over, or paint nothing for, a
-/// a specific component shape.
-class EmptySliderComponentShape extends SliderComponentShape {
+/// that will not paint any component shape. A static reference is stored in
+/// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
+/// is specified for [SliderThemeData.thumbShape], the thumb painting is
+/// skipped.  When this value is specified for [SliderThemeData.overlaySHape],
+/// the overlay painting is skipped.
+class _EmptySliderComponentShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size.zero;
 
