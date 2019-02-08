@@ -141,7 +141,7 @@ class TextField extends StatefulWidget {
     this.autocorrect = true,
     this.maxLines = 1,
     this.minLines = 1,
-    this.expands = false,
+    this.expands = null,
     this.maxLength,
     this.maxLengthEnforced = true,
     this.onChanged,
@@ -172,10 +172,17 @@ class TextField extends StatefulWidget {
          (maxLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
-       assert(expands != null),
        assert(
          !(expands == true && minLines == maxLines),
          'Cannot expand when minLines and maxLines are the same',
+       ),
+       assert(
+         !(expands == false && maxLines != null && minLines != maxLines),
+         'Expands is contradicted by providing different minLines and maxLines.',
+       ),
+       assert(
+         !(expands == false && maxLines == null),
+         'When expands is false, there must be a maxLines',
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
@@ -467,7 +474,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: 1));
-    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: null));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, defaultValue: true, ifFalse: 'maxLength not enforced'));
     properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
@@ -834,7 +841,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
-            expands: widget.expands && widget.maxLines == null,
+            // TODO(justinmc): I think this is more complicated now?
+            expands: widget.expands == true && widget.maxLines == null,
             child: child,
           );
         },

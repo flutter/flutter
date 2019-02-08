@@ -137,7 +137,7 @@ class RenderEditable extends RenderBox {
     bool hasFocus,
     int maxLines = 1,
     int minLines = 1,
-    bool expands = false,
+    bool expands = null,
     Color selectionColor,
     double textScaleFactor = 1.0,
     TextSelection selection,
@@ -164,10 +164,13 @@ class RenderEditable extends RenderBox {
          (maxLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
-       assert(expands != null),
        assert(
          !(expands == true && minLines == maxLines),
          'Cannot expand when minLines and maxLines are the same',
+       ),
+       assert(
+         !(expands == false && maxLines == null),
+         'When expands is false, there must be a maxLines',
        ),
        assert(textScaleFactor != null),
        assert(offset != null),
@@ -704,7 +707,6 @@ class RenderEditable extends RenderBox {
   bool get expands => _expands;
   bool _expands;
   set expands(bool value) {
-    assert(value != null);
     if (expands == value)
       return;
     _expands = value;
@@ -1170,8 +1172,12 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
+    if (maxLines != null && expands != true) {
+      return preferredLineHeight * maxLines;
+    }
+
     // If needed, set the height based on minLines and/or maxLines
-    if (expands) {
+    if (expands == true) {
       if (maxLines != null) {
         _layoutText(width);
         if (_textPainter.height > preferredLineHeight * maxLines) {
@@ -1185,14 +1191,13 @@ class RenderEditable extends RenderBox {
         }
       }
     } else {
-      if (maxLines != null) {
-        return preferredLineHeight * maxLines;
-      }
       _layoutText(width);
       if (minLines > 1 && _textPainter.height < preferredLineHeight * minLines) {
         return preferredLineHeight * minLines;
       }
     }
+
+    // TODO you're not considering when expands is false and you want to lock.
 
     // Set the height based on the content
     if (width == double.infinity) {

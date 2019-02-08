@@ -210,7 +210,7 @@ class EditableText extends StatefulWidget {
     this.textScaleFactor,
     this.maxLines = 1,
     this.minLines = 1,
-    this.expands = false,
+    this.expands = null,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,
@@ -249,10 +249,13 @@ class EditableText extends StatefulWidget {
          (maxLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
-       assert(expands != null),
        assert(
          !(expands == true && minLines == maxLines),
          'Cannot expand when minLines and maxLines are the same',
+       ),
+       assert(
+         !(expands == false && maxLines == null),
+         'When expands is false, there must be a maxLines',
        ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
@@ -597,7 +600,7 @@ class EditableText extends StatefulWidget {
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: 1));
-    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
