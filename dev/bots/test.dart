@@ -167,7 +167,7 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_integration'));
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
@@ -177,7 +177,7 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
   await runCommand(flutter,
     <String>['build', 'web', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: false,
+    expectNonZeroExit: true,
     timeout: _kShortTimeout,
   );
   print('Done.');

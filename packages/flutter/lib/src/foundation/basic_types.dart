@@ -72,8 +72,6 @@ typedef AsyncValueGetter<T> = Future<T> Function();
 /// The largest SMI value.
 ///
 /// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
-///
-/// In a web environment, this is limited to the max 32bit integer.
 const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
 
 /// A BitField over an enum (or other class whose values implement "index").
