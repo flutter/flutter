@@ -54,7 +54,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       plistFile,
       null,
     );
-    final String pathsSelectorValue = _pathsSelectorMatcher.stringMatch(plistValue).split('=').last.trim().replaceAll('"', '');
+    final String pathsSelectorValue = _pathsSelectorMatcher.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
     return AndroidStudio(studioPath, version: version, pathsSelectorPath: pathsSelectorValue);
   }
 
@@ -107,11 +107,19 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       final int major = version.major;
       final int minor = version.minor;
       if (platform.isMacOS) {
-        _pluginsPath = fs.path.join(
-            homeDirPath,
-            'Library',
-            'Application Support',
-            '$pathsSelectorPath');
+        if (pathsSelectorPath != null) {
+          _pluginsPath = fs.path.join(
+              homeDirPath,
+              'Library',
+              'Application Support',
+              '$pathsSelectorPath');
+        } else {
+          _pluginsPath = fs.path.join(
+              homeDirPath,
+              'Library',
+              'Application Support',
+              'AndroidStudio$major.$minor');
+        }
       } else {
         _pluginsPath = fs.path.join(homeDirPath,
             '.$studioAppName$major.$minor',
