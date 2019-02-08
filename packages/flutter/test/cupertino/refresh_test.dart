@@ -593,13 +593,25 @@ void main() {
         60.0, // Default value.
       ));
 
-      // Dragging up by more than 90% of sliver height
-      await tester.drag(find.text('0'), const Offset(0.0, 149));
-      expect(find.text('-1'), findsOneWidget);
+      // Dragging to 5% of refresh control height
+      await tester.drag(find.text('0'), const Offset(0.0, -57.0));
+      await tester.pump();
+
+      // Waiting for refresh control to reach approximately 5% of height
+      await tester.pump(const Duration(milliseconds: 300));
+
       expect(
-        tester.getRect(find.widgetWithText(Center, '0')),
-        Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+        tester.getRect(find.widgetWithText(Center, '0')).top,
+        moreOrLessEquals(3.0, epsilon: 4e-1),
       );
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.inactive,
+        any,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+      expect(find.text('-1'), findsOneWidget);
 
       debugDefaultTargetPlatformOverride = null;
     });
