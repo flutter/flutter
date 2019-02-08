@@ -632,8 +632,10 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    // 2 track segments.
+    // Only 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
@@ -651,8 +653,10 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>( find.byType(Slider));
 
-    // 5 tick marks.
+    // Only 5 tick marks.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 5));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
@@ -670,8 +674,10 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    // 1 thumb.
+    // Only 1 thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
@@ -694,8 +700,10 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // 1 overlay.
+    // Only 1 overlay.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
 
     await gesture.up();
   });
@@ -721,7 +729,9 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // 1 value indicator.
+    // Only 1 value indicator.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
     expect(sliderBox, paintsExactlyCountTimes(#drawPath, 1));
 
     await gesture.up();
