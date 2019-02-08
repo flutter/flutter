@@ -251,7 +251,7 @@ class TravelDestinationContent extends StatelessWidget {
         ? Image.asset(destination.assetName, package: destination.assetPackage, fit: BoxFit.cover,)
         : Ink.image(image: AssetImage(destination.assetName, package: destination.assetPackage), fit: BoxFit.cover, child: Container(),);
 
-    final List<Widget> children = [
+    final List<Widget> children = <Widget>[
       // photo and title
       SizedBox(
         height: 184.0,
