@@ -10,7 +10,7 @@ import '../../gallery/demo.dart';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 enum CardDemoType {
-  static,
+  standard,
   tappable,
   selectable,
 }
@@ -21,7 +21,7 @@ class TravelDestination {
     this.assetPackage,
     this.title,
     this.description,
-    this.type = CardDemoType.static,
+    this.type = CardDemoType.standard,
   });
 
   final String assetName;
@@ -224,10 +224,10 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+      padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title, style: Theme.of(context).textTheme.subhead,),
+        child: Text(title, style: Theme.of(context).textTheme.subhead),
       ),
     );
   }
@@ -246,13 +246,21 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    // Use Ink.image in order for the ink ripple to appear over the image
-    final Widget image = destination.type == CardDemoType.static
-        ? Image.asset(destination.assetName, package: destination.assetPackage, fit: BoxFit.cover,)
-        : Ink.image(image: AssetImage(destination.assetName, package: destination.assetPackage), fit: BoxFit.cover, child: Container(),);
+    // Use Ink.image in order for the ink ripple to appear over the image.
+    final Widget image = destination.type == CardDemoType.standard
+      ? Image.asset(
+          destination.assetName,
+          package: destination.assetPackage,
+          fit: BoxFit.cover,
+        )
+      : Ink.image(
+          image: AssetImage(destination.assetName, package: destination.assetPackage),
+          fit: BoxFit.cover,
+          child: Container(),
+        );
 
     final List<Widget> children = <Widget>[
-      // photo and title
+      // Photo and title.
       SizedBox(
         height: 184.0,
         child: Stack(
@@ -267,7 +275,8 @@ class TravelDestinationContent extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
-                child: Text(destination.title,
+                child: Text(
+                  destination.title,
                   style: titleStyle,
                 ),
               ),
@@ -275,7 +284,7 @@ class TravelDestinationContent extends StatelessWidget {
           ],
         ),
       ),
-      // description and share/explore buttons
+      // Description and share/explore buttons.
       Expanded(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
@@ -303,7 +312,7 @@ class TravelDestinationContent extends StatelessWidget {
       ),
     ];
 
-    if (destination.type == CardDemoType.static) {
+    if (destination.type == CardDemoType.standard) {
       children.add(
         // share, explore buttons
         ButtonTheme.bar(
@@ -313,12 +322,12 @@ class TravelDestinationContent extends StatelessWidget {
               FlatButton(
                 child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () { /* do nothing */ },
+                onPressed: () { print('pressed'); },
               ),
               FlatButton(
                 child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () { /* do nothing */ },
+                onPressed: () { print('pressed'); },
               ),
             ],
           ),
@@ -375,14 +384,14 @@ class _CardsDemoState extends State<CardsDemo> {
         children: destinations.map<Widget>((TravelDestination destination) {
           Widget child;
           switch (destination.type) {
-            case CardDemoType.static:
-              child = TravelDestinationItem(destination: destination, shape: _shape,);
+            case CardDemoType.standard:
+              child = TravelDestinationItem(destination: destination, shape: _shape);
               break;
             case CardDemoType.tappable:
-              child = TappableTravelDestinationItem(destination: destination, shape: _shape,);
+              child = TappableTravelDestinationItem(destination: destination, shape: _shape);
               break;
             case CardDemoType.selectable:
-              child = SelectableTravelDestinationItem(destination: destination, shape: _shape,);
+              child = SelectableTravelDestinationItem(destination: destination, shape: _shape);
               break;
           }
 
