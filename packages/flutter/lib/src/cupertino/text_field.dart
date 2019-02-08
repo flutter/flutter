@@ -172,7 +172,7 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorRadius = const Radius.circular(2.0),
-    this.cursorColor = CupertinoColors.activeBlue,
+    this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(textAlign != null),
@@ -365,7 +365,8 @@ class CupertinoTextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the standard iOS blue color. Cannot be null.
+  /// Defaults to activeBlue for light theme, activeOrange for dark theme, or
+  /// settable primaryColor for customization.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -401,6 +402,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
   }
 }
 
@@ -487,6 +489,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   @override
   bool get wantKeepAlive => _controller?.text?.isNotEmpty == true;
+
+  Color get _cursorColor {
+    return CupertinoTheme.of(context).primaryColor;
+  }
 
   bool _shouldShowAttachment({
     OverlayVisibilityMode attachment,
@@ -644,7 +650,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
-          cursorColor: widget.cursorColor,
+          cursorColor: _cursorColor,
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
