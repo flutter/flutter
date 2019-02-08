@@ -318,31 +318,35 @@ public final class ResourceUpdater {
             return false;
         }
 
-        final AssetManager manager = context.getResources().getAssets();
-        try (InputStream is = manager.open("flutter_assets/isolate_snapshot_data")) {
-            CRC32 checksum = new CRC32();
-
-            int count = 0;
-            byte[] buffer = new byte[BUFFER_SIZE];
-            while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                checksum.update(buffer, 0, count);
+        CRC32 checksum = new CRC32();
+        String[] checksumFiles = {
+            "isolate_snapshot_data",
+            "isolate_snapshot_instr",
+            "flutter_assets/isolate_snapshot_data",
+        };
+        for (String fn : checksumFiles) {
+            AssetManager manager = context.getResources().getAssets();
+            try (InputStream is = manager.open(fn)) {
+                int count = 0;
+                byte[] buffer = new byte[BUFFER_SIZE];
+                while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                    checksum.update(buffer, 0, count);
+                }
+            } catch (IOException e) {
+                // Skip missing files.
             }
+        }
 
-            if (!baselineChecksum.equals(String.valueOf(checksum.getValue()))) {
-                Log.w(TAG, "Mismatched update file for APK");
-                return false;
-            }
-
-            return true;
-
-        } catch (IOException e) {
-            Log.w(TAG, "Could not read APK: " + e);
+        if (!baselineChecksum.equals(String.valueOf(checksum.getValue()))) {
+            Log.w(TAG, "Mismatched update file for APK");
             return false;
         }
+
+        return true;
     }
 
     void startUpdateDownloadOnce() {
-        if (downloadTask != null ) {
+        if (downloadTask != null) {
             return;
         }
         downloadTask = new DownloadTask();
