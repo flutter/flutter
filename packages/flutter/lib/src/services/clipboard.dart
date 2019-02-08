@@ -60,19 +60,15 @@ class Clipboard {
 
   /// Stores the given clipboard data on the clipboard.
   static Future<void> setData(ClipboardData data) async {
-    print('setting data');
     await SystemChannels.platform.invokeMethod<void>(
       'Clipboard.setData',
       <String, dynamic>{
         'text': data.text,
       },
     );
-    print('setting data');
-
     final String text = data?.text;
     if (text != null && text != '')
       _isEmpty = false;
-    print(isEmpty);
   }
 
   /// Retrieves data from the clipboard that matches the given format.
