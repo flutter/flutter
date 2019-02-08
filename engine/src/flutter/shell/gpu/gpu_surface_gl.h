@@ -12,32 +12,10 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace shell {
-
-class GPUSurfaceGLDelegate {
- public:
-  virtual bool GLContextMakeCurrent() = 0;
-
-  virtual bool GLContextClearCurrent() = 0;
-
-  virtual bool GLContextPresent() = 0;
-
-  virtual intptr_t GLContextFBO() const = 0;
-
-  virtual bool GLContextFBOResetAfterPresent() const;
-
-  virtual bool UseOffscreenSurface() const;
-
-  virtual SkMatrix GLContextSurfaceTransformation() const;
-
-  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
-
-  using GLProcResolver =
-      std::function<void* /* proc name */ (const char* /* proc address */)>;
-  virtual GLProcResolver GetGLProcResolver() const;
-};
 
 class GPUSurfaceGL : public Surface {
  public:
