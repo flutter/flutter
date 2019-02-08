@@ -84,7 +84,10 @@ BuildApp() {
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
 
-  AssertExists "${framework_path}"
+  # If the framework path does not exist, ensure that it is downloaded.
+  if [[ ! -e "$1" ]]; then
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" precache --suppress-analytics
+  fi
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
