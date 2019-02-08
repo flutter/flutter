@@ -153,18 +153,18 @@ void main() {
         buildMode: BuildMode.release,
         targetPlatform: TargetPlatform.android_arm,
         skipUnknown: true,
-      ), unorderedEquals(const <RawArtifact>[
-        RawArtifact(
+      ), unorderedEquals(const <BinaryArtifact>[
+        BinaryArtifact(
           name: 'common',
           fileName: 'flutter_patched_sdk.zip',
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release',
           fileName: 'android-arm-release/artifacts.zip',
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-profile/darwin-x64',
           fileName: 'android-arm-profile/darwin-x64.zip',
           hostPlatform: TargetPlatform.darwin_x64,
@@ -172,14 +172,14 @@ void main() {
           targetPlatform: TargetPlatform.android_arm,
           skipChecks: true,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release/darwin-x64',
           fileName: 'android-arm-release/darwin-x64.zip',
           hostPlatform: TargetPlatform.darwin_x64,
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'darwin-x64',
           fileName: 'darwin-x64/artifacts.zip',
           hostPlatform: TargetPlatform.darwin_x64,
@@ -195,12 +195,12 @@ void main() {
         buildMode: null,
         targetPlatform: TargetPlatform.ios,
         skipUnknown: true,
-      ), unorderedEquals(const <RawArtifact>[
-        RawArtifact(
+      ), unorderedEquals(const <BinaryArtifact>[
+        BinaryArtifact(
           name: 'common',
           fileName: 'flutter_patched_sdk.zip',
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-profile/darwin-x64',
           fileName: 'android-arm-profile/darwin-x64.zip',
           hostPlatform: TargetPlatform.darwin_x64,
@@ -208,27 +208,27 @@ void main() {
           targetPlatform: TargetPlatform.android_arm,
           skipChecks: true,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'ios', fileName: 'ios/artifacts.zip',
           buildMode: BuildMode.debug,
           hostPlatform: TargetPlatform.darwin_x64,
           targetPlatform: TargetPlatform.ios,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'ios-profile',
           fileName: 'ios-profile/artifacts.zip',
           buildMode: BuildMode.profile,
           hostPlatform: TargetPlatform.darwin_x64,
           targetPlatform: TargetPlatform.ios,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'ios-release',
           fileName: 'ios-release/artifacts.zip',
           buildMode: BuildMode.release,
           hostPlatform: TargetPlatform.darwin_x64,
           targetPlatform: TargetPlatform.ios,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'darwin-x64',
           fileName: 'darwin-x64/artifacts.zip',
           hostPlatform: TargetPlatform.darwin_x64,
@@ -244,18 +244,18 @@ void main() {
         buildMode: BuildMode.release,
         targetPlatform: TargetPlatform.android_arm,
         skipUnknown: true,
-      ), unorderedEquals(const <RawArtifact>[
-          RawArtifact(
+      ), unorderedEquals(const <BinaryArtifact>[
+          BinaryArtifact(
           name: 'common',
           fileName: 'flutter_patched_sdk.zip',
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release',
           fileName: 'android-arm-release/artifacts.zip',
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-profile/windows-x64',
           fileName: 'android-arm-profile/windows-x64.zip',
           hostPlatform: TargetPlatform.windows_x64,
@@ -263,14 +263,14 @@ void main() {
           targetPlatform: TargetPlatform.android_arm,
           skipChecks: true,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release/windows-x64',
           fileName: 'android-arm-release/windows-x64.zip',
           hostPlatform: TargetPlatform.windows_x64,
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'windows-x64',
           fileName: 'windows-x64/artifacts.zip',
           hostPlatform: TargetPlatform.windows_x64,
@@ -286,18 +286,18 @@ void main() {
         buildMode: BuildMode.release,
         targetPlatform: TargetPlatform.android_arm,
         skipUnknown: true,
-      ), unorderedEquals(const <RawArtifact>[
-          RawArtifact(
+      ), unorderedEquals(const <BinaryArtifact>[
+          BinaryArtifact(
           name: 'common',
           fileName: 'flutter_patched_sdk.zip',
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release',
           fileName: 'android-arm-release/artifacts.zip',
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-profile/linux-x64',
           fileName: 'android-arm-profile/linux-x64.zip',
           hostPlatform: TargetPlatform.linux_x64,
@@ -305,14 +305,14 @@ void main() {
           targetPlatform: TargetPlatform.android_arm,
           skipChecks: true,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'android-arm-release/linux-x64',
           fileName: 'android-arm-release/linux-x64.zip',
           hostPlatform: TargetPlatform.linux_x64,
           buildMode: BuildMode.release,
           targetPlatform: TargetPlatform.android_arm,
         ),
-        RawArtifact(
+        BinaryArtifact(
           name: 'linux-x64',
           fileName: 'linux-x64/artifacts.zip',
           hostPlatform: TargetPlatform.linux_x64,
