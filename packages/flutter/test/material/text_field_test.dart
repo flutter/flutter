@@ -901,11 +901,6 @@ void main() {
       await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: null, expands: false));
     }, throwsAssertionError);
 
-    // A range of min and max with expands: false is a contradiction
-    expect(() async {
-      await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 5, expands: false));
-    }, throwsAssertionError);
-
     // Without expands set to true, minLines is ignored and the height is locked
     // to maxLines.
     await tester.enterText(find.byType(TextField), '');

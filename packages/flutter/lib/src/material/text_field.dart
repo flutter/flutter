@@ -177,10 +177,6 @@ class TextField extends StatefulWidget {
          'Cannot expand when minLines and maxLines are the same',
        ),
        assert(
-         !(expands == false && maxLines != null && minLines != maxLines),
-         'Expands is contradicted by providing different minLines and maxLines.',
-       ),
-       assert(
          !(expands == false && maxLines == null),
          'When expands is false, there must be a maxLines',
        ),
