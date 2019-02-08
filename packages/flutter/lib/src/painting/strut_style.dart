@@ -264,6 +264,8 @@ class StrutStyle extends Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be zero or positive.
   const StrutStyle({
     String fontFamily,
     List<String> fontFamilyFallback,
@@ -293,7 +295,7 @@ class StrutStyle extends Diagnosticable {
   ///
   /// If provided, fontSize must be positive and non-zero, leading must be zero or positive.
   ///
-  /// When [textStyle] has a package and a new package is also specified, the entire
+  /// When [textStyle] has a package and a new [package] is also specified, the entire
   /// font family fallback list should be redefined since the [textStyle]'s package data
   /// is inherited by being prepended onto the font family names. If
   /// [fontFamilyFallback] is meant to be empty, pass an empty list instead of null.
