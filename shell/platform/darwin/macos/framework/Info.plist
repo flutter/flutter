@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>Flutter</string>
+	<string>FlutterMacOS</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter</string>
+	<string>io.flutter.flutter-macos</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Flutter</string>
+	<string>FlutterMacOS</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>

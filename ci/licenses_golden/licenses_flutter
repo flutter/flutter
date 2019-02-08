@@ -588,7 +588,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEPluginRe
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEReshapeListener.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/Flutter.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterMacOS.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.mm

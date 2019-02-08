@@ -1,5 +1,5 @@
-framework module Flutter {
-  umbrella header "Flutter.h"
+framework module FlutterMacOS {
+  umbrella header "FlutterMacOS.h"
 
   export *
   module * { export * }
