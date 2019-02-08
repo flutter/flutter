@@ -28,6 +28,7 @@ final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
 final RegExp _pathsSelectorMatcher =
     RegExp(r'"idea.paths.selector" = "AndroidStudio[^;]+"');
+const String kJetBrainsToolboxAppKey = 'JetBrainsToolboxApp';
 
 String get javaPath => androidStudio?.javaPath;
 
@@ -39,8 +40,18 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
-    final String studioPath = fs.path.join(bundlePath, 'Contents');
-    final String plistFile = fs.path.join(studioPath, 'Info.plist');
+    String studioPath = fs.path.join(bundlePath, 'Contents');
+    String plistFile = fs.path.join(studioPath, 'Info.plist');
+
+    final String jetBrainsToolboxAppBundlePath = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      kJetBrainsToolboxAppKey,
+    );
+    if (jetBrainsToolboxAppBundlePath != null) {
+      studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
+      plistFile = fs.path.join(studioPath, 'Info.plist');
+    }
+
     final String versionString = iosWorkflow.getPlistValueFromFile(
       plistFile,
       plist.kCFBundleShortVersionStringKey,
