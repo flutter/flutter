@@ -5,8 +5,6 @@
 import 'dart:async';
 
 import '../android/apk.dart';
-import '../build_info.dart';
-import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -50,18 +48,5 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo: getBuildInfo(),
     );
     return null;
-  }
-
-  @override
-  Future<void> updateCache() async {
-    // Due to logic of flutter.gradle, we require every release mode and every android target architecture.
-    for (TargetPlatform targetPlatform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.android_arm64]) {
-      await cache.updateAll(
-        buildMode: null,
-        targetPlatform: targetPlatform,
-        clobber: false,
-        skipUnknown: true,
-      );
-    }
   }
 }
