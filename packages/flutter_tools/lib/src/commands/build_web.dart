@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/globals.dart';
-
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart' show ExitStatus, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
