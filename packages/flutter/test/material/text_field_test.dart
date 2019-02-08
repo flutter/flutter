@@ -1509,7 +1509,7 @@ void main() {
           decoration: InputDecoration.collapsed(
             hintText: 'hint',
           ),
-          strutStyle: const StrutStyle.disabled(),
+          strutStyle: StrutStyle.disabled(),
         ),
       ),
     );
