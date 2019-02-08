@@ -38,7 +38,7 @@ class CodeGenerator {
   String get physicalDefinitions {
     final StringBuffer definitions = StringBuffer();
     for (Key entry in keyData.data) {
-      final String firstComment = wrapString('Represents the location of a '
+      final String firstComment = wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = wrapString('See the function '
         '[RawKeyEvent.physicalKey] for more information.');
@@ -56,17 +56,19 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
     final StringBuffer definitions = StringBuffer();
     for (Key entry in keyData.data) {
-      final String comment = wrapString('Represents a logical "${entry.commentName}" key on the '
-        'keyboard.\nSee the function [RawKeyEvent.logicalKey] for more information.');
+      final String firstComment = wrapString('Represents the logical "${entry.commentName}" key on the keyboard.');
+      final String otherComments = wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
       if (entry.keyLabel == null) {
         definitions.write('''
 
-$comment  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$firstComment  ///
+$otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, debugName: kReleaseMode ? null : '${entry.commentName}');
 ''');
       } else {
         definitions.write('''
 
-$comment  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, keyLabel: ${escapeLabel(entry.keyLabel)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$firstComment  ///
+$otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, keyLabel: ${escapeLabel(entry.keyLabel)}, debugName: kReleaseMode ? null : '${entry.commentName}');
 ''');
       }
     }

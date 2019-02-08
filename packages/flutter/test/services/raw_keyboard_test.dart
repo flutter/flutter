@@ -110,7 +110,7 @@ void main() {
       final RawKeyEventDataAndroid data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('A'));
+      expect(data.keyLabel, equals('a'));
     });
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -225,13 +225,13 @@ void main() {
         'type': 'keydown',
         'keymap': 'fuchsia',
         'hidUsage': 0x00070004,
-        'codePoint': 'A'.codeUnitAt(0),
-        'character': 'A',
+        'codePoint': 'a'.codeUnitAt(0),
+        'character': 'a',
       });
       final RawKeyEventDataFuchsia data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('A'));
+      expect(data.keyLabel, equals('a'));
     });
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{

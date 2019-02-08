@@ -25,7 +25,7 @@ void main() {
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
       // Check a letter key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000041), equals(LogicalKeyboardKey.keyA));
+      expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000061), equals(LogicalKeyboardKey.keyA));
       // Check a control key
       expect(LogicalKeyboardKey.findKeyByKeyId(0x0100070029), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
