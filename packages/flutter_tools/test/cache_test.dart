@@ -88,7 +88,7 @@ void main() {
       when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
       when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isFalse);
+      expect(cache.isUpToDate().isUpToDate, isFalse);
     });
     test('should be up to date, if all cached artifacts are', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
@@ -96,7 +96,7 @@ void main() {
       when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
       when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isTrue);
+      expect(cache.isUpToDate().isUpToDate, isTrue);
     });
     test('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
