@@ -898,7 +898,7 @@ void main() {
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: StrutStyle.disabled(),
+          strutStyle: const StrutStyle.disabled(),
         ),
       ),
     );
@@ -1509,7 +1509,7 @@ void main() {
           decoration: InputDecoration.collapsed(
             hintText: 'hint',
           ),
-          strutStyle: StrutStyle.disabled(),
+          strutStyle: const StrutStyle.disabled(),
         ),
       ),
     );
@@ -2124,7 +2124,7 @@ void main() {
             child: TextField(
               controller: controller,
               maxLines: 3,
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: const StrutStyle.disabled(),
             ),
           ) ,
         ),
@@ -2684,7 +2684,7 @@ void main() {
                 decoration: null,
                 controller: controllerA,
                 style: const TextStyle(fontSize: 10.0),
-                strutStyle: StrutStyle.disabled(),
+                strutStyle: const StrutStyle.disabled(),
               )
             ),
             const Text(
@@ -2697,7 +2697,7 @@ void main() {
                 decoration: null,
                 controller: controllerB,
                 style: const TextStyle(fontSize: 30.0),
-                strutStyle: StrutStyle.disabled(),
+                strutStyle: const StrutStyle.disabled(),
               ),
             ),
           ],
@@ -4519,7 +4519,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(),
             ),
@@ -4540,7 +4540,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 style: TextStyle(fontSize: 20,),
@@ -4563,7 +4563,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
@@ -4586,7 +4586,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
@@ -4614,7 +4614,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
@@ -4640,7 +4640,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 maxLines: 3,
@@ -4667,7 +4667,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
+          home: const Material(
             child: Center(
               child: TextField(
                 maxLines: 3,

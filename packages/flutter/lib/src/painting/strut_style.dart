@@ -312,8 +312,8 @@ class StrutStyle extends Diagnosticable {
        fontWeight = fontWeight ?? textStyle.fontWeight,
        fontStyle = fontStyle ?? textStyle.fontStyle,
        debugLabel = debugLabel ?? textStyle.debugLabel,
-       _package = package ?? null; // the textStyle._package data is embedded in the fontFamily names,
-                                   // so we no longer need it.
+       _package = package; // the textStyle._package data is embedded in the fontFamily names,
+                           // so we no longer need it.
 
   /// A [StrutStyle] that will have no impact on the text layout.
   ///
