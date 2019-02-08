@@ -28,11 +28,12 @@ import 'package:flutter/foundation.dart';
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 class LogicalKeyboardKey extends Diagnosticable {
-  /// Defines a KeyboardKey value and optional debug name.
+  /// Creates a LogicalKeyboardKey object with an optional key label and debug
+  /// name.
   ///
   /// {@tool sample}
   /// To save executable size, it is recommended that the [debugName] be null in
-  /// release mode. You can do this using the [kReleaseMode] constant.
+  /// release mode. You can do this by using the [kReleaseMode] constant.
   ///
   /// ```dart
   /// const LogicalKeyboardKey(0x0010000000a, debugName: kReleaseMode ? null : 'Special Key')
@@ -42,7 +43,7 @@ class LogicalKeyboardKey extends Diagnosticable {
 
   /// A unique code representing this key.
   ///
-  /// This is an opaque code, and should not be unpacked to derive information
+  /// This is an opaque code. It should not be unpacked to derive information
   /// from it, as the representation of the code could change at any time.
   final int keyId;
 
@@ -1315,9 +1316,9 @@ class LogicalKeyboardKey extends Diagnosticable {
 /// A class with static values that describe the keys that are returned from
 /// [RawKeyEvent.physicalKey].
 ///
-/// These represent *physical* keys, which are keys which represent a
-/// particular key location on the keyboard. It ignores any modifiers, modes,
-/// or keyboard layouts which may be in effect. This is contrast to
+/// These represent *physical* keys, which are keys which represent a particular
+/// key location on a QWERTY keyboard. It ignores any modifiers, modes, or
+/// keyboard layouts which may be in effect. This is contrast to
 /// [LogicalKeyboardKey], which represents a logical key interpreted in the
 /// context of modifiers, modes, and/or keyboard layouts.
 ///
@@ -1328,7 +1329,7 @@ class LogicalKeyboardKey extends Diagnosticable {
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
 class PhysicalKeyboardKey extends Diagnosticable {
-  /// Defines a KeyboardKey value and optional debug name.
+  /// Creates a PhysicalKeyboardKey object with an optional debug name.
   ///
   /// {@tool sample}
   /// To save executable size, it is recommended that the [debugName] be null in
