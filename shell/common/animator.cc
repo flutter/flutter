@@ -124,10 +124,13 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
           if (!self.get()) {
             return;
           }
-          // If our (this task's) task id is the same as the current one, then
-          // no further frames were produced, and it is safe (w.r.t. jank) to
-          // notify the engine we are idle.
-          if (notify_idle_task_id == self->notify_idle_task_id_) {
+          // If our (this task's) task id is the same as the current one
+          // (meaning there were no follow up frames to the |BeginFrame| call
+          // that posted this task) and no frame is currently scheduled, then
+          // assume that we are idle, and notify the engine of this.
+          if (notify_idle_task_id == self->notify_idle_task_id_ &&
+              !self->frame_scheduled_) {
+            TRACE_EVENT0("flutter", "BeginFrame idle callback");
             self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
                                                  100000);
           }
