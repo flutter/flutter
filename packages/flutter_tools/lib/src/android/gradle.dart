@@ -459,7 +459,12 @@ Future<void> _buildGradleProjectV2(
 
       final Archive update = Archive();
       for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
+        if (!newFile.isFile)
+          continue;
+
+        if (newFile.name != 'assets/isolate_snapshot_data' &&
+            newFile.name != 'assets/isolate_snapshot_instr' &&
+            !newFile.name.startsWith('assets/flutter_assets/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
@@ -483,11 +488,20 @@ Future<void> _buildGradleProjectV2(
         printStatus('No changes detected, creating rollback patch.');
       }
 
-      final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
-      if (oldFile == null)
-        throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+      final ArchiveFile oldFile1 = oldApk.findFile('assets/isolate_snapshot_data');
+      final ArchiveFile oldFile2 = oldApk.findFile('assets/isolate_snapshot_instr');
+      final ArchiveFile oldFile3 = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
+      if (oldFile1 == null && oldFile2 == null && oldFile3 == null)
+        throwToolExit('Error: Could not find baseline VM snapshot.');
 
-      final int baselineChecksum = getCrc32(oldFile.content);
+      int baselineChecksum = 0;
+      if (oldFile1 != null)
+        baselineChecksum = getCrc32(oldFile1.content, baselineChecksum);
+      if (oldFile2 != null)
+        baselineChecksum = getCrc32(oldFile2.content, baselineChecksum);
+      if (oldFile3 != null)
+        baselineChecksum = getCrc32(oldFile3.content, baselineChecksum);
+
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
         'buildNumber': package.versionCode,

@@ -440,6 +440,15 @@ class JITSnapshotter {
           }
         }
       }
+
+      {
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
+        if (af != null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+      }
     }
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
