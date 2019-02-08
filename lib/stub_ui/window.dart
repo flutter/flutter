@@ -551,6 +551,28 @@ class Window {
     _onLocaleChangedZone = Zone.current;
   }
 
+  /// The setting indicating the current brightness mode of the host platform.
+  /// If the platform has no preference, [platformBrightness] defaults to [Brightness.light].
+  Brightness get platformBrightness => _platformBrightness;
+  Brightness _platformBrightness = Brightness.light;
+
+  /// A callback that is invoked whenever [platformBrightness] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  VoidCallback get onPlatformBrightnessChanged => _onPlatformBrightnessChanged;
+  VoidCallback _onPlatformBrightnessChanged;
+  Zone _onPlatformBrightnessChangedZone;
+  set onPlatformBrightnessChanged(VoidCallback callback) {
+    _onPlatformBrightnessChanged = callback;
+    _onPlatformBrightnessChangedZone = Zone.current;
+  }
+
   /// The system-reported text scale.
   ///
   /// This establishes the text scaling factor to use when rendering text,

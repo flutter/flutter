@@ -32,7 +32,7 @@ copy("stub_ui") {
 
 copy("stub_libraries") {
   sources = [
-    "$flutter_root/lib/snapshot/libraries.json"
+    "$flutter_root/lib/stub_ui/libraries.json"
   ]
 
   outputs = [
