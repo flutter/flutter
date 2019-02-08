@@ -1172,11 +1172,10 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
+    // If needed, set the height based on minLines and/or maxLines
     if (maxLines != null && expands != true) {
       return preferredLineHeight * maxLines;
     }
-
-    // If needed, set the height based on minLines and/or maxLines
     if (expands == true) {
       if (maxLines != null) {
         _layoutText(width);
@@ -1196,8 +1195,6 @@ class RenderEditable extends RenderBox {
         return preferredLineHeight * minLines;
       }
     }
-
-    // TODO you're not considering when expands is false and you want to lock.
 
     // Set the height based on the content
     if (width == double.infinity) {

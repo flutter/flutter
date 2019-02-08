@@ -814,6 +814,7 @@ class _RenderDecoration extends RenderBox {
   // in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
+    // If expands is set, allow a parent widget to set the height.
     BoxConstraints boxConstraints = expands
       ? layoutConstraints.deflate(EdgeInsets.only(
           top: contentPadding.top,

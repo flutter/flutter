@@ -165,6 +165,9 @@ class TextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       // TODO(justinmc): These asserts are repeated in editable and
+       // editable_text. Is that ok or is there a better pattern that avoids
+       // duplication?
        assert(maxLines == null || maxLines > 0),
        assert(minLines != null),
        assert(minLines > 0),
@@ -837,7 +840,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
-            // TODO(justinmc): I think this is more complicated now?
+            // TODO(justinmc): This directly controls whether the TextField will
+            // grow to fill an Expanded parent, so I only want to set it to true
+            // when the user has configured the params for expansion within a
+            // a parent.  Is it confusing that expands sort of means two
+            // different things?
             expands: widget.expands == true && widget.maxLines == null,
             child: child,
           );
