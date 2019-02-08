@@ -329,7 +329,7 @@ class StrutStyle extends Diagnosticable {
   /// the properties defined in [TextStyle].
   ///
   /// Default strut is not the same as [StrutStyle.disabled].
-  static const StrutStyle disabled = const StrutStyle(
+  static const StrutStyle disabled = StrutStyle(
     height: 0,
     leading: 0,
   );

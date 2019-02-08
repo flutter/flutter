@@ -281,7 +281,7 @@ void main() {
                 alignLabelWithHint: alignLabelWithHint,
                 hintText: 'hint',
               ),
-              strutStyle: const StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),

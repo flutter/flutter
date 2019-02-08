@@ -38,7 +38,7 @@ void main() {
           home: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints.loose(const Size(200, 200)),
-              child: const CupertinoTextField(strutStyle: StrutStyle.disabled()),
+              child: const CupertinoTextField(strutStyle: StrutStyle.disabled),
             ),
           ),
         ),
@@ -82,7 +82,7 @@ void main() {
               constraints: BoxConstraints.loose(const Size(200, 200)),
               child: const CupertinoTextField(
                 maxLines: 3,
-                strutStyle: StrutStyle.disabled(),
+                strutStyle: StrutStyle.disabled,
               ),
             ),
           ),
@@ -505,7 +505,7 @@ void main() {
               padding: EdgeInsets.all(20.0),
               prefix: SizedBox(height: 100.0, width: 100.0),
               suffix: SizedBox(height: 50.0, width: 50.0),
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -531,7 +531,7 @@ void main() {
               padding: EdgeInsets.all(30.0),
               prefix: SizedBox(height: 100.0, width: 100.0),
               suffix: SizedBox(height: 50.0, width: 50.0),
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -755,7 +755,7 @@ void main() {
         const CupertinoApp(
           home: Center(
             child: CupertinoTextField(
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -774,7 +774,7 @@ void main() {
                 // A larger font.
                 fontSize: 50.0,
               ),
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -861,7 +861,7 @@ void main() {
           home: Center(
             child: CupertinoTextField(
               maxLines: null,
-              strutStyle: StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),

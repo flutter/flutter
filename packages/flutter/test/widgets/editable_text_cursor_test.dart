@@ -521,7 +521,7 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
-              strutStyle: const StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
