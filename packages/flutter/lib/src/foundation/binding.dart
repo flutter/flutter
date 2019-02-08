@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'platform.dart';
 import 'print.dart';
@@ -131,8 +132,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,
@@ -444,27 +444,33 @@ abstract class BindingBase {
   /// not wrapped in a guard that allows the tree shaker to remove it (see
   /// sample code below).
   ///
-  /// ## Sample Code
-  ///
+  /// {@tool sample}
   /// The following code registers a service extension that is only included in
-  /// debug builds:
+  /// debug builds.
   ///
   /// ```dart
-  /// assert(() {
-  ///   // Register your service extension here.
-  ///   return true;
-  /// }());
-  ///
+  /// void myRegistrationFunction() {
+  ///   assert(() {
+  ///     // Register your service extension here.
+  ///     return true;
+  ///   }());
+  /// }
   /// ```
+  /// {@end-tool}
   ///
+  /// {@tool sample}
   /// A service extension registered with the following code snippet is
-  /// available in debug and profile mode:
+  /// available in debug and profile mode.
   ///
   /// ```dart
-  /// if (!const bool.fromEnvironment('dart.vm.product')) {
-  //   // Register your service extension here.
-  // }
+  /// void myRegistrationFunction() {
+  ///   // kReleaseMode is defined in the 'flutter/foundation.dart' package.
+  ///   if (!kReleaseMode) {
+  ///     // Register your service extension here.
+  ///   }
+  /// }
   /// ```
+  /// {@end-tool}
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.

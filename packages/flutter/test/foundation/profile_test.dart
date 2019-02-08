@@ -5,9 +5,6 @@
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-// We run our tests in debug mode, to this will always evaluate to false...
-const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-
 void main() {
   // TODO(devoncarew): This test - while very nice - isn't testing what we really want to know:
   // that the code in the `profile` closure is omitted in release mode.
@@ -16,6 +13,8 @@ void main() {
     profile(() {
       count++;
     });
-    expect(count, isReleaseMode ? 0 : 1);
+    // We run our tests in debug mode, so kReleaseMode will always evaluate to
+    // false...
+    expect(count, kReleaseMode ? 0 : 1);
   });
 }
