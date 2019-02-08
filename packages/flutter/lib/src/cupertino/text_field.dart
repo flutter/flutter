@@ -365,8 +365,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to activeBlue for light theme, activeOrange for dark theme, or
-  /// settable primaryColor for customization.
+  /// Defaults to the [CupertinoThemeData.primaryColor] of the ambient theme,
+  /// which itself defaults to [CupertinoColors.activeBlue] in the light theme
+  /// and [CupertinoColors.activeOrange] in the dark theme.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
