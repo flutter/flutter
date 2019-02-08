@@ -54,9 +54,13 @@ class ScaleUpdateDetails {
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
     this.scale = 1.0,
+    this.horizontalScale = 1.0,
+    this.verticalScale = 1.0,
     this.rotation = 0.0,
   })  : assert(focalPoint != null),
         assert(scale != null && scale >= 0.0),
+        assert(horizontalScale != null && horizontalScale >= 0.0),
+        assert(verticalScale != null && verticalScale >= 0.0),
         assert(rotation != null);
 
   /// The focal point of the pointers in contact with the screen. Reported in
@@ -66,6 +70,9 @@ class ScaleUpdateDetails {
   /// The scale implied by the pointers in contact with the screen. A value
   /// greater than or equal to zero.
   final double scale;
+
+  final double horizontalScale;
+  final double verticalScale;
 
   /// The angle implied by the first two pointers to enter in contact with
   /// the screen. Expressed in radians.
