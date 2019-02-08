@@ -89,6 +89,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
           }
+          dataText.add(Text('logical: ${_event.logicalKey}'));
+          dataText.add(Text('physical: ${_event.physicalKey}'));
           for (ModifierKey modifier in data.modifiersPressed.keys) {
             for (KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
