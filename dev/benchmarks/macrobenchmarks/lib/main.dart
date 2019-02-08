@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show defaultShaderWarmUp;
 import 'package:flutter/material.dart';
 
 import 'common.dart';

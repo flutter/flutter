@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/src/material/colors.dart';
-
 /// Signature to warm up GPU shader compilation cache.
 ///
 /// To warm up shaders for a specific draw function, call it with the provided
@@ -68,17 +66,18 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   }
 
   // Warm up shadow shaders.
+  const Color black = Color(0xFF000000);  // foundation can't access material/colors
   canvas.save();
-  canvas.drawShadow(rrectPath, Colors.black, 10.0, true);
+  canvas.drawShadow(rrectPath, black, 10.0, true);
   canvas.translate(80, 0);
-  canvas.drawShadow(rrectPath, Colors.black, 10.0, false);
+  canvas.drawShadow(rrectPath, black, 10.0, false);
   canvas.restore();
 
   // Warm up text shaders.
   canvas.translate(0, 80);
   final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
     ParagraphStyle(textDirection: TextDirection.ltr),
-  )..pushStyle(TextStyle(color: Colors.black))..addText('Hello, world.');
+  )..pushStyle(TextStyle(color: black))..addText('Hello, world.');
   final Paragraph paragraph = paragraphBuilder.build()
     ..layout(const ParagraphConstraints(width: 60));
   canvas.drawParagraph(paragraph, const Offset(20, 20));
