@@ -95,6 +95,7 @@ executable("flow_unittests") {
   sources = [
     "matrix_decomposition_unittests.cc",
     "raster_cache_unittests.cc",
+    "layers/performance_overlay_layer_unittests.cc",
   ]
 
   deps = [

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
 
+#include <string>
+
 #include "flutter/flow/layers/layer.h"
 #include "flutter/fml/macros.h"
 
@@ -17,12 +19,14 @@ const int kVisualizeEngineStatistics = 1 << 3;
 
 class PerformanceOverlayLayer : public Layer {
  public:
-  explicit PerformanceOverlayLayer(uint64_t options);
+  explicit PerformanceOverlayLayer(uint64_t options,
+                                   const char* font_path = nullptr);
 
   void Paint(PaintContext& context) const override;
 
  private:
   int options_;
+  std::string font_path_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PerformanceOverlayLayer);
 };
