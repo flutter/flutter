@@ -154,15 +154,15 @@ enum ShowValueIndicator {
 /// [RoundSliderTickMarkShape], [PaddleSliderValueIndicatorShape], and
 /// [RoundSliderOverlayShape] for examples.
 ///
-/// The track painting can be skipped by specifying [trackHeight] as 0.
+/// The track painting can be skipped by specifying 0 for [trackHeight].
 /// The thumb painting can be skipped by specifying
-/// [SliderComponentShape.noThumb].
+/// [SliderComponentShape.noThumb] for [SliderThemeData.thumbShape].
 /// The overlay painting can be skipped by specifying
-/// [SliderComponentShape.noOverlay].
+/// [SliderComponentShape.noOverlay] for [SliderThemeData.overlayShape].
 /// The tick mark painting can be skipped by specifying
-/// [SliderTickMarkShape.noTickMark].
+/// [SliderTickMarkShape.noTickMark] for [SliderThemeData.tickMarkShape].
 /// The value indicator painting can be skipped by specifying the
-/// appropriate [ShowValueIndicator].
+/// appropriate [ShowValueIndicator] for [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///
