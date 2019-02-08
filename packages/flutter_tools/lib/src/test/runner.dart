@@ -230,6 +230,7 @@ Future<void> _testWatch({
         installHook: installHook,
         host: host,
         updateGoldens: updateGoldens);
+      invalidatedFiles.clear();
       isBusy = false;
       status.stop();
       await test.runTests(testArgs);
