@@ -4,10 +4,14 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'internal.dart'
+  if (dart.html) 'internal_web.dart';
 
 // COMMON SIGNATURES
 
 export 'dart:ui' show VoidCallback;
+export 'internal.dart'
+  if (dart.html) 'internal_web.dart';
 
 /// Signature for callbacks that report that an underlying value has changed.
 ///
@@ -68,11 +72,6 @@ typedef AsyncValueGetter<T> = Future<T> Function();
 
 
 // BITFIELD
-
-/// The largest SMI value.
-///
-/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
-const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
 
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 62 values of the enum can be used as indices.
