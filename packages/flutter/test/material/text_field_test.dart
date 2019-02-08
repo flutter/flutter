@@ -4529,8 +4529,8 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
-        // This is the height of the decoration plus the metrics from the default
-        // TextStyle of the theme.
+        // This is the height of the decoration (24) plus the metrics from the default
+        // TextStyle of the theme (16).
         const Size(800, 40),
       );
     },
@@ -4599,7 +4599,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
-        // The height should be the input decoration plus 6x the strut height.
+        // The height should be the input decoration (24) plus 6x the strut height (16).
         const Size(800, 120),
       );
     },
@@ -4629,7 +4629,8 @@ void main() {
       expect(
         tester.getSize(find.byType(TextField)),
         // When the strut's height is smaller than TextStyle's and forceStrutHeight
-        // is disabled, then the TextStyle takes precedence.
+        // is disabled, then the TextStyle takes precedence. Should be the same height
+        // as 'strut basic multi line'.
         const Size(800, 120),
       );
     },
