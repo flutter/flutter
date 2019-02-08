@@ -32,14 +32,12 @@ class Clipboard {
   /// Used with [getData].
   static const String kTextPlain = 'text/plain';
 
-
   /// Whether or not the clipboard is empty.
   ///
   /// If the user has recently started their device and the user has not yet
   /// copied anything, this value will be true.
   static bool get isEmpty => _isEmpty;
   static bool _isEmpty;
-
 
   /// Initializes the [isEmpty] variable with whether or not the clipboard is
   /// currently empty.

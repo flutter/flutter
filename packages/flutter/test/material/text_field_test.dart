@@ -4156,7 +4156,7 @@ void main() {
       await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pumpAndSettle();
 
-      // Collapsed toolbar shows 2 buttons.
+      // Collapsed toolbar shows 1 button.
       expect(find.byType(FlatButton), findsNWidgets(1));
 
       Clipboard.setData(const ClipboardData(text: 'alright now there is some text!'));
@@ -4174,7 +4174,7 @@ void main() {
 
       // Dismissing toolbar so no menu comes up.
       textfieldStart = tester.getTopLeft(find.byType(TextField));
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textfieldStart + const Offset(50.0, 15.0));
       await tester.pumpAndSettle();
 
       expect(find.byType(FlatButton), findsNWidgets(0));
@@ -4182,12 +4182,55 @@ void main() {
       await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
       await tester.pumpAndSettle();
 
-      // Collapsed toolbar shows 3 buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Collapsed toolbar shows 2 buttons.
+      expect(find.byType(FlatButton), findsNWidgets(2));
     },
   );
 
-  testWidgets(
+  testWidgets('toolbar shows paste if the app goes to the background, a copy occurs '
+              'is then brought to the foreground',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'At');
+      final FocusNode focusNode = FocusNode();
+      Clipboard.setData(const ClipboardData(text: null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                focusNode: focusNode,
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // Focuses
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 1 button.
+      expect(find.byType(FlatButton), findsNWidgets(1));
+
+      focusNode.unfocus();
+      Clipboard.setData(const ClipboardData(text: 'alright now there is some text!'));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Toolbar shows 2 buttons.
+      expect(find.byType(FlatButton), findsNWidgets(2));
+    }
+  );
+
+    testWidgets(
     'long press tap is not a double tap (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(

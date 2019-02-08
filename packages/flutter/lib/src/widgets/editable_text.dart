@@ -1105,6 +1105,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
+      Clipboard.queryEmpty();
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
