@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -26,7 +25,7 @@ class WebCompiler {
   ///
   /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
   /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
-  Future<void> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
+  Future<int> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
@@ -50,25 +49,17 @@ class WebCompiler {
       command.add('--enable-asserts');
     }
     printTrace(command.join(' '));
-    final Status status = logger.startProgress('Compiling $target to JavaScript', timeout: null);
-    try {
-      final Process result = await processManager.start(command);
-      result
-          .stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printStatus);
-      result
-          .stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-      final int exitCode = await result.exitCode;
-      if (exitCode != 0) {
-        throwToolExit('Failed to compile $target to JavaScript');
-      }
-    } finally {
-      status.start();
-    }
+    final Process result = await processManager.start(command);
+    result
+        .stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printStatus);
+    result
+        .stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printError);
+    return result.exitCode;
   }
 }

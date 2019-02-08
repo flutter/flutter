@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
@@ -15,12 +16,14 @@ import '../src/context.dart';
 void main() {
   final MockProcessManager mockProcessManager = MockProcessManager();
   final MockProcess mockProcess = MockProcess();
+  final BufferLogger mockLogger = BufferLogger();
 
   testUsingContext('invokes dart2js with correct arguments', () async {
     const WebCompiler webCompiler = WebCompiler();
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String librariesPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath), 'libraries.json');
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    final String librariesPath = fs.path.join(flutterPatchedSdkPath, 'libraries.json');
 
     when(mockProcess.stdout).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
     when(mockProcess.stderr).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
@@ -34,10 +37,14 @@ void main() {
       engineDartPath,
       dart2jsPath,
       'lib/main.dart',
+      '-o=build/web/main.dart.js',
       '--libraries-spec=$librariesPath',
-    ]));
+      '--platform-binaries=$flutterPatchedSdkPath',
+      '-m',
+    ])).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
+    Logger: () => mockLogger,
   });
 }
 
