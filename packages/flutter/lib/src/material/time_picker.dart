@@ -1660,8 +1660,43 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// );
 /// ```
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
+/// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
+///
+/// The [builder] parameter can be used to wrap the dialog widget to change
+/// to add inherited widgets like [Localizations.override],
+/// [Directionality], or [MediaQuery].
+///
+/// To show a dialog with the text direction overridden to be
+/// [TextDirection.rtl]:
+///
+/// ```dart
+/// showTimePicker(
+///   context: context,
+///   initialTime: TimeOfDay.now(),
+///   builder: (BuildContext context, Widget child) {
+///     return Directionality(
+///       textDirection: TextDirection.rtl,
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+///
+/// To show a dialog with time unconditionally displayed in 24 hour format:
+///
+/// ```dart
+/// showTimePicker(
+///   context: context,
+///   initialTime: TimeOfDay(hour: 10, minute: 47),
+///   builder: (BuildContext context, Widget child) {
+///     return MediaQuery(
+///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
 ///
 /// See also:
 ///
@@ -1669,15 +1704,19 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///    date picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
-  @required TimeOfDay initialTime
+  @required TimeOfDay initialTime,
+  TransitionBuilder builder,
 }) async {
   assert(context != null);
   assert(initialTime != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
+  final Widget dialog = _TimePickerDialog(initialTime: initialTime);
   return await showDialog<TimeOfDay>(
     context: context,
-    builder: (BuildContext context) => _TimePickerDialog(initialTime: initialTime),
+    builder: (BuildContext context) {
+      return builder == null ? dialog : builder(context, dialog);
+    },
   );
 }
 
