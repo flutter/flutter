@@ -1244,6 +1244,47 @@ void main() {
     },
   );
 
+  testWidgets('toolbar shows paste if the app goes to the background, a copy occurs '
+              'is then brought to the foreground',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'At');
+      final FocusNode focusNode = FocusNode();
+      Clipboard.setData(const ClipboardData(text: null));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              focusNode: focusNode,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      // Focuses
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Collapsed toolbar shows 1 button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
+
+      focusNode.unfocus();
+      Clipboard.setData(const ClipboardData(text: 'alright now there is some text!'));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Toolbar shows 2 buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
+    }
+  );
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
