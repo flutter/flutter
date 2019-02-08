@@ -287,9 +287,17 @@ class StrutStyle extends Diagnosticable {
   ///
   /// The [textStyle] parameter must not be null.
   ///
-  /// Specific properties can be overrided by explicitly providing them. Since
-  /// TextStyle does not contain [leading] or [forceStrutHeight], these values
+  /// The named parameters override the [textStyle]'s argument's properties.
+  /// Since TextStyle does not contain [leading] or [forceStrutHeight], these values
   /// will take on default values (null and false) unless otherwise specified.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be zero or positive.
+  ///
+  /// When [textStyle] has a package and a new package is also specified, the entire
+  /// font family fallback list should be redefined since the [textStyle]'s package data
+  /// is inherited by being prepended onto the font family names. If
+  /// [fontFamilyFallback] is meant to be empty, pass an empty list instead of null.
+  /// This prevents the previous package name from being prepended twice.
   StrutStyle.fromTextStyle(TextStyle textStyle, {
     String fontFamily,
     List<String> fontFamilyFallback,
@@ -321,17 +329,10 @@ class StrutStyle extends Diagnosticable {
   /// the properties defined in [TextStyle].
   ///
   /// Default strut is not the same as [StrutStyle.disabled].
-  const StrutStyle.disabled()
-    : fontSize = 0,
-      height = 0,
-      leading = 0,
-      fontFamily = null,
-      _fontFamilyFallback = null,
-      fontWeight = null,
-      fontStyle = null,
-      debugLabel = null,
-      forceStrutHeight = null,
-      _package = null;
+  static const StrutStyle disabled = const StrutStyle(
+    height: 0,
+    leading: 0,
+  );
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with

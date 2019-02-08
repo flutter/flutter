@@ -898,7 +898,7 @@ void main() {
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: const StrutStyle.disabled(),
+          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -1509,7 +1509,7 @@ void main() {
           decoration: InputDecoration.collapsed(
             hintText: 'hint',
           ),
-          strutStyle: StrutStyle.disabled(),
+          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -2124,7 +2124,7 @@ void main() {
             child: TextField(
               controller: controller,
               maxLines: 3,
-              strutStyle: const StrutStyle.disabled(),
+              strutStyle: StrutStyle.disabled,
             ),
           ) ,
         ),
@@ -2684,7 +2684,7 @@ void main() {
                 decoration: null,
                 controller: controllerA,
                 style: const TextStyle(fontSize: 10.0),
-                strutStyle: const StrutStyle.disabled(),
+                strutStyle: StrutStyle.disabled,
               )
             ),
             const Text(
@@ -2697,7 +2697,7 @@ void main() {
                 decoration: null,
                 controller: controllerB,
                 style: const TextStyle(fontSize: 30.0),
-                strutStyle: const StrutStyle.disabled(),
+                strutStyle: StrutStyle.disabled,
               ),
             ),
           ],
@@ -2736,7 +2736,7 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontSize: 10.0,),
+                style: const TextStyle(fontSize: 10.0),
               )
             ),
             const Text(
@@ -2765,7 +2765,7 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    // Strut is not vertically rounded, so use actual values here instead of rowBottomY
+    // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
     expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
     expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
@@ -4529,6 +4529,8 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // This is the height of the decoration plus the metrics from the default
+        // TextStyle of the theme.
         const Size(800, 40),
       );
     },
@@ -4543,7 +4545,7 @@ void main() {
           home: const Material(
             child: Center(
               child: TextField(
-                style: TextStyle(fontSize: 20,),
+                style: TextStyle(fontSize: 20),
               ),
             ),
           ),
@@ -4552,6 +4554,28 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // Strut should inherit the TextStyle.fontSize by default and produce the
+        // same height as if it were disabled.
+        const Size(800, 44),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                style: TextStyle(fontSize: 20),
+                strutStyle: StrutStyle.disabled,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // The height here should match the previous version with strut enabled.
         const Size(800, 44),
       );
     },
@@ -4575,6 +4599,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // The height should be the input decoration plus 6x the strut height.
         const Size(800, 120),
       );
     },
@@ -4603,6 +4628,8 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // When the strut's height is smaller than TextStyle's and forceStrutHeight
+        // is disabled, then the TextStyle takes precedence.
         const Size(800, 120),
       );
     },
@@ -4629,6 +4656,8 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // When the strut's height is larger than TextStyle's and forceStrutHeight
+        // is disabled, then the StrutStyle takes precedence.
         const Size(800, 174),
       );
     },
@@ -4656,6 +4685,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // The smaller font size of strut make the field shorter than normal.
         const Size(800, 48),
       );
     },
@@ -4684,6 +4714,8 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextField)),
+        // When the strut fontSize is larger than a provided TextStyle, the
+        // the strut's height takes precedence.
         const Size(800, 78),
       );
     },

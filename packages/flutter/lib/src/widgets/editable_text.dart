@@ -301,7 +301,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
-      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : const StrutStyle.disabled();
+      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled;
     }
     return _strutStyle;
   }
