@@ -52,7 +52,7 @@ class Clipboard {
     );
     _isEmpty = result == null;
     if (result != null) {
-      String text = result['text'];
+      final String text = result['text'];
       _isEmpty = text == null || text == '';
     }
     return isEmpty;
