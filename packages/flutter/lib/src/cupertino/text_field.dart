@@ -490,10 +490,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   @override
   bool get wantKeepAlive => _controller?.text?.isNotEmpty == true;
 
-  Color get _cursorColor {
-    return CupertinoTheme.of(context).primaryColor;
-  }
-
   bool _shouldShowAttachment({
     OverlayVisibilityMode attachment,
     bool hasText,
@@ -650,7 +646,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
-          cursorColor: _cursorColor,
+          cursorColor: widget.cursorColor ?? CupertinoTheme.of(context).primaryColor,
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
