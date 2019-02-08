@@ -286,18 +286,20 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.strutStyle}
   /// The strut style used for the vertical layout.
   ///
-  /// Strut is used to establish a predictable vertical layout. Since fonts may
-  /// vary depending on user input and due to font fallback, [StrutStyle.forceStrutHeight]
-  /// is enabled by default to lock all lines to the height of the base [TextStyle], provided by
+  /// [StrutStyle] is used to establish a predictable vertical layout.
+  /// Since fonts may vary depending on user input and due to font
+  /// fallback, [StrutStyle.forceStrutHeight] is enabled by default
+  /// to lock all lines to the height of the base [TextStyle], provided by
   /// [style]. This ensures the typed text fits within the alotted space.
   ///
-  /// If null, the strut will is inherit values from the [style] and has
-  /// [StrutStyle.forceStrutHeight] set to true. When no [style] is passed,
-  /// the theme's [TextStyle] will be used to generate [strutStyle] instead.
+  /// If null, the strut used will is inherit values from the [style] and will
+  /// have [StrutStyle.forceStrutHeight] set to true. When no [style] is
+  /// passed, the theme's [TextStyle] will be used to generate [strutStyle]
+  /// instead.
   ///
-  /// To disable strut-based vertical alignment and allow dynamic vertical layout based
-  /// on the glyphs typed, passing [StrutStyle.disabled] will make strut take no
-  /// effect.
+  /// To disable strut-based vertical alignment and allow dynamic vertical
+  /// layout based on the glyphs typed, passing [StrutStyle.disabled] will
+  /// make strut take no effect.
   /// {@endtemplate}
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
