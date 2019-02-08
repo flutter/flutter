@@ -1,0 +1,5384 @@
+{
+  "none": {
+    "names": {
+      "domkey": "None",
+      "android": [
+        "UNKNOWN"
+      ],
+      "english": "None",
+      "chromium": "none"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 0,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        0
+      ]
+    }
+  },
+  "hyper": {
+    "names": {
+      "domkey": "Hyper",
+      "android": null,
+      "english": "Hyper",
+      "chromium": "hyper"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 16,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "superKey": {
+    "names": {
+      "domkey": "Super",
+      "android": null,
+      "english": "Super Key",
+      "chromium": "super"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 17,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "fn": {
+    "names": {
+      "domkey": "Fn",
+      "android": [
+        "FUNCTION"
+      ],
+      "english": "Fn",
+      "chromium": "fn"
+    },
+    "scanCodes": {
+      "android": [
+        464
+      ],
+      "usb": 18,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        119
+      ]
+    }
+  },
+  "fnLock": {
+    "names": {
+      "domkey": "FnLock",
+      "android": null,
+      "english": "Fn Lock",
+      "chromium": "fnLock"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 19,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "suspend": {
+    "names": {
+      "domkey": "Suspend",
+      "android": [
+        "SUSPEND"
+      ],
+      "english": "Suspend",
+      "chromium": "suspend"
+    },
+    "scanCodes": {
+      "android": [
+        205
+      ],
+      "usb": 20,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "resume": {
+    "names": {
+      "domkey": "Resume",
+      "android": null,
+      "english": "Resume",
+      "chromium": "resume"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 21,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "turbo": {
+    "names": {
+      "domkey": "Turbo",
+      "android": null,
+      "english": "Turbo",
+      "chromium": "turbo"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 22,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchAssistant": {
+    "names": {
+      "domkey": "LaunchAssistant",
+      "android": [
+        "ASSIST"
+      ],
+      "english": "Launch Assistant",
+      "chromium": "launchAssistant"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 23,
+      "linux": 583,
+      "xkb": 591,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        219
+      ]
+    }
+  },
+  "sleep": {
+    "names": {
+      "domkey": "Sleep",
+      "android": [
+        "SLEEP"
+      ],
+      "english": "Sleep",
+      "chromium": "sleep"
+    },
+    "scanCodes": {
+      "android": [
+        142
+      ],
+      "usb": 65666,
+      "linux": 142,
+      "xkb": 150,
+      "windows": 57439,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        223
+      ]
+    }
+  },
+  "wakeUp": {
+    "names": {
+      "domkey": "WakeUp",
+      "android": [
+        "WAKEUP"
+      ],
+      "english": "Wake Up",
+      "chromium": "wakeUp"
+    },
+    "scanCodes": {
+      "android": [
+        143
+      ],
+      "usb": 65667,
+      "linux": 143,
+      "xkb": 151,
+      "windows": 57443,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        224
+      ]
+    }
+  },
+  "usbReserved": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Usb Reserved",
+      "chromium": "usbReserved"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458752,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "usbErrorRollOver": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Usb Error Roll Over",
+      "chromium": "usbErrorRollOver"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458753,
+      "linux": null,
+      "xkb": null,
+      "windows": 255,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "usbPostFail": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Usb Post Fail",
+      "chromium": "usbPostFail"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458754,
+      "linux": null,
+      "xkb": null,
+      "windows": 252,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "usbErrorUndefined": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Usb Error Undefined",
+      "chromium": "usbErrorUndefined"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458755,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "keyA": {
+    "names": {
+      "domkey": "KeyA",
+      "android": [
+        "A"
+      ],
+      "english": "Key A",
+      "chromium": "usA"
+    },
+    "scanCodes": {
+      "android": [
+        30
+      ],
+      "usb": 458756,
+      "linux": 30,
+      "xkb": 38,
+      "windows": 30,
+      "macos": 0
+    },
+    "keyCodes": {
+      "android": [
+        29
+      ]
+    }
+  },
+  "keyB": {
+    "names": {
+      "domkey": "KeyB",
+      "android": [
+        "B"
+      ],
+      "english": "Key B",
+      "chromium": "usB"
+    },
+    "scanCodes": {
+      "android": [
+        48
+      ],
+      "usb": 458757,
+      "linux": 48,
+      "xkb": 56,
+      "windows": 48,
+      "macos": 11
+    },
+    "keyCodes": {
+      "android": [
+        30
+      ]
+    }
+  },
+  "keyC": {
+    "names": {
+      "domkey": "KeyC",
+      "android": [
+        "C"
+      ],
+      "english": "Key C",
+      "chromium": "usC"
+    },
+    "scanCodes": {
+      "android": [
+        46
+      ],
+      "usb": 458758,
+      "linux": 46,
+      "xkb": 54,
+      "windows": 46,
+      "macos": 8
+    },
+    "keyCodes": {
+      "android": [
+        31
+      ]
+    }
+  },
+  "keyD": {
+    "names": {
+      "domkey": "KeyD",
+      "android": [
+        "D"
+      ],
+      "english": "Key D",
+      "chromium": "usD"
+    },
+    "scanCodes": {
+      "android": [
+        32
+      ],
+      "usb": 458759,
+      "linux": 32,
+      "xkb": 40,
+      "windows": 32,
+      "macos": 2
+    },
+    "keyCodes": {
+      "android": [
+        32
+      ]
+    }
+  },
+  "keyE": {
+    "names": {
+      "domkey": "KeyE",
+      "android": [
+        "E"
+      ],
+      "english": "Key E",
+      "chromium": "usE"
+    },
+    "scanCodes": {
+      "android": [
+        18
+      ],
+      "usb": 458760,
+      "linux": 18,
+      "xkb": 26,
+      "windows": 18,
+      "macos": 14
+    },
+    "keyCodes": {
+      "android": [
+        33
+      ]
+    }
+  },
+  "keyF": {
+    "names": {
+      "domkey": "KeyF",
+      "android": [
+        "F"
+      ],
+      "english": "Key F",
+      "chromium": "usF"
+    },
+    "scanCodes": {
+      "android": [
+        33
+      ],
+      "usb": 458761,
+      "linux": 33,
+      "xkb": 41,
+      "windows": 33,
+      "macos": 3
+    },
+    "keyCodes": {
+      "android": [
+        34
+      ]
+    }
+  },
+  "keyG": {
+    "names": {
+      "domkey": "KeyG",
+      "android": [
+        "G"
+      ],
+      "english": "Key G",
+      "chromium": "usG"
+    },
+    "scanCodes": {
+      "android": [
+        34
+      ],
+      "usb": 458762,
+      "linux": 34,
+      "xkb": 42,
+      "windows": 34,
+      "macos": 5
+    },
+    "keyCodes": {
+      "android": [
+        35
+      ]
+    }
+  },
+  "keyH": {
+    "names": {
+      "domkey": "KeyH",
+      "android": [
+        "H"
+      ],
+      "english": "Key H",
+      "chromium": "usH"
+    },
+    "scanCodes": {
+      "android": [
+        35
+      ],
+      "usb": 458763,
+      "linux": 35,
+      "xkb": 43,
+      "windows": 35,
+      "macos": 4
+    },
+    "keyCodes": {
+      "android": [
+        36
+      ]
+    }
+  },
+  "keyI": {
+    "names": {
+      "domkey": "KeyI",
+      "android": [
+        "I"
+      ],
+      "english": "Key I",
+      "chromium": "usI"
+    },
+    "scanCodes": {
+      "android": [
+        23
+      ],
+      "usb": 458764,
+      "linux": 23,
+      "xkb": 31,
+      "windows": 23,
+      "macos": 34
+    },
+    "keyCodes": {
+      "android": [
+        37
+      ]
+    }
+  },
+  "keyJ": {
+    "names": {
+      "domkey": "KeyJ",
+      "android": [
+        "J"
+      ],
+      "english": "Key J",
+      "chromium": "usJ"
+    },
+    "scanCodes": {
+      "android": [
+        36
+      ],
+      "usb": 458765,
+      "linux": 36,
+      "xkb": 44,
+      "windows": 36,
+      "macos": 38
+    },
+    "keyCodes": {
+      "android": [
+        38
+      ]
+    }
+  },
+  "keyK": {
+    "names": {
+      "domkey": "KeyK",
+      "android": [
+        "K"
+      ],
+      "english": "Key K",
+      "chromium": "usK"
+    },
+    "scanCodes": {
+      "android": [
+        37
+      ],
+      "usb": 458766,
+      "linux": 37,
+      "xkb": 45,
+      "windows": 37,
+      "macos": 40
+    },
+    "keyCodes": {
+      "android": [
+        39
+      ]
+    }
+  },
+  "keyL": {
+    "names": {
+      "domkey": "KeyL",
+      "android": [
+        "L"
+      ],
+      "english": "Key L",
+      "chromium": "usL"
+    },
+    "scanCodes": {
+      "android": [
+        38
+      ],
+      "usb": 458767,
+      "linux": 38,
+      "xkb": 46,
+      "windows": 38,
+      "macos": 37
+    },
+    "keyCodes": {
+      "android": [
+        40
+      ]
+    }
+  },
+  "keyM": {
+    "names": {
+      "domkey": "KeyM",
+      "android": [
+        "M"
+      ],
+      "english": "Key M",
+      "chromium": "usM"
+    },
+    "scanCodes": {
+      "android": [
+        50
+      ],
+      "usb": 458768,
+      "linux": 50,
+      "xkb": 58,
+      "windows": 50,
+      "macos": 46
+    },
+    "keyCodes": {
+      "android": [
+        41
+      ]
+    }
+  },
+  "keyN": {
+    "names": {
+      "domkey": "KeyN",
+      "android": [
+        "N"
+      ],
+      "english": "Key N",
+      "chromium": "usN"
+    },
+    "scanCodes": {
+      "android": [
+        49
+      ],
+      "usb": 458769,
+      "linux": 49,
+      "xkb": 57,
+      "windows": 49,
+      "macos": 45
+    },
+    "keyCodes": {
+      "android": [
+        42
+      ]
+    }
+  },
+  "keyO": {
+    "names": {
+      "domkey": "KeyO",
+      "android": [
+        "O"
+      ],
+      "english": "Key O",
+      "chromium": "usO"
+    },
+    "scanCodes": {
+      "android": [
+        24
+      ],
+      "usb": 458770,
+      "linux": 24,
+      "xkb": 32,
+      "windows": 24,
+      "macos": 31
+    },
+    "keyCodes": {
+      "android": [
+        43
+      ]
+    }
+  },
+  "keyP": {
+    "names": {
+      "domkey": "KeyP",
+      "android": [
+        "P"
+      ],
+      "english": "Key P",
+      "chromium": "usP"
+    },
+    "scanCodes": {
+      "android": [
+        25
+      ],
+      "usb": 458771,
+      "linux": 25,
+      "xkb": 33,
+      "windows": 25,
+      "macos": 35
+    },
+    "keyCodes": {
+      "android": [
+        44
+      ]
+    }
+  },
+  "keyQ": {
+    "names": {
+      "domkey": "KeyQ",
+      "android": [
+        "Q"
+      ],
+      "english": "Key Q",
+      "chromium": "usQ"
+    },
+    "scanCodes": {
+      "android": [
+        16
+      ],
+      "usb": 458772,
+      "linux": 16,
+      "xkb": 24,
+      "windows": 16,
+      "macos": 12
+    },
+    "keyCodes": {
+      "android": [
+        45
+      ]
+    }
+  },
+  "keyR": {
+    "names": {
+      "domkey": "KeyR",
+      "android": [
+        "R"
+      ],
+      "english": "Key R",
+      "chromium": "usR"
+    },
+    "scanCodes": {
+      "android": [
+        19
+      ],
+      "usb": 458773,
+      "linux": 19,
+      "xkb": 27,
+      "windows": 19,
+      "macos": 15
+    },
+    "keyCodes": {
+      "android": [
+        46
+      ]
+    }
+  },
+  "keyS": {
+    "names": {
+      "domkey": "KeyS",
+      "android": [
+        "S"
+      ],
+      "english": "Key S",
+      "chromium": "usS"
+    },
+    "scanCodes": {
+      "android": [
+        31
+      ],
+      "usb": 458774,
+      "linux": 31,
+      "xkb": 39,
+      "windows": 31,
+      "macos": 1
+    },
+    "keyCodes": {
+      "android": [
+        47
+      ]
+    }
+  },
+  "keyT": {
+    "names": {
+      "domkey": "KeyT",
+      "android": [
+        "T"
+      ],
+      "english": "Key T",
+      "chromium": "usT"
+    },
+    "scanCodes": {
+      "android": [
+        20
+      ],
+      "usb": 458775,
+      "linux": 20,
+      "xkb": 28,
+      "windows": 20,
+      "macos": 17
+    },
+    "keyCodes": {
+      "android": [
+        48
+      ]
+    }
+  },
+  "keyU": {
+    "names": {
+      "domkey": "KeyU",
+      "android": [
+        "U"
+      ],
+      "english": "Key U",
+      "chromium": "usU"
+    },
+    "scanCodes": {
+      "android": [
+        22
+      ],
+      "usb": 458776,
+      "linux": 22,
+      "xkb": 30,
+      "windows": 22,
+      "macos": 32
+    },
+    "keyCodes": {
+      "android": [
+        49
+      ]
+    }
+  },
+  "keyV": {
+    "names": {
+      "domkey": "KeyV",
+      "android": [
+        "V"
+      ],
+      "english": "Key V",
+      "chromium": "usV"
+    },
+    "scanCodes": {
+      "android": [
+        47
+      ],
+      "usb": 458777,
+      "linux": 47,
+      "xkb": 55,
+      "windows": 47,
+      "macos": 9
+    },
+    "keyCodes": {
+      "android": [
+        50
+      ]
+    }
+  },
+  "keyW": {
+    "names": {
+      "domkey": "KeyW",
+      "android": [
+        "W"
+      ],
+      "english": "Key W",
+      "chromium": "usW"
+    },
+    "scanCodes": {
+      "android": [
+        17
+      ],
+      "usb": 458778,
+      "linux": 17,
+      "xkb": 25,
+      "windows": 17,
+      "macos": 13
+    },
+    "keyCodes": {
+      "android": [
+        51
+      ]
+    }
+  },
+  "keyX": {
+    "names": {
+      "domkey": "KeyX",
+      "android": [
+        "X"
+      ],
+      "english": "Key X",
+      "chromium": "usX"
+    },
+    "scanCodes": {
+      "android": [
+        45
+      ],
+      "usb": 458779,
+      "linux": 45,
+      "xkb": 53,
+      "windows": 45,
+      "macos": 7
+    },
+    "keyCodes": {
+      "android": [
+        52
+      ]
+    }
+  },
+  "keyY": {
+    "names": {
+      "domkey": "KeyY",
+      "android": [
+        "Y"
+      ],
+      "english": "Key Y",
+      "chromium": "usY"
+    },
+    "scanCodes": {
+      "android": [
+        21
+      ],
+      "usb": 458780,
+      "linux": 21,
+      "xkb": 29,
+      "windows": 21,
+      "macos": 16
+    },
+    "keyCodes": {
+      "android": [
+        53
+      ]
+    }
+  },
+  "keyZ": {
+    "names": {
+      "domkey": "KeyZ",
+      "android": [
+        "Z"
+      ],
+      "english": "Key Z",
+      "chromium": "usZ"
+    },
+    "scanCodes": {
+      "android": [
+        44
+      ],
+      "usb": 458781,
+      "linux": 44,
+      "xkb": 52,
+      "windows": 44,
+      "macos": 6
+    },
+    "keyCodes": {
+      "android": [
+        54
+      ]
+    }
+  },
+  "digit1": {
+    "names": {
+      "domkey": "Digit1",
+      "android": [
+        "1"
+      ],
+      "english": "Digit 1",
+      "chromium": "digit1"
+    },
+    "scanCodes": {
+      "android": [
+        2
+      ],
+      "usb": 458782,
+      "linux": 2,
+      "xkb": 10,
+      "windows": 2,
+      "macos": 18
+    },
+    "keyCodes": {
+      "android": [
+        8
+      ]
+    }
+  },
+  "digit2": {
+    "names": {
+      "domkey": "Digit2",
+      "android": [
+        "2"
+      ],
+      "english": "Digit 2",
+      "chromium": "digit2"
+    },
+    "scanCodes": {
+      "android": [
+        3
+      ],
+      "usb": 458783,
+      "linux": 3,
+      "xkb": 11,
+      "windows": 3,
+      "macos": 19
+    },
+    "keyCodes": {
+      "android": [
+        9
+      ]
+    }
+  },
+  "digit3": {
+    "names": {
+      "domkey": "Digit3",
+      "android": [
+        "3"
+      ],
+      "english": "Digit 3",
+      "chromium": "digit3"
+    },
+    "scanCodes": {
+      "android": [
+        4
+      ],
+      "usb": 458784,
+      "linux": 4,
+      "xkb": 12,
+      "windows": 4,
+      "macos": 20
+    },
+    "keyCodes": {
+      "android": [
+        10
+      ]
+    }
+  },
+  "digit4": {
+    "names": {
+      "domkey": "Digit4",
+      "android": [
+        "4"
+      ],
+      "english": "Digit 4",
+      "chromium": "digit4"
+    },
+    "scanCodes": {
+      "android": [
+        5
+      ],
+      "usb": 458785,
+      "linux": 5,
+      "xkb": 13,
+      "windows": 5,
+      "macos": 21
+    },
+    "keyCodes": {
+      "android": [
+        11
+      ]
+    }
+  },
+  "digit5": {
+    "names": {
+      "domkey": "Digit5",
+      "android": [
+        "5"
+      ],
+      "english": "Digit 5",
+      "chromium": "digit5"
+    },
+    "scanCodes": {
+      "android": [
+        6
+      ],
+      "usb": 458786,
+      "linux": 6,
+      "xkb": 14,
+      "windows": 6,
+      "macos": 23
+    },
+    "keyCodes": {
+      "android": [
+        12
+      ]
+    }
+  },
+  "digit6": {
+    "names": {
+      "domkey": "Digit6",
+      "android": [
+        "6"
+      ],
+      "english": "Digit 6",
+      "chromium": "digit6"
+    },
+    "scanCodes": {
+      "android": [
+        7
+      ],
+      "usb": 458787,
+      "linux": 7,
+      "xkb": 15,
+      "windows": 7,
+      "macos": 22
+    },
+    "keyCodes": {
+      "android": [
+        13
+      ]
+    }
+  },
+  "digit7": {
+    "names": {
+      "domkey": "Digit7",
+      "android": [
+        "7"
+      ],
+      "english": "Digit 7",
+      "chromium": "digit7"
+    },
+    "scanCodes": {
+      "android": [
+        8
+      ],
+      "usb": 458788,
+      "linux": 8,
+      "xkb": 16,
+      "windows": 8,
+      "macos": 26
+    },
+    "keyCodes": {
+      "android": [
+        14
+      ]
+    }
+  },
+  "digit8": {
+    "names": {
+      "domkey": "Digit8",
+      "android": [
+        "8"
+      ],
+      "english": "Digit 8",
+      "chromium": "digit8"
+    },
+    "scanCodes": {
+      "android": [
+        9
+      ],
+      "usb": 458789,
+      "linux": 9,
+      "xkb": 17,
+      "windows": 9,
+      "macos": 28
+    },
+    "keyCodes": {
+      "android": [
+        15
+      ]
+    }
+  },
+  "digit9": {
+    "names": {
+      "domkey": "Digit9",
+      "android": [
+        "9"
+      ],
+      "english": "Digit 9",
+      "chromium": "digit9"
+    },
+    "scanCodes": {
+      "android": [
+        10
+      ],
+      "usb": 458790,
+      "linux": 10,
+      "xkb": 18,
+      "windows": 10,
+      "macos": 25
+    },
+    "keyCodes": {
+      "android": [
+        16
+      ]
+    }
+  },
+  "digit0": {
+    "names": {
+      "domkey": "Digit0",
+      "android": [
+        "0"
+      ],
+      "english": "Digit 0",
+      "chromium": "digit0"
+    },
+    "scanCodes": {
+      "android": [
+        11
+      ],
+      "usb": 458791,
+      "linux": 11,
+      "xkb": 19,
+      "windows": 11,
+      "macos": 29
+    },
+    "keyCodes": {
+      "android": [
+        7
+      ]
+    }
+  },
+  "enter": {
+    "names": {
+      "domkey": "Enter",
+      "android": [
+        "ENTER"
+      ],
+      "english": "Enter",
+      "chromium": "enter"
+    },
+    "scanCodes": {
+      "android": [
+        28
+      ],
+      "usb": 458792,
+      "linux": 28,
+      "xkb": 36,
+      "windows": 28,
+      "macos": 36
+    },
+    "keyCodes": {
+      "android": [
+        66
+      ]
+    }
+  },
+  "escape": {
+    "names": {
+      "domkey": "Escape",
+      "android": [
+        "ESCAPE"
+      ],
+      "english": "Escape",
+      "chromium": "escape"
+    },
+    "scanCodes": {
+      "android": [
+        1
+      ],
+      "usb": 458793,
+      "linux": 1,
+      "xkb": 9,
+      "windows": 1,
+      "macos": 53
+    },
+    "keyCodes": {
+      "android": [
+        111
+      ]
+    }
+  },
+  "backspace": {
+    "names": {
+      "domkey": "Backspace",
+      "android": [
+        "DEL"
+      ],
+      "english": "Backspace",
+      "chromium": "backspace"
+    },
+    "scanCodes": {
+      "android": [
+        14
+      ],
+      "usb": 458794,
+      "linux": 14,
+      "xkb": 22,
+      "windows": 14,
+      "macos": 51
+    },
+    "keyCodes": {
+      "android": [
+        67
+      ]
+    }
+  },
+  "tab": {
+    "names": {
+      "domkey": "Tab",
+      "android": [
+        "TAB"
+      ],
+      "english": "Tab",
+      "chromium": "tab"
+    },
+    "scanCodes": {
+      "android": [
+        15
+      ],
+      "usb": 458795,
+      "linux": 15,
+      "xkb": 23,
+      "windows": 15,
+      "macos": 48
+    },
+    "keyCodes": {
+      "android": [
+        61
+      ]
+    }
+  },
+  "space": {
+    "names": {
+      "domkey": "Space",
+      "android": [
+        "SPACE"
+      ],
+      "english": "Space",
+      "chromium": "space"
+    },
+    "scanCodes": {
+      "android": [
+        57
+      ],
+      "usb": 458796,
+      "linux": 57,
+      "xkb": 65,
+      "windows": 57,
+      "macos": 49
+    },
+    "keyCodes": {
+      "android": [
+        62
+      ]
+    }
+  },
+  "minus": {
+    "names": {
+      "domkey": "Minus",
+      "android": [
+        "MINUS"
+      ],
+      "english": "Minus",
+      "chromium": "minus"
+    },
+    "scanCodes": {
+      "android": [
+        12
+      ],
+      "usb": 458797,
+      "linux": 12,
+      "xkb": 20,
+      "windows": 12,
+      "macos": 27
+    },
+    "keyCodes": {
+      "android": [
+        69
+      ]
+    }
+  },
+  "equal": {
+    "names": {
+      "domkey": "Equal",
+      "android": [
+        "EQUALS"
+      ],
+      "english": "Equal",
+      "chromium": "equal"
+    },
+    "scanCodes": {
+      "android": [
+        13
+      ],
+      "usb": 458798,
+      "linux": 13,
+      "xkb": 21,
+      "windows": 13,
+      "macos": 24
+    },
+    "keyCodes": {
+      "android": [
+        70
+      ]
+    }
+  },
+  "bracketLeft": {
+    "names": {
+      "domkey": "BracketLeft",
+      "android": [
+        "LEFT_BRACKET"
+      ],
+      "english": "Bracket Left",
+      "chromium": "bracketLeft"
+    },
+    "scanCodes": {
+      "android": [
+        26
+      ],
+      "usb": 458799,
+      "linux": 26,
+      "xkb": 34,
+      "windows": 26,
+      "macos": 33
+    },
+    "keyCodes": {
+      "android": [
+        71
+      ]
+    }
+  },
+  "bracketRight": {
+    "names": {
+      "domkey": "BracketRight",
+      "android": [
+        "RIGHT_BRACKET"
+      ],
+      "english": "Bracket Right",
+      "chromium": "bracketRight"
+    },
+    "scanCodes": {
+      "android": [
+        27
+      ],
+      "usb": 458800,
+      "linux": 27,
+      "xkb": 35,
+      "windows": 27,
+      "macos": 30
+    },
+    "keyCodes": {
+      "android": [
+        72
+      ]
+    }
+  },
+  "backslash": {
+    "names": {
+      "domkey": "Backslash",
+      "android": [
+        "BACKSLASH"
+      ],
+      "english": "Backslash",
+      "chromium": "backslash"
+    },
+    "scanCodes": {
+      "android": [
+        43,
+        86
+      ],
+      "usb": 458801,
+      "linux": 43,
+      "xkb": 51,
+      "windows": 43,
+      "macos": 42
+    },
+    "keyCodes": {
+      "android": [
+        73
+      ]
+    }
+  },
+  "semicolon": {
+    "names": {
+      "domkey": "Semicolon",
+      "android": [
+        "SEMICOLON"
+      ],
+      "english": "Semicolon",
+      "chromium": "semicolon"
+    },
+    "scanCodes": {
+      "android": [
+        39
+      ],
+      "usb": 458803,
+      "linux": 39,
+      "xkb": 47,
+      "windows": 39,
+      "macos": 41
+    },
+    "keyCodes": {
+      "android": [
+        74
+      ]
+    }
+  },
+  "quote": {
+    "names": {
+      "domkey": "Quote",
+      "android": [
+        "APOSTROPHE"
+      ],
+      "english": "Quote",
+      "chromium": "quote"
+    },
+    "scanCodes": {
+      "android": [
+        40
+      ],
+      "usb": 458804,
+      "linux": 40,
+      "xkb": 48,
+      "windows": 40,
+      "macos": 39
+    },
+    "keyCodes": {
+      "android": [
+        75
+      ]
+    }
+  },
+  "backquote": {
+    "names": {
+      "domkey": "Backquote",
+      "android": [
+        "GRAVE"
+      ],
+      "english": "Backquote",
+      "chromium": "backquote"
+    },
+    "scanCodes": {
+      "android": [
+        41
+      ],
+      "usb": 458805,
+      "linux": 41,
+      "xkb": 49,
+      "windows": 41,
+      "macos": 50
+    },
+    "keyCodes": {
+      "android": [
+        68
+      ]
+    }
+  },
+  "comma": {
+    "names": {
+      "domkey": "Comma",
+      "android": [
+        "COMMA"
+      ],
+      "english": "Comma",
+      "chromium": "comma"
+    },
+    "scanCodes": {
+      "android": [
+        51
+      ],
+      "usb": 458806,
+      "linux": 51,
+      "xkb": 59,
+      "windows": 51,
+      "macos": 43
+    },
+    "keyCodes": {
+      "android": [
+        55
+      ]
+    }
+  },
+  "period": {
+    "names": {
+      "domkey": "Period",
+      "android": [
+        "PERIOD"
+      ],
+      "english": "Period",
+      "chromium": "period"
+    },
+    "scanCodes": {
+      "android": [
+        52
+      ],
+      "usb": 458807,
+      "linux": 52,
+      "xkb": 60,
+      "windows": 52,
+      "macos": 47
+    },
+    "keyCodes": {
+      "android": [
+        56
+      ]
+    }
+  },
+  "slash": {
+    "names": {
+      "domkey": "Slash",
+      "android": [
+        "SLASH"
+      ],
+      "english": "Slash",
+      "chromium": "slash"
+    },
+    "scanCodes": {
+      "android": [
+        53
+      ],
+      "usb": 458808,
+      "linux": 53,
+      "xkb": 61,
+      "windows": 53,
+      "macos": 44
+    },
+    "keyCodes": {
+      "android": [
+        76
+      ]
+    }
+  },
+  "capsLock": {
+    "names": {
+      "domkey": "CapsLock",
+      "android": [
+        "CAPS_LOCK"
+      ],
+      "english": "Caps Lock",
+      "chromium": "capsLock"
+    },
+    "scanCodes": {
+      "android": [
+        58
+      ],
+      "usb": 458809,
+      "linux": 58,
+      "xkb": 66,
+      "windows": 58,
+      "macos": 57
+    },
+    "keyCodes": {
+      "android": [
+        115
+      ]
+    }
+  },
+  "f1": {
+    "names": {
+      "domkey": "F1",
+      "android": [
+        "F1"
+      ],
+      "english": "F1",
+      "chromium": "f1"
+    },
+    "scanCodes": {
+      "android": [
+        59
+      ],
+      "usb": 458810,
+      "linux": 59,
+      "xkb": 67,
+      "windows": 59,
+      "macos": 122
+    },
+    "keyCodes": {
+      "android": [
+        131
+      ]
+    }
+  },
+  "f2": {
+    "names": {
+      "domkey": "F2",
+      "android": [
+        "F2"
+      ],
+      "english": "F2",
+      "chromium": "f2"
+    },
+    "scanCodes": {
+      "android": [
+        60
+      ],
+      "usb": 458811,
+      "linux": 60,
+      "xkb": 68,
+      "windows": 60,
+      "macos": 120
+    },
+    "keyCodes": {
+      "android": [
+        132
+      ]
+    }
+  },
+  "f3": {
+    "names": {
+      "domkey": "F3",
+      "android": [
+        "F3"
+      ],
+      "english": "F3",
+      "chromium": "f3"
+    },
+    "scanCodes": {
+      "android": [
+        61
+      ],
+      "usb": 458812,
+      "linux": 61,
+      "xkb": 69,
+      "windows": 61,
+      "macos": 99
+    },
+    "keyCodes": {
+      "android": [
+        133
+      ]
+    }
+  },
+  "f4": {
+    "names": {
+      "domkey": "F4",
+      "android": [
+        "F4"
+      ],
+      "english": "F4",
+      "chromium": "f4"
+    },
+    "scanCodes": {
+      "android": [
+        62
+      ],
+      "usb": 458813,
+      "linux": 62,
+      "xkb": 70,
+      "windows": 62,
+      "macos": 118
+    },
+    "keyCodes": {
+      "android": [
+        134
+      ]
+    }
+  },
+  "f5": {
+    "names": {
+      "domkey": "F5",
+      "android": [
+        "F5"
+      ],
+      "english": "F5",
+      "chromium": "f5"
+    },
+    "scanCodes": {
+      "android": [
+        63
+      ],
+      "usb": 458814,
+      "linux": 63,
+      "xkb": 71,
+      "windows": 63,
+      "macos": 96
+    },
+    "keyCodes": {
+      "android": [
+        135
+      ]
+    }
+  },
+  "f6": {
+    "names": {
+      "domkey": "F6",
+      "android": [
+        "F6"
+      ],
+      "english": "F6",
+      "chromium": "f6"
+    },
+    "scanCodes": {
+      "android": [
+        64
+      ],
+      "usb": 458815,
+      "linux": 64,
+      "xkb": 72,
+      "windows": 64,
+      "macos": 97
+    },
+    "keyCodes": {
+      "android": [
+        136
+      ]
+    }
+  },
+  "f7": {
+    "names": {
+      "domkey": "F7",
+      "android": [
+        "F7"
+      ],
+      "english": "F7",
+      "chromium": "f7"
+    },
+    "scanCodes": {
+      "android": [
+        65
+      ],
+      "usb": 458816,
+      "linux": 65,
+      "xkb": 73,
+      "windows": 65,
+      "macos": 98
+    },
+    "keyCodes": {
+      "android": [
+        137
+      ]
+    }
+  },
+  "f8": {
+    "names": {
+      "domkey": "F8",
+      "android": [
+        "F8"
+      ],
+      "english": "F8",
+      "chromium": "f8"
+    },
+    "scanCodes": {
+      "android": [
+        66
+      ],
+      "usb": 458817,
+      "linux": 66,
+      "xkb": 74,
+      "windows": 66,
+      "macos": 100
+    },
+    "keyCodes": {
+      "android": [
+        138
+      ]
+    }
+  },
+  "f9": {
+    "names": {
+      "domkey": "F9",
+      "android": [
+        "F9"
+      ],
+      "english": "F9",
+      "chromium": "f9"
+    },
+    "scanCodes": {
+      "android": [
+        67
+      ],
+      "usb": 458818,
+      "linux": 67,
+      "xkb": 75,
+      "windows": 67,
+      "macos": 101
+    },
+    "keyCodes": {
+      "android": [
+        139
+      ]
+    }
+  },
+  "f10": {
+    "names": {
+      "domkey": "F10",
+      "android": [
+        "F10"
+      ],
+      "english": "F10",
+      "chromium": "f10"
+    },
+    "scanCodes": {
+      "android": [
+        68
+      ],
+      "usb": 458819,
+      "linux": 68,
+      "xkb": 76,
+      "windows": 68,
+      "macos": 109
+    },
+    "keyCodes": {
+      "android": [
+        140
+      ]
+    }
+  },
+  "f11": {
+    "names": {
+      "domkey": "F11",
+      "android": [
+        "F11"
+      ],
+      "english": "F11",
+      "chromium": "f11"
+    },
+    "scanCodes": {
+      "android": [
+        87
+      ],
+      "usb": 458820,
+      "linux": 87,
+      "xkb": 95,
+      "windows": 87,
+      "macos": 103
+    },
+    "keyCodes": {
+      "android": [
+        141
+      ]
+    }
+  },
+  "f12": {
+    "names": {
+      "domkey": "F12",
+      "android": [
+        "F12"
+      ],
+      "english": "F12",
+      "chromium": "f12"
+    },
+    "scanCodes": {
+      "android": [
+        88
+      ],
+      "usb": 458821,
+      "linux": 88,
+      "xkb": 96,
+      "windows": 88,
+      "macos": 111
+    },
+    "keyCodes": {
+      "android": [
+        142
+      ]
+    }
+  },
+  "printScreen": {
+    "names": {
+      "domkey": "PrintScreen",
+      "android": [
+        "SYSRQ"
+      ],
+      "english": "Print Screen",
+      "chromium": "printScreen"
+    },
+    "scanCodes": {
+      "android": [
+        99
+      ],
+      "usb": 458822,
+      "linux": 99,
+      "xkb": 107,
+      "windows": 57399,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        120
+      ]
+    }
+  },
+  "scrollLock": {
+    "names": {
+      "domkey": "ScrollLock",
+      "android": [
+        "SCROLL_LOCK"
+      ],
+      "english": "Scroll Lock",
+      "chromium": "scrollLock"
+    },
+    "scanCodes": {
+      "android": [
+        70
+      ],
+      "usb": 458823,
+      "linux": 70,
+      "xkb": 78,
+      "windows": 70,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        116
+      ]
+    }
+  },
+  "pause": {
+    "names": {
+      "domkey": "Pause",
+      "android": [
+        "BREAK"
+      ],
+      "english": "Pause",
+      "chromium": "pause"
+    },
+    "scanCodes": {
+      "android": [
+        119,
+        411
+      ],
+      "usb": 458824,
+      "linux": 119,
+      "xkb": 127,
+      "windows": 69,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        121
+      ]
+    }
+  },
+  "insert": {
+    "names": {
+      "domkey": "Insert",
+      "android": [
+        "INSERT"
+      ],
+      "english": "Insert",
+      "chromium": "insert"
+    },
+    "scanCodes": {
+      "android": [
+        110
+      ],
+      "usb": 458825,
+      "linux": 110,
+      "xkb": 118,
+      "windows": 57426,
+      "macos": 114
+    },
+    "keyCodes": {
+      "android": [
+        124
+      ]
+    }
+  },
+  "home": {
+    "names": {
+      "domkey": "Home",
+      "android": [
+        "MOVE_HOME"
+      ],
+      "english": "Home",
+      "chromium": "home"
+    },
+    "scanCodes": {
+      "android": [
+        102
+      ],
+      "usb": 458826,
+      "linux": 102,
+      "xkb": 110,
+      "windows": 57415,
+      "macos": 115
+    },
+    "keyCodes": {
+      "android": [
+        122
+      ]
+    }
+  },
+  "pageUp": {
+    "names": {
+      "domkey": "PageUp",
+      "android": [
+        "PAGE_UP"
+      ],
+      "english": "Page Up",
+      "chromium": "pageUp"
+    },
+    "scanCodes": {
+      "android": [
+        104,
+        177
+      ],
+      "usb": 458827,
+      "linux": 104,
+      "xkb": 112,
+      "windows": 57417,
+      "macos": 116
+    },
+    "keyCodes": {
+      "android": [
+        92
+      ]
+    }
+  },
+  "delete": {
+    "names": {
+      "domkey": "Delete",
+      "android": [
+        "FORWARD_DEL"
+      ],
+      "english": "Delete",
+      "chromium": "del"
+    },
+    "scanCodes": {
+      "android": [
+        111
+      ],
+      "usb": 458828,
+      "linux": 111,
+      "xkb": 119,
+      "windows": 57427,
+      "macos": 117
+    },
+    "keyCodes": {
+      "android": [
+        112
+      ]
+    }
+  },
+  "end": {
+    "names": {
+      "domkey": "End",
+      "android": [
+        "MOVE_END"
+      ],
+      "english": "End",
+      "chromium": "end"
+    },
+    "scanCodes": {
+      "android": [
+        107
+      ],
+      "usb": 458829,
+      "linux": 107,
+      "xkb": 115,
+      "windows": 57423,
+      "macos": 119
+    },
+    "keyCodes": {
+      "android": [
+        123
+      ]
+    }
+  },
+  "pageDown": {
+    "names": {
+      "domkey": "PageDown",
+      "android": [
+        "PAGE_DOWN"
+      ],
+      "english": "Page Down",
+      "chromium": "pageDown"
+    },
+    "scanCodes": {
+      "android": [
+        109,
+        178
+      ],
+      "usb": 458830,
+      "linux": 109,
+      "xkb": 117,
+      "windows": 57425,
+      "macos": 121
+    },
+    "keyCodes": {
+      "android": [
+        93
+      ]
+    }
+  },
+  "arrowRight": {
+    "names": {
+      "domkey": "ArrowRight",
+      "android": [
+        "DPAD_RIGHT"
+      ],
+      "english": "Arrow Right",
+      "chromium": "arrowRight"
+    },
+    "scanCodes": {
+      "android": [
+        106
+      ],
+      "usb": 458831,
+      "linux": 106,
+      "xkb": 114,
+      "windows": 57421,
+      "macos": 124
+    },
+    "keyCodes": {
+      "android": [
+        22
+      ]
+    }
+  },
+  "arrowLeft": {
+    "names": {
+      "domkey": "ArrowLeft",
+      "android": [
+        "DPAD_LEFT"
+      ],
+      "english": "Arrow Left",
+      "chromium": "arrowLeft"
+    },
+    "scanCodes": {
+      "android": [
+        105
+      ],
+      "usb": 458832,
+      "linux": 105,
+      "xkb": 113,
+      "windows": 57419,
+      "macos": 123
+    },
+    "keyCodes": {
+      "android": [
+        21
+      ]
+    }
+  },
+  "arrowDown": {
+    "names": {
+      "domkey": "ArrowDown",
+      "android": [
+        "DPAD_DOWN"
+      ],
+      "english": "Arrow Down",
+      "chromium": "arrowDown"
+    },
+    "scanCodes": {
+      "android": [
+        108
+      ],
+      "usb": 458833,
+      "linux": 108,
+      "xkb": 116,
+      "windows": 57424,
+      "macos": 125
+    },
+    "keyCodes": {
+      "android": [
+        20
+      ]
+    }
+  },
+  "arrowUp": {
+    "names": {
+      "domkey": "ArrowUp",
+      "android": [
+        "DPAD_UP"
+      ],
+      "english": "Arrow Up",
+      "chromium": "arrowUp"
+    },
+    "scanCodes": {
+      "android": [
+        103
+      ],
+      "usb": 458834,
+      "linux": 103,
+      "xkb": 111,
+      "windows": 57416,
+      "macos": 126
+    },
+    "keyCodes": {
+      "android": [
+        19
+      ]
+    }
+  },
+  "numLock": {
+    "names": {
+      "domkey": "NumLock",
+      "android": [
+        "NUM_LOCK"
+      ],
+      "english": "Num Lock",
+      "chromium": "numLock"
+    },
+    "scanCodes": {
+      "android": [
+        69
+      ],
+      "usb": 458835,
+      "linux": 69,
+      "xkb": 77,
+      "windows": 57413,
+      "macos": 71
+    },
+    "keyCodes": {
+      "android": [
+        143
+      ]
+    }
+  },
+  "numpadDivide": {
+    "names": {
+      "domkey": "NumpadDivide",
+      "android": [
+        "NUMPAD_DIVIDE"
+      ],
+      "english": "Numpad Divide",
+      "chromium": "numpadDivide"
+    },
+    "scanCodes": {
+      "android": [
+        98
+      ],
+      "usb": 458836,
+      "linux": 98,
+      "xkb": 106,
+      "windows": 57397,
+      "macos": 75
+    },
+    "keyCodes": {
+      "android": [
+        154
+      ]
+    }
+  },
+  "numpadMultiply": {
+    "names": {
+      "domkey": "NumpadMultiply",
+      "android": [
+        "NUMPAD_MULTIPLY"
+      ],
+      "english": "Numpad Multiply",
+      "chromium": "numpadMultiply"
+    },
+    "scanCodes": {
+      "android": [
+        55
+      ],
+      "usb": 458837,
+      "linux": 55,
+      "xkb": 63,
+      "windows": 55,
+      "macos": 67
+    },
+    "keyCodes": {
+      "android": [
+        155
+      ]
+    }
+  },
+  "numpadSubtract": {
+    "names": {
+      "domkey": "NumpadSubtract",
+      "android": [
+        "NUMPAD_SUBTRACT"
+      ],
+      "english": "Numpad Subtract",
+      "chromium": "numpadSubtract"
+    },
+    "scanCodes": {
+      "android": [
+        74
+      ],
+      "usb": 458838,
+      "linux": 74,
+      "xkb": 82,
+      "windows": 74,
+      "macos": 78
+    },
+    "keyCodes": {
+      "android": [
+        156
+      ]
+    }
+  },
+  "numpadAdd": {
+    "names": {
+      "domkey": "NumpadAdd",
+      "android": [
+        "NUMPAD_ADD"
+      ],
+      "english": "Numpad Add",
+      "chromium": "numpadAdd"
+    },
+    "scanCodes": {
+      "android": [
+        78
+      ],
+      "usb": 458839,
+      "linux": 78,
+      "xkb": 86,
+      "windows": 78,
+      "macos": 69
+    },
+    "keyCodes": {
+      "android": [
+        157
+      ]
+    }
+  },
+  "numpadEnter": {
+    "names": {
+      "domkey": "NumpadEnter",
+      "android": [
+        "NUMPAD_ENTER"
+      ],
+      "english": "Numpad Enter",
+      "chromium": "numpadEnter"
+    },
+    "scanCodes": {
+      "android": [
+        96
+      ],
+      "usb": 458840,
+      "linux": 96,
+      "xkb": 104,
+      "windows": 57372,
+      "macos": 76
+    },
+    "keyCodes": {
+      "android": [
+        160
+      ]
+    }
+  },
+  "numpad1": {
+    "names": {
+      "domkey": "Numpad1",
+      "android": [
+        "NUMPAD_1"
+      ],
+      "english": "Numpad 1",
+      "chromium": "numpad1"
+    },
+    "scanCodes": {
+      "android": [
+        79
+      ],
+      "usb": 458841,
+      "linux": 79,
+      "xkb": 87,
+      "windows": 79,
+      "macos": 83
+    },
+    "keyCodes": {
+      "android": [
+        145
+      ]
+    }
+  },
+  "numpad2": {
+    "names": {
+      "domkey": "Numpad2",
+      "android": [
+        "NUMPAD_2"
+      ],
+      "english": "Numpad 2",
+      "chromium": "numpad2"
+    },
+    "scanCodes": {
+      "android": [
+        80
+      ],
+      "usb": 458842,
+      "linux": 80,
+      "xkb": 88,
+      "windows": 80,
+      "macos": 84
+    },
+    "keyCodes": {
+      "android": [
+        146
+      ]
+    }
+  },
+  "numpad3": {
+    "names": {
+      "domkey": "Numpad3",
+      "android": [
+        "NUMPAD_3"
+      ],
+      "english": "Numpad 3",
+      "chromium": "numpad3"
+    },
+    "scanCodes": {
+      "android": [
+        81
+      ],
+      "usb": 458843,
+      "linux": 81,
+      "xkb": 89,
+      "windows": 81,
+      "macos": 85
+    },
+    "keyCodes": {
+      "android": [
+        147
+      ]
+    }
+  },
+  "numpad4": {
+    "names": {
+      "domkey": "Numpad4",
+      "android": [
+        "NUMPAD_4"
+      ],
+      "english": "Numpad 4",
+      "chromium": "numpad4"
+    },
+    "scanCodes": {
+      "android": [
+        75
+      ],
+      "usb": 458844,
+      "linux": 75,
+      "xkb": 83,
+      "windows": 75,
+      "macos": 86
+    },
+    "keyCodes": {
+      "android": [
+        148
+      ]
+    }
+  },
+  "numpad5": {
+    "names": {
+      "domkey": "Numpad5",
+      "android": [
+        "NUMPAD_5"
+      ],
+      "english": "Numpad 5",
+      "chromium": "numpad5"
+    },
+    "scanCodes": {
+      "android": [
+        76
+      ],
+      "usb": 458845,
+      "linux": 76,
+      "xkb": 84,
+      "windows": 76,
+      "macos": 87
+    },
+    "keyCodes": {
+      "android": [
+        149
+      ]
+    }
+  },
+  "numpad6": {
+    "names": {
+      "domkey": "Numpad6",
+      "android": [
+        "NUMPAD_6"
+      ],
+      "english": "Numpad 6",
+      "chromium": "numpad6"
+    },
+    "scanCodes": {
+      "android": [
+        77
+      ],
+      "usb": 458846,
+      "linux": 77,
+      "xkb": 85,
+      "windows": 77,
+      "macos": 88
+    },
+    "keyCodes": {
+      "android": [
+        150
+      ]
+    }
+  },
+  "numpad7": {
+    "names": {
+      "domkey": "Numpad7",
+      "android": [
+        "NUMPAD_7"
+      ],
+      "english": "Numpad 7",
+      "chromium": "numpad7"
+    },
+    "scanCodes": {
+      "android": [
+        71
+      ],
+      "usb": 458847,
+      "linux": 71,
+      "xkb": 79,
+      "windows": 71,
+      "macos": 89
+    },
+    "keyCodes": {
+      "android": [
+        151
+      ]
+    }
+  },
+  "numpad8": {
+    "names": {
+      "domkey": "Numpad8",
+      "android": [
+        "NUMPAD_8"
+      ],
+      "english": "Numpad 8",
+      "chromium": "numpad8"
+    },
+    "scanCodes": {
+      "android": [
+        72
+      ],
+      "usb": 458848,
+      "linux": 72,
+      "xkb": 80,
+      "windows": 72,
+      "macos": 91
+    },
+    "keyCodes": {
+      "android": [
+        152
+      ]
+    }
+  },
+  "numpad9": {
+    "names": {
+      "domkey": "Numpad9",
+      "android": [
+        "NUMPAD_9"
+      ],
+      "english": "Numpad 9",
+      "chromium": "numpad9"
+    },
+    "scanCodes": {
+      "android": [
+        73
+      ],
+      "usb": 458849,
+      "linux": 73,
+      "xkb": 81,
+      "windows": 73,
+      "macos": 92
+    },
+    "keyCodes": {
+      "android": [
+        153
+      ]
+    }
+  },
+  "numpad0": {
+    "names": {
+      "domkey": "Numpad0",
+      "android": [
+        "NUMPAD_0"
+      ],
+      "english": "Numpad 0",
+      "chromium": "numpad0"
+    },
+    "scanCodes": {
+      "android": [
+        82
+      ],
+      "usb": 458850,
+      "linux": 82,
+      "xkb": 90,
+      "windows": 82,
+      "macos": 82
+    },
+    "keyCodes": {
+      "android": [
+        144
+      ]
+    }
+  },
+  "numpadDecimal": {
+    "names": {
+      "domkey": "NumpadDecimal",
+      "android": [
+        "NUMPAD_DOT"
+      ],
+      "english": "Numpad Decimal",
+      "chromium": "numpadDecimal"
+    },
+    "scanCodes": {
+      "android": [
+        83
+      ],
+      "usb": 458851,
+      "linux": 83,
+      "xkb": 91,
+      "windows": 83,
+      "macos": 65
+    },
+    "keyCodes": {
+      "android": [
+        158
+      ]
+    }
+  },
+  "intlBackslash": {
+    "names": {
+      "domkey": "IntlBackslash",
+      "android": null,
+      "english": "Intl Backslash",
+      "chromium": "intlBackslash"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458852,
+      "linux": 86,
+      "xkb": 94,
+      "windows": 86,
+      "macos": 10
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "contextMenu": {
+    "names": {
+      "domkey": "ContextMenu",
+      "android": [
+        "MENU"
+      ],
+      "english": "Context Menu",
+      "chromium": "contextMenu"
+    },
+    "scanCodes": {
+      "android": [
+        127,
+        139
+      ],
+      "usb": 458853,
+      "linux": 127,
+      "xkb": 135,
+      "windows": 57437,
+      "macos": 110
+    },
+    "keyCodes": {
+      "android": [
+        82
+      ]
+    }
+  },
+  "power": {
+    "names": {
+      "domkey": "Power",
+      "android": [
+        "POWER"
+      ],
+      "english": "Power",
+      "chromium": "power"
+    },
+    "scanCodes": {
+      "android": [
+        116,
+        152
+      ],
+      "usb": 458854,
+      "linux": 116,
+      "xkb": 124,
+      "windows": 57438,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        26
+      ]
+    }
+  },
+  "numpadEqual": {
+    "names": {
+      "domkey": "NumpadEqual",
+      "android": [
+        "NUMPAD_EQUALS"
+      ],
+      "english": "Numpad Equal",
+      "chromium": "numpadEqual"
+    },
+    "scanCodes": {
+      "android": [
+        117
+      ],
+      "usb": 458855,
+      "linux": 117,
+      "xkb": 125,
+      "windows": 89,
+      "macos": 81
+    },
+    "keyCodes": {
+      "android": [
+        161
+      ]
+    }
+  },
+  "f13": {
+    "names": {
+      "domkey": "F13",
+      "android": [
+        "F13"
+      ],
+      "english": "F13",
+      "chromium": "f13"
+    },
+    "scanCodes": {
+      "android": [
+        183
+      ],
+      "usb": 458856,
+      "linux": 183,
+      "xkb": 191,
+      "windows": 100,
+      "macos": 105
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f14": {
+    "names": {
+      "domkey": "F14",
+      "android": [
+        "F14"
+      ],
+      "english": "F14",
+      "chromium": "f14"
+    },
+    "scanCodes": {
+      "android": [
+        184
+      ],
+      "usb": 458857,
+      "linux": 184,
+      "xkb": 192,
+      "windows": 101,
+      "macos": 107
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f15": {
+    "names": {
+      "domkey": "F15",
+      "android": [
+        "F15"
+      ],
+      "english": "F15",
+      "chromium": "f15"
+    },
+    "scanCodes": {
+      "android": [
+        185
+      ],
+      "usb": 458858,
+      "linux": 185,
+      "xkb": 193,
+      "windows": 102,
+      "macos": 113
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f16": {
+    "names": {
+      "domkey": "F16",
+      "android": [
+        "F16"
+      ],
+      "english": "F16",
+      "chromium": "f16"
+    },
+    "scanCodes": {
+      "android": [
+        186
+      ],
+      "usb": 458859,
+      "linux": 186,
+      "xkb": 194,
+      "windows": 103,
+      "macos": 106
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f17": {
+    "names": {
+      "domkey": "F17",
+      "android": [
+        "F17"
+      ],
+      "english": "F17",
+      "chromium": "f17"
+    },
+    "scanCodes": {
+      "android": [
+        187
+      ],
+      "usb": 458860,
+      "linux": 187,
+      "xkb": 195,
+      "windows": 104,
+      "macos": 64
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f18": {
+    "names": {
+      "domkey": "F18",
+      "android": [
+        "F18"
+      ],
+      "english": "F18",
+      "chromium": "f18"
+    },
+    "scanCodes": {
+      "android": [
+        188
+      ],
+      "usb": 458861,
+      "linux": 188,
+      "xkb": 196,
+      "windows": 105,
+      "macos": 79
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f19": {
+    "names": {
+      "domkey": "F19",
+      "android": [
+        "F19"
+      ],
+      "english": "F19",
+      "chromium": "f19"
+    },
+    "scanCodes": {
+      "android": [
+        189
+      ],
+      "usb": 458862,
+      "linux": 189,
+      "xkb": 197,
+      "windows": 106,
+      "macos": 80
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f20": {
+    "names": {
+      "domkey": "F20",
+      "android": [
+        "F20"
+      ],
+      "english": "F20",
+      "chromium": "f20"
+    },
+    "scanCodes": {
+      "android": [
+        190
+      ],
+      "usb": 458863,
+      "linux": 190,
+      "xkb": 198,
+      "windows": 107,
+      "macos": 90
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f21": {
+    "names": {
+      "domkey": "F21",
+      "android": [
+        "F21"
+      ],
+      "english": "F21",
+      "chromium": "f21"
+    },
+    "scanCodes": {
+      "android": [
+        191
+      ],
+      "usb": 458864,
+      "linux": 191,
+      "xkb": 199,
+      "windows": 108,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f22": {
+    "names": {
+      "domkey": "F22",
+      "android": [
+        "F22"
+      ],
+      "english": "F22",
+      "chromium": "f22"
+    },
+    "scanCodes": {
+      "android": [
+        192
+      ],
+      "usb": 458865,
+      "linux": 192,
+      "xkb": 200,
+      "windows": 109,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f23": {
+    "names": {
+      "domkey": "F23",
+      "android": [
+        "F23"
+      ],
+      "english": "F23",
+      "chromium": "f23"
+    },
+    "scanCodes": {
+      "android": [
+        193
+      ],
+      "usb": 458866,
+      "linux": 193,
+      "xkb": 201,
+      "windows": 110,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "f24": {
+    "names": {
+      "domkey": "F24",
+      "android": [
+        "F24"
+      ],
+      "english": "F24",
+      "chromium": "f24"
+    },
+    "scanCodes": {
+      "android": [
+        194
+      ],
+      "usb": 458867,
+      "linux": 194,
+      "xkb": 202,
+      "windows": 118,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "open": {
+    "names": {
+      "domkey": "Open",
+      "android": [
+        "OPEN"
+      ],
+      "english": "Open",
+      "chromium": "open"
+    },
+    "scanCodes": {
+      "android": [
+        134
+      ],
+      "usb": 458868,
+      "linux": 134,
+      "xkb": 142,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "help": {
+    "names": {
+      "domkey": "Help",
+      "android": [
+        "HELP"
+      ],
+      "english": "Help",
+      "chromium": "help"
+    },
+    "scanCodes": {
+      "android": [
+        138
+      ],
+      "usb": 458869,
+      "linux": 138,
+      "xkb": 146,
+      "windows": 57403,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        259
+      ]
+    }
+  },
+  "select": {
+    "names": {
+      "domkey": "Select",
+      "android": null,
+      "english": "Select",
+      "chromium": "select"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458871,
+      "linux": 132,
+      "xkb": 140,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "again": {
+    "names": {
+      "domkey": "Again",
+      "android": [
+        "AGAIN"
+      ],
+      "english": "Again",
+      "chromium": "again"
+    },
+    "scanCodes": {
+      "android": [
+        129
+      ],
+      "usb": 458873,
+      "linux": 129,
+      "xkb": 137,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "undo": {
+    "names": {
+      "domkey": "Undo",
+      "android": [
+        "UNDO"
+      ],
+      "english": "Undo",
+      "chromium": "undo"
+    },
+    "scanCodes": {
+      "android": [
+        131
+      ],
+      "usb": 458874,
+      "linux": 131,
+      "xkb": 139,
+      "windows": 57352,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "cut": {
+    "names": {
+      "domkey": "Cut",
+      "android": [
+        "CUT"
+      ],
+      "english": "Cut",
+      "chromium": "cut"
+    },
+    "scanCodes": {
+      "android": [
+        137
+      ],
+      "usb": 458875,
+      "linux": 137,
+      "xkb": 145,
+      "windows": 57367,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        277
+      ]
+    }
+  },
+  "copy": {
+    "names": {
+      "domkey": "Copy",
+      "android": [
+        "COPY"
+      ],
+      "english": "Copy",
+      "chromium": "copy"
+    },
+    "scanCodes": {
+      "android": [
+        133
+      ],
+      "usb": 458876,
+      "linux": 133,
+      "xkb": 141,
+      "windows": 57368,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        278
+      ]
+    }
+  },
+  "paste": {
+    "names": {
+      "domkey": "Paste",
+      "android": [
+        "PASTE"
+      ],
+      "english": "Paste",
+      "chromium": "paste"
+    },
+    "scanCodes": {
+      "android": [
+        135
+      ],
+      "usb": 458877,
+      "linux": 135,
+      "xkb": 143,
+      "windows": 57354,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        279
+      ]
+    }
+  },
+  "find": {
+    "names": {
+      "domkey": "Find",
+      "android": [
+        "FIND"
+      ],
+      "english": "Find",
+      "chromium": "find"
+    },
+    "scanCodes": {
+      "android": [
+        136
+      ],
+      "usb": 458878,
+      "linux": 136,
+      "xkb": 144,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "audioVolumeMute": {
+    "names": {
+      "domkey": "AudioVolumeMute",
+      "android": [
+        "VOLUME_MUTE"
+      ],
+      "english": "Audio Volume Mute",
+      "chromium": "volumeMute"
+    },
+    "scanCodes": {
+      "android": [
+        113
+      ],
+      "usb": 458879,
+      "linux": 113,
+      "xkb": 121,
+      "windows": 57376,
+      "macos": 74
+    },
+    "keyCodes": {
+      "android": [
+        164
+      ]
+    }
+  },
+  "audioVolumeUp": {
+    "names": {
+      "domkey": "AudioVolumeUp",
+      "android": [
+        "VOLUME_UP"
+      ],
+      "english": "Audio Volume Up",
+      "chromium": "volumeUp"
+    },
+    "scanCodes": {
+      "android": [
+        115
+      ],
+      "usb": 458880,
+      "linux": 115,
+      "xkb": 123,
+      "windows": 57392,
+      "macos": 72
+    },
+    "keyCodes": {
+      "android": [
+        24
+      ]
+    }
+  },
+  "audioVolumeDown": {
+    "names": {
+      "domkey": "AudioVolumeDown",
+      "android": [
+        "VOLUME_DOWN"
+      ],
+      "english": "Audio Volume Down",
+      "chromium": "volumeDown"
+    },
+    "scanCodes": {
+      "android": [
+        114
+      ],
+      "usb": 458881,
+      "linux": 114,
+      "xkb": 122,
+      "windows": 57390,
+      "macos": 73
+    },
+    "keyCodes": {
+      "android": [
+        25
+      ]
+    }
+  },
+  "numpadComma": {
+    "names": {
+      "domkey": "NumpadComma",
+      "android": [
+        "NUMPAD_COMMA"
+      ],
+      "english": "Numpad Comma",
+      "chromium": "numpadComma"
+    },
+    "scanCodes": {
+      "android": [
+        95,
+        121
+      ],
+      "usb": 458885,
+      "linux": 121,
+      "xkb": 129,
+      "windows": 126,
+      "macos": 95
+    },
+    "keyCodes": {
+      "android": [
+        159
+      ]
+    }
+  },
+  "intlRo": {
+    "names": {
+      "domkey": "IntlRo",
+      "android": null,
+      "english": "Intl Ro",
+      "chromium": "intlRo"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458887,
+      "linux": 89,
+      "xkb": 97,
+      "windows": 115,
+      "macos": 94
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "kanaMode": {
+    "names": {
+      "domkey": "KanaMode",
+      "android": null,
+      "english": "Kana Mode",
+      "chromium": "kanaMode"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458888,
+      "linux": 93,
+      "xkb": 101,
+      "windows": 112,
+      "macos": 104
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "intlYen": {
+    "names": {
+      "domkey": "IntlYen",
+      "android": null,
+      "english": "Intl Yen",
+      "chromium": "intlYen"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458889,
+      "linux": 124,
+      "xkb": 132,
+      "windows": 125,
+      "macos": 93
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "convert": {
+    "names": {
+      "domkey": "Convert",
+      "android": [
+        "HENKAN"
+      ],
+      "english": "Convert",
+      "chromium": "convert"
+    },
+    "scanCodes": {
+      "android": [
+        92
+      ],
+      "usb": 458890,
+      "linux": 92,
+      "xkb": 100,
+      "windows": 121,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        214
+      ]
+    }
+  },
+  "nonConvert": {
+    "names": {
+      "domkey": "NonConvert",
+      "android": [
+        "MUHENKAN"
+      ],
+      "english": "Non Convert",
+      "chromium": "nonConvert"
+    },
+    "scanCodes": {
+      "android": [
+        94
+      ],
+      "usb": 458891,
+      "linux": 94,
+      "xkb": 102,
+      "windows": 123,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        213
+      ]
+    }
+  },
+  "lang1": {
+    "names": {
+      "domkey": "Lang1",
+      "android": null,
+      "english": "Lang 1",
+      "chromium": "lang1"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458896,
+      "linux": 122,
+      "xkb": 130,
+      "windows": 114,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "lang2": {
+    "names": {
+      "domkey": "Lang2",
+      "android": null,
+      "english": "Lang 2",
+      "chromium": "lang2"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458897,
+      "linux": 123,
+      "xkb": 131,
+      "windows": 113,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "lang3": {
+    "names": {
+      "domkey": "Lang3",
+      "android": [
+        "KATAKANA"
+      ],
+      "english": "Lang 3",
+      "chromium": "lang3"
+    },
+    "scanCodes": {
+      "android": [
+        90
+      ],
+      "usb": 458898,
+      "linux": 90,
+      "xkb": 98,
+      "windows": 120,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "lang4": {
+    "names": {
+      "domkey": "Lang4",
+      "android": [
+        "HIRAGANA"
+      ],
+      "english": "Lang 4",
+      "chromium": "lang4"
+    },
+    "scanCodes": {
+      "android": [
+        91
+      ],
+      "usb": 458899,
+      "linux": 91,
+      "xkb": 99,
+      "windows": 119,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "lang5": {
+    "names": {
+      "domkey": "Lang5",
+      "android": null,
+      "english": "Lang 5",
+      "chromium": "lang5"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458900,
+      "linux": 85,
+      "xkb": 93,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "abort": {
+    "names": {
+      "domkey": "Abort",
+      "android": null,
+      "english": "Abort",
+      "chromium": "abort"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458907,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "props": {
+    "names": {
+      "domkey": "Props",
+      "android": [
+        "PROPS"
+      ],
+      "english": "Props",
+      "chromium": "props"
+    },
+    "scanCodes": {
+      "android": [
+        130
+      ],
+      "usb": 458915,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadParenLeft": {
+    "names": {
+      "domkey": "NumpadParenLeft",
+      "android": [
+        "NUMPAD_LEFT_PAREN"
+      ],
+      "english": "Numpad Paren Left",
+      "chromium": "numpadParenLeft"
+    },
+    "scanCodes": {
+      "android": [
+        179
+      ],
+      "usb": 458934,
+      "linux": 179,
+      "xkb": 187,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        162
+      ]
+    }
+  },
+  "numpadParenRight": {
+    "names": {
+      "domkey": "NumpadParenRight",
+      "android": [
+        "NUMPAD_RIGHT_PAREN"
+      ],
+      "english": "Numpad Paren Right",
+      "chromium": "numpadParenRight"
+    },
+    "scanCodes": {
+      "android": [
+        180
+      ],
+      "usb": 458935,
+      "linux": 180,
+      "xkb": 188,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        163
+      ]
+    }
+  },
+  "numpadBackspace": {
+    "names": {
+      "domkey": "NumpadBackspace",
+      "android": null,
+      "english": "Numpad Backspace",
+      "chromium": "numpadBackspace"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458939,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadMemoryStore": {
+    "names": {
+      "domkey": "NumpadMemoryStore",
+      "android": null,
+      "english": "Numpad Memory Store",
+      "chromium": "numpadMemoryStore"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458960,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadMemoryRecall": {
+    "names": {
+      "domkey": "NumpadMemoryRecall",
+      "android": null,
+      "english": "Numpad Memory Recall",
+      "chromium": "numpadMemoryRecall"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458961,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadMemoryClear": {
+    "names": {
+      "domkey": "NumpadMemoryClear",
+      "android": null,
+      "english": "Numpad Memory Clear",
+      "chromium": "numpadMemoryClear"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458962,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadMemoryAdd": {
+    "names": {
+      "domkey": "NumpadMemoryAdd",
+      "android": null,
+      "english": "Numpad Memory Add",
+      "chromium": "numpadMemoryAdd"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458963,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadMemorySubtract": {
+    "names": {
+      "domkey": "NumpadMemorySubtract",
+      "android": null,
+      "english": "Numpad Memory Subtract",
+      "chromium": "numpadMemorySubtract"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458964,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadSignChange": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Numpad Sign Change",
+      "chromium": "numpadSignChange"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458967,
+      "linux": 118,
+      "xkb": 126,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadClear": {
+    "names": {
+      "domkey": "NumpadClear",
+      "android": null,
+      "english": "Numpad Clear",
+      "chromium": "numpadClear"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458968,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "numpadClearEntry": {
+    "names": {
+      "domkey": "NumpadClearEntry",
+      "android": null,
+      "english": "Numpad Clear Entry",
+      "chromium": "numpadClearEntry"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 458969,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "controlLeft": {
+    "names": {
+      "domkey": "ControlLeft",
+      "android": [
+        "CTRL_LEFT"
+      ],
+      "english": "Control Left",
+      "chromium": "controlLeft"
+    },
+    "scanCodes": {
+      "android": [
+        29
+      ],
+      "usb": 458976,
+      "linux": 29,
+      "xkb": 37,
+      "windows": 29,
+      "macos": 59
+    },
+    "keyCodes": {
+      "android": [
+        113
+      ]
+    }
+  },
+  "shiftLeft": {
+    "names": {
+      "domkey": "ShiftLeft",
+      "android": [
+        "SHIFT_LEFT"
+      ],
+      "english": "Shift Left",
+      "chromium": "shiftLeft"
+    },
+    "scanCodes": {
+      "android": [
+        42
+      ],
+      "usb": 458977,
+      "linux": 42,
+      "xkb": 50,
+      "windows": 42,
+      "macos": 56
+    },
+    "keyCodes": {
+      "android": [
+        59
+      ]
+    }
+  },
+  "altLeft": {
+    "names": {
+      "domkey": "AltLeft",
+      "android": [
+        "ALT_LEFT"
+      ],
+      "english": "Alt Left",
+      "chromium": "altLeft"
+    },
+    "scanCodes": {
+      "android": [
+        56
+      ],
+      "usb": 458978,
+      "linux": 56,
+      "xkb": 64,
+      "windows": 56,
+      "macos": 58
+    },
+    "keyCodes": {
+      "android": [
+        57
+      ]
+    }
+  },
+  "metaLeft": {
+    "names": {
+      "domkey": "MetaLeft",
+      "android": [
+        "META_LEFT"
+      ],
+      "english": "Meta Left",
+      "chromium": "metaLeft"
+    },
+    "scanCodes": {
+      "android": [
+        125
+      ],
+      "usb": 458979,
+      "linux": 125,
+      "xkb": 133,
+      "windows": 57435,
+      "macos": 55
+    },
+    "keyCodes": {
+      "android": [
+        117
+      ]
+    }
+  },
+  "controlRight": {
+    "names": {
+      "domkey": "ControlRight",
+      "android": [
+        "CTRL_RIGHT"
+      ],
+      "english": "Control Right",
+      "chromium": "controlRight"
+    },
+    "scanCodes": {
+      "android": [
+        97
+      ],
+      "usb": 458980,
+      "linux": 97,
+      "xkb": 105,
+      "windows": 57373,
+      "macos": 62
+    },
+    "keyCodes": {
+      "android": [
+        114
+      ]
+    }
+  },
+  "shiftRight": {
+    "names": {
+      "domkey": "ShiftRight",
+      "android": [
+        "SHIFT_RIGHT"
+      ],
+      "english": "Shift Right",
+      "chromium": "shiftRight"
+    },
+    "scanCodes": {
+      "android": [
+        54
+      ],
+      "usb": 458981,
+      "linux": 54,
+      "xkb": 62,
+      "windows": 54,
+      "macos": 60
+    },
+    "keyCodes": {
+      "android": [
+        60
+      ]
+    }
+  },
+  "altRight": {
+    "names": {
+      "domkey": "AltRight",
+      "android": [
+        "ALT_RIGHT"
+      ],
+      "english": "Alt Right",
+      "chromium": "altRight"
+    },
+    "scanCodes": {
+      "android": [
+        100
+      ],
+      "usb": 458982,
+      "linux": 100,
+      "xkb": 108,
+      "windows": 57400,
+      "macos": 61
+    },
+    "keyCodes": {
+      "android": [
+        58
+      ]
+    }
+  },
+  "metaRight": {
+    "names": {
+      "domkey": "MetaRight",
+      "android": [
+        "META_RIGHT"
+      ],
+      "english": "Meta Right",
+      "chromium": "metaRight"
+    },
+    "scanCodes": {
+      "android": [
+        126
+      ],
+      "usb": 458983,
+      "linux": 126,
+      "xkb": 134,
+      "windows": 57436,
+      "macos": 54
+    },
+    "keyCodes": {
+      "android": [
+        118
+      ]
+    }
+  },
+  "info": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "INFO"
+      ],
+      "english": "Info",
+      "chromium": "info"
+    },
+    "scanCodes": {
+      "android": [
+        358
+      ],
+      "usb": 786528,
+      "linux": 358,
+      "xkb": 366,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        165
+      ]
+    }
+  },
+  "closedCaptionToggle": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "CAPTIONS"
+      ],
+      "english": "Closed Caption Toggle",
+      "chromium": "closedCaptionToggle"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786529,
+      "linux": 370,
+      "xkb": 378,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        175
+      ]
+    }
+  },
+  "brightnessUp": {
+    "names": {
+      "domkey": "BrightnessUp",
+      "android": [
+        "BRIGHTNESS_UP"
+      ],
+      "english": "Brightness Up",
+      "chromium": "brightnessUp"
+    },
+    "scanCodes": {
+      "android": [
+        225
+      ],
+      "usb": 786543,
+      "linux": 225,
+      "xkb": 233,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        221
+      ]
+    }
+  },
+  "brightnessDown": {
+    "names": {
+      "domkey": "BrightnessDown",
+      "android": [
+        "BRIGHTNESS_DOWN"
+      ],
+      "english": "Brightness Down",
+      "chromium": "brightnessDown"
+    },
+    "scanCodes": {
+      "android": [
+        224
+      ],
+      "usb": 786544,
+      "linux": 224,
+      "xkb": 232,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        220
+      ]
+    }
+  },
+  "brightnessToggle": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Brightness Toggle",
+      "chromium": "brightnessToggle"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786546,
+      "linux": 431,
+      "xkb": 439,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "brightnessMinimum": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Brightness Minimum",
+      "chromium": "brightnessMinimum"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786547,
+      "linux": 592,
+      "xkb": 600,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "brightnessMaximum": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Brightness Maximum",
+      "chromium": "brightnessMaximum"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786548,
+      "linux": 593,
+      "xkb": 601,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "brightnessAuto": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Brightness Auto",
+      "chromium": "brightnessAuto"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786549,
+      "linux": 244,
+      "xkb": 252,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "mediaLast": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "LAST_CHANNEL"
+      ],
+      "english": "Media Last",
+      "chromium": "mediaLast"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786563,
+      "linux": 405,
+      "xkb": 413,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        229
+      ]
+    }
+  },
+  "launchPhone": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Phone",
+      "chromium": "launchPhone"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786572,
+      "linux": 169,
+      "xkb": 177,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "programGuide": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Program Guide",
+      "chromium": "programGuide"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786573,
+      "linux": 362,
+      "xkb": 370,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "exit": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "EXIT"
+      ],
+      "english": "Exit",
+      "chromium": "exit"
+    },
+    "scanCodes": {
+      "android": [
+        174
+      ],
+      "usb": 786580,
+      "linux": 174,
+      "xkb": 182,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "channelUp": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "CHANNEL_UP"
+      ],
+      "english": "Channel Up",
+      "chromium": "channelUp"
+    },
+    "scanCodes": {
+      "android": [
+        402
+      ],
+      "usb": 786588,
+      "linux": 410,
+      "xkb": 418,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        166
+      ]
+    }
+  },
+  "channelDown": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "CHANNEL_DOWN"
+      ],
+      "english": "Channel Down",
+      "chromium": "channelDown"
+    },
+    "scanCodes": {
+      "android": [
+        403
+      ],
+      "usb": 786589,
+      "linux": 411,
+      "xkb": 419,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        167
+      ]
+    }
+  },
+  "mediaPlay": {
+    "names": {
+      "domkey": "MediaPlay",
+      "android": [
+        "MEDIA_PLAY"
+      ],
+      "english": "Media Play",
+      "chromium": "mediaPlay"
+    },
+    "scanCodes": {
+      "android": [
+        200,
+        207
+      ],
+      "usb": 786608,
+      "linux": 207,
+      "xkb": 215,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        126
+      ]
+    }
+  },
+  "mediaRecord": {
+    "names": {
+      "domkey": "MediaRecord",
+      "android": [
+        "MEDIA_RECORD"
+      ],
+      "english": "Media Record",
+      "chromium": "mediaRecord"
+    },
+    "scanCodes": {
+      "android": [
+        167
+      ],
+      "usb": 786610,
+      "linux": 167,
+      "xkb": 175,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        130
+      ]
+    }
+  },
+  "mediaFastForward": {
+    "names": {
+      "domkey": "MediaFastForward",
+      "android": [
+        "MEDIA_FAST_FORWARD"
+      ],
+      "english": "Media Fast Forward",
+      "chromium": "mediaFastForward"
+    },
+    "scanCodes": {
+      "android": [
+        208
+      ],
+      "usb": 786611,
+      "linux": 208,
+      "xkb": 216,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        90
+      ]
+    }
+  },
+  "mediaRewind": {
+    "names": {
+      "domkey": "MediaRewind",
+      "android": [
+        "MEDIA_REWIND"
+      ],
+      "english": "Media Rewind",
+      "chromium": "mediaRewind"
+    },
+    "scanCodes": {
+      "android": [
+        168
+      ],
+      "usb": 786612,
+      "linux": 168,
+      "xkb": 176,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        89
+      ]
+    }
+  },
+  "mediaTrackNext": {
+    "names": {
+      "domkey": "MediaTrackNext",
+      "android": [
+        "MEDIA_NEXT"
+      ],
+      "english": "Media Track Next",
+      "chromium": "mediaTrackNext"
+    },
+    "scanCodes": {
+      "android": [
+        163
+      ],
+      "usb": 786613,
+      "linux": 163,
+      "xkb": 171,
+      "windows": 57369,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        87
+      ]
+    }
+  },
+  "mediaTrackPrevious": {
+    "names": {
+      "domkey": "MediaTrackPrevious",
+      "android": [
+        "MEDIA_PREVIOUS"
+      ],
+      "english": "Media Track Previous",
+      "chromium": "mediaTrackPrevious"
+    },
+    "scanCodes": {
+      "android": [
+        165
+      ],
+      "usb": 786614,
+      "linux": 165,
+      "xkb": 173,
+      "windows": 57360,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        88
+      ]
+    }
+  },
+  "mediaStop": {
+    "names": {
+      "domkey": "MediaStop",
+      "android": [
+        "MEDIA_STOP"
+      ],
+      "english": "Media Stop",
+      "chromium": "mediaStop"
+    },
+    "scanCodes": {
+      "android": [
+        128,
+        166
+      ],
+      "usb": 786615,
+      "linux": 166,
+      "xkb": 174,
+      "windows": 57380,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        86
+      ]
+    }
+  },
+  "eject": {
+    "names": {
+      "domkey": "Eject",
+      "android": [
+        "MEDIA_EJECT"
+      ],
+      "english": "Eject",
+      "chromium": "eject"
+    },
+    "scanCodes": {
+      "android": [
+        161,
+        162
+      ],
+      "usb": 786616,
+      "linux": 161,
+      "xkb": 169,
+      "windows": 57388,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        129
+      ]
+    }
+  },
+  "mediaPlayPause": {
+    "names": {
+      "domkey": "MediaPlayPause",
+      "android": [
+        "MEDIA_PLAY_PAUSE"
+      ],
+      "english": "Media Play Pause",
+      "chromium": "mediaPlayPause"
+    },
+    "scanCodes": {
+      "android": [
+        164
+      ],
+      "usb": 786637,
+      "linux": 164,
+      "xkb": 172,
+      "windows": 57378,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        85
+      ]
+    }
+  },
+  "speechInputToggle": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Speech Input Toggle",
+      "chromium": "speechInputToggle"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786639,
+      "linux": 582,
+      "xkb": 590,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "bassBoost": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "BASSBOOST"
+      ],
+      "english": "Bass Boost",
+      "chromium": "bassBoost"
+    },
+    "scanCodes": {
+      "android": [
+        209
+      ],
+      "usb": 786661,
+      "linux": 209,
+      "xkb": 217,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "mediaSelect": {
+    "names": {
+      "domkey": "MediaSelect",
+      "android": null,
+      "english": "Media Select",
+      "chromium": "mediaSelect"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786819,
+      "linux": 171,
+      "xkb": 179,
+      "windows": 57453,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchWordProcessor": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Word Processor",
+      "chromium": "launchWordProcessor"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786820,
+      "linux": 421,
+      "xkb": 429,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchSpreadsheet": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Spreadsheet",
+      "chromium": "launchSpreadsheet"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786822,
+      "linux": 423,
+      "xkb": 431,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchMail": {
+    "names": {
+      "domkey": "LaunchMail",
+      "android": [
+        "ENVELOPE"
+      ],
+      "english": "Launch Mail",
+      "chromium": "launchMail"
+    },
+    "scanCodes": {
+      "android": [
+        155,
+        215
+      ],
+      "usb": 786826,
+      "linux": 155,
+      "xkb": 163,
+      "windows": 57452,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        65
+      ]
+    }
+  },
+  "launchContacts": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "CONTACTS"
+      ],
+      "english": "Launch Contacts",
+      "chromium": "launchContacts"
+    },
+    "scanCodes": {
+      "android": [
+        429
+      ],
+      "usb": 786829,
+      "linux": 429,
+      "xkb": 437,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        207
+      ]
+    }
+  },
+  "launchCalendar": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "CALENDAR"
+      ],
+      "english": "Launch Calendar",
+      "chromium": "launchCalendar"
+    },
+    "scanCodes": {
+      "android": [
+        397
+      ],
+      "usb": 786830,
+      "linux": 397,
+      "xkb": 405,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        208
+      ]
+    }
+  },
+  "launchApp2": {
+    "names": {
+      "domkey": "LaunchApp2",
+      "android": null,
+      "english": "Launch App2",
+      "chromium": "launchApp2"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786834,
+      "linux": 140,
+      "xkb": 148,
+      "windows": 57377,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchApp1": {
+    "names": {
+      "domkey": "LaunchApp1",
+      "android": null,
+      "english": "Launch App1",
+      "chromium": "launchApp1"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786836,
+      "linux": 144,
+      "xkb": 152,
+      "windows": 57451,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchInternetBrowser": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Internet Browser",
+      "chromium": "launchInternetBrowser"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786838,
+      "linux": 150,
+      "xkb": 158,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "logOff": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Log Off",
+      "chromium": "logOff"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786844,
+      "linux": 433,
+      "xkb": 441,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "lockScreen": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Lock Screen",
+      "chromium": "lockScreen"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786846,
+      "linux": 152,
+      "xkb": 160,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchControlPanel": {
+    "names": {
+      "domkey": "LaunchControlPanel",
+      "android": null,
+      "english": "Launch Control Panel",
+      "chromium": "launchControlPanel"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786847,
+      "linux": 579,
+      "xkb": 587,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "selectTask": {
+    "names": {
+      "domkey": "SelectTask",
+      "android": null,
+      "english": "Select Task",
+      "chromium": "selectTask"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786850,
+      "linux": 580,
+      "xkb": 588,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchDocuments": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Documents",
+      "chromium": "launchDocuments"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786855,
+      "linux": 235,
+      "xkb": 243,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "spellCheck": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Spell Check",
+      "chromium": "spellCheck"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786859,
+      "linux": 432,
+      "xkb": 440,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchKeyboardLayout": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Keyboard Layout",
+      "chromium": "launchKeyboardLayout"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786862,
+      "linux": 374,
+      "xkb": 382,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchScreenSaver": {
+    "names": {
+      "domkey": "LaunchScreenSaver",
+      "android": null,
+      "english": "Launch Screen Saver",
+      "chromium": "launchScreenSaver"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786865,
+      "linux": 581,
+      "xkb": 589,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "launchAudioBrowser": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Launch Audio Browser",
+      "chromium": "launchAudioBrowser"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786871,
+      "linux": 392,
+      "xkb": 400,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "newKey": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "NEW"
+      ],
+      "english": "New Key",
+      "chromium": "new"
+    },
+    "scanCodes": {
+      "android": [
+        181
+      ],
+      "usb": 786945,
+      "linux": 181,
+      "xkb": 189,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "close": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "MEDIA_CLOSE",
+        "CLOSE"
+      ],
+      "english": "Close",
+      "chromium": "close"
+    },
+    "scanCodes": {
+      "android": [
+        160,
+        206
+      ],
+      "usb": 786947,
+      "linux": 206,
+      "xkb": 214,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        128
+      ]
+    }
+  },
+  "save": {
+    "names": {
+      "domkey": null,
+      "android": null,
+      "english": "Save",
+      "chromium": "save"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786951,
+      "linux": 234,
+      "xkb": 242,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "print": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "PRINT"
+      ],
+      "english": "Print",
+      "chromium": "print"
+    },
+    "scanCodes": {
+      "android": [
+        210
+      ],
+      "usb": 786952,
+      "linux": 210,
+      "xkb": 218,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "browserSearch": {
+    "names": {
+      "domkey": "BrowserSearch",
+      "android": [
+        "SEARCH"
+      ],
+      "english": "Browser Search",
+      "chromium": "browserSearch"
+    },
+    "scanCodes": {
+      "android": [
+        217
+      ],
+      "usb": 786977,
+      "linux": 217,
+      "xkb": 225,
+      "windows": 57445,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        84
+      ]
+    }
+  },
+  "browserHome": {
+    "names": {
+      "domkey": "BrowserHome",
+      "android": null,
+      "english": "Browser Home",
+      "chromium": "browserHome"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786979,
+      "linux": 172,
+      "xkb": 180,
+      "windows": 57394,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "browserBack": {
+    "names": {
+      "domkey": "BrowserBack",
+      "android": null,
+      "english": "Browser Back",
+      "chromium": "browserBack"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786980,
+      "linux": 158,
+      "xkb": 166,
+      "windows": 57450,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "browserForward": {
+    "names": {
+      "domkey": "BrowserForward",
+      "android": [
+        "FORWARD"
+      ],
+      "english": "Browser Forward",
+      "chromium": "browserForward"
+    },
+    "scanCodes": {
+      "android": [
+        159
+      ],
+      "usb": 786981,
+      "linux": 159,
+      "xkb": 167,
+      "windows": 57449,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        125
+      ]
+    }
+  },
+  "browserStop": {
+    "names": {
+      "domkey": "BrowserStop",
+      "android": null,
+      "english": "Browser Stop",
+      "chromium": "browserStop"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786982,
+      "linux": 128,
+      "xkb": 136,
+      "windows": 57448,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "browserRefresh": {
+    "names": {
+      "domkey": "BrowserRefresh",
+      "android": null,
+      "english": "Browser Refresh",
+      "chromium": "browserRefresh"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786983,
+      "linux": 173,
+      "xkb": 181,
+      "windows": 57447,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "browserFavorites": {
+    "names": {
+      "domkey": "BrowserFavorites",
+      "android": [
+        "BOOKMARK"
+      ],
+      "english": "Browser Favorites",
+      "chromium": "browserFavorites"
+    },
+    "scanCodes": {
+      "android": [
+        156
+      ],
+      "usb": 786986,
+      "linux": 156,
+      "xkb": 164,
+      "windows": 57446,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        174
+      ]
+    }
+  },
+  "zoomIn": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "ZOOM_IN"
+      ],
+      "english": "Zoom In",
+      "chromium": "zoomIn"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786989,
+      "linux": 418,
+      "xkb": 426,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        168
+      ]
+    }
+  },
+  "zoomOut": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "ZOOM_OUT"
+      ],
+      "english": "Zoom Out",
+      "chromium": "zoomOut"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786990,
+      "linux": 419,
+      "xkb": 427,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        169
+      ]
+    }
+  },
+  "zoomToggle": {
+    "names": {
+      "domkey": "ZoomToggle",
+      "android": [
+        "TV_ZOOM_MODE"
+      ],
+      "english": "Zoom Toggle",
+      "chromium": "zoomToggle"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786994,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        255
+      ]
+    }
+  },
+  "redo": {
+    "names": {
+      "domkey": null,
+      "android": [
+        "REDO"
+      ],
+      "english": "Redo",
+      "chromium": "redo"
+    },
+    "scanCodes": {
+      "android": [
+        182
+      ],
+      "usb": 787065,
+      "linux": 182,
+      "xkb": 190,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "mailReply": {
+    "names": {
+      "domkey": "MailReply",
+      "android": null,
+      "english": "Mail Reply",
+      "chromium": "mailReply"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787081,
+      "linux": 232,
+      "xkb": 240,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "mailForward": {
+    "names": {
+      "domkey": "MailForward",
+      "android": null,
+      "english": "Mail Forward",
+      "chromium": "mailForward"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787083,
+      "linux": 233,
+      "xkb": 241,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  },
+  "mailSend": {
+    "names": {
+      "domkey": "MailSend",
+      "android": null,
+      "english": "Mail Send",
+      "chromium": "mailSend"
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787084,
+      "linux": 231,
+      "xkb": 239,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null
+    }
+  }
+}

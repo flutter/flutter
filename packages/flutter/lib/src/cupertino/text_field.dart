@@ -456,15 +456,18 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
-    // The cause is not keyboard press but we would still like to just
-    // highlight the word without showing any handles or toolbar.
-    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.keyboard);
+    _renderEditable.selectWordsInRange(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.forcePress,
+    );
   }
 
   void _handleForcePressEnded(ForcePressDetails details) {
-    // The cause is not technically double tap, but we would still like to show
-    // the toolbar and handles.
-    _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+    _renderEditable.selectWordsInRange(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.forcePress,
+    );
+    _editableTextKey.currentState.showToolbar();
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
@@ -474,10 +477,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleSingleLongTapDown() {
     _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+    _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
-    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+    _renderEditable.selectWord(cause: SelectionChangedCause.tap);
+    _editableTextKey.currentState.showToolbar();
   }
 
   @override

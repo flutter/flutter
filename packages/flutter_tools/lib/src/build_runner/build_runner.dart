@@ -4,19 +4,22 @@
 
 import 'dart:async';
 
+import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
+import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
+import 'build_script_generator.dart';
 
 /// The [BuildRunnerFactory] instance.
 BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
@@ -26,17 +29,8 @@ BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
 /// This requires both an experimental opt in via the environment variable
 /// 'FLUTTER_EXPERIMENTAL_BUILD' and that the project itself has a
 /// dependency on the package 'flutter_build' and 'build_runner.'
-FutureOr<bool> get experimentalBuildEnabled async {
-  if (_experimentalBuildEnabled != null) {
-    return _experimentalBuildEnabled;
-  }
-  final bool flagEnabled = platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
-  if (!flagEnabled) {
-    return _experimentalBuildEnabled = false;
-  }
-  final FlutterProject flutterProject = await FlutterProject.current();
-  final Map<String, Uri> packages = PackageMap(flutterProject.packagesFile.path).map;
-  return _experimentalBuildEnabled = packages.containsKey('flutter_build') && packages.containsKey('build_runner');
+bool get experimentalBuildEnabled {
+  return _experimentalBuildEnabled ??= platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
 }
 bool _experimentalBuildEnabled;
 
@@ -74,53 +68,69 @@ class BuildRunner {
     @required String mainPath,
     @required List<String> extraFrontEndOptions,
   }) async {
+    await generateBuildScript();
     final FlutterProject flutterProject = await FlutterProject.current();
     final String frontendServerPath = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    final String pubExecutable = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk','bin', 'pub');
     final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final Process process = await processManager.start(<String>[
-      '$pubExecutable',
-      'run',
-      'build_runner',
-      'build',
-      '--define', 'flutter_build|kernel=disabled=false',
-      '--define', 'flutter_build|kernel=aot=$aot',
-      '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-      '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-      '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-      '--define', 'flutter_build|kernel=mainPath=$mainPath',
-      '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-      '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-      '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-      '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-      '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
-    ]);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(_handleOutput);
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(_handleError);
-    final int exitCode = await process.exitCode;
-    if (exitCode != 0) {
-      throw Exception('build_runner exited with non-zero exit code: $exitCode');
+    final String buildScript = flutterProject
+        .dartTool
+        .childDirectory('build')
+        .childDirectory('entrypoint')
+        .childFile('build.dart')
+        .path;
+    final String scriptPackagesPath = flutterProject
+        .dartTool
+        .childDirectory('flutter_tool')
+        .childFile('.packages')
+        .path;
+    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+    final Status status = logger.startProgress('running builders...', timeout: null);
+    try {
+      final Process buildProcess = await processManager.start(<String>[
+        dartPath,
+        '--packages=$scriptPackagesPath',
+        buildScript,
+        'build',
+        '--define', 'flutter_build|kernel=disabled=false',
+        '--define', 'flutter_build|kernel=aot=$aot',
+        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
+        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
+        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
+        '--define', 'flutter_build|kernel=mainPath=$mainPath',
+        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
+        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
+        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
+        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
+        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
+      ]);
+      buildProcess
+          .stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(printStatus);
+      buildProcess
+          .stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(printError);
+      await buildProcess.exitCode;
+    } finally {
+      status.stop();
     }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
     final Directory dartTool = flutterProject.dartTool;
     final String projectName = flutterProject.manifest.appName;
     final Directory generatedDirectory = dartTool
-      .absolute
-      .childDirectory('build')
-      .childDirectory('generated')
-      .childDirectory(projectName);
-    if (!await generatedDirectory.exists()) {
+        .absolute
+        .childDirectory('build')
+        .childDirectory('generated')
+        .childDirectory(projectName);
+    if (!generatedDirectory.existsSync()) {
       throw Exception('build_runner cannot find generated directory');
     }
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
@@ -130,18 +140,66 @@ class BuildRunner {
     final File dillFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
-    if (!await packagesFile.exists() || !await dillFile.exists()) {
+    if (!packagesFile.existsSync() || !dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
     return BuildResult(packagesFile, dillFile);
   }
 
-  void _handleOutput(String line) {
-    printTrace(line);
+  /// Invalidates a generated build script by deleting it.
+  ///
+  /// Must be called any time a pubspec file update triggers a corresponding change
+  /// in .packages.
+  Future<void> invalidateBuildScript() async {
+    final FlutterProject flutterProject = await FlutterProject.current();
+    final File buildScript = flutterProject.dartTool
+        .absolute
+        .childDirectory('flutter_tool')
+        .childFile('build.dart');
+    if (!buildScript.existsSync()) {
+      return;
+    }
+    await buildScript.delete();
   }
 
-  void _handleError(String line) {
-    printError(line);
+  // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
+  // used to generate a build script.
+  Future<void> generateBuildScript() async {
+    final FlutterProject flutterProject = await FlutterProject.current();
+    final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
+    final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
+    if (fs.file(resultScriptPath).existsSync()) {
+      return;
+    }
+    final Status status = logger.startProgress('generating build script...', timeout: null);
+    try {
+      fs.directory(generatedDirectory).createSync(recursive: true);
+
+      final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
+      final StringBuffer stringBuffer = StringBuffer();
+
+      stringBuffer.writeln('name: synthetic_example');
+      stringBuffer.writeln('dependencies:');
+      for (String builder in await flutterProject.builders) {
+        stringBuffer.writeln('  $builder: any');
+      }
+      stringBuffer.writeln('  build_runner: any');
+      stringBuffer.writeln('  flutter_build:');
+      stringBuffer.writeln('    sdk: flutter');
+      await syntheticPubspec.writeAsString(stringBuffer.toString());
+
+      await pubGet(
+        context: PubContext.pubGet,
+        directory: generatedDirectory,
+        upgrade: false,
+        checkLastModified: false,
+      );
+      final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
+      final BuildScriptGenerator buildScriptGenerator = buildScriptGeneratorFactory.create(flutterProject, packageGraph);
+      await buildScriptGenerator.generateBuildScript();
+    } finally {
+      status.stop();
+    }
   }
 }
 
