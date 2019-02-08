@@ -647,8 +647,6 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
 
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
         ? argResults['compilation-trace-file'] : null;
     final bool createBaseline = argParser.options.containsKey('baseline')
