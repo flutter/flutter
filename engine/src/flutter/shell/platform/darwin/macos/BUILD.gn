@@ -8,14 +8,14 @@ import("//build/config/mac/mac_sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/platform/darwin/framework_shared.gni")
 
-_flutter_framework_name = "Flutter"
-_flutter_framework_out_dir_subpath = "macos/$_flutter_framework_name.framework"
-_flutter_framework_dir = "$root_out_dir/$_flutter_framework_out_dir_subpath"
+_flutter_framework_name = "FlutterMacOS"
+_flutter_framework_filename = "$_flutter_framework_name.framework"
+_flutter_framework_dir = "$root_out_dir/$_flutter_framework_filename"
 
-# The headers that will be copied to the Flutter.framework and be accessed
-# from outside the Flutter engine source root.
+# The headers that will be copied to the framework and be accessed from outside
+# the Flutter engine source root.
 _flutter_framework_headers = [
-  "framework/Headers/Flutter.h",
+  "framework/Headers/FlutterMacOS.h",
   "framework/Headers/FLEOpenGLContextHandling.h",
   "framework/Headers/FLEPlugin.h",
   "framework/Headers/FLEPluginRegistrar.h",
@@ -89,7 +89,7 @@ action("copy_dylib_and_update_framework_install_name") {
     "--dylib",
     rebase_path("$_flutter_framework_dir/Versions/A/$_flutter_framework_name"),
     "--install_name",
-    "@rpath/$_flutter_framework_name.framework/Versions/A/$_flutter_framework_name",
+    "@rpath/$_flutter_framework_filename/Versions/A/$_flutter_framework_name",
     "--stamp",
     rebase_path(stamp_file),
   ]
@@ -168,7 +168,7 @@ action("_generate_symlinks") {
   ]
   args = [
     "--framework",
-    "$_flutter_framework_out_dir_subpath",
+    "$_flutter_framework_filename",
     "--version",
     "A",
     "--contents",
