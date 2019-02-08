@@ -55,10 +55,10 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
   ];
 
   // Warm up path stroke and fill shaders.
-  for (Path path in paths) {
+  for (int i = 0; i < paths.length; i++) {
     canvas.save();
     for (Paint paint in paints) {
-      canvas.drawPath(path, paint);
+      canvas.drawPath(paths[i], paint);
       canvas.translate(80, 0);
     }
     canvas.restore();
@@ -82,4 +82,3 @@ ShaderWarmUp defaultShaderWarmUp = (Canvas canvas) {
     ..layout(const ParagraphConstraints(width: 60));
   canvas.drawParagraph(paragraph, const Offset(20, 20));
 };
-
