@@ -211,6 +211,7 @@ Future<void> _testWatch({
 }) async {
   final List<String> invalidatedFiles = <String>[];
   final DirectoryWatcher directoryWatcher = DirectoryWatcher(testDir.path);
+  bool isBusy = false;
 
   directoryWatcher.events.listen((WatchEvent event) {
     if (event.path.endsWith('.dart')) {
@@ -222,12 +223,14 @@ Future<void> _testWatch({
   await directoryWatcher.ready;
   terminal.singleCharMode = true;
   await for (String char in terminal.keystrokes.asBroadcastStream()){
-    if (char == 'r') {
+    if (char == 'r' && !isBusy) {
+      isBusy = true;
       final Status status = logger.startProgress('Recompiling test files...\n', timeout: null);
       await _compileTestFiles(compiler, testFiles,
         installHook: installHook,
         host: host,
         updateGoldens: updateGoldens);
+      isBusy = false;
       status.stop();
       await test.runTests(testArgs);
       _printReloadMessage();
