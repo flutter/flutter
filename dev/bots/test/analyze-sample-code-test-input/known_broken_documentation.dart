@@ -18,8 +18,7 @@
 /// blabla 0.0, the penzance blabla is blabla not blabla at all. Bla the blabla
 /// 1.0, the blabla is blabla blabla blabla an blabla blabla.
 ///
-/// ### Sample code
-///
+/// {@tool sample}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
@@ -29,9 +28,9 @@
 ///   child: const Text('Poor wandering ones!'),
 /// )
 /// ```
+/// {@end-tool}
 ///
-/// ## Sample code
-///
+/// {@tool sample}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla finale blabla:
 ///
@@ -41,3 +40,4 @@
 ///   child: const Text('Poor wandering ones!'),
 /// )
 /// ```
+/// {@end-tool}

@@ -80,8 +80,13 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// In this example, the children are spaced out equally, unless there's no
-/// more room, in which case they stack vertically and scroll.
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the children are spaced out equally, unless there's no more
+/// room, in which case they stack vertically and scroll.
+///
+/// When using this technique, [Expanded] and [Flexible] are not useful, because
+/// in both cases the "available space" is infinite (since this is in a viewport).
+/// The next section describes a technique for providing a maximum height constraint.
 ///
 /// ```dart
 /// LayoutBuilder(
@@ -112,10 +117,7 @@ import 'scrollable.dart';
 ///   },
 /// )
 /// ```
-///
-/// When using this technique, [Expanded] and [Flexible] are not useful, because
-/// in both cases the "available space" is infinite (since this is in a viewport).
-/// The next section describes a technique for providing a maximum height constraint.
+/// {@end-tool}
 ///
 /// ### Expanding content to fit the viewport
 ///
@@ -134,6 +136,18 @@ import 'scrollable.dart';
 ///
 /// The widget that is to grow to fit the remaining space so provided is wrapped
 /// in an [Expanded] widget.
+///
+/// This technique is quite expensive, as it more or less requires that the contents
+/// of the viewport be laid out twice (once to find their intrinsic dimensions, and
+/// once to actually lay them out). The number of widgets within the column should
+/// therefore be kept small. Alternatively, subsets of the children that have known
+/// dimensions can be wrapped in a [SizedBox] that has tight vertical constraints,
+/// so that the intrinsic sizing algorithm can short-circuit the computation when it
+/// reaches those parts of the subtree.
+///
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the column becomes either as big as viewport, or as big as
+/// the contents, whichever is biggest.
 ///
 /// ```dart
 /// LayoutBuilder(
@@ -155,7 +169,7 @@ import 'scrollable.dart';
 ///                 // A flexible child that will grow to fit the viewport but
 ///                 // still be at least as big as necessary to fit its contents.
 ///                 child: Container(
-///                   color: Colors.blue,
+///                   color: Colors.red,
 ///                   height: 120.0,
 ///                 ),
 ///               ),
@@ -167,14 +181,7 @@ import 'scrollable.dart';
 ///   },
 /// )
 /// ```
-///
-/// This technique is quite expensive, as it more or less requires that the contents
-/// of the viewport be laid out twice (once to find their intrinsic dimensions, and
-/// once to actually lay them out). The number of widgets within the column should
-/// therefore be kept small. Alternatively, subsets of the children that have known
-/// dimensions can be wrapped in a [SizedBox] that has tight vertical constraints,
-/// so that the intrinsic sizing algorithm can short-circuit the computation when it
-/// reaches those parts of the subtree.
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -241,7 +241,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///         icon: Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
   ///         onPressed: () {
-  ///           // ...
+  ///           // Implement navigation to shopping cart page here...
+  ///           print('Shopping cart opened.');
   ///         },
   ///       ),
   ///     ],

@@ -91,17 +91,23 @@ const double _kMinButtonSize = 48.0;
 /// button is.
 ///
 /// ```dart
-/// Ink(
-///   decoration: ShapeDecoration(
-///     color: Colors.purple,
-///     shape: CircleBorder(),
+/// Center(
+///   child: Container(
+///     child: Ink(
+///       decoration: ShapeDecoration(
+///         color: Colors.lightBlue,
+///         shape: CircleBorder(),
+///       ),
+///       child: IconButton(
+///         icon: Icon(Icons.android),
+///         color: Colors.white,
+///         onPressed: () {
+///           print("filled background");
+///         },
+///       ),
+///     ),
 ///   ),
-///   child: IconButton(
-///     icon: Icon(Icons.android),
-///     color: Colors.white,
-///     onPressed: () { print("filled background"); },
-///   ),
-/// )
+/// );
 /// ```
 /// {@end-tool}
 ///

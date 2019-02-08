@@ -1,6 +1,6 @@
 /* Styles for handling custom code snippets */
 .snippet-container {
-  background-color: #45aae8;
+  background-color: #2372a3;
   padding: 10px;
   overflow: auto;
 }
@@ -30,8 +30,21 @@
   color: white;
 }
 
+.snippet-description a:link {
+  color: #c7fcf4;
+}
+.snippet-description a:visited {
+  color: #c7dbfc;
+}
+.snippet-description a:hover {
+  color: white;
+}
+.snippet-description a:active {
+  color: #80b0fc;
+}
+
 .snippet-buttons button {
-  background-color: #45aae8;
+  background-color: #2372a3;
   border-style: none;
   color: white;
   padding: 10px 24px;
@@ -82,7 +95,7 @@
   height: 28px;
   width: 28px;
   transition: .3s ease;
-  background-color: #45aae8;
+  background-color: #2372a3;
 }
 
 .copy-button {
@@ -102,7 +115,7 @@
 
 .copy-image {
   opacity: 0.65;
-  color: #45aae8;
+  color: #2372a3;
   font-size: 28px;
   padding-top: 4px;
 }

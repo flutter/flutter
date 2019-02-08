@@ -49,6 +49,11 @@ additional burden, since all code will also be compiled to be sure it compiles).
 The templates available for using as an argument to the snippets tool are as
 follows:
 
+- [`freeform`](freeform.tmpl) :
+  This is a simple template for which you provide everything.  It has no code of
+  its own, just the sections for `imports`, `main`, and `preamble`. You must
+  provide the `main` section in order to have a `main()`.
+
 - [`stateful_widget`](stateful_widget.tmpl) :
   The default code block will be placed as the body of the `State` object of a
   StatefulWidget subclass. Because the default code block is placed as the body

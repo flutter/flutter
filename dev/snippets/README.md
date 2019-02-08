@@ -7,8 +7,9 @@ snippets.
 This takes code in dartdocs, like this:
 
 ```dart
-/// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
 /// {@tool snippet --template="stateless_widget"}
+/// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
+/// ```dart
 /// class GreenFrog extends StatelessWidget {
 ///   const GreenFrog({ Key key }) : super(key: key);
 ///
@@ -17,6 +18,7 @@ This takes code in dartdocs, like this:
 ///     return Container(color: const Color(0xFF2DBD3A));
 ///   }
 /// }
+/// ```
 /// {@end-tool}
 ```
 

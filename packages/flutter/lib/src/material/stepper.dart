@@ -192,7 +192,7 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// ## Sample Code:
+  /// {@tool snippet --template=stateless_widget}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -210,7 +210,7 @@ class Stepper extends StatefulWidget {
   ///              child: const Text('My Awesome Cancel Message!'),
   ///            ),
   ///          ],
-  ///        ),
+  ///        );
   ///     },
   ///   steps: const <Step>[
   ///     Step(
@@ -230,6 +230,7 @@ class Stepper extends StatefulWidget {
   ///   ],
   /// )
   /// ```
+  /// {@end-tool}
   final ControlsWidgetBuilder controlsBuilder;
 
   @override

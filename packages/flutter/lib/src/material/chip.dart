@@ -207,7 +207,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return Center(child: CastList());
   /// }
   /// ```
   /// {@end-tool}
