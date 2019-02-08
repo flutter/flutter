@@ -18,7 +18,7 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   final String name = 'web';
-  
+
   @override
   bool get hidden => true;
 

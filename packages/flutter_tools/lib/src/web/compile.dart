@@ -24,11 +24,13 @@ class WebCompiler {
 
   /// Compile `target` using dart2js.
   ///
-  /// `minify` controls whether minifaction of the source is enabled.
+  /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
+  /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
   Future<void> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String librariesPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath), 'libraries.json');
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    final String librariesPath = fs.path.join(flutterPatchedSdkPath, 'libraries.json');
     final String outputPath = fs.path.join(getWebBuildDirectory(), 'main.dart.js');
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
@@ -39,6 +41,7 @@ class WebCompiler {
       target,
       '-o=$outputPath',
       '--libraries-spec=$librariesPath',
+      '--platform-binaries=$flutterPatchedSdkPath'
     ];
     if (minify) {
       command.add('-m');
