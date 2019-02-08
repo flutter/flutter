@@ -1014,7 +1014,6 @@ void main() {
 
     // Wrapping in Expanded has no effect when expands, minLines, and maxLines
     // are all set.
-    // TODO(justinmc): Should the height be the lesser of lines and parent?
     await tester.pumpWidget(expandedTextFieldBuilder(expands: true, minLines: 2, maxLines: 4));
     expect(findEditableText(), equals(editableText));
     expect(editableText.size.height, greaterThan(unexpandedInputSize.height));
@@ -1024,6 +1023,17 @@ void main() {
     await tester.pump();
     expect(editableText.size.height, greaterThan(twoLineSize.height));
     expect(editableText.size.height, lessThan(expandedInputSize.height));
+
+    // The input will not grow beyond the size of its parent, even when maxLines
+    // is greater.
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: 200));
+    expect(findEditableText(), equals(editableText));
+    expect(editableText.size, equals(unexpandedInputSize));
+    await tester.enterText(find.byType(TextField), 'one line\n' * 20);
+    await tester.pump();
+    expect(editableText.size.height, greaterThan(twoLineSize.height));
+    expect(editableText.size, equals(expandedInputSize));
   });
 
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {

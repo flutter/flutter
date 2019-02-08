@@ -816,11 +816,18 @@ class _RenderDecoration extends RenderBox {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     // If expands is set, allow a parent widget to set the height.
     BoxConstraints boxConstraints = expands
-      ? layoutConstraints.deflate(EdgeInsets.only(
-          top: contentPadding.top,
-          bottom: contentPadding.bottom,
-        ))
+      ? layoutConstraints
       : layoutConstraints.loosen();
+    // TODO(justinmc): This seems like it will break other things, but it was
+    // needed to get the input to fill its parent perfectly without overflowing.
+    // Whether expanded is true or false, without this it overflows its parent
+    // when it's full height. What's a better solution?
+    // Also I just tried maxLines: null on master growing up to a container and
+    // it seems to also have this problem.  It overflows by this amount.
+    boxConstraints = boxConstraints.deflate(EdgeInsets.only(
+      top: contentPadding.top,
+      bottom: contentPadding.bottom,
+    ));
     double aboveBaseline = 0.0;
     double belowBaseline = 0.0;
     void layoutLineBox(RenderBox box) {
