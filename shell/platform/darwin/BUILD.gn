@@ -61,6 +61,8 @@ source_set("framework_shared") {
   set_sources_assignment_filter(sources_assignment_filter)
 
   defines = [ "FLUTTER_FRAMEWORK" ]
+
+  public_configs = [ "$flutter_root:config" ]
 }
 
 executable("flutter_channels_unittests") {
@@ -78,4 +80,6 @@ executable("flutter_channels_unittests") {
     "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",
   ]
+
+  public_configs = [ "$flutter_root:config" ]
 }
