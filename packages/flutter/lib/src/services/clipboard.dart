@@ -36,8 +36,10 @@ class Clipboard {
   ///
   /// If the user has recently started their device and the user has not yet
   /// copied anything, this value will be true.
+  ///
+  /// By default this value is true.
   static bool get isEmpty => _isEmpty;
-  static bool _isEmpty;
+  static bool _isEmpty = true;
 
   /// Initializes the [isEmpty] variable with whether or not the clipboard is
   /// currently empty.
@@ -64,7 +66,8 @@ class Clipboard {
         'text': data.text,
       },
     );
-    if (data?.text != null)
+    final String text = data?.text;
+    if (text != null && text != '')
       _isEmpty = false;
   }
 
