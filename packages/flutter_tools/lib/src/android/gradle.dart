@@ -462,14 +462,17 @@ Future<void> _buildGradleProjectV2(
         if (!newFile.isFile)
           continue;
 
-        if (newFile.name != 'assets/isolate_snapshot_data' &&
-            newFile.name != 'assets/isolate_snapshot_instr' &&
-            !newFile.name.startsWith('assets/flutter_assets/'))
+        // Ignore changes to signature manifests.
+        if (newFile.name.startsWith('META-INF/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
+
+        // Only allow changes under assets/.
+        if (!newFile.name.startsWith('assets/'))
+          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
         update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
@@ -488,19 +491,20 @@ Future<void> _buildGradleProjectV2(
         printStatus('No changes detected, creating rollback patch.');
       }
 
-      final ArchiveFile oldFile1 = oldApk.findFile('assets/isolate_snapshot_data');
-      final ArchiveFile oldFile2 = oldApk.findFile('assets/isolate_snapshot_instr');
-      final ArchiveFile oldFile3 = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
-      if (oldFile1 == null && oldFile2 == null && oldFile3 == null)
-        throwToolExit('Error: Could not find baseline VM snapshot.');
+      final List<String> checksumFiles = <String>[
+        'assets/isolate_snapshot_data',
+        'assets/isolate_snapshot_instr',
+        'assets/flutter_assets/isolate_snapshot_data',
+      ];
 
       int baselineChecksum = 0;
-      if (oldFile1 != null)
-        baselineChecksum = getCrc32(oldFile1.content, baselineChecksum);
-      if (oldFile2 != null)
-        baselineChecksum = getCrc32(oldFile2.content, baselineChecksum);
-      if (oldFile3 != null)
-        baselineChecksum = getCrc32(oldFile3.content, baselineChecksum);
+      for (String fn in checksumFiles) {
+        final ArchiveFile oldFile = oldApk.findFile(fn);
+        if (oldFile != null)
+          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
+      }
+      if (baselineChecksum == 0)
+        throwToolExit('Error: Could not find baseline VM snapshot.');
 
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
