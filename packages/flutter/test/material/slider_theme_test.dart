@@ -598,7 +598,7 @@ void main() {
   //
   // The value indicator can be skipped by passing the appropriate
   // [ShowValueIndicator].
-  testWidgets('The slider shape paintings can be variously skipped or removed', (WidgetTester tester) async {
+  testWidgets('The slider can skip all of its comoponent painting', (WidgetTester tester) async {
     // Pump a slider with all shapes skipped.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -612,117 +612,115 @@ void main() {
       divisions: 4
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>( find.byType(Slider));
 
     expect(sliderBox, paintsNothing);
+  });
 
+  testWidgets('The slider can skip all component painting except the track', (WidgetTester tester) async {
     // Pump a slider with just a track.
-    await tester.pumpWidget(_buildApp(
-        ThemeData().sliderTheme.copyWith(
-          overlayShape: SliderComponentShape.noOverlay,
-          thumbShape: SliderComponentShape.noThumb,
-          tickMarkShape: SliderTickMarkShape.noTickMark,
-          showValueIndicator: ShowValueIndicator.never,
-        ),
-        value: 0.5,
-        divisions: 4
-    ));
-
-    // 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-
-    // Pump a slider with just a track and tick marks.
-    await tester.pumpWidget(_buildApp(
-        ThemeData().sliderTheme.copyWith(
-          overlayShape: SliderComponentShape.noOverlay,
-          thumbShape: SliderComponentShape.noThumb,
-          showValueIndicator: ShowValueIndicator.never,
-        ),
-        value: 0.5,
-        divisions: 4
-    ));
-
-    // 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    // 5 tick marks.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 5));
-
-    // Pump a slider with a track, tick marks, and a thumb.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
         overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
       divisions: 4
     ));
 
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
     // 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    // 5 tick marks and 1 thumb.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+  });
+
+  testWidgets('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
+    // Pump a slider with just tick marks.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>( find.byType(Slider));
+
+    // 5 tick marks.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 5));
+  });
+
+  testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
+    // Pump a slider with just a thumb.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // 1 thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+  });
+
+  testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
+    // Pump a slider with just an overlay.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Tap the center of the track and wait for animations to finish.
     final Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // Tapping the center would usually produce an overlay and a value
-    // indicator. However, these shapes are currently removed, so no extra
-    // paint shapes are expected, and there are still the same number of
-    // shapes on the screen.
-
-    // 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    // 5 tick marks and 1 thumb.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+    // 1 overlay.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+  });
 
-    // Pump a slider with a track, tick marks, a thumb, and an overlay.
+  testWidgets('The slider can skip all component painting except the value indicator', (WidgetTester tester) async {
+    // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-        showValueIndicator: ShowValueIndicator.never,
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
       ),
       value: 0.5,
       divisions: 4
     ));
 
-    gesture = await tester.startGesture(center);
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Tap the center of the track and wait for animations to finish.
+    final Offset center = tester.getCenter(find.byType(Slider));
+    TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // Now that there is a tap, and the overlay is not the empty shape,
-    // an extra circle is expected to be painted.
-
-    // 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    // 5 tick marks, 1 thumb, and 1 overlay.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 7));
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    // Pump a slider with a track, tick marks, a thumb, an overlay, and a
-    // value indicator.
-    await tester.pumpWidget(_buildApp(
-        ThemeData().sliderTheme.copyWith(
-          showValueIndicator: ShowValueIndicator.always,
-        ),
-        value: 0.5,
-        divisions: 4
-    ));
-
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    // Now that there is a tap, and the value indicator is specified to be
-    // shown, a path is expected to be painted.
-
-    // 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    // 5 tick marks, 1 thumb, and 1 overlay.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 7));
     // 1 value indicator.
     expect(sliderBox, paintsExactlyCountTimes(#drawPath, 1));
 
