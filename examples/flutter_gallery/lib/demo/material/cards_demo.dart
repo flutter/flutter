@@ -246,6 +246,7 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
+    // Use Ink.image in order for the ink ripple to appear over the image
     final Widget image = destination.type == CardDemoType.static
         ? Image.asset(destination.assetName, package: destination.assetPackage, fit: BoxFit.cover,)
         : Ink.image(image: AssetImage(destination.assetName, package: destination.assetPackage), fit: BoxFit.cover, child: Container(),);
