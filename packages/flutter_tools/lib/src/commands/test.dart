@@ -106,6 +106,20 @@ class TestCommand extends FlutterCommand {
         'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
+
+    if (argResults['watch']) {
+      if(argResults['start-paused']) {
+        throwToolExit('The --watch flag cannot be used with --start-paused');
+      }
+
+      if (argResults['coverage'] || argResults['merge-coverage']) {
+        throwToolExit('The --watch flag cannot be used with --coverage or --merge-coverage');
+      }
+
+      if (argResults['update-goldens']) {
+        throwToolExit('The --watch flag cannot be used with --update-goldens');
+      }
+    }
   }
 
   @override
@@ -131,21 +145,6 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool watchTests = argResults['watch'];
-
-    if (watchTests) {
-      if(startPaused) {
-        throwToolExit('The --watch flag cannot be used with --start-paused');
-      }
-
-      if (argResults['coverage'] || argResults['merge-coverage']) {
-        throwToolExit('The --watch flag cannot be used with --coverage or --merge-coverage');
-      }
-
-      if (argResults['update-goldens']) {
-        throwToolExit('The --watch flag cannot be used with --update-goldens');
-      }
-    }
-
     Directory workDir;
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
