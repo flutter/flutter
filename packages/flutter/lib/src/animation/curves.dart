@@ -37,8 +37,8 @@ abstract class Curve {
   ///
   /// It is recommended that subclasses override [transformInternal] instead of
   /// this function, as the above cases are already handled in the default
-  /// implementation of [transform]. [transform] delegates the remaining logic
-  /// to [transformInternal], reducing boilerplate code.
+  /// implementation of [transform], which delegates the remaining logic to
+  /// [transformInternal].
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t == 0.0 || t == 1.0) {
