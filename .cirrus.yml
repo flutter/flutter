@@ -36,7 +36,6 @@ task:
       depends_on:
         - docs
         - analyze
-        - tool_tests-linux
         - build_tests-linux
       env:
         SHARD: deploy_gallery
@@ -146,7 +145,6 @@ task:
     folder: ~/.pub-cache
   depends_on:
     - analyze
-    - tool_tests-macos
     - build_tests-macos
     - add2app-macos
   env:
