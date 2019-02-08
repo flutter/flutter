@@ -17,15 +17,6 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-///// The padding above and below the [BottomNavigationBarItem] when it is selected.
-///// =======
-///// |      <-- [_kPadding].
-///// |  ☆
-///// | text
-///// |      <-- [_kPadding].
-///// =======
-//const double _kPadding = 7.0;
-
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
 /// See also:
@@ -156,7 +147,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedItemColor,
     this.selectedFontSize = 14.0,
     this.unselectedFontSize = 12.0,
-    this.showUnselectedLabels = false,
+    this.showUnselectedLabels = true,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -297,7 +288,7 @@ class _BottomNavigationTile extends StatelessWidget {
           bottomPadding = selectedFontSize / 2.0;
           topPadding = selectedFontSize / 2.0;
         }
-        label = _FixedLabel(
+        label = _Label(
           colorTween: colorTween,
           animation: animation,
           item: item,
@@ -308,11 +299,13 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
       case BottomNavigationBarType.shifting:
         size = (flex * 1000.0).round();
-        label = _ShiftingLabel(
+        label = _Label(
           colorTween: colorTween,
           animation: animation,
           item: item,
           selectedFontSize: selectedFontSize,
+          unselectedFontSize: unselectedFontSize,
+          showUnselectedLabels: false,
         );
         break;
     }
@@ -395,8 +388,8 @@ class _TileIcon extends StatelessWidget {
   }
 }
 
-class _FixedLabel extends StatelessWidget {
-  const _FixedLabel({
+class _Label extends StatelessWidget {
+  const _Label({
     Key key,
     @required this.colorTween,
     @required this.animation,
@@ -415,71 +408,41 @@ class _FixedLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      heightFactor: 1.0,
-      child: Container(
-        child: FadeTransition(
-          alwaysIncludeSemantics: true,
-          opacity: animation,
-          child: DefaultTextStyle.merge(
-            style: TextStyle(
-              fontSize: selectedFontSize,
-              color: colorTween.evaluate(animation),
-            ),
-            // The font size should grow here when active, but because of the way
-            // font rendering works, it doesn't grow smoothly if we just animate
-            // the font size, so we use a transform instead.
-            child: Transform(
-              transform: Matrix4.diagonal3(
-                Vector3.all(
-                  Tween<double>(
-                    begin: unselectedFontSize / selectedFontSize,
-                    end: 1.0,
-                  ).evaluate(animation),
-                ),
-              ),
-              alignment: Alignment.bottomCenter,
-              child: item.title,
-            ),
+    Widget text = DefaultTextStyle.merge(
+      style: TextStyle(
+        fontSize: selectedFontSize,
+        color: colorTween.evaluate(animation),
+      ),
+      // The font size should grow here when active, but because of the way
+      // font rendering works, it doesn't grow smoothly if we just animate
+      // the font size, so we use a transform instead.
+      child: Transform(
+        transform: Matrix4.diagonal3(
+          Vector3.all(
+            Tween<double>(
+              begin: unselectedFontSize / selectedFontSize,
+              end: 1.0,
+            ).evaluate(animation),
           ),
         ),
+        alignment: Alignment.bottomCenter,
+        child: item.title,
       ),
     );
-  }
-}
 
-class _ShiftingLabel extends StatelessWidget {
-  const _ShiftingLabel({
-    Key key,
-    @required this.animation,
-    @required this.colorTween,
-    @required this.item,
-    @required this.selectedFontSize,
-  }) : super(key: key);
+    if (!showUnselectedLabels) {
+      text = FadeTransition(
+        alwaysIncludeSemantics: true,
+        opacity: animation,
+        child: text,
+      );
+    }
 
-  final Animation<double> animation;
-  final ColorTween colorTween;
-  final BottomNavigationBarItem item;
-  final double selectedFontSize;
-
-  @override
-  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
       child: Container(
-        child: FadeTransition(
-          alwaysIncludeSemantics: true,
-          opacity: animation,
-          child: DefaultTextStyle.merge(
-            style: TextStyle(
-              fontSize: selectedFontSize,
-              color: colorTween.evaluate(animation),
-            ),
-            child: item.title,
-          ),
-        ),
+        child: text,
       ),
     );
   }
