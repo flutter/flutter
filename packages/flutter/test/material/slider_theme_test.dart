@@ -717,7 +717,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Now that there is a tap, and the value indicator is specified to be
-    // , shown an path is expected to be painted.
+    // shown, a path is expected to be painted.
 
     // 2 track segments.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));

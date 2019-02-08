@@ -790,11 +790,15 @@ abstract class SliderTickMarkShape {
 /// [SliderTickMarkShape.noTickMark]. When this value  is specified for
 /// [SliderThemeData.tickMarkShape], the tick mark painting is skipped.
 class _EmptySliderTickMarkShape extends SliderTickMarkShape {
+  @override
   Size getPreferredSize({
     SliderThemeData sliderTheme,
     bool isEnabled,
-  }) => Size.zero;
+  }) {
+    return Size.zero;
+  }
 
+  @override
   void paint(
     PaintingContext context,
     Offset center, {
@@ -906,6 +910,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size.zero;
 
+  @override
   void paint(
     PaintingContext context,
     Offset center, {
