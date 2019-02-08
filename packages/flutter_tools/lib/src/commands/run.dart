@@ -261,6 +261,36 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
+  Future<void> updateCache() async {
+    final BuildInfo buildInfo = getBuildInfo();
+    final BuildMode buildMode = buildInfo.mode ?? BuildMode.debug;
+    final List<TargetPlatform> targetPlatforms = <TargetPlatform>[];
+    if (buildInfo.targetPlatform != null) {
+      targetPlatforms.add(buildInfo.targetPlatform);
+    }
+    await for (Device device in deviceManager.getAllConnectedDevices()) {
+      targetPlatforms.add(await device.targetPlatform);
+    }
+    if (targetPlatforms.isEmpty) {
+      await cache.updateAll(
+        buildMode: buildMode,
+        targetPlatform: buildInfo.targetPlatform,
+        clobber: false,
+        skipUnknown: false,
+      );
+    } else {
+      for (TargetPlatform targetPlatform in targetPlatforms) {
+        await cache.updateAll(
+          buildMode: buildMode,
+          targetPlatform: targetPlatform,
+          clobber: false,
+          skipUnknown: true,
+        );
+      }
+    }
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
@@ -398,9 +428,9 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
+    unawaited(appStartedTimeRecorder.future.then<void>(
       (_) { appStartedTime = systemClock.now(); }
-    );
+    ));
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
