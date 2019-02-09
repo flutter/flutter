@@ -290,7 +290,7 @@ class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(
     this.fsName,
-    this.rootDirectory, 
+    this.rootDirectory,
     Watcher watcher, {
     String packagesFilePath,
     @required VMService vmService,
@@ -333,8 +333,9 @@ class DevFS {
       _baseUri = Uri.parse(response['uri']);
     } on rpc.RpcException catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
-      if (rpcException.code != 1001)
+      if (rpcException.code != 1001) {
         rethrow;
+      }
       printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       final Map<String, dynamic> response = await _vmService.vm.createDevFS(fsName);
@@ -395,7 +396,6 @@ class DevFS {
     });
 
     if (bundleFirstUpload) {
-      // await _httpWriter.write(dirtyEntries);
       return UpdateFSReport(invalidatedSourcesCount: dirtyDartEntries.length, success: true, syncedBytes: syncedBytes);
     }
 
@@ -411,7 +411,7 @@ class DevFS {
     syncedBytes += content.size;
     dirtyEntries[entryUri] = content;
     await _httpWriter.write(dirtyEntries);
-    
+
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
     if (!fullRestart) {
