@@ -78,7 +78,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: TextTheme(caption: TextStyle(color: captionColor)),
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -152,7 +152,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: TextTheme(caption: TextStyle(color: captionColor)),
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -201,7 +201,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: TextTheme(caption: TextStyle(color: captionColor)),
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
