@@ -439,8 +439,8 @@ abstract class WidgetController {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
-      final bool separateX = offset.dx * xSign > touchSlopX;
-      final bool separateY = offset.dy * ySign > touchSlopY;
+      final bool separateX = offset.dx * xSign > touchSlopX && touchSlopX > 0;
+      final bool separateY = offset.dy * ySign > touchSlopY && touchSlopY > 0;
 
       if (separateX || separateY) {
         final double firstX = separateX ? xSign * touchSlopX : offset.dx;
@@ -451,6 +451,7 @@ abstract class WidgetController {
         await gesture.moveBy(Offset(firstX, firstY));
         await gesture.moveBy(Offset(secondX, secondY));
       } else {
+        print(offset);
         await gesture.moveBy(offset);
       }
       await gesture.up();
