@@ -168,8 +168,6 @@ container:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: add2app-macos
-  pub_cache:
-    folder: ~/.pub-cache
   depends_on:
     - analyze
   env:
@@ -183,7 +181,7 @@ task:
     - sudo gem install cocoapods
   setup_flutter_script:
     - bin/flutter config --no-analytics
-    - bin/flutter update-packages
+    # - bin/flutter update-packages
   clone_ios_add2app_script:
     - git clone https://github.com/dnfield/ios_add2app.git
   test_all_script:
