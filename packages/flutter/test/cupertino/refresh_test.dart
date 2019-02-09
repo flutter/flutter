@@ -607,7 +607,7 @@ void main() {
       verify(mockHelper.builder(
         any,
         RefreshIndicatorMode.inactive,
-        any,
+        2.6980688300546443, // ~5% of 60.0
         100.0, // Default value.
         60.0, // Default value.
       ));
