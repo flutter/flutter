@@ -168,7 +168,6 @@ container:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: add2app-macos
-  only_if: $CIRRUS_BRANCH == 'master'
   pub_cache:
     folder: ~/.pub-cache
   depends_on:
