@@ -1,0 +1,179 @@
+import 'dart:ui' as ui;
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'marquee.dart';
+
+/// Route names. (See [main] for more details.)
+///
+/// The route names must match those sent by the platform-specific component.
+const greenMarqueeRouteName = 'marquee_green';
+const purpleMarqueeRouteName = 'marquee_purple';
+const fullscreenRouteName = 'full';
+const hybridRouteName = 'hybrid';
+
+const String _kReloadChannelName = "reload";
+const BasicMessageChannel<String> _kReloadChannel =
+    BasicMessageChannel<String>(_kReloadChannelName, const StringCodec());
+
+void main() {
+  _kReloadChannel.setMessageHandler(run);
+  run(ui.window.defaultRouteName);
+}
+
+Future<String> run(String name) async {
+  // The platform-specific component will call [setInitialRoute] on the Flutter
+  // view (or view controller for iOS) to set [ui.window.defaultRouteName].
+  // We then dispatch based on the route names to show different Flutter
+  // widgets.
+  // Since we don't really care about navigating in this app, we're not using
+  // a regular routes map.
+  switch (name) {
+    case greenMarqueeRouteName:
+      runApp(Marquee(color: Colors.green[400]));
+      break;
+    case purpleMarqueeRouteName:
+      runApp(Marquee(color: Colors.purple[400]));
+      break;
+    case fullscreenRouteName:
+    case hybridRouteName:
+    default:
+      runApp(FlutterView(initialRoute: name));
+      break;
+  }
+  return '';
+}
+
+class FlutterView extends StatelessWidget {
+  FlutterView({@required this.initialRoute});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter View',
+      home: MyHomePage(initialRoute: initialRoute),
+    );
+  }
+
+  final String initialRoute;
+}
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({this.initialRoute});
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+
+  final String initialRoute;
+
+  /// Whether we should display the home page in fullscreen mode.
+  ///
+  /// If in full screen mode, we will use an [AppBar] widget to show our own
+  /// title.
+  bool get isFullscreen => initialRoute == fullscreenRouteName;
+
+  /// Whether tapping the Flutter button should notify an external source.
+  ///
+  /// If false, the button will increments our own internal counter.
+  bool get hasExternalTarget => initialRoute == hybridRouteName;
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  // The name of the message channel used to communicate with the
+  // platform-specific component.
+  //
+  // This string must match the one used on the platform side.
+  static const String _channel = 'increment';
+
+  // The message to send to the platform-specific component when our button
+  // is tapped.
+  static const String _pong = 'pong';
+
+  // Used to pass messages between the platform-specific component and the
+  // Flutter component.
+  static const BasicMessageChannel<String> _platform =
+      BasicMessageChannel<String>(_channel, const StringCodec());
+
+  // An internal count.  Normally this represents the number of times that the
+  // button on the Flutter page has been tapped.
+  int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _platform.setMessageHandler(_handlePlatformIncrement);
+  }
+
+  /// Directly increments our internal counter and rebuilds the UI.
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  /// Callback for messages sent by the platform-specific component.
+  ///
+  /// Increments our internal counter.
+  Future<String> _handlePlatformIncrement(String message) async {
+    // Normally we'd dispatch based on the value of [message], but in this
+    // sample, there is only one message that is sent to us.
+    _incrementCounter();
+    return '';
+  }
+
+  /// Sends a message to the platform-specific component to increment its
+  /// counter.
+  void _sendFlutterIncrement() {
+    _platform.send(_pong);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String buttonName =
+        widget.hasExternalTarget ? 'Platform button' : 'Button';
+    return Scaffold(
+      appBar: widget.isFullscreen
+          ? AppBar(title: Text('Fullscreen Flutter'))
+          : null,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Text(
+                      '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                      style: const TextStyle(fontSize: 17.0)),
+                ),
+                FlatButton(
+                  child: Text('POP'),
+                  onPressed: SystemNavigator.pop,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
+            child: Row(
+              children: <Widget>[
+                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: Semantics(
+        label: 'Increment via Flutter',
+        child: FloatingActionButton(
+          onPressed: widget.hasExternalTarget
+              ? _sendFlutterIncrement
+              : _incrementCounter,
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}

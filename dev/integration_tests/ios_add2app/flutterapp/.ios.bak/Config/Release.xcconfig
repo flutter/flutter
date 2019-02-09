@@ -1,0 +1,2 @@
+#include "Flutter.xcconfig"
+FLUTTER_BUILD_MODE=release
