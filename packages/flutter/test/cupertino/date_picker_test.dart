@@ -497,7 +497,7 @@ void main() {
       await tester.pump();
       expect(
         date,
-        DateTime(2018, 2, 28),
+        DateTime(2018, 2, 28),s
       );
 
       await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0);
