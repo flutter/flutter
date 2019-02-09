@@ -49,7 +49,8 @@ class ScaleStartDetails {
 class ScaleUpdateDetails {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
-  /// The [focalPoint], [scale], [rotation] arguments must not be null. The [scale]
+  /// The [focalPoint], [scale], [horizontalScale], [verticalScale], [rotation]
+  /// arguments must not be null. The [scale], [horizontalScale], and [verticalScale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
@@ -80,7 +81,9 @@ class ScaleUpdateDetails {
 
   @override
   String toString() =>
-      'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, rotation: $rotation)';
+      'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, '
+      'horizontalScale: $horizontalScale, verticalScale: $verticalScale, '
+      'rotation: $rotation)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -168,6 +171,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _currentFocalPoint;
   double _initialSpan;
   double _currentSpan;
+  double _initialHorizontalSpan;
+  double _currentHorizontalSpan;
+  double _initialVerticalSpan;
+  double _currentVerticalSpan;
   _LineBetweenPointers _initialLine;
   _LineBetweenPointers _currentLine;
   Map<int, Offset> _pointerLocations;
@@ -176,6 +183,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double get _scaleFactor =>
       _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
+
+  double get _horizontalScaleFactor => _initialHorizontalSpan > 0.0
+      ? _currentHorizontalSpan / _initialHorizontalSpan
+      : 1.0;
+
+  double get _verticalScaleFactor => _initialVerticalSpan > 0.0
+      ? _currentVerticalSpan / _initialVerticalSpan
+      : 1.0;
 
   double _computeRotationFactor() {
     if (_initialLine == null || _currentLine == null) {
@@ -205,6 +220,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
+      _initialHorizontalSpan = 0.0;
+      _currentHorizontalSpan = 0.0;
+      _initialVerticalSpan = 0.0;
+      _currentVerticalSpan = 0.0;
       _pointerLocations = <int, Offset>{};
       _pointerQueue = <int>[];
     }
@@ -319,7 +338,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted) {
-    if (_state == _ScaleState.ready) _state = _ScaleState.possible;
+    if (_state == _ScaleState.ready)
+      _state = _ScaleState.possible;
 
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
@@ -341,6 +361,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           'onUpdate',
           () => onUpdate(ScaleUpdateDetails(
               scale: _scaleFactor,
+              horizontalScale: _horizontalScaleFactor,
+              verticalScale: _verticalScaleFactor,
               focalPoint: _currentFocalPoint,
               rotation: _computeRotationFactor())));
   }
