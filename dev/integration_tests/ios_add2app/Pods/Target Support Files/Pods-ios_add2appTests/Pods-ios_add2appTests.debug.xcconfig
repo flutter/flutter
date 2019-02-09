@@ -8,4 +8,4 @@ PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
 PODS_ROOT = ${SRCROOT}/Pods
-#include "/Users/dnfield/src/ios_add2app/flutterapp/.ios/Flutter/Generated.xcconfig"
+#include "/Users/dnfield/src/flutter/dev/integration_tests/ios_add2app/flutterapp/.ios/Flutter/Generated.xcconfig"
