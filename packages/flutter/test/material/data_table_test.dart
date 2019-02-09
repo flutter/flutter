@@ -235,6 +235,7 @@ void main() {
       ),
     );
     await tester.tap(find.text('Dessert'));
+    await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
@@ -262,6 +263,7 @@ void main() {
       ),
     );
     await tester.tap(find.text('Lollipop'));
+    await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
