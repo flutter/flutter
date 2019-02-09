@@ -1111,10 +1111,11 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
 ///
-/// The [builder] parameter can be used to wrap the dialog widget to change
+/// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
-/// To show a date picker with the dark theme:
+/// {@tool sample}
+/// Show a date picker with the dark theme.
 ///
 /// ```dart
 /// showDatePicker(
@@ -1130,6 +1131,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 ///   },
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// The [context], [initialDate], [firstDate], and [lastDate] parameters must
 /// not be null.

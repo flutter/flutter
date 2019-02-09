@@ -1663,12 +1663,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
 ///
-/// The [builder] parameter can be used to wrap the dialog widget to change
+/// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Localizations.override],
 /// [Directionality], or [MediaQuery].
 ///
-/// To show a dialog with the text direction overridden to be
-/// [TextDirection.rtl]:
+/// {@tool sample}
+/// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
 /// showTimePicker(
@@ -1682,8 +1682,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///   },
 /// );
 /// ```
+/// {@end-tool}
 ///
-/// To show a dialog with time unconditionally displayed in 24 hour format:
+/// {@tool sample}
+/// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart
 /// showTimePicker(
@@ -1697,6 +1699,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///   },
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
