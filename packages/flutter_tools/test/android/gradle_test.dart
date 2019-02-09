@@ -41,7 +41,50 @@ void main() {
       expect(shouldBeToolExit, isToolExit);
     });
 
-    test('regexp should only match lines without the error message', () {
+    test('androidXFailureRegex should match lines with likely AndroidX errors', () {
+      final List<String> nonMatchingLines = <String>[
+        ':app:preBuild UP-TO-DATE',
+        'BUILD SUCCESSFUL in 0s',
+        '',
+      ];
+      final List<String> matchingLines = <String>[
+        'AAPT: error: resource android:attr/fontVariationSettings not found.',
+        'AAPT: error: resource android:attr/ttcIndex not found.',
+        'error: package android.support.annotation does not exist',
+        'import android.support.annotation.NonNull;',
+        'import androidx.annotation.NonNull;',
+        'Daemon:  AAPT2 aapt2-3.2.1-4818971-linux Daemon #0',
+      ];
+      for (String m in nonMatchingLines) {
+        expect(androidXFailureRegex.hasMatch(m), isFalse);
+      }
+      for (String m in matchingLines) {
+        expect(androidXFailureRegex.hasMatch(m), isTrue);
+      }
+    });
+
+    test('androidXPluginWarningRegex should match lines with the AndroidX plugin warnings', () {
+      final List<String> nonMatchingLines = <String>[
+        ':app:preBuild UP-TO-DATE',
+        'BUILD SUCCESSFUL in 0s',
+        'Generic plugin AndroidX text',
+        '',
+      ];
+      final List<String> matchingLines = <String>[
+        '*********************************************************************************************************************************',
+        "WARNING: This version of image_picker will break your Android build if it or its dependencies aren't compatible with AndroidX.",
+        'See https://goo.gl/CP92wY for more information on the problem and how to fix it.',
+        'This warning prints for all Android build failures. The real root cause of the error may be unrelated.',
+      ];
+      for (String m in nonMatchingLines) {
+        expect(androidXPluginWarningRegex.hasMatch(m), isFalse);
+      }
+      for (String m in matchingLines) {
+        expect(androidXPluginWarningRegex.hasMatch(m), isTrue);
+      }
+    });
+
+    test('ndkMessageFilter should only match lines without the error message', () {
       final List<String> nonMatchingLines = <String>[
         'NDK is missing a "platforms" directory.',
         'If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to /usr/local/company/home/username/Android/Sdk/ndk-bundle.',

@@ -480,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }

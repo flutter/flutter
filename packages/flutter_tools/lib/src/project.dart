@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart' as gradle;
 import 'base/common.dart';
@@ -143,6 +144,18 @@ class FlutterProject {
     await android.ensureReadyForPlatformSpecificTooling();
     await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
+  }
+
+  /// Return the set of builders used by this package.
+  Future<List<String>> get builders async {
+    final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
+    final YamlList builders = pubspec['builders'];
+    if (builders == null) {
+      return <String>[];
+    }
+    return builders.map<String>((Object node) {
+      return node.toString();
+    }).toList();
   }
 }
 
