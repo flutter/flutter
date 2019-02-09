@@ -167,6 +167,33 @@ task:
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  name: add2app-macos
+  only_if: $CIRRUS_BRANCH == 'master'
+  pub_cache:
+    folder: ~/.pub-cache
+  depends_on:
+    - analyze
+  env:
+    # Name the SDK directory to include a space so that we constantly
+    # test path names with spaces in them.
+    CIRRUS_WORKING_DIR: "/tmp/flutter add2app"
+    SHARD: add2app_test
+  osx_instance:
+    image: high-sierra-xcode-9.4.1
+  install_cocoapods_script:
+    - sudo gem install cocoapods
+  git_fetch_script:
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD
+    - git clone https://github.com/dnfield/ios_add2app.git ../ios_add2app
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter update-packages
+  test_all_script:
+    - ../ios_add2app/build_and_test.sh
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
     image: high-sierra-xcode-9.4.1
   depends_on:
@@ -208,7 +235,6 @@ task:
       container:
         cpu: 4
         memory: 12G
-
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
