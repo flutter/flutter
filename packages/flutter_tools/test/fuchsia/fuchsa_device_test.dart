@@ -40,6 +40,13 @@ void main() {
       expect(names.first.id, '192.168.42.56');
     });
 
+    test('parse junk dev_finder output', () {
+      const String example = 'junk';
+      final List<FuchsiaDevice> names = parseListDevices(example);
+
+      expect(names.length, 0);
+    });
+
     test('default capabilities', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
 

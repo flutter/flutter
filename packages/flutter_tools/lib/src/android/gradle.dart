@@ -42,9 +42,29 @@ enum FlutterPluginVersion {
 // Investigation documented in #13975 suggests the filter should be a subset
 // of the impact of -q, but users insist they see the error message sometimes
 // anyway.  If we can prove it really is impossible, delete the filter.
+// This technically matches everything *except* the NDK message, since it's
+// passed to a function that filters out all lines that don't match a filter.
 final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+
+// This regex is intentionally broad. AndroidX errors can manifest in multiple
+// different ways and each one depends on the specific code config and
+// filesystem paths of the project. Throwing the broadest net possible here to
+// catch all known and likely cases.
+//
+// Example stack traces:
+//
+// https://github.com/flutter/flutter/issues/27226 "AAPT: error: resource android:attr/fontVariationSettings not found."
+// https://github.com/flutter/flutter/issues/27106 "Android resource linking failed|Daemon: AAPT2|error: failed linking references"
+// https://github.com/flutter/flutter/issues/27493 "error: cannot find symbol import androidx.annotation.NonNull;"
+// https://github.com/flutter/flutter/issues/23995 "error: package android.support.annotation does not exist import android.support.annotation.NonNull;"
+final RegExp androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
+
+final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
+  r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
+  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
+  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.hostAppGradleRoot.childFile(
@@ -106,7 +126,7 @@ Future<GradleProject> _readGradleProject() async {
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:tasks', '--all'],
+      <String>[gradle, 'app:tasks', '--all', '--console=auto'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
@@ -405,17 +425,41 @@ Future<void> _buildGradleProjectV2(
     command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
 
   command.add(assembleTask);
+  bool potentialAndroidXFailure = false;
   final int exitCode = await runCommandAndStreamOutput(
     command,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
-    filter: logger.isVerbose ? null : ndkMessageFilter,
+    // TODO(mklim): if AndroidX warnings are no longer required, this
+    // mapFunction and all its associated variabled can be replaced with just
+    // `filter: ndkMessagefilter`.
+    mapFunction: (String line) {
+      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
+      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
+        potentialAndroidXFailure = true;
+      }
+      // Always print the full line in verbose mode.
+      if (logger.isVerbose) {
+        return line;
+      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
+        return null;
+      }
+
+      return line;
+    }
   );
   status.stop();
 
-  if (exitCode != 0)
+  if (exitCode != 0) {
+    if (potentialAndroidXFailure) {
+      printError('*******************************************************************************************');
+      printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
+      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
+      printError('*******************************************************************************************');
+    }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
+  }
 
   if(!isBuildingBundle) {
     final File apkFile = _findApkFile(project, buildInfo);
