@@ -562,10 +562,10 @@ String _createAndroidIdentifier(String organization, String name) {
   // Android application ID is specified in: https://developer.android.com/studio/build/application-id
   // All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
   String tmpIdentifier = '$organization.$name';
-  final RegExp disallowed = RegExp(r'[^a-zA-Z0-9_\.]');
+  final RegExp disallowed = RegExp(r'[^\w\.]');
   tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
-  //It must have at least two segments (one or more dots).
+  // It must have at least two segments (one or more dots).
   final List<String> segments = tmpIdentifier
       .split('.')
       .where((String segment) => segment.isNotEmpty)
@@ -575,7 +575,7 @@ String _createAndroidIdentifier(String organization, String name) {
   }
 
   // Each segment must start with a letter.
-  final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][a-zA-Z0-9_]*$');
+  final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
   final List<String> prefixedSegments = segments
       .map((String segment) {
         if (!segmentPatternRegex.hasMatch(segment)) {
@@ -595,12 +595,20 @@ String _createPluginClassName(String name) {
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   name = camelCase(name);
+  String tmpIdentifier = '$organization.$name';
   final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
-  organization = organization.replaceAll(disallowed, '');
-  organization = organization.isEmpty ? 'untitled' : organization;
-  name = name.replaceAll(disallowed, '');
-  name = name.isEmpty ? 'untitled' : name;
-  return '$organization.$name';
+  tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
+
+  // It must have at least two segments (one or more dots).
+  final List<String> segments = tmpIdentifier
+      .split('.')
+      .where((String segment) => segment.isNotEmpty)
+      .toList();
+  while (segments.length < 2) {
+    segments.add('untitled');
+  }
+
+  return segments.join('.');
 }
 
 final Set<String> _packageDependencies = Set<String>.from(<String>[
