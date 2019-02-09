@@ -22,6 +22,9 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
 const Duration _kVibrateCommitDelay = Duration(milliseconds: 100);
@@ -1651,14 +1654,16 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
-/// To show a dialog with [initialTime] equal to the current time:
+/// {@tool sample}
+/// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
-/// showTimePicker(
+/// Future<TimeOfDay> selectedTime = showTimePicker(
 ///   initialTime: TimeOfDay.now(),
 ///   context: context,
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
@@ -1671,7 +1676,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
-/// showTimePicker(
+/// Future<TimeOfDay> selectedTimeRTL = showTimePicker(
 ///   context: context,
 ///   initialTime: TimeOfDay.now(),
 ///   builder: (BuildContext context, Widget child) {
@@ -1688,7 +1693,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart
-/// showTimePicker(
+/// Future<TimeOfDay> selectedTime24Hour = showTimePicker(
 ///   context: context,
 ///   initialTime: TimeOfDay(hour: 10, minute: 47),
 ///   builder: (BuildContext context, Widget child) {

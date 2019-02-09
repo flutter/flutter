@@ -25,6 +25,9 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Initial display mode of the date picker dialog.
 ///
 /// Date picker UI mode for either showing a list of available years or a
@@ -1118,7 +1121,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// Show a date picker with the dark theme.
 ///
 /// ```dart
-/// showDatePicker(
+/// Future<DateTime> selectedDate = showDatePicker(
 ///   context: context,
 ///   initialDate: DateTime.now(),
 ///   firstDate: DateTime(2018),
