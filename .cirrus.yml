@@ -177,13 +177,13 @@ task:
     SHARD: add2app_test
   osx_instance:
     image: high-sierra-xcode-9.4.1
+  clone_ios_add2app_script:
+    - git clone https://github.com/dnfield/ios_add2app.git
   install_cocoapods_script:
     - sudo gem install cocoapods
   setup_flutter_script:
     - bin/flutter config --no-analytics
     # - bin/flutter update-packages
-  clone_ios_add2app_script:
-    - git clone https://github.com/dnfield/ios_add2app.git
   test_all_script:
     - ./ios_add2app/build_and_test.sh
 
