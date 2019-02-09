@@ -176,7 +176,7 @@ task:
     CIRRUS_WORKING_DIR: "/tmp/flutter add2app"
     SHARD: add2app_test
   osx_instance:
-    image: high-sierra-xcode-9.4.1
+    image: mojave-xcode-10.1
   install_cocoapods_script:
     - sudo gem install cocoapods
   setup_flutter_script:
