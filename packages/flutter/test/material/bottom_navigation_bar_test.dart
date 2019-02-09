@@ -253,6 +253,7 @@ void main() {
       )
     );
 
+    expect(_getOpacity(tester, 'AC'), equals(1.0));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
   });
 
@@ -278,7 +279,70 @@ void main() {
       )
     );
 
+    expect(_getOpacity(tester, 'AC'), equals(1.0));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+  });
+
+  testWidgets('Fixed BottomNavigationBar can update background color', (WidgetTester tester) async {
+    const Color color = Colors.yellow;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: color,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
+    );
+    expect(material.color, equals(color));
+  });
+
+  testWidgets('Shifting BottomNavigationBar background color is overriden by item color', (WidgetTester tester) async {
+    const Color itemColor = Colors.yellow;
+    const Color backgroundColor = Colors.blue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            backgroundColor: backgroundColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+                backgroundColor: itemColor,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
+    );
+    expect(material.color, equals(itemColor));
   });
 
   testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
