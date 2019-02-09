@@ -234,7 +234,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('Dessert').first);
+    await tester.tap(find.text('Dessert'));
     expect(tester.takeException(), isNull);
   });
 
@@ -261,7 +261,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('Lollipop').first);
+    await tester.tap(find.text('Lollipop'));
     expect(tester.takeException(), isNull);
   });
 
