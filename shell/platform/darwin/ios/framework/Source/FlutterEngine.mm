@@ -149,11 +149,14 @@
 
 - (void)notifyViewControllerDeallocated {
   if (!_allowHeadlessExecution) {
-    [self resetChannels];
-
-    _shell.reset();
-    _threadHost.Reset();
+    [self destroyContext];
   }
+}
+
+- (void)destroyContext {
+  [self resetChannels];
+  _shell.reset();
+  _threadHost.Reset();
 }
 
 - (FlutterViewController*)viewController {
