@@ -177,7 +177,7 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
   await runCommand(flutter,
     <String>['build', 'web', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: true,
+    expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
   print('Done.');
