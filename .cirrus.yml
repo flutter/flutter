@@ -181,15 +181,13 @@ task:
     image: high-sierra-xcode-9.4.1
   install_cocoapods_script:
     - sudo gem install cocoapods
-  git_fetch_script:
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD
-    - git clone https://github.com/dnfield/ios_add2app.git ../ios_add2app
-  setup_script:
+  clone_ios_add2app_script:
+    - git clone https://github.com/dnfield/ios_add2app.git
+  setup_flutter_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
   test_all_script:
-    - ../ios_add2app/build_and_test.sh
+    - ./ios_add2app/build_and_test.sh
 
 # task:
 #   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
