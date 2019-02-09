@@ -178,7 +178,7 @@ task:
   osx_instance:
     image: high-sierra-xcode-9.4.1
   clone_ios_add2app_script:
-    - git clone git@github.com:dnfield/ios_add2app.git
+    - git clone https://github.com/dnfield/ios_add2app.git ios_add2app
   install_cocoapods_script:
     - sudo gem install cocoapods
   setup_flutter_script:
