@@ -503,12 +503,20 @@ Future<void> _buildGradleProjectV2(
 
       final Archive update = Archive();
       for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
+        if (!newFile.isFile)
+          continue;
+
+        // Ignore changes to signature manifests.
+        if (newFile.name.startsWith('META-INF/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
+
+        // Only allow changes under assets/.
+        if (!newFile.name.startsWith('assets/'))
+          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
         update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
@@ -527,11 +535,21 @@ Future<void> _buildGradleProjectV2(
         printStatus('No changes detected, creating rollback patch.');
       }
 
-      final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
-      if (oldFile == null)
-        throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+      final List<String> checksumFiles = <String>[
+        'assets/isolate_snapshot_data',
+        'assets/isolate_snapshot_instr',
+        'assets/flutter_assets/isolate_snapshot_data',
+      ];
 
-      final int baselineChecksum = getCrc32(oldFile.content);
+      int baselineChecksum = 0;
+      for (String fn in checksumFiles) {
+        final ArchiveFile oldFile = oldApk.findFile(fn);
+        if (oldFile != null)
+          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
+      }
+      if (baselineChecksum == 0)
+        throwToolExit('Error: Could not find baseline VM snapshot.');
+
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
         'buildNumber': package.versionCode,
