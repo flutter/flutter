@@ -90,7 +90,6 @@ void main() {
         ),
       );
     }).closed.whenComplete(() {
-      print('POPPED');
       showBottomSheetThenCalled = true;
     });
 
@@ -236,6 +235,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'BottomSheet',

@@ -354,13 +354,14 @@ Future<T> showModalBottomSheet<T>({
   ));
 }
 
-/// Shows a persistent material design bottom sheet in the nearest [Scaffold].
+/// Shows a material design bottom sheet in the nearest [Scaffold]. If you wish
+/// to show a persistent bottom sheet, use [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
-/// [StandardBottomSheetController.setState] on the controller returned by
+/// [PersistentBottomSheetController.setState] on the controller returned by
 /// this method.
 ///
 /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
@@ -391,7 +392,7 @@ Future<T> showModalBottomSheet<T>({
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
 ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-StandardBottomSheetController<T> showBottomSheet<T>({
+PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   double initialHeightPercentage = 0.5,

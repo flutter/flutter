@@ -1335,7 +1335,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // Important if the app/user takes an action that could repeatedly show a
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
-  StandardBottomSheetController<dynamic> _currentBottomSheet;
+  PersistentBottomSheetController<dynamic> _currentBottomSheet;
   BottomSheetScrollController _bottomSheetScrollController;
   bool _showBodyScrim = false;
   Color _bodyScrimColor;
@@ -1347,8 +1347,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       // support drag or swipe to dismiss.
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
-        false,
-        // TODO(dnfield): don't hard code this
+        true,
         clampTop: true,
       );
     }
@@ -1359,21 +1358,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet.close();
       assert(() {
         _currentBottomSheet?._completer?.future?.whenComplete(() {
-          assert(_currentBottomSheet = null);
+          assert(_currentBottomSheet == null);
         });
         return true;
       }());
     }
   }
 
-  StandardBottomSheetController<T> _buildBottomSheet<T>(
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(
       WidgetBuilder builder,
-      bool isLocalHistoryEntry, {
+      bool isPersistent, {
       double initialHeight = 0.5,
       bool clampTop = false,
     }) {
     assert(() {
-      if (widget.bottomSheet != null && isLocalHistoryEntry == false && _currentBottomSheet != null) {
+      if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
         throw FlutterError(
           'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
           'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
@@ -1383,12 +1382,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       return true;
     }());
 
-    final bool isPersistent = !isLocalHistoryEntry;
     LocalHistoryEntry persistentSheetHistoryEntry;
     _bottomSheetScrollController = BottomSheet.createScrollController(
       initialHeightPercentage: initialHeight,
       minTop: clampTop ? initialHeight : 0.0,
-      isPersistent: !isLocalHistoryEntry,
+      isPersistent: isPersistent,
       context: context,
     )..addTopListener(() => setState(() {
       final double screenHeight = MediaQuery.of(context).size.height;
@@ -1427,7 +1425,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
     _StandardBottomSheet bottomSheet;
 
+    bool removedEntry = false;
     void _removeCurrentBottomSheet() {
+      removedEntry = true;
       if (_currentBottomSheet == null) {
         return;
       }
@@ -1454,18 +1454,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         _closed(null);
     }
 
-    final LocalHistoryEntry entry = isLocalHistoryEntry
-      ? LocalHistoryEntry(onRemove: _removeCurrentBottomSheet)
-      : null;
+    final LocalHistoryEntry entry = isPersistent
+      ? null
+      : LocalHistoryEntry(onRemove: _removeCurrentBottomSheet);
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
-        if (isLocalHistoryEntry)
-          _currentBottomSheet = null;
-        else
+        if (isPersistent) {
           _removeCurrentBottomSheet();
+        } else if (!removedEntry) {
+          assert(entry != null);
+          removedEntry = true;
+          entry.remove();
+        }
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -1476,18 +1479,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder,
       scrollController: _bottomSheetScrollController,
-      isPersistent: !isLocalHistoryEntry,
+      isPersistent: isPersistent,
     );
 
-    if (isLocalHistoryEntry)
+    if (!isPersistent)
       ModalRoute.of(context).addLocalHistoryEntry(entry);
 
-    return StandardBottomSheetController<T>._(
+    return PersistentBottomSheetController<T>._(
       bottomSheet,
       completer,
-      isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
+      entry != null
+        ? () {}
+        : _removeCurrentBottomSheet,
       (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
-      isLocalHistoryEntry,
+      !isPersistent,
     );
   }
 
@@ -1497,7 +1502,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// bottom sheet.
   ///
   /// To rebuild the bottom sheet (e.g. if it is stateful), call
-  /// [StandardBottomSheetController.setState] on the controller returned by
+  /// [PersistentBottomSheetController.setState] on the controller returned by
   /// this method.
   ///
   /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
@@ -1525,7 +1530,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  StandardBottomSheetController<T> showBottomSheet<T>(
+  PersistentBottomSheetController<T> showBottomSheet<T>(
       WidgetBuilder builder, {
       double initialHeightPercentage = 0.5,
       bool clampTop = false,
@@ -1544,7 +1549,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _closeCurrentBottomSheet();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialHeight: initialHeightPercentage, clampTop: clampTop);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, false, initialHeight: initialHeightPercentage, clampTop: clampTop);
     });
     return _currentBottomSheet;
   }
@@ -2073,8 +2078,11 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 /// A [ScaffoldFeatureController] for standard bottom sheets.
 ///
 /// This is the type of objects returned by [ScaffoldState.showBottomSheet].
-class StandardBottomSheetController<T> extends ScaffoldFeatureController<_StandardBottomSheet, T> {
-  const StandardBottomSheetController._(
+///
+/// This controller is used to display both standard and persistent bottom
+/// sheets. A bottom sheet is only persistent if it is set as
+class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_StandardBottomSheet, T> {
+  const PersistentBottomSheetController._(
     _StandardBottomSheet widget,
     Completer<T> completer,
     VoidCallback close,

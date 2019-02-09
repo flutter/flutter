@@ -39,7 +39,7 @@ class _ListItem {
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  StandardBottomSheetController<void> _bottomSheet;
+  PersistentBottomSheetController<void> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverse = false;
   bool _reverseSort = false;
