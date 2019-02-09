@@ -105,21 +105,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0), touchSlopY: 0);
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0), touchSlopX: 0);
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0), touchSlopY: 0);
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0), touchSlopX: 0);
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0), touchSlopY: 0);
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0), touchSlopX: 0);
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0), touchSlopY: 0);
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0), touchSlopX: 0);
 
     expect(value, isFalse);
   });
