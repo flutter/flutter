@@ -593,15 +593,15 @@ void main() {
         60.0, // Default value.
       ));
 
-      // Dragging to 5% of refresh control height
-      await tester.drag(find.text('0'), const Offset(0.0, -57.0));
-      await tester.pump();
-
       // Waiting for refresh control to reach approximately 5% of height
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 400));
 
       expect(
         tester.getRect(find.widgetWithText(Center, '0')).top,
+        moreOrLessEquals(3.0, epsilon: 4e-1),
+      );
+      expect(
+        tester.getRect(find.widgetWithText(Center, '-1')).height,
         moreOrLessEquals(3.0, epsilon: 4e-1),
       );
       verify(mockHelper.builder(
