@@ -164,6 +164,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    print('handing event');
     assert(_state != _DragState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
@@ -174,6 +175,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (event is PointerMoveEvent) {
       final Offset delta = event.delta;
+      print('delta ' + delta.toString());
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
           invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
@@ -195,6 +197,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
+    print('handlying event');
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
@@ -209,6 +212,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           updateDelta = _getDeltaForDetails(delta);
           break;
       }
+      print('update delta '  + updateDelta.toString());
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = null;
       if (onStart != null) {
