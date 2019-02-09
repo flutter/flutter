@@ -33,11 +33,12 @@ void main() {
 
     await webCompiler.compile(target: 'lib/main.dart');
 
+    final String outputPath = fs.path.join('build', 'web', 'main.dart.js');
     verify(mockProcessManager.start(<String>[
       engineDartPath,
       dart2jsPath,
       'lib/main.dart',
-      '-o=build/web/main.dart.js',
+      '-o=$outputPath',
       '--libraries-spec=$librariesPath',
       '--platform-binaries=$flutterPatchedSdkPath',
       '-m',
