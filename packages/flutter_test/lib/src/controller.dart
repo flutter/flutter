@@ -419,7 +419,7 @@ abstract class WidgetController {
   /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
   /// {@end template}
-  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kTouchSlop + 1.0, double touchSlopY = kTouchSlop + 1.0 }) {
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
     return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
@@ -431,7 +431,7 @@ abstract class WidgetController {
   /// instead.
   ///
   /// {@macro flutter.flutter_test.lib.src.controller}
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop + 1.0, double touchSlopY = kTouchSlop + 1.0}) {
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
@@ -439,8 +439,8 @@ abstract class WidgetController {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
-      final bool separateX = offset.dx * xSign > touchSlopX && touchSlopX > 0;
-      final bool separateY = offset.dy * ySign > touchSlopY && touchSlopY > 0;
+      final bool separateX = offset.dx * xSign > touchSlopX;
+      final bool separateY = offset.dy * ySign > touchSlopY;
 
       if (separateX || separateY) {
         final double firstX = separateX ? xSign * touchSlopX : offset.dx;
