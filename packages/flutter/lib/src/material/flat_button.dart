@@ -39,7 +39,25 @@ import 'theme_data.dart';
 /// with [ButtonTheme].
 ///
 /// The [clipBehavior] argument must not be null.
+/// {@tool sample}
 ///
+/// This example to use [FlatButton] in your flutter code
+///
+/// ```dart
+/// FlatButton(
+///              onPressed: () {
+///                _doSomething();
+///              },
+///              child: Text(
+///                "Flat Button",
+///                style: TextStyle(
+///                  color: Colors.white,
+///                  fontSize: 20.0
+///                ),
+///              ),
+///            )
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [RaisedButton], a filled button whose material elevates when pressed.
