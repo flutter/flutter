@@ -85,37 +85,37 @@ void main() {
     test('should not be up to date, if some cached artifact is not', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
-      when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
+      when(artifact1.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
+      when(artifact2.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate().isUpToDate, isFalse);
     });
     test('should be up to date, if all cached artifacts are', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
-      when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
+      when(artifact1.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
+      when(artifact2.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate().isUpToDate, isTrue);
     });
     test('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
-      when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
+      when(artifact1.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: true, clobber: false));
+      when(artifact2.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       await cache.updateAll();
-      verifyNever(artifact1.update());
-      verify(artifact2.update());
+      verifyNever(artifact1.update(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown')));
+      verify(artifact2.update(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'), clobber: anyNamed('clobber')));
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
-      when(artifact2.isUpToDate()).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
+      when(artifact1.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
+      when(artifact2.isUpToDate(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'))).thenReturn(const UpdateResult(isUpToDate: false, clobber: false));
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(SocketException(
+      when(artifact1.update(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'), clobber: anyNamed('clobber'))).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
@@ -124,9 +124,9 @@ void main() {
         await cache.updateAll();
         fail('Mock thrown exception expected');
       } catch (e) {
-        verify(artifact1.update());
+        verify(artifact1.update(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'), clobber: anyNamed('clobber')));
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update());
+        verifyNever(artifact2.update(buildModes: anyNamed('buildModes'), targetPlatforms: anyNamed('targetPlatforms'), skipUnknown: anyNamed('skipUnknown'), clobber: anyNamed('clobber')));
         expect(
           testLogger.errorText,
           contains('https://flutter.io/community/china'),
@@ -150,8 +150,8 @@ void main() {
     testUsingContext('Engine cache filtering - macOS', () {
       final FlutterEngine flutterEngine = FlutterEngine(MockCache());
       expect(flutterEngine.getBinaryDirs(
-        buildMode: BuildMode.release,
-        targetPlatform: TargetPlatform.android_arm,
+        buildModes: <BuildMode>[BuildMode.release],
+        targetPlatforms: <TargetPlatform>[TargetPlatform.android_arm],
         skipUnknown: true,
       ), unorderedEquals(const <BinaryArtifact>[
         BinaryArtifact(
@@ -192,8 +192,8 @@ void main() {
     testUsingContext('Engine cache filtering - unknown mode - macOS', () {
       final FlutterEngine flutterEngine = FlutterEngine(MockCache());
       expect(flutterEngine.getBinaryDirs(
-        buildMode: null,
-        targetPlatform: TargetPlatform.ios,
+        buildModes: <BuildMode>[],
+        targetPlatforms: <TargetPlatform>[TargetPlatform.ios],
         skipUnknown: true,
       ), unorderedEquals(const <BinaryArtifact>[
         BinaryArtifact(
@@ -241,8 +241,8 @@ void main() {
     testUsingContext('Engine cache filtering - Windows', () {
       final FlutterEngine flutterEngine = FlutterEngine(MockCache());
       expect(flutterEngine.getBinaryDirs(
-        buildMode: BuildMode.release,
-        targetPlatform: TargetPlatform.android_arm,
+        buildModes: <BuildMode>[BuildMode.release],
+        targetPlatforms: <TargetPlatform>[TargetPlatform.android_arm],
         skipUnknown: true,
       ), unorderedEquals(const <BinaryArtifact>[
           BinaryArtifact(
@@ -283,8 +283,8 @@ void main() {
     testUsingContext('Engine cache filtering - linux', () {
       final FlutterEngine flutterEngine = FlutterEngine(MockCache());
       expect(flutterEngine.getBinaryDirs(
-        buildMode: BuildMode.release,
-        targetPlatform: TargetPlatform.android_arm,
+        buildModes: <BuildMode>[BuildMode.release],
+        targetPlatforms: <TargetPlatform>[TargetPlatform.android_arm],
         skipUnknown: true,
       ), unorderedEquals(const <BinaryArtifact>[
           BinaryArtifact(

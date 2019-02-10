@@ -45,10 +45,10 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       verify(cache.updateAll(
-        buildMode: anyNamed('buildMode'),
+        buildModes: anyNamed('buildModes'),
         clobber: anyNamed('clobber'),
         skipUnknown: anyNamed('skipUnknown'),
-        targetPlatform: anyNamed('targetPlatform')
+        targetPlatforms: anyNamed('targetPlatforms')
       )).called(1);
     },
     overrides: <Type, Generator>{

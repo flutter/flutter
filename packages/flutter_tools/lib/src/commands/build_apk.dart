@@ -54,14 +54,20 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<void> updateCache() async {
-    // Due to logic of flutter.gradle, we require every release mode and every android target architecture.
-    for (TargetPlatform targetPlatform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.android_arm64]) {
-      await cache.updateAll(
-        buildMode: null,
-        targetPlatform: targetPlatform,
-        clobber: false,
-        skipUnknown: true,
-      );
-    }
+    final BuildInfo buildInfo = getBuildInfo();
+    await cache.updateAll(
+      buildModes: <BuildMode>[
+        buildInfo.mode,
+        BuildMode.debug,
+      ],
+      targetPlatforms: <TargetPlatform>[
+        TargetPlatform.android_arm,
+        TargetPlatform.android_arm64,
+        TargetPlatform.android_x64,
+        TargetPlatform.android_x86
+      ],
+      clobber: false,
+      skipUnknown: true,
+    );
   }
 }

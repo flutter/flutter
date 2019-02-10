@@ -47,8 +47,8 @@ abstract class BuildSubCommand extends FlutterCommand {
       skipUnknown = true;
     }
     await cache.updateAll(
-      buildMode: buildInfo.mode,
-      targetPlatform: buildInfo.targetPlatform,
+      buildModes: buildInfo.mode != null ? <BuildMode>[buildInfo.mode] : <BuildMode>[],
+      targetPlatforms: buildInfo.targetPlatform != null ? <TargetPlatform>[buildInfo.targetPlatform] : <TargetPlatform>[],
       clobber: false,
       skipUnknown: skipUnknown,
     );

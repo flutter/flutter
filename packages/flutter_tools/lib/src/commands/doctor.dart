@@ -53,8 +53,6 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<void> updateCache() async {
     await cache.updateAll(
-      buildMode: null,
-      targetPlatform: null,
       clobber: false,
       skipUnknown: true,
     );

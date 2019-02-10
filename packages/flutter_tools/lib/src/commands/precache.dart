@@ -30,14 +30,11 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
     }
-    // Intentionally set to null to download all artifacts.
-    final UpdateResult result = cache.isUpToDate(buildMode: null, targetPlatform: null, skipUnknown: false);
+    final UpdateResult result = cache.isUpToDate(skipUnknown: false);
     if (result.isUpToDate && !result.clobber && !argResults['force']) {
       printStatus('Already up-to-date.');
     } else {
       await cache.updateAll(
-        buildMode: null,
-        targetPlatform: null,
         skipUnknown: false,
         clobber: argResults['force'] || result.clobber,
       );

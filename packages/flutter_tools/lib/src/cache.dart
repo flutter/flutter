@@ -189,14 +189,14 @@ class Cache {
   }
 
   UpdateResult isUpToDate({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes = const <BuildMode>[],
+    List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
     bool skipUnknown = true,
   }) {
     bool isUpToDate = true;
     bool clobber = false;
     for (CachedArtifact artifact in _artifacts) {
-      final UpdateResult result =  artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+      final UpdateResult result =  artifact.isUpToDate(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown);
       isUpToDate &= result.isUpToDate;
       clobber |= result.clobber;
     }
@@ -225,8 +225,8 @@ class Cache {
   }
 
   Future<void> updateAll({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes = const <BuildMode>[],
+    List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
     bool skipUnknown = true,
     bool clobber = false,
   }) async {
@@ -237,12 +237,12 @@ class Cache {
       for (CachedArtifact artifact in _artifacts) {
         bool localClobber = clobber;
         if (localClobber) {
-          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: localClobber);
+          await artifact.update(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown, clobber: localClobber);
         }
-        final UpdateResult result = artifact.isUpToDate(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+        final UpdateResult result = artifact.isUpToDate(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown);
         localClobber |= result.clobber;
         if (localClobber || !result.isUpToDate) {
-          await artifact.update(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown, clobber: localClobber);
+          await artifact.update(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown, clobber: localClobber);
         }
       }
     } on SocketException catch (e) {
@@ -283,8 +283,8 @@ abstract class CachedArtifact {
   final List<File> _downloadedFiles = <File>[];
 
   UpdateResult isUpToDate({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes = const <BuildMode>[],
+    List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
     bool skipUnknown = true,
   }) {
     if (!location.existsSync()) {
@@ -293,16 +293,16 @@ abstract class CachedArtifact {
       return const UpdateResult(isUpToDate: false, clobber: true);
     }
     final bool result = isUpToDateInner(
-      buildMode: buildMode,
-      targetPlatform: targetPlatform,
+      buildModes: buildModes,
+      targetPlatforms: targetPlatforms,
       skipUnknown: skipUnknown,
     );
     return UpdateResult(isUpToDate: result, clobber: false);
   }
 
   Future<void> update({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes,
+    List<TargetPlatform> targetPlatforms,
     bool skipUnknown = true,
     bool clobber = false,
   }) async {
@@ -313,8 +313,8 @@ abstract class CachedArtifact {
       location.createSync(recursive: true);
     }
     await updateInner(
-      buildMode: buildMode,
-      targetPlatform: targetPlatform,
+      buildModes: buildModes,
+      targetPlatforms: targetPlatforms,
       skipUnknown: skipUnknown,
       clobber: clobber,
     );
@@ -340,12 +340,12 @@ abstract class CachedArtifact {
   }
 
   /// Hook method for extra checks for being up-to-date.
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) => true;
+  bool isUpToDateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown}) => true;
 
   /// Template method to perform artifact update.
   Future<void> updateInner({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
+    @required List<BuildMode> buildModes,
+    @required List<TargetPlatform> targetPlatforms,
     @required bool skipUnknown,
     @required bool clobber,
   });
@@ -416,7 +416,7 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
+  Future<void> updateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
     if (fs.directory(location).listSync().isEmpty || clobber) {
       await _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
@@ -431,8 +431,8 @@ class FlutterEngine extends CachedArtifact {
   // Return a list of [BinaryArtifact]s to download.
   @visibleForTesting
   List<BinaryArtifact> getBinaryDirs({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
+    @required List<BuildMode> buildModes,
+    @required List<TargetPlatform> targetPlatforms,
     @required bool skipUnknown,
   }) {
     TargetPlatform hostPlatform;
@@ -446,8 +446,8 @@ class FlutterEngine extends CachedArtifact {
       hostPlatform = TargetPlatform.windows_x64;
     }
     final List<BinaryArtifact> results = _reduceEngineBinaries(
-      buildMode: buildMode,
-      targetPlatform: targetPlatform,
+      buildModes: buildModes,
+      targetPlatforms: targetPlatforms,
       hostPlatform: hostPlatform,
       skipUnknown: skipUnknown,
     ).toList();
@@ -458,24 +458,29 @@ class FlutterEngine extends CachedArtifact {
   }
 
   Iterable<BinaryArtifact> _reduceEngineBinaries({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes,
+    List<TargetPlatform> targetPlatforms,
     TargetPlatform hostPlatform,
     bool skipUnknown,
-  }) sync* {
-    for (BinaryArtifact engineBinary in _binaries) {
+  }) {
+    return _binaries.where((BinaryArtifact engineBinary) {
       if (hostPlatform != null && engineBinary.hostPlatform != null && engineBinary.hostPlatform != hostPlatform) {
-        continue;
+        return false;
       }
-      if (engineBinary.skipChecks
-        || engineBinary.buildMode == null && engineBinary.targetPlatform == null // match if artifact has no restrictions.
-        || engineBinary.buildMode == buildMode && engineBinary.targetPlatform == targetPlatform // match if artifact exactly matches requiremnets.
-        || skipUnknown && buildMode == null && targetPlatform != null && targetPlatform == engineBinary.targetPlatform // match if target platform matches but build mode is null
-        || skipUnknown && targetPlatform == null && buildMode != null && buildMode == engineBinary.buildMode // match if build mode matches but target platform is unknown)
-        || !skipUnknown && buildMode == null && targetPlatform == null) { // match if neither are provided but skipUnknown flag is provided.
-        yield engineBinary;
+      // match if artifact has no restrictions.
+      if (engineBinary.skipChecks || engineBinary.buildMode == null && engineBinary.targetPlatform == null) {
+        return true;
       }
-    }
+      final bool buildModeMatch = buildModes.any((BuildMode buildMode) => buildMode == engineBinary.buildMode);
+      final bool targetPlatformMatch = targetPlatforms.any((TargetPlatform targetPlatform) => targetPlatform == engineBinary.targetPlatform);
+      if (buildModeMatch && targetPlatformMatch  // match if artifact exactly matches requiremnets.
+        || skipUnknown && buildModeMatch && targetPlatforms.isEmpty // match if build mode matches but target platform is unknown.
+        || skipUnknown && targetPlatformMatch && buildModes.isEmpty // match if target platform matches but build mode is null.
+        || !skipUnknown && targetPlatforms.isEmpty && buildModes.isEmpty) { // match if neither are provided but skipUnknown flag is provided.
+          return true;
+      }
+      return false;
+    });
   }
 
   List<BinaryArtifact> get _packages => const <BinaryArtifact>[
@@ -816,8 +821,8 @@ class FlutterEngine extends CachedArtifact {
 
   @override
   bool isUpToDateInner({
-    BuildMode buildMode,
-    TargetPlatform targetPlatform,
+    List<BuildMode> buildModes,
+    List<TargetPlatform> targetPlatforms,
     bool skipUnknown,
   }) {
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -827,7 +832,7 @@ class FlutterEngine extends CachedArtifact {
         return false;
       }
     }
-    for (BinaryArtifact toolsArtifact in getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown)) {
+    for (BinaryArtifact toolsArtifact in getBinaryDirs(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown)) {
       final Directory dir = toolsArtifact.artifactLocation(location);
       if (!dir.existsSync()) {
         return false;
@@ -838,8 +843,8 @@ class FlutterEngine extends CachedArtifact {
 
   @override
   Future<void> updateInner({
-    @required BuildMode buildMode,
-    @required TargetPlatform targetPlatform,
+    @required List<BuildMode> buildModes,
+    @required List<TargetPlatform> targetPlatforms,
     @required bool skipUnknown,
     @required bool clobber,
   }) async {
@@ -859,7 +864,7 @@ class FlutterEngine extends CachedArtifact {
       await _downloadZipArchive('Downloading package ${rawArtifact.name}...', uri, packageDirectory);
     }
 
-    final List<BinaryArtifact> rawArtifacts = getBinaryDirs(buildMode: buildMode, targetPlatform: targetPlatform, skipUnknown: skipUnknown);
+    final List<BinaryArtifact> rawArtifacts = getBinaryDirs(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown);
     for (BinaryArtifact rawArtifact in rawArtifacts) {
       final Directory artifactDirectory = rawArtifact.artifactLocation(location);
       if (artifactDirectory.existsSync() && !clobber) {
@@ -906,7 +911,7 @@ class FlutterEngine extends CachedArtifact {
           return false;
         }
       }
-      final List<BinaryArtifact> rawArtifacts = getBinaryDirs(buildMode: null, targetPlatform: null, skipUnknown: false);
+      final List<BinaryArtifact> rawArtifacts = getBinaryDirs(buildModes: <BuildMode>[], targetPlatforms: <TargetPlatform>[], skipUnknown: false);
       for (BinaryArtifact rawArtifact in rawArtifacts) {
         final Uri uri = Uri.parse('$url${rawArtifact.fileName}');
         final bool exists = await _doesRemoteExist('Checking ${rawArtifact.name} tools are available...', uri);
@@ -942,7 +947,7 @@ class GradleWrapper extends CachedArtifact {
   String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
-  Future<void> updateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown, bool clobber}) async {
+  Future<void> updateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown, bool clobber}) async {
     final Uri archiveUri = _toStorageUri(version);
     if (fs.directory(location).listSync().isEmpty || clobber) {
       await _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
@@ -955,7 +960,7 @@ class GradleWrapper extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({BuildMode buildMode, TargetPlatform targetPlatform, bool skipUnknown}) {
+  bool isUpToDateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown}) {
     final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
     if (!fs.directory(wrapperDir).existsSync())
       return false;
