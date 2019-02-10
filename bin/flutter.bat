@@ -152,7 +152,7 @@ GOTO :after_subroutine
 
     POPD
 
-    "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+    "%dart%" --snapshot="%snapshot_path%" --snapshot-kind=app-jit --packages="%flutter_tools_dir%\.packages" "%script_path%"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool.
       SET exit_code=%ERRORLEVEL%
