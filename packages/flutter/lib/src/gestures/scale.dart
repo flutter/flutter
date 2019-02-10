@@ -72,7 +72,12 @@ class ScaleUpdateDetails {
   /// greater than or equal to zero.
   final double scale;
 
+  /// The scale along the horizontal axis implied by the pointers in contact
+  /// with the screen. A value greater than or equal to zero.
   final double horizontalScale;
+
+  /// The scale along the vertical axis implied by the pointers in contact
+  /// with the screen. A value greater than or equal to zero.
   final double verticalScale;
 
   /// The angle implied by the first two pointers to enter in contact with
