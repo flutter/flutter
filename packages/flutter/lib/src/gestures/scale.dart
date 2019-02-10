@@ -276,6 +276,19 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       totalDeviation +=
           (_currentFocalPoint - _pointerLocations[pointer]).distance;
     _currentSpan = count > 0 ? totalDeviation / count : 0.0;
+
+    // Horizontal and vertical span are the average deviations from the
+    // focal point's horizontal and vertical coordinates, respectively.
+    double totalHorizontalDeviation = 0.0;
+    double totalVerticalDeviation = 0.0;
+    for (int pointer in _pointerLocations.keys) {
+      totalHorizontalDeviation +=
+          (_currentFocalPoint.dx - _pointerLocations[pointer].dx).abs();
+      totalVerticalDeviation +=
+          (_currentFocalPoint.dy - _pointerLocations[pointer].dy).abs();
+    }
+    _currentHorizontalSpan = count > 0 ? totalHorizontalDeviation / count : 0.0;
+    _currentVerticalSpan = count > 0 ? totalVerticalDeviation / count : 0.0;
   }
 
   /// Updates [_initialLine] and [_currentLine] accordingly to the situation of
@@ -311,6 +324,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _initialFocalPoint = _currentFocalPoint;
     _initialSpan = _currentSpan;
     _initialLine = _currentLine;
+    _initialHorizontalSpan = _currentHorizontalSpan;
+    _initialVerticalSpan = _currentVerticalSpan;
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
         final VelocityTracker tracker = _velocityTrackers[pointer];
@@ -338,8 +353,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted) {
-    if (_state == _ScaleState.ready)
-      _state = _ScaleState.possible;
+    if (_state == _ScaleState.ready) _state = _ScaleState.possible;
 
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
