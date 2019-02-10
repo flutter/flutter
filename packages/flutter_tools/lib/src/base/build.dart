@@ -353,7 +353,7 @@ class JITSnapshotter {
     @required String outputPath,
     @required String compilationTraceFilePath,
     @required bool createPatch,
-    int buildNumber,
+    String buildNumber,
     String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
