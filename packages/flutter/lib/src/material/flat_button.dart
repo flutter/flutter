@@ -41,7 +41,8 @@ import 'theme_data.dart';
 /// The [clipBehavior] argument must not be null.
 /// {@tool sample}
 ///
-/// This example to use [FlatButton] in your flutter code
+/// This example shows to use [FlatButton] to create a simple button 
+/// in your flutter code.
 ///
 /// ```dart
 /// FlatButton(
