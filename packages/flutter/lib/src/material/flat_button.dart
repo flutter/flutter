@@ -45,17 +45,17 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// FlatButton(
-///              onPressed: () {
-///                _doSomething();
-///              },
-///              child: Text(
-///                "Flat Button",
-///                style: TextStyle(
-///                  color: Colors.white,
-///                  fontSize: 20.0
-///                ),
-///              ),
-///            )
+///   onPressed: () {
+///       _doSomething();
+///   },
+///   child: Text(
+///            "Flat Button",
+///            style: TextStyle(
+///                    color: Colors.white,
+///                    fontSize: 20.0
+///                 ),
+///            ),
+///  )
 /// ```
 /// {@end-tool}
 /// See also:
