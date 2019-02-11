@@ -225,15 +225,18 @@ Future<void> _testWatch({
   await for (String char in terminal.keystrokes.asBroadcastStream()){
     if (char == 'r' && !isBusy) {
       isBusy = true;
-      final Status status = logger.startProgress('Recompiling test files...\n', timeout: null);
-      await _compileTestFiles(compiler, testFiles,
-        installHook: installHook,
-        host: host,
-        updateGoldens: updateGoldens);
-      invalidatedFiles.clear();
-      isBusy = false;
-      status.stop();
+      if (invalidatedFiles.isNotEmpty) {
+        final Status status = logger.startProgress('Recompiling test files...\n', timeout: null);
+        await _compileTestFiles(compiler, testFiles,
+          installHook: installHook,
+          host: host,
+          updateGoldens: updateGoldens,
+          invalidatedFiles: invalidatedFiles);
+        invalidatedFiles.clear();
+        status.stop();
+      }
       await test.runTests(testArgs);
+      isBusy = false;
       _printReloadMessage();
     } else if (char == 'q') {
       break;
