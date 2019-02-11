@@ -20,12 +20,13 @@ class CoffeeMaker {
   @brandName
   final String _brand;
 
-  void brew() {
+  String brew() {
     _heater.on();
     _pump.pump();
     print(' [_]P coffee! [_]P');
-    print(' Thanks for using $_model by $_brand');
+    final String message = 'Thanks for using $_model by $_brand';
     _heater.off();
+    return message;
   }
 }
 

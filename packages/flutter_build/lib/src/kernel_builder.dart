@@ -122,8 +122,14 @@ class FlutterKernelBuilder implements Builder {
     // Note: currently we only replace the root package with a multiroot
     // scheme. To support codegen on arbitrary packages we will need to do
     // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:///lib/');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/lib///');
     await packagesFile.writeAsString(newPackagesContents);
+    String absoluteMainPath;
+    if (path.isAbsolute(mainPath)) {
+      absoluteMainPath = mainPath;
+    } else {
+      absoluteMainPath = path.join(projectDir.absolute.path, mainPath);
+    }
 
     // start up the frontend server with configuration.
     final List<String> arguments = <String>[
@@ -166,12 +172,12 @@ class FlutterKernelBuilder implements Builder {
       arguments.addAll(extraFrontEndOptions);
     }
     final Uri mainUri = _PackageUriMapper.findUri(
-      mainPath,
+      absoluteMainPath,
       packagesFile.path,
       multiRootScheme,
       <String>[projectDir.absolute.path, generatedRoot],
     );
-    arguments.add(mainUri.toString());
+    arguments.add(mainUri?.toString() ?? absoluteMainPath);
     // Invoke the frontend server and copy the dill back to the output
     // directory.
     try {

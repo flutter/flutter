@@ -16,7 +16,7 @@ class PourOverCoffeeModule {
 
   @provide
   @modelName
-  String provideModel() => 'PourOverSupreme';
+  String provideModel() => 'PourOverSupremeFiesta';
 
   @provide
   @asynchronous

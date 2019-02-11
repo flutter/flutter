@@ -8,13 +8,13 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.14.11
-  device_info: 0.4.0
+  device_info: 0.4.0+1
   intl: 0.15.7
-  connectivity: 0.4.0+1
+  connectivity: 0.4.2
   string_scanner: 1.0.4
-  url_launcher: 5.0.0
+  url_launcher: 5.0.1
   cupertino_icons: 0.1.2
-  video_player: 0.10.0
+  video_player: 0.10.0+1
   scoped_model: 1.0.1
   shrine_images: 1.1.1
 
@@ -242,4 +242,4 @@ flutter:
         - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
           weight: 400
 
-# PUBSPEC CHECKSUM: b3c7
+# PUBSPEC CHECKSUM: a527

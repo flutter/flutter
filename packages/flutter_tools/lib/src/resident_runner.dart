@@ -16,6 +16,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
@@ -895,6 +896,9 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
+    if (experimentalBuildEnabled) {
+      return false;
+    }
     final DartDependencySetBuilder dartDependencySetBuilder =
         DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =

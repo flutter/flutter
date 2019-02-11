@@ -4,7 +4,11 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/data/build_target.dart';
 import 'package:build_runner_core/build_runner_core.dart';
+import 'package:build_daemon/data/server_log.dart';
+import 'package:build_daemon/data/build_status.dart' as build;
+import 'package:build_daemon/client.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -19,6 +23,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../resident_runner.dart';
 import 'build_script_generator.dart';
 
 /// A wrapper for a build_runner process which delegates to a generated
@@ -158,10 +163,6 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('  build_runner: any');
       stringBuffer.writeln('  flutter_build:');
       stringBuffer.writeln('    sdk: flutter');
-      stringBuffer.writeln('dependency_overrides:');
-      stringBuffer.writeln('  build_runner_core:');
-      stringBuffer.writeln('    path: /Users/jonahwilliams/Documents/build/build_runner_core');
-      stringBuffer.writeln('  analyzer: ^0.35.0');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -176,5 +177,90 @@ class BuildRunner extends CodeGenerator {
     } finally {
       status.stop();
     }
+  }
+
+  @override
+  Future<CodegenDaemon> daemon({
+    String mainPath,
+    bool linkPlatformKernelIn = false,
+    bool targetProductVm = false,
+    bool trackWidgetCreation = false,
+    List<String> extraFrontEndOptions = const <String> [],
+  }) async {
+    mainPath ??= findMainDartFile();
+    await generateBuildScript();
+    final FlutterProject flutterProject = await FlutterProject.current();
+    final String frontendServerPath = artifacts.getArtifactPath(
+      Artifact.frontendServerSnapshotForEngineDartSdk
+    );
+    final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String packagesPath = flutterProject.packagesFile.absolute.path;
+    final String buildScript = flutterProject
+        .dartTool
+        .childDirectory('build')
+        .childDirectory('entrypoint')
+        .childFile('build.dart')
+        .path;
+    final String scriptPackagesPath = flutterProject
+        .dartTool
+        .childDirectory('flutter_tool')
+        .childFile('.packages')
+        .path;
+    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+    final Status status = logger.startProgress('starting build daemon...', timeout: null);
+    BuildDaemonClient buildDaemonClient;
+    try {
+      final List<String> command = <String>[
+        dartPath,
+        '--packages=$scriptPackagesPath',
+        buildScript,
+        'daemon',
+        '--define', 'flutter_build|kernel=disabled=false',
+        '--define', 'flutter_build|kernel=aot=false',
+        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
+        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
+        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
+        '--define', 'flutter_build|kernel=mainPath=$mainPath',
+        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
+        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
+        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
+        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
+        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
+      ];
+      buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command);
+    } finally {
+      status.stop();
+    }
+    buildDaemonClient.serverLogs.listen((ServerLog serverLog) {
+      printTrace(serverLog.log);
+    });
+    buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
+      builder.target = flutterProject.manifest.appName;
+    }));
+    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
+    final File generatedPackagesFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.packages')));
+    final File generatedDillFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.app.dill')));
+    return _BuildRunnerCodegenDaemon(buildDaemonClient, generatedPackagesFile, generatedDillFile);
+  }
+}
+
+class _BuildRunnerCodegenDaemon implements CodegenDaemon {
+  _BuildRunnerCodegenDaemon(this.buildDaemonClient, this.packagesFile, this.dillFile);
+
+  final BuildDaemonClient buildDaemonClient;
+  @override
+  final File packagesFile;
+  @override
+  final File dillFile;
+
+  @override
+  Stream<bool> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {
+    return results.results.first.status == build.BuildStatus.succeeded;
+  });
+
+  @override
+  void startBuild() {
+    buildDaemonClient.startBuild();
   }
 }

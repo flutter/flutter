@@ -20,20 +20,9 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+KernelCompiler get kernelCompiler => context[KernelCompiler];
 
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
-
-/// Injectable factory to allow async construction of a [KernelCompiler].
-class KernelCompilerFactory {
-  const KernelCompilerFactory();
-
-  /// Return the correct [KernelCompiler] instance for the given project
-  /// configuration.
-  FutureOr<KernelCompiler> create() async {
-    return const KernelCompiler();
-  }
-}
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.

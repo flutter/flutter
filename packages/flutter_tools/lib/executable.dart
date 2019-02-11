@@ -5,6 +5,11 @@
 import 'dart:async';
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
+// The build_runner code generation is provided here to make it easier to
+// avoid introducing the dependency into google3.
+import 'src/build_runner/build_runner.dart';
+import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -18,6 +23,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
+import 'src/commands/generate.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
@@ -63,6 +69,7 @@ Future<void> main(List<String> args) async {
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
+    GenerateCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
@@ -81,5 +88,9 @@ Future<void> main(List<String> args) async {
     VersionCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp);
+     verboseHelp: verboseHelp,
+     overrides: <Type, Generator>{
+       // The build runner instance is not supported in google3.
+       CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
+     });
 }

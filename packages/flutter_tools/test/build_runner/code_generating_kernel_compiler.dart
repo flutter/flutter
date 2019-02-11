@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/build_runner/build_kernel_compiler.dart';
 import 'package:flutter_tools/src/build_runner/build_runner.dart';
 import 'package:flutter_tools/src/codegen.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -13,7 +12,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(BuildKernelCompiler, () {
+  group(CodeGeneratingKernelCompiler, () {
     final MockBuildRunner mockBuildRunner = MockBuildRunner();
     final MockFileSystem mockFileSystem = MockFileSystem();
     final MockFile packagesFile = MockFile();
@@ -29,7 +28,7 @@ void main() {
     when(dillFile.readAsBytes()).thenAnswer((Invocation invocation) async => <int>[0, 1, 2, 3]);
 
     testUsingContext('delegates to build_runner', () async {
-      const BuildKernelCompiler kernelCompiler = BuildKernelCompiler();
+      const CodeGeneratingKernelCompiler kernelCompiler = CodeGeneratingKernelCompiler();
       when(mockBuildRunner.build(
         aot: anyNamed('aot'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
