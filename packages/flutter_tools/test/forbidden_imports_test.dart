@@ -82,7 +82,8 @@ void main() {
   test('no unauthorized imports of build_runner', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'test', 'src', 'build_runner'),
-      fs.path.join(flutterTools, 'lib', 'src', 'build_runner',),
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner'),
+      fs.path.join(flutterTools, 'lib', 'executable.dart')
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => !entity.path.contains(path));
 
