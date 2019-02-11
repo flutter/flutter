@@ -135,7 +135,6 @@ void main() {
 
     const double selectedFontSize = 14.0;
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
-    // Unselected label has a font size of 14 but is scaled down to be font size 12.
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(Colors.white));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
   });
@@ -226,7 +225,6 @@ void main() {
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
-    // Unselected label has a font size of 18 but is scaled down to be font size 14.
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
   });
@@ -343,6 +341,62 @@ void main() {
       find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
     );
     expect(material.color, equals(itemColor));
+  });
+
+  testWidgets('Fixed BottomNavigationBar uses selectedItemColor over fixedColor', (WidgetTester tester) async {
+    const Color fixedColor = Colors.black;
+    const Color selectedColor = Colors.blue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: selectedColor,
+            fixedColor: fixedColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
+  });
+
+  testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided', (WidgetTester tester) async {
+    const Color fixedColor = Colors.black;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            fixedColor: fixedColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(fixedColor));
   });
 
   testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
