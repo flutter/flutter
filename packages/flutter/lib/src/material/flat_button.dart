@@ -53,7 +53,7 @@ import 'theme_data.dart';
 ///           padding: EdgeInsets.all(8.0),
 ///           splashColor: Colors.blueAccent,
 ///           onPressed: () {
-///             /*_doSomething();*/
+///             /*...*/
 ///           },
 ///           child: Text(
 ///             "Flat Button",
