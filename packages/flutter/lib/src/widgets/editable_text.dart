@@ -210,7 +210,7 @@ class EditableText extends StatefulWidget {
     this.textScaleFactor,
     this.maxLines = 1,
     this.minLines,
-    this.expands,
+    this.expands = false,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,
@@ -248,18 +248,10 @@ class EditableText extends StatefulWidget {
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
+       assert(expands != null),
        assert(
-         !(expands == true && minLines != null && minLines == maxLines)
-         && !(expands == true && maxLines == 1),
-         'No space to expand between minLines and maxLines.',
-       ),
-       assert(
-         !(expands == false && maxLines == null),
-         'When expands is false, there must be a maxLines',
-       ),
-       assert(
-         !(minLines != null && maxLines != null && minLines < maxLines && expands == false),
-         'Can\'t give a range of minLines and maxLines when expands is false. For an input that expands through a range of lines, set expands to true.',
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
        ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
@@ -383,14 +375,12 @@ class EditableText extends StatefulWidget {
   /// container will start with enough vertical space for one line and
   /// automatically grow to accomodate additional lines as they are entered.
   ///
-  /// If it is not null, the value must be greater than zero. If it is greater
-  /// than 1, it sets the maximum number of lines for the multiline input. When
-  /// [expands] is true, the input can grow between [minLines] and maxLines with
-  /// its content.  When [expands] is not true, the height is locked to
-  /// maxLines.
+  /// If this is not null, the value must be greater than zero, and it will lock
+  /// the input to the given number of lines. Setting [minLines] as well allows
+  /// the input to grow between the indicated range.
   ///
-  /// When combined with [minLines] and [expands], the following behaviors are
-  /// possible:
+  /// The full set of behaviors possible with [minLines] and [maxLines] are as
+  /// follows.
   ///
   /// {@tool sample}
   /// Single line input
@@ -400,26 +390,57 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   ///
   /// {@tool sample}
-  /// Input that expands from 1 line indefinitely
+  /// Input whose height grows from 1 line indefinitely
   /// ```dart
   /// TextField(maxLines: null)
   /// ```
   /// {@end-tool}
   ///
   /// {@tool sample}
-  /// Input locked to some number of lines
+  /// Input locked to the given number of lines
   /// ```dart
   /// TextField(maxLines: 2)
   /// ```
   /// {@end-tool}
   ///
   /// {@tool sample}
-  /// Input that expands with content between a min and max, including an
-  /// infinite max with `maxLines: null`
+  /// Input whose height grows with content between a min and max. An infinite
+  /// max is possible with `maxLines: null`.
   /// ```dart
-  /// TextField(minLines: 2, maxLines: 4, expands: true)
+  /// TextField(minLines: 2, maxLines: 4)
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
+  final int maxLines;
+
+  /// {@template flutter.widgets.editableText.minLines}
+  /// The minimum number of lines to occupy when the content spans fewer lines.
+
+  /// When [maxLines] is set as well, the height will grow between the indicated
+  /// range of lines. When [maxLines] is null, it will grow as high as needed,
+  /// starting from [minLines].
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines]
+  /// and [minLines] interact to produce various behaviors.
+  ///
+  /// Defaults to null.
+  /// {@endtemplate}
+  final int minLines;
+
+  /// {@template flutter.widgets.editableText.expands}
+  /// Whether this widget can be sized based on its content or a parent Expanded
+  /// widget.
+  ///
+  /// If set to true and wrapped in an [Expanded] or [Flex] widget, the input
+  /// will expand its height to fill the parent.
+  ///
+  /// [maxLines] and [minLines] must both be null when this is set to true,
+  /// otherwise an error is thrown.
+  ///
+  /// Defaults to null.
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines],
+  /// [minLines], and [expands] interact to produce various behaviors.
   ///
   /// {@tool sample}
   /// Input that matches the height of its parent
@@ -429,39 +450,6 @@ class EditableText extends StatefulWidget {
   /// )
   /// ```
   /// {@end-tool}
-  /// {@endtemplate}
-  final int maxLines;
-
-  /// {@template flutter.widgets.editableText.minLines}
-  /// The minimum number of lines to occupy when the content spans fewer lines.
-  ///
-  /// Unlike [maxLines], this cannot be null.
-  ///
-  /// When [expands] is true, this can be used to set a minimum number of lines
-  /// for the input to expand from as content is entered.  The input will expand
-  /// between this and [maxLines], or indefinitely if [maxLines] is null.
-  ///
-  /// See the examples in [maxLines] for the complete picture of how [maxLines],
-  /// [minLines], and [expands] interact to produce various behaviors.
-  /// {@endtemplate}
-  final int minLines;
-
-  /// {@template flutter.widgets.editableText.expands}
-  /// Whether this widget can be sized based on its content or a parent Expanded
-  /// widget.
-  ///
-  /// If set to true and wrapped in an [Expanded] widget, the input will expand
-  /// its height to fill the parent.
-  ///
-  /// If set to true and not wrapped in an [Expanded] widget, the input will
-  /// increase its height as content is entered. It will respect [minLines] and
-  /// [maxLines] if set.
-  ///
-  /// Defaults to null.
-  ///
-  /// See the examples in [maxLines] for the complete picture of how [maxLines],
-  /// [minLines], and [expands] interact to produce various behaviors.
-  /// {@endtemplate}
   /// {@endtemplate}
   final bool expands;
 
@@ -653,8 +641,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(IntProperty('minLines', minLines, defaultValue: 1));
-    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: null));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }

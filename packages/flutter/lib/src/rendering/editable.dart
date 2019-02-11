@@ -137,7 +137,7 @@ class RenderEditable extends RenderBox {
     bool hasFocus,
     int maxLines = 1,
     int minLines,
-    bool expands,
+    bool expands = false,
     Color selectionColor,
     double textScaleFactor = 1.0,
     TextSelection selection,
@@ -163,18 +163,10 @@ class RenderEditable extends RenderBox {
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
+       assert(expands != null),
        assert(
-         !(expands == true && minLines != null && minLines == maxLines)
-         && !(expands == true && maxLines == 1),
-         'No space to expand between minLines and maxLines.',
-       ),
-       assert(
-         !(expands == false && maxLines == null),
-         'When expands is false, there must be a maxLines',
-       ),
-       assert(
-         !(minLines != null && maxLines != null && minLines < maxLines && expands == false),
-         'Can\'t give a range of minLines and maxLines when expands is false. For an input that expands through a range of lines, set expands to true.',
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
        ),
        assert(textScaleFactor != null),
        assert(offset != null),
@@ -711,6 +703,7 @@ class RenderEditable extends RenderBox {
   bool get expands => _expands;
   bool _expands;
   set expands(bool value) {
+    assert(value != null);
     if (expands == value)
       return;
     _expands = value;
@@ -1177,9 +1170,9 @@ class RenderEditable extends RenderBox {
 
   double _preferredHeight(double width) {
     // Lock height to maxLines if needed
-    final bool lockedMax = maxLines != null && expands != true && minLines == null;
+    final bool lockedMax = maxLines != null && minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
-    final bool singleLine = maxLines == 1 && expands != true;
+    final bool singleLine = maxLines == 1;
     if (singleLine || lockedMax || lockedBoth) {
       return preferredLineHeight * maxLines;
     }
