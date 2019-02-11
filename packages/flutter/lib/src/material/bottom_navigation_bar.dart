@@ -138,11 +138,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBar]s. If [selectedItemColor] and [fixedColor] are
   /// null, then the theme's primary color, [ThemeData.primaryColor] is used.
   ///
-  /// [elevation] must be non-null and non-negative.
-  ///
   /// [iconSize] must be at least 8.0 for the [Icon]s to display properly.
   ///
-  /// [selectedFontSize] and [unselectedFontSize] must be non-null and non-negative.
+  /// [selectedFontSize], [unselectedFontSize], and [elevation] must be non-null
+  /// and non-negative.
   ///
   /// [showUnselectedLabels] must not be null.
   BottomNavigationBar({
