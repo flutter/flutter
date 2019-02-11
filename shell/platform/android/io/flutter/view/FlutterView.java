@@ -26,6 +26,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import io.flutter.app.FlutterPluginRegistry;
+import io.flutter.embedding.engine.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
@@ -93,6 +94,7 @@ public class FlutterView extends SurfaceView
     private final SystemChannel systemChannel;
     private final InputMethodManager mImm;
     private final TextInputPlugin mTextInputPlugin;
+    private final AndroidKeyProcessor androidKeyProcessor;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
     private final AccessibilityManager mAccessibilityManager;
@@ -172,7 +174,7 @@ public class FlutterView extends SurfaceView
         addActivityLifecycleListener(platformPlugin);
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         mTextInputPlugin = new TextInputPlugin(this);
-
+        androidKeyProcessor = new AndroidKeyProcessor(keyEventChannel);
 
         setLocales(getResources().getConfiguration());
         sendUserPlatformSettingsToDart();
@@ -183,7 +185,7 @@ public class FlutterView extends SurfaceView
         if (!isAttached()) {
             return super.onKeyUp(keyCode, event);
         }
-        keyEventChannel.keyUp(event);
+        androidKeyProcessor.onKeyUp(event);
         return super.onKeyUp(keyCode, event);
     }
 
@@ -199,7 +201,7 @@ public class FlutterView extends SurfaceView
             }
         }
 
-        keyEventChannel.keyDown(event);
+        androidKeyProcessor.onKeyDown(event);
         return super.onKeyDown(keyCode, event);
     }
 
