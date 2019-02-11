@@ -702,6 +702,68 @@ void main() {
     expect(controller.text, 'abcdef');
   });
 
+  testWidgets('toolbar has the same visual regardless of theming', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: "j'aime la poutine",
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    Text text = tester.widget<Text>(find.text('Paste'));
+    expect(text.style.color, CupertinoColors.white);
+    expect(text.style.fontSize, 14);
+    expect(text.style.letterSpacing, -0.11);
+    expect(text.style.fontWeight, FontWeight.w300);
+
+    // Change the theme.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          textTheme: CupertinoTextThemeData(
+            textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
+          ),
+        ),
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    text = tester.widget<Text>(find.text('Paste'));
+    // The toolbar buttons' text are still the same style.
+    expect(text.style.color, CupertinoColors.white);
+    expect(text.style.fontSize, 14);
+    expect(text.style.letterSpacing, -0.11);
+    expect(text.style.fontWeight, FontWeight.w300);
+  });
+
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(

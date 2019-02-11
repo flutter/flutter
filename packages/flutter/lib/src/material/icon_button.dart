@@ -47,11 +47,25 @@ const double _kMinButtonSize = 48.0;
 /// ```
 ///
 /// ```dart
-/// Widget build(BuildContext) {
-///   return IconButton(
-///     icon: Icon(Icons.volume_up),
-///     tooltip: 'Increase volume by 10%',
-///     onPressed: () { setState(() { _volume *= 1.1; }); },
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           IconButton(
+///             icon: Icon(Icons.volume_up),
+///             tooltip: 'Increase volume by 10',
+///             onPressed: () {
+///               setState(() {
+///                 _volume += 10;
+///               });
+///             },
+///           ),
+///           Text('Volume : $_volume')
+///         ],
+///       ),
+///     ),
 ///   );
 /// }
 /// ```
