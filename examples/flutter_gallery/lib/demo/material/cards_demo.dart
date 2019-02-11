@@ -16,25 +16,26 @@ enum CardDemoType {
 }
 
 class TravelDestination {
-  const TravelDestination({
-    this.assetName,
-    this.assetPackage,
-    this.title,
-    this.description,
+  TravelDestination({
+    @required this.assetName,
+    @required this.assetPackage,
+    @required this.title,
+    @required this.description,
     this.type = CardDemoType.standard,
-  });
+  }) : assert(assetName != null),
+       assert(assetPackage != null),
+       assert(title != null),
+       assert(description != null && description?.length == 3);
 
   final String assetName;
   final String assetPackage;
   final String title;
   final List<String> description;
   final CardDemoType type;
-
-  bool get isValid => assetName != null && title != null && description?.length == 3;
 }
 
 final List<TravelDestination> destinations = <TravelDestination>[
-  const TravelDestination(
+  TravelDestination(
     assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Cities to Visit in Tamil Nadu',
@@ -44,7 +45,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
       'Thanjavur, Tamil Nadu',
     ],
   ),
-  const TravelDestination(
+  TravelDestination(
     assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Artisans of Southern India',
@@ -55,7 +56,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     ],
     type: CardDemoType.tappable,
   ),
-  const TravelDestination(
+  TravelDestination(
     assetName: 'places/india_tanjore_thanjavur_temple.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Brihadisvara Temple',
@@ -69,10 +70,11 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, @required this.destination, this.shape })
-    : assert(destination != null && destination.isValid),
+  const TravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
       super(key: key);
 
+  // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 366.0;
   final TravelDestination destination;
   final ShapeBorder shape;
@@ -87,9 +89,10 @@ class TravelDestinationItem extends StatelessWidget {
         child: Column(
           children: <Widget>[
             const SectionTitle(title: 'Card with actions'),
-            Container(
+            SizedBox(
               height: height,
               child: Card(
+                // This ensures that the Card's children are clipped correctly.
                 clipBehavior: Clip.antiAlias,
                 shape: shape,
                 child: TravelDestinationContent(destination: destination),
@@ -103,10 +106,11 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  TappableTravelDestinationItem({ Key key, @required this.destination, this.shape })
-      : assert(destination != null && destination.isValid),
-        super(key: key);
+  const TappableTravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
+      super(key: key);
 
+  // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 312.0;
   final TravelDestination destination;
   final ShapeBorder shape;
@@ -121,9 +125,10 @@ class TappableTravelDestinationItem extends StatelessWidget {
         child: Column(
           children: <Widget>[
             const SectionTitle(title: 'Card that can be tapped'),
-            Container(
+            SizedBox(
               height: height,
               child: Card(
+                // This ensures that the Card's children (including the ink splash) are clipped correctly.
                 clipBehavior: Clip.antiAlias,
                 shape: shape,
                 child: InkWell(
@@ -143,9 +148,9 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  SelectableTravelDestinationItem({ Key key, @required this.destination, this.shape })
-      : assert(destination != null && destination.isValid),
-        super(key: key);
+  const SelectableTravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
+      super(key: key);
 
   final TravelDestination destination;
   final ShapeBorder shape;
@@ -156,6 +161,7 @@ class SelectableTravelDestinationItem extends StatefulWidget {
 
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
 
+  // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 312.0;
   bool _isSelected = false;
 
@@ -169,9 +175,10 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
         child: Column(
           children: <Widget>[
             const SectionTitle(title: 'Card that can be selected'),
-            Container(
+            SizedBox(
               height: height,
               child: Card(
+                // This ensures that the Card's children (including the ink splash) are clipped correctly.
                 clipBehavior: Clip.antiAlias,
                 shape: widget.shape,
                 child: InkWell(
@@ -185,21 +192,20 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                   child: Stack(
                     children: <Widget>[
                       TravelDestinationContent(destination: widget.destination),
-                      Opacity(
-                        opacity: _isSelected ? 1 : 0,
-                        child: Container(
-                          color: Theme.of(context).colorScheme.primary.withAlpha(41),
-                        ),
+                      Container(
+                        color: _isSelected
+                          ? Theme.of(context).colorScheme.primary.withAlpha(41)
+                          : Colors.transparent,
                       ),
-                      Opacity(
-                        opacity: _isSelected ? 1 : 0,
-                        child: const Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                              padding: EdgeInsets.all(4.0),
-                              child: Icon(Icons.check_circle, color: Colors.white,),
-                            )
-                        ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.check_circle,
+                            color: _isSelected ? Colors.white : Colors.transparent,
+                          ),
+                        )
                       ),
                     ],
                   )
@@ -234,9 +240,9 @@ class SectionTitle extends StatelessWidget {
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  TravelDestinationContent({ Key key, @required this.destination })
-      : assert(destination != null && destination.isValid),
-        super(key: key);
+  const TravelDestinationContent({ Key key, @required this.destination })
+    : assert(destination != null),
+      super(key: key);
 
   final TravelDestination destination;
 
@@ -246,7 +252,10 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    // Use Ink.image in order for the ink ripple to appear over the image.
+    // In order to have the ink splash appear above the child image, you must
+    // use Ink.image. This allows the image to become part of the Material and
+    // display ink effects above it. Using a standard Image will obscure the ink
+    // splash.
     final Widget image = destination.type == CardDemoType.standard
       ? Image.asset(
           destination.assetName,

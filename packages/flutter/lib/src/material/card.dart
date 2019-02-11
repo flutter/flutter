@@ -57,11 +57,13 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// Sometimes the primary action area of a card is the card itself. Cards can be
-/// one large touch target to a detail screen on a subject.
+/// one large touch target that shows a detail screen when tapped.
 ///
 /// {@tool snippet --template=stateless_widget}
 ///
-/// This sample shows creation of a [Card] widget that can be tapped.
+/// This sample shows creation of a [Card] widget that can be tapped. When
+/// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
+/// entire card.
 ///
 /// ```dart
 /// Card(
