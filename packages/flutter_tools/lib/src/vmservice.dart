@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -112,6 +113,18 @@ class VMService {
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
+    });
+
+    _peer.registerMethod('loadDartLibrarySources',
+        (rpc.Parameters params) async {
+      return await _handleLoadDartLibrarySources(params.asMap);
+    });
+
+    // If the Flutter Engine doesn't support service registration this will
+    // have no effect
+    _peer.sendNotification('_registerService', <String, String> {
+      'service': 'loadDartLibrarySources',
+      'alias': 'Flutter Tools',
     });
 
     if (reloadSources != null) {
@@ -354,6 +367,19 @@ class VMService {
       _listeningFor.add(streamId);
       await _sendRequest('streamListen', <String, dynamic>{ 'streamId': streamId });
     }
+  }
+
+  Future<Map<String, dynamic>> _handleLoadDartLibrarySources(Map<String,
+      dynamic> data) async {
+    final path = data['kernelPath'];
+    final bytes = await fs.file(path).readAsBytes();
+    final result = Base64Encoder().convert(bytes);
+    return <String, dynamic>{
+      'type': 'Success',
+      'result': <String, String> {
+        'kernelBytes': result
+      }
+    };
   }
 
   /// Reloads the VM.
