@@ -457,7 +457,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // * strip '_sim_' since there are no host simulator builds.
     // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    String tmpBasename = basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    tmpBasename = tmpBasename.replaceFirst(RegExp(r'_arm64$'), '').replaceFirst(RegExp(r'_arm$'), '');
+    final String hostBasename = 'host_' + tmpBasename;
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
     if (!fs.isDirectorySync(engineHostBuildPath)) {
       throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
