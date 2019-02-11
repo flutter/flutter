@@ -45,25 +45,24 @@ import 'theme_data.dart';
 /// in your flutter code.
 ///
 /// ```dart
-///          FlatButton(
-///           color: Colors.blue,
-///           textColor: Colors.white,
-///           disabledColor: Colors.grey,
-///           disabledTextColor: Colors.black,
-///           padding: EdgeInsets.all(8.0),
-///           splashColor: Colors.blueAccent,
-///           onPressed: () {
-///             /*...*/
-///           },
-///           child: Text(
-///             "Flat Button",
-///             style: TextStyle(
-///               fontSize: 20.0
-///             ),
-///           ),
-///         )
+/// FlatButton(
+///   color: Colors.blue,
+///   textColor: Colors.white,
+///   disabledColor: Colors.grey,
+///   disabledTextColor: Colors.black,
+///   padding: EdgeInsets.all(8.0),
+///   splashColor: Colors.blueAccent,
+///   onPressed: () {
+///     /*...*/
+///   },
+///   child: Text(
+///     "Flat Button",
+///     style: TextStyle(fontSize: 20.0),
+///   ),
+/// )
 /// ```
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled button whose material elevates when pressed.
