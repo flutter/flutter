@@ -39,9 +39,10 @@ import 'theme_data.dart';
 /// with [ButtonTheme].
 ///
 /// The [clipBehavior] argument must not be null.
+///
 /// {@tool sample}
 ///
-/// This example shows to use [FlatButton] to create a simple button 
+/// This example shows to use [FlatButton] to create a simple button
 /// in your flutter code.
 ///
 /// ```dart
