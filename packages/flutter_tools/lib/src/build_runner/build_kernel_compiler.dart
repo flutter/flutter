@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
+import '../codegen.dart';
 import '../compile.dart';
 import '../globals.dart';
-import 'build_runner.dart';
 
 /// An implementation of the [KernelCompiler] which delegates to build_runner.
 ///
@@ -40,9 +40,8 @@ class BuildKernelCompiler implements KernelCompiler {
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
-    final BuildRunner buildRunner = buildRunnerFactory.create();
     try {
-      final BuildResult buildResult = await buildRunner.build(
+      final CodeGenerationResult buildResult = await codeGenerator.build(
         aot: aot,
         linkPlatformKernelIn: linkPlatformKernelIn,
         trackWidgetCreation: trackWidgetCreation,

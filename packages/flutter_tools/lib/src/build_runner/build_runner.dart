@@ -9,59 +9,28 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../artifacts.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../cache.dart';
+import '../codegen.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
 import 'build_script_generator.dart';
 
-/// The [BuildRunnerFactory] instance.
-BuildRunnerFactory get buildRunnerFactory => context[BuildRunnerFactory];
-
-/// Whether to attempt to build a flutter project using build* libraries.
-///
-/// This requires both an experimental opt in via the environment variable
-/// 'FLUTTER_EXPERIMENTAL_BUILD' and that the project itself has a
-/// dependency on the package 'flutter_build' and 'build_runner.'
-bool get experimentalBuildEnabled {
-  return _experimentalBuildEnabled ??= platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
-}
-bool _experimentalBuildEnabled;
-
-@visibleForTesting
-set experimentalBuildEnabled(bool value) {
-  _experimentalBuildEnabled = value;
-}
-
-/// An injectable factory to create instances of [BuildRunner].
-class BuildRunnerFactory {
-  const BuildRunnerFactory();
-
-  /// Creates a new [BuildRunner] instance.
-  BuildRunner create() {
-    return BuildRunner();
-  }
-}
-
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
 ///
 /// This is only enabled if [experimentalBuildEnabled] is true, and only for
 /// external flutter users.
-class BuildRunner {
+class BuildRunner extends CodeGenerator {
+  const BuildRunner();
 
-  /// Run a build_runner build and return the resulting .packages and dill file.
-  ///
-  /// The defines of the build command are the arguments required in the
-  /// flutter_build kernel builder.
-  Future<BuildResult> build({
+  @override
+  Future<CodeGenerationResult> build({
     @required String mainPath,
     @required bool aot,
     @required bool linkPlatformKernelIn,
@@ -124,7 +93,7 @@ class BuildRunner {
       status.stop();
     }
     if (disableKernelGeneration) {
-      return const BuildResult(null, null);
+      return const CodeGenerationResult(null, null);
     }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
@@ -148,13 +117,10 @@ class BuildRunner {
     if (!packagesFile.existsSync() || !dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
-    return BuildResult(packagesFile, dillFile);
+    return CodeGenerationResult(packagesFile, dillFile);
   }
 
-  /// Invalidates a generated build script by deleting it.
-  ///
-  /// Must be called any time a pubspec file update triggers a corresponding change
-  /// in .packages.
+  @override
   Future<void> invalidateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final File buildScript = flutterProject.dartTool
@@ -167,8 +133,7 @@ class BuildRunner {
     await buildScript.delete();
   }
 
-  // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
-  // used to generate a build script.
+  @override
   Future<void> generateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
@@ -212,11 +177,4 @@ class BuildRunner {
       status.stop();
     }
   }
-}
-
-class BuildResult {
-  const BuildResult(this.packagesFile, this.dillFile);
-
-  final File packagesFile;
-  final File dillFile;
 }
