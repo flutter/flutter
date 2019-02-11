@@ -1756,7 +1756,7 @@ void main() {
     // line text field).
     final double lineHeight = findRenderEditable(tester).preferredLineHeight;
     scrollableState = tester.firstState(find.byType(Scrollable));
-    expect(scrollableState.position.pixels, equals(lineHeight + 1));
+    expect(scrollableState.position.pixels, equals(lineHeight));
   });
 
   testWidgets('haptic feedback', (WidgetTester tester) async {
