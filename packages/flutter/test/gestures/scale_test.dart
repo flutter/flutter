@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 
 import 'gesture_tester.dart';
 
@@ -222,27 +222,16 @@ void main() {
 
   testGesture('Scale gesture competes with drag', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag =
-        HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) {
-      log.add('scale-start');
-    };
-    scale.onUpdate = (ScaleUpdateDetails details) {
-      log.add('scale-update');
-    };
-    scale.onEnd = (ScaleEndDetails details) {
-      log.add('scale-end');
-    };
+    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
 
-    drag.onStart = (DragStartDetails details) {
-      log.add('drag-start');
-    };
-    drag.onEnd = (DragEndDetails details) {
-      log.add('drag-end');
-    };
+    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
     final TestPointer pointer1 = TestPointer(1);
 
@@ -259,8 +248,7 @@ void main() {
 
     // scale will win if focal point delta exceeds 18.0*2
 
-    tester.route(pointer1
-        .move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
+    tester.route(pointer1.move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -380,6 +368,7 @@ void main() {
     expect(updatedRotation, isNull);
     expect(didStartScale, isFalse);
 
+
     // Zoom in
     tester.route(pointer2.move(const Offset(40.0, 50.0)));
     expect(didStartScale, isTrue);
@@ -445,6 +434,7 @@ void main() {
     didEndScale = false;
     expect(didTap, isFalse);
 
+
     // Continue scaling with two fingers
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(didStartScale, isTrue);
@@ -458,7 +448,7 @@ void main() {
     tester.route(pointer3.move(const Offset(30.0, 40.0)));
     expect(updatedFocalPoint, const Offset(25.0, 35.0));
     updatedFocalPoint = null;
-    expect(updatedRotation, -math.pi);
+    expect(updatedRotation, - math.pi);
     updatedRotation = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
