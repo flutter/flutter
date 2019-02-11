@@ -132,9 +132,15 @@ class BottomNavigationBar extends StatefulWidget {
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// If [fixedColor] is null then the theme's primary color,
-  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
-  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
+  /// Prefer [selectedItemColor] over [fixedColor], since [selectedItemColor]
+  /// applies to both shifting and fixed selected item colors. If
+  /// [selectedItemColor] is null, [fixedColor] will be used for fixed
+  /// [BottomNavigationBar]s. If [selectedItemColor] and [fixedColor] are
+  /// null, then the theme's primary color, [ThemeData.primaryColor] is used.
+  ///
+  /// [iconSize] but be at least 8.0 for the [Icon]s to display properly.
+  ///
+  /// [selectedFontSize] and [unselectedFontSize] must be non-null and non-negative.
   BottomNavigationBar({
     Key key,
     @required this.items,
