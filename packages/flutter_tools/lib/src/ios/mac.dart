@@ -436,10 +436,12 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
-  final String activeArchName = getNameForIOSArch(activeArch);
-  if (activeArchName !=null) {
-    buildCommands.add('ONLY_ACTIVE_ARCH=YES');
-    buildCommands.add('ARCHS=$activeArchName');
+  if (activeArch != null) {
+    final String activeArchName = getNameForIOSArch(activeArch);
+    if (activeArchName != null) {
+      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+      buildCommands.add('ARCHS=$activeArchName');
+    }
   }
 
   if (!codesign) {
