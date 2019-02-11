@@ -209,7 +209,7 @@ class EditableText extends StatefulWidget {
     this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
-    this.minLines = 1,
+    this.minLines,
     this.expands,
     this.autofocus = false,
     this.selectionColor,
@@ -243,19 +243,23 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
-       assert(minLines != null),
-       assert(minLines > 0),
+       assert(minLines == null || minLines > 0),
        assert(
-         (maxLines == null) || (maxLines >= minLines),
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
        assert(
-         !(expands == true && minLines == maxLines),
-         'Cannot expand when minLines and maxLines are the same',
+         !(expands == true && minLines != null && minLines == maxLines)
+         && !(expands == true && maxLines == 1),
+         'No space to expand between minLines and maxLines.',
        ),
        assert(
          !(expands == false && maxLines == null),
          'When expands is false, there must be a maxLines',
+       ),
+       assert(
+         !(minLines != null && maxLines != null && minLines < maxLines && expands == false),
+         'Can\'t give a range of minLines and maxLines when expands is false. For an input that expands through a range of lines, set expands to true.',
        ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),

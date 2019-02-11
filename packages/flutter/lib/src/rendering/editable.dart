@@ -136,7 +136,7 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
-    int minLines = 1,
+    int minLines,
     bool expands,
     Color selectionColor,
     double textScaleFactor = 1.0,
@@ -158,19 +158,23 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
-       assert(minLines != null),
-       assert(minLines > 0),
+       assert(minLines == null || minLines > 0),
        assert(
-         (maxLines == null) || (maxLines >= minLines),
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
        assert(
-         !(expands == true && minLines == maxLines),
-         'Cannot expand when minLines and maxLines are the same',
+         !(expands == true && minLines != null && minLines == maxLines)
+         && !(expands == true && maxLines == 1),
+         'No space to expand between minLines and maxLines.',
        ),
        assert(
          !(expands == false && maxLines == null),
          'When expands is false, there must be a maxLines',
+       ),
+       assert(
+         !(minLines != null && maxLines != null && minLines < maxLines && expands == false),
+         'Can\'t give a range of minLines and maxLines when expands is false. For an input that expands through a range of lines, set expands to true.',
        ),
        assert(textScaleFactor != null),
        assert(offset != null),
@@ -694,9 +698,9 @@ class RenderEditable extends RenderBox {
   /// {@macro flutter.widgets.editableText.minLines}
   int get minLines => _minLines;
   int _minLines;
-  /// The value must be greater than zero and cannot be null.
+  /// The value must be greater than zero.
   set minLines(int value) {
-    assert(value > 0);
+    assert(value == null || value > 0);
     if (minLines == value)
       return;
     _minLines = value;
@@ -1172,27 +1176,25 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    // If needed, set the height based on minLines and/or maxLines
-    if (maxLines != null && expands != true) {
+    // Lock height to maxLines if needed
+    final bool lockedMax = maxLines != null && expands != true && minLines == null;
+    final bool lockedBoth = minLines != null && minLines == maxLines;
+    final bool singleLine = maxLines == 1 && expands != true;
+    if (singleLine || lockedMax || lockedBoth) {
       return preferredLineHeight * maxLines;
     }
-    if (expands == true) {
-      if (maxLines != null) {
-        _layoutText(width);
-        if (_textPainter.height > preferredLineHeight * maxLines) {
-          return preferredLineHeight * maxLines;
-        }
-      }
-      if (minLines != null) {
-        _layoutText(width);
-        if(_textPainter.height < preferredLineHeight * minLines) {
-          return preferredLineHeight * minLines;
-        }
-      }
-    } else {
+
+    // Clamp height to minLines or maxLines if needed
+    final bool minLimited = minLines != null && minLines > 1;
+    final bool maxLimited = maxLines != null;
+    final bool limited = (minLines != null && minLines > 1) || maxLines != null;
+    if (limited) {
       _layoutText(width);
-      if (minLines > 1 && _textPainter.height < preferredLineHeight * minLines) {
+      if (minLimited && _textPainter.height < preferredLineHeight * minLines) {
         return preferredLineHeight * minLines;
+      }
+      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines) {
+        return preferredLineHeight * maxLines;
       }
     }
 

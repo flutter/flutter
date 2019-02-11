@@ -140,7 +140,7 @@ class TextField extends StatefulWidget {
     this.obscureText = false,
     this.autocorrect = true,
     this.maxLines = 1,
-    this.minLines = 1,
+    this.minLines,
     this.expands,
     this.maxLength,
     this.maxLengthEnforced = true,
@@ -169,19 +169,23 @@ class TextField extends StatefulWidget {
        // editable_text. Is that ok or is there a better pattern that avoids
        // duplication?
        assert(maxLines == null || maxLines > 0),
-       assert(minLines != null),
-       assert(minLines > 0),
+       assert(minLines == null || minLines > 0),
        assert(
-         (maxLines == null) || (maxLines >= minLines),
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
        ),
        assert(
-         !(expands == true && minLines == maxLines),
-         'Cannot expand when minLines and maxLines are the same',
+         !(expands == true && minLines != null && minLines == maxLines)
+         && !(expands == true && maxLines == 1),
+         'No space to expand between minLines and maxLines.',
        ),
        assert(
          !(expands == false && maxLines == null),
          'When expands is false, there must be a maxLines',
+       ),
+       assert(
+         !(minLines != null && maxLines != null && minLines < maxLines && expands == false),
+         'Can\'t give a range of minLines and maxLines when expands is false. For an input that expands through a range of lines, set expands to true.',
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
@@ -472,7 +476,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(IntProperty('minLines', minLines, defaultValue: 1));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: null));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, defaultValue: true, ifFalse: 'maxLength not enforced'));
