@@ -409,25 +409,27 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        // Skip if sky_engine is the self-contained one.
+        if (engineUri?.path == fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib') + fs.path.separator) {
+          engineUri = null;
+        }
+        // If sky_engine is specified and the engineSourcePath not set, try to determine the engineSourcePath by sky_engine setting.
         if (engineUri != null) {
-          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
-          final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
-          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))))));
+          if (engineSourcePath == '/' || engineSourcePath.isEmpty) {
             engineSourcePath = null;
+            throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
+              exitCode: 2);
+          }
         }
       } on FileSystemException {
         engineSourcePath = null;
       } on FormatException {
         engineSourcePath = null;
       }
-
-      engineSourcePath ??= _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
-
-      if (engineSourcePath == null) {
-        throwToolExit(userMessages.runnerNoEngineBuildDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
-          exitCode: 2);
-      }
+      // If engineSourcePath is still not set, try to determine it by flutter root.
+      engineSourcePath ??= _tryEnginePath(fs.path.join(fs.directory(Cache.flutterRoot).parent.path, 'engine', 'src'));
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
