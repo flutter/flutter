@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'basic_types.dart';
+import 'diagnostics.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
@@ -10,12 +11,106 @@ typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information into a string buffer.
-typedef InformationCollector = void Function(StringBuffer information);
+typedef InformationCollector = void Function(List<DiagnosticsNode> information);
+
+class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
+  _ErrorDiagnostic._fromParts(
+    List<Object> messageParts, {
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.whitespace,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(messageParts != null),
+       super(
+         null,
+         messageParts,
+         showName: false,
+         showSeparator: false,
+         defaultValue: null,
+         style: style,
+         level: level,
+       );
+
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    return value.join('');
+  }
+}
+
+/// Diagnostics describing an error message.
+///
+/// An error message should start with a summary that is typically
+/// no longer than 2 lines that concisely states what the assertion
+/// failure or contract violation was. The summary should be separated from the
+/// rest of the error message with a line break.
+///
+/// The client (e.g., an IDE) usually displays the error summary in red.
+///
+/// The full error message should include at least the following elements:
+/// * Claim: Explanation of the assertion failure or contract violation.
+/// * Grounds: Facts about the user's code that led to the error.
+/// * Warranty: Connections between the grounds and the claim.
+///
+/// Error messages may include references to objects relevant to the error using
+/// string interpolation and those objects will be directly available to
+/// debugging tools when error messages are generating as part of a debug builds.
+/// Other builds will see the same string error message but will not be able to
+/// extract the contents of the object.
+class ErrorMessage extends _ErrorDiagnostic {
+  // This constructor provides a reliable hook for a kernel transformer to find
+  // error messages that need to be rewritten to include object references.
+  //
+  // The message will display with the same text regardless of whether the
+  // kernel transformer is used but without the kernel transformer, debugging
+  // tools are unable to provide interactive displays of objects referenced by
+  // the string.
+  /// In debug builds, a kernel transformer rewrites calls to the default
+  /// constructor into calls to this constructor.
+  ///
+  /// of this class as follows so that the objects referenced in the
+  /// string literal can be captured by debuggers.
+  /// ```dart
+  /// ErrorMessage('Element $element must be color $color')
+  /// ```
+  /// Desugars to:
+  /// ```dart
+  /// ErrorMessage._structured(<Object>['Element ', element, ' must be ', color]);
+  /// ```
+  ///
+  /// Slightly more complext case:
+  /// ```dart
+  /// ErrorMessage('Element ${element.runtimeType} must be must be $color')
+  /// ```
+  /// Desugars to:
+  ///```dart
+  /// ErrorMessage._structured(<Object>[
+  ///   'Element ',
+  ///    DiagnosticsProperty(null, element, description: element.runtimeType?.toString()),
+  ///    ' must be ',
+  ///    color,
+  /// ]);
+  /// ```
+  ErrorMessage(String message) : super._fromParts([message], level: DiagnosticLevel.summary);
+
+  // Constructor that calls to the default constructor are rewriten to use in
+  // debug mode using a kernel transformer.
+  ErrorMessage._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level: DiagnosticLevel.summary);
+}
+
+/// An [ErrorHint] is a suggestion for resolving the error.
+///
+/// Urls may be be included in the hint to reference external material.
+class ErrorHint extends _ErrorDiagnostic {
+  // A lint enforces that this constructor can only be called with a string
+  // literal to match the limitations of the Dart Kernel transformer that
+  // optionally extracts out objects referenced using string interpolation in
+  // the message passed in.
+  ErrorHint(String message) : super._fromParts([message], level:DiagnosticLevel.hint);
+
+  ErrorHint._structured(List<Object> messageParts) : super._fromParts(messageParts, level:DiagnosticLevel.hint);
+}
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
-class FlutterErrorDetails {
+class FlutterErrorDetails extends Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
   ///
@@ -147,41 +242,24 @@ class FlutterErrorDetails {
   }
 
   @override
-  String toString() {
-    final StringBuffer buffer = StringBuffer();
-    if ((library != null && library != '') || (context != null && context != '')) {
-      if (library != null && library != '') {
-        buffer.write('Error caught by $library');
-        if (context != null && context != '')
-          buffer.write(', ');
-      } else {
-        buffer.writeln('Exception ');
-      }
-      if (context != null && context != '')
-        buffer.write('thrown $context');
-      buffer.writeln('.');
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    // TODO(jacobr): add back the rest of what was in the toString.
+    // This is purely for illustration of how this fits together.
+    if (exception is FlutterError) {
+      exception.debugFillProperties(properties);
     } else {
-      buffer.write('An error was caught.');
+      properties.add(DiagnosticsNode.message(exceptionAsString()));
     }
-    buffer.writeln(exceptionAsString());
-    if (informationCollector != null)
-      informationCollector(buffer);
-    if (stack != null) {
-      Iterable<String> stackLines = stack.toString().trimRight().split('\n');
-      if (stackFilter != null) {
-        stackLines = stackFilter(stackLines);
-      } else {
-        stackLines = FlutterError.defaultStackFilter(stackLines);
-      }
-      buffer.writeAll(stackLines, '\n');
-    }
-    return buffer.toString().trimRight();
+    // XXX: fully implement aligning more with dumpErrorToConsole
+    // than with the existing toString which is inconsistent for somewhat
+    // arbitrary reasons.
   }
 }
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
-class FlutterError extends AssertionError {
+class FlutterError extends AssertionError with DiagnosticableTreeMixin {
   /// Creates a [FlutterError].
   ///
   /// See [message] for details on the format that the message should
@@ -190,7 +268,9 @@ class FlutterError extends AssertionError {
   /// Include as much detail as possible in the full error message,
   /// including specifics about the state of the app that might be
   /// relevant to debugging the error.
-  FlutterError(String message) : super(message);
+  FlutterError(this._diagnostics) : super(null);
+
+  final List<DiagnosticsNode> _diagnostics;
 
   /// The message associated with this error.
   ///
@@ -208,10 +288,7 @@ class FlutterError extends AssertionError {
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
   @override
-  String get message => super.message;
-
-  @override
-  String toString() => message;
+  String get message => toStringDeep();
 
   /// Called whenever the Flutter framework catches an error.
   ///
@@ -403,6 +480,11 @@ class FlutterError extends AssertionError {
       }
     }
     return result;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    _diagnostics?.forEach(properties.add);
   }
 
   /// Calls [onError] with the given details, unless it is null.

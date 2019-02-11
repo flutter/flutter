@@ -108,6 +108,9 @@ class PointerRouter {
   }
 }
 
+// TODO(jacobr): we could alternately remove this library as these properties
+// could just as well be injected into the FlutterError object if they are
+// useful.
 /// Variant of [FlutterErrorDetails] with extra fields for the gestures
 /// library's pointer router ([PointerRouter]).
 ///
@@ -149,4 +152,12 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
 
   /// The pointer event that was being routed when the exception was raised.
   final PointerEvent event;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<PointerRouter>('The pointer router that caught the exception was', router, defaultValue: null));
+    properties.add(DiagnosticsProperty<PointerRoute>('The callback that threw the exception was', route, defaultValue: null));
+    properties.add(DiagnosticsProperty<PointerEvent>('The pointer event that was being routed when the exception was raised', event, defaultValue: null));
+  }
 }

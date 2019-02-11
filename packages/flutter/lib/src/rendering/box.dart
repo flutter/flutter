@@ -1761,13 +1761,18 @@ abstract class RenderBox extends RenderObject {
       }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size)) {
-        throw FlutterError(
-          '$runtimeType does not meet its constraints.\n'
-          'Constraints: $constraints\n'
-          'Size: $_size\n'
-          'If you are not writing your own RenderBox subclass, then this is not '
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
-        );
+        throw FlutterError(<DiagnosticsNode>[
+          ErrorMessage(
+            '$runtimeType does not meet its constraints.\n'
+            '\n'
+            'Constraints: $constraints\n'
+            'Size: $_size\n'
+          ),
+          ErrorHint(
+            'If you are not writing your own RenderBox subclass, then this is not '
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          )
+        ]);
       }
       if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
