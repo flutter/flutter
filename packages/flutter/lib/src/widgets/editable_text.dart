@@ -697,7 +697,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // The most recent text position as determined by the location of the floating
   // cursor.
-  TextPosition _lastTextPosition;
+  TextPosition _lastTextPosition = TextPosition();
 
   // The offset of the floating cursor as determined from the first update call.
   Offset _pointOffsetOrigin;
