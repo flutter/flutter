@@ -101,7 +101,7 @@ BuildApp() {
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
 
-  if [[ -n "FLUTTER_ENGINE" ]]; then
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
   fi
 
