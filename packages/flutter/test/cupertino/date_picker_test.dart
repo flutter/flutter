@@ -560,6 +560,46 @@ void main() {
       );
     });
 
+    testWidgets('picker handles noon/midnight edge cases', (WidgetTester tester) async {
+      DateTime date;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+              initialDateTime: DateTime(2019, 1, 1, 0, 15),
+            ),
+          ),
+        ),
+      );
+
+      // 0:15 -> 0:16
+      await tester.drag(find.text('15'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 0, 16));
+
+      // 0:16 -> 12:16
+      await tester.drag(find.text('AM'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 12, 16));
+
+      // 12:16 -> 12:17
+      await tester.drag(find.text('16'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 12, 17));
+    });
+
     testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
