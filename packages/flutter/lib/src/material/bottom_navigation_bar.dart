@@ -138,14 +138,19 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBar]s. If [selectedItemColor] and [fixedColor] are
   /// null, then the theme's primary color, [ThemeData.primaryColor] is used.
   ///
-  /// [iconSize] but be at least 8.0 for the [Icon]s to display properly.
+  /// [elevation] must be non-null and non-negative.
+  ///
+  /// [iconSize] must be at least 8.0 for the [Icon]s to display properly.
   ///
   /// [selectedFontSize] and [unselectedFontSize] must be non-null and non-negative.
+  ///
+  /// [showUnselectedLabels] must not be null.
   BottomNavigationBar({
     Key key,
     @required this.items,
     this.onTap,
     this.currentIndex = 0,
+    this.elevation = 8.0,
     BottomNavigationBarType type,
     this.fixedColor,
     this.backgroundColor,
@@ -162,6 +167,7 @@ class BottomNavigationBar extends StatefulWidget {
         'Every item must have a non-null title',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
+       assert(elevation != null && elevation >= 0.0),
        assert(iconSize != null && iconSize >= 8.0),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
@@ -181,6 +187,13 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// The index into [items] of the current active item.
   final int currentIndex;
+
+  /// The z-coordinate of this [BottomNavigationBar].
+  ///
+  /// If null, defaults to `8.0`.
+  ///
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
   ///
@@ -679,7 +692,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return Semantics(
       explicitChildNodes: true,
       child: Material(
-        elevation: 8.0,
+        elevation: widget.elevation,
         color: backgroundColor,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),

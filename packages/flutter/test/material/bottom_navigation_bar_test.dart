@@ -70,7 +70,7 @@ void main() {
     expect(find.text('Alarm'), findsOneWidget);
   });
 
-  testWidgets('Fixed BottomNavigationBar font size, color, and opacity defaults', (WidgetTester tester) async {
+  testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
     const Color captionColor = Colors.purple;
 
@@ -110,9 +110,10 @@ void main() {
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(primaryColor));
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(captionColor));
     expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+    expect(_getMaterial(tester).elevation, equals(8.0));
   });
 
-  testWidgets('Shifting BottomNavigationBar font size, color, and opacity defaults', (WidgetTester tester) async {
+  testWidgets('Shifting BottomNavigationBar defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -137,6 +138,7 @@ void main() {
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(Colors.white));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+    expect(_getMaterial(tester).elevation, equals(8.0));
   });
 
   testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
@@ -305,10 +307,7 @@ void main() {
       )
     );
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
-    );
-    expect(material.color, equals(color));
+    expect(_getMaterial(tester).color, equals(color));
   });
 
   testWidgets('Shifting BottomNavigationBar background color is overriden by item color', (WidgetTester tester) async {
@@ -337,10 +336,7 @@ void main() {
       )
     );
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
-    );
-    expect(material.color, equals(itemColor));
+    expect(_getMaterial(tester).color, equals(itemColor));
   });
 
   testWidgets('Fixed BottomNavigationBar uses selectedItemColor over fixedColor', (WidgetTester tester) async {
@@ -423,6 +419,33 @@ void main() {
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, 0.0);
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, 0.0);
+  });
+
+  testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
+    const double customElevation = 3.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            elevation: customElevation,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(_getMaterial(tester).elevation, equals(customElevation));
   });
 
   testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
@@ -1240,4 +1263,10 @@ double _getOpacity(WidgetTester tester, String textValue) {
       ).first
   );
   return opacityWidget.opacity.value;
+}
+
+Material _getMaterial(WidgetTester tester) {
+  return tester.firstWidget<Material>(
+    find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
+  );
 }
