@@ -498,23 +498,23 @@ void main() {
 
     expect(state.showToolbar(), false);
     await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('COPY'), findsNothing);
 
     controller.text = 'blah';
     await tester.pump();
     expect(state.showToolbar(), false);
     await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('COPY'), findsNothing);
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
       from: const Offset(0, 0),
       cause: SelectionChangedCause.tap,
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
