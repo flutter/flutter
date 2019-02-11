@@ -25,7 +25,7 @@ class BuildWebCommand extends BuildSubCommand {
   bool get hidden => true;
 
   @override
-  final String description = 'Build an Web application bundle.';
+  final String description = '(EXPERIMENTAL) Build an Web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
