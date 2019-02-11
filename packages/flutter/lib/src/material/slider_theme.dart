@@ -773,13 +773,13 @@ abstract class SliderTickMarkShape {
     TextDirection textDirection,
   });
 
-  /// Special instance of [SliderTickMarkShape] to skip the thumb painting.
+  /// Special instance of [SliderTickMarkShape] to skip the tick mark painting.
   ///
   /// See also:
   ///
   /// * [SliderThemeData.tickMarkShape], which is the shape that the [Slider]
   /// uses when painting tick marks.
-  static SliderTickMarkShape noTickMark = _EmptySliderTickMarkShape();
+  static final SliderTickMarkShape noTickMark = _EmptySliderTickMarkShape();
 }
 
 /// A special version of [SliderTickMarkShape] that has a zero size and paints
@@ -886,7 +886,7 @@ abstract class SliderComponentShape {
   ///
   /// * [SliderThemeData.thumbShape], which is the shape that the [Slider]
   /// uses when painting the thumb.
-  static SliderComponentShape noThumb = _EmptySliderComponentShape();
+  static final SliderComponentShape noThumb = _EmptySliderComponentShape();
 
   /// Special instance of [SliderComponentShape] to skip the overlay drawing.
   ///
@@ -894,7 +894,7 @@ abstract class SliderComponentShape {
   ///
   /// * [SliderThemeData.overlayShape], which is the shape that the [Slider]
   /// uses when painting the overlay.
-  static SliderComponentShape noOverlay = _EmptySliderComponentShape();
+  static final SliderComponentShape noOverlay = _EmptySliderComponentShape();
 }
 
 /// A special version of [SliderComponentShape] that has a zero size and paints

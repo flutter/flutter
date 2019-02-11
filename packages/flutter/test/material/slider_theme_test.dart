@@ -612,7 +612,7 @@ void main() {
       divisions: 4
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>( find.byType(Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(sliderBox, paintsNothing);
   });
@@ -651,7 +651,7 @@ void main() {
       divisions: 4
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>( find.byType(Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Only 5 tick marks.
     expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
