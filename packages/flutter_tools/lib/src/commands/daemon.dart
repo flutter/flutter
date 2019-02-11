@@ -17,18 +17,22 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../desktop.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../linux/linux_device.dart';
+import '../macos/macos_device.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
+import '../windows/windows_device.dart';
 
 const String protocolVersion = '0.4.2';
 
@@ -582,6 +586,11 @@ class DeviceDomain extends Domain {
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
     addDeviceDiscoverer(FlutterTesterDevices());
+    if (flutterDesktopEnabled) {
+      addDeviceDiscoverer(MacOSDevices());
+      addDeviceDiscoverer(LinuxDevices());
+      addDeviceDiscoverer(WindowsDevices());
+    }
   }
 
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
