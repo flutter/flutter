@@ -1389,16 +1389,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       isPersistent: isPersistent,
       context: context,
     )..addTopListener(() => setState(() {
-      final double screenHeight = MediaQuery.of(context).size.height;
-        floatingActionButtonVisibilityValue =
-            _bottomSheetScrollController.top /
-                (screenHeight * _kBottomSheetDominatesPercentage);
-        _bodyScrimColor = Colors.black.withOpacity(
-          math.max(
-            _kMinBottomSheetScrimOpacity,
-            _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
-          ),
-        );
+      // If we're very close to the top, just set the scale to 0.
+      // This avoids issues where a fling can send us up so fast we don't acutally
+      // fully dismiss the fab.
+      if (_bottomSheetScrollController.top < 2) {
+        floatingActionButtonVisibilityValue = 0.0;
+      } else {
+        final double screenHeight = MediaQuery.of(context).size.height;
+        floatingActionButtonVisibilityValue = _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
+      }
+      _bodyScrimColor = Colors.black.withOpacity(
+        math.max(
+          _kMinBottomSheetScrimOpacity,
+          _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
+        ),
+      );
       _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
 
       // Check if we're a persistent bottom sheet.

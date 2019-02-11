@@ -38,6 +38,32 @@ void main() {
     expect(buildCount, equals(2));
   });
 
+  testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: const Center(child: Text('body')),
+        bottomSheet: ListView(
+          shrinkWrap: true,
+          primary: true,
+          children: <Widget>[
+            Container(height: 100.0, child: const Text('One')),
+            Container(height: 100.0, child: const Text('Two')),
+            Container(height: 100.0, child: const Text('Three')),
+          ],
+        ),
+      )
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+  });
+
   testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -68,6 +94,90 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Two'), findsNothing);
+  });
+
+  testWidgets('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      appBar: AppBar(),
+      body: const Center(child: Text('body')),
+      bottomSheet: ListView.builder(
+        itemExtent: 50.0,
+        itemCount: 50,
+        itemBuilder: (_, int index) => Text('Item $index'),
+        primary: true,
+      ),
+      floatingActionButton: const FloatingActionButton(
+        onPressed: null,
+        child: Text('fab'),
+      ),
+    )));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -20.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    // We've started to drag up, we should have a back button now for a11y
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 22'), findsOneWidget);
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
+  });
+
+  testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+        floatingActionButton: const FloatingActionButton(
+          onPressed: null,
+          child: Text('fab'),
+        ),
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return ListView(
+        shrinkWrap: true,
+        primary: true,
+        children: <Widget>[
+          Container(height: 100.0, child: const Text('One')),
+          Container(height: 100.0, child: const Text('Two')),
+          Container(height: 100.0, child: const Text('Three')),
+        ],
+      );
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, -600.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });
 
   testWidgets('showBottomSheet()', (WidgetTester tester) async {
