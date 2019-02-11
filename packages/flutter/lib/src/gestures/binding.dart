@@ -108,11 +108,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
-  /// The gesture arena used for determining which widget handles a pointer
-  /// gesture event. Unlike [gestureArena], this arena is opened and closed on
-  /// every pointer gesture event, since they are discrete.
-  final PointerGestureArenaManager pointerGestureArena =
-      PointerGestureArenaManager();
+  /// The arena used for determining which widget handles a pointer
+  /// signal event. Unlike [gestureArena], this arena is opened and closed on
+  /// every pointer signal event, since they are discrete.
+  final PointerSignalArenaManager pointerSignalArena =
+      PointerSignalArenaManager();
 
   /// State for all pointers which are currently down.
   ///
@@ -123,7 +123,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerGestureEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
@@ -224,9 +224,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       gestureArena.close(event.pointer);
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
-    } else if (event is PointerGestureEvent) {
-      pointerGestureArena.close(event.pointer);
-      pointerGestureArena.sweep(event.pointer);
+    } else if (event is PointerSignalEvent) {
+      pointerSignalArena.close(event.pointer);
+      pointerSignalArena.sweep(event.pointer);
     }
   }
 }

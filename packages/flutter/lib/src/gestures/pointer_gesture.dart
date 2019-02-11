@@ -8,31 +8,31 @@ import 'arena.dart';
 import 'binding.dart';
 import 'events.dart';
 
-/// The callback for a winning [PointerGestureArenaMember]
-typedef PointerGestureResolvedCallback = void Function(PointerEvent event);
+/// The callback for a winning [PointerSignalArenaMember]
+typedef PointerSignalResolvedCallback = void Function(PointerEvent event);
 
-/// A mediator for resolving pointer gesture events, which are discrete and
+/// A mediator for resolving pointer signal events, which are discrete and
 /// thus resolve immediately, in an arena, to ensure that they are not handled
 /// by multiple widgets.
 ///
-/// Unlike a [GestureRecognizer], a [PointerGestureArenaMember] always accepts
-/// the event. This means that the first [PointerGestureArenaMember] created
-/// for any given pointer gesture event will always be the winner of the arena.
-class PointerGestureArenaMember implements GestureArenaMember {
+/// Unlike a [GestureRecognizer], a [PointerSignalArenaMember] always accepts
+/// the event. This means that the first [PointerSignalArenaMember] created
+/// for any given pointer signal event will always be the winner of the arena.
+class PointerSignalArenaMember implements GestureArenaMember {
   /// Creates a new arena member, which immediately enters itself in the
-  /// pointerGestureArena and accepts the pointer gesture.
-  PointerGestureArenaMember(
+  /// pointerSignalArena and accepts the pointer signal.
+  PointerSignalArenaMember(
       this.event, this.acceptCallback, this.rejectCallback) {
-    GestureBinding.instance.pointerGestureArena
+    GestureBinding.instance.pointerSignalArena
         .add(event.pointer, this)
         .resolve(GestureDisposition.accepted);
   }
 
-  /// The event for the pointer gesture.
+  /// The event for the pointer signal.
   PointerEvent event;
 
   /// The callback to call if [acceptGesture] is called.
-  PointerGestureResolvedCallback acceptCallback;
+  PointerSignalResolvedCallback acceptCallback;
 
   /// The callback to call if [rejectGesture] is called.
   VoidCallback rejectCallback;

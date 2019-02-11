@@ -2488,10 +2488,10 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
-/// Signature for listening to [PointerGestureEvent] events.
+/// Signature for listening to [PointerSignalEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerGestureEventListener = void Function(PointerGestureEvent event);
+typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 
 /// Calls callbacks in response to pointer events.
 ///
@@ -2514,7 +2514,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
-    this.onPointerGesture,
+    this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
   })  : _onPointerEnter = onPointerEnter,
@@ -2585,8 +2585,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  /// Called when a pointer gesture occures over this object.
-  PointerGestureEventListener onPointerGesture;
+  /// Called when a pointer signal occures over this object.
+  PointerSignalEventListener onPointerSignal;
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2656,8 +2656,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerUp(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
       return onPointerCancel(event);
-    if (onPointerGesture != null && event is PointerGestureEvent)
-      return onPointerGesture(event);
+    if (onPointerSignal != null && event is PointerSignalEvent)
+      return onPointerSignal(event);
   }
 
   @override
@@ -2678,8 +2678,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
-    if (onPointerGesture != null)
-      listeners.add('scroll');
+    if (onPointerSignal != null)
+      listeners.add('signal');
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(IterableProperty<String>('listeners', listeners));

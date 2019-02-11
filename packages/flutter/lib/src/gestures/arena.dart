@@ -276,11 +276,11 @@ class GestureArenaManager {
   }
 }
 
-/// An arena for use with pointer gestures (e.g., scroll wheel events).
+/// An arena for use with pointer signals (e.g., scroll wheel events).
 ///
-/// Pointer gestures are immediate, so are always resolved at sweep time. This
+/// Pointer signals are immediate, so are always resolved at sweep time. This
 /// means that [hold] and [release] are no-ops.
-class PointerGestureArenaManager extends GestureArenaManager {
+class PointerSignalArenaManager extends GestureArenaManager {
   @override
   void hold(int pointer) {}
 
