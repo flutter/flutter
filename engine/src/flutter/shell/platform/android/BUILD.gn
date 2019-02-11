@@ -108,6 +108,7 @@ java_library("flutter_shell_java") {
     "io/flutter/app/FlutterPluginRegistry.java",
     "io/flutter/embedding/engine/FlutterEngine.java",
     "io/flutter/embedding/engine/FlutterJNI.java",
+    "io/flutter/embedding/engine/android/AndroidKeyProcessor.java",
     "io/flutter/embedding/engine/dart/DartExecutor.java",
     "io/flutter/embedding/engine/dart/DartMessenger.java",
     "io/flutter/embedding/engine/dart/PlatformMessageHandler.java",

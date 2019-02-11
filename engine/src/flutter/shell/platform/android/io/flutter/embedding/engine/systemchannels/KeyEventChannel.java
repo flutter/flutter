@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class KeyEventChannel {
     this.channel = new BasicMessageChannel<>(dartExecutor, "flutter/keyevent", JSONMessageCodec.INSTANCE);
   }
 
-  public void keyUp(@NonNull KeyEvent keyEvent) {
+  public void keyUp(@NonNull FlutterKeyEvent keyEvent) {
     Map<String, Object> message = new HashMap<>();
     message.put("type", "keyup");
     message.put("keymap", "android");
@@ -35,7 +36,7 @@ public class KeyEventChannel {
     channel.send(message);
   }
 
-  public void keyDown(@NonNull KeyEvent keyEvent) {
+  public void keyDown(@NonNull FlutterKeyEvent keyEvent) {
     Map<String, Object> message = new HashMap<>();
     message.put("type", "keydown");
     message.put("keymap", "android");
@@ -44,11 +45,68 @@ public class KeyEventChannel {
     channel.send(message);
   }
 
-  private void encodeKeyEvent(@NonNull KeyEvent event, @NonNull Map<String, Object> message) {
-    message.put("flags", event.getFlags());
-    message.put("codePoint", event.getUnicodeChar());
-    message.put("keyCode", event.getKeyCode());
-    message.put("scanCode", event.getScanCode());
-    message.put("metaState", event.getMetaState());
+  private void encodeKeyEvent(@NonNull FlutterKeyEvent event, @NonNull Map<String, Object> message) {
+    message.put("flags", event.flags);
+    message.put("plainCodePoint", event.plainCodePoint);
+    message.put("codePoint", event.codePoint);
+    message.put("keyCode", event.keyCode);
+    message.put("scanCode", event.scanCode);
+    message.put("metaState", event.metaState);
+    if (event.complexCharacter != null) {
+      message.put("character", event.complexCharacter.toString());
+    }
+  }
+
+  /**
+   * Key event as defined by Flutter.
+   */
+  public static class FlutterKeyEvent {
+    public final int flags;
+    public final int plainCodePoint;
+    public final int codePoint;
+    public final int keyCode;
+    @Nullable
+    public final Character complexCharacter;
+    public final int scanCode;
+    public final int metaState;
+
+    public FlutterKeyEvent(
+        @NonNull KeyEvent androidKeyEvent
+    ) {
+      this(androidKeyEvent, null);
+    }
+
+    public FlutterKeyEvent(
+        @NonNull KeyEvent androidKeyEvent,
+        @Nullable Character complexCharacter
+    ) {
+      this(
+          androidKeyEvent.getFlags(),
+          androidKeyEvent.getUnicodeChar(0x0),
+          androidKeyEvent.getUnicodeChar(),
+          androidKeyEvent.getKeyCode(),
+          complexCharacter,
+          androidKeyEvent.getScanCode(),
+          androidKeyEvent.getMetaState()
+      );
+    }
+
+    public FlutterKeyEvent(
+        int flags,
+        int plainCodePoint,
+        int codePoint,
+        int keyCode,
+        @Nullable Character complexCharacter,
+        int scanCode,
+        int metaState
+    ) {
+      this.flags = flags;
+      this.plainCodePoint = plainCodePoint;
+      this.codePoint = codePoint;
+      this.keyCode = keyCode;
+      this.complexCharacter = complexCharacter;
+      this.scanCode = scanCode;
+      this.metaState = metaState;
+    }
   }
 }
