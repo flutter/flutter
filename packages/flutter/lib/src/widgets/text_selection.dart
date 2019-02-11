@@ -314,7 +314,7 @@ class TextSelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   Future<bool> showToolbar() async{
     assert(_toolbar == null);
-    if (Clipboard.isEmpty == null)
+    if (Clipboard.isEmpty)
       await Clipboard.queryEmpty();
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
