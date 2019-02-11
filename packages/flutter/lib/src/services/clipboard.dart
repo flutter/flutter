@@ -39,7 +39,7 @@ class Clipboard {
   ///
   /// By default this value is true.
   static bool get isEmpty => _isEmpty;
-  static bool _isEmpty = true;
+  static bool _isEmpty;
 
   /// Initializes the [isEmpty] variable with whether or not the clipboard is
   /// currently empty.
