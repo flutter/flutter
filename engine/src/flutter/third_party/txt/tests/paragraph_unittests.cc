@@ -669,6 +669,53 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyAlignParagraph)) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
+  const char* text =
+      "אאא בּבּבּבּ אאאא בּבּ אאא בּבּבּ אאאאא בּבּבּבּ אאאא בּבּבּבּבּ "
+      "אאאאא בּבּבּבּבּ אאאבּבּבּבּבּבּאאאאא בּבּבּבּבּבּאאאאאבּבּבּבּבּבּ אאאאא בּבּבּבּבּ "
+      "אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ";
+
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::justify;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Ahem");
+  text_style.font_size = 26;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  size_t paragraph_width = GetTestCanvasWidth() - 100;
+  paragraph->Layout(paragraph_width);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
+  auto glyph_line_width = [&paragraph](int index) {
+    return paragraph->glyph_lines_[index].positions.back().x_pos.end;
+  };
+
+  // All lines except the last should be justified to the width of the
+  // paragraph.
+  for (size_t i = 0; i < paragraph->glyph_lines_.size() - 1; ++i) {
+    ASSERT_EQ(glyph_line_width(i), paragraph_width);
+  }
+  ASSERT_NE(glyph_line_width(paragraph->glyph_lines_.size() - 1),
+            paragraph_width);
+}
+
 TEST_F(ParagraphTest, DecorationsParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;

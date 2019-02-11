@@ -212,6 +212,7 @@ class Paragraph {
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, RightAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, CenterAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyRTL);
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
   FRIEND_TEST(ParagraphTest, ChineseParagraph);

@@ -534,11 +534,12 @@ void Paragraph::Layout(double width, bool force) {
       }
     }
 
-    // Exclude trailing whitespace from right and center-justified lines so the
-    // last visible character in the line will be flush with the right margin.
+    // Exclude trailing whitespace from justified lines so the last visible
+    // character in the line will be flush with the right margin.
     size_t line_end_index =
         (paragraph_style_.effective_align() == TextAlign::right ||
-         paragraph_style_.effective_align() == TextAlign::center)
+         paragraph_style_.effective_align() == TextAlign::center ||
+         paragraph_style_.effective_align() == TextAlign::justify)
             ? line_range.end_excluding_whitespace
             : line_range.end;
 
@@ -551,6 +552,14 @@ void Paragraph::Layout(double width, bool force) {
                                std::min(bidi_run.end(), line_end_index),
                                bidi_run.direction(), bidi_run.style());
       }
+    }
+    bool line_runs_all_rtl =
+        line_runs.size() &&
+        std::accumulate(
+            line_runs.begin(), line_runs.end(), true,
+            [](const bool a, const BidiRun& b) { return a && b.is_rtl(); });
+    if (line_runs_all_rtl) {
+      std::reverse(words.begin(), words.end());
     }
 
     std::vector<GlyphPosition> line_glyph_positions;
@@ -720,15 +729,26 @@ void Paragraph::Layout(double width, bool force) {
                 grapheme_code_unit_counts[i]);
           }
 
-          if (word_index < words.size() &&
-              words[word_index].start == run.start() + glyph_code_units.start) {
+          bool at_word_start = false;
+          bool at_word_end = false;
+          if (word_index < words.size()) {
+            at_word_start =
+                words[word_index].start == run.start() + glyph_code_units.start;
+            at_word_end =
+                words[word_index].end == run.start() + glyph_code_units.end;
+            if (line_runs_all_rtl) {
+              std::swap(at_word_start, at_word_end);
+            }
+          }
+
+          if (at_word_start) {
             word_start_position = run_x_offset + glyph_x_offset;
           }
 
-          if (word_index < words.size() &&
-              words[word_index].end == run.start() + glyph_code_units.end) {
-            if (justify_line)
+          if (at_word_end) {
+            if (justify_line) {
               justify_x_offset += word_gap_width;
+            }
             word_index++;
 
             if (!isnan(word_start_position)) {
