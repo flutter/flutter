@@ -200,7 +200,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                       Align(
                         alignment: Alignment.topRight,
                         child: Padding(
-                          padding: EdgeInsets.all(4.0),
+                          padding: const EdgeInsets.all(4.0),
                           child: Icon(
                             Icons.check_circle,
                             color: _isSelected ? Colors.white : Colors.transparent,
