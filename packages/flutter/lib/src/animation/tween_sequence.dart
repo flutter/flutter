@@ -44,7 +44,9 @@ class TweenSequence<T> extends Animatable<T> {
   /// There's a small cost associated with building a `TweenSequence` so
   /// it's best to reuse one, rather than rebuilding it on every frame,
   /// when that's possible.
-  TweenSequence(List<TweenSequenceItem<T>> items) : assert(items != null), assert(items.isNotEmpty) {
+  TweenSequence(List<TweenSequenceItem<T>> items)
+      : assert(items != null),
+        assert(items.isNotEmpty) {
     _items.addAll(items);
 
     double totalWeight = 0.0;
@@ -95,7 +97,9 @@ class TweenSequenceItem<T> {
   const TweenSequenceItem({
     @required this.tween,
     @required this.weight,
-  }) : assert(tween != null), assert(weight != null), assert(weight > 0.0);
+  }) : assert(tween != null),
+       assert(weight != null),
+       assert(weight > 0.0);
 
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position

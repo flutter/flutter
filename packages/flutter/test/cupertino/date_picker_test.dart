@@ -7,6 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// scrolling by this offset will move the picker to the next item
+const Offset _kRowOffset = Offset(0.0, -32.0);
+
 void main() {
   group('Countdown timer picker', () {
     testWidgets('onTimerDurationChanged is not null', (WidgetTester tester) async {
@@ -195,6 +198,39 @@ void main() {
       );
     });
   });
+
+  testWidgets('picker honors minuteInterval and secondInterval', (WidgetTester tester) async {
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: CupertinoTimerPicker(
+            minuteInterval: 10,
+            secondInterval: 15,
+            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 45),
+            mode: CupertinoTimerPickerMode.hms,
+            onTimerDurationChanged: (Duration d) {
+              duration = d;
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('40'), _kRowOffset);
+    await tester.pump();
+    await tester.drag(find.text('45'), -_kRowOffset);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      duration,
+      const Duration(hours: 10, minutes: 50, seconds: 30),
+    );
+  });
+
   group('Date picker', () {
     testWidgets('mode is not null', (WidgetTester tester) async {
       expect(
@@ -221,28 +257,11 @@ void main() {
       );
     });
 
-    testWidgets('initial date time is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
-            initialDateTime: null,
-          );
-        },
-        throwsAssertionError,
+    testWidgets('initial date is set to default value', (WidgetTester tester) async {
+      final CupertinoDatePicker picker = CupertinoDatePicker(
+        onDateTimeChanged: (_) {},
       );
-    });
-
-    testWidgets('initial date time is not null', (WidgetTester tester) async {
-      expect(
-            () {
-          CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
-            initialDateTime: null,
-          );
-        },
-        throwsAssertionError,
-      );
+      expect(picker.initialDateTime, isNotNull);
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
@@ -541,6 +560,53 @@ void main() {
       );
     });
 
+    testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
+      DateTime date;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+              initialDateTime: DateTime(2019, 1, 1, 3),
+            ),
+          ),
+        ),
+      );
+
+      // 3:00 -> 15:00
+      await tester.drag(find.text('AM'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 15));
+
+      // 15:00 -> 16:00
+      await tester.drag(find.text('3'), _kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 16));
+
+      // 16:00 -> 4:00
+      await tester.drag(find.text('PM'), -_kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 4));
+
+      // 4:00 -> 3:00
+      await tester.drag(find.text('4'), -_kRowOffset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(date, DateTime(2019, 1, 1, 3));
+    });
+
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
@@ -559,25 +625,29 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('11'), const Offset(0.0, -32.0));
+      // 11:59 -> 12:59
+      await tester.drag(find.text('11'), _kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 12, 59));
 
-      await tester.drag(find.text('12'), const Offset(0.0, 32.0));
+      // 12:59 -> 11:59
+      await tester.drag(find.text('12'), -_kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
-      await tester.drag(find.text('11'), const Offset(0.0, 64.0));
+      // 11:59 -> 9:59
+      await tester.drag(find.text('11'), -_kRowOffset * 2);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
-      await tester.drag(find.text('9'), const Offset(0.0, -192.0));
+      // 9:59 -> 15:59
+      await tester.drag(find.text('9'), _kRowOffset * 6);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

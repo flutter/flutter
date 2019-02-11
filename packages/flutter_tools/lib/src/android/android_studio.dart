@@ -26,12 +26,14 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
+final RegExp _pathsSelectorMatcher =
+    RegExp(r'"idea.paths.selector" = "AndroidStudio[^;]+"');
 
 String get javaPath => androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
-      {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
+      {Version version, this.configured, this.studioAppName = 'AndroidStudio', this.pathsSelectorPath})
       : version = version ?? Version.unknown {
     _init();
   }
@@ -47,7 +49,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Version version;
     if (versionString != null)
       version = Version.parse(versionString);
-    return AndroidStudio(studioPath, version: version);
+
+    final String plistValue = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      null,
+    );
+    final String pathsSelectorValue = _pathsSelectorMatcher.stringMatch(plistValue).split('=').last.trim().replaceAll('"', '');
+    return AndroidStudio(studioPath, version: version, pathsSelectorPath: pathsSelectorValue);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -83,6 +91,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String studioAppName;
   final Version version;
   final String configured;
+  final String pathsSelectorPath;
 
   String _pluginsPath;
   String _javaPath;
@@ -102,7 +111,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             homeDirPath,
             'Library',
             'Application Support',
-            'AndroidStudio$major.$minor');
+            '$pathsSelectorPath');
       } else {
         _pluginsPath = fs.path.join(homeDirPath,
             '.$studioAppName$major.$minor',
@@ -156,7 +165,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       try {
         final Iterable<Directory> directories = fs
             .directory(path)
-            .listSync()
+            .listSync(followLinks: false)
             .whereType<Directory>();
         for (Directory directory in directories) {
           final String name = directory.basename;
@@ -210,7 +219,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
     if (fs.directory(homeDirPath).existsSync()) {
-      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
+      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync(followLinks: false)) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {

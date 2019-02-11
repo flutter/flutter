@@ -36,6 +36,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {

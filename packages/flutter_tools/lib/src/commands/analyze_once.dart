@@ -93,11 +93,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     await server.start();
     // Completing the future in the callback can't fail.
-    server.onExit.then<void>((int exitCode) { // ignore: unawaited_futures
+    unawaited(server.onExit.then<void>((int exitCode) {
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
-    });
+    }));
 
     Cache.releaseLockEarly();
 
@@ -107,7 +107,7 @@ class AnalyzeOnce extends AnalyzeBase {
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
     final Status progress = argResults['preamble']
-        ? logger.startProgress('Analyzing $message...')
+        ? logger.startProgress('Analyzing $message...', timeout: kSlowOperation)
         : null;
 
     await analysisCompleter.future;

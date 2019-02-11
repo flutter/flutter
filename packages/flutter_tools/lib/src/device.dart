@@ -16,24 +16,29 @@ import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'linux/linux_device.dart';
+import 'macos/macos_device.dart';
 import 'tester/flutter_tester.dart';
+import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
 /// A class to get all available devices.
 class DeviceManager {
+
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
-  DeviceManager() {
-    // Register the known discoverers.
-    _deviceDiscoverers.add(AndroidDevices());
-    _deviceDiscoverers.add(IOSDevices());
-    _deviceDiscoverers.add(IOSSimulators());
-    _deviceDiscoverers.add(FuchsiaDevices());
-    _deviceDiscoverers.add(FlutterTesterDevices());
-  }
-
-  final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
+  List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
+  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+    AndroidDevices(),
+    IOSDevices(),
+    IOSSimulators(),
+    FuchsiaDevices(),
+    FlutterTesterDevices(),
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+  ]);
 
   String _specifiedDeviceId;
 
@@ -85,7 +90,7 @@ class DeviceManager {
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
-    return _deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+    return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all connected devices.
@@ -150,7 +155,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
-          printTrace('Device poll timed out.');
+          printTrace('Device poll timed out. Will retry.');
         }
       }, _pollingInterval);
     }
@@ -184,6 +189,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
+
   Device(this.id);
 
   final String id;
@@ -276,10 +282,16 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
+  /// Whether flutter applications running on this device can be terminated
+  /// from the vmservice.
+  bool get supportsStopApp => true;
+
+  /// Whether the device supports taking screenshots of a running flutter
+  /// application.
+  bool get supportsScreenshot => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
-
-  bool get supportsScreenshot => false;
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
@@ -343,18 +355,20 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
+    this.traceSystrace = false,
     this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo) :
-    debuggingEnabled = false,
-    useTestFonts = false,
-    startPaused = false,
-    enableSoftwareRendering = false,
-    skiaDeterministicRendering = false,
-    traceSkia = false,
-    observatoryPort = null;
+  DebuggingOptions.disabled(this.buildInfo)
+    : debuggingEnabled = false,
+      useTestFonts = false,
+      startPaused = false,
+      enableSoftwareRendering = false,
+      skiaDeterministicRendering = false,
+      traceSkia = false,
+      traceSystrace = false,
+      observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -363,6 +377,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final bool traceSystrace;
   final bool useTestFonts;
   final int observatoryPort;
 
@@ -371,7 +386,9 @@ class DebuggingOptions {
 
 class LaunchResult {
   LaunchResult.succeeded({ this.observatoryUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null;
+  LaunchResult.failed()
+    : started = false,
+      observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
@@ -433,4 +450,32 @@ class DiscoveredApp {
   DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
+}
+
+// An empty device log reader
+class NoOpDeviceLogReader implements DeviceLogReader {
+  NoOpDeviceLogReader(this.name);
+
+  @override
+  final String name;
+
+  @override
+  int appPid;
+
+  @override
+  Stream<String> get logLines => const Stream<String>.empty();
+}
+
+// A portforwarder which does not support forwarding ports.
+class NoOpDevicePortForwarder implements DevicePortForwarder {
+  const NoOpDevicePortForwarder();
+
+  @override
+  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+
+  @override
+  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
 }

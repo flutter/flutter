@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -29,19 +31,35 @@ void main() {
       expect(device.name, name);
     });
 
-    test('parse netls log output', () {
-      const String example = 'device lilia-shore-only-last (fe80::0000:a00a:f00f:2002/3)';
-      final List<String> names = parseFuchsiaDeviceOutput(example);
+    test('parse dev_finder output', () {
+      const String example = '192.168.42.56 paper-pulp-bush-angel';
+      final List<FuchsiaDevice> names = parseListDevices(example);
 
       expect(names.length, 1);
-      expect(names.first, 'lilia-shore-only-last');
+      expect(names.first.name, 'paper-pulp-bush-angel');
+      expect(names.first.id, '192.168.42.56');
+    });
+
+    test('parse junk dev_finder output', () {
+      const String example = 'junk';
+      final List<FuchsiaDevice> names = parseListDevices(example);
+
+      expect(names.length, 0);
+    });
+
+    test('default capabilities', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+
+      expect(device.supportsHotReload, true);
+      expect(device.supportsHotRestart, false);
+      expect(device.supportsStopApp, false);
+      expect(await device.stopApp(null), false);
     });
   });
 
   group('displays friendly error when', () {
     final MockProcessManager mockProcessManager = MockProcessManager();
     final MockProcessResult mockProcessResult = MockProcessResult();
-    final MockFuchsiaArtifacts mockFuchsiaArtifacts = MockFuchsiaArtifacts();
     final MockFile mockFile = MockFile();
     when(mockProcessManager.run(
       any,
@@ -51,22 +69,8 @@ void main() {
     when(mockProcessResult.exitCode).thenReturn(1);
     when<String>(mockProcessResult.stdout).thenReturn('');
     when<String>(mockProcessResult.stderr).thenReturn('');
-    when(mockFuchsiaArtifacts.sshConfig).thenReturn(mockFile);
     when(mockFile.absolute).thenReturn(mockFile);
     when(mockFile.path).thenReturn('');
-
-    testUsingContext('No BUILD_DIR set', () async {
-      final FuchsiaDevice device = FuchsiaDevice('id');
-      ToolExit toolExit;
-      try {
-        await device.servicePorts();
-      } on ToolExit catch (err) {
-        toolExit = err;
-      }
-      expect(toolExit.message, contains('BUILD_DIR must be supplied to locate SSH keys'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
 
     final MockProcessManager emptyStdoutProcessManager = MockProcessManager();
     final MockProcessResult emptyStdoutProcessResult = MockProcessResult();
@@ -90,7 +94,10 @@ void main() {
       expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
-      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+        sshConfig: mockFile,
+        devFinder: mockFile,
+      ),
     });
 
     group('device logs', () {
@@ -200,9 +207,66 @@ void main() {
       });
     });
   });
-}
 
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
+  group(FuchsiaIsolateDiscoveryProtocol, () {
+    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) {
+      final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockVMService vmService = MockVMService();
+      final MockVM vm = MockVM();
+      vm.vmService = vmService;
+      vmService.vm = vm;
+      vm.views = views;
+      for (MockFlutterView view in views) {
+        view.owner = vm;
+      }
+      final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', portForwarder, false);
+      final FuchsiaIsolateDiscoveryProtocol discoveryProtocol = FuchsiaIsolateDiscoveryProtocol(
+        fuchsiaDevice,
+        expectedIsolateName,
+        (Uri uri) async => vmService,
+        true // only poll once.
+      );
+      when(fuchsiaDevice.servicePorts()).thenAnswer((Invocation invocation) async => <int>[1]);
+      when(portForwarder.forward(1)).thenAnswer((Invocation invocation) async => 2);
+      when(vmService.getVM()).thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(vmService.refreshViews()).thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(vmService.httpAddress).thenReturn(Uri.parse('example'));
+      return discoveryProtocol.uri;
+    }
+    testUsingContext('can find flutter view with matching isolate name', () async {
+      const String expectedIsolateName = 'foobar';
+      final Uri uri = await findUri(<MockFlutterView>[
+        MockFlutterView(null), // no ui isolate.
+        MockFlutterView(MockIsolate('wrong name')), // wrong name.
+        MockFlutterView(MockIsolate(expectedIsolateName)), // matching name.
+      ], expectedIsolateName);
+      expect(uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+    });
+
+    testUsingContext('can handle flutter view without matching isolate name', () async {
+      const String expectedIsolateName = 'foobar';
+      final Future<Uri> uri = findUri(<MockFlutterView>[
+        MockFlutterView(null), // no ui isolate.
+        MockFlutterView(MockIsolate('wrong name')), // wrong name.
+      ], expectedIsolateName);
+      expect(uri, throwsException);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+    });
+
+    testUsingContext('can handle non flutter view', () async {
+      const String expectedIsolateName = 'foobar';
+      final Future<Uri> uri = findUri(<MockFlutterView>[
+        MockFlutterView(null), // no ui isolate.
+      ], expectedIsolateName);
+      expect(uri, throwsException);
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+    });
+  });
+}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
@@ -211,3 +275,46 @@ class MockProcessResult extends Mock implements ProcessResult {}
 class MockFile extends Mock implements File {}
 
 class MockProcess extends Mock implements Process {}
+
+class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
+  MockFuchsiaDevice(this.id, this.portForwarder, this.ipv6);
+
+  @override
+  final bool ipv6;
+  @override
+  final String id;
+  @override
+  final DevicePortForwarder portForwarder;
+}
+
+class MockPortForwarder extends Mock implements DevicePortForwarder {}
+
+class MockVMService extends Mock implements VMService {
+  @override
+  VM vm;
+}
+
+class MockVM extends Mock implements VM {
+  @override
+  VMService vmService;
+
+  @override
+  List<FlutterView> views;
+}
+
+class MockFlutterView extends Mock implements FlutterView {
+  MockFlutterView(this.uiIsolate);
+
+  @override
+  final Isolate uiIsolate;
+
+  @override
+  ServiceObjectOwner owner;
+}
+
+class MockIsolate extends Mock implements Isolate {
+  MockIsolate(this.name);
+
+  @override
+  final String name;
+}

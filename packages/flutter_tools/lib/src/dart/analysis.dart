@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
+import '../base/common.dart';
 import '../base/file_system.dart' hide IOSink;
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -13,6 +13,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../globals.dart';
 
 class AnalysisServer {
@@ -42,7 +43,7 @@ class AnalysisServer {
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
-    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
+    unawaited(_process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream =
         _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());

@@ -84,22 +84,8 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<dynamic> _getRoute(RouteSettings settings) {
-    // Routes, by convention, are split on slashes, like filesystem paths.
-    final List<String> path = settings.name.split('/');
-    // We only support paths that start with a slash, so bail if
-    // the first component is not empty:
-    if (path[0] != '')
-      return null;
-    // If the path is "/stock:..." then show a stock page for the
-    // specified stock symbol.
-    if (path[1].startsWith('stock:')) {
-      // We don't yet support subpages of a stock, so bail if there's
-      // any more path components.
-      if (path.length != 2)
-        return null;
-      // Extract the symbol part of "stock:..." and return a route
-      // for that symbol.
-      final String symbol = path[1].substring(6);
+    if (settings.name == '/stocks') {
+      final String symbol = settings.arguments;
       return MaterialPageRoute<void>(
         settings: settings,
         builder: (BuildContext context) => StockSymbolPage(symbol: symbol, stocks: stocks),

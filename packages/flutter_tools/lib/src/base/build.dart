@@ -125,6 +125,7 @@ class AOTSnapshotter {
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
+      '--no-use-bare-instructions',
     ];
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
@@ -302,6 +303,7 @@ class AOTSnapshotter {
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
@@ -438,6 +440,15 @@ class JITSnapshotter {
           }
         }
       }
+
+      {
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
+        if (af != null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+      }
     }
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
@@ -458,8 +469,25 @@ class JITSnapshotter {
       outputPaths.add(isolateSnapshotInstructions);
     }
 
+    // There are a couple special cases below where we create a snapshot
+    // with only the data section, which only contains interpreted code.
+    bool supportsAppJit = true;
+
+    if (platform == TargetPlatform.android_x64 &&
+        getCurrentHostPlatform() == HostPlatform.windows_x64) {
+      supportsAppJit = false;
+      printStatus('Android x64 dynamic build on Windows x64 will use purely interpreted '
+                  'code for now (see  https://github.com/flutter/flutter/issues/17489).');
+    }
+
+    if (platform == TargetPlatform.android_x86) {
+      supportsAppJit = false;
+      printStatus('Android x86 dynamic build will use purely interpreted code for now. '
+                  'To optimize performance, consider using --target-platform=android-x64.');
+    }
+
     genSnapshotArgs.addAll(<String>[
-      '--snapshot_kind=app-jit',
+      '--snapshot_kind=${supportsAppJit ? 'app-jit' : 'app'}',
       '--load_compilation_trace=$compilationTraceFilePath',
       '--load_vm_snapshot_data=$engineVmSnapshotData',
       '--load_isolate_snapshot_data=$engineIsolateSnapshotData',
@@ -533,6 +561,8 @@ class JITSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_x86,
+      TargetPlatform.android_x64,
     ].contains(platform);
   }
 }

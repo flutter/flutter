@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
+import '../convert.dart';
 import '../globals.dart';
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
@@ -121,6 +122,12 @@ Future<Process> runCommand(List<String> cmd, {
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr. Completes with the process's exit code.
+///
+/// If [filter] is null, no lines are removed.
+///
+/// If [filter] is non-null, all lines that do not match it are removed. If
+/// [mapFunction] is present, all lines that match [filter] are also forwarded
+/// to [mapFunction] for further processing.
 Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
@@ -193,7 +200,7 @@ Future<int> runInteractively(List<String> command, {
   );
   // The real stdin will never finish streaming. Pipe until the child process
   // finishes.
-  process.stdin.addStream(stdin); // ignore: unawaited_futures
+  unawaited(process.stdin.addStream(stdin));
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -201,14 +208,6 @@ Future<int> runInteractively(List<String> command, {
     stderr.addStream(process.stderr),
   ]);
   return await process.exitCode;
-}
-
-Future<void> runAndKill(List<String> cmd, Duration timeout) {
-  final Future<Process> proc = runDetached(cmd);
-  return Future<void>.delayed(timeout, () async {
-    printTrace('Intentionally killing ${cmd[0]}');
-    processManager.killPid((await proc).pid);
-  });
 }
 
 Future<Process> runDetached(List<String> cmd) {
@@ -369,7 +368,9 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
+  RunResult(this.processResult, this._command)
+    : assert(_command != null),
+      assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -389,8 +390,8 @@ class RunResult {
     return out.toString().trimRight();
   }
 
- /// Throws a [ProcessException] with the given `message`.
- void throwException(String message) {
+  /// Throws a [ProcessException] with the given `message`.
+  void throwException(String message) {
     throw ProcessException(
       _command.first,
       _command.skip(1).toList(),
