@@ -12,9 +12,6 @@ class TransformInteraction extends StatefulWidget {
     @required this.child,
     // The desired size of the area that can receive events
     @required this.size,
-    // A callback for the onTapUp event from GestureDetector. Called with
-    // untransformed coordinates in an Offset.
-    this.onTapUp,
     // The scale will be clamped to between these values
     this.maxScale = 2.5,
     this.minScale = 0.8,
@@ -29,12 +26,62 @@ class TransformInteraction extends StatefulWidget {
     this.disableTranslation = false,
     this.disableScale = false,
     this.disableRotation = false,
-    // TODO(justinmc): add other GestureDetector callbacks
+    // Access to event callbacks from GestureDetector. Called with untransformed
+    // coordinates in an Offset.
+    this.onTapDown,
+    this.onTapUp,
+    this.onTap,
+    this.onTapCancel,
+    this.onDoubleTap,
+    this.onLongPress,
+    this.onLongPressUp,
+    this.onVerticalDragDown,
+    this.onVerticalDragStart,
+    this.onVerticalDragUpdate,
+    this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+    this.onHorizontalDragDown,
+    this.onHorizontalDragStart,
+    this.onHorizontalDragUpdate,
+    this.onHorizontalDragEnd,
+    this.onHorizontalDragCancel,
+    this.onPanDown,
+    this.onPanStart,
+    this.onPanUpdate,
+    this.onPanEnd,
+    this.onPanCancel,
+    this.onScaleStart,
+    this.onScaleUpdate,
+    this.onScaleEnd
   });
 
   final Widget child;
   final Size size;
+  final Function onTapDown;
   final Function onTapUp;
+  final Function onTap;
+  final Function onTapCancel;
+  final Function onDoubleTap;
+  final Function onLongPress;
+  final Function onLongPressUp;
+  final Function onVerticalDragDown;
+  final Function onVerticalDragStart;
+  final Function onVerticalDragUpdate;
+  final Function onVerticalDragEnd;
+  final Function onVerticalDragCancel;
+  final Function onHorizontalDragDown;
+  final Function onHorizontalDragStart;
+  final Function onHorizontalDragUpdate;
+  final Function onHorizontalDragEnd;
+  final Function onHorizontalDragCancel;
+  final Function onPanDown;
+  final Function onPanStart;
+  final Function onPanUpdate;
+  final Function onPanEnd;
+  final Function onPanCancel;
+  final Function onScaleStart;
+  final Function onScaleUpdate;
+  final Function onScaleEnd;
   final double maxScale;
   final double minScale;
   final Rect visibleRect;
@@ -159,10 +206,31 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
+      onTapDown: (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition, _transform)),
+      onTapUp: (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition, _transform)),
+      onTap: widget.onTap,
+      onTapCancel: widget.onTapCancel,
+      onDoubleTap: widget.onDoubleTap,
+      onLongPress: widget.onLongPress,
+      onLongPressUp: widget.onLongPressUp,
+      onVerticalDragDown: (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragStart: (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragUpdate: (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragEnd: (DragEndDetails details) => widget.onVerticalDragEnd(),
+      onVerticalDragCancel: widget.onVerticalDragCancel,
+      onHorizontalDragDown: (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragStart: (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragUpdate: (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragEnd: widget.onHorizontalDragEnd,
+      onHorizontalDragCancel: widget.onHorizontalDragCancel,
+      onPanDown: (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition, _transform)),
+      onPanStart: (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition, _transform)),
+      onPanUpdate: (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition, _transform)),
+      onPanEnd: (DragEndDetails details) => widget.onPanEnd(),
+      onPanCancel: widget.onPanCancel,
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
       onScaleUpdate: _onScaleUpdate,
-      onTapUp: _onTapUp,
       child: ClipRect(
         // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
@@ -193,6 +261,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle panning and pinch zooming events
   double _currentRotation = 0.0;
   void _onScaleStart(ScaleStartDetails details) {
+    widget.onScaleStart();
     _controller.stop();
     gestureType = null;
     setState(() {
@@ -202,6 +271,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
+    widget.onScaleUpdate(fromViewport(details.focalPoint, _transform));
     double scale = _transform.getMaxScaleOnAxis();
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
@@ -250,6 +320,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     });
   }
   void _onScaleEnd(ScaleEndDetails details) {
+    widget.onScaleStart();
     setState(() {
       _scaleStart = null;
       _rotationStart = null;
@@ -287,11 +358,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       final Offset translationChangeScene = translationChange / _transform.getMaxScaleOnAxis();
       _transform = matrixTranslate(_transform, translationChangeScene);
     });
-  }
-
-  // Handle tapping to select a tile
-  void _onTapUp(TapUpDetails details) {
-    widget.onTapUp(fromViewport(details.globalPosition, _transform));
   }
 
   @override
