@@ -191,12 +191,12 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                   splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
                   child: Stack(
                     children: <Widget>[
-                      TravelDestinationContent(destination: widget.destination),
                       Container(
                         color: _isSelected
                           ? Theme.of(context).colorScheme.primary.withAlpha(41)
                           : Colors.transparent,
                       ),
+                      TravelDestinationContent(destination: widget.destination),
                       Align(
                         alignment: Alignment.topRight,
                         child: Padding(
