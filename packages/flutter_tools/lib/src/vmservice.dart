@@ -61,7 +61,16 @@ typedef CompileExpression = Future<String> Function(
   bool isStatic,
 );
 
+const String _kAlias = 'alias';
+const String _kCompileExpression = 'compileExpression';
+const String _kFlutterTools = 'Flutter Tools';
+const String _kHotRestart = 'hotRestart';
+const String _kLoadDartLibrarySources = 'loadDartLibrarySources';
 const String _kRecordingType = 'vmservice';
+const String _kRegisterService = '_registerService';
+const String _kReloadSources = 'reloadSources';
+const String _kService = 'service';
+const String _kStreamNotify = 'streamNotify';
 
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
   Duration delay = const Duration(milliseconds: 100);
@@ -111,24 +120,24 @@ class VMService {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
-    _peer.registerMethod('streamNotify', (rpc.Parameters event) {
+    _peer.registerMethod(_kStreamNotify, (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
 
-    _peer.registerMethod('loadDartLibrarySources',
+    _peer.registerMethod(_kLoadDartLibrarySources,
         (rpc.Parameters params) async {
       return await _handleLoadDartLibrarySources(params.asMap);
     });
 
     // If the Flutter Engine doesn't support service registration this will
     // have no effect
-    _peer.sendNotification('_registerService', <String, String> {
-      'service': 'loadDartLibrarySources',
-      'alias': 'Flutter Tools',
+    _peer.sendNotification(_kRegisterService, <String, String> {
+      _kService: _kLoadDartLibrarySources,
+      _kAlias: _kFlutterTools,
     });
 
     if (reloadSources != null) {
-      _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
+      _peer.registerMethod(_kReloadSources, (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].value;
         final bool force = params.asMap['force'] ?? false;
         final bool pause = params.asMap['pause'] ?? false;
@@ -153,14 +162,14 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
-        'service': 'reloadSources',
-        'alias': 'Flutter Tools',
+      _peer.sendNotification(_kRegisterService, <String, String>{
+        _kService: _kReloadSources,
+        _kAlias: _kFlutterTools,
       });
     }
 
     if (restart != null) {
-      _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
+      _peer.registerMethod(_kHotRestart, (rpc.Parameters params) async {
         final bool pause = params.asMap['pause'] ?? false;
 
         if (pause is! bool)
@@ -179,14 +188,14 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
-        'service': 'hotRestart',
-        'alias': 'Flutter Tools',
+      _peer.sendNotification(_kRegisterService, <String, String>{
+        _kService: _kHotRestart,
+        _kAlias: _kFlutterTools,
       });
     }
 
     if (compileExpression != null) {
-      _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
+      _peer.registerMethod(_kCompileExpression, (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty)
           throw rpc.RpcException.invalidParams(
@@ -217,9 +226,9 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('_registerService', <String, String>{
-        'service': 'compileExpression',
-        'alias': 'Flutter Tools'
+      _peer.sendNotification(_kRegisterService, <String, String>{
+        _kService: _kCompileExpression,
+        _kAlias: _kFlutterTools,
       });
     }
   }
@@ -371,14 +380,14 @@ class VMService {
 
   Future<Map<String, dynamic>> _handleLoadDartLibrarySources(Map<String,
       dynamic> data) async {
-    final path = data['kernelPath'];
-    final bytes = await fs.file(path).readAsBytes();
-    final result = Base64Encoder().convert(bytes);
+    final String kernelPath = data['kernelPath'];
+    final List<int> bytes = await fs.file(kernelPath).readAsBytes();
+    final String result = base64.encode(bytes);
     return <String, dynamic>{
       'type': 'Success',
       'result': <String, String> {
-        'kernelBytes': result
-      }
+        'kernelBytes': result,
+      },
     };
   }
 
