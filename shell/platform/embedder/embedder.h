@@ -157,6 +157,9 @@ typedef struct {
   size_t timestamp;  // in microseconds.
   double x;
   double y;
+  // An optional device identifier. If this is not specified, it is assumed that
+  // the embedder has no multitouch capability.
+  int32_t device;
 } FlutterPointerEvent;
 
 struct _FlutterPlatformMessageResponseHandle;
