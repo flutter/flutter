@@ -155,7 +155,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
         .where((String segment) => segment.isNotEmpty)
         .toList();
     if (segments.isEmpty) {
-      segments.add('1');
+      segments.add('0');
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
