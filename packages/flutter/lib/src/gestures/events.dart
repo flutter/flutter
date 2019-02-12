@@ -828,7 +828,7 @@ abstract class PointerSignalEvent extends PointerEvent {
 class PointerScrollEvent extends PointerSignalEvent {
   /// Creates a pointer scroll event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerScrollEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
