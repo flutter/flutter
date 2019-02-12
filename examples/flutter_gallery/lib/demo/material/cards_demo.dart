@@ -16,55 +16,55 @@ enum CardDemoType {
 }
 
 class TravelDestination {
-  TravelDestination({
+  const TravelDestination({
     @required this.assetName,
     @required this.assetPackage,
     @required this.title,
     @required this.description,
+    @required this.city,
+    @required this.location,
     this.type = CardDemoType.standard,
   }) : assert(assetName != null),
        assert(assetPackage != null),
        assert(title != null),
-       assert(description != null && description?.length == 3);
+       assert(description != null),
+       assert(city != null),
+       assert(location != null);
 
   final String assetName;
   final String assetPackage;
   final String title;
-  final List<String> description;
+  final String description;
+  final String city;
+  final String location;
   final CardDemoType type;
 }
 
-final List<TravelDestination> destinations = <TravelDestination>[
+const List<TravelDestination> destinations = <TravelDestination>[
   TravelDestination(
     assetName: 'places/india_thanjavur_market.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Cities to Visit in Tamil Nadu',
-    description: <String>[
-      'Number 10',
-      'Thanjavur',
-      'Thanjavur, Tamil Nadu',
-    ],
+    description: 'Number 10',
+    city: 'Thanjavur',
+    location: 'Thanjavur, Tamil Nadu',
   ),
   TravelDestination(
     assetName: 'places/india_chettinad_silk_maker.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Artisans of Southern India',
-    description: <String>[
-      'Silk Spinners',
-      'Chettinad',
-      'Sivaganga, Tamil Nadu',
-    ],
+    description: 'Silk Spinners',
+    city: 'Chettinad',
+    location: 'Sivaganga, Tamil Nadu',
     type: CardDemoType.tappable,
   ),
   TravelDestination(
     assetName: 'places/india_tanjore_thanjavur_temple.png',
     assetPackage: _kGalleryAssetsPackage,
     title: 'Brihadisvara Temple',
-    description: <String>[
-      'Temples',
-      'Thanjavur',
-      'Thanjavur, Tamil Nadu',
-    ],
+    description: 'Temples',
+    city: 'Thanjavur',
+    location: 'Thanjavur, Tamil Nadu',
     type: CardDemoType.selectable,
   )
 ];
@@ -174,7 +174,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            const SectionTitle(title: 'Card that can be selected'),
+            const SectionTitle(title: 'Card that can be selected (long press)'),
             SizedBox(
               height: height,
               child: Card(
@@ -308,12 +308,12 @@ class TravelDestinationContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
-                    destination.description[0],
+                    destination.description,
                     style: descriptionStyle.copyWith(color: Colors.black54),
                   ),
                 ),
-                Text(destination.description[1]),
-                Text(destination.description[2]),
+                Text(destination.city),
+                Text(destination.location),
               ],
             ),
           ),
