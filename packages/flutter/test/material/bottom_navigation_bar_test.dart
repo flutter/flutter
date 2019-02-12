@@ -852,65 +852,72 @@ void main() {
     }, throwsA(isInstanceOf<AssertionError>()));
   });
 
-  testWidgets('BottomNavigationBar showLabel=false for shifting navbar, expect that there is no rendered text',
+  testWidgets('BottomNavigationBar [showLabel]=false for shifting navbar, expect that there is no rendered text',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              bottomNavigationBar: RepaintBoundary(
-                showLabel: false,
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.shifting,
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      title: Text('Red'),
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.dashboard),
-                    ),
-                    BottomNavigationBarItem(
-                      title: Text('Green'),
-                      backgroundColor: Colors.green,
-                      icon: Icon(Icons.menu),
-                    ),
-                  ],
+    final Widget widget = MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              showLabel: false,
+              type: BottomNavigationBarType.shifting,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  title: Text('Red'),
+                  backgroundColor: Colors.red,
+                  icon: Icon(Icons.dashboard),
                 ),
-              ),
-            );
-          },
-        ),
+                BottomNavigationBarItem(
+                  title: Text('Green'),
+                  backgroundColor: Colors.green,
+                  icon: Icon(Icons.menu),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
+    await tester.pumpWidget(widget);
     
-    expect(find.text('Red', findsNothing));
-    expect(find.text('Green', findsNothing));
+    expect(find.text('Red'), findsOneWidget);
+    expect(find.text('Green'), findsOneWidget);
+ 
+    final Finder navigationBarItems = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byWidgetPredicate((Widget w) {
+        if (w is Opacity)
+          return w.opacity == 0.0;
+        return false;
+      }),
+    );
+
+    expect(tester.widget<Opacity>(navigationBarItems.first).opacity, 0.0);
+    expect(tester.widget<Opacity>(navigationBarItems.last).opacity, 0.0);
   });
 
-  testWidgets('BottomNavigationBar showLabel=false for fixed navbar, expect that there is no rendered text',
+  testWidgets('BottomNavigationBar [showLabel]=false for fixed navbar, expect that there is no rendered text',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
-              bottomNavigationBar: RepaintBoundary(
+              bottomNavigationBar: BottomNavigationBar(
                 showLabel: false,
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      title: Text('Red'),
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.dashboard),
-                    ),
-                    BottomNavigationBarItem(
-                      title: Text('Green'),
-                      backgroundColor: Colors.green,
-                      icon: Icon(Icons.menu),
-                    ),
-                  ],
-                ),
+                type: BottomNavigationBarType.fixed,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    title: Text('Red'),
+                    backgroundColor: Colors.red,
+                    icon: Icon(Icons.dashboard),
+                  ),
+                  BottomNavigationBarItem(
+                    title: Text('Green'),
+                    backgroundColor: Colors.green,
+                    icon: Icon(Icons.menu),
+                  ),
+                ],
               ),
             );
           },
@@ -918,8 +925,133 @@ void main() {
       ),
     );
     
-    expect(find.text('Red', findsNothing));
-    expect(find.text('Green', findsNothing));
+    expect(find.text('Red'), findsOneWidget);
+    expect(find.text('Green'), findsOneWidget);
+
+    final Finder navigationBarItems = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byWidgetPredicate((Widget w) {
+        if (w is Opacity)
+          return w.opacity == 0.0;
+        return false;
+      }),
+    );
+
+    expect(tester.widget<Opacity>(navigationBarItems.first).opacity, 0.0);
+    expect(tester.widget<Opacity>(navigationBarItems.last).opacity, 0.0);
+  });
+
+  testWidgets('BottomNavigationBar.fixed showLabel=[false] semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showLabel: false,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('BottomNavigationBar.shifting [showLabel]=false semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showLabel: false,
+          type: BottomNavigationBarType.shifting,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 }
 
