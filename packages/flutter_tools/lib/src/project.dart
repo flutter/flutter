@@ -169,8 +169,6 @@ class IosProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
-  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
