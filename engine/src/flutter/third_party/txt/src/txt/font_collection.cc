@@ -178,6 +178,26 @@ FontCollection::GetMinikinFontCollectionForFamilies(
   return font_collection;
 }
 
+minikin::MinikinFont* FontCollection::GetMinikinFontForFamilies(
+    const std::vector<std::string>& font_families,
+    minikin::FontStyle style) {
+  std::shared_ptr<minikin::FontFamily> font_family = nullptr;
+  for (std::string family_name : font_families) {
+    font_family = FindFontFamilyInManagers(family_name);
+    if (font_family != nullptr) {
+      break;
+    }
+  }
+  if (font_family == nullptr) {
+    const auto default_font_family = GetDefaultFontFamily();
+    font_family = FindFontFamilyInManagers(default_font_family);
+  }
+  if (font_family == nullptr) {
+    return nullptr;
+  }
+  return font_family.get()->getClosestMatch(style).font;
+}
+
 std::shared_ptr<minikin::FontFamily> FontCollection::FindFontFamilyInManagers(
     const std::string& family_name) {
   // Search for the font family in each font manager.
