@@ -75,7 +75,7 @@ class TravelDestinationItem extends StatelessWidget {
       super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const double height = 366.0;
+  static const double height = 338.0;
   final TravelDestination destination;
   final ShapeBorder shape;
 
@@ -111,7 +111,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
       super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const double height = 312.0;
+  static const double height = 298.0;
   final TravelDestination destination;
   final ShapeBorder shape;
 
@@ -162,7 +162,7 @@ class SelectableTravelDestinationItem extends StatefulWidget {
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const double height = 312.0;
+  static const double height = 298.0;
   bool _isSelected = false;
 
   @override
@@ -294,28 +294,26 @@ class TravelDestinationContent extends StatelessWidget {
         ),
       ),
       // Description and share/explore buttons.
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-          child: DefaultTextStyle(
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            style: descriptionStyle,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // three line description
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    destination.description,
-                    style: descriptionStyle.copyWith(color: Colors.black54),
-                  ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+        child: DefaultTextStyle(
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: descriptionStyle,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // three line description
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  destination.description,
+                  style: descriptionStyle.copyWith(color: Colors.black54),
                 ),
-                Text(destination.city),
-                Text(destination.location),
-              ],
-            ),
+              ),
+              Text(destination.city),
+              Text(destination.location),
+            ],
           ),
         ),
       ),
