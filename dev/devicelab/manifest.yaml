@@ -82,6 +82,7 @@ tasks:
       correctly.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   flutter_gallery_android__compile:
     description: >
