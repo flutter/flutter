@@ -53,10 +53,10 @@ abstract class Notification {
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
   /// with the appropriate type parameters that are ancestors of the given
-  /// [BuildContext].
+  /// [BuildContext]. If the [BuildContext] is null, the notification is
+  /// dropped on the floor.
   void dispatch(BuildContext target) {
-    assert(target != null); // Only call dispatch if the widget's State is still mounted.
-    target.visitAncestorElements(visitAncestor);
+    target?.visitAncestorElements(visitAncestor);
   }
 
   @override
