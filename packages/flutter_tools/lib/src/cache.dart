@@ -524,7 +524,7 @@ class FlutterEngine extends CachedArtifact {
   ///   `BuildMode.dynamicProfile`. In the case where it is required regardless
   ///   of buildMode, it can be left null.
   ///   * `targetPlatform` should be one of the supported target platforms.
-  ///   * If, despite the restrictions above the artifact should still be
+  ///   * If, despite the restrictions above, the artifact should still be
   ///   downloaded, `skipChecks` can be set to true.
   List<BinaryArtifact> get _binaries => const <BinaryArtifact>[
     BinaryArtifact(
