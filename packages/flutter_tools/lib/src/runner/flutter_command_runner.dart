@@ -411,13 +411,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         // Skip if sky_engine is the self-contained one.
-        if (engineUri?.path == fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib') + fs.path.separator) {
+        if (fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib') + fs.path.separator == engineUri?.path) {
           engineUri = null;
         }
         // If sky_engine is specified and the engineSourcePath not set, try to determine the engineSourcePath by sky_engine setting.
-        if (engineUri != null) {
-          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))))));
-          if (engineSourcePath == '/' || engineSourcePath.isEmpty) {
+        // A typical engineUri looks like: file://flutter-engine-local-path/src/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/
+        if (engineUri?.path != null) {
+          engineSourcePath = fs.directory(engineUri.path)?.parent?.parent?.parent?.parent?.parent?.parent?.path;
+          if (engineSourcePath != null && (engineSourcePath == fs.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
             engineSourcePath = null;
             throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
               exitCode: 2);
