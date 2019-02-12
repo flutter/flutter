@@ -3,9 +3,10 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/services.dart';
 
 class _MarqueeText extends AnimatedWidget {
-  _MarqueeText({Key key, Animation<double> animation})
+  const _MarqueeText({Key key, Animation<double> animation})
       : super(key: key, listenable: animation);
 
+  @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
     return Container(
@@ -19,9 +20,9 @@ class _MarqueeText extends AnimatedWidget {
 }
 
 class Marquee extends StatefulWidget {
-  final Color color;
+  const Marquee({this.color});
 
-  Marquee({this.color});
+  final Color color;
 
   @override
   State<StatefulWidget> createState() => MarqueeState();
@@ -32,18 +33,18 @@ class MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
   Animation<double> animation;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     controller = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    animation = Tween(begin: 0.0, end: 400.0).animate(controller);
+    animation = Tween<double>(begin: 0.0, end: 400.0).animate(controller);
     controller.repeat();
   }
 
   @override
-  dispose() {
+  void dispose() {
     controller.dispose();
     super.dispose();
   }
@@ -60,7 +61,7 @@ class MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
               child: _MarqueeText(animation: animation),
               alignment: Alignment.centerLeft,
             ),
-            FlatButton(child: Text('POP'), onPressed: SystemNavigator.pop),
+            const FlatButton(child: Text('POP'), onPressed: SystemNavigator.pop),
           ],
         ),
       ),

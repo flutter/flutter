@@ -1,5 +1,6 @@
-import 'dart:ui' as ui;
 import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,14 +9,14 @@ import 'marquee.dart';
 /// Route names. (See [main] for more details.)
 ///
 /// The route names must match those sent by the platform-specific component.
-const greenMarqueeRouteName = 'marquee_green';
-const purpleMarqueeRouteName = 'marquee_purple';
-const fullscreenRouteName = 'full';
-const hybridRouteName = 'hybrid';
+const String greenMarqueeRouteName = 'marquee_green';
+const String purpleMarqueeRouteName = 'marquee_purple';
+const String fullscreenRouteName = 'full';
+const String hybridRouteName = 'hybrid';
 
-const String _kReloadChannelName = "reload";
+const String _kReloadChannelName = 'reload';
 const BasicMessageChannel<String> _kReloadChannel =
-    BasicMessageChannel<String>(_kReloadChannelName, const StringCodec());
+    BasicMessageChannel<String>(_kReloadChannelName, StringCodec());
 
 void main() {
   _kReloadChannel.setMessageHandler(run);
@@ -46,7 +47,7 @@ Future<String> run(String name) async {
 }
 
 class FlutterView extends StatelessWidget {
-  FlutterView({@required this.initialRoute});
+  const FlutterView({@required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class FlutterView extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({this.initialRoute});
+  const MyHomePage({this.initialRoute});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -93,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Used to pass messages between the platform-specific component and the
   // Flutter component.
   static const BasicMessageChannel<String> _platform =
-      BasicMessageChannel<String>(_channel, const StringCodec());
+      BasicMessageChannel<String>(_channel, StringCodec());
 
   // An internal count.  Normally this represents the number of times that the
   // button on the Flutter page has been tapped.
@@ -134,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
         widget.hasExternalTarget ? 'Platform button' : 'Button';
     return Scaffold(
       appBar: widget.isFullscreen
-          ? AppBar(title: Text('Fullscreen Flutter'))
+          ? AppBar(title: const Text('Fullscreen Flutter'))
           : null,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.',
                       style: const TextStyle(fontSize: 17.0)),
                 ),
-                FlatButton(
+                const FlatButton(
                   child: Text('POP'),
                   onPressed: SystemNavigator.pop,
                 ),
@@ -158,8 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
             child: Row(
-              children: <Widget>[
-                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+              children: const <Widget>[
+                Text('Flutter', style: TextStyle(fontSize: 30.0)),
               ],
             ),
           ),
