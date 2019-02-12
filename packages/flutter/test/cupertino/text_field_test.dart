@@ -91,7 +91,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 63), // 29 is the height of the default font * 3 (17 * 3) + decoration (12).
+        const Size(200, 63), // 63 is the height of the default font (17) * maxlines (3) + decoration height (12).
       );
     },
   );
