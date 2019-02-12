@@ -591,11 +591,11 @@ void main() {
               height: 100.0,
               child: AndroidView(
                 viewType: 'webview',
-                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                         () => VerticalDragGestureRecognizer(),
                   ),
-                ].toSet(),
+                },
                 layoutDirection: TextDirection.ltr,
               ),
             ),
@@ -728,11 +728,11 @@ void main() {
               height: 100.0,
               child: AndroidView(
                 viewType: 'webview',
-                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
                         () => EagerGestureRecognizer(),
                   ),
-                ].toSet(),
+                },
                 layoutDirection: TextDirection.ltr,
               ),
             ),
@@ -762,11 +762,11 @@ void main() {
 
       final AndroidView androidView = AndroidView(
         viewType: 'webview',
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           Factory<EagerGestureRecognizer>(
                 () => EagerGestureRecognizer(),
           ),
-        ].toSet(),
+        },
         layoutDirection: TextDirection.ltr,
       );
 
@@ -788,9 +788,9 @@ void main() {
       await tester.pumpWidget(
         AndroidView(
           viewType: 'webview',
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(constructRecognizer),
-          ].toSet(),
+          },
           layoutDirection: TextDirection.ltr,
         ),
       );
@@ -799,9 +799,9 @@ void main() {
         AndroidView(
           viewType: 'webview',
           hitTestBehavior: PlatformViewHitTestBehavior.translucent,
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(constructRecognizer),
-          ].toSet(),
+          },
           layoutDirection: TextDirection.ltr,
         ),
       );
@@ -1216,11 +1216,11 @@ void main() {
               height: 100.0,
               child: UiKitView(
                 viewType: 'webview',
-                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                         () => VerticalDragGestureRecognizer(),
                   ),
-                ].toSet(),
+                },
                 layoutDirection: TextDirection.ltr,
               ),
             ),
@@ -1340,11 +1340,11 @@ void main() {
               height: 100.0,
               child: UiKitView(
                 viewType: 'webview',
-                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
                         () => EagerGestureRecognizer(),
                   ),
-                ].toSet(),
+                },
                 layoutDirection: TextDirection.ltr,
               ),
             ),
@@ -1379,9 +1379,9 @@ void main() {
       await tester.pumpWidget(
         UiKitView(
           viewType: 'webview',
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(constructRecognizer),
-          ].toSet(),
+          },
           layoutDirection: TextDirection.ltr,
         ),
       );
@@ -1390,9 +1390,9 @@ void main() {
         UiKitView(
           viewType: 'webview',
           hitTestBehavior: PlatformViewHitTestBehavior.translucent,
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(constructRecognizer),
-          ].toSet(),
+          },
           layoutDirection: TextDirection.ltr,
         ),
       );

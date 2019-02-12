@@ -70,7 +70,7 @@ class _TrackedAnnotation {
   ///
   /// This is used to detect layers that used to have the mouse pointer inside
   /// them, but now no longer do (to facilitate exit notification).
-  Set<int> activeDevices = Set<int>();
+  Set<int> activeDevices = <int>{};
 }
 
 /// Describes a function that finds an annotation given an offset in logical

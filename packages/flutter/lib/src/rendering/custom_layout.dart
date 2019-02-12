@@ -183,7 +183,7 @@ abstract class MultiChildLayoutDelegate {
     Set<RenderBox> debugPreviousChildrenNeedingLayout;
     assert(() {
       debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
-      _debugChildrenNeedingLayout = Set<RenderBox>();
+      _debugChildrenNeedingLayout = <RenderBox>{};
       return true;
     }());
 

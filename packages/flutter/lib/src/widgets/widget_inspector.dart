@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -2259,7 +2258,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
-    final Set<RenderObject> hits = LinkedHashSet<RenderObject>();
+    final Set<RenderObject> hits = <RenderObject>{};
     hits..addAll(edgeHits)..addAll(regularHits);
     return hits.toList();
   }

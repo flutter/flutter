@@ -121,7 +121,7 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = Set<String>();
+    final Set<String> manifest = <String>{};
     final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
     for (FileSystemEntity entity in flutterFiles) {
       final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);

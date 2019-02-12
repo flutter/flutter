@@ -11,7 +11,7 @@ class DependencyChecker {
   DependencyChecker(this.builder, this.assets);
 
   final DartDependencySetBuilder builder;
-  final Set<String> _dependencies = Set<String>();
+  final Set<String> _dependencies = <String>{};
   final AssetBundle assets;
 
   /// Returns [true] if any components have been modified after [threshold] or

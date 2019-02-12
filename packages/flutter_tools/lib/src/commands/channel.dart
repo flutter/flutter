@@ -49,7 +49,7 @@ class ChannelCommand extends FlutterCommand {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
-    final Set<String> seenChannels = Set<String>();
+    final Set<String> seenChannels = <String>{};
 
     showAll = showAll || currentChannel != currentBranch;
 

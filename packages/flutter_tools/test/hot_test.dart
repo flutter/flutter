@@ -114,7 +114,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
     )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
-    when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
+    when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
 
     setUp(() {

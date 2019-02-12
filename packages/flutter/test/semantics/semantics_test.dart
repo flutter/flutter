@@ -26,7 +26,7 @@ void main() {
       expect(node.isTagged(tag1), isFalse);
       expect(node.isTagged(tag2), isFalse);
 
-      node.tags = Set<SemanticsTag>()..add(tag1);
+      node.tags = <SemanticsTag>{tag1};
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isFalse);
 
@@ -36,9 +36,7 @@ void main() {
     });
 
     test('getSemanticsData includes tags', () {
-      final Set<SemanticsTag> tags = Set<SemanticsTag>()
-        ..add(tag1)
-        ..add(tag2);
+      final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
 
       final SemanticsNode node = SemanticsNode()
         ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)

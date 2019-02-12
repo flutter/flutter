@@ -26,7 +26,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
   String analysisTarget;
   bool firstAnalysis = true;
-  Set<String> analyzedPaths = Set<String>();
+  Set<String> analyzedPaths = <String>{};
   Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   Stopwatch analysisTimer;
   int lastErrorCount = 0;

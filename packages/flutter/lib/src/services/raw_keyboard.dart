@@ -478,7 +478,7 @@ class RawKeyboard {
     }
   }
 
-  final Set<LogicalKeyboardKey> _keysPressed = Set<LogicalKeyboardKey>();
+  final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed {

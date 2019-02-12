@@ -575,7 +575,7 @@ String _createUTIIdentifier(String organization, String name) {
   return '$organization.$name';
 }
 
-final Set<String> _packageDependencies = Set<String>.from(<String>[
+final Set<String> _packageDependencies = <String>{
   'analyzer',
   'args',
   'async',
@@ -602,7 +602,7 @@ final Set<String> _packageDependencies = Set<String>.from(<String>[
   'utf',
   'watcher',
   'yaml'
-]);
+};
 
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.

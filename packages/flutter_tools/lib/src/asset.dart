@@ -320,7 +320,7 @@ Future<DevFSContent> _obtainLicenses(
   // example, a package might itself contain code from multiple third-party
   // sources, and might need to include a license for each one.)
   final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
-  final Set<String> allPackages = Set<String>();
+  final Set<String> allPackages = <String>{};
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
@@ -342,7 +342,7 @@ Future<DevFSContent> _obtainLicenses(
             packageNames = <String>[packageName];
             licenseText = rawLicense;
           }
-          packageLicenses.putIfAbsent(licenseText, () => Set<String>())
+          packageLicenses.putIfAbsent(licenseText, () => <String>{})
             ..addAll(packageNames);
           allPackages.addAll(packageNames);
         }

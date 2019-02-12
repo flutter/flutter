@@ -61,7 +61,7 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -92,7 +92,7 @@ class TestSemantics {
        elevation = 0.0,
        thickness = 0.0,
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -131,7 +131,7 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// The unique identifier for this node.
   ///

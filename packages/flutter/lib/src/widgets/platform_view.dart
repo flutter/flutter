@@ -297,7 +297,7 @@ class _AndroidViewState extends State<AndroidView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +380,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {

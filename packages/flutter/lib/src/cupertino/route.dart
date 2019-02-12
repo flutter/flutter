@@ -193,7 +193,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
   static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
-  static final Set<PageRoute<dynamic>> _popGestureInProgress = Set<PageRoute<dynamic>>();
+  static final Set<PageRoute<dynamic>> _popGestureInProgress = <PageRoute<dynamic>>{};
 
   /// True if a Cupertino pop gesture is currently underway for this route.
   ///

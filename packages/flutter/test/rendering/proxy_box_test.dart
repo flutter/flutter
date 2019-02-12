@@ -89,7 +89,7 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
     config = SemanticsConfiguration();
-    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+    renderObj.validActions = <SemanticsAction>{SemanticsAction.tap, SemanticsAction.scrollLeft};
 
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
