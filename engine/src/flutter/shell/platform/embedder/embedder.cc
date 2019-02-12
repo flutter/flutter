@@ -576,6 +576,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
     pointer_data.physical_x = SAFE_ACCESS(current, x, 0.0);
     pointer_data.physical_y = SAFE_ACCESS(current, y, 0.0);
+    pointer_data.device = SAFE_ACCESS(current, device, 0);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
