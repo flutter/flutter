@@ -42,8 +42,22 @@ import 'theme_data.dart';
 ///
 /// {@tool sample}
 ///
-/// This example shows to use [FlatButton] to create a simple button
+/// This example shows how to use [FlatButton] to create a simple button
 /// in your flutter code.
+///
+/// ```dart
+/// FlatButton(
+///   onPressed: () {
+///     /*...*/
+///   },
+///   child: Text(
+///     "Flat Button",
+///     style: TextStyle(fontSize: 20.0),
+///   ),
+/// )
+/// ```
+/// This example shows how to use [FlatButton] to create a styled
+/// button in your flutter code.
 ///
 /// ```dart
 /// FlatButton(
