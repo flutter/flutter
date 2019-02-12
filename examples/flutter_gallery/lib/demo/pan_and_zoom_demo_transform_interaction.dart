@@ -52,7 +52,7 @@ class TransformInteraction extends StatefulWidget {
     this.onPanCancel,
     this.onScaleStart,
     this.onScaleUpdate,
-    this.onScaleEnd
+    this.onScaleEnd,
   });
 
   final Widget child;
@@ -206,27 +206,27 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onTapDown: (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition, _transform)),
-      onTapUp: (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition, _transform)),
+      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition, _transform)),
+      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition, _transform)),
       onTap: widget.onTap,
       onTapCancel: widget.onTapCancel,
       onDoubleTap: widget.onDoubleTap,
       onLongPress: widget.onLongPress,
       onLongPressUp: widget.onLongPressUp,
-      onVerticalDragDown: (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition, _transform)),
-      onVerticalDragStart: (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition, _transform)),
-      onVerticalDragUpdate: (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition, _transform)),
-      onVerticalDragEnd: (DragEndDetails details) => widget.onVerticalDragEnd(),
+      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragEnd: widget.onVerticalDragEnd == null ? null : (DragEndDetails details) => widget.onVerticalDragEnd(),
       onVerticalDragCancel: widget.onVerticalDragCancel,
-      onHorizontalDragDown: (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition, _transform)),
-      onHorizontalDragStart: (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition, _transform)),
-      onHorizontalDragUpdate: (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition, _transform)),
       onHorizontalDragEnd: widget.onHorizontalDragEnd,
       onHorizontalDragCancel: widget.onHorizontalDragCancel,
-      onPanDown: (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition, _transform)),
-      onPanStart: (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition, _transform)),
-      onPanUpdate: (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition, _transform)),
-      onPanEnd: (DragEndDetails details) => widget.onPanEnd(),
+      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition, _transform)),
+      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition, _transform)),
+      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition, _transform)),
+      onPanEnd: widget.onPanEnd == null ? null : (DragEndDetails details) => widget.onPanEnd(),
       onPanCancel: widget.onPanCancel,
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
@@ -261,7 +261,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle panning and pinch zooming events
   double _currentRotation = 0.0;
   void _onScaleStart(ScaleStartDetails details) {
-    widget.onScaleStart();
+    widget.onScaleStart?.call();
     _controller.stop();
     gestureType = null;
     setState(() {
@@ -271,7 +271,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    widget.onScaleUpdate(fromViewport(details.focalPoint, _transform));
+    widget.onScaleUpdate?.call(fromViewport(details.focalPoint, _transform));
     double scale = _transform.getMaxScaleOnAxis();
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
@@ -306,7 +306,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
         );
         _transform = matrixTranslate(_transform, focalPointSceneNext - focalPointScene);
       } else if (gestureType == GestureType.rotate && details.rotation != 0.0) {
-        print('justin rotat');
         final double desiredRotation = _rotationStart + details.rotation;
         _transform = matrixRotate(_transform, _currentRotation - desiredRotation, details.focalPoint);
         _currentRotation = desiredRotation;
@@ -320,7 +319,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     });
   }
   void _onScaleEnd(ScaleEndDetails details) {
-    widget.onScaleStart();
+    widget.onScaleStart?.call();
     setState(() {
       _scaleStart = null;
       _rotationStart = null;
