@@ -221,6 +221,7 @@ class AttachCommand extends FlutterCommand {
             null,
             true,
             fs.currentDirectory,
+            LaunchMode.attach,
           );
         } catch (error) {
           throwToolExit(error.toString());
