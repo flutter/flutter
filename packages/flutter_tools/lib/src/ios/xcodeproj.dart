@@ -18,6 +18,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../runner/flutter_command.dart';
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -148,13 +149,21 @@ class XcodeProjectInterpreter {
   }
 
   Map<String, String> getBuildSettings(String projectPath, String target) {
+    final BuildInfo buildInfo = FlutterCommand.current.getBuildInfo();
+    final String ios = projectPath.substring(0, projectPath.lastIndexOf('/'));
+    final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(ios);
+    final String scheme = projectInfo.schemeFor(buildInfo);
+    final String configuration =
+        projectInfo.buildConfigurationFor(buildInfo, scheme);
     final String out = runCheckedSync(<String>[
       _executable,
       '-project',
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
+      '-configuration',
+      configuration
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }
