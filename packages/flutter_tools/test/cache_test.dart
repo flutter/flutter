@@ -61,7 +61,7 @@ void main() {
       directory.createSync(recursive: true);
       fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
-      expect(gradleWrapper.isUpToDateInner(), false);
+      expect(gradleWrapper.isUpToDate().isUpToDate, const UpdateResult(isUpToDate: false).isUpToDate);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => fs
@@ -76,7 +76,7 @@ void main() {
       fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew.bat')).createSync(recursive: true);
 
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
-      expect(gradleWrapper.isUpToDateInner(), true);
+      expect(gradleWrapper.isUpToDate().isUpToDate, const UpdateResult(isUpToDate: false).isUpToDate);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => fs

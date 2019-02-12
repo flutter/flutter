@@ -196,7 +196,11 @@ class Cache {
     bool isUpToDate = true;
     bool clobber = false;
     for (CachedArtifact artifact in _artifacts) {
-      final UpdateResult result =  artifact.isUpToDate(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown);
+      final UpdateResult result =  artifact.isUpToDate(
+        buildModes: buildModes,
+        targetPlatforms: targetPlatforms,
+        skipUnknown: skipUnknown,
+      );
       isUpToDate &= result.isUpToDate;
       clobber |= result.clobber;
     }
@@ -237,12 +241,26 @@ class Cache {
       for (CachedArtifact artifact in _artifacts) {
         bool localClobber = clobber;
         if (localClobber) {
-          await artifact.update(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown, clobber: localClobber);
+          await artifact.update(
+            buildModes: buildModes,
+            targetPlatforms: targetPlatforms,
+            skipUnknown: skipUnknown,
+            clobber: localClobber,
+          );
         }
-        final UpdateResult result = artifact.isUpToDate(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown);
+        final UpdateResult result = artifact.isUpToDate(
+          buildModes: buildModes,
+          targetPlatforms: targetPlatforms,
+          skipUnknown: skipUnknown,
+        );
         localClobber |= result.clobber;
         if (localClobber || !result.isUpToDate) {
-          await artifact.update(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown, clobber: localClobber);
+          await artifact.update(
+            buildModes: buildModes,
+            targetPlatforms: targetPlatforms,
+            skipUnknown: skipUnknown,
+            clobber: localClobber,
+          );
         }
       }
     } on SocketException catch (e) {
@@ -260,9 +278,11 @@ class Cache {
 }
 
 class UpdateResult {
-  const UpdateResult({this.isUpToDate, this.clobber});
+  const UpdateResult({this.isUpToDate, this.clobber = false});
 
+  /// Whether the artifact exists and is the correct version.
   final bool isUpToDate;
+  /// Whether the artifact needs to be redownloaded.
   final bool clobber;
 }
 
@@ -282,6 +302,7 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
+  @mustCallSuper
   UpdateResult isUpToDate({
     List<BuildMode> buildModes = const <BuildMode>[],
     List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
@@ -289,15 +310,11 @@ abstract class CachedArtifact {
   }) {
     if (!location.existsSync()) {
       return const UpdateResult(isUpToDate: false, clobber: false);
-    } if (version != cache.getStampFor(name)) {
+    }
+    if (version != cache.getStampFor(name)) {
       return const UpdateResult(isUpToDate: false, clobber: true);
     }
-    final bool result = isUpToDateInner(
-      buildModes: buildModes,
-      targetPlatforms: targetPlatforms,
-      skipUnknown: skipUnknown,
-    );
-    return UpdateResult(isUpToDate: result, clobber: false);
+    return const UpdateResult(isUpToDate: true, clobber: false);
   }
 
   Future<void> update({
@@ -338,9 +355,6 @@ abstract class CachedArtifact {
       }
     }
   }
-
-  /// Hook method for extra checks for being up-to-date.
-  bool isUpToDateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown}) => true;
 
   /// Template method to perform artifact update.
   Future<void> updateInner({
@@ -416,7 +430,12 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
-  Future<void> updateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown, bool clobber}) async {
+  Future<void> updateInner({
+    List<BuildMode> buildModes,
+    List<TargetPlatform> targetPlatforms,
+    bool skipUnknown,
+    bool clobber,
+  }) async {
     final Uri archiveUri = _toStorageUri(version);
     if (fs.directory(location).listSync().isEmpty || clobber) {
       await _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
@@ -820,25 +839,33 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({
-    List<BuildMode> buildModes,
-    List<TargetPlatform> targetPlatforms,
-    bool skipUnknown,
+  UpdateResult isUpToDate({
+    List<BuildMode> buildModes = const <BuildMode>[],
+    List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
+    bool skipUnknown = true,
   }) {
+    final UpdateResult parentResult = super.isUpToDate(
+      buildModes: buildModes,
+      targetPlatforms: targetPlatforms,
+      skipUnknown: skipUnknown
+    );
+    if (!parentResult.isUpToDate || parentResult.clobber) {
+      return parentResult;
+    }
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (BinaryArtifact packageArtifact in _packages) {
       final Directory packageDirectory = packageArtifact.artifactLocation(pkgDir);
       if (!packageDirectory.existsSync()) {
-        return false;
+        return const UpdateResult(isUpToDate: false);
       }
     }
     for (BinaryArtifact toolsArtifact in getBinaryDirs(buildModes: buildModes, targetPlatforms: targetPlatforms, skipUnknown: skipUnknown)) {
       final Directory dir = toolsArtifact.artifactLocation(location);
       if (!dir.existsSync()) {
-        return false;
+        return const UpdateResult(isUpToDate: false);
       }
     }
-    return true;
+    return const UpdateResult(isUpToDate: true);
   }
 
   @override
@@ -960,19 +987,31 @@ class GradleWrapper extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner({List<BuildMode> buildModes, List<TargetPlatform> targetPlatforms, bool skipUnknown}) {
+  UpdateResult isUpToDate({
+    List<BuildMode> buildModes = const <BuildMode>[],
+    List<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
+    bool skipUnknown = true,
+  }) {
+    final UpdateResult parentResult = super.isUpToDate(
+      buildModes: buildModes,
+      targetPlatforms: targetPlatforms,
+      skipUnknown: skipUnknown,
+    );
+    if (!parentResult.isUpToDate || parentResult.clobber) {
+      return parentResult;
+    }
     final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
     if (!fs.directory(wrapperDir).existsSync())
-      return false;
+      return const UpdateResult(isUpToDate: false);
     for (String scriptName in _gradleScripts) {
       final File scriptFile = fs.file(fs.path.join(wrapperDir.path, scriptName));
       if (!scriptFile.existsSync())
-        return false;
+        return const UpdateResult(isUpToDate: false);
     }
     final File gradleWrapperJar = fs.file(fs.path.join(wrapperDir.path, _gradleWrapper));
     if (!gradleWrapperJar.existsSync())
-      return false;
-    return true;
+      return const UpdateResult(isUpToDate: false);
+    return const UpdateResult(isUpToDate: true);
   }
 }
 
