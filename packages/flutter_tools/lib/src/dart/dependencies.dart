@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/analyzer.dart' as analyzer;
+import 'package:analyzer/analyzer.dart' as analyzer; // ignore:deprecated_member_use
 
 import '../base/file_system.dart';
 import '../dart/package_map.dart';
