@@ -298,8 +298,7 @@ class EditableText extends StatefulWidget {
   /// instead.
   ///
   /// To disable strut-based vertical alignment and allow dynamic vertical
-  /// layout based on the glyphs typed, passing [StrutStyle.disabled] will
-  /// make strut take no effect.
+  /// layout based on the glyphs typed, use [StrutStyle.disabled].
   /// {@endtemplate}
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
