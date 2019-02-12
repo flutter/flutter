@@ -242,7 +242,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutDefault.png'),
+      matchesGoldenFile('text_golden.StrutDefault.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -269,7 +269,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.png'),
+      matchesGoldenFile('text_golden.Strut.1.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -297,7 +297,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.png'),
+      matchesGoldenFile('text_golden.Strut.2.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -348,7 +348,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.png'),
+      matchesGoldenFile('text_golden.Strut.3.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -383,7 +383,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.png'),
+      matchesGoldenFile('text_golden.Strut.4.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -434,7 +434,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.png'),
+      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
     );
   }, skip: !Platform.isLinux);
 }
