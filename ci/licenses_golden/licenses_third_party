@@ -1,4 +1,4 @@
-Signature: 040756bb0b57c047a52c98602ad55b4b
+Signature: b0c9cbfed3ecf7fd6279c9c064b15125
 
 UNUSED LICENSES:
 
@@ -5653,7 +5653,6 @@ FILE: ../../../third_party/dart/runtime/vm/signal_handler_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_dbc.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.h
@@ -5709,15 +5708,26 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_dbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/pointer_tagging.h
+FILE: ../../../third_party/dart/runtime/vm/static_type_exactness_state.h
+FILE: ../../../third_party/dart/runtime/vm/stub_code_list.h
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
 FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_state.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_x64.cc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -6201,10 +6211,7 @@ FILE: ../../../third_party/dart/runtime/vm/simulator_arm.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_arm.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_ia32.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_x64.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/stub_code_arm_test.cc
-FILE: ../../../third_party/dart/runtime/vm/stub_code_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/stub_code_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/tags.h
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter.h
@@ -6466,7 +6473,6 @@ FILE: ../../../third_party/dart/runtime/vm/runtime_entry_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_arm64.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_arm64.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/stub_code_arm64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/tags.cc
 FILE: ../../../third_party/dart/runtime/vm/unibrow-inl.h
