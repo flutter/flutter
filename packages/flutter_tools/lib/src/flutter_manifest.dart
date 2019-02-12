@@ -10,6 +10,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart' as convert;
@@ -75,6 +76,9 @@ class FlutterManifest {
   /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
+  // Flag to avoid printing multiple invalid version messages.
+  bool _hasShowInvalidVersionMsg = false;
+
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String get appVersion {
@@ -87,7 +91,10 @@ class FlutterManifest {
     try {
       version = Version.parse(verStr);
     } on Exception {
-      printTrace('Invalid version number: ${version.toString()}');
+      if (!_hasShowInvalidVersionMsg) {
+        printStatus(userMessages.invalidVersionSettingHintMessage(version), emphasis: true);
+        _hasShowInvalidVersionMsg = true;
+      }
     }
     return version?.toString();
   }
