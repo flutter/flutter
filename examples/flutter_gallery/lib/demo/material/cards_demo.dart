@@ -88,7 +88,7 @@ class TravelDestinationItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            const SectionTitle(title: 'Card with actions'),
+            const SectionTitle(title: 'Normal'),
             SizedBox(
               height: height,
               child: Card(
@@ -124,7 +124,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            const SectionTitle(title: 'Card that can be tapped'),
+            const SectionTitle(title: 'Tappable'),
             SizedBox(
               height: height,
               child: Card(
@@ -174,7 +174,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            const SectionTitle(title: 'Card that can be selected (long press)'),
+            const SectionTitle(title: 'Selectable (long press)'),
             SizedBox(
               height: height,
               child: Card(
@@ -252,22 +252,6 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    // In order to have the ink splash appear above the child image, you must
-    // use Ink.image. This allows the image to become part of the Material and
-    // display ink effects above it. Using a standard Image will obscure the ink
-    // splash.
-    final Widget image = destination.type == CardDemoType.standard
-      ? Image.asset(
-          destination.assetName,
-          package: destination.assetPackage,
-          fit: BoxFit.cover,
-        )
-      : Ink.image(
-          image: AssetImage(destination.assetName, package: destination.assetPackage),
-          fit: BoxFit.cover,
-          child: Container(),
-        );
-
     final List<Widget> children = <Widget>[
       // Photo and title.
       SizedBox(
@@ -275,7 +259,15 @@ class TravelDestinationContent extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             Positioned.fill(
-              child: image,
+              // In order to have the ink splash appear above the image, you
+              // must use Ink.image. This allows the image to be painted as part
+              // of the Material and display ink effects above it. Using a
+              // standard Image will obscure the ink splash.
+              child: Ink.image(
+                image: AssetImage(destination.assetName, package: destination.assetPackage),
+                fit: BoxFit.cover,
+                child: Container(),
+              )
             ),
             Positioned(
               bottom: 16.0,
