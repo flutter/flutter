@@ -1,4 +1,4 @@
-Signature: cd4ae5c621870cc057df563c35539d56
+Signature: 61a114339340fd33e37605281ad212bc
 
 UNUSED LICENSES:
 
@@ -4682,6 +4682,18 @@ ORIGIN: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h + ../../.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/experimental/canvaskit/skottie_bindings.cpp
+FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleEmitter.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
+FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
+FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkParticleEmitter.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
 
@@ -4925,6 +4937,7 @@ FILE: ../../../third_party/skia/include/private/SkVx.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
+FILE: ../../../third_party/skia/samplecode/SampleSG.cpp
 FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.cpp
