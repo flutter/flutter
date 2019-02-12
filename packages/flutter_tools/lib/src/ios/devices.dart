@@ -243,6 +243,9 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
 
+      final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
+
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package,
@@ -250,6 +253,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
+          activeArch: iosArch
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
