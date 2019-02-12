@@ -19,7 +19,7 @@ class UserMessages {
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-libstdc++5';
+      'On Arch: pacman -S lib32-libstdc++5 (you need to enable multilib: https://wiki.archlinux.org/index.php/Official_repositories#multilib)';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
@@ -76,7 +76,7 @@ class UserMessages {
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesUnknown => 'Android license status unknown.';
-  String androidSdkOutdated(String managerPath) =>
+  String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
   String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
@@ -85,6 +85,11 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.io/setup/#android-setup for detailed instructions.';
+  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
+      'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
+      'To update using sdkmanager, run:\n'
+      '  $managerPath "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
+      'or visit https://flutter.io/setup/#android-setup for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -224,9 +229,7 @@ class UserMessages {
       'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
   String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
-  String get flutterBaselineRequiresDynamic => 'Error: --baseline is allowed only when --dynamic is specified.';
   String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
-  String get flutterPatchRequiresDynamic => 'Error: --patch is allowed only when --dynamic is specified.';
   String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
 
   // Messages used in FlutterCommandRunner
@@ -278,4 +281,12 @@ class UserMessages {
       'This can happen when you have multiple copies of flutter installed. Please check '
       'your system path to verify that you are running the expected version (run '
       '\'flutter --version\' to see which flutter is on your path).\n';
+  String invalidVersionSettingHintMessage(String invalidVersion) =>
+      'Invalid version $invalidVersion found, default value will be used.\n'
+      'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
+      'In Android, build-name is used as versionName while build-number used as versionCode.\n'
+      'Read more about Android versioning at https://developer.android.com/studio/publish/versioning\n'
+      'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
+      'Read more about iOS versioning at\n'
+      'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 }

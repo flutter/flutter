@@ -6,12 +6,14 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' show saveCompilationTrace;
+// Before adding any more dart:ui imports, pleaes read the README.
+import 'dart:ui' as ui show saveCompilationTrace, Window, window;
 
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'platform.dart';
 import 'print.dart';
@@ -66,6 +68,24 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
+  /// The window to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of [BindingBase],
+  /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
+  /// these bindings define behaviors that interact with a [ui.Window], e.g.,
+  /// [ServicesBinding] registers a [ui.Window.onPlatformMessage] handler, and
+  /// [RendererBinding] registers [ui.Window.onMetricsChanged],
+  /// [ui.Window.onTextScaleFactorChanged], [ui.Window.onSemanticsEnabledChanged],
+  /// and [ui.Window.onSemanticsAction] handlers.
+  ///
+  /// Each of these other bindings could individually access a [Window] statically,
+  /// but that would preclude the ability to test these behaviors with a fake
+  /// window for verification purposes.  Therefore, [BindingBase] exposes this
+  /// [Window] for use by other bindings.  A subclass of [BindingBase], such as
+  /// [TestWidgetsFlutterBinding], can override this accessor to return a
+  /// different [Window] implementation, such as a [TestWindow].
+  ui.Window get window => ui.window;
+
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
   /// "super.initInstances()".
@@ -112,8 +132,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,
@@ -122,7 +141,7 @@ abstract class BindingBase {
         name: 'saveCompilationTrace',
         callback: (Map<String, String> parameters) async {
           return <String, dynamic> {
-            'value': saveCompilationTrace(),
+            'value': ui.saveCompilationTrace(),
           };
         }
       );
@@ -425,27 +444,33 @@ abstract class BindingBase {
   /// not wrapped in a guard that allows the tree shaker to remove it (see
   /// sample code below).
   ///
-  /// ## Sample Code
-  ///
+  /// {@tool sample}
   /// The following code registers a service extension that is only included in
-  /// debug builds:
+  /// debug builds.
   ///
   /// ```dart
-  /// assert(() {
-  ///   // Register your service extension here.
-  ///   return true;
-  /// }());
-  ///
+  /// void myRegistrationFunction() {
+  ///   assert(() {
+  ///     // Register your service extension here.
+  ///     return true;
+  ///   }());
+  /// }
   /// ```
+  /// {@end-tool}
   ///
+  /// {@tool sample}
   /// A service extension registered with the following code snippet is
-  /// available in debug and profile mode:
+  /// available in debug and profile mode.
   ///
   /// ```dart
-  /// if (!const bool.fromEnvironment('dart.vm.product')) {
-  //   // Register your service extension here.
-  // }
+  /// void myRegistrationFunction() {
+  ///   // kReleaseMode is defined in the 'flutter/foundation.dart' package.
+  ///   if (!kReleaseMode) {
+  ///     // Register your service extension here.
+  ///   }
+  /// }
   /// ```
+  /// {@end-tool}
   ///
   /// Both guards ensure that Dart's tree shaker can remove the code for the
   /// service extension in release builds.

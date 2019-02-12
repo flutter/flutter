@@ -90,7 +90,8 @@ class RevealedOffset {
   const RevealedOffset({
     @required this.offset,
     @required this.rect,
-  }) : assert(offset != null), assert(rect != null);
+  }) : assert(offset != null),
+       assert(rect != null);
 
   /// Offset for the viewport to reveal a specific element in the viewport.
   ///

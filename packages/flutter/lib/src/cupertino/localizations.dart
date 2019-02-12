@@ -7,24 +7,26 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'date_picker.dart';
+
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
 enum DatePickerDateTimeOrder {
   /// Order of the columns, from left to right: date, hour, minute, am/pm.
   ///
-  /// Example: [Fri Aug 31 | 02 | 08 | PM].
+  /// Example: Fri Aug 31 | 02 | 08 | PM.
   date_time_dayPeriod,
   /// Order of the columns, from left to right: date, am/pm, hour, minute.
   ///
-  /// Example: [Fri Aug 31 | PM | 02 | 08].
+  /// Example: Fri Aug 31 | PM | 02 | 08.
   date_dayPeriod_time,
   /// Order of the columns, from left to right: hour, minute, am/pm, date.
   ///
-  /// Example: [02 | 08 | PM | Fri Aug 31].
+  /// Example: 02 | 08 | PM | Fri Aug 31.
   time_dayPeriod_date,
   /// Order of the columns, from left to right: am/pm, hour, minute, date.
   ///
-  /// Example: [PM | 02 | 08 | Fri Aug 31].
+  /// Example: PM | 02 | 08 | Fri Aug 31.
   dayPeriod_time_date,
 }
 
@@ -32,19 +34,19 @@ enum DatePickerDateTimeOrder {
 enum DatePickerDateOrder {
   /// Order of the columns, from left to right: day, month, year.
   ///
-  /// Example: [12 | March | 1996]
+  /// Example: 12 | March | 1996
   dmy,
   /// Order of the columns, from left to right: month, day, year.
   ///
-  /// Example: [March | 12 | 1996]
+  /// Example: March | 12 | 1996
   mdy,
   /// Order of the columns, from left to right: year, month, day.
   ///
-  /// Example: [1996 | March | 12]
+  /// Example: 1996 | March | 12
   ymd,
   /// Order of the columns, from left to right: year, day, month.
   ///
-  /// Example: [1996 | 12 | March]
+  /// Example: 1996 | 12 | March
   ydm,
 }
 
@@ -131,7 +133,7 @@ abstract class CupertinoLocalizations {
   /// The term used by the system to announce dialog alerts.
   String get alertDialogLabel;
 
-  /// Hour that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
   ///
   /// Examples: timerPickerHour(1) in:
@@ -140,7 +142,7 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ١
   String timerPickerHour(int hour);
 
-  /// Minute that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Minute that is shown in [CupertinoTimerPicker] corresponding to
   /// the given minute value.
   ///
   /// Examples: timerPickerMinute(1) in:
@@ -149,7 +151,7 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ١
   String timerPickerMinute(int minute);
 
-  /// Second that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Second that is shown in [CupertinoTimerPicker] corresponding to
   /// the given second value.
   ///
   /// Examples: timerPickerSecond(1) in:
@@ -159,17 +161,17 @@ abstract class CupertinoLocalizations {
   String timerPickerSecond(int second);
 
   /// Label that appears next to the hour picker in
-  /// [CupertinoCountdownTimerPicker] when selected hour value is `hour`.
+  /// [CupertinoTimerPicker] when selected hour value is `hour`.
   /// This function will deal with pluralization based on the `hour` parameter.
   String timerPickerHourLabel(int hour);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is `minute`.
+  /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   String timerPickerMinuteLabel(int minute);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is `second`.
+  /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   String timerPickerSecondLabel(int second);
 
@@ -290,7 +292,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerMinuteSemanticsLabel(int minute) {
     if (minute == 1)
-       return '1 minute';
+      return '1 minute';
     return minute.toString() + ' minutes';
   }
 

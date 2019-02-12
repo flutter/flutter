@@ -30,7 +30,7 @@ enum DrawerAlignment {
 }
 
 // TODO(eseidel): Draw width should vary based on device size:
-// http://material.google.com/layout/structure.html#structure-side-nav
+// https://material.io/design/components/navigation-drawer.html#specs
 
 // Mobile:
 // Width = Screen width − 56 dp
@@ -81,7 +81,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
 ///    display and animation of the drawer.
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///
@@ -180,7 +180,7 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -200,6 +200,7 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// {@template flutter.material.drawer.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -212,7 +213,7 @@ class DrawerController extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///

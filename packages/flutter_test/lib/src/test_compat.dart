@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/frontend/timeout.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
@@ -155,6 +156,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible and instead use the test runner flag `-n` to
 /// filter tests by name.
+@isTest
 void test(Object description, Function body, {
   String testOn,
   Timeout timeout,
@@ -227,6 +229,7 @@ void test(Object description, Function body, {
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
+@isTest
 void group(Object description, Function body) {
   _declarer.group(description.toString(), body);
 }
@@ -304,12 +307,13 @@ void tearDownAll(Function body) {
 /// fixed, this must not import `dart:io`.
 class _Reporter {
   _Reporter({bool color = true, bool printPath = true})
-  : _printPath = printPath,
-    _green = color ? '\u001b[32m' : '',
-    _red = color ? '\u001b[31m' : '',
-    _yellow = color ? '\u001b[33m' : '',
-    _bold = color ? '\u001b[1m' : '',
-    _noColor = color ? '\u001b[0m' : '';
+    : _printPath = printPath,
+      _green = color ? '\u001b[32m' : '',
+      _red = color ? '\u001b[31m' : '',
+      _yellow = color ? '\u001b[33m' : '',
+      _bold = color ? '\u001b[1m' : '',
+      _noColor = color ? '\u001b[0m' : '';
+
   final List<LiveTest> passed = <LiveTest>[];
   final List<LiveTest> failed = <LiveTest>[];
   final List<Test> skipped = <Test>[];

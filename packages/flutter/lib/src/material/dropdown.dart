@@ -223,7 +223,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // The maximum height of a simple menu should be one or more rows less than
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
-    //   -- https://material.google.com/components/menus.html#menus-simple-menus
+    //   -- https://material.io/design/components/menus.html#usage
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
@@ -476,10 +476,54 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// shows the currently selected item as well as an arrow that opens a menu for
 /// selecting another item.
 ///
-/// The type `T` is the type of the values the dropdown menu represents. All the
-/// entries in a given menu must represent values with consistent types.
+/// The type `T` is the type of the [value] that each dropdown item represents.
+/// All the entries in a given menu must represent values with consistent types.
 /// Typically, an enum is used. Each [DropdownMenuItem] in [items] must be
 /// specialized with that same type argument.
+///
+/// The [onChanged] callback should update a state variable that defines the
+/// dropdown's value. It should also call [State.setState] to rebuild the
+/// dropdown with the new value.
+///
+/// {@tool snippet --template=stateful_widget}
+///
+/// This sample shows a `DropdownButton` whose value is one of
+/// "One", "Two", "Free", or "Four".
+///
+/// ```dart preamble
+/// String dropdownValue = 'One';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: DropdownButton<String>(
+///         value: dropdownValue,
+///         onChanged: (String newValue) {
+///           setState(() {
+///             dropdownValue = newValue;
+///           });
+///         },
+///         items: <String>['One', 'Two', 'Free', 'Four']
+///           .map<DropdownMenuItem<String>>((String value) {
+///             return DropdownMenuItem<String>(
+///               value: value,
+///               child: Text(value),
+///             );
+///           })
+///           .toList(),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// If the [onChanged] callback is null or the list of [items] is null
+/// then the dropdown button will be disabled, i.e. its arrow will be
+/// displayed in grey and it will not respond to input. A disabled button
+/// will display the [disabledHint] widget if it is non-null.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -489,16 +533,18 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
 ///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
-///  * <https://material.google.com/components/buttons.html#buttons-dropdown-buttons>
+///  * <https://material.io/design/components/menus.html#dropdown-menu>
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
-  /// The [items] must have distinct values and if [value] isn't null it must be among them.
-  /// If [items] or [onChanged] is null, the button will be disabled, the down arrow will be grayed out, and
-  /// the [disabledHint] will be shown (if provided).
+  /// The [items] must have distinct values. If [value] isn't null then it
+  /// must be equal to one of the [DropDownMenuItem] values. If [items] or
+  /// [onChanged] is null, the button will be disabled, the down arrow
+  /// will be greyed out, and the [disabledHint] will be shown (if provided).
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
-  /// defaults, so do not need to be specified).
+  /// defaults, so do not need to be specified). The boolean [isDense] and
+  /// [isExpanded] arguments must not be null.
   DropdownButton({
     Key key,
     @required this.items,
@@ -511,15 +557,24 @@ class DropdownButton<T> extends StatefulWidget {
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
-  }) : assert(items == null || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+       assert(elevation != null),
+       assert(iconSize != null),
+       assert(isDense != null),
+       assert(isExpanded != null),
+       super(key: key);
 
-  /// The list of possible items to select among.
+  /// The list of items the user can select.
+  ///
+  /// If the [onChanged] callback is null or the list of items is null
+  /// then the dropdown button will be disabled, i.e. its arrow will be
+  /// displayed in grey and it will not respond to input. A disabled button
+  /// will display the [disabledHint] widget if it is non-null.
   final List<DropdownMenuItem<T>> items;
 
-  /// The currently selected item, or null if no item has been selected. If
-  /// value is null then the menu is popped up as if the first item was
-  /// selected.
+  /// The value of the currently selected [DropdownMenuItem], or null if no
+  /// item has been selected. If `value` is null then the menu is popped up as
+  /// if the first item were selected.
   final T value;
 
   /// Displayed if [value] is null.
@@ -531,11 +586,17 @@ class DropdownButton<T> extends StatefulWidget {
   final Widget disabledHint;
 
   /// Called when the user selects an item.
+  ///
+  /// If the [onChanged] callback is null or the list of [items] is null
+  /// then the dropdown button will be disabled, i.e. its arrow will be
+  /// displayed in grey and it will not respond to input. A disabled button
+  /// will display the [disabledHint] widget if it is non-null.
   final ValueChanged<T> onChanged;
 
   /// The z-coordinate at which to place the menu when open.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
+  /// 16, and 24. See [kElevationToShadow].
   ///
   /// Defaults to 8, the appropriate elevation for dropdown buttons.
   final int elevation;
@@ -709,11 +770,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // If value is null (then _selectedIndex is null) or if disabled then we
     // display the hint or nothing at all.
-    final IndexedStack innerItemsWidget = IndexedStack(
-      index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
-      alignment: AlignmentDirectional.centerStart,
-      children: items,
-    );
+    final int index = _enabled ? (_selectedIndex ?? hintIndex) : hintIndex;
+    Widget innerItemsWidget;
+    if (items.isEmpty) {
+      innerItemsWidget = Container();
+    } else {
+      innerItemsWidget = IndexedStack(
+        index: index,
+        alignment: AlignmentDirectional.centerStart,
+        children: items,
+      );
+    }
 
     Widget result = DefaultTextStyle(
       style: _textStyle,

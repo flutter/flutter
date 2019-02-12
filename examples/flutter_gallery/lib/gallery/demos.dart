@@ -167,7 +167,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     GalleryDemo(
       title: 'Bottom sheet: Modal',
-      subtitle: 'A dismissable bottom sheet',
+      subtitle: 'A dismissible bottom sheet',
       icon: GalleryIcons.bottom_sheets,
       category: _kMaterialComponents,
       routeName: ModalBottomSheetDemo.routeName,

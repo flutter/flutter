@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -2473,7 +2474,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    ui.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.window.updateSemantics(builder.build());
     notifyListeners();
   }
 
@@ -2621,8 +2622,8 @@ class SemanticsConfiguration {
   /// is set on the same node, all previously painted siblings and cousins up
   /// until the next ancestor that is a semantic boundary are dropped.
   ///
-  /// Paint order as established by [visitChildrenForSemantics] is used to
-  /// determine if a node is previous to this one.
+  /// Paint order as established by [RenderObject.visitChildrenForSemantics] is
+  /// used to determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS

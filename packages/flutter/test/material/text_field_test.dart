@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
@@ -125,12 +124,12 @@ void main() {
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   const String kThreeLines =
-    'First line of text is '
-    'Second line goes until '
-    'Third line of stuff ';
+    'First line of text is\n'
+    'Second line goes until\n'
+    'Third line of stuff';
   const String kMoreThanFourLines =
     kThreeLines +
-    'Fourth line won\'t display and ends at';
+    '\nFourth line won\'t display and ends at';
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -277,6 +276,65 @@ void main() {
     await checkCursorToggle();
   });
 
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
+        ),
+      ),
+    );
+
+    final Finder textFinder = find.byType(TextField);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 16);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
@@ -304,7 +362,10 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
+  // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
+  /*
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -321,9 +382,11 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.0.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
           child: const RepaintBoundary(
@@ -341,7 +404,9 @@ void main() {
       find.byType(TextField),
       matchesGoldenFile('text_field_test.1.0.png'),
     );
+    EditableText.debugDeterministicCursor = false;
   }, skip: !Platform.isLinux);
+  */
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -840,7 +905,7 @@ void main() {
     );
 
     const String testValue = kThreeLines;
-    const String cutValue = 'First line of stuff ';
+    const String cutValue = 'First line of stuff';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -910,7 +975,9 @@ void main() {
 
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = TextEditingController(
+      text: kMoreThanFourLines,
+    );
 
     await tester.pumpWidget(
       overlay(
@@ -923,12 +990,6 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(seconds: 1));
-
-    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
     final RenderBox inputBox = findInputBox();
@@ -953,6 +1014,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     // Now the first line is scrolled up, and the fourth line is visible.
     Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
@@ -963,14 +1025,20 @@ void main() {
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
 
     // Now try scrolling by dragging the selection handle.
-
     // Long press the 'i' in 'Fourth line' to select the word.
-    await tester.pump(const Duration(seconds: 1));
-    final Offset untilPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth line')+8);
-    gesture = await tester.startGesture(untilPos, pointer: 7);
+    final Offset selectedWordPos = textOffsetToPosition(
+      tester,
+      kMoreThanFourLines.indexOf('Fourth line') + 8,
+    );
+
+    gesture = await tester.startGesture(selectedWordPos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+
+    expect(controller.selection.base.offset, 91);
+    expect(controller.selection.extent.offset, 94);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -980,7 +1048,7 @@ void main() {
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
-    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    final Offset handlePos = endpoints[0].point + const Offset(-1, 1);
     final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
@@ -996,9 +1064,7 @@ void main() {
     expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
-  },
-  // This test fails on some Mac environments when libtxt is enabled.
-  skip: Platform.isMacOS);
+  });
 
   testWidgets('TextField smoke test', (WidgetTester tester) async {
     String textFieldValue;
@@ -1469,7 +1535,10 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    // The overlay() function centers its child within a 800x600 window.
+    // Default cursorWidth is 2.0, test windowWidth is 800
+    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1478,7 +1547,8 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    // TextPosition(offset: 2) - center of 'abcd'
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1501,7 +1571,10 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    // The overlay() function centers its child within a 800x600 window.
+    // Default cursorWidth is 2.0, test windowWidth is 800
+    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1510,7 +1583,8 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(398.5));
+    // TextPosition(offset: 2) - center of 'abcd'
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
@@ -3130,7 +3204,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 10)).topLeft,
     );
 
-    expect(topLeft.dx, equals(701.0));
+    expect(topLeft.dx, equals(701));
 
     await tester.pumpWidget(
       const MaterialApp(

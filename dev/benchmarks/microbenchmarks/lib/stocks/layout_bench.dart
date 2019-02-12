@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -33,27 +32,21 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    // Disable calls from the engine which would interfere with the benchmark.
-    ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
-
-    final TestViewConfiguration big = TestViewConfiguration(size: const Size(360.0, 640.0));
-    final TestViewConfiguration small = TestViewConfiguration(size: const Size(355.0, 635.0));
+    final TestViewConfiguration big = TestViewConfiguration(
+      size: const Size(360.0, 640.0),
+      window: RendererBinding.instance.window,
+    );
+    final TestViewConfiguration small = TestViewConfiguration(
+      size: const Size(355.0, 635.0),
+      window: RendererBinding.instance.window,
+    );
     final RenderView renderView = WidgetsBinding.instance.renderView;
-    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
       renderView.configuration = (iterations % 2 == 0) ? big : small;
-      // We don't use tester.pump() because we're trying to drive it in an
-      // artificially high load to find out how much CPU each frame takes.
-      // This differs from normal benchmarks which might look at how many
-      // frames are missed, etc.
-      // We use Timer.run to ensure there's a microtask flush in between
-      // the two calls below.
-      Timer.run(() { binding.handleBeginFrame(Duration(milliseconds: iterations * 16)); });
-      Timer.run(() { binding.handleDrawFrame(); });
-      await tester.idle(); // wait until the frame has run (also uses Timer.run)
+      await tester.pumpBenchmark(Duration(milliseconds: iterations * 16));
       iterations += 1;
     }
     watch.stop();

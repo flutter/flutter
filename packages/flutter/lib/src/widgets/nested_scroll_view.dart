@@ -189,7 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -371,7 +371,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
@@ -1377,7 +1377,8 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
     RenderSliver child,
-  }) : assert(handle != null), _handle = handle {
+  }) : assert(handle != null),
+       _handle = handle {
     this.child = child;
   }
 
@@ -1522,7 +1523,8 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     @required SliverOverlapAbsorberHandle handle,
-  }) : assert(handle != null), _handle = handle;
+  }) : assert(handle != null),
+       _handle = handle;
 
   double _currentLayoutExtent;
   double _currentMaxExtent;

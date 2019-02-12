@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-
 import 'dart:io';
+
+import 'package:flutter_tools/src/base/common.dart';
 
 Process daemon;
 
@@ -41,7 +42,8 @@ Future<void> main() async {
         'method': 'app.start',
         'params': <String, dynamic> {
           'deviceId': words[1],
-          'projectDirectory': words[2]
+          'projectDirectory': words[2],
+          'launchMode': words[3],
         }
       });
     } else if (words.first == 'stop') {
@@ -82,10 +84,10 @@ Future<void> main() async {
   });
 
   // Print in the callback can't fail.
-  daemon.exitCode.then<void>((int code) { // ignore: unawaited_futures
+  unawaited(daemon.exitCode.then<void>((int code) {
     print('daemon exiting ($code)');
     exit(code);
-  });
+  }));
 }
 
 int id = 0;

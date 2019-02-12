@@ -54,7 +54,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// [dragStartBehavior] must not be null.
   DragGestureRecognizer({
     Object debugOwner,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner);
 
@@ -330,8 +330,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) :
-        super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -35,6 +37,47 @@ void main() {
     expect(value, isFalse);
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
+  });
+
+  testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    bool value = false;
+
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                key: switchKey,
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pumpAndSettle();
+
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {

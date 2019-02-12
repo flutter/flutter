@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
@@ -68,7 +69,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/text-fields.html>
+///  * <https://material.io/design/components/text-fields.html>
 ///  * [TextFormField], which integrates with the [Form] widget.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
@@ -143,7 +144,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
     this.onTap,
     this.buildCounter,
@@ -565,11 +566,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    if (cause == SelectionChangedCause.longPress)
-      Feedback.forLongPress(context);
-  }
-
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -613,9 +609,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleForcePressStarted(ForcePressDetails details) {
     if (widget.selectionEnabled) {
-      // The cause is not technically double tap, but we would like to show
-      // the toolbar.
-      _renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.doubleTap);
+      _renderEditable.selectWordsInRange(
+        from: details.globalPosition,
+        cause: SelectionChangedCause.forcePress,
+      );
+      _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -650,14 +648,19 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          Feedback.forLongPress(context);
           break;
       }
+      _editableTextKey.currentState.showToolbar();
     }
     _confirmCurrentSplash();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
-    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+    if (widget.selectionEnabled) {
+      _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+      _editableTextKey.currentState.showToolbar();
+    }
   }
 
   void _startSplash(TapDownDetails details) {
@@ -704,7 +707,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&
-         (widget.style.fontSize == null || widget.style.textBaseline == null)),
+        (widget.style.fontSize == null || widget.style.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
 
@@ -719,15 +722,37 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     bool forcePressEnabled;
     TextSelectionControls textSelectionControls;
+    bool paintCursorAboveText;
+    bool cursorOpacityAnimates;
+    Offset cursorOffset;
+    Color cursorColor = widget.cursorColor;
+    Radius cursorRadius = widget.cursorRadius;
+
     switch (themeData.platform) {
       case TargetPlatform.iOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
+        paintCursorAboveText = true;
+        cursorOpacityAnimates = true;
+        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        cursorRadius ??= const Radius.circular(2.0);
+        // An eyeballed value that moves the cursor slightly left of where it is
+        // rendered for text on Android so its positioning more accurately matches the
+        // native iOS text cursor positioning.
+        //
+        // This value is in device pixels, not logical pixels as is typically used
+        // throughout the codebase.
+        const int _iOSHorizontalOffset = 2;
+        cursorOffset = Offset(_iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
+
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates = false;
+        cursorColor ??= themeData.cursorColor;
         break;
     }
 
@@ -751,12 +776,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onChanged: widget.onChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
-        cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor ?? themeData.cursorColor,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorOffset: cursorOffset,
+        paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
