@@ -35,7 +35,7 @@ String get javaPath => androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
-      {Version version, this.configured, this.studioAppName = 'AndroidStudio', this.pathsSelectorPath})
+      {Version version, this.configured, this.studioAppName = 'AndroidStudio', this.presetPluginsPath})
       : version = version ?? Version.unknown {
     _init();
   }
@@ -69,7 +69,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       version = Version.parse(versionString);
 
     final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
-    return AndroidStudio(studioPath, version: version, pathsSelectorPath: pathsSelectorValue);
+    final String presetPluginsPath = pathsSelectorValue == null ? null :
+                                      fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
+    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -105,9 +107,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String studioAppName;
   final Version version;
   final String configured;
-  final String pathsSelectorPath;
+  final String presetPluginsPath;
 
-  String _pluginsPath;
   String _javaPath;
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
@@ -117,31 +118,23 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   bool get isValid => _isValid;
 
   String get pluginsPath {
-    if (_pluginsPath == null) {
-      final int major = version.major;
-      final int minor = version.minor;
-      if (platform.isMacOS) {
-        if (pathsSelectorPath != null) {
-          _pluginsPath = fs.path.join(
-              homeDirPath,
-              'Library',
-              'Application Support',
-              '$pathsSelectorPath');
-        } else {
-          _pluginsPath = fs.path.join(
-              homeDirPath,
-              'Library',
-              'Application Support',
-              'AndroidStudio$major.$minor');
-        }
-      } else {
-        _pluginsPath = fs.path.join(homeDirPath,
-            '.$studioAppName$major.$minor',
-            'config',
-            'plugins');
-      }
+    if (presetPluginsPath != null) {
+      return presetPluginsPath;
     }
-    return _pluginsPath;
+    final int major = version?.major;
+    final int minor = version?.minor;
+    if (platform.isMacOS) {
+      return fs.path.join(
+          homeDirPath,
+          'Library',
+          'Application Support',
+          'AndroidStudio$major.$minor');
+    } else {
+      return fs.path.join(homeDirPath,
+          '.$studioAppName$major.$minor',
+          'config',
+          'plugins');
+    }
   }
 
   List<String> get validationMessages => _validationMessages;
