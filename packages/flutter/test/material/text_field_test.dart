@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -3317,6 +3318,75 @@ void main() {
     await tester.pump();
     semantics.dispose();
   });
+
+  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final TextEditingController controller = TextEditingController();
+    const TextStyle textStyle = TextStyle();
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Padding(
+          padding: const EdgeInsets.only(top: 0.25),
+          child: Material(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable editable = findRenderEditable(tester);
+    editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(20, 20)));
+    await tester.pump();
+
+    expect(editable, paints
+      ..rrect(rrect: RRect.fromRectAndRadius(
+        Rect.fromLTRB(463.3333435058594, -1.5833333730697632, 465.3333435058594, 16.41666603088379),
+        const Radius.circular(2.0)),
+        color: const Color(0xff8e8e93))
+      ..rrect(rrect: RRect.fromRectAndRadius(
+        Rect.fromLTRB(463.8333435058594, -2.416666269302368, 466.8333435058594, 17.58333396911621),
+        const Radius.circular(1.0)),
+        color: const Color(0xbf2196f3))
+    );
+
+    // Moves the cursor right a few characters.
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: const Offset(-250, 20)
+      ),
+    );
+
+    expect(find.byType(EditableText), paints
+      ..rrect(rrect: RRect.fromRectAndRadius(
+        Rect.fromLTRB(191.3333282470703, -1.5833333730697632, 193.3333282470703, 16.41666603088379),
+        const Radius.circular(2.0)),
+        color: const Color(0xff8e8e93))
+      ..rrect(rrect: RRect.fromRectAndRadius(
+        Rect.fromLTRB(193.83334350585938, -2.416666269302368, 196.83334350585938, 17.58333396911621),
+        const Radius.circular(1.0)),
+        color: const Color(0xbf2196f3))
+    );
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+    debugDefaultTargetPlatformOverride = null;
+  });
+
 
   testWidgets('InputDecoration counterText can have a semanticCounterText', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
