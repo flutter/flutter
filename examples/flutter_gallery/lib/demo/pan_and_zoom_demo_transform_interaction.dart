@@ -97,8 +97,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     }
 
     // Don't allow a scale that moves the viewport outside of _visibleRect
-    // TODO this might mess you up because transform includes rotation, but we
-    // were previously setting rotation to 0.0
     final Offset tl = fromViewport(const Offset(0, 0), _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
