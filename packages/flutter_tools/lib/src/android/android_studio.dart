@@ -27,7 +27,7 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
 final RegExp _pathsSelectorMatcher =
-    RegExp(r'"idea.paths.selector" = "AndroidStudio[^;]+"');
+    RegExp(r'"idea.paths.selector" = "[^;]+"');
 final RegExp _jetBrainsToolboxAppMatcher =
     RegExp(r'JetBrainsToolboxApp = "[^;]+"');
 
@@ -47,8 +47,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       plistFile,
       null,
     );
-
-    final String jetBrainsToolboxAppBundlePath = _jetBrainsToolboxAppMatcher.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
+    // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
+    // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
+    final String jetBrainsToolboxAppBundlePath = extractStudioPlistValueWithMatcher(plistValue, _jetBrainsToolboxAppMatcher);
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
@@ -67,7 +68,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (versionString != null)
       version = Version.parse(versionString);
 
-    final String pathsSelectorValue = _pathsSelectorMatcher.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
+    final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
     return AndroidStudio(studioPath, version: version, pathsSelectorPath: pathsSelectorValue);
   }
 
@@ -269,6 +270,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       _checkWellKnownPath('$homeDirPath/android-studio');
     }
     return studios;
+  }
+
+  static String extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
+    if (plistValue == null || keyMatcher == null) {
+      return null;
+    }
+    return keyMatcher?.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
   }
 
   void _init() {
