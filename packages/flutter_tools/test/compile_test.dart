@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -445,23 +446,26 @@ example:org-dartlang-app:///lib/
           ]));
 
       // The test manages timing via completers.
-      generator.recompile( // ignore: unawaited_futures
-        '/path/to/main.dart',
-        null, /* invalidatedFiles */
-        outputPath: '/build/',
-      ).then((CompilerOutput outputCompile) {
-        expect(logger.errorText,
-            equals('\nCompiler message:\nline1\nline2\n'));
-        expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
+      unawaited(
+        generator.recompile(
+          '/path/to/main.dart',
+          null, /* invalidatedFiles */
+          outputPath: '/build/',
+        ).then((CompilerOutput outputCompile) {
+          expect(logger.errorText,
+              equals('\nCompiler message:\nline1\nline2\n'));
+          expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
-        compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
-            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
-        )));
-      });
+          compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
+              'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+          )));
+        }),
+      );
 
       // The test manages timing via completers.
       final Completer<bool> lastExpressionCompleted = Completer<bool>();
-      generator.compileExpression('0+1', null, null, null, null, false).then( // ignore: unawaited_futures
+      unawaited(
+        generator.compileExpression('0+1', null, null, null, null, false).then(
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,
@@ -470,17 +474,22 @@ example:org-dartlang-app:///lib/
             compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
                 'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
             )));
-          });
+          },
+        ),
+      );
 
       // The test manages timing via completers.
-      generator.compileExpression('1+1', null, null, null, null, false).then( // ignore: unawaited_futures
+      unawaited(
+        generator.compileExpression('1+1', null, null, null, null, false).then(
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,
                 equals('/path/to/main.dart.dill.incremental'));
             expect(outputExpression.errorCount, 0);
             lastExpressionCompleted.complete(true);
-          });
+          },
+        )
+      );
 
       compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
           'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'

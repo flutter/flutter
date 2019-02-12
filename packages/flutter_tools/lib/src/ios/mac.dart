@@ -114,7 +114,7 @@ class IMobileDevice {
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode != 0 || result.stdout.isEmpty)
+    if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
     // Check that we can look up the names of any attached devices.
@@ -480,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }

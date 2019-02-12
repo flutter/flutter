@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,13 +14,30 @@ import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
-void main() {
-  final TextEditingController controller = TextEditingController();
-  final FocusNode focusNode = FocusNode();
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
-  const TextStyle textStyle = TextStyle();
-  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+RenderEditable findRenderEditable(WidgetTester tester) {
+  final RenderObject root = tester.renderObject(find.byType(EditableText));
+  expect(root, isNotNull);
 
+  RenderEditable renderEditable;
+  void recursiveFinder(RenderObject child) {
+    if (child is RenderEditable) {
+      renderEditable = child;
+      return;
+    }
+    child.visitChildren(recursiveFinder);
+  }
+  root.visitChildren(recursiveFinder);
+  expect(renderEditable, isNotNull);
+  return renderEditable;
+}
+
+final TextEditingController controller = TextEditingController();
+final FocusNode focusNode = FocusNode();
+final FocusScopeNode focusScopeNode = FocusScopeNode();
+const TextStyle textStyle = TextStyle();
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
   });
@@ -88,29 +104,8 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
+    expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
-  });
-
-  testWidgets('cursor has expected width and radius',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          cursorWidth: 10.0,
-          cursorRadius: const Radius.circular(2.0),
-        ))));
-
-    final EditableText editableText =
-        tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorWidth, 10.0);
-    expect(editableText.cursorRadius.x, 2.0);
   });
 
   testWidgets('text keyboard is requested when maxLines is default',
@@ -483,6 +478,45 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  testWidgets('can only show toolbar when there is text and a selection',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(state.showToolbar(), false);
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    controller.text = 'blah';
+    await tester.pump();
+    expect(state.showToolbar(), false);
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -518,6 +552,7 @@ void main() {
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pump();
 
     await tester.tap(find.text('PASTE'));
@@ -525,113 +560,6 @@ void main() {
 
     expect(changedValue, clipboardContent);
   });
-
-  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
-    String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          selectionControls: materialTextSelectionControls,
-          keyboardType: TextInputType.text,
-          onChanged: (String value) {
-            changedValue = value;
-          },
-          cursorWidth: 15.0,
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-
-    // Populate a fake clipboard.
-    const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
-
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    await tester.pump();
-
-    await tester.tap(find.text('PASTE'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.0.png'),
-    );
-  }, skip: !Platform.isLinux);
-
-  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
-    String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: EditableText(
-          backgroundCursorColor: Colors.grey,
-          key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          selectionControls: materialTextSelectionControls,
-          keyboardType: TextInputType.text,
-          onChanged: (String value) {
-            changedValue = value;
-          },
-          cursorWidth: 15.0,
-          cursorRadius: const Radius.circular(3.0),
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-
-    // Populate a fake clipboard.
-    const String clipboardContent = ' ';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
-
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    await tester.pump();
-
-    await tester.tap(find.text('PASTE'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.0.png'),
-    );
-  }, skip: !Platform.isLinux);
 
   testWidgets('Does not lose focus by default when "next" action is pressed',
       (WidgetTester tester) async {
@@ -841,119 +769,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            maxLines: 3,
-          )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 110);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 16);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-            child: TextField(
-              maxLines: 3,
-            )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor.alpha, 0);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    const Widget widget =
-      MaterialApp(
-        home: Material(
-            child: TextField(
-              maxLines: 3,
-            )
-        ),
-      );
-    await tester.pumpWidget(widget);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-testWidgets(
+  testWidgets(
       'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
@@ -1055,19 +871,20 @@ testWidgets(
 
     expect(log, hasLength(1));
     expect(
-        log.single,
-        isMethodCall(
-          'TextInput.setEditingState',
-          arguments: const <String, dynamic>{
-            'text': 'Wobble',
-            'selectionBase': -1,
-            'selectionExtent': -1,
-            'selectionAffinity': 'TextAffinity.downstream',
-            'selectionIsDirectional': false,
-            'composingBase': -1,
-            'composingExtent': -1,
-          },
-        ));
+      log.single,
+      isMethodCall(
+        'TextInput.setEditingState',
+        arguments: const <String, dynamic>{
+          'text': 'Wobble',
+          'selectionBase': -1,
+          'selectionExtent': -1,
+          'selectionAffinity': 'TextAffinity.downstream',
+          'selectionIsDirectional': false,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ),
+    );
   });
 
   testWidgets('EditableText identifies as text field (w/ focus) in semantics',
@@ -1094,19 +911,19 @@ testWidgets(
       ),
     );
 
-    expect(semantics,
-        includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
     await tester.pump();
 
     expect(
-        semantics,
-        includesNodeWith(flags: <SemanticsFlag>[
-          SemanticsFlag.isTextField,
-          SemanticsFlag.isFocused
-        ]));
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.isFocused
+      ]),
+    );
 
     semantics.dispose();
   });
@@ -1139,11 +956,12 @@ testWidgets(
     );
 
     expect(
-        semantics,
-        includesNodeWith(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-          value: value1,
-        ));
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+        value: value1,
+      ),
+    );
 
     const String value2 = 'Changed the EditableText content';
     controller.text = value2;
@@ -1151,17 +969,17 @@ testWidgets(
     await tester.pump();
 
     expect(
-        semantics,
-        includesNodeWith(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-          value: value2,
-        ));
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+        value: value2,
+      ),
+    );
 
     semantics.dispose();
   });
 
-  testWidgets('changing selection with keyboard does not show handles',
-      (WidgetTester tester) async {
+  testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
     const String value1 = 'Hello World';
 
     controller.text = value1;
@@ -1190,8 +1008,9 @@ testWidgets(
 
     expect(textState.selectionOverlay.handlesAreVisible, isTrue);
     expect(
-        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
-        const TextSelection.collapsed(offset: 4));
+      textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 4),
+    );
 
     // Simulate selection change via keyboard and expect handles to disappear.
     render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render,
@@ -1200,8 +1019,9 @@ testWidgets(
 
     expect(textState.selectionOverlay.handlesAreVisible, isFalse);
     expect(
-        textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
-        const TextSelection.collapsed(offset: 10));
+      textState.selectionOverlay.selectionDelegate.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 10),
+    );
   });
 
   testWidgets('exposes correct cursor movement semantics',
@@ -1221,10 +1041,11 @@ testWidgets(
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+      ),
+    );
 
     controller.selection =
         TextSelection.collapsed(offset: controller.text.length);
@@ -1232,15 +1053,16 @@ testWidgets(
 
     // At end, can only go backwards.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     controller.selection =
         TextSelection.collapsed(offset: controller.text.length - 2);
@@ -1248,32 +1070,34 @@ testWidgets(
 
     // Somewhere in the middle, can go in both directions.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pumpAndSettle();
 
     // At beginning, can only go forward.
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1297,14 +1121,15 @@ testWidgets(
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1321,17 +1146,18 @@ testWidgets(
     expect(controller.selection.extentOffset, 3);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
@@ -1348,15 +1174,16 @@ testWidgets(
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
@@ -1387,14 +1214,15 @@ testWidgets(
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1411,17 +1239,18 @@ testWidgets(
     expect(controller.selection.extentOffset, 9);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
@@ -1439,15 +1268,16 @@ testWidgets(
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
@@ -1487,14 +1317,15 @@ testWidgets(
     ));
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1511,17 +1342,18 @@ testWidgets(
     expect(controller.selection.extentOffset, 3);
 
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
@@ -1538,15 +1370,16 @@ testWidgets(
 
     await tester.pumpAndSettle();
     expect(
-        semantics,
-        includesNodeWith(
-          value: 'test',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ));
+      semantics,
+      includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
     tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
         SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
@@ -1586,14 +1419,15 @@ testWidgets(
       ));
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+          ],
+        ),
+      );
 
       final RenderEditable render = tester.allRenderObjects
           .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
@@ -1610,17 +1444,18 @@ testWidgets(
       expect(controller.selection.extentOffset, 9);
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorForwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.moveCursorForwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
           SemanticsAction.moveCursorBackwardByWord, extendSelection);
@@ -1638,15 +1473,16 @@ testWidgets(
 
       await tester.pumpAndSettle();
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test for words',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorForwardByCharacter,
-              SemanticsAction.moveCursorForwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
           SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
@@ -1685,32 +1521,130 @@ testWidgets(
     final String expectedValue = '•' * controller.text.length;
 
     expect(
-        semantics,
-        hasSemantics(
-            TestSemantics(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isObscured
-                          ],
-                          value: expectedValue,
-                          textDirection: TextDirection.ltr,
-                        ),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
+                        SemanticsFlag.isObscured
                       ],
+                      value: expectedValue,
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreTransform: true,
-            ignoreRect: true,
-            ignoreId: true));
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('password fields become obscured with the right semantics when set',
+      (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    const String originalText = 'super-secret-password!!1';
+    controller.text = originalText;
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    const String expectedValue = '••••••••••••••••••••••••';
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
+                      ],
+                      value: originalText,
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    // Now change it to make it obscure text.
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(findRenderEditable(tester).text.text, expectedValue);
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isTextField,
+                        SemanticsFlag.isObscured,
+                        SemanticsFlag.isFocused,
+                      ],
+                      value: expectedValue,
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1755,77 +1689,82 @@ testWidgets(
       await tester.pump();
 
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.copy,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.copy,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.paste,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.paste,
+          ],
+        ),
+      );
 
       when(controls.canPaste(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.cut,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.cut,
+          ],
+        ),
+      );
 
       when(controls.canCopy(any)).thenReturn(true);
       when(controls.canCut(any)).thenReturn(true);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
       expect(
-          semantics,
-          includesNodeWith(
-            value: 'test',
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-              SemanticsAction.cut,
-              SemanticsAction.copy,
-              SemanticsAction.paste,
-            ],
-          ));
+        semantics,
+        includesNodeWith(
+          value: 'test',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.setSelection,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
+            SemanticsAction.paste,
+          ],
+        ),
+      );
 
       semantics.dispose();
     });
@@ -1844,44 +1783,46 @@ testWidgets(
       const int expectedNodeId = 4;
 
       expect(
-          semantics,
-          hasSemantics(
-              TestSemantics.root(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 1,
                 children: <TestSemantics>[
-                  TestSemantics.rootChild(
-                    id: 1,
+                  TestSemantics(
+                    id: 2,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
-                      TestSemantics(
-                        id: 2,
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics.rootChild(
-                            id: expectedNodeId,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isTextField,
-                              SemanticsFlag.isFocused
-                            ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.moveCursorBackwardByCharacter,
-                              SemanticsAction.moveCursorBackwardByWord,
-                              SemanticsAction.setSelection,
-                              SemanticsAction.copy,
-                              SemanticsAction.cut,
-                              SemanticsAction.paste
-                            ],
-                            value: 'test',
-                            textSelection: TextSelection.collapsed(
-                                offset: controller.text.length),
-                            textDirection: TextDirection.ltr,
-                          ),
+                      TestSemantics.rootChild(
+                        id: expectedNodeId,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.isFocused
                         ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.moveCursorBackwardByCharacter,
+                          SemanticsAction.moveCursorBackwardByWord,
+                          SemanticsAction.setSelection,
+                          SemanticsAction.copy,
+                          SemanticsAction.cut,
+                          SemanticsAction.paste
+                        ],
+                        value: 'test',
+                        textSelection: TextSelection.collapsed(
+                            offset: controller.text.length),
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
                 ],
               ),
-              ignoreRect: true,
-              ignoreTransform: true));
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
       verify(controls.handleCopy(any)).called(1);
@@ -1913,196 +1854,6 @@ testWidgets(
     final RenderEditable render = tester.allRenderObjects
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     expect(render.text.style.fontStyle, FontStyle.italic);
-  });
-
-  testWidgets('autofocus sets cursor to the end of text',
-      (WidgetTester tester) async {
-    const String text = 'hello world';
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    final FocusNode focusNode = FocusNode();
-
-    controller.text = text;
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              autofocus: true,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(focusNode.hasFocus, true);
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, text.length);
-  });
-
-  RenderEditable findRenderEditable(WidgetTester tester) {
-    final RenderObject root = tester.renderObject(find.byType(EditableText));
-    expect(root, isNotNull);
-
-    RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditable) {
-        renderEditable = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderEditable, isNotNull);
-    return renderEditable;
-  }
-
-  testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
-    final FocusNode focusNode = FocusNode();
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
-
-    expect(controller.selection.baseOffset, 29);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
-
-    // But we have not yet set the offset because the user is not done placing the cursor.
-    expect(controller.selection.baseOffset, 29);
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-    // The cursor has been set.
-    expect(controller.selection.baseOffset, 10);
-  });
-
-  testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
-    final FocusNode focusNode = FocusNode();
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
-
-    expect(controller.selection.baseOffset, 29);
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
-
-    expect(controller.selection.baseOffset, 29);
-
-    // Moves the cursor super far right
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2100, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(2090, 20)));
-
-    // After peaking the cursor, we move in the opposite direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(1400, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-    // The cursor has been set.
-    expect(controller.selection.baseOffset, 8);
-
-    // Go in the other direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5010, 20)));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-5000, 20)));
-
-    // Move back in the opposite direction only a few hundred.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(-4850, 20)));
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
-    await tester.pumpAndSettle();
-
-    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
