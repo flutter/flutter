@@ -33,7 +33,7 @@ class BuildKernelCompiler implements KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String depFilePath,
-    TargetModel targetModel,
+    TargetModel targetModel = TargetModel.flutter,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'

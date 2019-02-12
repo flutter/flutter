@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // This demo is based on
-// https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs
+// https://material.io/design/components/dialogs.html#full-screen-dialog
 
 enum DismissDialogAction {
   cancel,

@@ -101,7 +101,7 @@ class DartVmEvent {
 /// Dart VM at any given time.
 class FuchsiaRemoteConnection {
   FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner)
-      : _pollDartVms = false;
+    : _pollDartVms = false;
 
   bool _pollDartVms;
   final List<PortForwarder> _forwardedVmServicePorts = <PortForwarder>[];

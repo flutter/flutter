@@ -120,7 +120,7 @@ class XcodeProjectInterpreter {
       _majorVersion = int.parse(components[0]);
       _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
     } on ProcessException {
-      // Ignore: leave values null.
+      // Ignored, leave values null.
     }
   }
 

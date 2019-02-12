@@ -47,6 +47,63 @@ void main() {
       expect(pathDoesNotContainCircle(actualPath, guest), isTrue);
     });
 
+    test('no guest is ok', () {
+      final Rect host = Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      expect(
+        const CircularNotchedRectangle().getOuterPath(host, null),
+        coversSameAreaAs(
+          Path()..addRect(host),
+          areaToCompare: host.inflate(800.0),
+          sampleSize: 100,
+        )
+      );
+    });
+
+    test('AutomaticNotchedShape - with guest', () {
+      expect(
+        const AutomaticNotchedShape(
+          RoundedRectangleBorder(),
+          RoundedRectangleBorder(),
+        ).getOuterPath(
+          Rect.fromLTWH(-200.0, -100.0, 50.0, 100.0),
+          Rect.fromLTWH(-175.0, -110.0, 100.0, 100.0),
+        ),
+        coversSameAreaAs(
+          Path()
+            ..moveTo(-200.0, -100.0)
+            ..lineTo(-150.0, -100.0)
+            ..lineTo(-150.0, -10.0)
+            ..lineTo(-175.0, -10.0)
+            ..lineTo(-175.0, 0.0)
+            ..lineTo(-200.0, 0.0)
+            ..close(),
+          areaToCompare: Rect.fromLTWH(-300.0, -300.0, 600.0, 600.0),
+          sampleSize: 100,
+        )
+      );
+    });
+
+    test('AutomaticNotchedShape - no guest', () {
+      expect(
+        const AutomaticNotchedShape(
+          RoundedRectangleBorder(),
+          RoundedRectangleBorder(),
+        ).getOuterPath(
+          Rect.fromLTWH(-200.0, -100.0, 50.0, 100.0),
+          null,
+        ),
+        coversSameAreaAs(
+          Path()
+            ..moveTo(-200.0, -100.0)
+            ..lineTo(-150.0, -100.0)
+            ..lineTo(-150.0, 0.0)
+            ..lineTo(-200.0, 0.0)
+            ..close(),
+          areaToCompare: Rect.fromLTWH(-300.0, -300.0, 600.0, 600.0),
+          sampleSize: 100,
+        )
+      );
+    });
   });
 }
 

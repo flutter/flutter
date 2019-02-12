@@ -320,7 +320,10 @@ class IOSSimulator extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
-        args.add('--enable-checked-mode');
+        args.addAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points'
+        ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
       if (debuggingOptions.skiaDeterministicRendering)
@@ -535,10 +538,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     // We don't want to wait for the process or its callback. Best effort
     // cleanup in the callback.
-    _deviceProcess.exitCode.whenComplete(() { // ignore: unawaited_futures
+    unawaited(_deviceProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener)
         _linesController.close();
-    });
+    }));
   }
 
   // Match the log prefix (in order to shorten it):

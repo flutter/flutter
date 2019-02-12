@@ -119,7 +119,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
-      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'flutter_build'];
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
       // ensure we only get flutter/packages
       packages.retainWhere((Directory directory) {
         return consumerPackages.any((String package) {
@@ -903,7 +903,8 @@ class PubspecDependency extends PubspecLine {
     DependencyKind kind,
     this.version,
     this.sourcePath,
-  }) : _kind = kind, super(line);
+  }) : _kind = kind,
+       super(line);
 
   static PubspecDependency parse(String line, { @required String filename }) {
     // We recognize any line that:

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -142,6 +143,72 @@ void main() {
       );
     },
   );
+
+  testWidgets('iOS cursor has offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+      ),
+    );
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorOffset, const Offset(-2.0 / 3.0, 0));
+  });
+
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+      ),
+    );
+
+    final Finder textFinder = find.byType(CupertinoTextField);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(renderEditable.cursorColor.alpha, 255);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 110);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(renderEditable.cursorColor.alpha, 16);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(renderEditable.cursorColor.alpha, 0);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorRadius, const Radius.circular(2.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets(
     'can control text content via controller',
@@ -633,6 +700,68 @@ void main() {
     await tester.enterText(find.byType(CupertinoTextField), 'abc\ndef');
 
     expect(controller.text, 'abcdef');
+  });
+
+  testWidgets('toolbar has the same visual regardless of theming', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: "j'aime la poutine",
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    Text text = tester.widget<Text>(find.text('Paste'));
+    expect(text.style.color, CupertinoColors.white);
+    expect(text.style.fontSize, 14);
+    expect(text.style.letterSpacing, -0.11);
+    expect(text.style.fontWeight, FontWeight.w300);
+
+    // Change the theme.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          textTheme: CupertinoTextThemeData(
+            textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
+          ),
+        ),
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    text = tester.widget<Text>(find.text('Paste'));
+    // The toolbar buttons' text are still the same style.
+    expect(text.style.color, CupertinoColors.white);
+    expect(text.style.fontSize, 14);
+    expect(text.style.letterSpacing, -0.11);
+    expect(text.style.fontWeight, FontWeight.w300);
   });
 
   testWidgets('copy paste', (WidgetTester tester) async {
@@ -1215,5 +1344,47 @@ void main() {
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('cursorColor respects theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+      ),
+    );
+
+    final Finder textFinder = find.byType(CupertinoTextField);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState =
+    tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+        theme: CupertinoThemeData(
+          primaryColor: Color(0xFFF44336),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(renderEditable.cursorColor, const Color(0xFFF44336));
   });
 }

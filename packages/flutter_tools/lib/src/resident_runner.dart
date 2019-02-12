@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -35,6 +36,7 @@ class FlutterDevice {
     this.fileSystemScheme,
     this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
+    List<String> experimentalFlags,
     ResidentCompiler generator,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
@@ -43,6 +45,7 @@ class FlutterDevice {
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
+         experimentalFlags: experimentalFlags,
        );
 
   final Device device;
@@ -426,11 +429,11 @@ class FlutterDevice {
     return report;
   }
 
-  void updateReloadStatus(bool wasReloadSuccessful) {
+  Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
     if (wasReloadSuccessful)
       generator?.accept();
     else
-      generator?.reject();
+      await generator?.reject();
   }
 }
 
@@ -737,10 +740,10 @@ abstract class ResidentRunner {
         // This hooks up callbacks for when the connection stops in the future.
         // We don't want to wait for them. We don't handle errors in those callbacks'
         // futures either because they just print to logger and is not critical.
-        service.done.then<void>( // ignore: unawaited_futures
+        unawaited(service.done.then<void>(
           _serviceProtocolDone,
           onError: _serviceProtocolError
-        ).whenComplete(_serviceDisconnected);
+        ).whenComplete(_serviceDisconnected));
       }
     }
   }

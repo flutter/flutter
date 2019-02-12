@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Note: this Builder does not run in the same process as the flutter_tool, so
+// the DI provided getters such as `fs` will not work.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:build_modules/build_modules.dart';
 import 'package:build/build.dart';
 import 'package:package_config/packages_file.dart' as packages_file;
 import 'package:meta/meta.dart';
@@ -13,7 +16,6 @@ import 'package:path/path.dart' as path;
 
 const String _kFlutterDillOutputExtension = '.app.dill';
 const String _kPackagesExtension = '.packages';
-const String multiRootScheme = 'org-dartlang-app';
 
 /// A builder which creates a kernel and packages file for a Flutter app.
 ///
@@ -56,7 +58,7 @@ class FlutterKernelBuilder implements Builder {
   /// Whether to build an ahead of time build.
   final bool aot;
 
-  /// Whether to disable this builder entirely.
+  /// Whether to disable production of kernel.
   final bool disabled;
 
   /// Whether the `trackWidgetCreation` flag is provided to the frontend
@@ -82,13 +84,24 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    // Do not run builder if it has been disabled or if this asset does not
+    final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
+    final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
+
+    // Use modules to verify dependencies are sound.
+    final AssetId moduleId = buildStep.inputId.changeExtension(moduleExtension(DartPlatform.flutter));
+    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+    try {
+      await module.computeTransitiveDependencies(buildStep);
+    } on MissingModulesException catch (err) {
+      log.shout(err);
+      return;
+    }
+
+    // Do not generate kernel if it has been disabled or if this asset does not
     // correspond to the current entrypoint.
     if (disabled || !mainPath.contains(buildStep.inputId.path)) {
       return;
     }
-    final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
-    final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
     // Create a scratch space file that can be read/written by the frontend server.
     // It is okay to hard-code these file names because we will copy them back
@@ -223,39 +236,47 @@ class _StdoutHandler {
   }
 }
 
+
+class _CompilerOutput {
+  const _CompilerOutput(this.outputFilename, this.errorCount);
+
+  final String outputFilename;
+  final int errorCount;
+}
+
 /// Converts filesystem paths to package URIs.
 class _PackageUriMapper {
-  _PackageUriMapper(String scriptPath, String packagesPath, this.fileSystemScheme, this.fileSystemRoots) {
+  _PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final List<int> bytes = File(path.absolute(packagesPath)).readAsBytesSync();
     final Map<String, Uri> packageMap = packages_file.parse(bytes, Uri.file(packagesPath, windows: Platform.isWindows));
     final String scriptUri = Uri.file(scriptPath, windows: Platform.isWindows).toString();
+
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
-        _uriPrefix = fileSystemRoots.map((String name) => Uri.file('$name/lib/', windows: Platform.isWindows).toString()).toList();
+        _uriPrefixes = fileSystemRoots
+          .map((String name) => Uri.file('$name/lib/', windows: Platform.isWindows).toString())
+          .toList();
         return;
       }
       if (scriptUri.startsWith(prefix)) {
         _packageName = packageName;
-        _uriPrefix = <String>[prefix];
+        _uriPrefixes = <String>[prefix];
         return;
       }
     }
   }
 
-  final String fileSystemScheme;
-  final List<String> fileSystemRoots;
-
   String _packageName;
-  List<String> _uriPrefix;
+  List<String> _uriPrefixes;
 
   Uri map(String scriptPath) {
     if (_packageName == null) {
       return null;
     }
     final String scriptUri = Uri.file(scriptPath, windows: Platform.isWindows).toString();
-    for (String uriPrefix in _uriPrefix) {
+    for (String uriPrefix in _uriPrefixes) {
       if (scriptUri.startsWith(uriPrefix)) {
         return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
       }
@@ -266,11 +287,4 @@ class _PackageUriMapper {
   static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     return _PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
-}
-
-class _CompilerOutput {
-  const _CompilerOutput(this.outputFilename, this.errorCount);
-
-  final String outputFilename;
-  final int errorCount;
 }

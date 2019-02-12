@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -21,7 +20,7 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -31,15 +30,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    ui.window
+    window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    _mouseTracker = _createMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -93,8 +94,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
       registerSignalServiceExtension(
         name: 'debugDumpRenderTree',
@@ -130,9 +130,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
-    renderView = RenderView(configuration: createViewConfiguration());
+    renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.scheduleInitialFrame();
   }
+
+  /// The object that manages state about currently connected mice, for hover
+  /// notification.
+  MouseTracker get mouseTracker => _mouseTracker;
+  MouseTracker _mouseTracker;
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics
@@ -164,6 +169,38 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   @protected
   void handleTextScaleFactorChanged() { }
 
+  /// {@template on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// The current platform brightness can be queried either from a Flutter
+  /// binding, or from a [MediaQuery] widget.
+  ///
+  /// ## Sample Code
+  ///
+  /// Querying [Window.platformBrightness]:
+  ///
+  /// ```dart
+  /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
+  /// ```
+  ///
+  /// Querying [MediaQuery] directly:
+  ///
+  /// ```dart
+  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  /// ```
+  ///
+  /// Querying [MediaQueryData]:
+  ///
+  /// ```dart
+  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+  /// final Brightness brightness = mediaQueryData.platformBrightness;
+  /// ```
+  ///
+  /// See [Window.onPlatformBrightnessChanged].
+  /// {@endtemplate}
+  @protected
+  void handlePlatformBrightnessChanged() { }
+
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///
@@ -175,17 +212,29 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final double devicePixelRatio = window.devicePixelRatio;
     return ViewConfiguration(
-      size: ui.window.physicalSize / devicePixelRatio,
+      size: window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
 
   SemanticsHandle _semanticsHandle;
 
+  // Creates a [MouseTracker] which manages state about currently connected
+  // mice, for hover notification.
+  MouseTracker _createMouseTracker() {
+    return MouseTracker(pointerRouter, (Offset offset) {
+      // Layer hit testing is done using device pixels, so we have to convert
+      // the logical coordinates of the event location back to device pixels
+      // here.
+      return renderView.layer
+          .find<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
+    });
+  }
+
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(ui.window.semanticsEnabled);
+    setSemanticsEnabled(window.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree
@@ -222,8 +271,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
-  /// frame.
+  /// automatically by the engine when it is time to lay out and paint a frame.
   ///
   /// Each frame consists of the following phases:
   ///
@@ -302,8 +350,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Semanti
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);
-    // This super call is safe since it will be bound to a mixed-in declaration.
-    super.hitTest(result, position); // ignore: abstract_super_member_reference
+    super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {

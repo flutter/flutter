@@ -21,7 +21,6 @@ import 'base/platform.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'build_runner/build_runner.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
@@ -60,7 +59,6 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      BuildRunnerFactory: () => const BuildRunnerFactory(),
       Cache: () => Cache(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
@@ -81,7 +79,7 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompiler: () => const KernelCompiler(),
+      KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),

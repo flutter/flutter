@@ -53,7 +53,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * <https://material.google.com/components/tabs.html>
+///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab. At least one of [text], [icon],
   /// and [child] must be non-null. The [text] and [child] arguments must not be
@@ -95,7 +95,7 @@ class Tab extends StatelessWidget {
     if (icon == null) {
       height = _kTabHeight;
       label = _buildLabelText();
-    } else if (text == null) {
+    } else if (text == null && child == null) {
       height = _kTabHeight;
       label = icon;
     } else {
@@ -476,10 +476,21 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
 
   final _TabBarState tabBar;
 
+  bool _initialViewportDimensionWasZero;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     bool result = true;
-    if (pixels == null) {
+    if (_initialViewportDimensionWasZero != true) {
+      // If the viewport never had a non-zero dimension, we just want to jump
+      // to the initial scroll position to avoid strange scrolling effects in
+      // release mode: In release mode, the viewport temporarily may have a
+      // dimension of zero before the actual dimension is calculated. In that
+      // scenario, setting the actual dimension would cause a strange scroll
+      // effect without this guard because the super call below would starts a
+      // ballistic scroll activity.
+      assert(viewportDimension != null);
+      _initialViewportDimensionWasZero = viewportDimension != 0.0;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
     }
@@ -730,7 +741,10 @@ class _TabBarState extends State<TabBar> {
     // When that happens, automatic transitions of the theme will likely look
     // ugly as the indicator color suddenly snaps to white at one end, but it's
     // not clear how to avoid that any further.
-    if (color.value == Material.of(context).color.value)
+    //
+    // The material's color might be null (if it's a transparency). In that case
+    // there's no good way for us to find out what the color is so we don't.
+    if (color.value == Material.of(context).color?.value)
       color = Colors.white;
 
     return UnderlineTabIndicator(
@@ -1236,7 +1250,10 @@ class TabPageSelectorIndicator extends StatelessWidget {
     @required this.backgroundColor,
     @required this.borderColor,
     @required this.size,
-  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
+  }) : assert(backgroundColor != null),
+       assert(borderColor != null),
+       assert(size != null),
+       super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1275,7 +1292,8 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0),
+       super(key: key);
 
   /// This widget's selection and animation state.
   ///

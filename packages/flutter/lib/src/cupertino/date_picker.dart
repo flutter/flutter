@@ -168,7 +168,6 @@ class CupertinoDatePicker extends StatefulWidget {
   CupertinoDatePicker({
     this.mode = CupertinoDatePickerMode.dateAndTime,
     @required this.onDateTimeChanged,
-    // ignore: always_require_non_null_named_parameters
     DateTime initialDateTime,
     this.minimumDate,
     this.maximumDate,
@@ -179,32 +178,33 @@ class CupertinoDatePicker extends StatefulWidget {
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
-       assert(initialDateTime != null),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !initialDateTime.isBefore(minimumDate),
-         'initial date is before minimum date',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !initialDateTime.isAfter(maximumDate),
-         'initial date is after maximum date',
-       ),
        assert(minimumYear != null),
-       assert(
-         mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && initialDateTime.year >= minimumYear),
-         'initial year is not greater than minimum year, or mininum year is not positive',
-       ),
-       assert(
-         mode != CupertinoDatePickerMode.date || maximumYear == null || initialDateTime.year <= maximumYear,
-         'initial year is not smaller than maximum year',
-       ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
-       ),
-       assert(
-         initialDateTime.minute % minuteInterval == 0,
-         'initial minute is not divisible by minute interval',
-       );
+       ) {
+    assert(this.initialDateTime != null);
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate),
+      'initial date is before minimum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !this.initialDateTime.isAfter(maximumDate),
+      'initial date is after maximum date',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
+      'initial year is not greater than minimum year, or mininum year is not positive',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear,
+      'initial year is not smaller than maximum year',
+    );
+    assert(
+      this.initialDateTime.minute % minuteInterval == 0,
+      'initial minute is not divisible by minute interval',
+    );
+  }
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode].
   /// Defaults to [CupertinoDatePickerMode.dateAndTime]. Cannot be null and
@@ -351,16 +351,35 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // in the widget after first build is ignored.
   DateTime initialDateTime;
 
-  // The currently selected values of the date picker.
-  int selectedDayFromInitial; // The difference in days between the initial date and the currently selected date.
+  // The difference in days between the initial date and the currently selected date.
+  int selectedDayFromInitial;
+
+  // The current selection of the hour picker.
+  //
+  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
+  // range from 1-12.
   int selectedHour;
+
+  // The previous selection index of the hour column.
+  //
+  // This ranges from 0-23 even if [widget.use24hFormat] is false. As a result,
+  // it can be used for determining if we just changed from AM -> PM or vice
+  // versa.
+  int previousHourIndex;
+
+  // The current selection of the minute picker. Values range from 0 to 59.
   int selectedMinute;
-  int selectedAmPm; // 0 means AM, 1 means PM.
+
+  // The current selection of the AM/PM picker.
+  //
+  // - 0 means AM
+  // - 1 means PM
+  int selectedAmPm;
 
   // The controller of the AM/PM column.
   FixedExtentScrollController amPmController;
 
-  // Estimated width of columns.
+  // The estimated width of columns.
   final Map<int, double> estimatedColumnWidths = <int, double>{};
 
   @override
@@ -380,6 +399,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
       amPmController = FixedExtentScrollController(initialItem: selectedAmPm);
     }
+
+    previousHourIndex = selectedHour;
   }
 
   @override
@@ -477,25 +498,29 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         if (widget.use24hFormat) {
           selectedHour = index;
           widget.onDateTimeChanged(_getDateTime());
-        }
-        else {
-          final int currentHourIn24h = selectedHour + selectedAmPm * 12;
+        } else {
+          selectedHour = index % 12;
+
           // Automatically scrolls the am/pm column when the hour column value
-          // goes far enough. This behavior is similar to
-          // iOS picker version.
-          if (currentHourIn24h ~/ 12 != index ~/ 12) {
-            selectedHour = index % 12;
+          // goes far enough.
+
+          final bool wasAm = previousHourIndex >=0 && previousHourIndex <= 11;
+          final bool isAm = index >= 0 && index <= 11;
+
+          if (wasAm != isAm) {
+            // Animation values obtained by comparing with iOS version.
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
-              duration: const Duration(milliseconds: 300), // Set by comparing with iOS version.
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-            ); // Set by comparing with iOS version.
+            );
           }
           else {
-            selectedHour = index % 12;
             widget.onDateTimeChanged(_getDateTime());
           }
         }
+
+        previousHourIndex = index;
       },
       children: List<Widget>.generate(24, (int index) {
         int hour = index;
@@ -1125,7 +1150,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedMinute = index;
+          selectedMinute = index * widget.minuteInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,
@@ -1237,7 +1262,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedSecond = index;
+          selectedSecond = index * widget.secondInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,
