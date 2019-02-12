@@ -53,9 +53,11 @@ abstract class Notification {
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
   /// with the appropriate type parameters that are ancestors of the given
-  /// [BuildContext]. If the [BuildContext] is null, the notification is
-  /// dropped on the floor.
+  /// [BuildContext]. If the [BuildContext] is null, the notification is not
+  /// dispatched.
   void dispatch(BuildContext target) {
+    // The `target` may be null if the subtree the notification is supposed to be
+    // dispatched in is in the process of being disposed.
     target?.visitAncestorElements(visitAncestor);
   }
 
