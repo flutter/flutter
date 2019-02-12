@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -73,7 +74,7 @@ void main() {
       called = 0;
       ansiStatus = AnsiStatus(
         message: 'Hello world',
-        timeout: const Duration(milliseconds: 10),
+        timeout: const Duration(milliseconds: 100),
         padding: 20,
         onFinish: () => called += 1,
       );
@@ -151,6 +152,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {
@@ -685,3 +687,5 @@ void main() {
     });
   });
 }
+
+class MockStopwatch extends Stopwatch implements Mock {}
