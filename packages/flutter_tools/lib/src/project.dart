@@ -238,11 +238,6 @@ class IosProject {
       // Info.plist has no build variables in product bundle ID.
       return fromPlist;
     }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
-    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
-      // Common case. Avoids parsing build settings.
-      return fromPbxproj;
-    }
     if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
       // General case: perform variable substitution using build settings.
       return xcode.substituteXcodeVariables(fromPlist, buildSettings);
