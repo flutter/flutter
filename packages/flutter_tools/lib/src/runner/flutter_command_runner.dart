@@ -440,7 +440,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   String stripCpu(String name) {
     // Keep in sync with --android-cpu from flutter/tools/gn in flutter engine.
-    const List<String> cpus = ['_arm', '_x64', '_x86', '_arm64'];
+    const List<String> cpus = <String>['_arm', '_x64', '_x86', '_arm64'];
     for (String cpu in cpus) {
       if (name.endsWith(cpu)) {
         return name.substring(0, name.length - cpu.length);
