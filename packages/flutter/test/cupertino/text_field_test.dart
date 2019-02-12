@@ -1571,4 +1571,46 @@ void main() {
     expect(setClient.method, 'TextInput.setClient');
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
   });
+
+  testWidgets('cursorColor respects theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+      ),
+    );
+
+    final Finder textFinder = find.byType(CupertinoTextField);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    final EditableTextState editableTextState =
+    tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(),
+        theme: CupertinoThemeData(
+          primaryColor: Color(0xFFF44336),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(renderEditable.cursorColor, const Color(0xFFF44336));
+  });
 }
