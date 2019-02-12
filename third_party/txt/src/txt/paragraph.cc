@@ -441,20 +441,18 @@ void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
   // force_strut makes all lines have exactly the strut metrics, and ignores all
   // actual metrics. We only force the strut if the strut is non-zero and valid.
   strut->force_strut = paragraph_style_.force_strut_height && valid_strut;
-  minikin::FontStyle minikin_font_style(
-      0, GetWeight(paragraph_style_.strut_font_weight),
-      paragraph_style_.strut_font_style == FontStyle::italic);
+  const FontSkia* font_skia =
+      static_cast<const FontSkia*>(font_collection_->GetMinikinFontForFamilies(
+          paragraph_style_.strut_font_families,
+          // TODO(garyq): The variant is currently set to 0 (default) as we do
+          // not have a property to set it with. We should eventually support
+          // default, compact, and elegant variants.
+          minikin::FontStyle(
+              0, GetWeight(paragraph_style_.strut_font_weight),
+              paragraph_style_.strut_font_style == FontStyle::italic)));
 
-  std::shared_ptr<minikin::FontCollection> collection =
-      font_collection_->GetMinikinFontCollectionForFamilies(
-          paragraph_style_.strut_font_families, "");
-  if (!collection) {
-    return;
-  }
-  minikin::FakedFont faked_font = collection->baseFontFaked(minikin_font_style);
-
-  if (faked_font.font != nullptr) {
-    font.setTypeface(static_cast<FontSkia*>(faked_font.font)->GetSkTypeface());
+  if (font_skia != nullptr) {
+    font.setTypeface(font_skia->GetSkTypeface());
     font.setSize(paragraph_style_.strut_font_size);
     SkFontMetrics strut_metrics;
     font.getMetrics(&strut_metrics);
