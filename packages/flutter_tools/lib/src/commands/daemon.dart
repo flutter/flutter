@@ -400,6 +400,7 @@ class AppDomain extends Domain {
       projectDirectory,
       enableHotReload,
       cwd,
+      LaunchMode.run,
     );
   }
 
@@ -409,7 +410,8 @@ class AppDomain extends Domain {
       Device device,
       String projectDirectory,
       bool enableHotReload,
-      Directory cwd) async {
+      Directory cwd,
+      LaunchMode launchMode) async {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
@@ -417,6 +419,7 @@ class AppDomain extends Domain {
       'deviceId': device.id,
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
+      'launchMode': launchMode.toString(),
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -1020,4 +1023,20 @@ class LogMessage {
   final String level;
   final String message;
   final StackTrace stackTrace;
+}
+
+/// The method by which the flutter app was launched.
+class LaunchMode {
+  const LaunchMode._(this._value);
+
+  /// The app was launched via `flutter run`.
+  static const LaunchMode run = LaunchMode._('run');
+
+  /// The app was launched via `flutter attach`.
+  static const LaunchMode attach = LaunchMode._('attach');
+
+  final String _value;
+
+  @override
+  String toString() => _value;
 }
