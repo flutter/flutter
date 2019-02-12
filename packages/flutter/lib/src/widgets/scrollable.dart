@@ -522,8 +522,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // SCROLL WHEEL
 
-  PointerSignalArenaMember _pointerSignalArenaMember;
-
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
@@ -540,8 +538,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
           _targetScrollOffsetForPointerScroll(event);
       // Only claim the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
-        _pointerSignalArenaMember = PointerSignalArenaMember(
-            event, _handlePointerScroll, _cancelPointerScroll);
+        PointerSignalArenaMember(
+            event, _handlePointerScroll);
       }
     }
   }
@@ -553,11 +551,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }
-    _pointerSignalArenaMember = null;
-  }
-
-  void _cancelPointerScroll() {
-    _pointerSignalArenaMember = null;
   }
 
   // DESCRIPTION

@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
+import 'pointer_signal_arena.dart';
 
 /// A binding for the gesture subsystem.
 ///
@@ -225,8 +226,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
     } else if (event is PointerSignalEvent) {
-      pointerSignalArena.close(event.pointer);
-      pointerSignalArena.sweep(event.pointer);
+      pointerSignalArena.close(event);
     }
   }
 }
