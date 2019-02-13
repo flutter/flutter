@@ -472,8 +472,11 @@ class _TheatreElement extends RenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (_onstage != null)
-      visitor(_onstage);
+    assert(() {
+      if (_onstage != null)
+        visitor(_onstage);
+      return true;
+    }());
   }
 
   @override
