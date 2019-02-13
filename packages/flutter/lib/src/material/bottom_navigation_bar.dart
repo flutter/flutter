@@ -25,13 +25,11 @@ import 'theme.dart';
 ///  * [BottomNavigationBarItem]
 ///  * <https://material.io/design/components/bottom-navigation.html#specs>
 enum BottomNavigationBarType {
-  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
-  /// display their text labels, and do not shift when tapped.
+  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width.
   fixed,
 
   /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
-  /// animate and labels fade in when they are tapped. Only the selected item
-  /// displays its text label.
+  /// animate and labels fade in when they are tapped.
   shifting,
 }
 
@@ -52,13 +50,14 @@ enum BottomNavigationBarType {
 /// otherwise.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
-///    four [items]. The selected item is rendered with [fixedColor] if it's
-///    non-null, otherwise the theme's [ThemeData.primaryColor] is used. The
-///    navigation bar's background color is the default [Material] background
+///    four [items]. The selected item is rendered with [fixedColor] if
+///    [selectedColor] is null and if it is non-null, otherwise the theme's
+///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
+///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
 ///  * [BottomNavigationBarType.shifting], the default when there are four
-///    or more [items]. All items are rendered in white and the navigation bar's
-///    background color is the same as the
+///    or more [items]. If [selectedItemColor] is null, all items are rendered
+///    in white. The navigation bar's background color is the same as the
 ///    [BottomNavigationBarItem.backgroundColor] of the selected item. In this
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
@@ -143,7 +142,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// [selectedFontSize], [unselectedFontSize], and [elevation] must be non-null
   /// and non-negative.
   ///
-  /// [showUnselectedLabels] must not be null.
+  /// [showSelectedLabels] must not be non-null.
+  ///
+  /// [showUnselectedLabels] defaults to `true` if [type] is
+  /// [BottomNavigationBarType.fixed] and `false` if [type] is
+  /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
     Key key,
     @required this.items,
@@ -158,7 +161,8 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedItemColor,
     this.selectedFontSize = 14.0,
     this.unselectedFontSize = 12.0,
-    this.showUnselectedLabels = true,
+    this.showSelectedLabels = true,
+    bool showUnselectedLabels,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -170,8 +174,9 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 8.0),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       assert(showUnselectedLabels != null),
-       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
+       assert(showSelectedLabels != null),
+       type = _type(type, items),
+       showUnselectedLabels = showUnselectedLabels ?? _defaultShowUnselected(_type(type, items)),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
@@ -246,13 +251,41 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defaults to `12.0`.
   final double unselectedFontSize;
 
-  /// Whether the labels are shown for all [BottomNavigationBarItem]s, or just
-  /// the selected item.
-  ///
-  /// This will be ignored if [type] is [BottomNavigationBarType.shifting].
-  /// This is because the unselected labels are always hidden on shifting
-  /// [BottomNavigationBar]s.
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   final bool showUnselectedLabels;
+
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  final bool showSelectedLabels;
+
+  /// Used by the [BottomNavigationBar] constructor to set the [type] parameter.
+  ///
+  /// If type is provided, it is returned. Otherwise,
+  /// [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
+  /// [BottomNavigationBarType.shifting] is used for 4+ items.
+  static BottomNavigationBarType _type(
+      BottomNavigationBarType type,
+      List<BottomNavigationBarItem> items,
+  ) {
+    if (type != null) {
+      return type;
+    }
+    return items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting;
+  }
+
+  /// Used by the [BottomNavigationBar] constructor to set the [showUnselected]
+  /// parameter.
+  ///
+  /// Unselected labels are shown by default for [BottomNavigationBarType.fixed],
+  /// and hidden by default for [BottomNavigationBarType.shifting].
+  static bool _defaultShowUnselected(BottomNavigationBarType type) {
+    switch (type) {
+      case BottomNavigationBarType.shifting:
+        return false;
+      case BottomNavigationBarType.fixed:
+      default:
+        return true;
+    }
+  }
 
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
@@ -272,6 +305,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.selected = false,
     @required this.selectedFontSize,
     @required this.unselectedFontSize,
+    this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
   }) : assert(selected != null),
@@ -289,6 +323,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final double selectedFontSize;
   final double unselectedFontSize;
   final String indexLabel;
+  final bool showSelectedLabels;
   final bool showUnselectedLabels;
 
   @override
@@ -298,7 +333,6 @@ class _BottomNavigationTile extends StatelessWidget {
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
     int size;
-    Widget label;
 
     /// Defines the padding for the animating icons + labels.
     ///
@@ -326,32 +360,24 @@ class _BottomNavigationTile extends StatelessWidget {
       end: selectedFontSize / 2.0,
     ).evaluate(animation);
 
+    // Center all items + labels if unselected labels are shown.
+    if (showUnselectedLabels) {
+      bottomPadding = selectedFontSize / 2.0;
+      topPadding = selectedFontSize / 2.0;
+    }
+
+    // Center all icons if no labels are shown.
+    if (!showSelectedLabels && !showUnselectedLabels) {
+      bottomPadding = 0.0;
+      topPadding = selectedFontSize;
+    }
+
     switch (type) {
       case BottomNavigationBarType.fixed:
         size = 1;
-        if (showUnselectedLabels) {
-          bottomPadding = selectedFontSize / 2.0;
-          topPadding = selectedFontSize / 2.0;
-        }
-        label = _Label(
-          colorTween: colorTween,
-          animation: animation,
-          item: item,
-          selectedFontSize: selectedFontSize,
-          unselectedFontSize: unselectedFontSize,
-          showUnselectedLabels: showUnselectedLabels,
-        );
         break;
       case BottomNavigationBarType.shifting:
         size = (flex * 1000.0).round();
-        label = _Label(
-          colorTween: colorTween,
-          animation: animation,
-          item: item,
-          selectedFontSize: selectedFontSize,
-          unselectedFontSize: unselectedFontSize,
-          showUnselectedLabels: false,
-        );
         break;
     }
 
@@ -380,7 +406,15 @@ class _BottomNavigationTile extends StatelessWidget {
                       selected: selected,
                       item: item,
                     ),
-                    label,
+                    _Label(
+                      colorTween: colorTween,
+                      animation: animation,
+                      item: item,
+                      selectedFontSize: selectedFontSize,
+                      unselectedFontSize: unselectedFontSize,
+                      showSelectedLabels: showSelectedLabels,
+                      showUnselectedLabels: showUnselectedLabels,
+                    ),
                   ],
                 ),
               ),
@@ -441,6 +475,7 @@ class _Label extends StatelessWidget {
     @required this.item,
     @required this.selectedFontSize,
     @required this.unselectedFontSize,
+    @required this.showSelectedLabels,
     @required this.showUnselectedLabels,
   }) : super(key: key);
 
@@ -449,6 +484,7 @@ class _Label extends StatelessWidget {
   final BottomNavigationBarItem item;
   final double selectedFontSize;
   final double unselectedFontSize;
+  final bool showSelectedLabels;
   final bool showUnselectedLabels;
 
   @override
@@ -475,7 +511,17 @@ class _Label extends StatelessWidget {
       ),
     );
 
+    if (!showUnselectedLabels && !showSelectedLabels) {
+      // Never show any labels.
+      text = Opacity(
+        alwaysIncludeSemantics: true,
+        opacity: 0.0,
+        child: text,
+      );
+    }
+
     if (!showUnselectedLabels) {
+      // Fade selected labels in.
       text = FadeTransition(
         alwaysIncludeSemantics: true,
         opacity: animation,
@@ -483,12 +529,19 @@ class _Label extends StatelessWidget {
       );
     }
 
+    if (!showSelectedLabels) {
+      // Fade selected labels out.
+      text = FadeTransition(
+        alwaysIncludeSemantics: true,
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
+        child: text,
+      );
+    }
+
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
-      child: Container(
-        child: text,
-      ),
+      child: Container(child: text),
     );
   }
 }
@@ -656,6 +709,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
+        showSelectedLabels: widget.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
       );
