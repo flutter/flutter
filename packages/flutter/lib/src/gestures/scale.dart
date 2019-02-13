@@ -103,6 +103,7 @@ class ScaleUpdateDetails {
   final double verticalScale;
 
   /// The angle implied by the first two pointers to enter in contact with
+  /// the screen.
   ///
   /// Expressed in radians.
   final double rotation;
