@@ -430,7 +430,7 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
   ///
-  /// {@macro flutter.flutter_test.lib.src.controller}
+  /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
@@ -439,8 +439,8 @@ abstract class WidgetController {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
-      final bool separateX = offset.dx * xSign > touchSlopX;
-      final bool separateY = offset.dy * ySign > touchSlopY;
+      final bool separateX = offset.dx.abs() > touchSlopX;
+      final bool separateY = offset.dy.abs() > touchSlopY;
 
       if (separateX || separateY) {
         final double firstX = separateX ? xSign * touchSlopX : offset.dx;
