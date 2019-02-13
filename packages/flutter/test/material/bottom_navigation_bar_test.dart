@@ -882,18 +882,9 @@ void main() {
     
     expect(find.text('Red'), findsOneWidget);
     expect(find.text('Green'), findsOneWidget);
- 
-    final Finder navigationBarItems = find.descendant(
-      of: find.byType(BottomNavigationBar),
-      matching: find.byWidgetPredicate((Widget w) {
-        if (w is Opacity)
-          return w.opacity == 0.0;
-        return false;
-      }),
-    );
 
-    expect(tester.widget<Opacity>(navigationBarItems.first).opacity, 0.0);
-    expect(tester.widget<Opacity>(navigationBarItems.last).opacity, 0.0);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+    expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
   });
 
   testWidgets('BottomNavigationBar [showLabel]=false for fixed navbar, expect that there is no rendered text',
@@ -928,17 +919,8 @@ void main() {
     expect(find.text('Red'), findsOneWidget);
     expect(find.text('Green'), findsOneWidget);
 
-    final Finder navigationBarItems = find.descendant(
-      of: find.byType(BottomNavigationBar),
-      matching: find.byWidgetPredicate((Widget w) {
-        if (w is Opacity)
-          return w.opacity == 0.0;
-        return false;
-      }),
-    );
-
-    expect(tester.widget<Opacity>(navigationBarItems.first).opacity, 0.0);
-    expect(tester.widget<Opacity>(navigationBarItems.last).opacity, 0.0);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+    expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
   });
 
   testWidgets('BottomNavigationBar.fixed showLabel=[false] semantics', (WidgetTester tester) async {

@@ -150,15 +150,15 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
     this.showLabel = true,
   }) : assert(items != null),
-        assert(items.length >= 2),
-        assert(
-        items.every((BottomNavigationBarItem item) => item.title != null) == true,
-        'Every item must have a non-null title',
-        ),
-        assert(0 <= currentIndex && currentIndex < items.length),
-        assert(iconSize != null),
-        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
-        super(key: key);
+       assert(items.length >= 2),
+       assert(
+         items.every((BottomNavigationBarItem item) => item.title != null) == true,
+         'Every item must have a non-null title',
+       ),
+       assert(0 <= currentIndex && currentIndex < items.length),
+       assert(iconSize != null),
+       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
+       super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
   final List<BottomNavigationBarItem> items;
@@ -192,7 +192,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
-  /// The optional parameter for whether to show label in [BottomNavigationBar].
+  /// Whether to show the label on the [BottomNavigationBarItem].
   ///
   /// If the value is set to [false], [BottomNavigationBar] won't have
   /// label rendered below the icon.
@@ -209,17 +209,18 @@ class BottomNavigationBar extends StatefulWidget {
 // to go into a flex container.
 class _BottomNavigationTile extends StatelessWidget {
   const _BottomNavigationTile(
-      this.type,
-      this.item,
-      this.animation,
-      this.iconSize, {
-        this.onTap,
-        this.colorTween,
-        this.flex,
-        this.selected = false,
-        this.indexLabel,
-        this.showLabel = true,
-      }) : assert(selected != null);
+    this.type,
+    this.item,
+    this.animation,
+    this.iconSize, {
+      this.onTap,
+      this.colorTween,
+      this.flex,
+      this.selected = false,
+      this.indexLabel,
+      this.showLabel = true,
+    }
+  ) : assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -244,9 +245,9 @@ class _BottomNavigationTile extends StatelessWidget {
       case BottomNavigationBarType.fixed:
         size = 1;
         label = Opacity(
-            opacity: showLabel ? 1.0 : 0.0,
-            alwaysIncludeSemantics: true,
-            child: _FixedLabel(colorTween: colorTween, animation: animation, item: item),
+           opacity: showLabel ? 1.0 : 0.0,
+           alwaysIncludeSemantics: true,
+           child: _FixedLabel(colorTween: colorTween, animation: animation, item: item),
         );
         break;
       case BottomNavigationBarType.shifting:
@@ -508,7 +509,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor,
           vsync: this,
         )..controller.addStatusListener(
-              (AnimationStatus status) {
+            (AnimationStatus status) {
             switch (status) {
               case AnimationStatus.completed:
                 setState(() {
@@ -681,8 +682,8 @@ class _Circle {
     @required this.color,
     @required TickerProvider vsync,
   }) : assert(state != null),
-        assert(index != null),
-        assert(color != null) {
+       assert(index != null),
+       assert(color != null) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
@@ -726,7 +727,7 @@ class _RadialPainter extends CustomPainter {
     @required this.circles,
     @required this.textDirection,
   }) : assert(circles != null),
-        assert(textDirection != null);
+       assert(textDirection != null);
 
   final List<_Circle> circles;
   final TextDirection textDirection;
