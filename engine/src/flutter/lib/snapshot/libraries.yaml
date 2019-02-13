@@ -84,6 +84,13 @@ flutter:
         - "../../../third_party/dart/runtime/lib/profiler.dart"
         - "../../../third_party/dart/runtime/lib/timeline.dart"
 
+    ffi:
+      uri: "../../../third_party/dart/sdk/lib/ffi/ffi.dart"
+      patches:
+        - "../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart"
+        - "../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart"
+        - "../../../third_party/dart/runtime/lib/ffi_patch.dart"
+
     _http:
       uri: "../../../third_party/dart/sdk/lib/_http/http.dart"
 
