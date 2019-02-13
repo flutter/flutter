@@ -323,43 +323,30 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    bool debug;
-    bool profile;
-    bool release;
-    if (argParser.options.containsKey('debug')) {
-      debug = argResults['debug'];
-    } else {
-      debug = _defaultBuildMode == BuildMode.debug;
-    }
-    if (argParser.options.containsKey('profile')) {
-      profile = argResults['profile'];
-    } else {
-      profile = _defaultBuildMode == BuildMode.profile;
-    }
-    if (argParser.options.containsKey('release')) {
-      release = argResults['release'];
-    } else {
-      release = _defaultBuildMode == BuildMode.release;
-    }
-    if (debug && profile || debug && release || release && profile) {
+    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
-    }
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
 
-    if (debug) {
-      if (dynamicFlag) {
+    if (argResults['debug']) {
+      if (dynamicFlag)
         throw ToolExit('Error: --dynamic requires --release or --profile.');
-      }
       return BuildMode.debug;
     }
-    if (profile) {
+    if (argResults['profile'])
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    }
-    if (release) {
+    if (argResults['release'])
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-    }
+
+    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
+      throw ToolExit('Error: --dynamic requires --release or --profile.');
+    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
+      return BuildMode.dynamicRelease;
+    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
+      return BuildMode.dynamicProfile;
+
     return _defaultBuildMode;
   }
 
@@ -397,7 +384,7 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
-    List<String> extraFrontEndOptions =
+    String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
             ? argResults[FlutterOptions.kExtraFrontEndOptions]
             : null;
@@ -406,9 +393,9 @@ abstract class FlutterCommand extends Command<void> {
       for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
-          extraFrontEndOptions.add(flag);
+          extraFrontEndOptions += ',' + flag;
         } else {
-          extraFrontEndOptions = <String>[flag];
+          extraFrontEndOptions = flag;
         }
       }
     }
@@ -434,9 +421,9 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: extraFrontEndOptions?.join(', '),
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]?.join(', ')
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
         ? argResults['build-shared-library']
@@ -526,19 +513,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  /// A hook called to populate the cache with a particular target platform
-  /// or build mode.
-  ///
-  /// If a command requires specific artifacts, it is it's responsibility to
-  /// request them here.
-  Future<void> updateCache() async {
-    // Only download the minimum set of binaries.
-    await cache.updateAll(
-      clobber: false,
-      skipUnknown: true,
-    );
-  }
-
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -549,11 +523,11 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
+
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      await updateCache();
-    }
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));

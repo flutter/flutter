@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -12,8 +11,6 @@ class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
         help: 'Precache artifacts for all platforms.');
-    argParser.addFlag('force', abbr: 'f', negatable: false,
-        help: 'Force download of new cached artifacts');
   }
 
   @override
@@ -27,18 +24,14 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
+    if (argResults['all-platforms'])
       cache.includeAllPlatforms = true;
-    }
-    final UpdateResult result = cache.isUpToDate(skipUnknown: false);
-    if (result.isUpToDate && !result.clobber && !argResults['force']) {
+
+    if (cache.isUpToDate())
       printStatus('Already up-to-date.');
-    } else {
-      await cache.updateAll(
-        skipUnknown: false,
-        clobber: argResults['force'] || result.clobber,
-      );
-    }
-    return const FlutterCommandResult(ExitStatus.success);
+    else
+      await cache.updateAll();
+
+    return null;
   }
 }
