@@ -7,13 +7,13 @@ import 'platform.dart';
 
 /// Return the absolute path of the user's home directory
 String get homeDirPath {
-  String _homeDirPath = platform.isWindows
+  String path = platform.isWindows
       ? platform.environment['USERPROFILE']
       : platform.environment['HOME'];
-  if (_homeDirPath != null) {
-    _homeDirPath = fs.path.absolute(_homeDirPath);
+  if (path != null) {
+    path = fs.path.absolute(path);
   }
-  return _homeDirPath;
+  return path;
 }
 
 /// Throw a specialized exception for expected situations
