@@ -57,6 +57,14 @@
         ],
         "uri": "../../../third_party/dart/sdk/lib/collection/collection.dart"
       },
+      "ffi": {
+        "patches": [
+          "../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart",
+          "../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart",
+          "../../../third_party/dart/runtime/lib/ffi_patch.dart"
+        ],
+        "uri": "../../../third_party/dart/sdk/lib/ffi/ffi.dart"
+      },
       "typed_data": {
         "patches": "../../../third_party/dart/runtime/lib/typed_data_patch.dart",
         "uri": "../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
