@@ -3320,8 +3320,6 @@ void main() {
   });
 
   testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
-    Theme.of(context).platform = TargetPlatform.iOS;
-
     final TextEditingController controller = TextEditingController();
     const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
@@ -3330,6 +3328,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(
@@ -3384,7 +3383,6 @@ void main() {
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
-    debugDefaultTargetPlatformOverride = null;
   });
 
 
