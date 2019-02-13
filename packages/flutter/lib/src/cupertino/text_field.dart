@@ -172,7 +172,7 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorRadius = const Radius.circular(2.0),
-    this.cursorColor = CupertinoColors.activeBlue,
+    this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(textAlign != null),
@@ -365,7 +365,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the standard iOS blue color. Cannot be null.
+  /// Defaults to the [CupertinoThemeData.primaryColor] of the ambient theme,
+  /// which itself defaults to [CupertinoColors.activeBlue] in the light theme
+  /// and [CupertinoColors.activeOrange] in the dark theme.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -401,6 +403,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
   }
 }
 
@@ -475,14 +478,37 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _requestKeyboard();
   }
 
-  void _handleSingleLongTapDown() {
-    _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
+    _renderEditable.selectPositionAt(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.longPress,
+    );
+  }
+
+  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
+    _renderEditable.selectPositionAt(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.longPress,
+    );
+  }
+
+  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
+    _renderEditable.selectPositionAt(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.longPress
+    );
     _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     _renderEditable.selectWord(cause: SelectionChangedCause.tap);
     _editableTextKey.currentState.showToolbar();
+  }
+
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.longPress) {
+      _editableTextKey.currentState?.bringIntoView(selection.base);
+    }
   }
 
   @override
@@ -638,13 +664,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           selectionColor: _kSelectionHighlightColor,
           selectionControls: cupertinoTextSelectionControls,
           onChanged: widget.onChanged,
+          onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
-          cursorColor: widget.cursorColor,
+          cursorColor: themeData.primaryColor,
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
@@ -678,7 +705,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onForcePressStart: _handleForcePressStarted,
               onForcePressEnd: _handleForcePressEnded,
               onSingleTapUp: _handleSingleTapUp,
-              onSingleLongTapDown: _handleSingleLongTapDown,
+              onSingleLongTapStart: _handleSingleLongTapStart,
+              onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
+              onSingleLongTapUp: _handleSingleLongTapUp,
               onDoubleTapDown: _handleDoubleTapDown,
               behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable, textStyle),

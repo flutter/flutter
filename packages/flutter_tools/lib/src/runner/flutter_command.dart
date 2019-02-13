@@ -199,12 +199,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
-        help: 'An integer used as an internal version number.\n'
-              'Each build must have a unique number to differentiate it from previous builds.\n'
+        help: 'An identifier used as an internal version number.\n'
+              'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as \'versionCode\'.\n'
               'On Xcode builds it is used as \'CFBundleVersion\'',
-        valueHelp: 'int');
+    );
   }
 
   void usesBuildNameOption() {
@@ -370,15 +370,9 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['track-widget-creation']
         : false;
 
-    int buildNumber;
-    try {
-      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
+    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+        ? argResults['build-number']
+        : null;
 
     int patchNumber;
     try {
@@ -647,8 +641,6 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
 
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
         ? argResults['compilation-trace-file'] : null;
     final bool createBaseline = argParser.options.containsKey('baseline')
@@ -658,12 +650,8 @@ abstract class FlutterCommand extends Command<void> {
 
     if (createBaseline && createPatch)
       throw ToolExit(userMessages.flutterBasePatchFlagsExclusive);
-    if (createBaseline && !dynamicFlag)
-      throw ToolExit(userMessages.flutterBaselineRequiresDynamic);
     if (createBaseline && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterBaselineRequiresTraceFile);
-    if (createPatch && !dynamicFlag)
-      throw ToolExit(userMessages.flutterPatchRequiresDynamic);
     if (createPatch && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterPatchRequiresTraceFile);
   }
