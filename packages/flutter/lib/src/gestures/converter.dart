@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'events.dart';
 
 class _PointerState {
-  _PointerState(this.lastPosition, this.kind);
+  _PointerState(this.lastPosition);
 
   int get pointer => _pointer; // The identifier used in PointerEvent objects.
   int _pointer;
@@ -31,8 +31,6 @@ class _PointerState {
   }
 
   Offset lastPosition;
-
-  PointerDeviceKind kind;
 
   @override
   String toString() {
@@ -63,7 +61,7 @@ class PointerEventConverter {
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
     return _pointers.putIfAbsent(
       datum.device,
-      () => _PointerState(position, datum.kind)
+      () => _PointerState(position)
     );
   }
 
@@ -84,78 +82,7 @@ class PointerEventConverter {
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       assert(datum.change != null);
-      if (datum.kind == PointerDeviceKind.signal) {
-        switch (datum.signalKind) {
-          case ui.PointerSignalKind.scroll:
-            // Devices must be added before they send scroll events.
-            assert(_pointers.containsKey(datum.device));
-            final _PointerState state = _ensureStateForPointer(datum, position);
-            if (state.lastPosition != position) {
-              // Synthesize a hover/move of the pointer to the scroll location
-              // before sending the scroll event, if necessary, so that clients
-              // don't have to worry about native ordering of hover and scroll
-              // events.
-              final Offset offset = position - state.lastPosition;
-              state.lastPosition = position;
-              if (state.down) {
-                yield PointerMoveEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: state.kind,
-                  device: datum.device,
-                  position: position,
-                  delta: offset,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                  synthesized: true,
-                );
-              } else {
-                yield PointerHoverEvent(
-                  timeStamp: timeStamp,
-                  kind: state.kind,
-                  device: datum.device,
-                  position: position,
-                  delta: offset,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                  synthesized: true,
-                );
-              }
-            }
-            final Offset scrollDelta =
-                Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            yield PointerScrollEvent(
-              timeStamp: timeStamp,
-              pointer: state.pointer,
-              kind: kind,
-              device: datum.device,
-              position: position,
-              scrollDelta: scrollDelta,
-            );
-            break;
-        }
-      } else {
+      if (datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
             assert(!_pointers.containsKey(datum.device));
@@ -449,6 +376,77 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax
+            );
+            break;
+        }
+      } else {
+        switch (datum.signalKind) {
+          case ui.PointerSignalKind.scroll:
+            // Devices must be added before they send scroll events.
+            assert(_pointers.containsKey(datum.device));
+            final _PointerState state = _ensureStateForPointer(datum, position);
+            if (state.lastPosition != position) {
+              // Synthesize a hover/move of the pointer to the scroll location
+              // before sending the scroll event, if necessary, so that clients
+              // don't have to worry about native ordering of hover and scroll
+              // events.
+              final Offset offset = position - state.lastPosition;
+              state.lastPosition = position;
+              if (state.down) {
+                yield PointerMoveEvent(
+                  timeStamp: timeStamp,
+                  pointer: state.pointer,
+                  kind: kind,
+                  device: datum.device,
+                  position: position,
+                  delta: offset,
+                  buttons: datum.buttons,
+                  obscured: datum.obscured,
+                  pressureMin: datum.pressureMin,
+                  pressureMax: datum.pressureMax,
+                  distanceMax: datum.distanceMax,
+                  size: datum.size,
+                  radiusMajor: radiusMajor,
+                  radiusMinor: radiusMinor,
+                  radiusMin: radiusMin,
+                  radiusMax: radiusMax,
+                  orientation: datum.orientation,
+                  tilt: datum.tilt,
+                  synthesized: true,
+                );
+              } else {
+                yield PointerHoverEvent(
+                  timeStamp: timeStamp,
+                  kind: kind,
+                  device: datum.device,
+                  position: position,
+                  delta: offset,
+                  buttons: datum.buttons,
+                  obscured: datum.obscured,
+                  pressureMin: datum.pressureMin,
+                  pressureMax: datum.pressureMax,
+                  distance: datum.distance,
+                  distanceMax: datum.distanceMax,
+                  size: datum.size,
+                  radiusMajor: radiusMajor,
+                  radiusMinor: radiusMinor,
+                  radiusMin: radiusMin,
+                  radiusMax: radiusMax,
+                  orientation: datum.orientation,
+                  tilt: datum.tilt,
+                  synthesized: true,
+                );
+              }
+            }
+            final Offset scrollDelta =
+                Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+            yield PointerScrollEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              scrollDelta: scrollDelta,
             );
             break;
         }
