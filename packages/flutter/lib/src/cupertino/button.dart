@@ -110,11 +110,6 @@ class CupertinoButton extends StatefulWidget {
   /// Defaults to round corners of 8 logical pixels.
   final BorderRadius borderRadius;
 
-  /// The shape of the button.
-  ///
-  /// Defaults to a super ellipse with
-//  final ShapeBorder shape;
-
   final bool _filled;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
