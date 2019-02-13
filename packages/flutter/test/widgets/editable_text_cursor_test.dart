@@ -546,11 +546,11 @@ void main() {
 
     expect(editable, paints
       ..rrect(rrect: RRect.fromRectAndRadius(
-        Rect.fromLTRB(463.3333435058594, -1.5833333730697632, 465.3333435058594, 16.41666603088379),
+        Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
         const Radius.circular(2.0)),
         color: const Color(0xff8e8e93))
       ..rrect(rrect: RRect.fromRectAndRadius(
-        Rect.fromLTRB(463.8333435058594, -2.416666269302368, 466.8333435058594, 17.58333396911621),
+        Rect.fromLTRB(463.8333435058594, 1.0833336114883423, 466.8333435058594, 15.083333969116211),
         const Radius.circular(1.0)),
         color: const Color(0xbf2196f3))
     );
@@ -565,11 +565,11 @@ void main() {
 
     expect(find.byType(EditableText), paints
       ..rrect(rrect: RRect.fromRectAndRadius(
-        Rect.fromLTRB(191.3333282470703, -1.5833333730697632, 193.3333282470703, 16.41666603088379),
+        Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
         const Radius.circular(2.0)),
         color: const Color(0xff8e8e93))
       ..rrect(rrect: RRect.fromRectAndRadius(
-        Rect.fromLTRB(193.83334350585938, -2.416666269302368, 196.83334350585938, 17.58333396911621),
+        Rect.fromLTRB(193.83334350585938, 1.0833336114883423, 196.83334350585938, 15.083333969116211),
         const Radius.circular(1.0)),
         color: const Color(0xbf2196f3))
     );

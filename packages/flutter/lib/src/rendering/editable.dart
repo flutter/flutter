@@ -1407,7 +1407,6 @@ class RenderEditable extends RenderBox {
       caretRect = caretRect.shift(_cursorOffset);
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
-
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
     } else {
@@ -1470,6 +1469,7 @@ class RenderEditable extends RenderBox {
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);
     const Radius floatingCursorRadius = Radius.circular(_kFloatingCaretRadius);
     final RRect caretRRect = RRect.fromRectAndRadius(caretRect, floatingCursorRadius);
+
     canvas.drawRRect(caretRRect, paint);
   }
 
