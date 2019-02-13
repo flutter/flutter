@@ -128,6 +128,37 @@ void main() {
   });
 
   group('OutlineButton', () {
+    testWidgets('theme: ThemeData.light(), enabled: true, highlightElevation: 2.0', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Center(
+            child: OutlineButton(
+              onPressed: () { }, // button.enabled == true
+              // Causes the button to be filled with the theme's canvasColor
+              // instead of Colors.transparent before the button material's
+              // elevation is animated to 2.0.
+              highlightElevation: 2.0,
+              child: const Text('button'),
+            )
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.fillColor, const Color(0x00fafafa));
+      expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
+      expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
+      expect(raw.elevation, 0.0);
+      expect(raw.highlightElevation, 0.0);
+      expect(raw.disabledElevation, 0.0);
+      expect(raw.constraints, defaultButtonConstraints);
+      expect(raw.padding, defaultButtonPadding);
+      // animationDuration can't be configed by the theme/constructor
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+
     testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -143,7 +174,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.textStyle.color, const Color(0xdd000000));
-      expect(raw.fillColor, const Color(0x00ffffff));
+      expect(raw.fillColor, Colors.transparent);
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
       expect(raw.elevation, 0.0);
@@ -183,4 +214,65 @@ void main() {
     });
   });
 
+  group('FloatingActionButton', () {
+    const BoxConstraints defaultFABConstraints = BoxConstraints.tightFor(width: 56.0, height: 56.0);
+    const ShapeBorder defaultFABShape = CircleBorder(side: BorderSide(color: Color(0xff000000), width: 0.0, style: BorderStyle.none));
+    const EdgeInsets defaultFABPadding = EdgeInsets.zero;
+
+    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Center(
+              child: FloatingActionButton(
+                onPressed: () { }, // button.enabled == true
+                child: const Icon(Icons.add),
+              )
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, true);
+      expect(raw.textStyle.color, const Color(0xffffffff));
+      expect(raw.fillColor, const Color(0xff2196f3));
+      expect(raw.elevation, 6.0);
+      expect(raw.highlightElevation, 12.0);
+      expect(raw.disabledElevation, 6.0);
+      expect(raw.constraints, defaultFABConstraints);
+      expect(raw.padding, defaultFABPadding);
+      expect(raw.shape, defaultFABShape);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+
+    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: const Center(
+              child: FloatingActionButton(
+                onPressed: null, // button.enabled == false
+                child: Icon(Icons.add),
+              )
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, false);
+      expect(raw.textStyle.color, const Color(0xffffffff));
+      expect(raw.fillColor, const Color(0xff2196f3));
+      // highlightColor, disabled button can't be pressed
+      // splashColor, disabled button doesn't splash
+      expect(raw.elevation, 6.0);
+      expect(raw.highlightElevation, 12.0);
+      expect(raw.disabledElevation, 6.0);
+      expect(raw.constraints, defaultFABConstraints);
+      expect(raw.padding, defaultFABPadding);
+      expect(raw.shape, defaultFABShape);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+  });
 }

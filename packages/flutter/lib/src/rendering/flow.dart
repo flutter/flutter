@@ -75,7 +75,7 @@ abstract class FlowDelegate {
   /// Override to control the layout constraints given to each child.
   ///
   /// By default, the children will receive the given constraints, which are the
-  /// constrains the constraints used to size the container. The children need
+  /// constraints used to size the container. The children need
   /// not respect the given constraints, but they are required to respect the
   /// returned constraints. For example, the incoming constraints might require
   /// the container to have a width of exactly 100.0 and a height of exactly

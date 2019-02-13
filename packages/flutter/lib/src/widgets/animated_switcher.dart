@@ -22,9 +22,9 @@ class _ChildEntry {
     @required this.animation,
     @required this.transition,
     @required this.widgetChild,
-  })  : assert(animation != null),
-        assert(transition != null),
-        assert(controller != null);
+  }) : assert(animation != null),
+       assert(transition != null),
+       assert(controller != null);
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -156,12 +156,12 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  })  : assert(duration != null),
-        assert(switchInCurve != null),
-        assert(switchOutCurve != null),
-        assert(transitionBuilder != null),
-        assert(layoutBuilder != null),
-        super(key: key);
+  }) : assert(duration != null),
+       assert(switchInCurve != null),
+       assert(switchOutCurve != null),
+       assert(transitionBuilder != null),
+       assert(layoutBuilder != null),
+       super(key: key);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new

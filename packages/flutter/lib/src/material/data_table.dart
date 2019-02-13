@@ -229,7 +229,7 @@ class DataCell {
 ///  * [DataCell], which contains the data for a single cell in the data table.
 ///  * [PaginatedDataTable], which shows part of the data in a data table and
 ///    provides controls for paging through the remainder of the data.
-///  * <https://material.google.com/components/data-tables.html>
+///  * <https://material.io/design/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
   ///
@@ -543,7 +543,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged(!row.selected),
+          onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
         );
         rowIndex += 1;
@@ -568,7 +568,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true),
+        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );
@@ -583,7 +583,7 @@ class DataTable extends StatelessWidget {
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
-          onSelectChanged: () => row.onSelectChanged(!row.selected),
+          onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
         );
         rowIndex += 1;
       }

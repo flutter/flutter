@@ -230,10 +230,10 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
-    this.dragStartBehavior = DragStartBehavior.start,
-  }): assert(value != null),
-      assert(context != null),
-      _value = value {
+    this.dragStartBehavior = DragStartBehavior.down,
+  }) : assert(value != null),
+       assert(context != null),
+       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
     _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);
@@ -265,6 +265,7 @@ class TextSelectionOverlay {
   /// text field.
   final TextSelectionDelegate selectionDelegate;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], handle drag behavior will
@@ -275,7 +276,7 @@ class TextSelectionOverlay {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// See also:
   ///
@@ -467,7 +468,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
     @required this.selectionControls,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : super(key: key);
 
   final TextSelection selection;
@@ -612,9 +613,13 @@ class TextSelectionGestureDetector extends StatefulWidget {
   const TextSelectionGestureDetector({
     Key key,
     this.onTapDown,
+    this.onForcePressStart,
+    this.onForcePressEnd,
     this.onSingleTapUp,
     this.onSingleTapCancel,
-    this.onSingleLongTapDown,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapDragUpdate,
+    this.onSingleLongTapUp,
     this.onDoubleTapDown,
     this.behavior,
     @required this.child,
@@ -625,6 +630,14 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
+
+  /// Called when a pointer has tapped down and the force of the pointer has
+  /// just become greater than [ForcePressGestureDetector.startPressure].
+  final GestureForcePressStartCallback onForcePressStart;
+
+  /// Called when a pointer that had previously triggered [onForcePressStart] is
+  /// lifted off the screen.
+  final GestureForcePressEndCallback onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured [onSingleTapDown] and
@@ -640,7 +653,13 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
-  final GestureLongPressCallback onSingleLongTapDown;
+  final GestureLongPressDragStartCallback onSingleLongTapStart;
+
+  /// Called after [onSingleLongTapStart] when the pointer is dragged.
+  final GestureLongPressDragUpdateCallback onSingleLongTapDragUpdate;
+
+  /// Called after [onSingleLongTapStart] when the pointer is lifted.
+  final GestureLongPressDragUpCallback onSingleLongTapUp;
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
@@ -712,9 +731,33 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  void _handleLongPress() {
-    if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
-      widget.onSingleLongTapDown();
+  void _forcePressStarted(ForcePressDetails details) {
+    _doubleTapTimer?.cancel();
+    _doubleTapTimer = null;
+    if (widget.onForcePressStart != null)
+      widget.onForcePressStart(details);
+  }
+
+  void _forcePressEnded(ForcePressDetails details) {
+    if (widget.onForcePressEnd != null)
+      widget.onForcePressEnd(details);
+  }
+
+  void _handleLongDragStart(GestureLongPressDragStartDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+      widget.onSingleLongTapStart(details);
+    }
+  }
+
+  void _handleLongDragUpdate(GestureLongPressDragUpdateDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapDragUpdate != null) {
+      widget.onSingleLongTapDragUpdate(details);
+    }
+  }
+
+  void _handleLongDragUp(GestureLongPressDragUpDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapUp != null) {
+      widget.onSingleLongTapUp(details);
     }
     _isDoubleTap = false;
   }
@@ -739,8 +782,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
+      onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
+      onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
-      onLongPress: _handleLongPress,
+      onLongPressDragStart: _handleLongDragStart,
+      onLongPressDragUpdate: _handleLongDragUpdate,
+      onLongPressDragUp: _handleLongDragUp,
       excludeFromSemantics: true,
       behavior: widget.behavior,
       child: widget.child,

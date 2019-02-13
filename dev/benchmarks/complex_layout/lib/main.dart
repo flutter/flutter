@@ -620,7 +620,11 @@ class GalleryDrawer extends StatelessWidget {
           FancyDrawerHeader(),
           ListTile(
             key: const Key('scroll-switcher'),
-            onTap: () { _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex); },
+            title: const Text('Scroll Mode'),
+            onTap: () {
+              _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex);
+             Navigator.pop(context);
+            },
             trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex')
           ),
           ListTile(

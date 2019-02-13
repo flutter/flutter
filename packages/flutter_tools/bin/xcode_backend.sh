@@ -52,9 +52,9 @@ BuildApp() {
   local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   local artifact_variant="unknown"
   case "$build_mode" in
-    release*) build_mode="release"; artifact_variant="ios-release";;
-    profile*) build_mode="profile"; artifact_variant="ios-profile";;
-    debug*) build_mode="debug"; artifact_variant="ios";;
+    *release*) build_mode="release"; artifact_variant="ios-release";;
+    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    *debug*) build_mode="debug"; artifact_variant="ios";;
     *)
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
@@ -242,7 +242,7 @@ BuildApp() {
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/flutter_assets"                             \
+    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
     ${track_widget_creation_flag}
@@ -347,10 +347,6 @@ EmbedFlutterFrameworks() {
   fi
 
   AssertExists "${flutter_ios_out_folder}"
-
-  # Copy the flutter_assets to the Application's resources.
-  AssertExists "${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
-  RunCommand cp -r -- "${flutter_ios_out_folder}/flutter_assets" "${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
 
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).

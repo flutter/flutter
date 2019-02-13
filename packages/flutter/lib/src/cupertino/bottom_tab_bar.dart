@@ -54,7 +54,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     ),
   }) : assert(items != null),
-       assert(items.length >= 2),
+       assert(
+         items.length >= 2,
+         "Tabs need at least 2 items to conform to Apple's HIG",
+       ),
        assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
@@ -75,7 +78,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The index into [items] of the current active item.
   ///
-  /// Must not be null.
+  /// Must not be null and must inclusively be between 0 and the number of tabs
+  /// minus 1.
   final int currentIndex;
 
   /// The background color of the tab bar. If it contains transparency, the
@@ -99,8 +103,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
-  /// This value is used to to configure the [IconTheme] for the navigation
-  /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
+  /// This value is used to configure the [IconTheme] for the navigation bar.
+  /// When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
   ///
   /// Must not be null.

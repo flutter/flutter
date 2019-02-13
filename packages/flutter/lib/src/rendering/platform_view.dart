@@ -412,17 +412,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    controller.rejectGesture().catchError((dynamic e) {
-      if (e is MissingPluginException) {
-        // We land the framework part of active gesture rejection before the engine part.
-        // There will be some commit range where we call rejectGesture from the framework and it
-        // isn't implemented in the engine, if that is the case we swallow the MissingPluginException.
-        // Once the engine support lands we will remove the enclosing catchError call.
-        // TODO(amirh): remove this once the engine supports active gesture rejection.
-        return;
-      }
-      throw e;
-    });
+    controller.rejectGesture();
   }
 
   void reset() {

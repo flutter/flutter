@@ -26,25 +26,39 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 
 void main() {
   group('ApkManifestData', () {
-    test('Select explicity enabled activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledActivity);
+    test('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    test('Select default enabled activity', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledActivity);
+    test('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     });
-    testUsingContext('Error on no enabled activity', () {
+    testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
+    testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
+      expect(data, isNull);
+      final BufferLogger logger = context[Logger];
+      expect(
+          logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
+    });
+    testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
+      expect(data, isNull);
+      final BufferLogger logger = context[Logger];
+      expect(
+          logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
+    });
   });
 
   group('PrebuiltIOSApp', () {
@@ -161,7 +175,7 @@ void main() {
   });
 }
 
-const String _aaptDataWithExplicitEnabledActivity =
+const String _aaptDataWithExplicitEnabledAndMainLauncherActivity =
 '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
@@ -202,7 +216,7 @@ const String _aaptDataWithExplicitEnabledActivity =
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
 
-const String _aaptDataWithDefaultEnabledActivity =
+const String _aaptDataWithDefaultEnabledAndMainLauncherActivity =
 '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
@@ -271,6 +285,62 @@ const String _aaptDataWithNoEnabledActivity =
             A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
           E: category (line=45)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
+
+const String _aaptDataWithNoMainActivity =
+'''N: android=http://schemas.android.com/apk/res/android
+  E: manifest (line=7)
+    A: android:versionCode(0x0101021b)=(type 0x10)0x1
+    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
+    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+    E: uses-sdk (line=12)
+      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
+      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
+    E: uses-permission (line=21)
+      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
+    E: application (line=29)
+      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
+      A: android:icon(0x01010002)=@0x7f010000
+      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
+      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
+      E: activity (line=34)
+        A: android:theme(0x01010000)=@0x1030009
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
+        A: android:launchMode(0x0101001d)=(type 0x10)0x1
+        A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
+        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
+        A: android:hardwareAccelerated(0x010102d3)=(type 0x12)0xffffffff
+        E: intent-filter (line=42)
+          E: category (line=43)
+            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
+
+const String _aaptDataWithNoLauncherActivity =
+'''N: android=http://schemas.android.com/apk/res/android
+  E: manifest (line=7)
+    A: android:versionCode(0x0101021b)=(type 0x10)0x1
+    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
+    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+    E: uses-sdk (line=12)
+      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
+      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
+    E: uses-permission (line=21)
+      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
+    E: application (line=29)
+      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
+      A: android:icon(0x01010002)=@0x7f010000
+      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
+      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
+      E: activity (line=34)
+        A: android:theme(0x01010000)=@0x1030009
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
+        A: android:launchMode(0x0101001d)=(type 0x10)0x1
+        A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
+        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
+        A: android:hardwareAccelerated(0x010102d3)=(type 0x12)0xffffffff
+        E: intent-filter (line=42)
+          E: action (line=43)
+            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")''';
 
 
 class MockIosWorkFlow extends Mock implements IOSWorkflow {

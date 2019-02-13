@@ -19,6 +19,10 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
+  GestureLongPressUpCallback,
+  GestureLongPressDragStartCallback,
+  GestureLongPressDragUpdateCallback,
+  GestureLongPressDragUpCallback,
   GestureDragDownCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
@@ -31,11 +35,15 @@ export 'package:flutter/gestures.dart' show
   GestureForcePressPeakCallback,
   GestureForcePressEndCallback,
   GestureForcePressUpdateCallback,
+  GestureLongPressDragStartDetails,
+  GestureLongPressDragUpdateDetails,
+  GestureLongPressDragUpDetails,
   ScaleStartDetails,
   ScaleUpdateDetails,
   ScaleEndDetails,
   TapDownDetails,
   TapUpDetails,
+  ForcePressDetails,
   Velocity;
 
 // Examples can assume:
@@ -82,9 +90,9 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer) :
-    assert(_constructor != null),
-    assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
+    : assert(_constructor != null),
+      assert(_initializer != null);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -149,6 +157,10 @@ class GestureDetector extends StatelessWidget {
   /// because a combination of a horizontal and vertical drag is a pan. Simply
   /// use the pan callbacks instead.
   ///
+  /// Long press and long press drag callbacks cannot be used simultaneously
+  /// since they overlap. A long press cannot be subsequently dragged while a
+  /// long press drag can be dragged after a long press.
+  ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
@@ -161,6 +173,9 @@ class GestureDetector extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onLongPressUp,
+    this.onLongPressDragStart,
+    this.onLongPressDragUpdate,
+    this.onLongPressDragUp,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -185,7 +200,7 @@ class GestureDetector extends StatelessWidget {
     this.onScaleEnd,
     this.behavior,
     this.excludeFromSemantics = false,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
        assert(() {
@@ -193,6 +208,8 @@ class GestureDetector extends StatelessWidget {
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
+         final bool haveLongPress = onLongPress != null || onLongPressUp != null;
+         final bool haveLongPressDrag = onLongPressDragStart != null || onLongPressDragUpdate != null || onLongPressDragUp != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
              throw FlutterError(
@@ -208,6 +225,15 @@ class GestureDetector extends StatelessWidget {
                'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
              );
            }
+         }
+         if (haveLongPress && haveLongPressDrag) {
+           throw FlutterError(
+             'Incorrect GestureDetector arguments.\n'
+             'Having both a long press and a long press drag recognizer is '
+             'redundant as the long press drag is a superset of long press. '
+             'Except long press drag allows for drags after the long press is '
+             'triggered.'
+           );
          }
          return true;
        }()),
@@ -257,10 +283,36 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer has remained in contact with the screen at the same location for
   /// a long period of time.
+  ///
+  /// The long press drag callbacks [onLongPressDragStart], [onLongPressDragUpdate]
+  /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressCallback onLongPress;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
+  ///
+  /// The long press drag callbacks [onLongPressDragStart], [onLongPressDragUpdate]
+  /// and [onLongPressDragUp] cannot be set while this callback is set.
   final GestureLongPressUpCallback onLongPressUp;
+
+  /// A pointer has remained in contact with the screen at the same location for
+  /// a long period of time and can subsequently be dragged.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
+  final GestureLongPressDragStartCallback onLongPressDragStart;
+
+  /// A pointer has been drag-moved after a long press.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
+  final GestureLongPressDragUpdateCallback onLongPressDragUpdate;
+
+  /// A pointer that has triggered a long press has stopped contacting the screen
+  /// regardless of whether the pointer is dragged after the long press.
+  ///
+  /// The non-drag long press callbacks [onLongPress] and [onLongPressUp] cannot
+  /// be set while this callback is set.
+  final GestureLongPressDragUpCallback onLongPressDragUp;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -372,6 +424,7 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], gesture drag behavior will
@@ -382,7 +435,7 @@ class GestureDetector extends StatelessWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
+  /// By default, the drag start behavior is [DragStartBehavior.down].
   ///
   /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
   /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
@@ -420,13 +473,25 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null || onLongPressUp !=null) {
+    if (onLongPress != null || onLongPressUp != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress
             ..onLongPressUp = onLongPressUp;
+        },
+      );
+    }
+
+    if (onLongPressDragStart != null || onLongPressDragUpdate != null || onLongPressDragUp != null) {
+      gestures[LongPressDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressDragGestureRecognizer>(
+        () => LongPressDragGestureRecognizer(debugOwner: this),
+        (LongPressDragGestureRecognizer instance) {
+          instance
+            ..onLongPressStart = onLongPressDragStart
+            ..onLongPressDragUpdate = onLongPressDragUpdate
+            ..onLongPressUp = onLongPressDragUp;
         },
       );
     }
