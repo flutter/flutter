@@ -102,7 +102,7 @@ abstract class FlutterCommand extends Command<void> {
     if (_usesPubOption && argResults['pub']) {
       final File pubspecEdit = fs.file('pubspec.yaml');
       final File packagesEdit = fs.file('pubspec.lock');
-      if (pubspecEdit.lastModifiedSync().isAfter(packagesEdit.lastModifiedSync())) {
+      if (!packagesEdit.existsSync() || pubspecEdit.lastModifiedSync().isAfter(packagesEdit.lastModifiedSync())) {
         return true;
       }
     }
