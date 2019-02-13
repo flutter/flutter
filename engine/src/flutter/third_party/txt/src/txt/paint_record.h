@@ -39,13 +39,15 @@ class PaintRecord {
               sk_sp<SkTextBlob> text,
               SkFontMetrics metrics,
               size_t line,
-              double run_width);
+              double run_width,
+              bool is_ghost);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
               SkFontMetrics metrics,
               size_t line,
-              double run_width);
+              double run_width,
+              bool is_ghost);
 
   PaintRecord(PaintRecord&& other);
 
@@ -65,6 +67,8 @@ class PaintRecord {
 
   double GetRunWidth() const { return run_width_; }
 
+  bool isGhost() const { return is_ghost_; }
+
  private:
   TextStyle style_;
   // offset_ is the overall offset of the origin of the SkTextBlob.
@@ -75,6 +79,9 @@ class PaintRecord {
   SkFontMetrics metrics_;
   size_t line_;
   double run_width_ = 0.0f;
+  // 'Ghost' runs represent trailing whitespace. 'Ghost' runs should not have
+  // decorations painted on them and do not impact layout of visible glyphs.
+  bool is_ghost_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };
