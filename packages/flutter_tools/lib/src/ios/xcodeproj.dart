@@ -189,6 +189,8 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
+  if (xcodeBuildSettings == null || xcodeBuildSettings.isEmpty)
+    return null;
   final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty)
     return str;
