@@ -213,14 +213,13 @@ class _BottomNavigationTile extends StatelessWidget {
     this.item,
     this.animation,
     this.iconSize, {
-      this.onTap,
-      this.colorTween,
-      this.flex,
-      this.selected = false,
-      this.indexLabel,
-      this.showLabel = true,
-    }
-  ) : assert(selected != null);
+    this.onTap,
+    this.colorTween,
+    this.flex,
+    this.selected = false,
+    this.indexLabel,
+    this.showLabel = true,
+  }) : assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -509,7 +508,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor,
           vsync: this,
         )..controller.addStatusListener(
-            (AnimationStatus status) {
+          (AnimationStatus status) {
             switch (status) {
               case AnimationStatus.completed:
                 setState(() {
