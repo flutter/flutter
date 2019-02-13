@@ -40,7 +40,7 @@ class WebCompiler {
       target,
       '-o=$outputPath',
       '--libraries-spec=$librariesPath',
-      '--platform-binaries=$flutterPatchedSdkPath'
+      '--platform-binaries=$flutterPatchedSdkPath',
     ];
     if (minify) {
       command.add('-m');
