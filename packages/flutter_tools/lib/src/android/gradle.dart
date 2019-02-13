@@ -274,9 +274,9 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = buildInfo.buildName ?? manifest.buildName;
+    final String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
-    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
