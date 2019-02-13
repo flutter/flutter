@@ -30,7 +30,11 @@ class WebCompiler {
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     final String librariesPath = fs.path.join(flutterPatchedSdkPath, 'libraries.json');
-    final String outputPath = fs.path.join(getWebBuildDirectory(), 'main.dart.js');
+    final Directory outputDir = fs.directory(getWebBuildDirectory());
+    if (!outputDir.existsSync()) {
+      outputDir.createSync(recursive: true);
+    }
+    final String outputPath = fs.path.join(outputDir.absolute.path, 'main.dart.js');
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -38,7 +42,8 @@ class WebCompiler {
       engineDartPath,
       dart2jsPath,
       target,
-      '-o=$outputPath',
+      '-o',
+      '$outputPath',
       '--libraries-spec=$librariesPath',
       '--platform-binaries=$flutterPatchedSdkPath',
     ];
