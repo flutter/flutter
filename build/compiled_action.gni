@@ -84,6 +84,9 @@ template("compiled_action") {
     if (defined(invoker.visibility)) {
       visibility = invoker.visibility
     }
+    if (defined(invoker.testonly)) {
+      testonly = invoker.testonly
+    }
 
     script = "//build/gn_run_binary.py"
 
