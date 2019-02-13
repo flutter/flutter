@@ -530,7 +530,7 @@ class FlutterEngine extends CachedArtifact {
   /// Adding a new artifact:
   ///
   /// To ensure that we do not waste a user's time/data/storage, the flutter
-  /// tool should only binaries when they are required. These can be requested
+  /// tool should only download binaries when they are required. These can be requested
   /// in [FlutterCommand.updateCache].
   ///
   /// An artifact should have the following features to prevent unecessary download:
