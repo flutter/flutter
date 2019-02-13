@@ -14,6 +14,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -378,13 +379,8 @@ class VMService {
   }
 
   Future<Map<String, dynamic>> _handleLoadDartLibrarySources() async {
-    // We assume that the current program is being run using the dart executable
-    // from the dart-sdk packaged with Flutter.
-    const relativeKernelPath =
-      '../../artifacts/engine/common/flutter_patched_sdk/platform_strong.dill';
-    final Uri exePath =
-      Uri.directory(fs.path.dirname(platform.resolvedExecutable));
-    final Uri kernelPath = exePath.resolve(relativeKernelPath);
+    final String kernelPath =
+      Artifacts.instance.getArtifactPath(Artifact.platformKernelDill);
     try {
       final List<int> bytes = await fs.file(kernelPath).readAsBytes();
       final String result = base64.encode(bytes);
