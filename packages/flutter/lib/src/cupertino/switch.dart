@@ -263,6 +263,15 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       _positionController.forward();
     else
       _positionController.reverse();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.lightImpact();
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+    }
   }
 
   TickerProvider get vsync => _vsync;
@@ -296,14 +305,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
       markNeedsSemanticsUpdate();
-    }
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        HapticFeedback.lightImpact();
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        break;
     }
   }
 

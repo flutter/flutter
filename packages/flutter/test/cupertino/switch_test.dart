@@ -80,6 +80,65 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('Using other pickers that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    bool value = false;
+
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                  Container(
+                    height: 100,
+                    child: CupertinoTimerPicker(
+                      onTimerDurationChanged: (Duration d){}
+                    ),
+                  ),
+                ]
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pumpAndSettle();
+
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+
+    await tester.drag(find.text('0').first, const Offset(0, -35.0));
+    await tester.pumpAndSettle();
+
+    expect(log, hasLength(2));
+    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'));
+    debugDefaultTargetPlatformOverride = null;
+
+  });
+
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;
 
