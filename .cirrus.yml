@@ -46,12 +46,12 @@ task:
       test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
       test_script:
-        - dart ./dev/bots/analyze.dart
+        - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
         SHARD: tests
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
@@ -59,7 +59,7 @@ task:
       env:
         SHARD: tool_tests
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
@@ -77,7 +77,7 @@ task:
         - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
         - export CIRRUS_CHANGE_MESSAGE=""
         - export CIRRUS_COMMIT_MESSAGE=""
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
         - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
       container:
@@ -192,7 +192,7 @@ task:
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
     - name: tests-macos
       env:
