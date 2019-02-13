@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../doctor.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -47,5 +48,13 @@ class DoctorCommand extends FlutterCommand {
     }
     final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
+  }
+
+  @override
+  Future<void> updateCache() async {
+    await cache.updateAll(
+      clobber: false,
+      skipUnknown: true,
+    );
   }
 }
