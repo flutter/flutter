@@ -1,4 +1,4 @@
-Signature: 8a314b3884017fae7b125cb423fa8d3f
+Signature: a76c88a9ff389b1401e9df71fb13c1f6
 
 UNUSED LICENSES:
 
@@ -5604,6 +5604,7 @@ FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_dbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc_test.cc
@@ -5617,7 +5618,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_eliminati
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/cpu_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/cpu_dbc.h
@@ -5653,7 +5653,6 @@ FILE: ../../../third_party/dart/runtime/vm/signal_handler_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_dbc.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.h
@@ -5700,24 +5699,68 @@ ORIGIN: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_exte
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
+FILE: ../../../third_party/dart/runtime/bin/ffi_test_dynamic_library.cc
+FILE: ../../../third_party/dart/runtime/bin/ffi_test_functions.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
+FILE: ../../../third_party/dart/runtime/lib/ffi.cc
+FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
+FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
+FILE: ../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart
+FILE: ../../../third_party/dart/runtime/lib/ffi_patch.dart
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/recognized_methods_list.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_dbc.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/ffi_trampoline_stubs_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/pointer_tagging.h
+FILE: ../../../third_party/dart/runtime/vm/static_type_exactness_state.h
+FILE: ../../../third_party/dart/runtime/vm/stub_code_list.h
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_stack_resource.h
 FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_state.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_x64.cc
+FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_data.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_dynamic_library.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_structs.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_structs.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -6145,9 +6188,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_arm.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/jit/jit_call_specializer.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm.h
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.h
@@ -6201,10 +6241,7 @@ FILE: ../../../third_party/dart/runtime/vm/simulator_arm.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_arm.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_ia32.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_x64.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/stub_code_arm_test.cc
-FILE: ../../../third_party/dart/runtime/vm/stub_code_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/stub_code_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/tags.h
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter.h
@@ -6415,7 +6452,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/range_analysis.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/range_analysis.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/range_analysis_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/intrinsifier_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/method_recognizer.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/method_recognizer.h
 FILE: ../../../third_party/dart/runtime/vm/constants_arm64.h
@@ -6466,7 +6502,6 @@ FILE: ../../../third_party/dart/runtime/vm/runtime_entry_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_arm64.h
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_arm64.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/stub_code_arm64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/tags.cc
 FILE: ../../../third_party/dart/runtime/vm/unibrow-inl.h
