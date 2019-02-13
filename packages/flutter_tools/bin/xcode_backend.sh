@@ -119,6 +119,7 @@ BuildApp() {
 
   # If the framework path does not exist, ensure that it is downloaded.
   if [[ ! -e "$1" ]]; then
+    FLUTTER_ALREADY_LOCKED = "true"
     RunCommand "${FLUTTER_ROOT}/bin/flutter" precache --suppress-analytics
   fi
 
