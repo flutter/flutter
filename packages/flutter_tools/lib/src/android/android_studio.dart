@@ -26,10 +26,6 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
-final RegExp _pathsSelectorMatcher =
-    RegExp(r'"idea.paths.selector" = "[^;]+"');
-final RegExp _jetBrainsToolboxAppMatcher =
-    RegExp(r'JetBrainsToolboxApp = "[^;]+"');
 
 String get javaPath => androidStudio?.javaPath;
 
@@ -47,6 +43,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       plistFile,
       null,
     );
+    final RegExp _pathsSelectorMatcher = RegExp(r'"idea.paths.selector" = "[^;]+"');
+    final RegExp _jetBrainsToolboxAppMatcher = RegExp(r'JetBrainsToolboxApp = "[^;]+"');
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
     final String jetBrainsToolboxAppBundlePath = extractStudioPlistValueWithMatcher(plistValue, _jetBrainsToolboxAppMatcher);
@@ -69,8 +67,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       version = Version.parse(versionString);
 
     final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
-    final String presetPluginsPath = pathsSelectorValue == null ? null :
-                                      fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
+    final String presetPluginsPath = pathsSelectorValue == null
+        ? null
+        : fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
