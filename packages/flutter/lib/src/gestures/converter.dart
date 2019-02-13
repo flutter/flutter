@@ -81,8 +81,7 @@ class PointerEventConverter {
       final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
-      assert(datum.change != null);
-      if (datum.signalKind == ui.PointerSignalKind.none) {
+      if (datum.signalKind == null || datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
             assert(!_pointers.containsKey(datum.device));
