@@ -3319,8 +3319,8 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
+    Theme.of(context).platform = TargetPlatform.iOS;
 
     final TextEditingController controller = TextEditingController();
     const TextStyle textStyle = TextStyle();
