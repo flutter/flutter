@@ -100,13 +100,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub {
     if (_usesPubOption && argResults['pub']) {
-      final DateTime pubspecEdit = fs.file('pubpsec.yaml').statSync().modified;
-      final DateTime pubspecLockEdit = fs.file('.packages').statSync().modified;
-      final DateTime packagesEdit = fs.file('pubpspec.lock').statSync().modified;
-      if (pubspecLockEdit == null || packagesEdit == null) {
-        return true;
-      }
-      if (pubspecEdit.isAfter(packagesEdit) || pubspecEdit.isAfter(pubspecLockEdit)) {
+      final File pubspecEdit = fs.file('pubspec.yaml');
+      final File packagesEdit = fs.file('pubspec.lock');
+      if (pubspecEdit.lastModifiedSync().isAfter(packagesEdit.lastModifiedSync())) {
         return true;
       }
     }
