@@ -2465,8 +2465,11 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!widget.offstage)
-      super.debugVisitOnstageChildren(visitor);
+    assert(() {
+      if (!widget.offstage)
+        super.debugVisitOnstageChildren(visitor);
+      return true;
+    }());
   }
 }
 
