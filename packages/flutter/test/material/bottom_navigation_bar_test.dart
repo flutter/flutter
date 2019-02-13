@@ -879,10 +879,8 @@ void main() {
       ),
     );
     await tester.pumpWidget(widget);
-    
     expect(find.text('Red'), findsOneWidget);
     expect(find.text('Green'), findsOneWidget);
-
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
     expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
   });
@@ -915,10 +913,8 @@ void main() {
         ),
       ),
     );
-    
     expect(find.text('Red'), findsOneWidget);
     expect(find.text('Green'), findsOneWidget);
-
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
     expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
   });
