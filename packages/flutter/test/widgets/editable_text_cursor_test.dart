@@ -540,8 +540,15 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Start),
+    );
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: const Offset(20, 20)
+      ),
+    );
     await tester.pump();
 
     expect(editable, paints
