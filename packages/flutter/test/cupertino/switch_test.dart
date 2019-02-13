@@ -80,7 +80,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('Using other pickers that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
     final Key switchKey2 = UniqueKey();
