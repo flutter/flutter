@@ -387,15 +387,15 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<void>(
-        'onUpdate',
-        () => onUpdate(
-          ScaleUpdateDetails(scale: _scaleFactor, horizontalScale: _horizontalScaleFactor,
-            verticalScale: _verticalScaleFactor, focalPoint: _currentFocalPoint,
-            rotation: _computeRotationFactor(),
-          ),
-        ),
-      );
+      invokeCallback<void>('onUpdate', () {
+        onUpdate(ScaleUpdateDetails(
+          scale: _scaleFactor,
+          horizontalScale: _horizontalScaleFactor,
+          verticalScale: _verticalScaleFactor,
+          focalPoint: _currentFocalPoint,
+          rotation: _computeRotationFactor(),
+        ));
+      });
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
