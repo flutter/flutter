@@ -83,8 +83,9 @@ void main() {
   testWidgets('Using other pickers that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
+    final Key switchKey2 = UniqueKey();
     bool value = false;
-
+    bool value2 = false;
     final List<MethodCall> log = <MethodCall>[];
 
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -99,21 +100,26 @@ void main() {
             return Center(
               child: Column(
                 children: <Widget>[
+                  const SizedBox(
+                    height: 400,
+                  ),
                   CupertinoSwitch(
                     key: switchKey,
                     value: value,
-                    dragStartBehavior: DragStartBehavior.down,
                     onChanged: (bool newValue) {
                       setState(() {
                         value = newValue;
                       });
                     },
                   ),
-                  Container(
-                    height: 100,
-                    child: CupertinoTimerPicker(
-                      onTimerDurationChanged: (Duration d){}
-                    ),
+                  CupertinoSwitch(
+                    key: switchKey2,
+                    value: value2,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value2 = newValue;
+                      });
+                    },
                   ),
                 ]
               ),
@@ -127,16 +133,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(log, hasLength(1));
-    expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
-    debugDefaultTargetPlatformOverride = null;
+    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
 
-    await tester.drag(find.text('0').first, const Offset(0, -35.0));
+    await tester.tap(find.byKey(switchKey2));
     await tester.pumpAndSettle();
 
     expect(log, hasLength(2));
-    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'));
+    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
     debugDefaultTargetPlatformOverride = null;
-
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {

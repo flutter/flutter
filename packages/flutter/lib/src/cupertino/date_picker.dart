@@ -1071,6 +1071,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
+        print('changed' + index.toString());
         setState(() {
           selectedHour = index;
           widget.onTimerDurationChanged(
