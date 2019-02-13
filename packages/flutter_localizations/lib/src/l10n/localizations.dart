@@ -6288,6 +6288,210 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'LICENCEK MEGTEKINTÉSE';
 }
 
+/// The translations for Armenian (`hy`).
+class MaterialLocalizationHy extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Armenian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationHy({
+    String localeName = 'hy',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName: տեղեկություն';
+
+  @override
+  String get alertDialogLabel => r'Զգուշացում';
+
+  @override
+  String get anteMeridiemAbbreviation => r'АМ';
+
+  @override
+  String get backButtonTooltip => r'Հետ';
+
+  @override
+  String get cancelButtonLabel => r'ՉԵՂԱՐԿԵԼ';
+
+  @override
+  String get closeButtonLabel => r'ՓԱԿԵԼ';
+
+  @override
+  String get closeButtonTooltip => r'Փակել';
+
+  @override
+  String get collapsedIconTapHint => r'Ընդլայնել';
+
+  @override
+  String get continueButtonLabel => r'ՇԱՐՈՒՆԱԿԵԼ';
+
+  @override
+  String get copyButtonLabel => r'ԿՐԿՆՕՐԻՆԱԿԵԼ';
+
+  @override
+  String get cutButtonLabel => r'ԿՏՐԵԼ';
+
+  @override
+  String get deleteButtonTooltip => r'Ջնջել';
+
+  @override
+  String get dialogLabel => r'Դիալոգի պատուհան';
+
+  @override
+  String get drawerLabel => r'Նավիգացյոն մենյու';
+
+  @override
+  String get expandedIconTapHint => r'Պահել';
+
+  @override
+  String get hideAccountsLabel => r'Թաքցնել հաշիվը';
+
+  @override
+  String get licensesPageTitle => r'Լիցենզիա';
+
+  @override
+  String get modalBarrierDismissLabel => r'Փակել';
+
+  @override
+  String get nextMonthTooltip => r'Հաջորդ ամիս';
+
+  @override
+  String get nextPageTooltip => r'Հաջորդ էջ';
+
+  @override
+  String get okButtonLabel => r'ՕԿ';
+
+  @override
+  String get openAppDrawerTooltip => r'Բացել նավիգացյոն մենյուն';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-ից';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow մոտավոր $rowCount-ից';
+
+  @override
+  String get pasteButtonLabel => r'ՏԵՂԱԴՐԵԼ';
+
+  @override
+  String get popupMenuLabel => r'Հայտնվող մենյու';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Նախորդ ամիս';
+
+  @override
+  String get previousPageTooltip => r'Նախորդ էջ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Թարմացում';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountMany => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Մնաց 1 նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'Նիշի հնարավորություն չկա';
+
+  @override
+  String get reorderItemDown => r'Տանել ներքև';
+
+  @override
+  String get reorderItemLeft => r'Տանել ձախ';
+
+  @override
+  String get reorderItemRight => r'Տանել աջ';
+
+  @override
+  String get reorderItemToEnd => r'Տանել վերջ';
+
+  @override
+  String get reorderItemToStart => r'Տանել սկիզբ';
+
+  @override
+  String get reorderItemUp => r'Տանել վերև';
+
+  @override
+  String get rowsPerPageTitle => r'Էջ տողի վրա:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Փնտրել';
+
+  @override
+  String get selectAllButtonLabel => r'ՆՇԵԼ ԱՄԲՈՂՋԸ';
+
+  @override
+  String get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleMany => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleOne => r'Ընտրված է 1 օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleOther => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Տողերը ընտրված չեն';
+
+  @override
+  String get showAccountsLabel => r'Ցույց տալ հաշիվը';
+
+  @override
+  String get showMenuTooltip => r'Ցույց տալ մենյուն';
+
+  @override
+  String get signedInLabel => r'Մուտքը կատարվեց';
+
+  @override
+  String get tabLabelRaw => r'Ներդիր $tabIndex $tabCount-ից';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Ընտրեք ժամերը';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Ընտրեք րոպեները';
+
+  @override
+  String get viewLicensesButtonLabel => r'ԼԻՑԵՆԶԻԱ';
+}
+
 /// The translations for Indonesian (`id`).
 class MaterialLocalizationId extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Indonesian.
@@ -12963,6 +13167,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'hi', // Hindi
   'hr', // Croatian
   'hu', // Hungarian
+  'hy', // Armenian
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
@@ -13026,6 +13231,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `hi` - Hindi
 ///  * `hr` - Croatian
 ///  * `hu` - Hungarian
+///  * `hy` - Armenian
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
@@ -13182,6 +13388,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationHr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hu':
       return MaterialLocalizationHu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'hy':
+      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
       return MaterialLocalizationId(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':
