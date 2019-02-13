@@ -419,7 +419,8 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
-  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  // Two records for each due to 'ghost' trailing whitespace run.
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines * 2);
   double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
@@ -431,15 +432,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
           paragraph->breaker_.getWidths()[paragraph->records_[0].line()],
       2.0);
 
-  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30;
-  ASSERT_NEAR(
-      paragraph->records_[1].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[1].line()],
-      2.0);
-
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
   expected_y += 30;
@@ -449,21 +441,30 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
           paragraph->breaker_.getWidths()[paragraph->records_[2].line()],
       2.0);
 
-  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30 * 10;
+  ASSERT_TRUE(paragraph->records_[4].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[4].offset().y(), expected_y);
+  expected_y += 30;
   ASSERT_NEAR(
-      paragraph->records_[3].offset().x(),
+      paragraph->records_[4].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[3].line()],
+          paragraph->breaker_.getWidths()[paragraph->records_[4].line()],
       2.0);
 
-  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_TRUE(paragraph->records_[6].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[6].offset().y(), expected_y);
+  expected_y += 30 * 10;
   ASSERT_NEAR(
-      paragraph->records_[13].offset().x(),
+      paragraph->records_[6].offset().x(),
       paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[13].line()],
+          paragraph->breaker_.getWidths()[paragraph->records_[6].line()],
+      2.0);
+
+  ASSERT_TRUE(paragraph->records_[26].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().y(), expected_y);
+  ASSERT_NEAR(
+      paragraph->records_[26].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[26].line()],
       2.0);
 
   ASSERT_EQ(paragraph_style.text_align,
@@ -528,7 +529,8 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
-  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  // Two records for each due to 'ghost' trailing whitespace run.
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines * 2);
   double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
@@ -537,15 +539,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   ASSERT_NEAR(paragraph->records_[0].offset().x(),
               (paragraph->width_ -
                paragraph->breaker_.getWidths()[paragraph->records_[0].line()]) /
-                  2,
-              2.0);
-
-  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30;
-  ASSERT_NEAR(paragraph->records_[1].offset().x(),
-              (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[1].line()]) /
                   2,
               2.0);
 
@@ -558,21 +551,30 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
                   2,
               2.0);
 
-  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30 * 10;
-  ASSERT_NEAR(paragraph->records_[3].offset().x(),
+  ASSERT_TRUE(paragraph->records_[4].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[4].offset().y(), expected_y);
+  expected_y += 30;
+  ASSERT_NEAR(paragraph->records_[4].offset().x(),
               (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[3].line()]) /
+               paragraph->breaker_.getWidths()[paragraph->records_[4].line()]) /
                   2,
               2.0);
 
-  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_TRUE(paragraph->records_[6].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[6].offset().y(), expected_y);
+  expected_y += 30 * 10;
+  ASSERT_NEAR(paragraph->records_[6].offset().x(),
+              (paragraph->width_ -
+               paragraph->breaker_.getWidths()[paragraph->records_[6].line()]) /
+                  2,
+              2.0);
+
+  ASSERT_TRUE(paragraph->records_[26].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().y(), expected_y);
   ASSERT_NEAR(
-      paragraph->records_[13].offset().x(),
+      paragraph->records_[26].offset().x(),
       (paragraph->width_ -
-       paragraph->breaker_.getWidths()[paragraph->records_[13].line()]) /
+       paragraph->breaker_.getWidths()[paragraph->records_[26].line()]) /
           2,
       2.0);
 
@@ -1760,7 +1762,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeCenterParagraph)) {
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 346.04492);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 346.04492);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 358.49414);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
   paint.setColor(SK_ColorRED);
@@ -1868,7 +1870,7 @@ TEST_F(ParagraphTest,
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 346.04492);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 346.04492);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 358.49414);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
   paint.setColor(SK_ColorBLACK);
@@ -1892,7 +1894,7 @@ TEST_F(ParagraphTest,
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 331.83594);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 59.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 331.83594);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 419.18359);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 118);
 
   paint.setColor(SK_ColorRED);
@@ -2413,7 +2415,7 @@ TEST_F(ParagraphTest, Ellipsize) {
 
   // Check that the ellipsizer limited the text to one line and did not wrap
   // to a second line.
-  ASSERT_EQ(paragraph->records_.size(), 1ull);
+  ASSERT_EQ(paragraph->records_.size(), 2ull);
 }
 
 // Test for shifting when identical runs of text are built as multiple runs.
