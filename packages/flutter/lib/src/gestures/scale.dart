@@ -64,24 +64,47 @@ class ScaleUpdateDetails {
        assert(verticalScale != null && verticalScale >= 0.0),
        assert(rotation != null);
 
-  /// The focal point of the pointers in contact with the screen. Reported in
-  /// global coordinates.
+  /// The focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in global coordinates.
   final Offset focalPoint;
 
-  /// The scale implied by the pointers in contact with the screen. A value
-  /// greater than or equal to zero.
+  /// The scale implied by the average distance between the pointers in contact
+  /// with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [horizontalScale], which is the scale along the horizontal axis.
+  ///  * [verticalScale], which is the scale along the vertical axis.
   final double scale;
 
-  /// The scale along the horizontal axis implied by the pointers in contact
-  /// with the screen. A value greater than or equal to zero.
+  /// The scale implied by the average distance along the horizontal axis
+  /// between the pointers in contact with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [scale], which is the general scale implied by the pointers.
+  ///  * [verticalScale], which is the scale along the vertical axis.
   final double horizontalScale;
 
-  /// The scale along the vertical axis implied by the pointers in contact
-  /// with the screen. A value greater than or equal to zero.
+  /// The scale implied by the average distance along the vertical axis
+  /// between the pointers in contact with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [scale], which is the general scale implied by the pointers.
+  ///  * [horizontalScale], which is the scale along the horizontal axis.
   final double verticalScale;
 
   /// The angle implied by the first two pointers to enter in contact with
-  /// the screen. Expressed in radians.
+  ///
+  /// Expressed in radians.
   final double rotation;
 
   @override
@@ -363,7 +386,15 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(ScaleUpdateDetails(scale: _scaleFactor, horizontalScale: _horizontalScaleFactor, verticalScale: _verticalScaleFactor, focalPoint: _currentFocalPoint, rotation: _computeRotationFactor())));
+      invokeCallback<void>(
+        'onUpdate',
+        () => onUpdate(
+          ScaleUpdateDetails(scale: _scaleFactor, horizontalScale: _horizontalScaleFactor,
+            verticalScale: _verticalScaleFactor, focalPoint: _currentFocalPoint,
+            rotation: _computeRotationFactor(),
+          ),
+        ),
+      );
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
