@@ -40,7 +40,7 @@ IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
   ECHO        The flutter tool requires Git in order to operate properly;
   ECHO        to set up Flutter, run the following command:
-  ECHO        git clone -b beta https://github.com/flutter/flutter.git
+  ECHO        git clone -b stable https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 
@@ -136,7 +136,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade...
-        CALL "%pub%" upgrade "%VERBOSITY%" --no-packages-dir
+        CALL "%pub%" upgrade "%VERBOSITY%"
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL

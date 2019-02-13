@@ -79,7 +79,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             Text('modifiers set: $modifierList'),
           ];
           if (data is RawKeyEventDataAndroid) {
-            dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
+            const int combiningCharacterMask = 0x7fffffff;
+            final String codePointChar = String.fromCharCode(combiningCharacterMask & data.codePoint);
+            dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)}: $codePointChar)'));
+            final String plainCodePointChar = String.fromCharCode(combiningCharacterMask & data.plainCodePoint);
+            dataText.add(Text('plainCodePoint: ${data.plainCodePoint} (${_asHex(data.plainCodePoint)}: $plainCodePointChar)'));
             dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
             dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
@@ -88,6 +92,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
+          }
+          dataText.add(Text('logical: ${_event.logicalKey}'));
+          dataText.add(Text('physical: ${_event.physicalKey}'));
+          if (_event.character != null) {
+            dataText.add(Text('character: ${_event.character}'));
           }
           for (ModifierKey modifier in data.modifiersPressed.keys) {
             for (KeyboardSide side in KeyboardSide.values) {

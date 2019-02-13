@@ -26,10 +26,10 @@ String _dottedNameToString(analyzer.DottedName dottedName) {
 }
 
 class DartDependencySetBuilder {
-  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
-    _mainScriptPath = canonicalizePath(mainScriptPath),
-    _mainScriptUri = fs.path.toUri(mainScriptPath),
-    _packagesFilePath = canonicalizePath(packagesFilePath);
+  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath)
+    : _mainScriptPath = canonicalizePath(mainScriptPath),
+      _mainScriptUri = fs.path.toUri(mainScriptPath),
+      _packagesFilePath = canonicalizePath(packagesFilePath);
 
   final String _mainScriptPath;
   final String _packagesFilePath;

@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -65,8 +63,6 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
-
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -74,14 +70,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
-    int buildNumber;
-    try {
-      buildNumber = argResults['build-number'] != null
-          ? int.parse(argResults['build-number']) : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
+    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
 
     await build(
       platform: platform,

@@ -89,7 +89,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 }
 
 /// [Color] and [ColorSwatch] constants which represent Material design's
-/// [color palette](http://material.google.com/style/color.html).
+/// [color palette](https://material.io/design/color/).
 ///
 /// Instead of using an absolute color from these palettes, consider using
 /// [Theme.of] to obtain the local [ThemeData] structure, which exposes the

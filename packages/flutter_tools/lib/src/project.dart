@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart' as gradle;
 import 'base/common.dart';
@@ -31,9 +32,9 @@ import 'template.dart';
 class FlutterProject {
   @visibleForTesting
   FlutterProject(this.directory, this.manifest, this._exampleManifest)
-      : assert(directory != null),
-        assert(manifest != null),
-        assert(_exampleManifest != null);
+    : assert(directory != null),
+      assert(manifest != null),
+      assert(_exampleManifest != null);
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -89,7 +90,7 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => IosProject._(this);
+  IosProject get ios => IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
   AndroidProject get android => AndroidProject._(this);
@@ -144,6 +145,18 @@ class FlutterProject {
     await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
   }
+
+  /// Return the set of builders used by this package.
+  Future<List<String>> get builders async {
+    final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
+    final YamlList builders = pubspec['builders'];
+    if (builders == null) {
+      return <String>[];
+    }
+    return builders.map<String>((Object node) {
+      return node.toString();
+    }).toList();
+  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -151,12 +164,12 @@ class FlutterProject {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject {
-  IosProject._(this.parent);
+  IosProject.fromFlutter(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
 
-  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
@@ -225,7 +238,7 @@ class IosProject {
       // Info.plist has no build variables in product bundle ID.
       return fromPlist;
     }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
     if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
       // Common case. Avoids parsing build settings.
       return fromPbxproj;

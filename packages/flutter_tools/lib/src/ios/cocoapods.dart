@@ -11,6 +11,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
@@ -85,8 +86,18 @@ class CocoaPods {
     }
   }
 
-  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
+  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
+  /// cloned.
+  ///
+  /// A user can override the default location via the CP_REPOS_DIR environment
+  /// variable.
+  ///
+  /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
+  /// for details of this variable.
+  Future<bool> get isCocoaPodsInitialized {
+    final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
+    return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
+  }
 
   Future<bool> processPods({
     @required IosProject iosProject,
@@ -193,6 +204,12 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfile.path);
     }
+    addPodsDependencyToFlutterXcconfig(iosProject);
+  }
+
+  /// Ensures all `Flutter/Xxx.xcconfig` files for the given iOS sub-project of
+  /// a parent Flutter project include pods configuration.
+  void addPodsDependencyToFlutterXcconfig(IosProject iosProject) {
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }

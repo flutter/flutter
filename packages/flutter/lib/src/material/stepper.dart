@@ -73,7 +73,7 @@ const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(
 /// See also:
 ///
 ///  * [Stepper]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 @immutable
 class Step {
   /// Creates a step for a [Stepper].
@@ -123,7 +123,7 @@ class Step {
 /// See also:
 ///
 ///  * [Step]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 class Stepper extends StatefulWidget {
   /// Creates a stepper from a list of steps.
   ///
@@ -135,6 +135,7 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
+    this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
     this.onStepTapped,
@@ -151,6 +152,15 @@ class Stepper extends StatefulWidget {
   ///
   /// The length of [steps] must not change.
   final List<Step> steps;
+
+  /// How the stepper's scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to
+  /// animate after the user stops dragging the scroll view.
+  ///
+  /// If the stepper is contained within another scrollable it
+  /// can be helpful to set this property to [ClampingScrollPhysics].
+  final ScrollPhysics physics;
 
   /// The type of stepper that determines the layout. In the case of
   /// [StepperType.horizontal], the content of the current step is displayed
@@ -594,6 +604,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return ListView(
       shrinkWrap: true,
+      physics: widget.physics,
       children: children,
     );
   }
@@ -676,7 +687,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         throw FlutterError(
           'Steppers must not be nested. The material specification advises '
           'that one should avoid embedding steppers within steppers. '
-          'https://material.google.com/components/steppers.html#steppers-usage\n'
+          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
         );
       return true;
     }());

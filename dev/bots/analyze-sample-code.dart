@@ -45,6 +45,7 @@
 
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 // To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
@@ -54,14 +55,44 @@ final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutt
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
 void main(List<String> arguments) {
+  final ArgParser argParser = ArgParser();
+  argParser.addOption(
+    'temp',
+    defaultsTo: null,
+    help: 'A location where temporary files may be written. Defaults to a '
+        'directory in the system temp folder. If specified, will not be '
+        'automatically removed at the end of execution.',
+  );
+  argParser.addFlag(
+    'help',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print help for this command.',
+  );
+
+  final ArgResults parsedArguments = argParser.parse(arguments);
+
+  if (parsedArguments['help']) {
+    print(argParser.usage);
+    exit(0);
+  }
+
   Directory flutterPackage;
-  if (arguments.length == 1) {
+  if (parsedArguments.rest.length == 1) {
     // Used for testing.
-    flutterPackage = Directory(arguments.single);
+    flutterPackage = Directory(parsedArguments.rest.single);
   } else {
     flutterPackage = Directory(_defaultFlutterPackage);
   }
-  exitCode = SampleChecker(flutterPackage).checkSamples();
+
+  Directory tempDirectory;
+  if (parsedArguments.wasParsed('temp')) {
+    tempDirectory = Directory(parsedArguments['temp']);
+    if (!tempDirectory.existsSync()) {
+      tempDirectory.createSync(recursive: true);
+    }
+  }
+  exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory).checkSamples();
 }
 
 /// Checks samples and code snippets for analysis errors.
@@ -79,8 +110,10 @@ void main(List<String> arguments) {
 /// don't necessarily match. It does, however, print the source of the
 /// problematic line.
 class SampleChecker {
-  SampleChecker(this._flutterPackage) {
-    _tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
+  SampleChecker(this._flutterPackage, {Directory tempDirectory})
+      : _tempDirectory = tempDirectory,
+        _keepTmp = tempDirectory != null {
+    _tempDirectory ??= Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   }
 
   /// The prefix of each comment line
@@ -104,9 +137,14 @@ class SampleChecker {
   /// A RegExp that matches a Dart constructor.
   static final RegExp _constructorRegExp = RegExp(r'[A-Z][a-zA-Z0-9<>.]*\(');
 
+  /// Whether or not to keep the temp directory around after running.
+  ///
+  /// Defaults to false.
+  final bool _keepTmp;
+
   /// The temporary directory where all output is written. This will be deleted
   /// automatically if there are no errors.
-  Directory _tempDir;
+  Directory _tempDirectory;
 
   /// The package directory for the flutter package within the flutter root dir.
   final Directory _flutterPackage;
@@ -128,10 +166,17 @@ class SampleChecker {
     return path.canonicalize(path.join(platformScriptPath, '..', 'snippets', 'lib', 'main.dart'));
   }
 
+  /// Finds the location of the Dart executable.
+  String get _dartExecutable {
+    final File dartExecutable = File(Platform.resolvedExecutable);
+    return dartExecutable.absolute.path;
+  }
+
   static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
     return directory.listSync(recursive: recursive, followLinks: false)
-      .whereType<File>()
-      .where((File file) => path.extension(file.path) == '.dart').toList();
+        .whereType<File>()
+        .where((File file) => path.extension(file.path) == '.dart')
+        .toList();
   }
 
   /// Computes the headers needed for each sample file.
@@ -165,7 +210,7 @@ class SampleChecker {
       final Map<String, Section> sections = <String, Section>{};
       final Map<String, Snippet> snippets = <String, Snippet>{};
       _extractSamples(sections, snippets);
-      errors = _analyze(_tempDir, sections, snippets);
+      errors = _analyze(_tempDirectory, sections, snippets);
     } finally {
       if (errors.isNotEmpty) {
         for (String filePath in errors.keys) {
@@ -173,10 +218,14 @@ class SampleChecker {
         }
         stderr.writeln('\nFound ${errors.length} sample code errors.');
       }
-      try {
-        _tempDir.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        stderr.writeln('Failed to delete ${_tempDir.path}: $e');
+      if (!_keepTmp) {
+        try {
+          _tempDirectory.deleteSync(recursive: true);
+        } on FileSystemException catch (e) {
+          stderr.writeln('Failed to delete ${_tempDirectory.path}: $e');
+        }
+      } else {
+        print('Leaving temporary directory ${_tempDirectory.path} around for your perusal.');
       }
       // If we made a snapshot, remove it (so as not to clutter up the tree).
       if (_snippetsSnapshotPath != null) {
@@ -192,8 +241,7 @@ class SampleChecker {
   /// Creates a name for the snippets tool to use for the snippet ID from a
   /// filename and starting line number.
   String _createNameFromSource(String prefix, String filename, int start) {
-    String snippetId = path.relative(filename, from: _flutterPackage.path);
-    snippetId = path.split(snippetId).join('.');
+    String snippetId = path.split(filename).join('.');
     snippetId = path.basenameWithoutExtension(snippetId);
     snippetId = '$prefix.$snippetId.$start';
     return snippetId;
@@ -206,7 +254,7 @@ class SampleChecker {
     if (_snippetsSnapshotPath == null) {
       _snippetsSnapshotPath = '$_snippetsExecutable.snapshot';
       return Process.runSync(
-        path.canonicalize(Platform.executable),
+        _dartExecutable,
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
@@ -216,23 +264,23 @@ class SampleChecker {
       );
     } else {
       return Process.runSync(
-        path.canonicalize(Platform.executable),
+        _dartExecutable,
         <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
         workingDirectory: workingDirectory,
       );
     }
   }
 
-  /// Writes out the given [snippet] to an output file in the [_tempDir] and
+  /// Writes out the given [snippet] to an output file in the [_tempDirectory] and
   /// returns the output file.
   File _writeSnippet(Snippet snippet) {
     // Generate the snippet.
     final String snippetId = _createNameFromSource('snippet', snippet.start.filename, snippet.start.line);
     final String inputName = '$snippetId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
-    final File inputFile = File(path.join(_tempDir.path, inputName))..createSync(recursive: true);
+    final File inputFile = File(path.join(_tempDirectory.path, inputName))..createSync(recursive: true);
     inputFile.writeAsStringSync(snippet.input.join('\n'));
-    final File outputFile = File(path.join(_tempDir.path, '$snippetId.dart'));
+    final File outputFile = File(path.join(_tempDirectory.path, '$snippetId.dart'));
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
       '--input=${inputFile.absolute.path}',
@@ -449,7 +497,7 @@ linter:
   /// Writes out a sample section to the disk and returns the file.
   File _writeSection(Section section) {
     final String sectionId = _createNameFromSource('sample', section.start.filename, section.start.line);
-    final File outputFile = File(path.join(_tempDir.path, '$sectionId.dart'))..createSync(recursive: true);
+    final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = headers.toList();
     mainContents.add(const Line(''));
     mainContents.add(Line('// From: ${section.start.filename}:${section.start.line}'));
@@ -520,7 +568,7 @@ linter:
       final Match parts = errorPattern.matchAsPrefix(error);
       if (parts != null) {
         final String message = parts[2];
-        final File file = File(path.join(_tempDir.path, parts[3]));
+        final File file = File(path.join(_tempDirectory.path, parts[3]));
         final List<String> fileContents = file.readAsLinesSync();
         final bool isSnippet = path.basename(file.path).startsWith('snippet.');
         final bool isSample = path.basename(file.path).startsWith('sample.');

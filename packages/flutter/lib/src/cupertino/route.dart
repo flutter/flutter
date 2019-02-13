@@ -106,10 +106,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog) {
-    // ignore: prefer_asserts_in_initializer_lists, https://github.com/dart-lang/sdk/issues/31223
-    assert(opaque); // PageRoute makes it return true.
-  }
+       assert(opaque),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -636,18 +634,22 @@ class _CupertinoBackGestureController<T> {
       controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
     }
 
-    assert(controller.isAnimating);
-    assert(controller.status != AnimationStatus.completed);
-    assert(controller.status != AnimationStatus.dismissed);
+    if (controller.isAnimating) {
+      // Don't end the gesture until the transition completes.
+      _animating = true;
+      controller.addStatusListener(_handleStatusChanged);
+    } else {
+      // Animate calls could return inline if already at the target destination
+      // value.
+      return _handleStatusChanged(controller.status);
+    }
 
-    // Don't end the gesture until the transition completes.
-    _animating = true;
-    controller.addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    assert(_animating);
-    controller.removeStatusListener(_handleStatusChanged);
+    if (_animating) {
+      controller.removeStatusListener(_handleStatusChanged);
+    }
     _animating = false;
     if (status == AnimationStatus.dismissed)
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us

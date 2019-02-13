@@ -595,7 +595,8 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.allowImplicitScrolling,
     @required this.semanticChildCount,
     Widget child
-  }) : assert(position != null), super(key: key, child: child);
+  }) : assert(position != null),
+       super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -628,7 +629,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
        _semanticChildCount = semanticChildCount,
-       assert(position != null), super(child) {
+       assert(position != null),
+       super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
