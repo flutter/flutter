@@ -210,9 +210,11 @@ void main() {
     print(metrics);
     expect(metrics[0].length, 20);
     expect(metrics[0].isClosed, true);
-    expect(() => metrics[0].getTangentForOffset(4.0), throwsStateError);
-    expect(() => metrics[0].getTangentForOffset(4.0), throwsStateError);
+    expect(() => metrics[0].getTangentForOffset(4.0), isNotNull);
+    expect(() => metrics[0].extractPath(4.0, 10.0), isNotNull);
     expect(metrics[1].length, 10);
     expect(metrics[1].isClosed, false);
+    expect(() => metrics[1].getTangentForOffset(4.0), isNotNull);
+    expect(() => metrics[1].extractPath(4.0, 10.0), isNotNull);
   });
 }

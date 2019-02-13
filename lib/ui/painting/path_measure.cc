@@ -49,9 +49,9 @@ fml::RefPtr<CanvasPathMeasure> CanvasPathMeasure::Create(const CanvasPath* path,
     const SkPath skPath = path->path();
     SkScalar resScale = 1;
     pathMeasure->path_measure_ =
-        std::make_unique<SkPathMeasure>(skPath, forceClosed, resScale);
+        std::make_unique<SkContourMeasureIter>(skPath, forceClosed, resScale);
   } else {
-    pathMeasure->path_measure_ = std::make_unique<SkPathMeasure>();
+    pathMeasure->path_measure_ = std::make_unique<SkContourMeasureIter>();
   }
   return pathMeasure;
 }
@@ -61,39 +61,53 @@ CanvasPathMeasure::CanvasPathMeasure() {}
 CanvasPathMeasure::~CanvasPathMeasure() {}
 
 void CanvasPathMeasure::setPath(const CanvasPath* path, bool isClosed) {
-  const SkPath* skPath = &(path->path());
-  path_measure_->setPath(skPath, isClosed);
+  const SkPath& skPath = path->path();
+  path_measure_->reset(skPath, isClosed);
 }
 
-float CanvasPathMeasure::getLength() {
-  return path_measure_->getLength();
+float CanvasPathMeasure::getLength(int contourIndex) {
+  if (static_cast<std::vector<sk_sp<SkContourMeasure>>::size_type>(
+          contourIndex) < measures_.size()) {
+    return measures_[contourIndex]->length();
+  }
+  return -1;
 }
 
-tonic::Float32List CanvasPathMeasure::getPosTan(float distance) {
+tonic::Float32List CanvasPathMeasure::getPosTan(int contourIndex,
+                                                float distance) {
+  tonic::Float32List posTan(Dart_NewTypedData(Dart_TypedData_kFloat32, 5));
+  posTan[0] = 0;  // dart code will check for this for failure
+  if (static_cast<std::vector<sk_sp<SkContourMeasure>>::size_type>(
+          contourIndex) >= measures_.size()) {
+    return posTan;
+  }
+
   SkPoint pos;
   SkVector tan;
-  bool success = path_measure_->getPosTan(distance, &pos, &tan);
+  bool success = measures_[contourIndex]->getPosTan(distance, &pos, &tan);
 
-  tonic::Float32List posTan(Dart_NewTypedData(Dart_TypedData_kFloat32, 5));
   if (success) {
     posTan[0] = 1;  // dart code will check for this for success
     posTan[1] = pos.x();
     posTan[2] = pos.y();
     posTan[3] = tan.x();
     posTan[4] = tan.y();
-  } else {
-    posTan[0] = 0;  // dart code will check for this for failure
   }
 
   return posTan;
 }
 
-fml::RefPtr<CanvasPath> CanvasPathMeasure::getSegment(float startD,
+fml::RefPtr<CanvasPath> CanvasPathMeasure::getSegment(int contourIndex,
+                                                      float startD,
                                                       float stopD,
                                                       bool startWithMoveTo) {
+  if (static_cast<std::vector<sk_sp<SkContourMeasure>>::size_type>(
+          contourIndex) >= measures_.size()) {
+    return CanvasPath::Create();
+  }
   SkPath dst;
   bool success =
-      path_measure_->getSegment(startD, stopD, &dst, startWithMoveTo);
+      measures_[contourIndex]->getSegment(startD, stopD, &dst, startWithMoveTo);
   if (!success) {
     return CanvasPath::Create();
   } else {
@@ -101,12 +115,21 @@ fml::RefPtr<CanvasPath> CanvasPathMeasure::getSegment(float startD,
   }
 }
 
-bool CanvasPathMeasure::isClosed() {
-  return path_measure_->isClosed();
+bool CanvasPathMeasure::isClosed(int contourIndex) {
+  if (static_cast<std::vector<sk_sp<SkContourMeasure>>::size_type>(
+          contourIndex) < measures_.size()) {
+    return measures_[contourIndex]->isClosed();
+  }
+  return false;
 }
 
 bool CanvasPathMeasure::nextContour() {
-  return path_measure_->nextContour();
+  auto measure = path_measure_->next();
+  if (measure) {
+    measures_.push_back(std::move(measure));
+    return true;
+  }
+  return false;
 }
 
 }  // namespace blink
