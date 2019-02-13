@@ -56,6 +56,27 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
+/// Sometimes the primary action area of a card is the card itself. Cards can be
+/// one large touch target that shows a detail screen when tapped.
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// This sample shows creation of a [Card] widget that can be tapped. When
+/// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
+/// entire card.
+///
+/// ```dart
+/// Card(
+///   child: InkWell(
+///     splashColor: Colors.blue.withAlpha(30),
+///     onTap: () { /* ... */ },
+///     child: Text('A card that can be tapped'),
+///   ),
+/// )
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTile], to display icons and text in a card.

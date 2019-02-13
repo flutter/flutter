@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/context.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'terminal.dart';
@@ -464,7 +465,7 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context[Stopwatch] ?? Stopwatch();
 
   @protected
   @visibleForTesting

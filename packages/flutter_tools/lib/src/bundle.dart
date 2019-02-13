@@ -61,7 +61,7 @@ Future<void> build({
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
   bool createPatch = false,
-  int buildNumber,
+  String buildNumber,
   String baselineDir,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],

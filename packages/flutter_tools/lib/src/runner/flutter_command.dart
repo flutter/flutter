@@ -199,12 +199,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
-        help: 'An integer used as an internal version number.\n'
-              'Each build must have a unique number to differentiate it from previous builds.\n'
+        help: 'An identifier used as an internal version number.\n'
+              'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as \'versionCode\'.\n'
               'On Xcode builds it is used as \'CFBundleVersion\'',
-        valueHelp: 'int');
+    );
   }
 
   void usesBuildNameOption() {
@@ -323,30 +323,43 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
-    if (modeFlags.where((bool flag) => flag).length > 1)
+    bool debug;
+    bool profile;
+    bool release;
+    if (argParser.options.containsKey('debug')) {
+      debug = argResults['debug'];
+    } else {
+      debug = _defaultBuildMode == BuildMode.debug;
+    }
+    if (argParser.options.containsKey('profile')) {
+      profile = argResults['profile'];
+    } else {
+      profile = _defaultBuildMode == BuildMode.profile;
+    }
+    if (argParser.options.containsKey('release')) {
+      release = argResults['release'];
+    } else {
+      release = _defaultBuildMode == BuildMode.release;
+    }
+    if (debug && profile || debug && release || release && profile) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+    }
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
 
-    if (argResults['debug']) {
-      if (dynamicFlag)
+    if (debug) {
+      if (dynamicFlag) {
         throw ToolExit('Error: --dynamic requires --release or --profile.');
+      }
       return BuildMode.debug;
     }
-    if (argResults['profile'])
+    if (profile) {
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (argResults['release'])
+    }
+    if (release) {
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-
-    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
-      throw ToolExit('Error: --dynamic requires --release or --profile.');
-    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
-      return BuildMode.dynamicRelease;
-    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
-      return BuildMode.dynamicProfile;
-
+    }
     return _defaultBuildMode;
   }
 
@@ -370,15 +383,9 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['track-widget-creation']
         : false;
 
-    int buildNumber;
-    try {
-      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
+    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+        ? argResults['build-number']
+        : null;
 
     int patchNumber;
     try {
@@ -390,7 +397,7 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
-    String extraFrontEndOptions =
+    List<String> extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
             ? argResults[FlutterOptions.kExtraFrontEndOptions]
             : null;
@@ -399,9 +406,9 @@ abstract class FlutterCommand extends Command<void> {
       for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
-          extraFrontEndOptions += ',' + flag;
+          extraFrontEndOptions.add(flag);
         } else {
-          extraFrontEndOptions = flag;
+          extraFrontEndOptions = <String>[flag];
         }
       }
     }
@@ -427,9 +434,9 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: extraFrontEndOptions,
+      extraFrontEndOptions: extraFrontEndOptions?.join(', '),
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]?.join(', ')
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
         ? argResults['build-shared-library']
@@ -519,6 +526,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// A hook called to populate the cache with a particular target platform
+  /// or build mode.
+  ///
+  /// If a command requires specific artifacts, it is it's responsibility to
+  /// request them here.
+  Future<void> updateCache() async {
+    // Only download the minimum set of binaries.
+    await cache.updateAll(
+      clobber: false,
+      skipUnknown: true,
+    );
+  }
+
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -529,11 +549,11 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
-
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache)
-      await cache.updateAll();
+    if (shouldUpdateCache) {
+      await updateCache();
+    }
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
@@ -647,8 +667,6 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
 
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
         ? argResults['compilation-trace-file'] : null;
     final bool createBaseline = argParser.options.containsKey('baseline')
@@ -658,12 +676,8 @@ abstract class FlutterCommand extends Command<void> {
 
     if (createBaseline && createPatch)
       throw ToolExit(userMessages.flutterBasePatchFlagsExclusive);
-    if (createBaseline && !dynamicFlag)
-      throw ToolExit(userMessages.flutterBaselineRequiresDynamic);
     if (createBaseline && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterBaselineRequiresTraceFile);
-    if (createPatch && !dynamicFlag)
-      throw ToolExit(userMessages.flutterPatchRequiresDynamic);
     if (createPatch && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterPatchRequiresTraceFile);
   }

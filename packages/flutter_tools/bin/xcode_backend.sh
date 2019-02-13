@@ -52,9 +52,9 @@ BuildApp() {
   local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   local artifact_variant="unknown"
   case "$build_mode" in
-    release*) build_mode="release"; artifact_variant="ios-release";;
-    profile*) build_mode="profile"; artifact_variant="ios-profile";;
-    debug*) build_mode="debug"; artifact_variant="ios";;
+    *release*) build_mode="release"; artifact_variant="ios-release";;
+    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    *debug*) build_mode="debug"; artifact_variant="ios";;
     *)
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
@@ -84,7 +84,6 @@ BuildApp() {
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
 
-  AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
@@ -116,6 +115,12 @@ BuildApp() {
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+  fi
+
+  # If the framework path does not exist, ensure that it is downloaded.
+  if [[ ! -e "$1" ]]; then
+    FLUTTER_ALREADY_LOCKED = "true"
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" precache --suppress-analytics
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then

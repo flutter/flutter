@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/bsdiff.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -273,9 +274,9 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = buildInfo.buildName ?? manifest.buildName;
+    final String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
-    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
@@ -498,20 +499,36 @@ Future<void> _buildGradleProjectV2(
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
+      printStatus('Creating dynamic patch...');
       final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
       final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
 
       final Archive update = Archive();
       for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
+        if (!newFile.isFile)
+          continue;
+
+        // Ignore changes to signature manifests.
+        if (newFile.name.startsWith('META-INF/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
 
+        // Only allow changes under assets/.
+        if (!newFile.name.startsWith('assets/'))
+          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
+
         final String name = fs.path.relative(newFile.name, from: 'assets/');
-        update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        if (name.contains('_snapshot_')) {
+          final List<int> diff = bsdiff(oldFile.content, newFile.content);
+          final int ratio = 100 * diff.length ~/ newFile.content.length;
+          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
+          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
+        } else {
+          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        }
       }
 
       File updateFile;
@@ -527,11 +544,21 @@ Future<void> _buildGradleProjectV2(
         printStatus('No changes detected, creating rollback patch.');
       }
 
-      final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
-      if (oldFile == null)
-        throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+      final List<String> checksumFiles = <String>[
+        'assets/isolate_snapshot_data',
+        'assets/isolate_snapshot_instr',
+        'assets/flutter_assets/isolate_snapshot_data',
+      ];
 
-      final int baselineChecksum = getCrc32(oldFile.content);
+      int baselineChecksum = 0;
+      for (String fn in checksumFiles) {
+        final ArchiveFile oldFile = oldApk.findFile(fn);
+        if (oldFile != null)
+          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
+      }
+      if (baselineChecksum == 0)
+        throwToolExit('Error: Could not find baseline VM snapshot.');
+
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
         'buildNumber': package.versionCode,
@@ -549,7 +576,8 @@ Future<void> _buildGradleProjectV2(
 
       updateFile.parent.createSync(recursive: true);
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      printStatus('Created dynamic patch ${updateFile.path}.');
+      final String patchSize = getSizeAsMB(updateFile.lengthSync());
+      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
     }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);

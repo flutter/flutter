@@ -63,20 +63,24 @@ void main() {
 
   group('Spinners', () {
     MockStdio mockStdio;
-    AnsiStatus ansiStatus;
+    FakeStopwatch mockStopwatch;
     int called;
     const List<String> testPlatforms = <String>['linux', 'macos', 'windows', 'fuchsia'];
     final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
 
-    setUp(() {
-      mockStdio = MockStdio();
-      called = 0;
-      ansiStatus = AnsiStatus(
+    AnsiStatus _createAnsiStatus() {
+      mockStopwatch = FakeStopwatch();
+      return AnsiStatus(
         message: 'Hello world',
-        timeout: const Duration(milliseconds: 10),
+        timeout: const Duration(seconds: 2),
         padding: 20,
         onFinish: () => called += 1,
       );
+    }
+
+    setUp(() {
+      mockStdio = MockStdio();
+      called = 0;
     });
 
     List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
@@ -221,20 +225,17 @@ void main() {
         Stdio: () => mockStdio,
       });
 
-      testUsingContext('AnsiStatus works for $testOs', () async {
+      testUsingContext('AnsiStatus works for $testOs', () {
+        final AnsiStatus ansiStatus = _createAnsiStatus();
         bool done = false;
-        // We pad the time here so that we have a little slack in terms of the first part of this test
-        // taking longer to run than we'd like, since we are forced to start the timer before the actual
-        // stopwatch that we're trying to test. This is an unfortunate possible race condition. If this
-        // turns out to be flaky, we will need to find another solution.
-        final Future<void> tenMillisecondsLater = Future<void>.delayed(const Duration(milliseconds: 15));
-        await FakeAsync().run((FakeAsync time) async {
+        FakeAsync().run((FakeAsync time) {
           ansiStatus.start();
+          mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
           expect(ansiStatus.seemsSlow, isFalse);
           expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
-          await tenMillisecondsLater;
+          mockStopwatch.elapsed = const Duration(seconds: 3);
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
           expect(ansiStatus.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
@@ -246,12 +247,15 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiStatus works when cancelled for $testOs', () async {
+        final AnsiStatus ansiStatus = _createAnsiStatus();
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           ansiStatus.start();
+          mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiStatus.ticks < 10);
           List<String> lines = outputStdout();
           expect(lines[0], startsWith(platform.isWindows
@@ -280,12 +284,15 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiStatus works when stopped for $testOs', () async {
+        final AnsiStatus ansiStatus = _createAnsiStatus();
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           ansiStatus.start();
+          mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiStatus.ticks < 10);
           List<String> lines = outputStdout();
           expect(lines, hasLength(1));
@@ -323,6 +330,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
     }
   });
@@ -684,4 +692,40 @@ void main() {
       Platform: _kNoAnsiPlatform,
     });
   });
+}
+
+class FakeStopwatch implements Stopwatch {
+  @override
+  bool get isRunning => _isRunning;
+  bool _isRunning = false;
+
+  @override
+  void start() => _isRunning = true;
+
+  @override
+  void stop() => _isRunning = false;
+
+  @override
+  Duration elapsed = Duration.zero;
+
+  @override
+  int get elapsedMicroseconds => elapsed.inMicroseconds;
+
+  @override
+  int get elapsedMilliseconds => elapsed.inMilliseconds;
+
+  @override
+  int get elapsedTicks => elapsed.inMilliseconds;
+
+  @override
+  int get frequency => 1000;
+
+  @override
+  void reset() {
+    _isRunning = false;
+    elapsed = Duration.zero;
+  }
+
+  @override
+  String toString() => '$runtimeType $elapsed $isRunning';
 }
