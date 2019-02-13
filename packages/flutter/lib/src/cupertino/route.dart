@@ -639,6 +639,8 @@ class _CupertinoBackGestureController<T> {
       _animating = true;
       controller.addStatusListener(_handleStatusChanged);
     } else {
+      // Animate calls could return inline if already at the target destination
+      // value.
       return _handleStatusChanged(controller.status);
     }
 
