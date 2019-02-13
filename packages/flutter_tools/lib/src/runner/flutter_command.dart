@@ -98,7 +98,20 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+  bool get shouldRunPub {
+    if (_usesPubOption && argResults['pub']) {
+      final DateTime pubspecEdit = fs.file('pubpsec.yaml').statSync().modified;
+      final DateTime pubspecLockEdit = fs.file('.packages').statSync().modified;
+      final DateTime packagesEdit = fs.file('pubpspec.lock').statSync().modified;
+      if (pubspecLockEdit == null || packagesEdit == null) {
+        return true;
+      }
+      if (pubspecEdit.isAfter(packagesEdit) || pubspecEdit.isAfter(pubspecLockEdit)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   bool get shouldUpdateCache => true;
 
