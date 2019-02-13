@@ -47,7 +47,9 @@ class MockPeer implements rpc.Peer {
 
   @override
   void sendNotification(String method, [ dynamic parameters ]) {
-    throw 'unexpected call to sendNotification';
+    if (method != '_registerService') {
+      throw 'unexpected call to sendNotification';
+    }
   }
 
   bool isolatesEnabled = false;
