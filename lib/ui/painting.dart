@@ -2317,7 +2317,7 @@ class PathMetric {
 
 class _PathMeasure extends NativeFieldWrapperClass2 {
   _PathMeasure(Path path, bool forceClosed) {
-    currentContourIndex = -1; // nextContour will incremenet this to the zero based index.
+    currentContourIndex = -1; // nextContour will increment this to the zero based index.
     _constructor(path, forceClosed);
   }
   void _constructor(Path path, bool forceClosed) native 'PathMeasure_constructor';
