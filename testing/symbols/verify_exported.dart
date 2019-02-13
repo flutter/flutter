@@ -14,10 +14,18 @@ import 'package:collection/collection.dart' show MapEquality;
 // Symbols from the Flutter namespace. These are either of type
 // "(__DATA,__common)" or "(__DATA,__objc_data)".
 
-/// Takes the path to the out directory as argument.
+/// Takes the path to the out directory as the first argument, and the path to
+/// the buildtools directory as the second argument.
+///
+/// If the second argument is not specified, it is assumed that it is the parent
+/// of the out directory (for backwards compatibility).
 void main(List<String> arguments) {
-  assert(arguments.length == 1);
+  assert(arguments.length == 2 || arguments.length == 1);
   final String outPath = arguments.first;
+  final String buildToolsPath = arguments.length == 1
+      ? p.join(p.dirname(outPath), 'buildtools')
+      : arguments[1];
+
   String platform;
   if (Platform.isLinux) {
     platform = 'linux-x64';
@@ -26,7 +34,7 @@ void main(List<String> arguments) {
   } else {
     throw new UnimplementedError('Script only support running on Linux or MacOS.');
   }
-  final String nmPath = p.join(p.dirname(outPath), 'buildtools', platform, 'clang', 'bin', 'llvm-nm');
+  final String nmPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-nm');
   assert(new Directory(outPath).existsSync());
 
   final Iterable<String> releaseBuilds = new Directory(outPath).listSync()
