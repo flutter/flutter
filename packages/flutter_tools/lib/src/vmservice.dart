@@ -18,6 +18,7 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'convert.dart' show base64;
 import 'globals.dart';
@@ -125,9 +126,7 @@ class VMService {
     });
 
     _peer.registerMethod(_kLoadDartLibrarySources,
-        (rpc.Parameters params) async {
-      return await _handleLoadDartLibrarySources(params.asMap);
-    });
+        () async => await _handleLoadDartLibrarySources());
 
     // If the Flutter Engine doesn't support service registration this will
     // have no effect
@@ -378,17 +377,28 @@ class VMService {
     }
   }
 
-  Future<Map<String, dynamic>> _handleLoadDartLibrarySources(Map<String,
-      dynamic> data) async {
-    final String kernelPath = data['kernelPath'];
-    final List<int> bytes = await fs.file(kernelPath).readAsBytes();
-    final String result = base64.encode(bytes);
-    return <String, dynamic>{
-      'type': 'Success',
-      'result': <String, String> {
-        'kernelBytes': result,
-      },
-    };
+  Future<Map<String, dynamic>> _handleLoadDartLibrarySources() async {
+    // We assume that the current program is being run using the dart executable
+    // from the dart-sdk packaged with Flutter.
+    const relativeKernelPath =
+      '../../artifacts/engine/common/flutter_patched_sdk/platform_strong.dill';
+    final Uri exePath =
+      Uri.directory(fs.path.dirname(platform.resolvedExecutable));
+    final Uri kernelPath = exePath.resolve(relativeKernelPath);
+    try {
+      final List<int> bytes = await fs.file(kernelPath).readAsBytes();
+      final String result = base64.encode(bytes);
+      return <String, dynamic> {
+        'type': 'Success',
+        'result': <String, String> {
+          'kernelBytes': result,
+        },
+      };
+    } catch(_) {
+      return <String, dynamic> {
+        'error': 'Unable to find file: $kernelPath',
+      };
+    }
   }
 
   /// Reloads the VM.
