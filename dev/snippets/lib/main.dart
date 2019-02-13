@@ -79,7 +79,7 @@ void main(List<String> argList) {
   parser.addOption(
     _kSerialOption,
     defaultsTo: environment['INVOCATION_INDEX'],
-    help: 'A unique serial number for the snippet invocation.',
+    help: 'A unique serial number for this snippet tool invocation.',
   );
   parser.addFlag(
     _kHelpOption,

@@ -68,7 +68,7 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets and the [currentIndex] is set to index 1. The color of the selected
@@ -78,7 +78,7 @@ enum BottomNavigationBarType {
 ///
 /// ```dart
 /// int _selectedIndex = 1;
-/// final List<Widget> _widgetOptions = <Widget>[
+/// static const List<Widget> _widgetOptions = const <Widget>[
 ///   Text('Index 0: Home'),
 ///   Text('Index 1: Business'),
 ///   Text('Index 2: School'),

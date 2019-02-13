@@ -627,8 +627,7 @@ class NavigatorObserver {
 ///     );
 ///   }
 /// }
-/// 
-/// // Placeholder for real page.
+///
 /// class HomePage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -642,8 +641,7 @@ class NavigatorObserver {
 ///     );
 ///   }
 /// }
-/// 
-/// // Placeholder for real page.
+///
 /// class CollectPersonalInfoPage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -665,15 +663,14 @@ class NavigatorObserver {
 ///     );
 ///   }
 /// }
-/// 
-/// // Placeholder for real page.
+///
 /// class ChooseCredentialsPage extends StatelessWidget {
 ///   const ChooseCredentialsPage({
 ///     this.onSignupComplete,
 ///   });
-/// 
+///
 ///   final VoidCallback onSignupComplete;
-/// 
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -689,7 +686,7 @@ class NavigatorObserver {
 ///     );
 ///   }
 /// }
-/// 
+///
 /// class SignUpPage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {

@@ -63,8 +63,26 @@ follows:
   function calls are not allowed in the preamble.  It also has an `imports`
   section to import additional packages. Please only import things that are part
   of flutter or part of default dependencies for a `flutter create` project.
+  It creates a WidgetsApp around the child stateful widget.
 
 - [`stateless_widget`](stateless_widget.tmpl) :
   Identical to the `stateful_widget` template, except that the default code
-  block is inserted as the return value for a pre-existing `build` function in a
-  StatelessWidget, instead of being at the class level.
+  block is inserted as the `build` function in a
+  StatelessWidget. There is no need to include the @override before the build
+  funciton (the template adds this for you).
+
+- [`stateful_widget_material`](stateful_widget_material.tmpl) : Similar to
+  `stateful_widget`, except that it imports the material library, and uses
+  a MaterialApp instead of WidgetsApp.
+
+- [`stateless_widget_material`](stateless_widget_material.tmpl) : Similar to
+  `stateless_widget`, except that it imports the material library, and uses
+  a MaterialApp instead of WidgetsApp.
+
+- [`stateful_widget_scaffold`](stateful_widget_scaffold.tmpl) : Similar to
+  `stateful_widget_material`, except that it wraps the stateful widget with a
+  Scaffold.
+
+- [`stateless_widget_scaffold`](stateless_widget_scaffold.tmpl) : Similar to
+  `stateless_widget_material`, except that it wraps the stateless widget with a
+  Scaffold.

@@ -87,13 +87,17 @@ void main(List<String> arguments) {
 
   Directory tempDirectory;
   if (parsedArguments.wasParsed('temp')) {
-    tempDirectory = Directory(parsedArguments['temp']);
-    if (!tempDirectory.existsSync()) {
-      tempDirectory.createSync(recursive: true);
-    } else {
-      tempDirectory.deleteSync(recursive: true);
-      tempDirectory.createSync(recursive: true);
+    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(parsedArguments['temp'])));
+    if (path.basename(parsedArguments['temp']) != parsedArguments['temp']) {
+      stderr.writeln('Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
     }
+    print('Leaving temporary output in ${tempDirectory.absolute.path}.');
+    // Make sure that any directory left around from a previous run is cleared
+    // out.
+    if (tempDirectory.existsSync()) {
+      tempDirectory.deleteSync(recursive: true);
+    }
+    tempDirectory.createSync();
   }
   try {
     exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory).checkSamples();
@@ -199,10 +203,7 @@ class SampleChecker {
   }
 
   static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
-    return directory.listSync(recursive: recursive, followLinks: false)
-        .whereType<File>()
-        .where((File file) => path.extension(file.path) == '.dart')
-        .toList();
+    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((File file) => path.extension(file.path) == '.dart').toList();
   }
 
   /// Computes the headers needed for each sample file.
@@ -244,14 +245,14 @@ class SampleChecker {
         }
         stderr.writeln('\nFound ${errors.length} sample code errors.');
       }
-      if (!_keepTmp) {
+      if (_keepTmp) {
+        print('Leaving temporary directory ${_tempDirectory.path} around for your perusal.');
+      } else {
         try {
           _tempDirectory.deleteSync(recursive: true);
         } on FileSystemException catch (e) {
           stderr.writeln('Failed to delete ${_tempDirectory.path}: $e');
         }
-      } else {
-        print('Leaving temporary directory ${_tempDirectory.path} around for your perusal.');
       }
       // If we made a snapshot, remove it (so as not to clutter up the tree).
       if (_snippetsSnapshotPath != null) {

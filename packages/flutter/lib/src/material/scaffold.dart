@@ -668,7 +668,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold] and the [FloatingActionButton] is
@@ -959,7 +959,7 @@ class Scaffold extends StatefulWidget {
   /// ```dart main
   /// void main() => runApp(MyApp());
   /// ```
-  /// 
+  ///
   /// ```dart preamble
   /// class MyApp extends StatelessWidget {
   ///   // This widget is the root of your application.
@@ -972,7 +972,7 @@ class Scaffold extends StatefulWidget {
   ///       ),
   ///       home: Scaffold(
   ///         body: MyScaffoldBody(),
-  ///         appBar: AppBar(title: Text('Demo')),
+  ///         appBar: AppBar(title: Text('Scaffold.of Example')),
   ///       ),
   ///       color: Colors.white,
   ///     );
@@ -988,9 +988,11 @@ class Scaffold extends StatefulWidget {
   ///       child: RaisedButton(
   ///         child: Text('SHOW A SNACKBAR'),
   ///         onPressed: () {
-  ///           Scaffold.of(context).showSnackBar(SnackBar(
-  ///             content: Text('Hello!'),
-  ///           ));
+  ///           Scaffold.of(context).showSnackBar(
+  ///             SnackBar(
+  ///               content: Text('Have a snack!'),
+  ///             ),
+  ///           );
   ///         },
   ///       ),
   ///     );
@@ -999,35 +1001,38 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool snippet --template=stateless_widget}
+  /// {@tool snippet --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
-  /// [Scaffold] (since it's "above" the widget being returned). In such cases,
-  /// the following technique with a [Builder] can be used to provide a new
-  /// scope with a [BuildContext] that is "under" the [Scaffold]:
+  /// [Scaffold] (since it's "above" the widget being returned in the widget
+  /// tree). In such cases, the following technique with a [Builder] can be used
+  /// to provide a new scope with a [BuildContext] that is "under" the
+  /// [Scaffold]:
   ///
   /// ```dart
-  /// Scaffold(
-  ///   appBar: AppBar(
-  ///     title: Text('Demo')
-  ///   ),
-  ///   body: Builder(
-  ///     // Create an inner BuildContext so that the onPressed methods
-  ///     // can refer to the Scaffold with Scaffold.of().
-  ///     builder: (BuildContext context) {
-  ///       return Center(
-  ///         child: RaisedButton(
-  ///           child: Text('SHOW A SNACKBAR'),
-  ///           onPressed: () {
-  ///             Scaffold.of(context).showSnackBar(SnackBar(
-  ///               content: Text('Hello!'),
-  ///             ));
-  ///           },
-  ///         ),
-  ///       );
-  ///     },
-  ///   ),
-  /// )
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text('Demo')
+  ///     ),
+  ///     body: Builder(
+  ///       // Create an inner BuildContext so that the onPressed methods
+  ///       // can refer to the Scaffold with Scaffold.of().
+  ///       builder: (BuildContext context) {
+  ///         return Center(
+  ///           child: RaisedButton(
+  ///             child: Text('SHOW A SNACKBAR'),
+  ///             onPressed: () {
+  ///               Scaffold.of(context).showSnackBar(SnackBar(
+  ///                 content: Text('Have a snack!'),
+  ///               ));
+  ///             },
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   ///

@@ -31,7 +31,8 @@ class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
       : configuration = configuration ??
             // Flutter's root is four directories up from this script.
-            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
+            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT']
+                ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 
@@ -181,6 +182,16 @@ class SnippetGenerator {
     return file.readAsStringSync(encoding: Encoding.getByName('utf-8'));
   }
 
+  String _addLineNumbers(String app) {
+    final StringBuffer buffer = StringBuffer();
+    int count = 0;
+    for (String line in app.split('\n')) {
+      count++;
+      buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
+    }
+    return buffer.toString();
+  }
+
   /// The main routine for generating snippets.
   ///
   /// The [input] is the file containing the dartdoc comments (minus the leading
@@ -221,7 +232,7 @@ class SnippetGenerator {
         try {
           app = formatter.format(app);
         } on FormatterException catch (exception) {
-          stderr.write('Code to format:\n$app\n');
+          stderr.write('Code to format:\n${_addLineNumbers(app)}\n');
           errorExit('Unable to format snippet app template: $exception');
         }
 
