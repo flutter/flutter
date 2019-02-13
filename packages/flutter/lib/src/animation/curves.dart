@@ -28,11 +28,11 @@ abstract class Curve {
   /// const constructors so that they can be used in const expressions.
   const Curve();
 
-  /// Returns the value of the curve at point [t].
+  /// Returns the value of the curve at point `t`.
   ///
   /// This function must ensure the following:
-  /// - The value of [t] must be between 0.0 and 1.0
-  /// - Values of [t]=0.0 and [t]=1.0 must be mapped to 0.0 and 1.0,
+  /// - The value of `t` must be between 0.0 and 1.0
+  /// - Values of `t`=0.0 and `t`=1.0 must be mapped to 0.0 and 1.0,
   /// respectively.
   ///
   /// It is recommended that subclasses override [transformInternal] instead of
@@ -47,8 +47,8 @@ abstract class Curve {
     return transformInternal(t);
   }
 
-  /// Returns the value of the curve at point [t], in cases where
-  /// 1.0 > [t] > 0.0.
+  /// Returns the value of the curve at point `t`, in cases where
+  /// 1.0 > `t` > 0.0.
   @protected
   double transformInternal(double t) {
     throw UnimplementedError();
