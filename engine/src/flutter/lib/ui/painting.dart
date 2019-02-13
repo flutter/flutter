@@ -2234,13 +2234,6 @@ class PathMetricIterator implements Iterator<PathMetric> {
 
   @override
   bool moveNext() {
-    // PathMetric isn't a normal iterable - it's already initialized to its
-    // first Path.  Should only call _moveNext when done with the first one.
-    if (_pathMeasure.currentContourIndex == -1) {
-      _pathMeasure.currentContourIndex++;
-      _pathMetric = PathMetric._(_pathMeasure);
-      return true;
-    }
     if (_pathMeasure._nextContour()) {
       _pathMetric = PathMetric._(_pathMeasure);
       return true;
@@ -2256,16 +2249,15 @@ class PathMetricIterator implements Iterator<PathMetric> {
 /// [PathMetric] objects.
 ///
 /// Once created, the methods on this class will only be valid while the
-/// iterator is at the contour for which they were created. When the next
-/// contour's [PathMetric] is obtained, the [length] and [isClosed] properties
-/// remain valid, but the [getTangentForOffset] and [extractPath] will throw a
-/// [StateError].
-// TODO(dnfield): Fix this if/when https://bugs.chromium.org/p/skia/issues/detail?id=8721 lands.
+/// iterator is at the contour for which they were created. It will also only be
+/// valid for the path as it was specifed when [Path.computeMetrics] was called.
+/// If additional contours are added or any contours are updated, the metrics
+/// need to be recomputed.
 class PathMetric {
   PathMetric._(this._measure)
     : assert(_measure != null),
-      length = _measure.length,
-      isClosed = _measure.isClosed,
+      length = _measure.length(_measure.currentContourIndex),
+      isClosed = _measure.isClosed(_measure.currentContourIndex),
       contourIndex = _measure.currentContourIndex;
 
   /// Return the total length of the current contour.
@@ -2287,10 +2279,10 @@ class PathMetric {
   /// although it may not if optimizations are applied that determine the move
   /// command did not actually result in moving the pen.
   ///
-  /// This property is only valid with reference to its original iterator. If
-  /// [getTangetForOffset] or [extractPath] are called when this property does
-  /// not match the actual count of the iterator, those methods will throw a
-  /// [StateError].
+  /// This property is only valid with reference to its original iterator and
+  /// the contours of the path at the time the path's metrics were computed. If
+  /// additional contours were added or existing contours updated, this metric
+  /// will be invalid for the current state of the path.
   final int contourIndex;
 
   final _PathMeasure _measure;
@@ -2307,10 +2299,7 @@ class PathMetric {
   ///
   /// The distance is clamped to the [length] of the current contour.
   Tangent getTangentForOffset(double distance) {
-    if (contourIndex != _measure.currentContourIndex) {
-      throw StateError('This method cannot be invoked once the underlying iterator has advanced.');
-    }
-    return _measure.getTangentForOffset(distance);
+    return _measure.getTangentForOffset(contourIndex, distance);
   }
 
   /// Given a start and stop distance, return the intervening segment(s).
@@ -2319,10 +2308,7 @@ class PathMetric {
   /// Returns null if the segment is 0 length or `start` > `stop`.
   /// Begin the segment with a moveTo if `startWithMoveTo` is true.
   Path extractPath(double start, double end, {bool startWithMoveTo: true}) {
-    if (contourIndex != _measure.currentContourIndex) {
-      throw StateError('This method cannot be invoked once the underlying iterator has advanced.');
-    }
-    return _measure.extractPath(start, end, startWithMoveTo: startWithMoveTo);
+    return _measure.extractPath(contourIndex, start, end, startWithMoveTo: startWithMoveTo);
   }
 
   @override
@@ -2331,15 +2317,20 @@ class PathMetric {
 
 class _PathMeasure extends NativeFieldWrapperClass2 {
   _PathMeasure(Path path, bool forceClosed) {
-    currentContourIndex = -1; // PathMetricIterator will increment this the first time.
+    currentContourIndex = -1; // nextContour will incremenet this to the zero based index.
     _constructor(path, forceClosed);
   }
   void _constructor(Path path, bool forceClosed) native 'PathMeasure_constructor';
 
-  double get length native 'PathMeasure_getLength';
+  double length(int contourIndex) {
+    assert(contourIndex <= currentContourIndex, 'Iterator must be advanced before index $contourIndex can be used.');
+    return _length(contourIndex);
+  }
+  double _length(int contourIndex) native 'PathMeasure_getLength';
 
-  Tangent getTangentForOffset(double distance) {
-    final Float32List posTan = _getPosTan(distance);
+  Tangent getTangentForOffset(int contourIndex, double distance) {
+    assert(contourIndex <= currentContourIndex, 'Iterator must be advanced before index $contourIndex can be used.');
+    final Float32List posTan = _getPosTan(contourIndex, distance);
     // first entry == 0 indicates that Skia returned false
     if (posTan[0] == 0.0) {
       return null;
@@ -2350,22 +2341,27 @@ class _PathMeasure extends NativeFieldWrapperClass2 {
       );
     }
   }
-  Float32List _getPosTan(double distance) native 'PathMeasure_getPosTan';
+  Float32List _getPosTan(int contourIndex, double distance) native 'PathMeasure_getPosTan';
 
-  Path extractPath(double start, double end, {bool startWithMoveTo: true}) native 'PathMeasure_getSegment';
+  Path extractPath(int contourIndex, double start, double end, {bool startWithMoveTo: true}) {
+    assert(contourIndex <= currentContourIndex, 'Iterator must be advanced before index $contourIndex can be used.');
+    return _extractPath(contourIndex, start, end, startWithMoveTo: startWithMoveTo);
+  }
+  Path _extractPath(int contourIndex, double start, double end, {bool startWithMoveTo: true}) native 'PathMeasure_getSegment';
 
-  bool get isClosed native 'PathMeasure_isClosed';
+  bool isClosed(int contourIndex) {
+    assert(contourIndex <= currentContourIndex, 'Iterator must be advanced before index $contourIndex can be used.');
+    return _isClosed(contourIndex);
+  }
+  bool _isClosed(int contourIndex) native 'PathMeasure_isClosed';
 
   // Move to the next contour in the path.
   //
   // A path can have a next contour if [Path.moveTo] was called after drawing began.
   // Return true if one exists, or false.
   //
-  // This is not exactly congruent with a regular [Iterator.moveNext].
-  // Typically, [Iterator.moveNext] should be called before accessing the
-  // [Iterator.current]. In this case, the [PathMetric] is valid before
-  // calling `_moveNext` - `_moveNext` should be called after the first
-  // iteration is done instead of before.
+  // Before Skia introduced an SkPathContourMeasureIter, this didn't work like
+  // a normal iterator.  Now it does.
   bool _nextContour() {
     final bool next = _nativeNextContour();
     if (next) {
