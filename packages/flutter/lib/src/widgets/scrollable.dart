@@ -538,8 +538,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
           _targetScrollOffsetForPointerScroll(event);
       // Only claim the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
-        PointerSignalArenaMember(
-            event, _handlePointerScroll);
+        GestureBinding.instance.pointerSignalArena.add(event,
+            _handlePointerScroll);
       }
     }
   }
