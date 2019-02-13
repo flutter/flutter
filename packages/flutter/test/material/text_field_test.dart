@@ -955,6 +955,8 @@ void main() {
 
     // It does expand to fill its parent when expands: true, maxLines: null, and
     // it's wrapped in an Expanded widget.
+    // TODO(justinmc): failing this test because expands: true is not supported
+    // in new _layout yet.
     await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: null));
     expect(findEditableText(), equals(editableText));
     expect(editableText.size.height, greaterThan(unexpandedInputSize.height));

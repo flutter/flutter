@@ -909,6 +909,8 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
+  // TODO(justinmc): fails because prefix/suffix no longer change input size
+  // Change these values so that input doesnt change with prefix/suffix?
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
     const Key pKey = Key('p');
     const Key sKey = Key('s');
@@ -960,6 +962,7 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx));
   });
 
+  // TODO(justinmc): Fails b/c icons used to increase size of input, now dont
   testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -995,6 +998,7 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  // TODO(justinmc): fails because prefix/suffix no longer change input size
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
@@ -1020,6 +1024,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 16.0);
   });
 
+  // TODO(justinmc): fails because prefix/suffix no longer change input size
   testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
@@ -1041,7 +1046,6 @@ void main() {
     expect(tester.getSize(find.byKey(prefixKey)).height, 100.0);
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
   });
-
 
   testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1430,12 +1434,12 @@ void main() {
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
-      // isFocused: false (default)
-      isEmpty: true,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(borderSide: BorderSide.none),
-        hasFloatingPlaceholder: false,
-        labelText: 'label',
+        // isFocused: false (default)
+        isEmpty: true,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(borderSide: BorderSide.none),
+          hasFloatingPlaceholder: false,
+          labelText: 'label',
         ),
       ),
     );

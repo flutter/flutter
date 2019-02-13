@@ -808,26 +808,138 @@ class _RenderDecoration extends RenderBox {
 
   EdgeInsets get contentPadding => decoration.contentPadding;
 
+  double layoutLineBox(RenderBox box, BoxConstraints constraints) {
+    if (box == null) {
+      return 0.0;
+    }
+    box.layout(constraints, parentUsesSize: true);
+    final double baseline = box.getDistanceToBaseline(textBaseline);
+    assert(baseline != null && baseline >= 0.0);
+    return baseline;
+  }
+
   // Returns a value used by performLayout to position all
   // of the renderers. This method applies layout to all of the renderers
   // except the container. For convenience, the container is laid out
   // in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+    // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
-    // If expands is set, allow a parent widget to set the height.
-    BoxConstraints boxConstraints = expands
-      ? layoutConstraints
-      : layoutConstraints.loosen();
-    // TODO(justinmc): This seems like it will break other things, but it was
-    // needed to get the input to fill its parent perfectly without overflowing.
-    // Whether expanded is true or false, without this it overflows its parent
-    // when it's full height. What's a better solution?
-    // Also I just tried maxLines: null on master growing up to a container and
-    // it seems to also have this problem.  It overflows by this amount.
-    boxConstraints = boxConstraints.deflate(EdgeInsets.only(
-      top: contentPadding.top,
-      bottom: contentPadding.bottom,
-    ));
+
+    // TODO(justinmc): this loosen removes the minheight used by Expanded
+    final BoxConstraints boxConstraints = layoutConstraints.loosen();
+
+    // Layout all the widgets used by InputDecorator
+    boxToBaseline[prefix] = layoutLineBox(prefix, boxConstraints);
+    boxToBaseline[suffix] = layoutLineBox(suffix, boxConstraints);
+    boxToBaseline[icon] = layoutLineBox(icon, boxConstraints);
+    boxToBaseline[prefixIcon] = layoutLineBox(prefixIcon, boxConstraints);
+    boxToBaseline[suffixIcon] = layoutLineBox(suffixIcon, boxConstraints);
+    boxToBaseline[label] = layoutLineBox(label, boxConstraints);
+    boxToBaseline[hint] = layoutLineBox(hint, boxConstraints);
+    boxToBaseline[counter] = layoutLineBox(counter, boxConstraints);
+
+    // The helper or error text can occupy the full width less the space
+    // occupied by the icon and counter.
+    boxToBaseline[helperError] = layoutLineBox(
+      helperError,
+      boxConstraints.copyWith(
+        maxWidth: math.max(0.0, boxConstraints.maxWidth
+          - _boxSize(icon).width
+          - _boxSize(counter).width
+          - contentPadding.horizontal,
+        ),
+      ),
+    );
+
+    // The height of the input needs to accommodate label above and counter and
+    // helperError below, when they exist.
+    const double SUBTEXT_GAP = 8.0;
+    // TODO(justinmc): Do I ever need to use label.size.height instead?
+    final double labelHeight = label == null
+      ? 0
+      : decoration.floatingLabelHeight;
+    final double topHeight = decoration.border.isOutline
+        ? math.max(labelHeight - boxToBaseline[label], 0)
+        : labelHeight;
+    final double counterHeight = counter == null
+      ? 0 : boxToBaseline[counter] + SUBTEXT_GAP * 2;
+    final _HelperError helperErrorWidget = decoration.helperError;
+    final double helperErrorHeight = helperErrorWidget.helperText == null
+      ? 0 : helperError.size.height + SUBTEXT_GAP * 2;
+    final double bottomHeight = math.max(
+      counterHeight,
+      helperErrorHeight,
+    );
+    boxToBaseline[input] = layoutLineBox(
+      input,
+      boxConstraints.deflate(EdgeInsets.only(
+        top: contentPadding.top + topHeight,
+        bottom: contentPadding.bottom + bottomHeight,
+      )),
+    );
+    //print('justin deflate ${contentPadding.top} + $topHeight | ${contentPadding.bottom} + $bottomHeight');
+
+    // The baseline that will be used to draw the actual input text content.
+    final double inputBaseline = contentPadding.top + topHeight + boxToBaseline[input];
+    final double inputHeight = input?.size?.height == null ? 0 : input.size.height;
+
+    //print('justin inputB ${contentPadding.top} + $topHeight + ${boxToBaseline[input]} = $inputBaseline btw labelheight $labelHeight ${decoration.floatingLabelHeight}');
+
+    // The height of the visible input container box. What would be outlined.
+    final double containerHeight = topHeight
+      + contentPadding.top
+      + inputHeight
+      + contentPadding.bottom;
+    //print('justin containerHeight $topHeight + ${contentPadding.top} + $inputHeight + ${contentPadding.bottom} = $containerHeight');
+
+    // TODO(justinmc): What exactly is outlineBaseline and how did the original
+    // calculation work? It seems like it's used as the inputBaseline when there
+    // is a border present. It doesn't seem to be the baseline for the text in
+    // the border, which is what it sounds like it should be.
+    //
+    // Inline text within an outline border is centered within the container
+    // less 2.0 dps at the top to account for the vertical space occupied
+    // by the floating label.
+    /*
+    final double outlineBaseline = topHeight +
+      (containerHeight - (2.0 + topHeight + bottomHeight)) / 2.0;
+    */
+    final double outlineBaseline = inputBaseline;
+
+    double subtextBaseline = 0.0;
+    double subtextHeight = 0.0;
+    if (counter != null) {
+      subtextBaseline = containerHeight + SUBTEXT_GAP + boxToBaseline[counter];
+      subtextHeight = counter.size.height + SUBTEXT_GAP;
+    } else if (helperErrorWidget.helperText != null) {
+      subtextBaseline = containerHeight + SUBTEXT_GAP + boxToBaseline[helperError];
+      subtextHeight = helperError.size.height + SUBTEXT_GAP;
+    }
+
+  /*
+    print('''justin return
+      containerHeight: $containerHeight,
+      inputBaseline: $inputBaseline,
+      outlineBaseline: $outlineBaseline,
+      subtextBaseline: $subtextBaseline,
+      subtextHeight: $subtextHeight,
+    ''');
+    */
+    return _RenderDecorationLayout(
+      boxToBaseline: boxToBaseline,
+      containerHeight: containerHeight,
+      inputBaseline: inputBaseline,
+      outlineBaseline: outlineBaseline,
+      subtextBaseline: subtextBaseline,
+      subtextHeight: subtextHeight,
+    );
+  }
+
+  /*
+  _RenderDecorationLayout _layoutOld(BoxConstraints layoutConstraints) {
+    final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
+    BoxConstraints boxConstraints = layoutConstraints.loosen();
     double aboveBaseline = 0.0;
     double belowBaseline = 0.0;
     void layoutLineBox(RenderBox box) {
@@ -886,18 +998,21 @@ class _RenderDecoration extends RenderBox {
       containerHeight += decoration.floatingLabelHeight;
       inputBaseline += decoration.floatingLabelHeight;
     }
+    print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
 
     containerHeight = math.max(
       containerHeight,
       math.max(
         _boxSize(suffixIcon).height,
         _boxSize(prefixIcon).height));
+    //print('justin containerHeight sum: ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom} maybe+ ${decoration.floatingLabelHeight} maybe+ prefix/suffix = $containerHeight, btw inputsizeheight: ${input.size.height}, boxtobaselineinput: ${boxToBaseline[input]}, btbl[label] ${boxToBaseline[label]}');
 
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
     // by the floating label.
     final double outlineBaseline = aboveBaseline +
       (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
+    print('justin old outlinebaseline $outlineBaseline');
 
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
@@ -925,6 +1040,14 @@ class _RenderDecoration extends RenderBox {
       }
     }
 
+    print('''justin return old
+      containerHeight: $containerHeight,
+      inputBaseline: $inputBaseline,
+      outlineBaseline: $outlineBaseline,
+      subtextBaseline: $subtextBaseline,
+      subtextHeight: $subtextHeight,
+    ''');
+
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
@@ -934,6 +1057,7 @@ class _RenderDecoration extends RenderBox {
       subtextHeight: subtextHeight,
     );
   }
+  */
 
   @override
   double computeMinIntrinsicWidth(double height) {
