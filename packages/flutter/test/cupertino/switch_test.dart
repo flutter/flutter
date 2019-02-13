@@ -100,9 +100,6 @@ void main() {
             return Center(
               child: Column(
                 children: <Widget>[
-                  const SizedBox(
-                    height: 400,
-                  ),
                   CupertinoSwitch(
                     key: switchKey,
                     value: value,
@@ -140,6 +137,18 @@ void main() {
 
     expect(log, hasLength(2));
     expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pumpAndSettle();
+
+    expect(log, hasLength(3));
+    expect(log[2], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pumpAndSettle();
+
+    expect(log, hasLength(4));
+    expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
     debugDefaultTargetPlatformOverride = null;
   });
 
