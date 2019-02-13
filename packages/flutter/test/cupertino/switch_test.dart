@@ -152,7 +152,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+  testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
