@@ -64,31 +64,6 @@ abstract class RunCommandBase extends FlutterCommand {
 
   @override
   bool get shouldUpdateCache => true;
-
-  @override
-  Future<void> updateCache() async {
-    final BuildInfo buildInfo = getBuildInfo();
-    final BuildMode buildMode = buildInfo.mode ?? BuildMode.debug;
-    final Set<TargetPlatform> targetPlatforms = Set<TargetPlatform>();
-    if (buildInfo.targetPlatform != null) {
-      targetPlatforms.add(buildInfo.targetPlatform);
-    }
-    await for (Device device in deviceManager.getAllConnectedDevices()) {
-      targetPlatforms.add(await device.targetPlatform);
-    }
-    if (targetPlatforms.contains(TargetPlatform.android_arm) || targetPlatforms.contains(TargetPlatform.android_arm64)) {
-      targetPlatforms.add(TargetPlatform.android_x64);
-      targetPlatforms.add(TargetPlatform.android_x86);
-      targetPlatforms.add(TargetPlatform.android_arm);
-      targetPlatforms.add(TargetPlatform.android_arm64);
-    }
-    await cache.updateAll(
-      buildModes: <BuildMode>[buildMode],
-      targetPlatforms: targetPlatforms.toList(),
-      clobber: false,
-      skipUnknown: false,
-    );
-  }
 }
 
 class RunCommand extends RunCommandBase {

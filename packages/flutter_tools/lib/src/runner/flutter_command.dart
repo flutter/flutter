@@ -532,8 +532,22 @@ abstract class FlutterCommand extends Command<void> {
   /// If a command requires specific artifacts, it is it's responsibility to
   /// request them here.
   Future<void> updateCache() async {
-    // Only download the minimum set of binaries.
+    // Download all artifacts unless told otherwise.
     await cache.updateAll(
+      buildModes: <BuildMode>[
+        BuildMode.debug,
+        BuildMode.release,
+        BuildMode.profile,
+        BuildMode.dynamicProfile,
+        BuildMode.dynamicRelease,
+      ],
+      targetPlatforms: <TargetPlatform>[
+        TargetPlatform.android_arm,
+        TargetPlatform.android_arm64,
+        TargetPlatform.android_x64,
+        TargetPlatform.android_x86,
+        TargetPlatform.ios,
+      ],
       clobber: false,
       skipUnknown: true,
     );

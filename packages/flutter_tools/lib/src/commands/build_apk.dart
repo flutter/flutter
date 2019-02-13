@@ -5,8 +5,6 @@
 import 'dart:async';
 
 import '../android/apk.dart';
-import '../build_info.dart';
-import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -50,24 +48,5 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo: getBuildInfo(),
     );
     return null;
-  }
-
-  @override
-  Future<void> updateCache() async {
-    final BuildInfo buildInfo = getBuildInfo();
-    await cache.updateAll(
-      buildModes: <BuildMode>[
-        buildInfo.mode,
-        BuildMode.debug,
-      ],
-      targetPlatforms: <TargetPlatform>[
-        TargetPlatform.android_arm,
-        TargetPlatform.android_arm64,
-        TargetPlatform.android_x64,
-        TargetPlatform.android_x86
-      ],
-      clobber: false,
-      skipUnknown: true,
-    );
   }
 }
