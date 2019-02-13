@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
@@ -14,8 +15,6 @@ import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart' as convert;
 import 'globals.dart';
-
-final RegExp _versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -83,16 +82,21 @@ class FlutterManifest {
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String get appVersion {
-    final String version = _descriptor['version']?.toString();
-    if (version != null) {
-      if (_versionPattern.hasMatch(version)) {
-        return version;
-      } else if (!_hasShowInvalidVersionMsg) {
-        printStatus(userMessages.invalidVersionSettingHintMessage(version), emphasis: true);
+    final String verStr = _descriptor['version']?.toString();
+    if (verStr == null) {
+      return null;
+    }
+
+    Version version;
+    try {
+      version = Version.parse(verStr);
+    } on Exception {
+      if (!_hasShowInvalidVersionMsg) {
+        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
-    return null;
+    return version?.toString();
   }
 
   /// The build version name from the `pubspec.yaml` file.
@@ -100,16 +104,17 @@ class FlutterManifest {
   String get buildName {
     if (appVersion != null && appVersion.contains('+'))
       return appVersion.split('+')?.elementAt(0);
-    else
+    else {
       return appVersion;
+    }
   }
 
   /// The build version number from the `pubspec.yaml` file.
   /// Can be null if version isn't set or has a wrong format.
-  int get buildNumber {
+  String get buildNumber {
     if (appVersion != null && appVersion.contains('+')) {
       final String value = appVersion.split('+')?.elementAt(1);
-      return value == null ? null : int.tryParse(value);
+      return value;
     } else {
       return null;
     }
