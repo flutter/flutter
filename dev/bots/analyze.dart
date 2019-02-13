@@ -24,6 +24,13 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> args) async {
+  bool assertsEnabled = false;
+  assert(() { assertsEnabled = true; return true; }());
+  if (!assertsEnabled) {
+    print('The analyze.dart script must be run with --enable-asserts.');
+    exit(1);
+  }
+  await _verifyNoTestImports(flutterRoot);
   await _verifyNoTestPackageImports(flutterRoot);
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
@@ -339,8 +346,11 @@ Future<void> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   // Verify that the imports are well-ordered.
   final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
   for (String directory in directories) {
-    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+    dependencyMap[directory] = _findFlutterDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
   }
+  assert(dependencyMap['material'].contains('widgets') &&
+         dependencyMap['widgets'].contains('rendering') &&
+         dependencyMap['rendering'].contains('painting')); // to make sure we're convinced _findFlutterDependencies is finding some
   for (String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
@@ -384,9 +394,9 @@ bool _matches<T>(List<T> a, List<T> b) {
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
-final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta.dart\1''');
+final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
-Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
+Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
   return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {
@@ -457,6 +467,37 @@ Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
       print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
     }
     print(errors.join('\n\n'));
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
+const Set<String> _exemptTestImports = <String>{
+  'package:flutter_test/flutter_test.dart',
+  'hit_test.dart',
+  'package:test_api/src/backend/live_test.dart',
+};
+
+Future<void> _verifyNoTestImports(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    for (String line in file.readAsLinesSync()) {
+      final Match match = _testImportPattern.firstMatch(line);
+      if (match != null && !_exemptTestImports.contains(match.group(2)))
+        errors.add(file.path);
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    final String s = errors.length == 1 ? '' : 's';
+    print('${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset\n');
+    print(errors.join('\n'));
     print('$redLine\n');
     exit(1);
   }

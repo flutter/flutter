@@ -38,6 +38,49 @@ void main() {
     );
   });
 
+  testWidgets('custom shape', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Future<void> pump(FloatingActionButtonLocation location) async {
+      await tester.pumpWidget(
+        SizedBox(
+          width: 200,
+          height: 200,
+          child: RepaintBoundary(
+            key: key,
+            child: MaterialApp(
+              home: Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () { },
+                ),
+                floatingActionButtonLocation: location,
+                bottomNavigationBar: BottomAppBar(
+                  shape: AutomaticNotchedShape(
+                    BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                    SuperellipseShape(borderRadius: BorderRadius.circular(30.0)),
+                  ),
+                  notchMargin: 10.0,
+                  color: Colors.green,
+                  child: const SizedBox(height: 100.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await pump(FloatingActionButtonLocation.endDocked);
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+    );
+    await pump(FloatingActionButtonLocation.centerDocked);
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+    );
+  });
+
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -92,7 +135,7 @@ void main() {
 
   // This is a regression test for a bug we had where toggling the notch on/off
   // would crash, as the shouldReclip method of ShapeBorderClipper or
-  // _BottomAppBarClipper will try an illegal downcast.
+  // _BottomAppBarClipper would try an illegal downcast.
   testWidgets('toggle shape to null', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -386,11 +429,13 @@ class ShapeListenerState extends State<ShapeListener> {
 
 }
 
-class RectangularNotch implements NotchedShape {
+class RectangularNotch extends NotchedShape {
   const RectangularNotch();
 
   @override
   Path getOuterPath(Rect host, Rect guest) {
+    if (guest == null)
+      return Path()..addRect(host);
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

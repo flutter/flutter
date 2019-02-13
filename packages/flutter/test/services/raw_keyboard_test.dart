@@ -35,8 +35,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'android',
           'keyCode': 0x04,
-          'codePoint': 0x64,
-          'scanCode': 0x64,
+          'plainCodePoint': 0x64,
+          'codePoint': 0x44,
+          'scanCode': 0x20,
           'metaState': modifier,
         });
         final RawKeyEventDataAndroid data = event.data;
@@ -68,8 +69,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'android',
           'keyCode': 0x04,
-          'codePoint': 0x64,
-          'scanCode': 0x64,
+          'plainCodePoint': 0x64,
+          'codePoint': 0x44,
+          'scanCode': 0x20,
           'metaState': modifier | RawKeyEventDataAndroid.modifierFunction,
         });
         final RawKeyEventDataAndroid data = event.data;
@@ -96,6 +98,53 @@ void main() {
           }
         }
       }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 29,
+        'plainCodePoint': 'a'.codeUnitAt(0),
+        'codePoint': 'A'.codeUnitAt(0),
+        'character': 'A',
+        'scanCode': 30,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataAndroid data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 111,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 1,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataAndroid data = escapeKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 59,
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 42,
+        'metaState': RawKeyEventDataAndroid.modifierLeftShift,
+      });
+      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
     });
   });
   group('RawKeyEventDataFuchsia', () {
@@ -174,6 +223,45 @@ void main() {
           }
         }
       }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x00070004,
+        'codePoint': 'a'.codeUnitAt(0),
+        'character': 'a',
+      });
+      final RawKeyEventDataFuchsia data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x00070029,
+        'codePoint': null,
+        'character': null,
+      });
+      final RawKeyEventDataFuchsia data = escapeKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x000700e1,
+        'codePoint': null,
+        'character': null,
+      });
+      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
     });
   });
 }
