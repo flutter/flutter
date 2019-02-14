@@ -21,6 +21,22 @@ import 'icon_theme_data.dart';
 /// Typically this is introduced automatically by the [WidgetsApp] or
 /// [MaterialApp].
 ///
+/// {@tool sample}
+///
+/// This example shows how to use [Icon] to create a simple icon in your flutter
+/// code.
+///
+/// ```dart
+/// Icon(
+///   icon: Icons.add,
+///   color: Colors.white,
+///   size: 30.0,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// This example shows how to use [Icon] to create an icon
+///
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
