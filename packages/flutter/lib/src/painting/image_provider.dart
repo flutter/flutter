@@ -280,13 +280,23 @@ abstract class ImageProvider<T> {
         }
       );
     }
-    obtainKey(configuration).then<void>((T key) {
-      obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
-      if (completer != null) {
-        stream.setCompleter(completer);
-      }
-    }).catchError(handleError);
+
+    /// `obtainKey` can throw both sync and async errors.
+    /// `catchError` handles cases where async errors are thrown and the outer try block is for sync errors.
+    ///
+    /// `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
+    try {
+      obtainKey(configuration).then<void>((T key) {
+        obtainedKey = key;
+        final ImageStreamCompleter completer = PaintingBinding.instance
+            .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+        if (completer != null) {
+          stream.setCompleter(completer);
+        }
+      }).catchError(handleError);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+    }
     return stream;
   }
 
