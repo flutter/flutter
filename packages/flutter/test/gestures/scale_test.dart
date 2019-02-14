@@ -24,8 +24,12 @@ void main() {
     };
 
     double updatedScale;
+    double updatedHorizontalScale;
+    double updatedVerticalScale;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedScale = details.scale;
+      updatedHorizontalScale = details.horizontalScale;
+      updatedVerticalScale = details.verticalScale;
       updatedFocalPoint = details.focalPoint;
     };
 
@@ -91,17 +95,34 @@ void main() {
     expect(updatedFocalPoint, const Offset(10.0, 20.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
+    expect(updatedHorizontalScale, 2.0);
+    expect(updatedVerticalScale, 2.0);
     updatedScale = null;
+    updatedHorizontalScale = null;
+    updatedVerticalScale = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
     // Zoom out
     tester.route(pointer2.move(const Offset(15.0, 25.0)));
     expect(updatedFocalPoint, const Offset(17.5, 27.5));
-    updatedFocalPoint = null;
     expect(updatedScale, 0.5);
-    updatedScale = null;
+    expect(updatedHorizontalScale, 0.5);
+    expect(updatedVerticalScale, 0.5);
     expect(didTap, isFalse);
+
+    // Horizontal scaling
+    tester.route(pointer2.move(const Offset(0.0, 20.0)));
+    expect(updatedHorizontalScale, 2.0);
+    expect(updatedVerticalScale, 1.0);
+
+    // Vertical scaling
+    tester.route(pointer2.move(const Offset(10.0, 10.0)));
+    expect(updatedHorizontalScale, 1.0);
+    expect(updatedVerticalScale, 2.0);
+    tester.route(pointer2.move(const Offset(15.0, 25.0)));
+    updatedFocalPoint = null;
+    updatedScale = null;
 
     // Three-finger scaling
     final TestPointer pointer3 = TestPointer(3);

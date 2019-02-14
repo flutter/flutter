@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/bsdiff.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -273,9 +274,9 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = buildInfo.buildName ?? manifest.buildName;
+    final String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
-    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
@@ -498,6 +499,7 @@ Future<void> _buildGradleProjectV2(
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
+      printStatus('Creating dynamic patch...');
       final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
       final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
 
@@ -519,7 +521,14 @@ Future<void> _buildGradleProjectV2(
           throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
-        update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        if (name.contains('_snapshot_')) {
+          final List<int> diff = bsdiff(oldFile.content, newFile.content);
+          final int ratio = 100 * diff.length ~/ newFile.content.length;
+          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
+          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
+        } else {
+          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        }
       }
 
       File updateFile;
@@ -567,7 +576,8 @@ Future<void> _buildGradleProjectV2(
 
       updateFile.parent.createSync(recursive: true);
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      printStatus('Created dynamic patch ${updateFile.path}.');
+      final String patchSize = getSizeAsMB(updateFile.lengthSync());
+      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
     }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
