@@ -46,10 +46,10 @@ class ApplicationPackageFactory {
         return applicationBinary != null
           ? MacOSApp.fromPrebuiltApp(applicationBinary)
           : null;
-      case TargetPlatform.fuchsia:
-        return FuchsiaMod(id: '');
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:	
+        return null;
     }
     assert(platform != null);
     return null;
@@ -71,13 +71,6 @@ abstract class ApplicationPackage {
 
   @override
   String toString() => displayName ?? id;
-}
-
-class FuchsiaMod extends ApplicationPackage {
-  FuchsiaMod({String id}) : super(id: id);
-
-  @override
-  String get name => id;
 }
 
 class AndroidApk extends ApplicationPackage {
