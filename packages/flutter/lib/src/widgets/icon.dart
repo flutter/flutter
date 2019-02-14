@@ -35,8 +35,6 @@ import 'icon_theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// This example shows how to use [Icon] to create an icon
-///
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
