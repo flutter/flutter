@@ -35,7 +35,7 @@ class OptionsRevision {
       int.parse(rawParts[0]),
       int.parse(rawParts[1]),
       int.parse(rawParts[2]),
-      rawParts.length == 4 ? int.parse(rawParts[4]) : 0,
+      rawParts.length == 4 ? int.parse(rawParts[3]) : 0,
     );
   }
 
