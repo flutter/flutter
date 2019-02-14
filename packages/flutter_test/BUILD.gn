@@ -14,6 +14,7 @@ dart_library("flutter_test") {
 
   deps = [
     "../flutter",
+    "//third_party/dart-pkg/pub/multicast_dns",
     "//third_party/dart-pkg/pub/quiver",
     "//third_party/dart-pkg/pub/test",
   ]
