@@ -732,7 +732,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     final Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
     shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(1000, 1000).then((Image image){
+    picture.toImage(1000, 1000).then((Image image) {
       shaderWarmUpTask.finish();
     });
   }
