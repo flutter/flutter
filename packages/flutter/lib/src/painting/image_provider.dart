@@ -280,12 +280,17 @@ abstract class ImageProvider<T> {
         }
       );
     }
-    obtainKey(configuration).then<void>((T key) {
-      obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
-      if (completer != null) {
-        stream.setCompleter(completer);
-      }
+
+    Future<void>.sync(() {
+      obtainKey(configuration).then<void>((T key) {
+        obtainedKey = key;
+        final ImageStreamCompleter completer = PaintingBinding
+            .instance.imageCache
+            .putIfAbsent(key, () => load(key), onError: handleError);
+        if (completer != null) {
+          stream.setCompleter(completer);
+        }
+      });
     }).catchError(handleError);
     return stream;
   }
