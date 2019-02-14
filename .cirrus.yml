@@ -59,7 +59,7 @@ task:
       env:
         SHARD: tool_tests
         TEST_SHARD_INDEX: 0
-        TEST_SHARD_COUNT: 3
+        TEST_SHARD_COUNT: 6
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -69,7 +69,7 @@ task:
       env:
         SHARD: tool_tests
         TEST_SHARD_INDEX: 1
-        TEST_SHARD_COUNT: 3
+        TEST_SHARD_COUNT: 6
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -79,12 +79,37 @@ task:
       env:
         SHARD: tool_tests
         TEST_SHARD_INDEX: 2
-        TEST_SHARD_COUNT: 3
+        TEST_SHARD_COUNT: 6
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
+    - name: tool_tests_3-linux
+      env:
+        SHARD: tool_tests
+        TEST_SHARD_INDEX: 3
+        TEST_SHARD_COUNT: 6
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tool_tests_4-linux
+      env:
+        SHARD: tool_tests
+        TEST_SHARD_INDEX: 4
+        TEST_SHARD_COUNT: 6
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tool_tests_5-linux
+      env:
+        SHARD: tool_tests
+        TEST_SHARD_INDEX: 5
+        TEST_SHARD_COUNT: 6
     # - name: build_tests-linux
     #   env:
     #     SHARD: build_tests
