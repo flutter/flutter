@@ -7,7 +7,8 @@ import 'dart:async';
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
 // The build_runner code generation is provided here to make it easier to
-// avoid introducing the dependency into google3.
+// avoid introducing the dependency into google3. Not all build* packages
+// are synced internally.
 import 'src/build_runner/build_runner.dart';
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
@@ -90,7 +91,8 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       // The build runner instance is not supported in google3.
+       // The build runner instance is not supported in google3 because
+       // the build runner packages are not synced internally.
        CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
      });
 }

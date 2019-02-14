@@ -208,7 +208,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
 }
 
 /// An implementation of a [ResidentCompiler] which runs a [BuildRunner] before
-/// talking to the frontend_server.
+/// talking to the CFE.
 class CodeGeneratingResidentCompiler implements ResidentCompiler {
   CodeGeneratingResidentCompiler._(this._residentCompiler, this._codegenDaemon);
 
@@ -262,7 +262,9 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     _codegenDaemon.startBuild();
     await _codegenDaemon.buildResults.first;
-    // This might be a bug
+    // Delete this file so that the frontend_server can handle multi-root.
+    // TODO(jonahwilliams): investigate frontend_server behavior in the presence
+    // of multi-root and initialize from dill.
     if (await fs.file(outputPath).exists()) {
       await fs.file(outputPath).delete();
     }
