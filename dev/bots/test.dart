@@ -277,6 +277,22 @@ Future<void> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
+void _addShardArguments(List<String> args) {
+  final String testShardIndex = Platform.environment['TEST_SHARD_INDEX'];
+  if (testShardIndex != null) {
+    final String testShardCount = Platform.environment['TEST_SHARD_COUNT'];
+    if (testShardCount == null) {
+      print('${red}TEST_SHARD_INDEX was specified as $testShardIndex, but TEST_SHARD_COUNT was not specified.');
+      print('Sharding tests requires specifying both the number of total shards and the index of this shard.');
+      exit(1);
+    }
+    args.addAll(<String>[
+      '--shard-index', testShardIndex,
+      '--total-shards', testShardCount,
+    ]);
+  }
+}
+
 Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
@@ -287,6 +303,8 @@ Future<void> _pubRunTest(
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
+
+  _addShardArguments(args);
   final Map<String, String> pubEnvironment = <String, String>{};
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
@@ -329,6 +347,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
+
+  _addShardArguments(args);
+
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
     if (!FileSystemEntity.isFileSync(fullScriptPath)) {
