@@ -70,12 +70,14 @@ Future<void> _runSmokeTests() async {
     script: path.join('test_smoke_test', 'pass_test.dart'),
     printOutput: false,
     timeout: _kShortTimeout,
+    useShards: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
     printOutput: false,
     timeout: _kShortTimeout,
+    useShards: false,
   );
   // We run the timeout tests individually because they are timing-sensitive.
   await _runFlutterTest(automatedTests,
@@ -83,12 +85,14 @@ Future<void> _runSmokeTests() async {
     expectFailure: false,
     printOutput: false,
     timeout: _kShortTimeout,
+    useShards: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
     timeout: _kShortTimeout,
+    useShards: false,
   );
   // We run the remaining smoketests in parallel, because they each take some
   // time to run (e.g. compiling), so we don't want to run them in series,
@@ -100,30 +104,35 @@ Future<void> _runSmokeTests() async {
         expectFailure: true,
         printOutput: false,
         timeout: _kShortTimeout,
+        useShards: false,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'crash2_test.dart'),
         expectFailure: true,
         printOutput: false,
         timeout: _kShortTimeout,
+        useShards: false,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
         timeout: _kShortTimeout,
+        useShards: false,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
         timeout: _kShortTimeout,
+        useShards: false,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
         expectFailure: true,
         printOutput: false,
         timeout: _kShortTimeout,
+        useShards: false,
       ),
       runCommand(flutter,
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
@@ -296,15 +305,18 @@ void _addShardArguments(List<String> args) {
 Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool enableFlutterToolAsserts = false
+  bool enableFlutterToolAsserts = false,
+  bool useShards = true,
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
+  if (useShards) {
+    _addShardArguments(args);
+  }
 
-  _addShardArguments(args);
   final Map<String, String> pubEnvironment = <String, String>{};
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
@@ -343,12 +355,14 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> options = const <String>[],
   bool skip = false,
   Duration timeout = _kLongTimeout,
+  bool useShards = true,
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
-
-  _addShardArguments(args);
+  if (useShards) {
+    _addShardArguments(args);
+  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
