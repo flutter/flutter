@@ -229,10 +229,13 @@ Future<void> _runTests() async {
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
   // Only packages/flutter/test/widgets/widget_inspector_test.dart really
-  // needs to be run with --track-widget-creation but it is nice to run
-  // all of the tests in package:flutter with the flag to ensure that
-  // the Dart kernel transformer triggered by the flag does not break anything.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
+  // needs to be run with --track-widget-creation.  We run --track-widget-creation
+  // against flutter_gallery to make sure it can run other tests too.
+  await _runFlutterTest(
+    path.join(flutterRoot, 'packages', 'flutter'),
+    script: path.join(flutterRoot, 'packages', 'flutter', 'test', 'widgets', 'widget_inspector_test.dart'),
+    options: <String>['--track-widget-creation'],
+  );
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
