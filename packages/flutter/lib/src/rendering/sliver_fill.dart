@@ -25,7 +25,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///    remaining space rather than the viewport itself.
 ///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
 ///  * [RenderSliverList], which does not require its children to have the same
-///    extent in the main axis.
+///  * /// extent in the main axis.
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
@@ -57,21 +57,19 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
-
   @override
   double indexToLayoutOffset(double itemExtent, int index) {
-    return _padding + super.indexToLayoutOffset(itemExtent, index);
+    return  super.indexToLayoutOffset(itemExtent, index);
   }
 
   @override
   int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
+    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset , 0.0), itemExtent);
   }
 
   @override
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
+    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset, 0.0), itemExtent);
   }
 
   @override
@@ -81,14 +79,13 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
-    final double padding = _padding;
     return childManager.estimateMaxScrollOffset(
       constraints,
       firstIndex: firstIndex,
       lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset - padding,
-      trailingScrollOffset: trailingScrollOffset - padding,
-    ) + padding + padding;
+      leadingScrollOffset: leadingScrollOffset,
+      trailingScrollOffset: trailingScrollOffset,
+    );
   }
 }
 
