@@ -125,7 +125,6 @@ class AOTSnapshotter {
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
-      '--no-use-bare-instructions',
     ];
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
@@ -353,7 +352,7 @@ class JITSnapshotter {
     @required String outputPath,
     @required String compilationTraceFilePath,
     @required bool createPatch,
-    int buildNumber,
+    String buildNumber,
     String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {

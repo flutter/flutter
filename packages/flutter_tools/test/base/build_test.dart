@@ -193,7 +193,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -233,7 +232,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -273,7 +271,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -318,7 +315,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -359,7 +355,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -399,7 +394,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -457,7 +451,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -502,7 +495,6 @@ void main() {
       expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
-        '--no-use-bare-instructions',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -860,7 +852,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -913,7 +905,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -974,7 +966,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -1017,7 +1009,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 

@@ -208,10 +208,13 @@ class _ViewportElement extends MultiChildRenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    children.where((Element e) {
-      final RenderSliver renderSliver = e.renderObject;
-      return renderSliver.geometry.visible;
-    }).forEach(visitor);
+    assert(() {
+      children.where((Element e) {
+        final RenderSliver renderSliver = e.renderObject;
+        return renderSliver.geometry.visible;
+      }).forEach(visitor);
+      return true;
+    }());
   }
 }
 
