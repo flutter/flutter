@@ -778,7 +778,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         //
         // This value is in device pixels, not logical pixels as is typically used
         // throughout the codebase.
-        const int _iOSHorizontalOffset = 2;
+        const int _iOSHorizontalOffset = -2;
         cursorOffset = Offset(_iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 

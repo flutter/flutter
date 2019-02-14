@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(dnfield): This will be removed when @jonahwilliams' work on build lands
+// ignore: deprecated_member_use
 import 'package:analyzer/analyzer.dart' as analyzer;
 
 import '../base/file_system.dart';
