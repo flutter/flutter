@@ -48,7 +48,7 @@ class ApplicationPackageFactory {
           : null;
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:	
+      case TargetPlatform.fuchsia:
         return null;
     }
     assert(platform != null);
