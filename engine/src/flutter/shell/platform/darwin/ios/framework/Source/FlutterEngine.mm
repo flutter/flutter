@@ -10,6 +10,7 @@
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/darwin/platform_version.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
@@ -60,6 +61,8 @@
   fml::scoped_nsobject<FlutterBasicMessageChannel> _settingsChannel;
 
   int64_t _nextTextureId;
+
+  uint64_t _nextPointerFlowId;
 
   BOOL _allowHeadlessExecution;
 }
@@ -117,12 +120,15 @@
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<blink::PointerDataPacket>)packet {
-  self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = self.shell.GetEngine(), packet = std::move(packet)] {
+  TRACE_EVENT0("flutter", "dispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", _nextPointerFlowId);
+  self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
+      [engine = self.shell.GetEngine(), packet = std::move(packet), flow_id = _nextPointerFlowId] {
         if (engine) {
-          engine->DispatchPointerDataPacket(*packet);
+          engine->DispatchPointerDataPacket(*packet, flow_id);
         }
       }));
+  _nextPointerFlowId++;
 }
 
 - (fml::WeakPtr<shell::PlatformView>)platformView {
