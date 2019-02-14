@@ -104,7 +104,8 @@ class Engine final : public blink::RuntimeDelegate {
 
   void DispatchPlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
 
-  void DispatchPointerDataPacket(const blink::PointerDataPacket& packet);
+  void DispatchPointerDataPacket(const blink::PointerDataPacket& packet,
+                                 uint64_t trace_flow_id);
 
   void DispatchSemanticsAction(int id,
                                blink::SemanticsAction action,

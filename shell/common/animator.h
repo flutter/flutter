@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_COMMON_ANIMATOR_H_
 #define FLUTTER_SHELL_COMMON_ANIMATOR_H_
 
+#include <deque>
+
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/weak_ptr.h"
@@ -48,6 +50,10 @@ class Animator final {
 
   void SetDimensionChangePending();
 
+  // Enqueue |trace_flow_id| into |trace_flow_ids_|.  The corresponding flow
+  // will be ended during the next |BeginFrame|.
+  void EnqueueTraceFlowId(uint64_t trace_flow_id);
+
  private:
   using LayerTreePipeline = flutter::Pipeline<flow::LayerTree>;
 
@@ -77,6 +83,7 @@ class Animator final {
   int notify_idle_task_id_;
   bool dimension_change_pending_;
   SkISize last_layer_tree_size_;
+  std::deque<uint64_t> trace_flow_ids_;
 
   fml::WeakPtrFactory<Animator> weak_factory_;
 
