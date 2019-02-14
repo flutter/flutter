@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -1684,8 +1685,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   void _afterNavigation() {
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       // This event is used by performance tools that show stats for the
       // time interval since the last navigation event occurred ensuring that
       // stats only reflect the current page.
@@ -1816,7 +1816,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
-    if (oldRoute == newRoute) // ignore: unrelated_type_equality_checks, https://github.com/dart-lang/sdk/issues/32522
+    if (oldRoute == newRoute)
       return;
     assert(() { _debugLocked = true; return true; }());
     assert(oldRoute._navigator == this);

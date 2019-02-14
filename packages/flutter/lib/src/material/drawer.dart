@@ -30,7 +30,7 @@ enum DrawerAlignment {
 }
 
 // TODO(eseidel): Draw width should vary based on device size:
-// http://material.google.com/layout/structure.html#structure-side-nav
+// https://material.io/design/components/navigation-drawer.html#specs
 
 // Mobile:
 // Width = Screen width − 56 dp
@@ -81,7 +81,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
 ///    display and animation of the drawer.
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///

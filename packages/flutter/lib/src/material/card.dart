@@ -56,27 +56,51 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
+/// Sometimes the primary action area of a card is the card itself. Cards can be
+/// one large touch target that shows a detail screen when tapped.
+///
+/// {@tool snippet --template=stateless_widget}
+///
+/// This sample shows creation of a [Card] widget that can be tapped. When
+/// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
+/// entire card.
+///
+/// ```dart
+/// Card(
+///   child: InkWell(
+///     splashColor: Colors.blue.withAlpha(30),
+///     onTap: () { /* ... */ },
+///     child: Text('A card that can be tapped'),
+///   ),
+/// )
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTile], to display icons and text in a card.
 ///  * [ButtonBar], to display buttons at the bottom of a card. Typically these
 ///    would be styled using a [ButtonTheme] created with [new ButtonTheme.bar].
 ///  * [showDialog], to display a modal card.
-///  * <https://material.google.com/components/cards.html>
+///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [elevation] must be null or non-negative.
+  /// The [elevation] must be null or non-negative. The [borderOnForeground]
+  /// must not be null.
   const Card({
     Key key,
     this.color,
     this.elevation,
     this.shape,
+    this.borderOnForeground = true,
     this.margin,
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
   }) : assert(elevation == null || elevation >= 0.0),
+       assert(borderOnForeground != null),
        super(key: key);
 
   /// The card's background color.
@@ -104,6 +128,12 @@ class Card extends StatelessWidget {
   /// If that's null then the shape will be a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder shape;
+
+  /// Whether to paint the [shape] border in front of the [child].
+  ///
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
+  final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
   /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
@@ -155,6 +185,7 @@ class Card extends StatelessWidget {
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
+          borderOnForeground: borderOnForeground,
           clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? _defaultClipBehavior,
           child: Semantics(
             explicitChildNodes: !semanticContainer,

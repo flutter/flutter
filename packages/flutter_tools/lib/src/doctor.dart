@@ -50,7 +50,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(_FlutterValidator());
+      _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
@@ -438,8 +438,8 @@ class ValidationMessage {
   String toString() => message;
 }
 
-class _FlutterValidator extends DoctorValidator {
-  _FlutterValidator() : super('Flutter');
+class FlutterValidator extends DoctorValidator {
+  FlutterValidator() : super('Flutter');
 
   @override
   Future<ValidationResult> validate() async {
