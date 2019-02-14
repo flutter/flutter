@@ -441,6 +441,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return engineSourcePath;
   }
 
+  String _getHostEngineBasename(String localEngineBasename) {
+    // Determine the host engine directory associated with the local engine:
+    // Strip '_sim_' since there are no host simulator builds.
+    String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
+    tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
+    // Strip suffix for various archs.
+    final List<String> suffixes = ['_arm', '_arm64', '_x86', '_x64'];
+    for (String suffix in suffixes) {
+      tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
+    }
+    return 'host_' + tmpBasename;
+  }
+
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
@@ -454,13 +467,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       throwToolExit(userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
     }
 
-    // Determine the host engine directory associated with the local engine:
-    // * strip '_sim_' since there are no host simulator builds.
-    // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    String tmpBasename = basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
-    tmpBasename = tmpBasename.replaceFirst(RegExp(r'_arm64$'), '').replaceFirst(RegExp(r'_arm$'), '');
-    final String hostBasename = 'host_' + tmpBasename;
+    final String hostBasename = _getHostEngineBasename(basename);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
     if (!fs.isDirectorySync(engineHostBuildPath)) {
       throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
