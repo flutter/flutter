@@ -58,21 +58,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   @override
-  double indexToLayoutOffset(double itemExtent, int index) {
-    return  super.indexToLayoutOffset(itemExtent, index);
-  }
-
-  @override
-  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset , 0.0), itemExtent);
-  }
-
-  @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset, 0.0), itemExtent);
-  }
-
-  @override
   double estimateMaxScrollOffset(SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
