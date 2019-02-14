@@ -638,7 +638,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyAlignParagraph)) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
-  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  ASSERT_EQ(paragraph->records_.size(), 27ull);
   double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
@@ -646,24 +646,24 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyAlignParagraph)) {
   expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
 
-  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30;
-  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
-
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
   expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
 
-  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30 * 10;
-  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
+  ASSERT_TRUE(paragraph->records_[4].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[4].offset().y(), expected_y);
+  expected_y += 30;
+  ASSERT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 0);
 
-  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
-  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
-  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().x(), 0);
+  ASSERT_TRUE(paragraph->records_[6].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[6].offset().y(), expected_y);
+  expected_y += 30 * 10;
+  ASSERT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[26].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().y(), expected_y);
+  ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().x(), 0);
 
   ASSERT_EQ(paragraph_style.text_align,
             paragraph->GetParagraphStyle().text_align);
@@ -706,7 +706,11 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
   ASSERT_TRUE(Snapshot());
 
   auto glyph_line_width = [&paragraph](int index) {
-    return paragraph->glyph_lines_[index].positions.back().x_pos.end;
+    size_t second_to_last_position_index =
+        paragraph->glyph_lines_[index].positions.size() - 2;
+    return paragraph->glyph_lines_[index]
+        .positions[second_to_last_position_index]
+        .x_pos.end;
   };
 
   // All lines except the last should be justified to the width of the
