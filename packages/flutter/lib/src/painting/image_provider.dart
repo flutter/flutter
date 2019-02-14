@@ -290,6 +290,7 @@ abstract class ImageProvider<T> {
       key = obtainKey(configuration);
     } catch (error, stackTrace) {
       handleError(error, stackTrace);
+      return stream;
     }
 
     key.then<void>((T key) {
