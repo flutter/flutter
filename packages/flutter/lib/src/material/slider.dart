@@ -1005,6 +1005,7 @@ class _RenderSlider extends RenderBox {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
+      // If the ticks would be too dense, don't bother painting them.
       if ((trackRect.width - tickMarkWidth) / divisions >= 3.0 * tickMarkWidth) {
         for (int i = 0; i <= divisions; i++) {
           final double tickValue = i / divisions;
