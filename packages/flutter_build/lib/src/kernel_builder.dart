@@ -122,7 +122,7 @@ class FlutterKernelBuilder implements Builder {
     // Note: currently we only replace the root package with a multiroot
     // scheme. To support codegen on arbitrary packages we will need to do
     // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/lib///');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/');
     await packagesFile.writeAsString(newPackagesContents);
     String absoluteMainPath;
     if (path.isAbsolute(mainPath)) {
@@ -155,14 +155,15 @@ class FlutterKernelBuilder implements Builder {
     if (incrementalCompilerByteStorePath != null) {
       arguments.add('--incremental');
     }
-    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName');
+    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName', 'lib');
+    final String normalRoot =  path.join(projectDir.absolute.path, 'lib');
     arguments.addAll(<String>[
       '--packages',
       packagesFile.path,
       '--output-dill',
       outputFile.path,
       '--filesystem-root',
-      projectDir.absolute.path,
+      normalRoot,
       '--filesystem-root',
       generatedRoot,
       '--filesystem-scheme',
@@ -175,7 +176,7 @@ class FlutterKernelBuilder implements Builder {
       absoluteMainPath,
       packagesFile.path,
       multiRootScheme,
-      <String>[projectDir.absolute.path, generatedRoot],
+      <String>[normalRoot, generatedRoot],
     );
     arguments.add(mainUri?.toString() ?? absoluteMainPath);
     // Invoke the frontend server and copy the dill back to the output
@@ -212,7 +213,6 @@ class _StdoutHandler {
   bool _suppressCompilerMessages;
 
   void handler(String message) {
-    log.info(message);
     const String kResultPrefix = 'result ';
     if (boundaryKey == null) {
       if (message.startsWith(kResultPrefix))
@@ -266,7 +266,7 @@ class _PackageUriMapper {
       if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file('$name/lib/', windows: Platform.isWindows).toString())
+          .map((String name) => Uri.file(name, windows: Platform.isWindows).toString())
           .toList();
         return;
       }

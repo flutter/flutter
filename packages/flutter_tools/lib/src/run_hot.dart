@@ -123,6 +123,8 @@ class HotRunner extends ResidentRunner {
       return false;
     }
 
+    /// When using the build system, dependency analysis is handled by build
+    /// runner instead.
     if (experimentalBuildEnabled) {
       return true;
     }

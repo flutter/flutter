@@ -7,7 +7,7 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   build: 1.1.1
-  build_modules: 1.0.7
+  build_modules: 1.0.7+2
   package_config: 1.0.5
   path: 1.6.2
 
@@ -50,4 +50,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 0361
+# PUBSPEC CHECKSUM: dcbe

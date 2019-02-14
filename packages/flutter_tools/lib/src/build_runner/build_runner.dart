@@ -228,13 +228,10 @@ class BuildRunner extends CodeGenerator {
         '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
         '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
       ];
-      buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command);
+      buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
     } finally {
       status.stop();
     }
-    buildDaemonClient.serverLogs.listen((ServerLog serverLog) {
-      printTrace(serverLog.log);
-    });
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
     }));
