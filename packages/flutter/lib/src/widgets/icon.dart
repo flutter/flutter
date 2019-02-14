@@ -28,7 +28,7 @@ import 'icon_theme_data.dart';
 ///
 /// ```dart
 /// Icon(
-///   icon: Icons.add,
+///   Icons.add,
 ///   color: Colors.white,
 ///   size: 30.0,
 /// )
