@@ -34,7 +34,7 @@ class WebCompiler {
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
-    final String outputPath = fs.path.join(outputDir.absolute.path, 'main.dart.js');
+    final String outputPath = fs.path.join(outputDir.path, 'main.dart.js');
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
