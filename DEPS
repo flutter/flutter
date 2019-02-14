@@ -451,7 +451,7 @@ hooks = [
         '--build-tools-version=28.0.3',
         '--platform-tools-version=28.0.1',
         '--tools-version=26.1.1',
-        '--ndk-version=19.0.5232133'
+        '--ndk-version=19.1.5304403'
     ],
   },
   # TODO(dnfield): This can be enabled when we actually support building
