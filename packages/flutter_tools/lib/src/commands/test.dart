@@ -79,7 +79,13 @@ class TestCommand extends FlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs');
+        valueHelp: 'jobs')
+      ..addOption('shard-index',
+        hide: true,
+      )
+      ..addOption('total-shards',
+        hide: true,
+      );
   }
 
   @override
@@ -170,6 +176,8 @@ class TestCommand extends FlutterCommand {
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
+      shardIndex: argResults['shard-index'],
+      totalShards: argResults['total-shards'],
     );
 
     if (collector != null) {

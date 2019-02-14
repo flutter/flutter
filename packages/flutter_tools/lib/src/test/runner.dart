@@ -34,6 +34,8 @@ Future<int> runTests(
   bool updateGoldens = false,
   TestWatcher watcher,
   @required int concurrency,
+  String shardIndex,
+  String totalShards,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -49,6 +51,15 @@ Future<int> runTests(
 
   testArgs.add('--concurrency=$concurrency');
 
+  if (shardIndex != null) {
+    if (totalShards == null) {
+      throwToolExit('If --shard-index is specified, --total-shards must also be specified');
+    }
+    testArgs..addAll(<String>[
+      '--shard-index', shardIndex,
+      '--total-shards', totalShards,
+    ]);
+  }
   for (String name in names) {
     testArgs..add('--name')..add(name);
   }
