@@ -257,32 +257,6 @@ void main() {
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
   });
 
-  testWidgets('Shifting BottomNavigationBar always hides unselected labels', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.shifting,
-            showUnselectedLabels: true,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
-              ),
-            ]
-          )
-        )
-      )
-    );
-
-    expect(_getOpacity(tester, 'AC'), equals(1.0));
-    expect(_getOpacity(tester, 'Alarm'), equals(0.0));
-  });
-
   testWidgets('Fixed BottomNavigationBar can update background color', (WidgetTester tester) async {
     const Color color = Colors.yellow;
 
@@ -1231,6 +1205,191 @@ void main() {
           ])));
     }, throwsA(isInstanceOf<AssertionError>()));
   });
+
+  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+      'for shifting navbar, expect that there is no rendered text', (WidgetTester tester) async {
+        final Widget widget = MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                bottomNavigationBar: BottomNavigationBar(
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
+                  type: BottomNavigationBarType.shifting,
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      title: Text('Red'),
+                      backgroundColor: Colors.red,
+                      icon: Icon(Icons.dashboard),
+                    ),
+                    BottomNavigationBarItem(
+                      title: Text('Green'),
+                      backgroundColor: Colors.green,
+                      icon: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+        await tester.pumpWidget(widget);
+        expect(find.text('Red'), findsOneWidget);
+        expect(find.text('Green'), findsOneWidget);
+        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      });
+
+  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+      'for fixed navbar, expect that there is no rendered text', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Scaffold(
+                  bottomNavigationBar: BottomNavigationBar(
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                    type: BottomNavigationBarType.fixed,
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        title: Text('Red'),
+                        backgroundColor: Colors.red,
+                        icon: Icon(Icons.dashboard),
+                      ),
+                      BottomNavigationBarItem(
+                        title: Text('Green'),
+                        backgroundColor: Colors.green,
+                        icon: Icon(Icons.menu),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        expect(find.text('Red'), findsOneWidget);
+        expect(find.text('Green'), findsOneWidget);
+        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      });
+
+  testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          type: BottomNavigationBarType.shifting,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
