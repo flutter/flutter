@@ -287,9 +287,9 @@ class RenderParagraph extends RenderBox {
     // Other _textPainter state like didExceedMaxLines will also be affected.
     // See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
+    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
-    final bool didOverflowHeight = size.height < textSize.height || _textPainter.didExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
