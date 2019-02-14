@@ -1179,24 +1179,21 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    assert(() {
-      _childElements.values.where((Element child) {
-        final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
-        double itemExtent;
-        switch (renderObject.constraints.axis) {
-          case Axis.horizontal:
-            itemExtent = child.renderObject.paintBounds.width;
-            break;
-          case Axis.vertical:
-            itemExtent = child.renderObject.paintBounds.height;
-            break;
-        }
-        final SliverConstraints constraints = renderObject.constraints;
-        return parentData.layoutOffset              < constraints.scrollOffset + constraints.remainingPaintExtent
-            && parentData.layoutOffset + itemExtent > constraints.scrollOffset;
-      }).forEach(visitor);
-      return true;
-    }());
+    _childElements.values.where((Element child) {
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      double itemExtent;
+      switch (renderObject.constraints.axis) {
+        case Axis.horizontal:
+          itemExtent = child.renderObject.paintBounds.width;
+          break;
+        case Axis.vertical:
+          itemExtent = child.renderObject.paintBounds.height;
+          break;
+      }
+
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+    }).forEach(visitor);
   }
 }
 
