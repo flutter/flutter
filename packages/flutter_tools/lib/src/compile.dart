@@ -131,7 +131,7 @@ class PackageUriMapper {
       if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file('$name/lib/', windows: platform.isWindows).toString())
+          .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
           .toList();
         return;
       }

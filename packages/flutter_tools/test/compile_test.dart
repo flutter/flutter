@@ -65,12 +65,12 @@ example:file:///example/lib/
       const String multiRootPackagesContents = r'''
 xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
 yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
-example:org-dartlang-app:///lib/
+example:org-dartlang-app:/
 ''';
       when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(multiRootPackagesContents));
 
       testUsingContext('Maps main file from same package on multiroot scheme', () async {
-        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example', '/gen']);
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example/lib/', '/gen/lib/']);
         expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
       }, overrides: <Type, Generator>{
         FileSystem: () => mockFileSystem,
