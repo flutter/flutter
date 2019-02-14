@@ -719,15 +719,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
-  void _warmUpSkiaShaderCompilations({ShaderWarmUp customShaderWarmUp}) {
+  void _warmUpSkiaShaderCompilations(ShaderWarmUp shaderWarmUp) {
+    if (shaderWarmUp == null) {
+      return;
+    }
+
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
-    if (customShaderWarmUp != null) {
-      customShaderWarmUp(canvas);
-    } else {
-      defaultShaderWarmUp(canvas);
-    }
+    shaderWarmUp(canvas);
 
     final Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
@@ -743,8 +743,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// This is used during application startup so that the first frame (which is
   /// likely to be quite expensive) gets a few extra milliseconds to run.
   ///
-  /// This also warms up the Skia shader compilation cache by
-  /// either [defaultShaderWarmUp], or [customShaderWarmUp] if it's not null.
+  /// This also warms up the Skia shader compilation cache using [shaderWarmUp].
   ///
   /// Locks events dispatching until the scheduled frame has completed.
   ///
@@ -755,11 +754,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [scheduleWarmUpFrame] was already called, this call will be ignored.
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
-  void scheduleWarmUpFrame({ShaderWarmUp customShaderWarmUp}) {
+  void scheduleWarmUpFrame({ShaderWarmUp shaderWarmUp = defaultShaderWarmUp}) {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
 
-    _warmUpSkiaShaderCompilations(customShaderWarmUp: customShaderWarmUp);
+    _warmUpSkiaShaderCompilations(shaderWarmUp);
 
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');

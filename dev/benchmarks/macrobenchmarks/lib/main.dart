@@ -9,7 +9,7 @@ const String kMacrobenchmarks ='Macrobenchmarks';
 
 void main() => runApp(
   MacrobenchmarksApp(),
-  customShaderWarmUp: (Canvas canvas) {
+  shaderWarmUp: (Canvas canvas) {
     defaultShaderWarmUp(canvas);
 
     // Warm up the cubic shaders used by CubicBezierPage.

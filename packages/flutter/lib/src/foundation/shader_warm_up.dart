@@ -19,7 +19,7 @@ typedef ShaderWarmUp = void Function(Canvas canvas);
 ///
 /// Therefore we use this as the default [ShaderWarmUp] in
 /// [SchedulerBinding.scheduleWarmUpFrame] to move common shader compilations
-/// from animation time to startup time. Alternatively, [customShaderWarmUp]
+/// from animation time to startup time. Alternatively,  a custom [ShaderWarmUp]
 /// can be provided to [runApp] to replace this default warm up function.
 void defaultShaderWarmUp(Canvas canvas) {
   final RRect rrect = RRect.fromLTRBXY(20, 20, 60, 60, 10, 10);
