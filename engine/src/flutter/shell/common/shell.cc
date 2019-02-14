@@ -546,14 +546,18 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPointerDataPacket(
     std::unique_ptr<blink::PointerDataPacket> packet) {
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewDispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = engine_->GetWeakPtr(), packet = std::move(packet)] {
+      [engine = engine_->GetWeakPtr(), packet = std::move(packet),
+       flow_id = next_pointer_flow_id_] {
         if (engine) {
-          engine->DispatchPointerDataPacket(*packet);
+          engine->DispatchPointerDataPacket(*packet, flow_id);
         }
       }));
+  next_pointer_flow_id_++;
 }
 
 // |shell::PlatformView::Delegate|

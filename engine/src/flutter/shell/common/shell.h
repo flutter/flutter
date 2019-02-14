@@ -99,6 +99,8 @@ class Shell final : public PlatformView::Delegate,
       service_protocol_handlers_;
   bool is_setup_ = false;
 
+  uint64_t next_pointer_flow_id_ = 0;
+
   Shell(blink::TaskRunners task_runners, blink::Settings settings);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(

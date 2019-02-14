@@ -192,12 +192,18 @@ void AndroidShellHolder::DispatchPointerDataPacket(
     return;
   }
 
+  TRACE_EVENT0("flutter", "AndroidShellHolder::DispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
+
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = shell_->GetEngine(), packet = std::move(packet)] {
+      [engine = shell_->GetEngine(), packet = std::move(packet),
+       flow_id = next_pointer_flow_id_] {
         if (engine) {
-          engine->DispatchPointerDataPacket(*packet);
+          engine->DispatchPointerDataPacket(*packet, flow_id);
         }
       }));
+
+  next_pointer_flow_id_++;
 }
 
 Rasterizer::Screenshot AndroidShellHolder::Screenshot(
