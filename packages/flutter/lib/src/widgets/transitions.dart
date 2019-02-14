@@ -59,15 +59,15 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// }
 ///
 /// class AnimatedContainer extends AnimatedWidget {
-///   AnimatedContainer({Key key, AnimationController controller})
-///       : controller = controller,
-///         super(key: key, listenable: controller);
-///   final AnimationController controller;
+///   const AnimatedContainer({Key key, AnimationController controller})
+///       : super(key: key, listenable: controller);
+///
+///   Animation<double> get progress => listenable;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Transform.rotate(
-///       angle: controller.value * 2.0 * math.pi,
+///       angle: progress.value * 2.0 * math.pi,
 ///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
 ///     );
 ///   }
