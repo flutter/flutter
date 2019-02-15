@@ -316,6 +316,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
 class _CircularProgressIndicatorPainter extends CustomPainter {
   _CircularProgressIndicatorPainter({
+    this.backgroundColor,
     this.valueColor,
     this.value,
     this.headValue,
@@ -330,6 +331,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? value.clamp(0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
+  final Color backgroundColor;
   final Color valueColor;
   final double value;
   final double headValue;
@@ -352,6 +354,13 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       ..color = valueColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
+    if (backgroundColor != null) {
+      final Paint backgroundPaint = Paint()
+        ..color = backgroundColor
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke;
+      canvas.drawArc(Offset.zero & size, 0, _twoPi, false, backgroundPaint);
+    }
 
     if (value == null) // Indeterminate
       paint.strokeCap = StrokeCap.square;
@@ -361,7 +370,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
-    return oldPainter.valueColor != valueColor
+    return oldPainter.backgroundColor != backgroundColor
+        || oldPainter.valueColor != valueColor
         || oldPainter.value != value
         || oldPainter.headValue != headValue
         || oldPainter.tailValue != tailValue
@@ -478,6 +488,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         ),
         child: CustomPaint(
           painter: _CircularProgressIndicatorPainter(
+            backgroundColor: widget.backgroundColor,
             valueColor: widget._getValueColor(context),
             value: widget.value, // may be null
             headValue: headValue, // remaining arguments are ignored if widget.value is not null
