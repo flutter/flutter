@@ -121,6 +121,9 @@ class FocusNode extends ChangeNotifier {
 /// parent [FocusScopeNode] and [FocusScopeNode.isFirstFocus] is true for
 /// that scope and all its ancestor scopes.
 ///
+/// If a [FocusScopeNode] is removed, then the next sibling node will be set as
+/// the focused node by the [FocusManager].
+///
 /// See also:
 ///
 ///  * [FocusNode], which is a leaf node in the focus tree that can receive
@@ -326,7 +329,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   /// the child.
   void setFirstFocus(FocusScopeNode child) {
     assert(child != null);
-    assert(child._parent == null || child._parent == this);
+    assert(child._parent == null || child._parent == this, "Child's parent ${child._parent} != $this");
     if (_firstChild == child)
       return;
     child.detach();
@@ -348,10 +351,12 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
     assert(child != null);
     if (child._parent == null || child._parent == this)
       return;
-    if (child.isFirstFocus)
-      setFirstFocus(child);
-    else
+    if (child.isFirstFocus) {
       child.detach();
+      setFirstFocus(child);
+    } else {
+      child.detach();
+    }
   }
 
   /// Remove this scope from its parent child list.
@@ -394,8 +399,8 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
 
 /// Manages the focus tree.
 ///
-/// The focus tree keeps track of which widget is the user's current focus. The
-/// focused widget often listens for keyboard events.
+/// The focus tree keeps track of which [FocusNode] is the user's current focus.
+/// The widget that owns the [FocusNode] often listens for keyboard events.
 ///
 /// The focus manager is responsible for holding the [FocusScopeNode] that is
 /// the root of the focus tree and tracking which [FocusNode] has the overall
@@ -405,6 +410,12 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
 /// [WidgetsBinding.focusManager]. The [FocusManager] is rarely accessed
 /// directly. Instead, to find the [FocusScopeNode] for a given [BuildContext],
 /// use [FocusScope.of].
+///
+/// The [FocusManager] knows nothing about [FocusNode]s other than the one that
+/// is currently focused. If a [FocusScopeNode] is removed, then the
+/// [FocusManager] will attempt to focus the next node in the tree, but if the
+/// current focus in that scope node is null, it will stop there, and no
+/// [FocusNode] will have focus.
 ///
 /// See also:
 ///
