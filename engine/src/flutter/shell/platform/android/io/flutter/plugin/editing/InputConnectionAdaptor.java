@@ -11,16 +11,17 @@ import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-
-import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.ErrorLogResult;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.view.FlutterView;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 class InputConnectionAdaptor extends BaseInputConnection {
     private final FlutterView mFlutterView;
     private final int mClient;
-    private final TextInputChannel textInputChannel;
+    private final MethodChannel mFlutterChannel;
     private final Editable mEditable;
     private int mBatchCount;
     private InputMethodManager mImm;
@@ -28,16 +29,12 @@ class InputConnectionAdaptor extends BaseInputConnection {
     private static final MethodChannel.Result logger =
         new ErrorLogResult("FlutterTextInput");
 
-    public InputConnectionAdaptor(
-        FlutterView view,
-        int client,
-        TextInputChannel textInputChannel,
-        Editable editable
-    ) {
+    public InputConnectionAdaptor(FlutterView view, int client,
+        MethodChannel flutterChannel, Editable editable) {
         super(view, true);
         mFlutterView = view;
         mClient = client;
-        this.textInputChannel = textInputChannel;
+        mFlutterChannel = flutterChannel;
         mEditable = editable;
         mBatchCount = 0;
         mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -58,14 +55,14 @@ class InputConnectionAdaptor extends BaseInputConnection {
                              selectionStart, selectionEnd,
                              composingStart, composingEnd);
 
-        textInputChannel.updateEditingState(
-            mClient,
-            mEditable.toString(),
-            selectionStart,
-            selectionEnd,
-            composingStart,
-            composingEnd
-        );
+        HashMap<Object, Object> state = new HashMap<>();
+        state.put("text", mEditable.toString());
+        state.put("selectionBase", selectionStart);
+        state.put("selectionExtent", selectionEnd);
+        state.put("composingBase", composingStart);
+        state.put("composingExtent", composingEnd);
+        mFlutterChannel.invokeMethod("TextInputClient.updateEditingState",
+            Arrays.asList(mClient, state), logger);
     }
 
     @Override
@@ -181,30 +178,39 @@ class InputConnectionAdaptor extends BaseInputConnection {
     @Override
     public boolean performEditorAction(int actionCode) {
         switch (actionCode) {
+            // TODO(mattcarroll): is newline an appropriate action for "none"?
             case EditorInfo.IME_ACTION_NONE:
-                textInputChannel.newline(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.newline"), logger);
                 break;
             case EditorInfo.IME_ACTION_UNSPECIFIED:
-                textInputChannel.unspecifiedAction(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.unspecified"), logger);
                 break;
             case EditorInfo.IME_ACTION_GO:
-                textInputChannel.go(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.go"), logger);
                 break;
             case EditorInfo.IME_ACTION_SEARCH:
-                textInputChannel.search(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.search"), logger);
                 break;
             case EditorInfo.IME_ACTION_SEND:
-                textInputChannel.send(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.send"), logger);
                 break;
             case EditorInfo.IME_ACTION_NEXT:
-                textInputChannel.next(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.next"), logger);
                 break;
             case EditorInfo.IME_ACTION_PREVIOUS:
-                textInputChannel.previous(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                        Arrays.asList(mClient, "TextInputAction.previous"), logger);
                 break;
             default:
             case EditorInfo.IME_ACTION_DONE:
-                textInputChannel.done(mClient);
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                    Arrays.asList(mClient, "TextInputAction.done"), logger);
                 break;
         }
         return true;
