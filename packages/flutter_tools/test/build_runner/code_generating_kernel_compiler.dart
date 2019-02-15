@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/build_runner/build_kernel_compiler.dart';
 import 'package:flutter_tools/src/build_runner/build_runner.dart';
+import 'package:flutter_tools/src/codegen.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 
@@ -12,8 +12,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(BuildKernelCompiler, () {
-    final MockBuildRunnerFactory mockBuildRunnerFactory = MockBuildRunnerFactory();
+  group(CodeGeneratingKernelCompiler, () {
     final MockBuildRunner mockBuildRunner = MockBuildRunner();
     final MockFileSystem mockFileSystem = MockFileSystem();
     final MockFile packagesFile = MockFile();
@@ -26,11 +25,10 @@ void main() {
     when(packagesFile.exists()).thenAnswer((Invocation invocation) async => true);
     when(dillFile.exists()).thenAnswer((Invocation invocation) async => true);
     when(outputFile.exists()).thenAnswer((Invocation invocation) async => true);
-    when(mockBuildRunnerFactory.create()).thenReturn(mockBuildRunner);
     when(dillFile.readAsBytes()).thenAnswer((Invocation invocation) async => <int>[0, 1, 2, 3]);
 
     testUsingContext('delegates to build_runner', () async {
-      const BuildKernelCompiler kernelCompiler = BuildKernelCompiler();
+      const CodeGeneratingKernelCompiler kernelCompiler = CodeGeneratingKernelCompiler();
       when(mockBuildRunner.build(
         aot: anyNamed('aot'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
@@ -39,7 +37,7 @@ void main() {
         targetProductVm: anyNamed('targetProductVm'),
         trackWidgetCreation: anyNamed('trackWidgetCreation')
       )).thenAnswer((Invocation invocation) async {
-        return BuildResult(fs.file('.packages'), fs.file('main.app.dill'));
+        return CodeGenerationResult(fs.file('.packages'), fs.file('main.app.dill'));
       });
       final CompilerOutput buildResult = await kernelCompiler.compile(
         outputFilePath: 'output.app.dill',
@@ -48,13 +46,12 @@ void main() {
       expect(buildResult.errorCount, 0);
       verify(outputFile.writeAsBytes(<int>[0, 1, 2, 3])).called(1);
     }, overrides: <Type, Generator>{
-      BuildRunnerFactory: () => mockBuildRunnerFactory,
+      CodeGenerator: () => mockBuildRunner,
       FileSystem: () => mockFileSystem,
     });
   });
 }
 
-class MockBuildRunnerFactory extends Mock implements BuildRunnerFactory {}
 class MockBuildRunner extends Mock implements BuildRunner {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}

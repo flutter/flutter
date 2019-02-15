@@ -73,10 +73,174 @@ void main() {
     );
 
     await tester.tap(find.byKey(switchKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    final Key switchKey2 = UniqueKey();
+    bool value = false;
+    bool value2 = false;
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey2,
+                    value: value2,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value2 = newValue;
+                      });
+                    },
+                  ),
+                ]
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
+
+    expect(log, hasLength(1));
+    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
+
+    expect(log, hasLength(2));
+    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
+
+    expect(log, hasLength(3));
+    expect(log[2], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
+
+    expect(log, hasLength(4));
+    expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    bool value = false;
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    expect(value, isTrue);
+    await tester.pump();
+
+    expect(log, hasLength(1));
+    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('No haptic vibration triggers from a programmatic value change', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    bool value = false;
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoButton(
+                    child: const Text('Button'),
+                    onPressed: (){
+                      setState(() {
+                        value = !value;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ]
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(CupertinoButton));
+    expect(value, isTrue);
+    await tester.pump();
+
+    expect(log, hasLength(0));
     debugDefaultTargetPlatformOverride = null;
   });
 

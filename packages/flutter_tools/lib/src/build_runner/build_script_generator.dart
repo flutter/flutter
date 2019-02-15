@@ -12,11 +12,8 @@ import 'package:dart_style/dart_style.dart';
 import 'package:graphs/graphs.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../project.dart';
-
-BuildScriptGeneratorFactory get buildScriptGeneratorFactory => context[BuildScriptGeneratorFactory];
 
 class BuildScriptGeneratorFactory {
   const BuildScriptGeneratorFactory();
@@ -227,14 +224,16 @@ class BuildScriptGenerator {
         return refer('toNoneByDefault',
                 'package:build_runner_core/build_runner_core.dart')
             .call(<Expression>[]);
-      case AutoApply.dependents:
-        return refer('toDependentsOf',
-                'package:build_runner_core/build_runner_core.dart')
-            .call(<Expression>[literalString(definition.package)]);
+      // TODO(jonahwilliams): re-enabled when we have the builders strategy fleshed out.
+      // case AutoApply.dependents:
+      //   return refer('toDependentsOf',
+      //           'package:build_runner_core/build_runner_core.dart')
+      //       .call(<Expression>[literalString(definition.package)]);
       case AutoApply.allPackages:
         return refer('toAllPackages',
                 'package:build_runner_core/build_runner_core.dart')
             .call(<Expression>[]);
+      case AutoApply.dependents:
       case AutoApply.rootPackage:
         return refer('toRoot', 'package:build_runner_core/build_runner_core.dart')
             .call(<Expression>[]);
