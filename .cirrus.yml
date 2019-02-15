@@ -39,6 +39,7 @@ task:
     #     - tests-linux
     #     - tool_tests-linux
     #     - build_tests-linux
+    #     - integration_tests-linux
     #   env:
     #     SHARD: deploy_gallery
     #     GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
@@ -109,46 +110,70 @@ task:
         memory: 12G
 
 
-# task:
-#   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
-#   windows_container:
-#     image: cirrusci/windowsservercore:2016
-#     os_version: 2016
-#     cpu: 4
-#   env:
-#     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
-#   git_fetch_script:
-#     - git fetch origin
-#     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-#   pub_cache:
-#     folder: $APPDATA\Pub\Cache
-#     fingerprint_script:
-#       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-#   flutter_pkg_cache:
-#     folder: bin\cache\pkg
-#     fingerprint_script: echo %OS% & type bin\internal\engine.version
-#   artifacts_cache:
-#     folder: bin\cache\artifacts
-#     fingerprint_script: echo %OS% & type bin\internal\engine.version
-#   setup_script:
-#     - bin\flutter.bat config --no-analytics
-#     - bin\flutter.bat update-packages
-#     - git fetch origin master
-#   test_all_script:
-#     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
-#   matrix:
-#     - name: tests-windows
-#       env:
-#         SHARD: tests
-#     - name: tool_tests-windows
-#       env:
-#         SHARD: tool_tests
-#     - name: build_tests-windows
-#       env:
-#         SHARD: build_tests
-#       container:
-#         cpu: 4
-#         memory: 12G
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  windows_container:
+    image: gcr.io/flutter-cirrus/win-android-image:latest
+    os_version: 2016
+    cpu: 4
+  env:
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+  git_fetch_script:
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $APPDATA\Pub\Cache
+    fingerprint_script:
+      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+  flutter_pkg_cache:
+    folder: bin\cache\pkg
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  artifacts_cache:
+    folder: bin\cache\artifacts
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  setup_script:
+    - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat update-packages
+    - git fetch origin master
+  matrix:
+    # - name: tests-windows
+    #   env:
+    #     SHARD: tests
+    #   test_all_script:
+    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    # - name: tool_tests-windows
+    #   env:
+    #     SHARD: tool_tests
+    #   test_all_script:
+    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    # - name: build_tests-windows
+    #   env:
+    #     SHARD: build_tests
+    #   test_all_script:
+    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    #   container:
+    #     cpu: 4
+    #     memory: 12G
+    - name: integration_tests-windows
+      env:
+        SHARD: integration_tests
+      test_script:
+        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
+        # might include non-ASCII characters which makes Gradle crash.
+        # See: https://github.com/flutter/flutter/issues/24935
+        # This is a temporary workaround until we figure how to properly configure
+        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
+        # TODO(amirh): Set the locale to UTF8.
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - dart --enable-asserts ./dev/bots/test.dart
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+      container:
+        cpu: 4
+        memory: 12G
 
 # task:
 #   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
@@ -241,6 +266,7 @@ task:
 #     - tests-linux
 #     - tool_tests-linux
 #     - build_tests-linux
+#     - integration_tests-linux
 #   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
 #   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
 #   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
