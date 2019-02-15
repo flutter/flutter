@@ -311,15 +311,15 @@ class SystemChrome {
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// ## Sample Code
-  ///
+  /// {@tool sample}
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
   ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return /* ... */;
+  ///   return Placeholder();
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
   /// an [AnnotatedRegion] widget instead of calling [setSystemUiOverlayStyle]
@@ -329,47 +329,46 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool snippet --template=stateful_widget}
+  /// {@tool snippet --template=stateful_widget_material}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
   /// ```dart imports
-  ///    import 'package:flutter/services.dart';
-  ///    import 'dart:math' as math;
+  /// import 'package:flutter/services.dart';
+  /// import 'dart:math' as math;
   /// ```
   ///
   /// ```dart
-  ///    final _random = math.Random();
-  ///    SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
+  /// final _random = math.Random();
+  /// SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
   ///
-  ///    void _changeColor() {
-  ///      final color = Color.fromRGBO(
-  ///        _random.nextInt(255),
-  ///        _random.nextInt(255),
-  ///        _random.nextInt(255),
-  ///        1.0,
-  ///      );
-  ///      setState(() {
-  ///        _currentStyle = SystemUiOverlayStyle.dark.copyWith(
-  ///          statusBarColor: color,
-  ///        );
-  ///      });
-  ///    }
+  /// void _changeColor() {
+  ///   final color = Color.fromRGBO(
+  ///     _random.nextInt(255),
+  ///     _random.nextInt(255),
+  ///     _random.nextInt(255),
+  ///     1.0,
+  ///   );
+  ///   setState(() {
+  ///     _currentStyle = SystemUiOverlayStyle.dark.copyWith(
+  ///       statusBarColor: color,
+  ///     );
+  ///   });
+  /// }
   ///
-  ///    @override
-  ///    Widget build(BuildContext context) {
-  ///      return Scaffold(
-  ///        body: AnnotatedRegion(
-  ///          value: _currentStyle,
-  ///           child: Center(
-  ///             child: RaisedButton(
-  ///               child: const Text('Change Color'),
-  ///               onPressed: _changeColor,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       );
-  ///     }
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return AnnotatedRegion(
+  ///     value: _currentStyle,
+  ///     child: Center(
+  ///       child: RaisedButton(
+  ///         child: const Text('Change Color'),
+  ///         onPressed: _changeColor,
+  ///        ),
+  ///      ),
+  ///    );
+  ///  }
+  /// ```
   /// {@end-tool}
   ///
   /// See also:

@@ -486,4 +486,19 @@ void main() {
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
   });
+
+  testWidgets('Cannot set both a long press and a long press drag callback', (WidgetTester tester) async {
+    try {
+      GestureDetector(
+        onLongPress: () {},
+        onLongPressDragUpdate: (GestureLongPressDragUpdateDetails details) {},
+        child: Container(
+          color: const Color(0xFF00FF00),
+        ),
+      );
+      throw 'setting long press and long press drag should throw';
+    } on FlutterError catch (_) {
+      // Should throw.
+    }
+  });
 }
