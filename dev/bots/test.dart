@@ -408,6 +408,7 @@ Future<void> _integrationTestsAndroidSdk() async {
       ? Platform.environment['ANDROID_SDK_ROOT']
       : Platform.environment['ANDROID_HOME'];
   if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
+    print('No Android SDK detected, skipping Android Integration Tests');
     return;
   }
 
