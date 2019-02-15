@@ -978,6 +978,63 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Tick marks are skipped when they aro too dense', (WidgetTester tester) async {
+    double value = 25.0;
+
+    Widget buildSlider({
+      int divisions,
+      TextDirection textDirection,
+    }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: Slider(
+                    min: 0.0,
+                    max: 100.0,
+                    divisions: divisions,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildSlider(
+        textDirection: TextDirection.ltr,
+        divisions: 4,
+      ),
+    );
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // 5 tick marks and a thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+
+    await tester.pumpWidget(
+      buildSlider(
+        textDirection: TextDirection.ltr,
+        divisions: 500,
+      ),
+    );
+
+    // No tick marks because they are too dense, just a thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+  });
+
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
