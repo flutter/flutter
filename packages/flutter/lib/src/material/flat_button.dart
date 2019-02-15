@@ -42,8 +42,7 @@ import 'theme_data.dart';
 ///
 /// {@tool sample}
 ///
-/// This example shows how to use [FlatButton] to create a simple button
-/// in your flutter code.
+/// This example shows a simple [FlatButton].
 ///
 /// ```dart
 /// FlatButton(
@@ -52,12 +51,17 @@ import 'theme_data.dart';
 ///   },
 ///   child: Text(
 ///     "Flat Button",
-///     style: TextStyle(fontSize: 20.0),
 ///   ),
 /// )
 /// ```
-/// This example shows how to use [FlatButton] to create a styled
-/// button in your flutter code.
+/// {@end-tool}
+///
+/// {@tool sample}
+///
+/// This example shows a [FlatButton] that is normally white-on-blue,
+/// with splashes rendered in a different shade of blue.
+/// It turns black-on-grey when disabled.
+/// The button has 8px of padding on each side, and the text is 20px high.
 ///
 /// ```dart
 /// FlatButton(
