@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -108,6 +107,13 @@ class FlutterProject {
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
+  /// The directory containing the generated code for this project.
+  Directory get generated => directory
+    .childDirectory('.dart_tool')
+    .childDirectory('build')
+    .childDirectory('generated')
+    .childDirectory(manifest.appName);
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
@@ -147,21 +153,10 @@ class FlutterProject {
     await injectPlugins(this);
   }
 
-  /// Return the build_runner [PackageGraph] for this package.
-  Future<PackageGraph> get packageGraph async {
-    return PackageGraph.forPath(directory.path);
-  }
-
   /// Return the set of builders used by this package.
-  Future<List<String>> get builders async {
+  Future<YamlMap> get builders async {
     final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
-    final YamlList builders = pubspec['builders'];
-    if (builders == null) {
-      return <String>[];
-    }
-    return builders.map<String>((Object node) {
-      return node.toString();
-    }).toList();
+    return pubspec['builders'];
   }
 }
 

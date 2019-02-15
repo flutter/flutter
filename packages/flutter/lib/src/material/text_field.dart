@@ -37,14 +37,6 @@ typedef InputCounterWidgetBuilder = Widget Function(
   }
 );
 
-// An eyeballed value that moves the cursor slightly left of where it is
-// rendered for text on Android so it's positioning more accurately matches the
-// native iOS text cursor positioning.
-//
-// This value is in device pixels, not logical pixels as is typically used
-// throughout the codebase.
-const int _iOSHorizontalCursorOffsetPixels = 2;
-
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -478,14 +470,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  Radius get _cursorRadius {
-    if (widget.cursorRadius != null)
-      return widget.cursorRadius;
-    if (Theme.of(context).platform == TargetPlatform.iOS)
-      return const Radius.circular(2.0);
-    return null;
-  }
-
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -582,6 +566,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableTextKey.currentState?.requestKeyboard();
   }
 
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
+    // iOS cursor doesn't move via a selection handle. The scroll happens
+    // directly from new text selection changes.
+    if (Theme.of(context).platform == TargetPlatform.iOS
+        && cause == SelectionChangedCause.longPress) {
+      _editableTextKey.currentState?.bringIntoView(selection.base);
+    }
+  }
+
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -655,11 +648,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
-  void _handleSingleLongTapDown() {
+  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
-          _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
+          _renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -667,9 +663,33 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           Feedback.forLongPress(context);
           break;
       }
-      _editableTextKey.currentState.showToolbar();
     }
     _confirmCurrentSplash();
+  }
+
+  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
+    if (widget.selectionEnabled) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+          _renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          _renderEditable.selectWordsInRange(
+            from: details.globalPosition - details.offsetFromOrigin,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+      }
+    }
+  }
+
+  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
+    _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
@@ -700,22 +720,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   @override
   bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
-
-  bool get _cursorOpacityAnimates => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
-
-  Offset get _getCursorOffset => Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
-
-  bool get _paintCursorAboveText => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
-
-  Color get _cursorColor {
-    if (widget.cursorColor == null) {
-      if (Theme.of(context).platform == TargetPlatform.iOS)
-        return CupertinoTheme.of(context).primaryColor;
-      else
-        return Theme.of(context).cursorColor;
-    }
-    return widget.cursorColor;
-  }
 
   @override
   void deactivate() {
@@ -754,15 +758,37 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     bool forcePressEnabled;
     TextSelectionControls textSelectionControls;
+    bool paintCursorAboveText;
+    bool cursorOpacityAnimates;
+    Offset cursorOffset;
+    Color cursorColor = widget.cursorColor;
+    Radius cursorRadius = widget.cursorRadius;
+
     switch (themeData.platform) {
       case TargetPlatform.iOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
+        paintCursorAboveText = true;
+        cursorOpacityAnimates = true;
+        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        cursorRadius ??= const Radius.circular(2.0);
+        // An eyeballed value that moves the cursor slightly left of where it is
+        // rendered for text on Android so its positioning more accurately matches the
+        // native iOS text cursor positioning.
+        //
+        // This value is in device pixels, not logical pixels as is typically used
+        // throughout the codebase.
+        const int _iOSHorizontalOffset = -2;
+        cursorOffset = Offset(_iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
+
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates = false;
+        cursorColor ??= themeData.cursorColor;
         break;
     }
 
@@ -784,16 +810,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
+        onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
-        cursorRadius: _cursorRadius,
-        cursorColor: _cursorColor,
-        cursorOpacityAnimates: _cursorOpacityAnimates,
-        cursorOffset: _getCursorOffset,
-        paintCursorAboveText: _paintCursorAboveText,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorOffset: cursorOffset,
+        paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
@@ -832,7 +859,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
-          onSingleLongTapDown: _handleSingleLongTapDown,
+          onSingleLongTapStart: _handleSingleLongTapStart,
+          onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
+          onSingleLongTapUp: _handleSingleLongTapUp,
           onDoubleTapDown: _handleDoubleTapDown,
           behavior: HitTestBehavior.translucent,
           child: child,

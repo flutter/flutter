@@ -448,7 +448,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       date.year,
       date.month,
       date.day,
-      selectedHour + selectedAmPm * 12,
+      widget.use24hFormat ? selectedHour : selectedHour % 12 + selectedAmPm * 12,
       selectedMinute,
     );
   }
@@ -1150,7 +1150,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedMinute = index;
+          selectedMinute = index * widget.minuteInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,
@@ -1262,7 +1262,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedSecond = index;
+          selectedSecond = index * widget.secondInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,

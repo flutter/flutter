@@ -151,7 +151,8 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget}
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
   ///
@@ -206,7 +207,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return Center(child: CastList());
   /// }
   /// ```
   /// {@end-tool}

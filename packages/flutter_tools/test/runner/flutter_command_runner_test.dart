@@ -17,7 +17,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'flutter_command_test.dart';
+import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
 const String _kEngineRoot = '/flutter/engine';

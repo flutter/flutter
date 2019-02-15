@@ -505,6 +505,54 @@ void _tests() {
 
     semantics.dispose();
   });
+
+  testWidgets('builder parameter', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      builder: (BuildContext context, Widget child) {
+                        return Directionality(
+                          textDirection: textDirection,
+                          child: child,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    final double ltrOkRight = tester.getBottomRight(find.text('OK')).dx;
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the time picker is being laid out RTL.
+    // We expect the left edge of the 'OK' button in the RTL
+    // layout to match the gap between right edge of the 'OK'
+    // button and the right edge of the 800 wide window.
+    expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
