@@ -2,7 +2,7 @@
 
 {{description}}
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 {{code-imports}}
 
@@ -10,19 +10,22 @@ void main() => runApp(new MyApp());
 
 /// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
+  static const String _title = 'Flutter Code Sample';
+
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
-      title: 'Flutter Code Sample',
-      home: MyStatefulWidget(),
-      color: const Color(0xffffffff),
+    return MaterialApp(
+      title: _title,
+      home: Scaffold(
+        appBar: AppBar(title: Text(_title)),
+        body: MyStatefulWidget(),
+      ),
     );
   }
 }
 
 {{code-preamble}}
 
-/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   MyStatefulWidget({Key key}) : super(key: key);
 
@@ -30,7 +33,6 @@ class MyStatefulWidget extends StatefulWidget {
   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
 }
 
-// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   {{code}}
 }
