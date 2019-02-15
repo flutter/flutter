@@ -4620,4 +4620,93 @@ void main() {
       'selection disabled'
     ]);
   });
+
+  testWidgets('Caret center position', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(
+        child: Container(
+          width: 300.0,
+          child: const TextField(
+            textAlign: TextAlign.center,
+            decoration: null,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), 'abcd');
+    await tester.pump();
+
+
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
+    );
+    expect(topLeft.dx, equals(431));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
+    );
+    expect(topLeft.dx, equals(415));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
+    );
+    expect(topLeft.dx, equals(399));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
+    );
+    expect(topLeft.dx, equals(383));
+  });
+
+  testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(
+        child: Container(
+          width: 300.0,
+          child: const TextField(
+            textAlign: TextAlign.center,
+            decoration: null,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable editable = findRenderEditable(tester);
+
+    await tester.enterText(find.byType(TextField), 'abcd    ');
+    await tester.pump();
+
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 7)).topLeft,
+    );
+    expect(topLeft.dx, equals(479));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 8)).topLeft,
+    );
+    expect(topLeft.dx, equals(495));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
+    );
+    expect(topLeft.dx, equals(431));
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
+    );
+    expect(topLeft.dx, equals(415)); // Should be same as equivalent in 'Caret center position'
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
+    );
+    expect(topLeft.dx, equals(399)); // Should be same as equivalent in 'Caret center position'
+
+    topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
+    );
+    expect(topLeft.dx, equals(383)); // Should be same as equivalent in 'Caret center position'
+  });
 }
