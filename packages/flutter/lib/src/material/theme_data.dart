@@ -18,6 +18,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'focusable.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
@@ -163,6 +164,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
+    FocusableThemeData focusableTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -262,6 +264,8 @@ class ThemeData extends Diagnosticable {
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
+    focusableTheme ??= const FocusableThemeData();
+
     return ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -314,6 +318,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
+      focusableTheme: focusableTheme,
     );
   }
 
@@ -379,6 +384,7 @@ class ThemeData extends Diagnosticable {
     @required this.floatingActionButtonTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
+    @required this.focusableTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -427,7 +433,8 @@ class ThemeData extends Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
-       assert(typography != null);
+       assert(typography != null),
+       assert(focusableTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -688,6 +695,14 @@ class ThemeData extends Diagnosticable {
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final CupertinoThemeData cupertinoOverrideTheme;
 
+  /// Defines the appearance of [Focusable]s.
+  ///
+  /// This property is used to define the value of [ThemeData.focusableTheme].
+  ///
+  /// The [Focusable] widget uses the current focusable theme to initialize some
+  /// [Focusable] properties (like [Focusable.focusedDecoration]).
+  final FocusableThemeData focusableTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -741,6 +756,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
+    FocusableThemeData focusableTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -795,6 +811,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      focusableTheme: focusableTheme ?? this.focusableTheme,
     );
   }
 
@@ -927,6 +944,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
+      focusableTheme: FocusableThemeData.lerp(a.focusableTheme, b.focusableTheme, t),
     );
   }
 

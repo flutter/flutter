@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -1195,7 +1196,10 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: Localizations(
         locale: appLocale,
         delegates: _localizationsDelegates.toList(),
-        child: title,
+        child: DefaultFocusTraversal(
+          policy: const WidgetOrderFocusTraversalPolicy(),
+          child: title,
+        ),
       ),
     );
   }
