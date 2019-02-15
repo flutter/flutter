@@ -1,13 +1,16 @@
 #!/bin/bash
 
+set -e
+
 if [[ -z $ANDROID_SDK_TOOLS_URL || -z $ANDROID_HOME || -z $ANDROID_SDK_ROOT ]]; then
   exit 0
 fi
 
-curl $ANDROID_SDK_TOOLS_URL --output android_sdk_tools.zip
+curl -L $ANDROID_SDK_TOOLS_URL --output android_sdk_tools.zip
 
-mkdir
+mkdir -p $ANDROID_SDK_ROOT
 unzip android_sdk_tools.zip -d $ANDROID_SDK_ROOT
+rm android_sdk_tools.zip
 
 yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses
 $ANDROID_SDK_ROOT/tools/bin/sdkmanager tools

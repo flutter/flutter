@@ -205,35 +205,38 @@ task:
     ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
     ANDROID_SDK_ROOT: $HOME/Android
     ANDROID_HOME: $HOME/Android
-    JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-8-latest/Contents/Home
+    OPEN_JDK_URL: https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jdk_x64_mac_hotspot_8u202b08.tar.gz
+    OPEN_JDK_REVISION: jdk8u202-b08
+    JAVA_HOME: $HOME/Java/$OPEN_JDK_REVISION/Contents/Home
     PATH: "$PATH:$JAVA_HOME/bin:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
-  temp_script:
-    - ls /Library/Java/JavaVirtualMachines
-    - java -version
-  # install_cocoapods_script:
-  #   - sudo gem install cocoapods
-  # git_fetch_script:
-  #   - git fetch origin
-  #   - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  # pub_cache:
-  #   folder: $HOME/.pub-cache
-  #   fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  # flutter_pkg_cache:
-  #   folder: bin/cache/pkg
-  #   fingerprint_script: echo $OS; cat bin/internal/engine.version
-  # artifacts_cache:
-  #   folder: bin/cache/artifacts
-  #   fingerprint_script: echo $OS; cat bin/internal/engine.version
-  # android_sdk_cache:
-  #   folder: $ANDROID_SDK_ROOT
-  #   fingerprint_script: echo $ANDROID_SDK_TOOLS_URL; cat dev/bots/download_android_sdk.sh
-  #   populate_script: dev/bots/download_android_sdk.sh
-  # setup_script:
-  #   - bin/flutter config --no-analytics
-  #   - bin/flutter update-packages
-  # test_all_script: |
-  #   ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-  #   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+  install_cocoapods_script:
+    - sudo gem install cocoapods
+  git_fetch_script:
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  open_jdk_cache:
+    folder: $HOME/Java
+    fingerprint_script: echo $OPEN_JDK_URL; cat dev/bots/download_open_jdk.sh
+    populate_script: dev/bots/download_open_jdk.sh
+  android_sdk_cache:
+    folder: $ANDROID_SDK_ROOT
+    fingerprint_script: echo $ANDROID_SDK_TOOLS_URL; cat dev/bots/download_android_sdk.sh
+    populate_script: dev/bots/download_android_sdk.sh
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter update-packages
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
 #    - name: tests-macos
 #       env:
