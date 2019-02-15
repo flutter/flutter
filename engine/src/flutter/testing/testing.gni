@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/common/config.gni")
+import("//build/compiled_action.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
 # Builds test fixtures for a unit test.
@@ -21,7 +23,11 @@ template("test_fixtures") {
   testonly = true
 
   assert(defined(invoker.fixtures), "Test fixtures must be specified.")
-  kernel_out = "kernel_blob.bin"
+  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+    kernel_out = "kernel_snapshot.dill"
+  } else {
+    kernel_out = "kernel_blob.bin"
+  }
   if (defined(invoker.kernel_out)) {
     kernel_out = invoker.kernel_out
   }
@@ -69,21 +75,72 @@ template("test_fixtures") {
     inputs = fixture_paths
     outputs = ["$fixtures_location/$kernel_out"]
 
-    args = [
-      "--sdk-root", rebase_path("$root_out_dir/flutter_patched_sdk"),
-      "--target", "flutter",
-      "--output-dill", rebase_path("$fixtures_location/$kernel_out"),
-    ] + fixture_paths
     deps = [
       "//third_party/dart/utils/kernel-service:frontend_server"
+    ]
+
+    if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+      args = [
+        "--sdk-root", rebase_path("$root_out_dir/flutter_patched_sdk"),
+        "--strong",
+        "--target=flutter",
+        "--aot",
+        "--tfa",
+        "-Ddart.vm.product=true",
+        "--output-dill", rebase_path("$fixtures_location/$kernel_out"),
+      ] + fixture_paths
+
+      deps += [ "//flutter/lib/snapshot:strong_platform" ]
+    } else {
+      args = [
+        "--sdk-root", rebase_path("$root_out_dir/flutter_patched_sdk"),
+        "--target", "flutter",
+        "--output-dill", rebase_path("$fixtures_location/$kernel_out"),
+      ] + fixture_paths
+    }
+  }
+
+  fixtures_aot_target_name = target_name + "_aot"
+  compiled_action(fixtures_aot_target_name) {
+    testonly = true
+    tool = "//third_party/dart/runtime/bin:gen_snapshot"
+
+    inputs = [
+      "$fixtures_location/$kernel_out"
+    ]
+
+    outputs = [
+      "$fixtures_location/vm_snapshot_data",
+      "$fixtures_location/vm_snapshot_instr",
+      "$fixtures_location/isolate_snapshot_data",
+      "$fixtures_location/isolate_snapshot_instr",
+    ]
+
+    args = [
+      "--causal_async_stacks",
+      "--deterministic",
+      "--snapshot_kind=app-aot-blobs",
+      "--vm_snapshot_data=" + rebase_path("$fixtures_location/vm_snapshot_data"),
+      "--vm_snapshot_instructions=" + rebase_path("$fixtures_location/vm_snapshot_instr"),
+      "--isolate_snapshot_data=" + rebase_path("$fixtures_location/isolate_snapshot_data"),
+      "--isolate_snapshot_instructions=" + rebase_path("$fixtures_location/isolate_snapshot_instr"),
+      rebase_path("$fixtures_location/$kernel_out")
+    ]
+
+    deps = [
+      ":$fixtures_kernel_target_name",
     ]
   }
 
   group(target_name) {
     testonly = true
     deps = [
-      ":$fixtures_kernel_target_name",
       ":$fixtures_source_set_target_name",
     ]
+    if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+      deps += [ ":$fixtures_aot_target_name" ]
+    } else {
+      deps += [ ":$fixtures_kernel_target_name" ]
+    }
   }
 }
