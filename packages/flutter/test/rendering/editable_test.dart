@@ -168,4 +168,89 @@ void main() {
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
+
+  test('text is painted above selection', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection(
+        baseOffset: 0,
+        extentOffset: 3,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        // This is a big selection rectangle, not the cursor.
+        ..rect(color: Colors.black, rect: Rect.fromLTWH(0, 0, 30, 10))
+        ..paragraph(),
+    );
+
+    // There is exactly one rect paint (1 selection, 0 cursor).
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+  });
+
+  test('cursor can paint above or below the text', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      paintCursorAboveText: true,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      showCursor: showCursor,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 2,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        ..paragraph()
+        ..rect(color: Colors.red[500], rect: Rect.fromLTWH(20, 2, 1, 6)),
+    );
+
+    // There is exactly one rect paint (0 selection, 1 cursor).
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+
+    editable.paintCursorAboveText = false;
+    pumpFrame();
+
+    expect(
+      editable,
+      // The paint order is now flipped.
+      paints
+        ..rect(color: Colors.red[500], rect: Rect.fromLTWH(20, 2, 1, 6))
+        ..paragraph(),
+    );
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+  });
 }
