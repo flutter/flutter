@@ -26,11 +26,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import io.flutter.app.FlutterPluginRegistry;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
-import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
@@ -125,7 +125,7 @@ public class FlutterView extends SurfaceView
             mNativeView = nativeView;
         }
         dartExecutor = new DartExecutor(mNativeView.getFlutterJNI());
-        mIsSoftwareRenderingEnabled = mNativeView.getFlutterJNI().nativeGetIsSoftwareRenderingEnabled();
+        mIsSoftwareRenderingEnabled = FlutterJNI.nativeGetIsSoftwareRenderingEnabled();
         mAnimationScaleObserver = new AnimationScaleObserver(new Handler());
         mMetrics = new ViewportMetrics();
         mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
