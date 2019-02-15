@@ -432,7 +432,7 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
-    assert(touchSlopX > 0 && touchSlopY > 0);
+    assert(touchSlopX >= 0 && touchSlopY >= 0);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
