@@ -39,6 +39,7 @@ import 'macos/macos_workflow.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
+import 'web/compile.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
@@ -91,6 +92,7 @@ Future<T> runInContext<T>(
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
       WindowsWorkflow: () => const WindowsWorkflow(),
+      WebCompiler: () => const WebCompiler(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

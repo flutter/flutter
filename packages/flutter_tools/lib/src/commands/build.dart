@@ -11,6 +11,7 @@ import 'build_appbundle.dart';
 import 'build_bundle.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
+import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
@@ -20,6 +21,7 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildIOSCommand());
     addSubcommand(BuildFlxCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildWebCommand());
   }
 
   @override
