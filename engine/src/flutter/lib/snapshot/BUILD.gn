@@ -60,17 +60,15 @@ compiled_action("generate_snapshot_bin") {
     "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
     "--isolate_snapshot_instructions=" +
         rebase_path(isolate_snapshot_instructions),
-    rebase_path(platform_kernel),
   ]
 
   if (is_debug) {
     args += [
       "--enable_asserts",
-      "--enable_type_checks",
-      "--error_on_bad_type",
-      "--error_on_bad_override",
     ]
   }
+
+  args += [rebase_path(platform_kernel)]
 }
 
 # Generates an assembly file defining a given symbol with the bytes from a
