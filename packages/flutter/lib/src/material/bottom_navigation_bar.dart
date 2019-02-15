@@ -334,6 +334,9 @@ class _BottomNavigationTile extends StatelessWidget {
     // (which is an integer) by a large number.
     int size;
 
+    double bottomPadding = selectedFontSize / 2.0;
+    double topPadding = selectedFontSize / 2.0;
+
     // Defines the padding for the animating icons + labels.
     //
     // The animations go from "Unselected":
@@ -351,19 +354,15 @@ class _BottomNavigationTile extends StatelessWidget {
     // | text
     // |      <-- Padding equal to 1/2 text height.
     // =======
-    double bottomPadding = Tween<double>(
-      begin: 0.0,
-      end: selectedFontSize / 2.0,
-    ).evaluate(animation);
-    double topPadding = Tween<double>(
-      begin: selectedFontSize,
-      end: selectedFontSize / 2.0,
-    ).evaluate(animation);
-
-    // Center all items + labels if unselected labels are shown.
-    if (showUnselectedLabels) {
-      bottomPadding = selectedFontSize / 2.0;
-      topPadding = selectedFontSize / 2.0;
+    if (showSelectedLabels && !showUnselectedLabels) {
+      bottomPadding = Tween<double>(
+        begin: 0.0,
+        end: selectedFontSize / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize,
+        end: selectedFontSize / 2.0,
+      ).evaluate(animation);
     }
 
     // Center all icons if no labels are shown.
