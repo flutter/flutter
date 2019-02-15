@@ -90,6 +90,7 @@ Future<void> pubGet({
   }
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
+    await codeGenerator.invalidateBuildScript();
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
@@ -111,7 +112,6 @@ Future<void> pubGet({
         retry: true,
       );
       status.stop();
-      await codeGenerator.invalidateBuildScript();
     } catch (exception) {
       status.cancel();
       rethrow;
