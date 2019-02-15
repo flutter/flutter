@@ -122,7 +122,7 @@ class FlutterKernelBuilder implements Builder {
     // Note: currently we only replace the root package with a multiroot
     // scheme. To support codegen on arbitrary packages we will need to do
     // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:');
     await packagesFile.writeAsString(newPackagesContents);
     String absoluteMainPath;
     if (path.isAbsolute(mainPath)) {
