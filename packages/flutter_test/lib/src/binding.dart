@@ -1320,7 +1320,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   ///
-  /// If a [window] instance is not provide it defaults to [ui.window].
+  /// If a [window] instance is not provided it defaults to [ui.window].
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.Window window,
