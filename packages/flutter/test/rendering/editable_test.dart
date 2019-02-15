@@ -175,7 +175,7 @@ void main() {
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
       textDirection: TextDirection.ltr,
-      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      cursorColor: Colors.red,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       text: const TextSpan(
@@ -196,8 +196,8 @@ void main() {
     expect(
       editable,
       paints
-        // This is a big selection rectangle, not the cursor.
-        ..rect(color: Colors.black, rect: Rect.fromLTWH(0, 0, 30, 10))
+        // Check that it's the black selection box, not the red cursor.
+        ..rect(color: Colors.black)
         ..paragraph(),
     );
 
@@ -235,7 +235,8 @@ void main() {
       editable,
       paints
         ..paragraph()
-        ..rect(color: Colors.red[500], rect: Rect.fromLTWH(20, 2, 1, 6)),
+        // Red collapsed cursor is painted, not a selection box.
+        ..rect(color: Colors.red[500]),
     );
 
     // There is exactly one rect paint (0 selection, 1 cursor).
@@ -248,7 +249,7 @@ void main() {
       editable,
       // The paint order is now flipped.
       paints
-        ..rect(color: Colors.red[500], rect: Rect.fromLTWH(20, 2, 1, 6))
+        ..rect(color: Colors.red[500])
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
