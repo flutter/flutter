@@ -342,7 +342,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// In more technical terms, [BackdropFilter] will only apply the filter to the
 /// area of the background that is covered by the [Scene] defined by [child]
-/// and its decedents.
+/// and its descendants.
 ///
 /// {@tool sample}
 /// Even though the [BackdropFilter] is wrapping the [Container] below, the
@@ -402,7 +402,6 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
-///
 ///
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
