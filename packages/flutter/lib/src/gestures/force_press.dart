@@ -232,6 +232,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         pressure.isNaN || // and interpolation may return NaN for values it doesn't want to support...
         (pressure <= 1.0 && pressure >= 0.0) // but if everything is going well, it must be in the range 1.0..0.0.
       );
+
+      if (event.pressure > event.pressureMax || event.pressure < event.pressureMin)
+        debugPrint('The reported device pressure is outside of the ')
+
       _lastPosition = event.position;
       _lastPressure = pressure;
 
