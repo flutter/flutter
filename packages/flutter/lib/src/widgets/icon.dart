@@ -23,7 +23,7 @@ import 'icon_theme_data.dart';
 ///
 /// {@tool sample}
 ///
-/// This example shows how to use [Icon] to create an addition icon, in the 
+/// This example shows how to use [Icon] to create an addition icon, in the
 /// color pink, and 30 pixels in size.
 ///
 /// ```dart
