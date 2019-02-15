@@ -76,7 +76,7 @@ template("mac_toolchain") {
 
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
@@ -86,7 +86,7 @@ template("mac_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
@@ -97,7 +97,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -107,7 +107,7 @@ template("mac_toolchain") {
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} {{cflags_objc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} {{cflags_objc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
@@ -117,7 +117,7 @@ template("mac_toolchain") {
 
     tool("objcxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
@@ -229,9 +229,9 @@ mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
-  ar = "${goma_prefix}$prefix/llvm-ar"
-  cc = "${goma_prefix}$prefix/clang"
-  cxx = "${goma_prefix}$prefix/clang++"
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $ios_device_sdk_path -miphoneos-version-min=$ios_deployment_target"
@@ -242,9 +242,9 @@ mac_toolchain("ios_clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
-  ar = "${goma_prefix}$prefix/llvm-ar"
-  cc = "${goma_prefix}$prefix/clang"
-  cxx = "${goma_prefix}$prefix/clang++"
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $ios_simulator_sdk_path -mios-simulator-version-min=$ios_deployment_target"
@@ -255,9 +255,9 @@ mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
-  ar = "${goma_prefix}$prefix/llvm-ar"
-  cc = "${goma_prefix}$prefix/clang"
-  cxx = "${goma_prefix}$prefix/clang++"
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
@@ -268,9 +268,9 @@ mac_toolchain("clang_x86") {
   toolchain_cpu = "i386"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
-  ar = "${goma_prefix}$prefix/llvm-ar"
-  cc = "${goma_prefix}$prefix/clang"
-  cxx = "${goma_prefix}$prefix/clang++"
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
