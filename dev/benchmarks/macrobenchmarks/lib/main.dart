@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart' show defaultShaderWarmUp;
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart' show DefaultShaderWarmUp;
 
 import 'common.dart';
 import 'src/cubic_bezier.dart';
@@ -7,10 +7,10 @@ import 'src/cull_opacity.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
 
-void main() => runApp(
-  MacrobenchmarksApp(),
-  shaderWarmUp: (Canvas canvas) {
-    defaultShaderWarmUp(canvas);
+class CubicBezierShaderWarmUp extends DefaultShaderWarmUp {
+  @override
+  void warmUpOnCanvas(Canvas canvas) {
+    super.warmUpOnCanvas(canvas);
 
     // Warm up the cubic shaders used by CubicBezierPage.
     //
@@ -30,6 +30,11 @@ void main() => runApp(
     paint.strokeCap = StrokeCap.round;
     canvas.drawPath(path, paint);
   }
+}
+
+void main() => runApp(
+  MacrobenchmarksApp(),
+  shaderWarmUp: CubicBezierShaderWarmUp(),
 );
 
 class MacrobenchmarksApp extends StatelessWidget {

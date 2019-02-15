@@ -4,7 +4,7 @@
 
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
-import '../../../raw/spinning_square.dart' as demo;
+import '../../../raw/shader_warm_up.dart' as demo;
 
 void main() {
   test('layers smoketest for raw/shader_warm_up.dart', () {

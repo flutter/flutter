@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState, Canvas, Image, Picture, PictureRecorder;
+import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart' show ShaderWarmUp, defaultShaderWarmUp;
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -719,31 +718,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
-  void _warmUpSkiaShaderCompilations(ShaderWarmUp shaderWarmUp) {
-    if (shaderWarmUp == null) {
-      return;
-    }
-
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    shaderWarmUp(canvas);
-
-    final Picture picture = recorder.endRecording();
-    final TimelineTask shaderWarmUpTask = TimelineTask();
-    shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(1000, 1000).then((Image image) {
-      shaderWarmUpTask.finish();
-    });
-  }
-
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
   /// This is used during application startup so that the first frame (which is
   /// likely to be quite expensive) gets a few extra milliseconds to run.
-  ///
-  /// This also warms up the Skia shader compilation cache using [shaderWarmUp].
   ///
   /// Locks events dispatching until the scheduled frame has completed.
   ///
@@ -754,11 +733,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [scheduleWarmUpFrame] was already called, this call will be ignored.
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
-  void scheduleWarmUpFrame({ShaderWarmUp shaderWarmUp = defaultShaderWarmUp}) {
+  void scheduleWarmUpFrame() {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
-
-    _warmUpSkiaShaderCompilations(shaderWarmUp);
 
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');

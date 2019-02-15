@@ -85,7 +85,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   @override
-  void scheduleWarmUpFrame({ShaderWarmUp shaderWarmUp = defaultShaderWarmUp}) {
+  void scheduleWarmUpFrame() {
     expect(pendingReassemble, isTrue);
     pendingReassemble = false;
   }

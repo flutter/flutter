@@ -778,7 +778,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  void scheduleWarmUpFrame({ShaderWarmUp shaderWarmUp = defaultShaderWarmUp}) {
+  void scheduleWarmUpFrame() {
     // We override the default version of this so that the application-startup warm-up frame
     // does not schedule timers which we might never get around to running.
     handleBeginFrame(null);

@@ -7,7 +7,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show defaultShaderWarmUp;
+import 'package:flutter/painting.dart' show DefaultShaderWarmUp;
 
 void beginFrame(Duration timeStamp) {
   // PAINT
@@ -16,7 +16,7 @@ void beginFrame(Duration timeStamp) {
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
   final ui.Paint backgroundPaint = ui.Paint()..color = Colors.white;
   canvas.drawRect(paintBounds, backgroundPaint);
-  defaultShaderWarmUp(canvas);
+  const DefaultShaderWarmUp().warmUpOnCanvas(canvas);
   final ui.Picture picture = recorder.endRecording();
 
   // COMPOSITE
