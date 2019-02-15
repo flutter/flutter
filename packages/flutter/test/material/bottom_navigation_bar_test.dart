@@ -370,32 +370,6 @@ void main() {
   });
 
   testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            selectedFontSize: 0.0,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
-              ),
-            ]
-          )
-        )
-      )
-    );
-
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, 0.0);
-    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, 0.0);
-  });
-
-  testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
     const double customElevation = 3.0;
 
     await tester.pumpWidget(

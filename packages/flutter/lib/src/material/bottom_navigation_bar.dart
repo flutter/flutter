@@ -518,18 +518,14 @@ class _Label extends StatelessWidget {
         opacity: 0.0,
         child: text,
       );
-    }
-
-    if (!showUnselectedLabels) {
+    } else if (!showUnselectedLabels) {
       // Fade selected labels in.
       text = FadeTransition(
         alwaysIncludeSemantics: true,
         opacity: animation,
         child: text,
       );
-    }
-
-    if (!showSelectedLabels) {
+    } else if (!showSelectedLabels) {
       // Fade selected labels out.
       text = FadeTransition(
         alwaysIncludeSemantics: true,
