@@ -432,6 +432,7 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
+    assert(touchSlopX > 0 && touchSlopY > 0);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
@@ -439,18 +440,61 @@ abstract class WidgetController {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
+      final double offsetX = offset.dx;
+      final double offsetY = offset.dy;
+
       final bool separateX = offset.dx.abs() > touchSlopX;
       final bool separateY = offset.dy.abs() > touchSlopY;
 
-      if (separateX || separateY) {
-        final double firstX = separateX ? xSign * touchSlopX : offset.dx;
-        final double firstY = separateY ? ySign * touchSlopY : offset.dy;
-        final double secondX = separateX ? offset.dx - (xSign * touchSlopX) : 0;
-        final double secondY = separateY ? offset.dy - (ySign * touchSlopY) : 0;
+      if (separateY || separateX) {
+        final double offsetSlope = offsetY / offsetX;
+        final double inverseOffsetSlope = offsetX / offsetY;
+        final double slopSlope = touchSlopY / touchSlopX;
+        final double absoluteOffsetSlope = offsetSlope.abs();
+        if (absoluteOffsetSlope != slopSlope) {
+          // The drag goes through the edges of the box.
+          if (absoluteOffsetSlope < slopSlope) {
+            // The drag goes through the vertical edge of the box.
+            // It is guaranteed that the |offsetX| > touchSlopX.
+            final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
-        await gesture.moveBy(Offset(firstX, firstY));
-        await gesture.moveBy(Offset(secondX, secondY));
-      } else {
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(touchSlopX * xSign, diffY));
+            if (offsetY.abs() < touchSlopY) {
+              // The drag ends before getting to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(offsetX - touchSlopX, offsetY - diffY));
+            } else {
+              final double diffY2 = touchSlopY * ySign - diffY;
+              final double diffX2 = inverseOffsetSlope * diffY2;
+
+              // The vector from the edge of the box to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - diffX2 - touchSlopX * xSign, offsetY - touchSlopY * ySign));
+            }
+          } else {
+            // The drag goes through the horizontal edge of the box.
+            // It is guaranteed that the |offsetY| > touchSlopY.
+            final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(diffX, touchSlopY * ySign));
+            if (offsetX.abs() < touchSlopX) {
+              // The drag ends before getting to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - touchSlopY));
+            } else {
+              final double diffX2 = touchSlopX * xSign - diffX;
+              final double diffY2 = offsetSlope * diffX2;
+
+              // The vector from the edge of the box to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - touchSlopX * xSign, offsetY - diffY2 - touchSlopY * ySign));
+            }
+          }
+        } else { // The drag goes through the corner of the box.
+          await gesture.moveBy(Offset(touchSlopX, touchSlopY));
+          await gesture.moveBy(Offset(offsetX - touchSlopX, offsetY - touchSlopY));
+        }
+      } else { // The drag ends inside the box.
         await gesture.moveBy(offset);
       }
       await gesture.up();
