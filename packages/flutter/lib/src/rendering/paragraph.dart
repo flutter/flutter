@@ -281,15 +281,16 @@ class RenderParagraph extends RenderBox {
   @override
   void performLayout() {
     _layoutTextWithConstraints(constraints);
-    // We grab _textPainter.size here because assigning to `size` will trigger
-    // us to validate our intrinsic sizes, which will change _textPainter's
-    // layout because the intrinsic size calculations are destructive.
-    // Other _textPainter state like didExceedMaxLines will also be affected.
-    // See also RenderEditable which has a similar issue.
+    // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
+    // assigning to `size` will trigger us to validate our intrinsic sizes,
+    // which will change _textPainter's layout because the intrinsic size
+    // calculations are destructive. Other _textPainter state will also be
+    // affected. See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
+    final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
