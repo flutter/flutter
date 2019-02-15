@@ -313,8 +313,7 @@ class _BodyBoxConstraints extends BoxConstraints {
 
   @override
   int get hashCode {
-    assert(debugAssertIsValid());
-    return hashValues(minWidth, maxWidth, minHeight, maxHeight, bottomWidgetsHeight);
+    return hashValues(super.hashCode, bottomWidgetsHeight);
   }
 }
 
@@ -334,8 +333,6 @@ class _BodyBuilder extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final _BodyBoxConstraints bodyConstraints = constraints;
-        if (bodyConstraints.bottomWidgetsHeight == 0.0)
-          return body;
         final MediaQueryData metrics = MediaQuery.of(context);
         return MediaQuery(
           data: metrics.copyWith(
@@ -421,16 +418,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
-      if (extendBody)
+      if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
+        assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
+      }
 
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
-        // If the keyboard is up, minInsets.bottom will match the keyboard's
-        // height (typically it will be > bottomWidgetsHeight) and we
-        // do not want _BodyBuilder to add bottom padding to MediaQuery.
-        bottomWidgetsHeight: math.max(bottomWidgetsHeight - minInsets.bottom , 0.0),
+        bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, Offset(0.0, contentTop));
@@ -893,13 +889,13 @@ class Scaffold extends StatefulWidget {
   /// instead of only extending to the top of the [bottomNavigationBar]
   /// or the [persistentFooterButtons].
   ///
-  /// If true a [MediaQuery] widget whose bottom padding matches the
+  /// If true, a [MediaQuery] widget whose bottom padding matches the
   /// the height of the [bottomNavigationBar] will be added above the
   /// scaffold's [body].
   ///
   /// This property is often useful when the [bottomNavigationBar] has
   /// a non-rectangular shape, like [CircularNotchedRectangle], which
-  /// adds [FloatingActionButton] sized notch to the top edge of the bar.
+  /// adds a [FloatingActionButton] sized notch to the top edge of the bar.
   /// In this case specifying `extendBody: true` ensures that that scaffold's
   /// body will be visible through the bottom navigation bar's notch.
   final bool extendBody;
