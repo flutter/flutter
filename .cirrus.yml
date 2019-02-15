@@ -141,6 +141,7 @@ task:
     - tests-macos
     - tool_tests-macos
     - build_tests-macos
+    - add2app-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
