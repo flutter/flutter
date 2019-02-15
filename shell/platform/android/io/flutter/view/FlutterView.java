@@ -1128,11 +1128,16 @@ public class FlutterView extends SurfaceView
                 return;
             }
             released = true;
-            mNativeView.getFlutterJNI().unregisterTexture(id);
+
+            // The ordering of the next 3 calls is important:
+            // First we remove the frame listener, then we release the SurfaceTexture, and only after we unregister
+            // the texture which actually deletes the GL texture.
+
             // Otherwise onFrameAvailableListener might be called after mNativeView==null
             // (https://github.com/flutter/flutter/issues/20951). See also the check in onFrameAvailable.
             surfaceTexture.setOnFrameAvailableListener(null);
             surfaceTexture.release();
+            mNativeView.getFlutterJNI().unregisterTexture(id);
         }
     }
 }

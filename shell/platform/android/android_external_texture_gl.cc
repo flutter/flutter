@@ -16,7 +16,11 @@ AndroidExternalTextureGL::AndroidExternalTextureGL(
     const fml::jni::JavaObjectWeakGlobalRef& surfaceTexture)
     : Texture(id), surface_texture_(surfaceTexture), transform(SkMatrix::I()) {}
 
-AndroidExternalTextureGL::~AndroidExternalTextureGL() = default;
+AndroidExternalTextureGL::~AndroidExternalTextureGL() {
+  if (state_ == AttachmentState::attached) {
+    glDeleteTextures(1, &texture_name_);
+  }
+}
 
 void AndroidExternalTextureGL::OnGrContextCreated() {
   state_ = AttachmentState::uninitialized;

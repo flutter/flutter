@@ -134,8 +134,8 @@ public class FlutterRenderer implements TextureRegistry {
       if (released) {
         return;
       }
-      unregisterTexture(id);
       surfaceTexture.release();
+      unregisterTexture(id);
       released = true;
     }
   }
