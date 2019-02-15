@@ -406,6 +406,9 @@ Future<void> _integrationTestsAndroidSdk() async {
     return;
   }
 
+  print('ANDROID_HOME: ${Platform.environment['ANDROID_HOME']}');
+  print('ANDROID_SDK_ROOT: ${Platform.environment['ANDROID_SDK_ROOT']}');
+
   await _runDevicelabTest('gradle_plugin_test');
   await _runDevicelabTest('module_test');
   // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
