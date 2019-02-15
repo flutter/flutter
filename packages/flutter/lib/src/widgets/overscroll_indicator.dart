@@ -221,15 +221,17 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
-        child: CustomPaint(
-          foregroundPainter: _GlowingOverscrollIndicatorPainter(
-            leadingController: widget.showLeading ? _leadingController : null,
-            trailingController: widget.showTrailing ? _trailingController : null,
-            axisDirection: widget.axisDirection,
-            repaint: _leadingAndTrailingListener,
-          ),
-          child: RepaintBoundary(
-            child: widget.child,
+        child: ClipRect(
+          child: CustomPaint(
+            foregroundPainter: _GlowingOverscrollIndicatorPainter(
+              leadingController: widget.showLeading ? _leadingController : null,
+              trailingController: widget.showTrailing ? _trailingController : null,
+              axisDirection: widget.axisDirection,
+              repaint: _leadingAndTrailingListener,
+            ),
+            child: RepaintBoundary(
+              child: widget.child,
+            ),
           ),
         ),
       ),
