@@ -115,7 +115,7 @@ class UnsupportedCodeGenerator extends CodeGenerator {
 
   @override
   Future<void> invalidateBuildScript() async {
-    // No-op implementation so it be always be called.
+    // No-op implementation to ensure it can be called safely.
   }
 
   @override
