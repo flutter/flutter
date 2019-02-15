@@ -257,11 +257,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
 
-  /// Used by the [BottomNavigationBar] constructor to set the [type] parameter.
-  ///
-  /// If type is provided, it is returned. Otherwise,
-  /// [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
-  /// [BottomNavigationBarType.shifting] is used for 4+ items.
+  // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
+  //
+  // If type is provided, it is returned. Otherwise,
+  // [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
+  // [BottomNavigationBarType.shifting] is used for 4+ items.
   static BottomNavigationBarType _type(
       BottomNavigationBarType type,
       List<BottomNavigationBarItem> items,
@@ -272,11 +272,11 @@ class BottomNavigationBar extends StatefulWidget {
     return items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting;
   }
 
-  /// Used by the [BottomNavigationBar] constructor to set the [showUnselected]
-  /// parameter.
-  ///
-  /// Unselected labels are shown by default for [BottomNavigationBarType.fixed],
-  /// and hidden by default for [BottomNavigationBarType.shifting].
+  // Used by the [BottomNavigationBar] constructor to set the [showUnselected]
+  // parameter.
+  //
+  // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
+  // and hidden by default for [BottomNavigationBarType.shifting].
   static bool _defaultShowUnselected(BottomNavigationBarType type) {
     switch (type) {
       case BottomNavigationBarType.shifting:
@@ -690,8 +690,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
-    return List<Widget>.generate(widget.items.length, (int i) {
-      return _BottomNavigationTile(
+    final List<Widget> tiles = <Widget>[];
+    for (int i = 0; i < widget.items.length; i++) {
+      tiles.add(_BottomNavigationTile(
         widget.type,
         widget.items[i],
         _animations[i],
@@ -708,8 +709,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showSelectedLabels: widget.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-      );
-    });
+      ));
+    }
+    return tiles;
   }
 
   Widget _createContainer(List<Widget> tiles) {
@@ -726,6 +728,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMediaQuery(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
     final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
