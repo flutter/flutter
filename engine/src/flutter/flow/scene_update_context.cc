@@ -110,9 +110,9 @@ void SceneUpdateContext::CreateFrame(
   );
   scenic::ShapeNode shape_node(session_);
   shape_node.SetShape(shape);
-  shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
-                            shape_bounds.height() * 0.5f + shape_bounds.top(),
-                            0.f);
+  shape_node.SetTranslationRH(shape_bounds.width() * 0.5f + shape_bounds.left(),
+                              shape_bounds.height() * 0.5f + shape_bounds.top(),
+                              0.f);
   // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
   entity_node->AddPart(shape_node);
 
@@ -141,9 +141,9 @@ void SceneUpdateContext::CreateFrame(
                                   inner_bounds.height());
     scenic::ShapeNode inner_node(session_);
     inner_node.SetShape(inner_shape);
-    inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
-                              inner_bounds.height() * 0.5f + inner_bounds.top(),
-                              0.f);
+    inner_node.SetTranslationRH(
+        inner_bounds.width() * 0.5f + inner_bounds.left(),
+        inner_bounds.height() * 0.5f + inner_bounds.top(), 0.f);
     entity_node->AddPart(inner_node);
     SetShapeTextureOrColor(inner_node, color, scale_x, scale_y, inner_bounds,
                            std::move(paint_layers), layer,
@@ -282,9 +282,9 @@ SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
     : Entity(context) {
   scenic::ShapeNode shape_node(context.session());
   shape_node.SetShape(shape);
-  shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
-                            shape_bounds.height() * 0.5f + shape_bounds.top(),
-                            0.f);
+  shape_node.SetTranslationRH(shape_bounds.width() * 0.5f + shape_bounds.left(),
+                              shape_bounds.height() * 0.5f + shape_bounds.top(),
+                              0.f);
 
   // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
   entity_node().AddPart(shape_node);
@@ -305,9 +305,9 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
     // are not handled correctly.
     MatrixDecomposition decomposition(transform);
     if (decomposition.IsValid()) {
-      entity_node().SetTranslation(decomposition.translation().x(),  //
-                                   decomposition.translation().y(),  //
-                                   decomposition.translation().z()   //
+      entity_node().SetTranslationRH(decomposition.translation().x(),  //
+                                     decomposition.translation().y(),  //
+                                     decomposition.translation().z()   //
       );
 
       entity_node().SetScale(decomposition.scale().x(),  //
@@ -356,7 +356,7 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
       paint_bounds_(SkRect::MakeEmpty()),
       layer_(layer) {
   if (elevation != 0.0)
-    entity_node().SetTranslation(0.f, 0.f, elevation);
+    entity_node().SetTranslationRH(0.f, 0.f, -elevation);
 }
 
 SceneUpdateContext::Frame::~Frame() {
