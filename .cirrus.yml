@@ -111,7 +111,7 @@ task:
 
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: gcr.io/flutter-cirrus/win-android-image:latest
     os_version: 2016
