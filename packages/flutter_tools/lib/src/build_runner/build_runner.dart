@@ -128,10 +128,8 @@ class BuildRunner extends CodeGenerator {
   @override
   Future<void> invalidateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
-    final File buildScript = flutterProject.dartTool
-        .absolute
-        .childDirectory('flutter_tool')
-        .childFile('build.dart');
+    final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
+    final File buildScript = fs.file(resultScriptPath);
     if (!buildScript.existsSync()) {
       return;
     }
@@ -147,10 +145,11 @@ class BuildRunner extends CodeGenerator {
       return;
     }
     final Status status = logger.startProgress('generating build script...', timeout: null);
+    File syntheticPubspec;
     try {
       fs.directory(generatedDirectory).createSync(recursive: true);
 
-      final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
+      syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
       final StringBuffer stringBuffer = StringBuffer();
 
       stringBuffer.writeln('name: synthetic_example');
@@ -176,6 +175,9 @@ class BuildRunner extends CodeGenerator {
       await buildScriptGenerator.generateBuildScript();
     } finally {
       status.stop();
+      if (syntheticPubspec != null && syntheticPubspec.existsSync()) {
+        syntheticPubspec.deleteSync();
+      }
     }
   }
 

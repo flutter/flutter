@@ -9,6 +9,7 @@ import '../runner/flutter_command.dart';
 class GenerateCommand extends FlutterCommand {
   GenerateCommand() {
     usesTargetOption();
+    usesPubOption();
   }
   @override
   String get description => 'run code generators.';

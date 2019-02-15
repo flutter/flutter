@@ -114,8 +114,8 @@ class UnsupportedCodeGenerator extends CodeGenerator {
   }
 
   @override
-  Future<void> invalidateBuildScript() {
-    throw UnsupportedError('build_runner is not currently supported.');
+  Future<void> invalidateBuildScript() async {
+    // No-op implementation so it be always be called.
   }
 
   @override

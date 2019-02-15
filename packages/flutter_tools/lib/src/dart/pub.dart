@@ -13,6 +13,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../codegen.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'sdk.dart';
@@ -110,6 +111,7 @@ Future<void> pubGet({
         retry: true,
       );
       status.stop();
+      await codeGenerator.invalidateBuildScript();
     } catch (exception) {
       status.cancel();
       rethrow;
