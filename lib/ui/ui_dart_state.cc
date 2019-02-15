@@ -23,7 +23,7 @@ UIDartState::UIDartState(
     std::string advisory_script_entrypoint,
     std::string logger_prefix,
     UnhandledExceptionCallback unhandled_exception_callback,
-    IsolateNameServer* isolate_name_server)
+    std::shared_ptr<IsolateNameServer> isolate_name_server)
     : task_runners_(std::move(task_runners)),
       add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
@@ -33,7 +33,7 @@ UIDartState::UIDartState(
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
       logger_prefix_(std::move(logger_prefix)),
       unhandled_exception_callback_(unhandled_exception_callback),
-      isolate_name_server_(isolate_name_server) {
+      isolate_name_server_(std::move(isolate_name_server)) {
   AddOrRemoveTaskObserver(true /* add */);
 }
 
@@ -124,7 +124,7 @@ fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
   return io_manager_->GetResourceContext();
 }
 
-IsolateNameServer* UIDartState::GetIsolateNameServer() {
+std::shared_ptr<IsolateNameServer> UIDartState::GetIsolateNameServer() const {
   return isolate_name_server_;
 }
 
