@@ -1005,23 +1005,27 @@ class _RenderSlider extends RenderBox {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      for (int i = 0; i <= divisions; i++) {
-        final double tickValue = i / divisions;
-        // The ticks are mapped to be within the track, so the tick mark width
-        // must be subtracted from the track width.
-        final double tickX = trackRect.left + tickValue * (trackRect.width - tickMarkWidth) + tickMarkWidth / 2;
-        final double tickY = trackRect.center.dy;
-        final Offset tickMarkOffset = Offset(tickX, tickY);
-        _sliderTheme.tickMarkShape.paint(
-          context,
-          tickMarkOffset,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          enableAnimation: _enableAnimation,
-          textDirection: _textDirection,
-          thumbCenter: thumbCenter,
-          isEnabled: isInteractive,
-        );
+      // If the ticks would be too dense, don't bother painting them.
+      if ((trackRect.width - tickMarkWidth) / divisions >= 3.0 * tickMarkWidth) {
+        for (int i = 0; i <= divisions; i++) {
+          final double tickValue = i / divisions;
+          // The ticks are mapped to be within the track, so the tick mark width
+          // must be subtracted from the track width.
+          final double tickX = trackRect.left +
+              tickValue * (trackRect.width - tickMarkWidth) + tickMarkWidth / 2;
+          final double tickY = trackRect.center.dy;
+          final Offset tickMarkOffset = Offset(tickX, tickY);
+          _sliderTheme.tickMarkShape.paint(
+            context,
+            tickMarkOffset,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            enableAnimation: _enableAnimation,
+            textDirection: _textDirection,
+            thumbCenter: thumbCenter,
+            isEnabled: isInteractive,
+          );
+        }
       }
     }
 
