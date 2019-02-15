@@ -135,37 +135,24 @@ task:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat update-packages
     - git fetch origin master
+  test_all_script:
+    - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
   matrix:
     # - name: tests-windows
     #   env:
     #     SHARD: tests
-    #   test_all_script:
-    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
     # - name: tool_tests-windows
     #   env:
     #     SHARD: tool_tests
-    #   test_all_script:
-    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
     # - name: build_tests-windows
     #   env:
     #     SHARD: build_tests
-    #   test_all_script:
-    #     - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
     #   container:
     #     cpu: 4
     #     memory: 12G
     - name: integration_tests-windows
       env:
         SHARD: integration_tests
-      test_script:
-        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
-        # might include non-ASCII characters which makes Gradle crash.
-        # See: https://github.com/flutter/flutter/issues/24935
-        # This is a temporary workaround until we figure how to properly configure
-        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
-        # TODO(amirh): Set the locale to UTF8.
-        - set CIRRUS_CHANGE_MESSAGE=""
-        - set CIRRUS_COMMIT_MESSAGE=""
       container:
         cpu: 4
         memory: 12G
@@ -229,6 +216,10 @@ task:
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
+  android_sdk_cache:
+    folder: $HOME/Android
+    fingerprint_script: dev/bots/download_android_sdk.sh
+    populate_script: dev/bots/download_android_sdk.sh
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
@@ -252,6 +243,10 @@ task:
     - name: integration_tests-macos
       env:
         SHARD: integration_tests
+        ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
+        ANDROID_SDK_ROOT: $HOME/Android
+        ANDROID_HOME: $HOME/Android
+        PATH: "$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
       container:
         cpu: 4
         memory: 12G
