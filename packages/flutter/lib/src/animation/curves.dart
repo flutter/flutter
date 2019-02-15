@@ -569,7 +569,7 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_sine.mp4}
-  static const Cubic easeInSine = Cubic(0.47, 0, 0.745, 0.715);
+  static const Cubic easeInSine = Cubic(0.47, 0.0, 0.745, 0.715);
 
   /// A cubic animation curve that starts slowly and ends quickly. Based on a
   /// quadratic equation where `f(t) = t²`, this is effectively the inverse of
@@ -802,7 +802,7 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quart.mp4}
-  static const Cubic easeInOutQuart = Cubic(0.77, 0, 0.175, 1.0);
+  static const Cubic easeInOutQuart = Cubic(0.77, 0.0, 0.175, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends
   /// slowly. This curve can be imagined as [Curves.easeInQuint] as the first
@@ -813,7 +813,7 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quint.mp4}
-  static const Cubic easeInOutQuint = Cubic(0.86, 0, 0.07, 1.0);
+  static const Cubic easeInOutQuint = Cubic(0.86, 0.0, 0.07, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends
   /// slowly.
@@ -827,7 +827,7 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_expo.mp4}
-  static const Cubic easeInOutExpo = Cubic(1.0, 0, 0, 1.0);
+  static const Cubic easeInOutExpo = Cubic(1.0, 0.0, 0.0, 1.0);
 
   /// A cubic animation curve that starts slowly, speeds up, and then and ends
   /// slowly. This curve can be imagined as [Curves.easeInCirc] as the first
