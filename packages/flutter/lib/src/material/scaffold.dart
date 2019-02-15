@@ -305,8 +305,6 @@ class _BodyBoxConstraints extends BoxConstraints {
   bool operator ==(dynamic other) {
     if (super != other)
       return false;
-    if (other is! _BodyBoxConstraints)
-      return false;
     final _BodyBoxConstraints typedOther = other;
     return bottomWidgetsHeight == typedOther.bottomWidgetsHeight;
   }
@@ -336,7 +334,9 @@ class _BodyBuilder extends StatelessWidget {
         final MediaQueryData metrics = MediaQuery.of(context);
         return MediaQuery(
           data: metrics.copyWith(
-            padding: metrics.padding.copyWith(bottom: bodyConstraints.bottomWidgetsHeight),
+            padding: metrics.padding.copyWith(
+              bottom: math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight),
+            ),
           ),
           child: body,
         );
