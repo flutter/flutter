@@ -27,7 +27,7 @@ class ResourceCleaner {
         }
 
         boolean hasFilesToDelete() {
-            return mFilesToDelete.length > 0;
+            return mFilesToDelete != null && mFilesToDelete.length > 0;
         }
 
         @Override
