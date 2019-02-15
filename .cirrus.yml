@@ -202,6 +202,11 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
+    ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
+    ANDROID_SDK_ROOT: $HOME/Android
+    ANDROID_HOME: $HOME/Android
+    JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-8-latest/Contents/Home
+    PATH: "$PATH:$JAVA_HOME/bin:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
   install_cocoapods_script:
     - sudo gem install cocoapods
   git_fetch_script:
@@ -217,7 +222,7 @@ task:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   android_sdk_cache:
-    folder: $HOME/Android
+    folder: $ANDROID_SDK_ROOT
     fingerprint_script: dev/bots/download_android_sdk.sh
     populate_script: dev/bots/download_android_sdk.sh
   setup_script:
@@ -243,10 +248,6 @@ task:
     - name: integration_tests-macos
       env:
         SHARD: integration_tests
-        ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
-        ANDROID_SDK_ROOT: $HOME/Android
-        ANDROID_HOME: $HOME/Android
-        PATH: "$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
       container:
         cpu: 4
         memory: 12G
