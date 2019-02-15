@@ -2666,11 +2666,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The default implementation defers to [visitChildren] and therefore treats
   /// the element as onstage.
   ///
-  /// This method should only be used in tests and debug code. In production,
-  /// the vague concept of "onstage" vs "offstage" is meaningless and should not
-  /// be used to affect widget behavior; this method does nothing in release
-  /// builds.
-  ///
   /// See also:
   ///
   ///  * [Offstage] widget that hides its children.
@@ -2678,9 +2673,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///  * [RenderObject.visitChildrenForSemantics], in contrast to this method,
   ///    designed specifically for excluding parts of the UI from the semantics
   ///    tree.
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    assert(() { visitChildren(visitor); return true; }());
-  }
+  void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
 
   /// Wrapper around [visitChildren] for [BuildContext].
   @override
