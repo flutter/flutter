@@ -978,7 +978,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Tick marks are skipped when they aro too dense', (WidgetTester tester) async {
+  testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     double value = 25.0;
 
     Widget buildSlider({
