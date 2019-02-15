@@ -517,12 +517,13 @@ Future<void> _buildGradleProjectV2(
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
 
-        // Only allow changes under assets/.
-        if (!newFile.name.startsWith('assets/'))
+        // Only allow certain changes.
+        if (!newFile.name.startsWith('assets/') &&
+            !(buildInfo.usesAot && newFile.name.endsWith('.so')))
           throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
-        final String name = fs.path.relative(newFile.name, from: 'assets/');
-        if (name.contains('_snapshot_')) {
+        final String name = newFile.name;
+        if (name.contains('_snapshot_') || name.endsWith('.so')) {
           final List<int> diff = bsdiff(oldFile.content, newFile.content);
           final int ratio = 100 * diff.length ~/ newFile.content.length;
           printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
