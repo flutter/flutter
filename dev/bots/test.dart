@@ -377,6 +377,9 @@ Future<void> _verifyVersion(String filename) async {
 }
 
 Future<void> _runIntegrationTests() async {
+  print('Platform env vars:');
+  print(Platform.environment);
+
   await _runDevicelabTest('dartdocs');
   await _runDevicelabTest('technical_debt__cost');
 
@@ -391,26 +394,30 @@ Future<void> _runIntegrationTests() async {
   await _integrationTestsAndroidSdk();
 }
 
-Future<void> _runDevicelabTest(String testName) async {
+Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
   await runCommand(
     dart,
     <String>['bin/run.dart', '-t', testName],
     workingDirectory: path.join(flutterRoot, 'dev', 'devicelab'),
+    environment: env,
   );
 }
 
 Future<void> _integrationTestsAndroidSdk() async {
-  if (
-        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
-        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
+  final String androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
+      ? Platform.environment['ANDROID_SDK_ROOT']
+      : Platform.environment['ANDROID_HOME'];
+  if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
     return;
   }
 
-  print('ANDROID_HOME: ${Platform.environment['ANDROID_HOME']}');
-  print('ANDROID_SDK_ROOT: ${Platform.environment['ANDROID_SDK_ROOT']}');
+  Map<String, String> env = <String, String> {
+    'ANDROID_HOME': androidSdkRoot,
+    'ANDROID_SDK_ROOT': androidSdkRoot,
+  };
 
-  await _runDevicelabTest('gradle_plugin_test');
-  await _runDevicelabTest('module_test');
+  await _runDevicelabTest('gradle_plugin_test', env: env);
+  await _runDevicelabTest('module_test', env: env);
   // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
-  await _runDevicelabTest('plugin_test');
+  await _runDevicelabTest('plugin_test', env: env);
 }
