@@ -1102,7 +1102,7 @@ public class FlutterView extends SurfaceView
         private SurfaceTexture.OnFrameAvailableListener onFrameListener = new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture texture) {
-                if (released) {
+                if (released || mNativeView == null) {
                     // Even though we make sure to unregister the callback before releasing, as of Android O
                     // SurfaceTexture has a data race when accessing the callback, so the callback may
                     // still be called by a stale reference after released==true and mNativeView==null.
