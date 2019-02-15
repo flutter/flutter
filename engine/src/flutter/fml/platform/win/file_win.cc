@@ -316,6 +316,10 @@ bool TruncateFile(const fml::UniqueFD& file, size_t size) {
   return true;
 }
 
+bool FileExists(const fml::UniqueFD& base_directory, const char* path) {
+  return IsFile(GetAbsolutePath(base_directory, path).c_str());
+}
+
 bool WriteAtomically(const fml::UniqueFD& base_directory,
                      const char* file_name,
                      const Mapping& mapping) {
