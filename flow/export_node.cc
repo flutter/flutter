@@ -56,7 +56,7 @@ void ExportNode::Bind(SceneUpdateContext& context,
 
   if (node_) {
     container.AddChild(*node_);
-    node_->SetTranslation(offset.x(), offset.y(), 0.f);
+    node_->SetTranslationRH(offset.x(), offset.y(), 0.f);
     node_->SetHitTestBehavior(
         hit_testable ? fuchsia::ui::gfx::HitTestBehavior::kDefault
                      : fuchsia::ui::gfx::HitTestBehavior::kSuppress);
