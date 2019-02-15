@@ -233,6 +233,7 @@ abstract class SearchDelegate<T> {
   Animation<double> get transitionAnimation => _proxyAnimation;
 
   final FocusNode _focusNode = FocusNode();
+  FocusAttachment _focusAttachment;
 
   final TextEditingController _queryTextController = TextEditingController();
 
@@ -352,6 +353,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
+    widget.delegate._focusAttachment = widget.delegate._focusNode.attach(context);
     widget.delegate._focusNode.addListener(_onFocusChanged);
   }
 
@@ -395,6 +397,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    widget.delegate._focusAttachment.reparent(Focus.of(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show RawKeyEvent;
@@ -61,9 +62,12 @@ class RawKeyboardListener extends StatefulWidget {
 }
 
 class _RawKeyboardListenerState extends State<RawKeyboardListener> {
+  FocusAttachment _focusAttachment;
+
   @override
   void initState() {
     super.initState();
+    _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
   }
 
@@ -71,8 +75,10 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   void didUpdateWidget(RawKeyboardListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
+      _focusAttachment.detach();
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
+      _focusAttachment = widget.focusNode.attach(context);
     }
   }
 
@@ -112,5 +118,8 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    _focusAttachment.reparent(Focus.of(context));
+    return widget.child;
+  }
 }

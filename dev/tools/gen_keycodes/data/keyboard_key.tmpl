@@ -44,7 +44,7 @@ import 'package:flutter/foundation.dart';
 /// ```dart
 /// // The node used to request the keyboard focus.
 /// final FocusNode _focusNode = FocusNode();
-/// // The message to display.
+///
 /// String _message;
 ///
 /// // Focus nodes need to be disposed.
@@ -90,7 +90,7 @@ import 'package:flutter/foundation.dart';
 ///                 onTap: () {
 ///                   FocusScope.of(context).requestFocus(_focusNode);
 ///                 },
-///                 child: Text('Tap to focus'),
+///                 child: const Text('Tap to focus'),
 ///               );
 ///             }
 ///             return Text(_message ?? 'Press a key');

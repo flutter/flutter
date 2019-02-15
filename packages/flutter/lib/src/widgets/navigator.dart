@@ -1468,13 +1468,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final Set<Route<dynamic>> _poppedRoutes = <Route<dynamic>>{};
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
+  FocusAttachment _focusAttachment;
 
   final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
 
   @override
   void initState() {
     super.initState();
+    _focusAttachment = focusScopeNode.attach(context);
     for (NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
@@ -1556,7 +1558,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.dispose();
     _poppedRoutes.clear();
     _history.clear();
-    focusScopeNode.detach();
+    _focusAttachment.detach();
+    focusScopeNode.dispose();
     super.dispose();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -2175,6 +2178,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
+    _focusAttachment.reparent(Focus.of(context));
     return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,

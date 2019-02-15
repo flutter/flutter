@@ -297,6 +297,7 @@ class _TabSwitchingView extends StatefulWidget {
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
   List<Widget> tabs;
   List<FocusScopeNode> tabFocusNodes;
+  List<FocusAttachment> tabFocusAttachments;
 
   @override
   void initState() {
@@ -304,7 +305,11 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     tabs = List<Widget>(widget.tabNumber);
     tabFocusNodes = List<FocusScopeNode>.generate(
       widget.tabNumber,
-      (int index) => FocusScopeNode(),
+      (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
+    );
+    tabFocusAttachments = List<FocusAttachment>.generate(
+      widget.tabNumber,
+          (int index) => tabFocusNodes[index].attach(context),
     );
   }
 
@@ -326,8 +331,8 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
 
   @override
   void dispose() {
-    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
-      focusScopeNode.detach();
+    for (FocusAttachment focusAttachment in tabFocusAttachments) {
+      focusAttachment.detach();
     }
     super.dispose();
   }

@@ -99,8 +99,8 @@ class TriggerableState extends State<TriggerableWidget> {
   }
 }
 
-class TestFocusable extends StatefulWidget {
-  const TestFocusable({
+class TestFocus extends StatefulWidget {
+  const TestFocus({
     Key key,
     this.focusNode,
     this.autofocus = true,
@@ -110,10 +110,10 @@ class TestFocusable extends StatefulWidget {
   final FocusNode focusNode;
 
   @override
-  TestFocusableState createState() => TestFocusableState();
+  TestFocusState createState() => TestFocusState();
 }
 
-class TestFocusableState extends State<TestFocusable> {
+class TestFocusState extends State<TestFocus> {
   bool _didAutofocus = false;
 
   @override
@@ -187,12 +187,12 @@ void main() {
     final FocusNode onscreenFocus = FocusNode();
     final FocusNode offscreenFocus = FocusNode();
     await tester.pumpWidget(
-      TestFocusable(
+      TestFocus(
         focusNode: onscreenFocus,
       ),
     );
     tree.pumpWidget(
-      TestFocusable(
+      TestFocus(
         focusNode: offscreenFocus,
       ),
     );
