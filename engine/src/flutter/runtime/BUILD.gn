@@ -36,6 +36,10 @@ source_set("runtime") {
     "dart_snapshot_buffer.h",
     "dart_vm.cc",
     "dart_vm.h",
+    "dart_vm_data.cc",
+    "dart_vm_data.h",
+    "dart_vm_lifecycle.cc",
+    "dart_vm_lifecycle.h",
     "embedder_resources.cc",
     "embedder_resources.h",
     "runtime_controller.cc",
@@ -73,7 +77,9 @@ source_set("runtime") {
       flutter_runtime_mode != "dynamic_release" && !is_fuchsia) {
     # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
     # instead puts Observatory into the runner's package.
-    deps += [ "//third_party/dart/runtime/observatory:embedded_observatory_archive" ]
+    deps += [
+      "//third_party/dart/runtime/observatory:embedded_observatory_archive",
+    ]
   }
 }
 
@@ -95,6 +101,7 @@ executable("runtime_unittests") {
     ":runtime_fixtures",
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
+    "$flutter_root/shell/common",
     "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
