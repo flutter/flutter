@@ -23,6 +23,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
+  'integration_tests': _runIntegrationTests,
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
@@ -373,4 +374,40 @@ Future<void> _verifyVersion(String filename) async {
     print('$redLine');
     exit(1);
   }
+}
+
+Future<void> _runIntegrationTests() async {
+  await _runDevicelabTest('dartdocs');
+  await _runDevicelabTest('technical_debt__cost');
+
+  if (Platform.isLinux) {
+    await _runDevicelabTest('flutter_create_offline_test_linux');
+  } else if (Platform.isWindows) {
+    await _runDevicelabTest('flutter_create_offline_test_win');
+  } else if (Platform.isMacOS) {
+    await _runDevicelabTest('flutter_create_offline_test_mac');
+    await _runDevicelabTest('module_test_ios');
+  }
+  await _integrationTestsAndroidSdk();
+}
+
+Future<void> _runDevicelabTest(String testName) async {
+  await runCommand(
+    dart,
+    <String>['bin/run.dart', '-t', testName],
+    workingDirectory: path.join(flutterRoot, 'dev', 'devicelab'),
+  );
+}
+
+Future<void> _integrationTestsAndroidSdk() async {
+  if (
+        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
+        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
+    return;
+  }
+
+  await _runDevicelabTest('gradle_plugin_test');
+  await _runDevicelabTest('module_test');
+  // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
+  await _runDevicelabTest('plugin_test');
 }
