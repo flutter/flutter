@@ -229,14 +229,14 @@ class BottomNavigationBar extends StatefulWidget {
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
-  /// The color of the selected [BottomNavigationBarItem.icon] + [BottomNavigationBarItem.label].
+  /// The color of the selected [BottomNavigationBarItem.icon] and [BottomNavigationBarItem.label].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   ///
   /// If provided, this will take precedence over [fixedColor].
   final Color selectedItemColor;
 
-  /// The color of the unselected [BottomNavigationBarItem.icon] + [BottomNavigationBarItem.label]s.
+  /// The color of the unselected [BottomNavigationBarItem.icon] and [BottomNavigationBarItem.label]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
