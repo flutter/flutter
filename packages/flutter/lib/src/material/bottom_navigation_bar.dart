@@ -334,23 +334,23 @@ class _BottomNavigationTile extends StatelessWidget {
     // (which is an integer) by a large number.
     int size;
 
-    /// Defines the padding for the animating icons + labels.
-    ///
-    /// The animations go from "Unselected":
-    /// =======
-    /// |      <-- Padding equal to the text height.
-    /// |  ☆
-    /// | text <-- Invisible text.
-    /// =======
-    ///
-    /// To "Selected":
-    ///
-    /// =======
-    /// |      <-- Padding equal to 1/2 text height.
-    /// |  ☆
-    /// | text
-    /// |      <-- Padding equal to 1/2 text height.
-    /// =======
+    // Defines the padding for the animating icons + labels.
+    //
+    // The animations go from "Unselected":
+    // =======
+    // |      <-- Padding equal to the text height.
+    // |  ☆
+    // | text <-- Invisible text.
+    // =======
+    //
+    // To "Selected":
+    //
+    // =======
+    // |      <-- Padding equal to 1/2 text height.
+    // |  ☆
+    // | text
+    // |      <-- Padding equal to 1/2 text height.
+    // =======
     double bottomPadding = Tween<double>(
       begin: 0.0,
       end: selectedFontSize / 2.0,
