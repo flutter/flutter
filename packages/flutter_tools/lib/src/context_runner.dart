@@ -22,6 +22,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -80,7 +81,7 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompilerFactory: () => const KernelCompilerFactory(),
+      KernelCompiler: () => experimentalBuildEnabled ? const CodeGeneratingKernelCompiler() : const KernelCompiler(),
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
