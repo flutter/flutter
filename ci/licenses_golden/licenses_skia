@@ -1,4 +1,4 @@
-Signature: a5fd73a8d92635818c8fb0f596b19547
+Signature: ed2d1aa421644a29414ee77b0a91d235
 
 UNUSED LICENSES:
 
@@ -4329,6 +4329,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGTrimEffect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCCPRGeometry.cpp
 FILE: ../../../third_party/skia/samplecode/SampleChineseFling.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCowboy.cpp
+FILE: ../../../third_party/skia/samplecode/SampleMixer.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowReference.cpp
@@ -4686,12 +4687,14 @@ FILE: ../../../third_party/skia/experimental/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEmitter.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
 FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
 FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEmitter.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
