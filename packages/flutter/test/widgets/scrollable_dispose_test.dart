@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -27,5 +29,69 @@ void main() {
 
     tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();
     await tester.pump(const Duration(hours: 5));
+  });
+
+  testWidgets('Disposing a (nested) Scrollable while holding in overscroll (iOS) does not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27707.
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final ScrollController controller = ScrollController();
+    final Key outterContainer = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            key: outterContainer,
+            color: Colors.purple,
+            width: 400.0,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                width: 500.0,
+                child: ListView.builder(
+                  controller: controller,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      color: index % 2 == 0 ? Colors.red : Colors.green,
+                      height: 200.0,
+                      child: Text('Hello $index'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Go into overscroll.
+    double lastScrollOffset;
+    await tester.fling(find.text('Hello 0'), const Offset(0.0, 1000.0), 1000.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(lastScrollOffset = controller.offset, lessThan(0.0));
+
+    // Reduce the overscroll a little, but don't let it go back to 0.0.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, greaterThan(lastScrollOffset));
+    expect(controller.offset, lessThan(0.0));
+    final double currentOffset = controller.offset;
+
+    // Start a hold activity by putting one pointer down.
+    await tester.startGesture(tester.getTopLeft(find.byKey(outterContainer)) + const Offset(50.0, 50.0));
+    await tester.pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
+    expect(controller.offset, currentOffset);
+
+    // Dispose the scrollables while the finger is still down, this should not crash.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Container(),
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(controller.hasClients, isFalse);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

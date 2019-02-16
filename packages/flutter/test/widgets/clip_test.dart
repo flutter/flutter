@@ -242,7 +242,7 @@ void main() {
       ..restore()
     );
     debugPaintSizeEnabled = true;
-    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
       ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..paragraph()
     );

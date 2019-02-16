@@ -51,6 +51,7 @@ export 'src/painting/paint_utilities.dart';
 export 'src/painting/rounded_rectangle_border.dart';
 export 'src/painting/shape_decoration.dart';
 export 'src/painting/stadium_border.dart';
+export 'src/painting/strut_style.dart';
 export 'src/painting/superellipse_shape.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';

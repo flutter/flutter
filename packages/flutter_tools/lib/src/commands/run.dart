@@ -10,6 +10,8 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../codegen.dart';
+import '../compile.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
@@ -89,6 +91,11 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
+      )
+      ..addFlag('trace-systrace',
+        negatable: false,
+        help: 'Enable tracing to the system tracer. This is only useful on '
+              'platforms where such a tracer is available (Android and Fuchsia).',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -249,6 +256,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
+        traceSystrace: argResults['trace-systrace'],
         observatoryPort: observatoryPort,
       );
     }
@@ -333,6 +341,16 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
+    List<String> expFlags;
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
+      expFlags = argResults[FlutterOptions.kEnableExperiment];
+    }
+
+    ResidentCompiler residentCompiler;
+    if (experimentalBuildEnabled) {
+      residentCompiler = await CodeGeneratingResidentCompiler.create(mainPath: argResults['target']);
+    }
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -341,6 +359,8 @@ class RunCommand extends RunCommandBase {
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        experimentalFlags: expFlags,
+        generator: residentCompiler,
       );
     }).toList();
 
@@ -385,9 +405,9 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
+    unawaited(appStartedTimeRecorder.future.then<void>(
       (_) { appStartedTime = systemClock.now(); }
-    );
+    ));
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,

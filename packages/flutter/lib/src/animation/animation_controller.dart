@@ -797,8 +797,8 @@ class _InterpolationSimulation extends Simulation {
 
 class _RepeatingSimulation extends Simulation {
   _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period)
-    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
-      _initialT = (max == min) ? 0.0 : (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
+      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
+        _initialT = (max == min) ? 0.0 : (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
   }

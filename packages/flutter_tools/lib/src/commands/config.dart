@@ -50,10 +50,10 @@ class ConfigCommand extends FlutterCommand {
     String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
-    if (values.isNotEmpty)
-      values = '\nSettings:\n$values\n\n';
+    if (values.isEmpty)
+      values = '  No settings have been configured.';
     return
-      '$values'
+      '\nSettings:\n$values\n\n'
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 

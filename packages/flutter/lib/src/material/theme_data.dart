@@ -106,7 +106,7 @@ class ThemeData extends Diagnosticable {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
-  /// See <https://material.google.com/style/color.html> for
+  /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
@@ -544,7 +544,7 @@ class ThemeData extends Diagnosticable {
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
   // According to the spec for data tables:
-  // https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+  // https://material.io/archive/guidelines/components/data-tables.html#data-tables-tables-within-cards
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 

@@ -18,6 +18,8 @@ dart_library("flutter_tools") {
     "//third_party/dart/third_party/pkg/linter",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
+    "//third_party/dart-pkg/pub/build_daemon",
+    "//third_party/dart-pkg/pub/build_runner_core",
     "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/completion",
     "//third_party/dart-pkg/pub/coverage",

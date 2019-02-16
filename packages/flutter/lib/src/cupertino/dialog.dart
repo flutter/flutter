@@ -137,8 +137,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
-  })  : assert(actions != null),
-        super(key: key);
+  }) : assert(actions != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -893,8 +893,8 @@ class _CupertinoAlertActionSection extends StatefulWidget {
     Key key,
     @required this.children,
     this.scrollController,
-  })  : assert(children != null),
-        super(key: key);
+  }) : assert(children != null),
+       super(key: key);
 
   final List<Widget> children;
 
@@ -1578,7 +1578,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     // Create the button backgrounds path and paint it.
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest)
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
       ..addRect(verticalDivider);
 
     for (int i = 0; i < pressedButtonRects.length; i += 1) {
@@ -1616,7 +1616,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest);
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
 
     final Path pressedBackgroundFillPath = Path();
 

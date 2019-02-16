@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show PointerData, PointerChange;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import 'events.dart';
 
 class _PointerState {
@@ -44,7 +46,16 @@ class _PointerState {
 class PointerEventConverter {
   PointerEventConverter._();
 
+  /// Clears internal state mapping platform pointer identifiers to
+  /// [PointerEvent] pointer identifiers.
+  ///
+  /// Visible only so that tests can reset the global state contained in
+  /// [PointerEventConverter].
+  @visibleForTesting
+  static void clearPointers() => _pointers.clear();
+
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
+  // Static to guarantee that pointers are unique.
   static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
@@ -54,7 +65,8 @@ class PointerEventConverter {
     );
   }
 
-  /// Expand the given packet of pointer data into a sequence of framework pointer events.
+  /// Expand the given packet of pointer data into a sequence of framework
+  /// pointer events.
   ///
   /// The `devicePixelRatio` argument (usually given the value from
   /// [dart:ui.Window.devicePixelRatio]) is used to convert the incoming data

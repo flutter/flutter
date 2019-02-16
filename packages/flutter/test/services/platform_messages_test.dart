@@ -5,10 +5,13 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Mock binary message handler control test', () async {
+    // Initialize all bindings because BinaryMessages.send() needs a window.
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     final List<ByteData> log = <ByteData>[];
 
     BinaryMessages.setMockMessageHandler('test1', (ByteData message) async {

@@ -12,7 +12,7 @@ import 'src/kernel_builder.dart';
 /// be configured via the `build.yaml` file.
 Builder flutterKernelBuilder(BuilderOptions builderOptions) {
   final Map<String, Object> config = builderOptions.config;
-  final List<Object> extraFrontEndOptions = config['extraFrontEndOptions'];
+  final List<Object> extraFrontEndOptions = config['extraFrontEndOptions'] ?? const <String>[];
   return FlutterKernelBuilder(
     aot: config['aot'],
     disabled: config['disabled'],

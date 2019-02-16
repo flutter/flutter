@@ -111,7 +111,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, { this.name, String sdkVersion }) : _sdkVersion = sdkVersion, super(id) {
+  IOSDevice(String id, { this.name, String sdkVersion })
+      : _sdkVersion = sdkVersion,
+        super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }
@@ -241,6 +243,9 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
 
+      final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
+
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package,
@@ -248,6 +253,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
+          activeArch: iosArch
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
@@ -277,8 +283,10 @@ class IOSDevice extends Device {
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled)
+    if (debuggingOptions.debuggingEnabled) {
       launchArguments.add('--enable-checked-mode');
+      launchArguments.add('--verify-entry-points');
+    }
 
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');

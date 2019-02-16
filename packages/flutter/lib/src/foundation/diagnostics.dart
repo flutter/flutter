@@ -1753,7 +1753,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
        _valueComputed = false,
        _value = null,
        _computeValue = computeValue,
-        _defaultLevel = level,
+       _defaultLevel = level,
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
        super(
          name: name,

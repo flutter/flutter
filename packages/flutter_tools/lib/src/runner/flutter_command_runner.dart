@@ -409,25 +409,28 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
-        if (engineUri != null) {
-          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
-          final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
-          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+        Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        // Skip if sky_engine is the self-contained one.
+        if (fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib') + fs.path.separator == engineUri?.path) {
+          engineUri = null;
+        }
+        // If sky_engine is specified and the engineSourcePath not set, try to determine the engineSourcePath by sky_engine setting.
+        // A typical engineUri looks like: file://flutter-engine-local-path/src/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/
+        if (engineUri?.path != null) {
+          engineSourcePath = fs.directory(engineUri.path)?.parent?.parent?.parent?.parent?.parent?.parent?.path;
+          if (engineSourcePath != null && (engineSourcePath == fs.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
             engineSourcePath = null;
+            throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
+              exitCode: 2);
+          }
         }
       } on FileSystemException {
         engineSourcePath = null;
       } on FormatException {
         engineSourcePath = null;
       }
-
-      engineSourcePath ??= _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
-
-      if (engineSourcePath == null) {
-        throwToolExit(userMessages.runnerNoEngineBuildDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
-          exitCode: 2);
-      }
+      // If engineSourcePath is still not set, try to determine it by flutter root.
+      engineSourcePath ??= _tryEnginePath(fs.path.join(fs.directory(Cache.flutterRoot).parent.path, 'engine', 'src'));
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
@@ -436,6 +439,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     return engineSourcePath;
+  }
+
+  String _getHostEngineBasename(String localEngineBasename) {
+    // Determine the host engine directory associated with the local engine:
+    // Strip '_sim_' since there are no host simulator builds.
+    String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
+    tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
+    // Strip suffix for various archs.
+    final List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
+    for (String suffix in suffixes) {
+      tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
+    }
+    return 'host_' + tmpBasename;
   }
 
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
@@ -451,11 +467,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       throwToolExit(userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
     }
 
-    // Determine the host engine directory associated with the local engine:
-    // * strip '_sim_' since there are no host simulator builds.
-    // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    final String hostBasename = _getHostEngineBasename(basename);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
     if (!fs.isDirectorySync(engineHostBuildPath)) {
       throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);

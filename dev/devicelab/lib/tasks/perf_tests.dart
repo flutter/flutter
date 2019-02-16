@@ -30,6 +30,14 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createHomeScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'test_driver/scroll_perf.dart',
+    'home_scroll_perf',
+  ).run;
+}
+
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -359,7 +367,6 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
@@ -368,8 +375,6 @@ class CompileTest {
     final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
-      'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
-      'icudtl_compressed_bytes': icudtl.compressedSize,
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
       'libflutter_compressed_bytes': libflutter.compressedSize,
       'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +

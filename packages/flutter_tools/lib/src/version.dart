@@ -540,7 +540,12 @@ String _shortGitRevision(String revision) {
 
 class GitTagVersion {
   const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
-  const GitTagVersion.unknown() : x = null, y = null, z = null, commits = 0, hash = '';
+  const GitTagVersion.unknown()
+    : x = null,
+      y = null,
+      z = null,
+      commits = 0,
+      hash = '';
 
   /// The X in vX.Y.Z.
   final int x;

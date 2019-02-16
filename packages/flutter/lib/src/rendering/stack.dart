@@ -630,11 +630,12 @@ class RenderIndexedStack extends RenderStack {
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     int index = 0,
-  }) : _index = index, super(
-    children: children,
-    alignment: alignment,
-    textDirection: textDirection,
-  );
+  }) : _index = index,
+       super(
+         children: children,
+         alignment: alignment,
+         textDirection: textDirection,
+       );
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

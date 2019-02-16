@@ -37,7 +37,7 @@ const double _kMinButtonSize = 48.0;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
@@ -47,11 +47,25 @@ const double _kMinButtonSize = 48.0;
 /// ```
 ///
 /// ```dart
-/// Widget build(BuildContext) {
-///   return IconButton(
-///     icon: Icon(Icons.volume_up),
-///     tooltip: 'Increase volume by 10%',
-///     onPressed: () { setState(() { _volume *= 1.1; }); },
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           IconButton(
+///             icon: Icon(Icons.volume_up),
+///             tooltip: 'Increase volume by 10',
+///             onPressed: () {
+///               setState(() {
+///                 _volume += 10;
+///               });
+///             },
+///           ),
+///           Text('Volume : $_volume')
+///         ],
+///       ),
+///     ),
 ///   );
 /// }
 /// ```
@@ -69,7 +83,7 @@ const double _kMinButtonSize = 48.0;
 /// the underlying [Material] along with the splash and highlight
 /// [InkResponse] contributed by descendant widgets.
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// In this sample the icon button's background color is defined with an [Ink]
 /// widget whose child is an [IconButton]. The icon button's filled background
@@ -77,17 +91,25 @@ const double _kMinButtonSize = 48.0;
 /// button is.
 ///
 /// ```dart
-/// Ink(
-///   decoration: ShapeDecoration(
-///     color: Colors.purple,
-///     shape: CircleBorder(),
-///   ),
-///   child: IconButton(
-///     icon: Icon(Icons.android),
-///     color: Colors.white,
-///     onPressed: () { print("filled background"); },
-///   ),
-/// )
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Container(
+///       child: Ink(
+///         decoration: ShapeDecoration(
+///           color: Colors.lightBlue,
+///           shape: CircleBorder(),
+///         ),
+///         child: IconButton(
+///           icon: Icon(Icons.android),
+///           color: Colors.white,
+///           onPressed: () {
+///             print("filled background");
+///           },
+///         ),
+///       ),
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

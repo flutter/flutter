@@ -7,6 +7,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -193,7 +194,9 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
+  DevFSStringContent(String string)
+    : _string = string,
+      super(utf8.encode(string));
 
   String _string;
 
@@ -274,7 +277,7 @@ class DevFSException implements Exception {
 
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-      : httpAddress = serviceProtocol.httpAddress;
+    : httpAddress = serviceProtocol.httpAddress;
 
   final String fsName;
   final Uri httpAddress;
@@ -334,7 +337,7 @@ class _DevFSHttpWriter {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
         // Synchronization is handled by the _completer below.
-        _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
+        unawaited(_scheduleWrite(deviceUri, content, retry + 1));
         return;
       } else {
         printError('Error writing "$deviceUri" to DevFS: $e');
@@ -377,25 +380,25 @@ class UpdateFSReport {
 
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
-  DevFS(VMService serviceProtocol,
-        this.fsName,
-        this.rootDirectory, {
-        String packagesFilePath
-      })
-    : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
+  DevFS(
+    VMService serviceProtocol,
+    this.fsName,
+    this.rootDirectory, {
+    String packagesFilePath
+  }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
+       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
-  DevFS.operations(this._operations,
-                   this.fsName,
-                   this.rootDirectory, {
-                   String packagesFilePath,
-      })
-    : _httpWriter = null {
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+  DevFS.operations(
+    this._operations,
+    this.fsName,
+    this.rootDirectory, {
+    String packagesFilePath,
+  }) : _httpWriter = null {
+       _packagesFilePath =
+           packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
   final DevFSOperations _operations;

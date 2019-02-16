@@ -462,7 +462,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   void accept() {}
 
   @override
-  void reject() {}
+  Future<CompilerOutput> reject() async { return null; }
 
   @override
   void reset() {}

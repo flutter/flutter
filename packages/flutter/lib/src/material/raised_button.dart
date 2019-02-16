@@ -31,6 +31,48 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
+/// and lastly a RaisedButton with gradient background.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           RaisedButton(
+///             onPressed: null,
+///             child: const Text('Disabled Button'),
+///           ),
+///           RaisedButton(
+///             onPressed: () {},
+///             child: const Text('Enabled Button'),
+///           ),
+///           RaisedButton(
+///             onPressed: () {},
+///             textColor: Colors.white,
+///             padding: const EdgeInsets.all(0.0),
+///             child: Container(
+///               decoration: const BoxDecoration(
+///                 gradient: LinearGradient(
+///                   colors: <Color>[Colors.red, Colors.green, Colors.blue],
+///                 ),
+///               ),
+///               padding: const EdgeInsets.all(10.0),
+///               child: Text('Gradient Button'),
+///             ),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FlatButton], a material design button without a shadow.
@@ -39,7 +81,7 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///

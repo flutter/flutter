@@ -551,6 +551,61 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('PopupMenuButton PopupMenuDivider', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27072
+
+    String selectedValue;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(
+            child: Center(
+              child: PopupMenuButton<String>(
+                onSelected: (String result) {
+                  selectedValue = result;
+                },
+                child: const Text('Menu Button'),
+                initialValue: '1',
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    child: Text('1'),
+                    value: '1',
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    child: Text('2'),
+                    value: '2',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Menu Button'));
+    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(PopupMenuDivider), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    expect(selectedValue, '1');
+
+    await tester.tap(find.text('Menu Button'));
+    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(PopupMenuDivider), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+
+    await tester.tap(find.text('2'));
+    await tester.pumpAndSettle();
+    expect(selectedValue, '2');
+  });
+
 }
 
 class TestApp extends StatefulWidget {

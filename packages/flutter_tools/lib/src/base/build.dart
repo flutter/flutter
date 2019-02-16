@@ -351,7 +351,7 @@ class JITSnapshotter {
     @required String outputPath,
     @required String compilationTraceFilePath,
     @required bool createPatch,
-    int buildNumber,
+    String buildNumber,
     String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
@@ -436,6 +436,15 @@ class JITSnapshotter {
             printError('Error: Detected engine changes unsupported by dynamic patching.');
             return 1;
           }
+        }
+      }
+
+      {
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
+        if (af != null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
         }
       }
     }

@@ -55,7 +55,7 @@ class _FakeGenSnapshot implements GenSnapshot {
     String packagesPath,
     String depfilePath,
     IOSArch iosArch,
-    Iterable<String> additionalArgs,
+    Iterable<String> additionalArgs = const <String>[],
   }) async {
     _callCount += 1;
     _snapshotType = snapshotType;
@@ -852,7 +852,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -905,7 +905,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -966,7 +966,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -1009,7 +1009,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 

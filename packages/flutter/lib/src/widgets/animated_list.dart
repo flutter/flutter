@@ -26,7 +26,9 @@ const Duration _kDuration = Duration(milliseconds: 300);
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
-  _ActiveItem.index(this.itemIndex) : controller = null, removedItemBuilder = null;
+  _ActiveItem.index(this.itemIndex)
+    : controller = null,
+      removedItemBuilder = null;
 
   final AnimationController controller;
   final AnimatedListRemovedItemBuilder removedItemBuilder;

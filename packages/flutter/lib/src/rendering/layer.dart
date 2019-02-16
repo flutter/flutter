@@ -48,6 +48,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
+  @visibleForTesting
   void markNeedsAddToScene() {
     _needsAddToScene = true;
   }
@@ -90,6 +91,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// A subtree needs [addToScene] if any of its layer needs [addToScene].
   /// The [ContainerLayer] will override this to respect its children.
   @protected
+  @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
     _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
@@ -323,7 +325,8 @@ class TextureLayer extends Layer {
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
-  }): assert(rect != null), assert(textureId != null);
+  }) : assert(rect != null),
+       assert(textureId != null);
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -366,7 +369,8 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
-  }): assert(rect != null), assert(viewId != null);
+  }) : assert(rect != null),
+       assert(viewId != null);
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -815,9 +819,13 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ @required Rect clipRect, Clip clipBehavior = Clip.hardEdge }) :
-        _clipRect = clipRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRectLayer({
+    @required Rect clipRect,
+    Clip clipBehavior = Clip.hardEdge,
+  }) : _clipRect = clipRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -887,9 +895,13 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ @required RRect clipRRect, Clip clipBehavior = Clip.antiAlias }) :
-        _clipRRect = clipRRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRRectLayer({
+    @required RRect clipRRect,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipRRect = clipRRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -955,9 +967,13 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ @required Path clipPath, Clip clipBehavior = Clip.antiAlias }) :
-        _clipPath = clipPath, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipPathLayer({
+    @required Path clipPath,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -1094,8 +1110,11 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({ @required int alpha, Offset offset = Offset.zero })
-      : _alpha = alpha, _offset = offset;
+  OpacityLayer({
+    @required int alpha,
+    Offset offset = Offset.zero,
+  }) : _alpha = alpha,
+       _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1152,8 +1171,13 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({ @required Shader shader, @required Rect maskRect, @required BlendMode blendMode })
-      : _shader = shader, _maskRect = maskRect, _blendMode = blendMode;
+  ShaderMaskLayer({
+    @required Shader shader,
+    @required Rect maskRect,
+    @required BlendMode blendMode,
+  }) : _shader = shader,
+       _maskRect = maskRect,
+       _blendMode = blendMode;
 
   /// The shader to apply to the children.
   ///
@@ -1729,10 +1753,13 @@ class FollowerLayer extends ContainerLayer {
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new layer annotated with [value] that clips to [size] if provided.
+  /// Creates a new layer annotated with [value] that clips to rectangle defined
+  /// by the [size] and [offset] if provided.
   ///
-  /// The value provided cannot be null.
-  AnnotatedRegionLayer(this.value, {this.size}) : assert(value != null);
+  /// The [value] provided cannot be null.
+  AnnotatedRegionLayer(this.value, {this.size, Offset offset})
+      : offset = offset ?? Offset.zero,
+        assert(value != null);
 
   /// The value returned by [find] if the offset is contained within this layer.
   final T value;
@@ -1741,14 +1768,25 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// If not provided, all offsets are considered to be contained within this
   /// layer, unless an ancestor layer applies a clip.
+  ///
+  /// If [offset] is set, then the offset is applied to the size region before
+  /// hit testing in [find].
   final Size size;
+
+  /// The [offset] is optionally used to translate the clip region for the
+  /// hit-testing of [find] by [offset].
+  ///
+  /// If not provided, offset defaults to [Offset.zero].
+  ///
+  /// Ignored if [size] is not set.
+  final Offset offset;
 
   @override
   S find<S>(Offset regionOffset) {
     final S result = super.find<S>(regionOffset);
     if (result != null)
       return result;
-    if (size != null && !size.contains(regionOffset))
+    if (size != null && !(offset & size).contains(regionOffset))
       return null;
     if (T == S) {
       final Object untypedResult = value;
@@ -1763,5 +1801,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<T>('value', value));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
   }
 }

@@ -155,7 +155,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           overlayEntries.first.opaque = false;
         break;
       case AnimationStatus.dismissed:
-        assert(!overlayEntries.first.opaque);
         // We might still be the current route if a subclass is controlling the
         // the transition and hits the dismissed status. For example, the iOS
         // back gesture drives this animation to the dismissed status before
@@ -1450,14 +1449,14 @@ class _DialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder transitionBuilder,
     RouteSettings settings,
-  })  : assert(barrierDismissible != null),
-        _pageBuilder = pageBuilder,
-        _barrierDismissible = barrierDismissible,
-        _barrierLabel = barrierLabel,
-        _barrierColor = barrierColor,
-        _transitionDuration = transitionDuration,
-        _transitionBuilder = transitionBuilder,
-        super(settings: settings);
+  }) : assert(barrierDismissible != null),
+       _pageBuilder = pageBuilder,
+       _barrierDismissible = barrierDismissible,
+       _barrierLabel = barrierLabel,
+       _barrierColor = barrierColor,
+       _transitionDuration = transitionDuration,
+       _transitionBuilder = transitionBuilder,
+       super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
 
