@@ -154,6 +154,12 @@ void main() {
           const Offset(-150, 0),
           const Offset(-150, 0),
         ],
+        <Offset>[
+          const Offset(18, 18),
+          const Offset(-32, 0),
+          const Offset(-18, 0),
+          const Offset(-14, 0),
+        ],
       ];
 
       await tester.pumpWidget(
