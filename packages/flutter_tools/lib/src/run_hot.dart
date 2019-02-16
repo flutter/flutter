@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/dependencies.dart';
@@ -122,8 +123,12 @@ class HotRunner extends ResidentRunner {
       return false;
     }
 
-    final DartDependencySetBuilder dartDependencySetBuilder =
-        DartDependencySetBuilder(mainPath, packagesFilePath);
+    /// When using the build system, dependency analysis is handled by build
+    /// runner instead.
+    if (experimentalBuildEnabled) {
+      return true;
+    }
+    final DartDependencySetBuilder dartDependencySetBuilder = DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = Set<String>.from(dartDependencySetBuilder.build());
     } on DartDependencyException catch (error) {

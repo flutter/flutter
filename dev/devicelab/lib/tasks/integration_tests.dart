@@ -61,6 +61,16 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   );
 }
 
+TaskFunction createCodegenerationIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/codegen',
+    'lib/main.dart',
+    environment: <String, String>{
+      'FLUTTER_EXPERIMENTAL_BUILD': 'true'
+    },
+  );
+}
+
 TaskFunction createFlutterCreateOfflineTest() {
   return () async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
@@ -83,12 +93,14 @@ class DriverTest {
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
+      this.environment =  const <String, String>{},
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
+  final Map<String, String> environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -107,7 +119,7 @@ class DriverTest {
         deviceId,
       ];
       options.addAll(extraOptions);
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);
     });
