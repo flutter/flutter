@@ -8,7 +8,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // scrolling by this offset will move the picker to the next item
-const Offset _kRowOffset = Offset(0.0, -32.0);
+const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
   group('Countdown timer picker', () {
@@ -660,28 +660,28 @@ void main() {
       );
 
       // 3:00 -> 15:00
-      await tester.drag(find.text('AM'), _kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('AM'), _kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 15));
 
       // 15:00 -> 16:00
-      await tester.drag(find.text('3'), _kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('3'), _kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 16));
 
       // 16:00 -> 4:00
-      await tester.drag(find.text('PM'), -_kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('PM'), -_kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2019, 1, 1, 4));
 
       // 4:00 -> 3:00
-      await tester.drag(find.text('4'), -_kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('4'), -_kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -707,28 +707,28 @@ void main() {
       );
 
       // 11:59 -> 12:59
-      await tester.drag(find.text('11'), _kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('11'), _kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 12, 59));
 
       // 12:59 -> 11:59
-      await tester.drag(find.text('12'), -_kRowOffset, touchSlopY: 0);
+      await tester.drag(find.text('12'), -_kRowOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
       // 11:59 -> 9:59
-      await tester.drag(find.text('11'), -_kRowOffset * 2, touchSlopY: 0);
+      await tester.drag(find.text('11'), -_kRowOffset * 1.5);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
       // 9:59 -> 15:59
-      await tester.drag(find.text('9'), _kRowOffset * 6, touchSlopY: 0);
+      await tester.drag(find.text('9'), _kRowOffset * 4.2);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

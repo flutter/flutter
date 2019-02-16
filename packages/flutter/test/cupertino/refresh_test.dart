@@ -549,7 +549,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
       await tester.pump();
       verify(mockHelper.builder(
         any,
