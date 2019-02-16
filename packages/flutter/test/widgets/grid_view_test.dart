@@ -538,6 +538,7 @@ void main() {
   });
 
   testWidgets('GridView crossAxisSpacing', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27151.
     final Key target = UniqueKey();
 
     Widget build(TextDirection textDirection) {
