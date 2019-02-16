@@ -110,7 +110,6 @@ void main() {
   });
 
   testGesture('Force presses are not recognized on devices with low maxmium pressure', (GestureTester tester) {
-
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 1.0;
@@ -586,6 +585,7 @@ void main() {
     expect(updated, 0);
     expect(ended, 0);
 
+    // If the case where the pressure is greater than the max pressure were not handled correctly, this move event would throw an error.
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 8.0, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(pointer.up());
 
