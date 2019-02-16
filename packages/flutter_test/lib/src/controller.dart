@@ -443,8 +443,8 @@ abstract class WidgetController {
       final double offsetX = offset.dx;
       final double offsetY = offset.dy;
 
-      final bool separateX = offset.dx.abs() > touchSlopX;
-      final bool separateY = offset.dy.abs() > touchSlopY;
+      final bool separateX = offset.dx.abs() > touchSlopX && touchSlopX > 0;
+      final bool separateY = offset.dy.abs() > touchSlopY && touchSlopY > 0;
 
       if (separateY || separateX) {
         final double offsetSlope = offsetY / offsetX;
@@ -462,7 +462,7 @@ abstract class WidgetController {
             await gesture.moveBy(Offset(touchSlopX * xSign, diffY));
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(offsetX - touchSlopX, offsetY - diffY));
+              await gesture.moveBy(Offset(offsetX - touchSlopX * xSign, offsetY - diffY));
             } else {
               final double diffY2 = touchSlopY * ySign - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
@@ -480,7 +480,7 @@ abstract class WidgetController {
             await gesture.moveBy(Offset(diffX, touchSlopY * ySign));
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(offsetX - diffX, offsetY - touchSlopY));
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - touchSlopY * ySign));
             } else {
               final double diffX2 = touchSlopX * xSign - diffX;
               final double diffY2 = offsetSlope * diffX2;
@@ -491,8 +491,8 @@ abstract class WidgetController {
             }
           }
         } else { // The drag goes through the corner of the box.
-          await gesture.moveBy(Offset(touchSlopX, touchSlopY));
-          await gesture.moveBy(Offset(offsetX - touchSlopX, offsetY - touchSlopY));
+          await gesture.moveBy(Offset(touchSlopX * xSign, touchSlopY * ySign));
+          await gesture.moveBy(Offset(offsetX - touchSlopX * xSign, offsetY - touchSlopY * ySign));
         }
       } else { // The drag ends inside the box.
         await gesture.moveBy(offset);
