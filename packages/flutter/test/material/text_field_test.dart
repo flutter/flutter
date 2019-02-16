@@ -4509,7 +4509,8 @@ void main() {
     final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 5.0);
 
     const int pointerValue = 1;
-    final TestGesture gesture = await TestGesture.downWithCustomEvent(
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
       offset,
       PointerDownEvent(
           pointer: pointerValue,
@@ -4518,8 +4519,6 @@ void main() {
           pressureMax: 6.0,
           pressureMin: 0.0
       ),
-      hitTester: tester.hitTestOnBinding,
-      dispatcher: tester.sendEventToBinding,
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
@@ -4551,17 +4550,16 @@ void main() {
 
     const int pointerValue = 1;
     final Offset offset = textfieldStart + const Offset(150.0, 5.0);
-    final TestGesture gesture = await TestGesture.downWithCustomEvent(
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
       offset,
       PointerDownEvent(
-          pointer: pointerValue,
-          position: offset,
-          pressure: 0.0,
-          pressureMax: 6.0,
-          pressureMin: 0.0
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
       ),
-      hitTester: tester.hitTestOnBinding,
-      dispatcher: tester.sendEventToBinding,
     );
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));

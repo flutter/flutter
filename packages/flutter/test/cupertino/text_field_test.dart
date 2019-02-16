@@ -1396,7 +1396,8 @@ void main() {
       final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
       const int pointerValue = 1;
-      final TestGesture gesture = await TestGesture.downWithCustomEvent(
+      final TestGesture gesture = await tester.createGesture();
+      await gesture.downWithCustomEvent(
         textfieldStart + const Offset(150.0, 5.0),
         PointerDownEvent(
           pointer: pointerValue,
@@ -1405,8 +1406,6 @@ void main() {
           pressureMax: 6.0,
           pressureMin: 0.0
         ),
-        hitTester: tester.hitTestOnBinding,
-        dispatcher: tester.sendEventToBinding,
       );
       // We expect the force press to select a word at the given location.
       expect(
