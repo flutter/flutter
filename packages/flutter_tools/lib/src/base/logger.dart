@@ -14,7 +14,7 @@ import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
 const Duration kFastOperation = Duration(seconds: 2);
-const Duration kMediumOperation =Duration(seconds: 4);
+const Duration kMediumOperation = Duration(seconds: 4);
 const Duration kSlowOperation = Duration(minutes: 2);
 
 typedef VoidCallback = void Function();
