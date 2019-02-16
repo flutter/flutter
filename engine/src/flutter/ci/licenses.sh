@@ -42,7 +42,7 @@ fi
 
 echo "Checking license count in licenses_flutter..."
 actualLicenseCount=`tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9'`
-expectedLicenseCount=3 # When changing this number: Update the error message below as well describing all expected license types.
+expectedLicenseCount=2 # When changing this number: Update the error message below as well describing all expected license types.
 
 if [ "$actualLicenseCount" -ne "$expectedLicenseCount" ]
 then
