@@ -12,7 +12,6 @@ import 'base/file_system.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
-import 'convert.dart' as convert;
 import 'globals.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
