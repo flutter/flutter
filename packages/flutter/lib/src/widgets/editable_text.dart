@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart' show debugCheckHasMediaQuery;
+import 'package:flutter/widgets.dart' show debugCheckHasMediaQuery;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
