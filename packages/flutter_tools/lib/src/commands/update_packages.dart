@@ -25,7 +25,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
   'xml': '3.3.1',
   'mustache': '1.1.1',
-  'petitparser': '2.1.1'
+  'petitparser': '2.1.1',
+  'json_schema': '1.0.10',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
