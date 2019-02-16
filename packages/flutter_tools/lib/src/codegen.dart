@@ -240,8 +240,8 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: codegenDaemon.packagesFile.path,
       fileSystemRoots: <String>[
-        fs.path.join(flutterProject.generated.absolute.path, 'lib/'),
-        fs.path.join(flutterProject.directory.path, 'lib/'),
+        fs.path.join(flutterProject.generated.absolute.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
       fileSystemScheme: _kMultiRootScheme,
       targetModel: TargetModel.flutter,
