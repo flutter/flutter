@@ -11,7 +11,6 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
-import io.flutter.util.BSDiff;
 import io.flutter.util.PathUtils;
 import org.json.JSONObject;
 
@@ -20,7 +19,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -30,6 +28,8 @@ import java.util.zip.ZipFile;
 class ResourceExtractor {
     private static final String TAG = "ResourceExtractor";
     private static final String TIMESTAMP_PREFIX = "res_timestamp-";
+
+    private static final int BUFFER_SIZE = 16 * 1024;
 
     @SuppressWarnings("deprecation")
     static long getVersionCode(PackageInfo packageInfo) {
@@ -177,6 +177,7 @@ class ResourceExtractor {
     private boolean extractAPK(File dataDir) {
         final AssetManager manager = mContext.getResources().getAssets();
 
+        byte[] buffer = null;
         for (String asset : mResources) {
             try {
                 final File output = new File(dataDir, asset);
@@ -189,10 +190,18 @@ class ResourceExtractor {
 
                 try (InputStream is = manager.open(asset);
                      OutputStream os = new FileOutputStream(output)) {
-                    copy(is, os);
-                }
+                    if (buffer == null) {
+                        buffer = new byte[BUFFER_SIZE];
+                    }
 
-                Log.i(TAG, "Extracted baseline resource " + asset);
+                    int count = 0;
+                    while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                        os.write(buffer, 0, count);
+                    }
+
+                    os.flush();
+                    Log.i(TAG, "Extracted baseline resource " + asset);
+                }
 
             } catch (FileNotFoundException fnfe) {
                 continue;
@@ -210,8 +219,6 @@ class ResourceExtractor {
     /// Returns true if successfully unpacked update resources or if there is no update,
     /// otherwise deletes all resources and returns false.
     private boolean extractUpdate(File dataDir) {
-        final AssetManager manager = mContext.getResources().getAssets();
-
         ResourceUpdater resourceUpdater = FlutterMain.getResourceUpdater();
         if (resourceUpdater == null) {
             return true;
@@ -238,15 +245,11 @@ class ResourceExtractor {
             return false;
         }
 
+        byte[] buffer = null;
         for (String asset : mResources) {
-            boolean useDiff = false;
             ZipEntry entry = zipFile.getEntry(asset);
             if (entry == null) {
-                useDiff = true;
-                entry = zipFile.getEntry(asset + ".bzdiff40");
-                if (entry == null) {
-                    continue;
-                }
+                continue;
             }
 
             final File output = new File(dataDir, asset);
@@ -257,29 +260,18 @@ class ResourceExtractor {
                 output.getParentFile().mkdirs();
             }
 
-            try {
-                if (useDiff) {
-                    ByteArrayOutputStream diff = new ByteArrayOutputStream();
-                    try (InputStream is = zipFile.getInputStream(entry)) {
-                        copy(is, diff);
-                    }
-
-                    ByteArrayOutputStream orig = new ByteArrayOutputStream();
-                    try (InputStream is = manager.open(asset)) {
-                        copy(is, orig);
-                    }
-
-                    try (OutputStream os = new FileOutputStream(output)) {
-                        os.write(BSDiff.bspatch(orig.toByteArray(), diff.toByteArray()));
-                    }
-
-                } else {
-                    try (InputStream is = zipFile.getInputStream(entry);
-                         OutputStream os = new FileOutputStream(output)) {
-                        copy(is, os);
-                    }
+            try (InputStream is = zipFile.getInputStream(entry);
+                 OutputStream os = new FileOutputStream(output)) {
+                if (buffer == null) {
+                    buffer = new byte[BUFFER_SIZE];
                 }
 
+                int count = 0;
+                while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                    os.write(buffer, 0, count);
+                }
+
+                os.flush();
                 Log.i(TAG, "Extracted override resource " + asset);
 
             } catch (FileNotFoundException fnfe) {
@@ -346,12 +338,5 @@ class ResourceExtractor {
         }
 
         return null;
-    }
-
-    private static void copy(InputStream in, OutputStream out) throws IOException {
-        byte[] buf = new byte[16 * 1024];
-        for (int i; (i = in.read(buf)) >= 0; ) {
-            out.write(buf, 0, i);
-        }
     }
 }
