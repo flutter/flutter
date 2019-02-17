@@ -1,4 +1,4 @@
-Signature: fdad52cc7a1181ea7c03fa13bccd2cd1
+Signature: 94017eaa2abe4dcf08db41c433b0850e
 
 UNUSED LICENSES:
 
@@ -4930,8 +4930,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/skbug_8664.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/mixercolorfilter.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
 FILE: ../../../third_party/skia/include/private/GrContext_Base.h
