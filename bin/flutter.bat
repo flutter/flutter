@@ -12,6 +12,8 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
+SETLOCAL ENABLEDELAYEDEXPANSION
+
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
@@ -99,7 +101,7 @@ GOTO :after_subroutine
     ECHO Checking Dart SDK version...
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
-    SET "update_dart_bin=%update_dart_bin:'=''%"
+    SET "update_dart_bin=!update_dart_bin:'=''!"
     PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
