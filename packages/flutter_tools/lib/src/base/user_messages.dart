@@ -45,6 +45,13 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidSdkLicenseOnly(String envKey) =>
+      'Android SDK contains licenses only.\n'
+      'Your first build of an Android application will take longer than usual, '
+      'while gradle downloads the missing components. This functionality will '
+      'only work if the licenses in the licenses folder in $envKey are valid.\n'
+      'If the Android SDK has been installed to another location, set $envKey to that location.\n'
+      'You may also want to add it to your PATH environment variable.\n';
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
@@ -53,7 +60,7 @@ class UserMessages {
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-      'If Android SDK has been installed to a custom location, set $envKey to that location.\n'
+      'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>

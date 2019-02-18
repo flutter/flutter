@@ -29,7 +29,7 @@ void main() {
   MockStdio stdio;
 
   setUp(() {
-    sdk = MockAndroidSdk();
+    sdk = MockAndroidSdk(false);
     fs = MemoryFileSystem();
     fs.directory('/home/me').createSync(recursive: true);
     processManager = MockProcessManager();
@@ -172,6 +172,21 @@ void main() {
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
+  testUsingContext('detects license-only SDK installation', () async {
+    final ValidationResult validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.partial);
+    expect(
+      validationResult.messages.last.message,
+      userMessages.androidSdkLicenseOnly(kAndroidHome),
+    );
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => MockAndroidSdk(true),
     FileSystem: () => fs,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,

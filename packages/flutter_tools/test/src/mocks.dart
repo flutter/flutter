@@ -38,6 +38,11 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
+  MockAndroidSdk(this.licensesOnly);
+
+  @override
+  final bool licensesOnly;
+
   static Directory createSdkDirectory({
     bool withAndroidN = false,
     String withNdkDir,
@@ -46,6 +51,8 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withSdkManager = true,
   }) {
     final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+
+    _createDir(dir, 'licenses');
 
     _createSdkFile(dir, 'platform-tools/adb');
 

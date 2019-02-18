@@ -262,7 +262,7 @@ class AndroidNdk {
 }
 
 class AndroidSdk {
-  AndroidSdk(this.directory, [this.ndk]) {
+  AndroidSdk(this.directory, this.licensesOnly, [this.ndk]) : assert(licensesOnly != null) {
     _init();
   }
 
@@ -277,6 +277,8 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
+
+  final bool licensesOnly;
 
   static AndroidSdk locateAndroidSdk() {
     String findAndroidHomeDir() {
@@ -344,11 +346,14 @@ class AndroidSdk {
       // exceptions.
     }
 
-    return AndroidSdk(androidHomeDir, ndk);
+    final bool licensesOnly = fs.directory(fs.path.join(androidHomeDir, 'licenses')).existsSync() &&
+          !fs.directory(fs.path.join(androidHomeDir, 'platform-tools')).existsSync();
+
+    return AndroidSdk(androidHomeDir, licensesOnly, ndk);
   }
 
   static bool validSdkDirectory(String dir) {
-    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
+    return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
   }
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
@@ -376,8 +381,8 @@ class AndroidSdk {
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
-    if (!processManager.canRun(adbPath))
-      return <String>['Android SDK file not found: $adbPath.'];
+    if (adbPath == null || !processManager.canRun(adbPath))
+      return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
 
     if (sdkVersions.isEmpty || latestVersion == null) {
       final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
@@ -396,7 +401,10 @@ class AndroidSdk {
   }
 
   String getPlatformToolsPath(String binaryName) {
-    return fs.path.join(directory, 'platform-tools', binaryName);
+    final String path = fs.path.join(directory, 'platform-tools', binaryName);
+    if (fs.file(path).existsSync())
+      return path;
+    return null;
   }
 
   String getEmulatorPath() {
