@@ -42,11 +42,12 @@ void main() {
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
-  testUsingContext('licensesAccepted throws if cannot run sdkmanager', () async {
+  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
     processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
-    expect(licenseValidator.licensesAccepted, throwsToolExit());
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
+    expect(licenseStatus, LicensesAccepted.unknown);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,

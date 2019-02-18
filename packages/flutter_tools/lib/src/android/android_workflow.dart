@@ -253,7 +253,9 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
     }
 
-    _ensureCanRunSdkManager();
+    if (!_ensureCanRunSdkManager()) {
+      return LicensesAccepted.unknown;
+    }
 
     final Process process = await runCommand(
       <String>[androidSdk.sdkManagerPath, '--licenses'],
@@ -283,7 +285,9 @@ class AndroidLicenseValidator extends DoctorValidator {
       return false;
     }
 
-    _ensureCanRunSdkManager();
+    if (!_ensureCanRunSdkManager()) {
+      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
+    }
 
     final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
     if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
@@ -310,10 +314,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     return exitCode == 0;
   }
 
-  static void _ensureCanRunSdkManager() {
+  static bool _ensureCanRunSdkManager() {
     assert(androidSdk != null);
     final String sdkManagerPath = androidSdk.sdkManagerPath;
-    if (!processManager.canRun(sdkManagerPath))
-      throwToolExit(userMessages.androidMissingSdkManager(sdkManagerPath));
+    return processManager.canRun(sdkManagerPath);
   }
 }

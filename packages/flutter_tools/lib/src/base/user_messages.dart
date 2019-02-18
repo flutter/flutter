@@ -82,7 +82,11 @@ class UserMessages {
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown => 'Android license status unknown.';
+  String get androidLicensesUnknown =>
+      'Android license status unknown.\n'
+      'Try re-installing or updating your Android SDK Manager.\n'
+      'See https://developer.android.com/studio/#downloads or visit '
+      'https://flutter.io/setup/#android-setup for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
