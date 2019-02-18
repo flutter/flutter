@@ -94,11 +94,7 @@ class AndroidValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    if (androidSdk == null || androidSdk.licensesOnly) {
-      if (androidSdk.licensesOnly) {
-        messages.add(ValidationMessage.hint(userMessages.androidSdkLicenseOnly(kAndroidHome)));
-        return ValidationResult(ValidationType.partial, messages);
-      }
+    if (androidSdk == null) {
       // No Android SDK found.
       if (platform.environment.containsKey(kAndroidHome)) {
         final String androidHomeDir = platform.environment[kAndroidHome];
@@ -107,6 +103,11 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
       }
       return ValidationResult(ValidationType.missing, messages);
+    }
+
+    if (androidSdk.licensesOnly) {
+      messages.add(ValidationMessage.hint(userMessages.androidSdkLicenseOnly(kAndroidHome)));
+      return ValidationResult(ValidationType.partial, messages);
     }
 
     messages.add(ValidationMessage(userMessages.androidSdkLocation(androidSdk.directory)));
