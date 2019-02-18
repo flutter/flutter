@@ -153,12 +153,14 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
     @required this.crossAxisStride,
     @required this.childMainAxisExtent,
     @required this.childCrossAxisExtent,
+    @required this.crossAxisExtent,
     @required this.reverseCrossAxis,
   }) : assert(crossAxisCount != null && crossAxisCount > 0),
        assert(mainAxisStride != null && mainAxisStride >= 0),
        assert(crossAxisStride != null && crossAxisStride >= 0),
        assert(childMainAxisExtent != null && childMainAxisExtent >= 0),
        assert(childCrossAxisExtent != null && childCrossAxisExtent >= 0),
+       assert(crossAxisExtent != null && crossAxisExtent >= 0),
        assert(reverseCrossAxis != null);
 
   /// The number of children in the cross axis.
@@ -179,6 +181,11 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   /// The number of pixels from the leading edge of one tile to the trailing
   /// edge of the same tile in the cross axis.
   final double childCrossAxisExtent;
+
+  /// The number of pixels in the cross-axis.
+  ///
+  /// For a vertical list, this is the width of the sliver.
+  final double crossAxisExtent;
 
   /// Whether the children should be placed in the opposite order of increasing
   /// coordinates in the cross axis.
@@ -206,8 +213,9 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   }
 
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
-    if (reverseCrossAxis)
-      return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent;
+    if (reverseCrossAxis){
+      return crossAxisExtent - crossAxisStart - childCrossAxisExtent;
+    }
     return crossAxisStart;
   }
 
@@ -334,6 +342,7 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
       crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
       childMainAxisExtent: childMainAxisExtent,
       childCrossAxisExtent: childCrossAxisExtent,
+      crossAxisExtent: constraints.crossAxisExtent,
       reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
     );
   }
@@ -432,6 +441,7 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
       crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
       childMainAxisExtent: childMainAxisExtent,
       childCrossAxisExtent: childCrossAxisExtent,
+      crossAxisExtent: constraints.crossAxisExtent,
       reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
     );
   }
