@@ -344,12 +344,12 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         break;
       case 'assets':
       case 'services':
-        if (kvp.value is! YamlList && kvp.value[0] is! String) {
+        if (kvp.value is! YamlList || kvp.value[0] is! String) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         break;
       case 'fonts':
-        if (kvp.value is! YamlList && kvp.value[0] is! YamlMap) {
+        if (kvp.value is! YamlList || kvp.value[0] is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         _validateFonts(kvp.value, errors);
