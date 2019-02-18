@@ -61,7 +61,7 @@ Future<void> build({
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
   bool createPatch = false,
-  int buildNumber,
+  String buildNumber,
   String baselineDir,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
@@ -99,7 +99,6 @@ Future<void> build({
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
-    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :

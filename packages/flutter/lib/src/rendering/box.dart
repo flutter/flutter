@@ -574,7 +574,7 @@ class BoxConstraints extends Constraints {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (other is! BoxConstraints)
+    if (runtimeType != other.runtimeType)
       return false;
     final BoxConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());

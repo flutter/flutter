@@ -123,6 +123,12 @@ Future<Process> runCommand(
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr. Completes with the process's exit code.
+///
+/// If [filter] is null, no lines are removed.
+///
+/// If [filter] is non-null, all lines that do not match it are removed. If
+/// [mapFunction] is present, all lines that match [filter] are also forwarded
+/// to [mapFunction] for further processing.
 Future<int> runCommandAndStreamOutput(
   List<String> cmd, {
   String workingDirectory,
