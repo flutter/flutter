@@ -38,12 +38,12 @@ class ShortAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
-      height: 40,
+      width: 96,
+      height: 50,
       child: Material(
         elevation: 4,
         shape: const BeveledRectangleBorder(
-          borderRadius: BorderRadius.only(bottomRight: Radius.circular(46)),
+          borderRadius: BorderRadius.only(bottomRight: Radius.circular(22)),
         ),
         child: Row(
           children: <Widget>[
@@ -51,6 +51,7 @@ class ShortAppBar extends StatelessWidget {
               icon: const Icon(Icons.arrow_back),
               onPressed: onBackPressed,
             ),
+            const SizedBox(width: 12),
             Image.asset(
               'logos/fortnightly/fortnightly_logo.png',
               package: 'flutter_gallery_assets',
