@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
+  const Offset forcePressOffset = Offset(400.0, 50.0);
+
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double updatedDragDelta;
@@ -368,14 +370,13 @@ void main() {
       ),
     );
     const int pointerValue = 1;
-    const Offset offset = Offset(400, 50);
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
@@ -441,16 +442,15 @@ void main() {
     );
 
     const int pointerValue = 1;
-    const Offset offset = Offset(400, 50);
     const double maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: maxPressure,
         pressureMin: 0.0
@@ -495,15 +495,14 @@ void main() {
     );
 
     const int pointerValue = 1;
-    const Offset offset = Offset(400, 50);
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0

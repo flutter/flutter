@@ -13,6 +13,8 @@ void main() {
   int doubleTapDownCount;
   int forcePressStartCount;
   int forcePressEndCount;
+  const Offset forcePressOffset = Offset(400.0, 50.0);
+
 
   void _handleTapDown(TapDownDetails details) { tapCount++; }
   void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
@@ -155,14 +157,14 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    const Offset offset = Offset(400.0, 50.0);
 
     final TestGesture gesture = await tester.createGesture();
+
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
@@ -174,10 +176,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
@@ -188,10 +190,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 20));
 
      await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
@@ -202,10 +204,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 20));
 
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
@@ -221,13 +223,12 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    const Offset offset = Offset(400.0, 50.0);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
           pointer: pointerValue,
-          position: offset,
+          position: forcePressOffset,
           pressure: 0.0,
           pressureMax: 6.0,
           pressureMin: 0.0
@@ -249,10 +250,10 @@ void main() {
 
     // Initiate a force tap.
     await gesture.downWithCustomEvent(
-      offset,
+      forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
-        position: offset,
+        position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0
