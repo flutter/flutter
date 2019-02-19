@@ -534,20 +534,17 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && position != null) {
-      final double targetScrollOffset =
-          _targetScrollOffsetForPointerScroll(event);
-      // Only claim the event if it would actually result in a scroll.
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
-        GestureBinding.instance.pointerSignalArena.add(event,
-            _handlePointerScroll);
+        GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
   }
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double targetScrollOffset =
-        _targetScrollOffsetForPointerScroll(event);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }

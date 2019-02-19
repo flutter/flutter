@@ -14,7 +14,7 @@ import 'debug.dart';
 import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
-import 'pointer_signal_arena.dart';
+import 'pointer_signal_resolver.dart';
 
 /// A binding for the gesture subsystem.
 ///
@@ -109,11 +109,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
-  /// The arena used for determining which widget handles a pointer
-  /// signal event. Unlike [gestureArena], this arena is opened and closed on
-  /// every pointer signal event, since they are discrete.
-  final PointerSignalArenaManager pointerSignalArena =
-      PointerSignalArenaManager();
+  /// The resolver used for determining which widget handles a pointer
+  /// signal event.
+  final PointerSignalResolver pointerSignalResolver = PointerSignalResolver();
 
   /// State for all pointers which are currently down.
   ///
@@ -226,7 +224,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
     } else if (event is PointerSignalEvent) {
-      pointerSignalArena.close(event);
+      pointerSignalResolver.resolve(event);
     }
   }
 }
