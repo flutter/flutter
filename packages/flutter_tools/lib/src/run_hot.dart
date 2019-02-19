@@ -585,7 +585,7 @@ class HotRunner extends ResidentRunner {
       }
       final Status status = logger.startProgress(
         'Performing hot restart...',
-        timeout: experimentalBuildEnabled ? kMediumOperation : kFastOperation,
+        timeout: kFastOperation,
         progressId: 'hot.restart',
       );
       try {
@@ -604,7 +604,7 @@ class HotRunner extends ResidentRunner {
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
       Status status = logger.startProgress(
         '$progressPrefix hot reload...',
-        timeout: experimentalBuildEnabled ? kMediumOperation : kFastOperation,
+        timeout: kFastOperation,
         progressId: 'hot.reload',
       );
       OperationResult result;
