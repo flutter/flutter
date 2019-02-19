@@ -99,7 +99,7 @@ enum BottomNavigationBarType {
 ///         BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
 ///       ],
 ///       currentIndex: _selectedIndex,
-///       selectedColor: Colors.deepPurple,
+///       selectedItemColor: Colors.deepPurple,
 ///       onTap: _onItemTapped,
 ///     ),
 ///   );
@@ -114,10 +114,10 @@ enum BottomNavigationBarType {
 ///  * <https://material.io/design/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar which is typically used as a
-  /// [Scaffold's] [Scaffold.bottomNavigationBar] argument.
+  /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
   ///
   /// The length of [items] must be at least two and each item's icon and title
-  /// must be not null.
+  /// must not be null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
