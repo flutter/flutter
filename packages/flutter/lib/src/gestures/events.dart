@@ -318,7 +318,7 @@ abstract class PointerEvent extends Diagnosticable {
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
-    return toString(minLevel: DiagnosticLevel.hidden);
+    return toString(minLevel: DiagnosticLevel.fine);
   }
 }
 
