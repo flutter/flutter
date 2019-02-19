@@ -433,7 +433,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           title: TextField(
             controller: queryTextController,
             focusNode: widget.delegate._focusNode,
-            style: theme.textTheme.title,
+            style: theme.primaryTextTheme.title,
             textInputAction: TextInputAction.search,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
