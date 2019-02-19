@@ -45,13 +45,13 @@ enum BottomNavigationBarType {
 /// where it is provided as the [Scaffold.bottomNavigationBar] argument.
 ///
 /// The bottom navigation bar's [type] changes how its [items] are displayed.
-/// If not specified then it's automatically set to
-/// [BottomNavigationBarType.fixed] when there are less than four items,
+/// If not specified, then it's automatically set to
+/// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
-///    [selectedItem Color] if it's non-null, otherwise the theme's
+///    [selectedItemColor] if it's non-null, otherwise the theme's
 ///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
@@ -175,7 +175,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// bottom navigation bar.
   final List<BottomNavigationBarItem> items;
 
-  /// Called when on of the [items] is tapped.
+  /// Called when one of the [items] is tapped.
   ///
   /// The stateful widget that creates the bottom navigation bar needs to keep
   /// track of the index of the selected [BottomNavigationBarItem] and call
