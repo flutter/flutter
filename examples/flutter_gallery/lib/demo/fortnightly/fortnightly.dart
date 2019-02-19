@@ -30,7 +30,7 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  ShortAppBar({this.onPressed});
+  const ShortAppBar({this.onPressed});
 
   final VoidCallback onPressed;
 
@@ -47,7 +47,7 @@ class ShortAppBar extends StatelessWidget {
         child: Row(
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: onPressed,
             ),
             Image.asset(
@@ -64,7 +64,7 @@ class ShortAppBar extends StatelessWidget {
 class FruitPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).primaryTextTheme;
+    final TextTheme textTheme = Theme.of(context).primaryTextTheme;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -73,16 +73,16 @@ class FruitPage extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Container(
-              constraints: BoxConstraints.expand(height: 248.0),
+              constraints: const BoxConstraints.expand(height: 248.0),
               child: Image.asset(
                 'food/fruits.png',
                 package: 'flutter_gallery_assets',
                 fit: BoxFit.fitWidth,
               ),
             ),
-            SizedBox(height: 17.0),
+            const SizedBox(height: 17.0),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -103,19 +103,19 @@ class FruitPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
                   Text(
-                    "Quince for Wisdom, Persimmon for Luck, Pomegranate for Love",
+                    'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
                     style: textTheme.display1,
                   ),
-                  SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
                   Text(
-                    "How these crazy fruits sweetened our hearts, relationships,"
-                        "and puffed pastries",
+                    'How these crazy fruits sweetened our hearts, relationships,'
+                        'and puffed pastries',
                     style: textTheme.body1,
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Row(
                       children: <Widget>[
                         CircleAvatar(
@@ -125,12 +125,12 @@ class FruitPage extends StatelessWidget {
                           ),
                           radius: 20,
                         ),
-                        SizedBox(width: 12.0),
+                        const SizedBox(width: 12.0),
                         Text(
                           'by',
                           style: textTheme.display3,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'Connor Eghan',
                           style: TextStyle(
@@ -144,22 +144,22 @@ class FruitPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Have you ever held a quince? It's strange; covered in a fuzz"
-                        "somewhere between peach skin and a spider web. And it's"
-                        "hard as soft lumber. You'd be forgiven for thinking it's"
-                        "veneered Larch-wood. But inhale the aroma and you'll instantly"
-                        "know you have something wonderful. Its scent can fill a"
-                        "room for days. And all this before you've even cooked it."
-                        "\n\nPomegranates on the other hand have become almost"
-                        "ubiquitous. You can find its juice in any bodega, Walmart,"
-                        "and even some gas stations. But at what cost? The pomegranate"
-                        "juice craze of the aughts made \"megafarmers\" Lynda and"
-                        "Stewart Resnick billions. Unfortunately, it takes a lot"
-                        "of water to make that much pomegranate juice. Water the"
-                        "Resnicks get from their majority stake in the Kern Water"
-                        "Bank. How did one family come to hold control over water"
-                        "meant for the whole central valley of California? The"
-                        "story will shock you.",
+                    'Have you ever held a quince? It\'s strange; covered in a fuzz'
+                        'somewhere between peach skin and a spider web. And it\'s'
+                        'hard as soft lumber. You\'d be forgiven for thinking it\'s'
+                        'veneered Larch-wood. But inhale the aroma and you\'ll instantly'
+                        'know you have something wonderful. Its scent can fill a'
+                        'room for days. And all this before you\'ve even cooked it.'
+                        '\n\nPomegranates on the other hand have become almost'
+                        'ubiquitous. You can find its juice in any bodega, Walmart,'
+                        'and even some gas stations. But at what cost? The pomegranate'
+                        'juice craze of the aughts made \"megafarmers\" Lynda and'
+                        'Stewart Resnick billions. Unfortunately, it takes a lot'
+                        'of water to make that much pomegranate juice. Water the'
+                        'Resnicks get from their majority stake in the Kern Water'
+                        'Bank. How did one family come to hold control over water'
+                        'meant for the whole central valley of California? The'
+                        'story will shock you.',
                     style: textTheme.body2,
                   ),
                 ],
@@ -206,14 +206,14 @@ TextTheme _buildTextTheme(TextTheme base) {
       fontFamily: 'Merriweather',
       fontSize: 14.0,
       fontWeight: FontWeight.w300,
-      color: Color(0xFF666666),
+      color: const Color(0xFF666666),
       height: 1.11,
     ),
     body2: base.body2.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 16.0,
       fontWeight: FontWeight.w300,
-      color: Color(0xFF666666),
+      color: const Color(0xFF666666),
       height: 1.4,
       letterSpacing: .25,
     ),
