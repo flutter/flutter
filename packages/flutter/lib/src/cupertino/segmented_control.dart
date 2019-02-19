@@ -183,7 +183,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
 
   /// The [children], if any, are placed inside this padding.
   ///
-  /// Defaults to the EdgeInsets.symmetric(horizontal: 16.0)
+  /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
   final EdgeInsets padding;
 
   @override
