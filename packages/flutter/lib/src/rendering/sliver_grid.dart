@@ -213,7 +213,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   }
 
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
-    if (reverseCrossAxis){
+    if (reverseCrossAxis) {
       return crossAxisExtent - crossAxisStart - childCrossAxisExtent;
     }
     return crossAxisStart;
