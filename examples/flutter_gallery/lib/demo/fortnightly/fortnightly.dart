@@ -19,9 +19,10 @@ class FortnightlyDemo extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               child: ShortAppBar(
-                onBackPressed: (){
+                onBackPressed: () {
                   Navigator.pop(context);
-              },),
+                },
+              ),
             ),
           ],
         ),
