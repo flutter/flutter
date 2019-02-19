@@ -38,12 +38,12 @@ class ShortAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100.0,
-      height: 40.0,
+      width: 100,
+      height: 40,
       child: Material(
-        elevation: 4.0,
+        elevation: 4,
         shape: const BeveledRectangleBorder(
-          borderRadius: BorderRadius.only(bottomRight: Radius.circular(46.0)),
+          borderRadius: BorderRadius.only(bottomRight: Radius.circular(46)),
         ),
         child: Row(
           children: <Widget>[
@@ -74,16 +74,16 @@ class FruitPage extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Container(
-              constraints: const BoxConstraints.expand(height: 248.0),
+              constraints: const BoxConstraints.expand(height: 248),
               child: Image.asset(
                 'food/fruits.png',
                 package: 'flutter_gallery_assets',
                 fit: BoxFit.fitWidth,
               ),
             ),
-            const SizedBox(height: 17.0),
+            const SizedBox(height: 17),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -104,19 +104,19 @@ class FruitPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10.0),
+                  const SizedBox(height: 10),
                   Text(
                     'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
                     style: textTheme.display1,
                   ),
-                  const SizedBox(height: 10.0),
+                  const SizedBox(height: 10),
                   Text(
                     'How these crazy fruits sweetened our hearts, relationships,'
                         'and puffed pastries',
                     style: textTheme.body1,
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Row(
                       children: <Widget>[
                         CircleAvatar(
@@ -126,7 +126,7 @@ class FruitPage extends StatelessWidget {
                           ),
                           radius: 20,
                         ),
-                        const SizedBox(width: 12.0),
+                        const SizedBox(width: 12),
                         Text(
                           'by',
                           style: textTheme.display3,
@@ -136,7 +136,7 @@ class FruitPage extends StatelessWidget {
                           'Connor Eghan',
                           style: TextStyle(
                             fontFamily: 'Merriweather',
-                            fontSize: 18.0,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
@@ -191,28 +191,28 @@ TextTheme _buildTextTheme(TextTheme base) {
     display1: base.display1.copyWith(
       fontFamily: 'Merriweather',
       fontStyle: FontStyle.italic,
-      fontSize: 28.0,
+      fontSize: 28,
       fontWeight: FontWeight.w800,
       color: Colors.black,
       height: .88,
     ),
     display3: base.display3.copyWith(
       fontFamily: 'LibreFranklin',
-      fontSize: 18.0,
+      fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.black.withAlpha(153),
     ),
     headline: base.headline.copyWith(fontWeight: FontWeight.w500),
     body1: base.body1.copyWith(
       fontFamily: 'Merriweather',
-      fontSize: 14.0,
+      fontSize: 14,
       fontWeight: FontWeight.w300,
       color: const Color(0xFF666666),
       height: 1.11,
     ),
     body2: base.body2.copyWith(
       fontFamily: 'Merriweather',
-      fontSize: 16.0,
+      fontSize: 16,
       fontWeight: FontWeight.w300,
       color: const Color(0xFF666666),
       height: 1.4,
@@ -220,7 +220,7 @@ TextTheme _buildTextTheme(TextTheme base) {
     ),
     overline: TextStyle(
       fontFamily: 'LibreFranklin',
-      fontSize: 10.0,
+      fontSize: 10,
       fontWeight: FontWeight.w700,
       color: Colors.black,
     ),
