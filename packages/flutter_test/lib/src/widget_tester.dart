@@ -288,9 +288,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     dynamic caughtException;
     void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
 
-    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
-    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
     await idle();
 
     if (caughtException != null) {
