@@ -18,8 +18,9 @@ class FortnightlyDemo extends StatelessWidget {
             FruitPage(),
             Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-              child: ShortAppBar(onPressed: (){
-                Navigator.pop(context);
+              child: ShortAppBar(
+                onBackPressed: (){
+                  Navigator.pop(context);
               },),
             ),
           ],
@@ -30,9 +31,9 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({this.onPressed});
+  const ShortAppBar({this.onBackPressed});
 
-  final VoidCallback onPressed;
+  final VoidCallback onBackPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class ShortAppBar extends StatelessWidget {
           children: <Widget>[
             IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: onPressed,
+              onPressed: onBackPressed,
             ),
             Image.asset(
               'logos/fortnightly/fortnightly_logo.png',
