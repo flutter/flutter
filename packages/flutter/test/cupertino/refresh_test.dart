@@ -116,7 +116,7 @@ void main() {
       );
 
       // Drag down but not enough to trigger the refresh.
-      await tester.drag(find.text('0'), const Offset(0.0, 50.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0), touchSlopY: 0);
       await tester.pump();
 
       // The function is referenced once while passing into CupertinoSliverRefreshControl
@@ -124,7 +124,7 @@ void main() {
       verify(mockHelper.builder(
         any,
         RefreshIndicatorMode.drag,
-        32.08099300425676,
+        50.0,
         100.0, // Default value.
         60.0, // Default value.
       ));
@@ -132,7 +132,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 32.08099300425676),
+        const Offset(0.0, 50.0),
       );
 
       debugDefaultTargetPlatformOverride = null;
@@ -190,7 +190,7 @@ void main() {
       );
 
       // Drag down but not enough to trigger the refresh.
-      await tester.drag(find.text('0'), const Offset(0.0, 68.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0), touchSlopY: 0);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 20));
       await tester.pump(const Duration(milliseconds: 20));
@@ -200,21 +200,21 @@ void main() {
         mockHelper.builder(
           any,
           RefreshIndicatorMode.drag,
-          50.080993004256754,
+          50.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
           any,
           RefreshIndicatorMode.drag,
-          argThat(moreOrLessEquals(48.44636689277975)),
+          argThat(moreOrLessEquals(48.36801747187993)),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
           any,
           RefreshIndicatorMode.drag,
-          argThat(moreOrLessEquals(44.70261419160995)),
+          argThat(moreOrLessEquals(44.63031931875867)),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -316,7 +316,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
         await tester.pump();
         // Let it start snapping back.
         await tester.pump(const Duration(milliseconds: 50));
@@ -325,7 +325,7 @@ void main() {
           mockHelper.builder(
             any,
             RefreshIndicatorMode.armed,
-            132.08099300425673,
+            150.0,
             100.0, // Default value.
             60.0, // Default value.
           ),
@@ -333,7 +333,7 @@ void main() {
           mockHelper.builder(
             any,
             RefreshIndicatorMode.armed,
-            argThat(moreOrLessEquals(111.92012371530531)),
+            argThat(moreOrLessEquals(127.10396988577114)),
             100.0, // Default value.
             60.0, // Default value.
           ),
@@ -393,13 +393,13 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
       await tester.pump();
 
       verify(mockHelper.builder(
         any,
         RefreshIndicatorMode.armed,
-        132.08099300425673,
+        150.0,
         100.0, // Default value.
         60.0, // Default value.
       ));
@@ -407,10 +407,10 @@ void main() {
       // Given a box constraint of 150, the Center will occupy all that height.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 132.08099365234375),
+        Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, -300.0));
+      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0);
       await tester.pump();
 
       // Refresh indicator still being told to layout the same way.
@@ -425,15 +425,15 @@ void main() {
       // Now the sliver is scrolled off screen.
       expect(
         tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-        moreOrLessEquals(-180.02036952379308),
+        moreOrLessEquals(-175.38461538461536),
       );
       expect(
         tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-        moreOrLessEquals(-120.02036952379308),
+        moreOrLessEquals(-115.38461538461536),
       );
       expect(
         tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
-        moreOrLessEquals(-120.02036952379308),
+        moreOrLessEquals(-115.38461538461536),
       );
 
       // Scroll the top of the refresh indicator back to overscroll, it will
@@ -473,19 +473,19 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
       await tester.pump();
       verify(mockHelper.builder(
         any,
         RefreshIndicatorMode.armed,
-        132.08099300425673,
+        150.0,
         100.0, // Default value.
         60.0, // Default value.
       ));
 
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 132.08099365234375),
+        Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
       verify(mockHelper.refreshTask());
 
@@ -639,7 +639,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
         await tester.pump();
         verify(mockHelper.refreshTask());
 
@@ -648,7 +648,7 @@ void main() {
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.done,
-          132.08099300425673, // Still overscrolled here.
+          150.0, // Still overscrolled here.
           100.0, // Default value.
           60.0, // Default value.
         ));
@@ -659,18 +659,18 @@ void main() {
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.done,
-          80.40369615445843,
+          91.31180913199277,
           100.0, // Default value.
           60.0, // Default value.
         ));
         expect(
           tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
-          moreOrLessEquals(80.40369615445843),
+          moreOrLessEquals(91.311809131992776),
         );
 
         // Start another drag by an amount that would have been enough to
         // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
         await tester.pump();
 
         // Instead, it's still in the done state because the sliver never
@@ -678,7 +678,7 @@ void main() {
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.done,
-          132.24480308772814,
+          147.3772721631821,
           100.0, // Default value.
           60.0, // Default value.
         ));
@@ -692,12 +692,12 @@ void main() {
         );
 
         // Start another drag. It's now in drag mode.
-        await tester.drag(find.text('0'), const Offset(0.0, 40.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 40.0), touchSlopY: 0);
         await tester.pump();
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.drag,
-          22.08099300425676,
+          40.0,
           100.0, // Default value.
           60.0, // Default value.
         ));
@@ -908,12 +908,12 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
         await tester.pump();
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.armed,
-          132.08099300425673,
+          150.0,
           100.0, // Default value.
           60.0, // Default value.
         ));
@@ -922,7 +922,7 @@ void main() {
         verify(mockHelper.builder(
           any,
           RefreshIndicatorMode.done, // Goes to done on the next frame.
-          130.88908469468464,
+          148.6463892921364,
           100.0, // Default value.
           60.0, // Default value.
         ));
@@ -1101,7 +1101,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 118.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 100.0), touchSlopY: 0);
         await tester.pump();
         expect(
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
