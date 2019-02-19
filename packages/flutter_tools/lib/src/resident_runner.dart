@@ -18,9 +18,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
-import 'dependency_checker.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -901,16 +899,7 @@ abstract class ResidentRunner {
     if (experimentalBuildEnabled) {
       return false;
     }
-    final DartDependencySetBuilder dartDependencySetBuilder =
-        DartDependencySetBuilder(mainPath, packagesFilePath);
-    final DependencyChecker dependencyChecker =
-        DependencyChecker(dartDependencySetBuilder, assetBundle);
-    if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
-      return true;
-    }
-    final DateTime lastBuildTime = device.package.packagesFile.statSync().modified;
-
-    return dependencyChecker.check(lastBuildTime);
+    return true;
   }
 
   Future<void> preStop() async { }
