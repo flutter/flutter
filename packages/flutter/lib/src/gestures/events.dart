@@ -290,15 +290,14 @@ abstract class PointerEvent extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('position', position));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero));
     properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero));
     properties.add(IntProperty('pointer', pointer));
     properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('device', device, defaultValue: 0));
-    properties.add(DiagnosticsProperty<Offset>('position', position));
-    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero));
     properties.add(IntProperty('buttons', buttons, defaultValue: 0));
     properties.add(DiagnosticsProperty<bool>('down', down));
-    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured'));
     properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0));
     properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0));
     properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0));
@@ -313,7 +312,13 @@ abstract class PointerEvent extends Diagnosticable {
     properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0));
     properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0));
     properties.add(IntProperty('platformData', platformData, defaultValue: 0));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured'));
     properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized'));
+  }
+
+  /// Returns a complete textual description of this event.
+  String toStringFull() {
+    return toString(minLevel: DiagnosticLevel.hidden);
   }
 }
 
