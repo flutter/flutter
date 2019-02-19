@@ -302,9 +302,15 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 }
 
-
+/// The current status of a codegen build.
 enum CodegenStatus {
+  /// The build has started running.
+  ///
+  /// If this is the current status when running a hot reload, an additional build does
+  /// not need to be started.
   Started,
+  /// The build succeeded.
   Succeeded,
+  /// The build failed.
   Failed
 }
