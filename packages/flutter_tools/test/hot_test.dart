@@ -149,7 +149,7 @@ void main() {
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('Does not hot restart when one of many devices does not support it', () async {
@@ -171,7 +171,7 @@ void main() {
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('Does hot restarts when all devices support it', () async {
@@ -193,7 +193,7 @@ void main() {
       expect(result.message, isNot('hotRestart not supported'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('setup function fails', () async {
@@ -226,7 +226,7 @@ void main() {
       expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     group('shutdown hook tests', () {
@@ -235,7 +235,6 @@ void main() {
       setUp(() {
         shutdownTestingConfig = TestHotRunnerConfig(
           successfulSetup: true,
-          computeDartDependencies: false,
         );
       });
 
@@ -283,10 +282,7 @@ class MockDevice extends Mock implements Device {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  TestHotRunnerConfig({@required this.successfulSetup, bool computeDartDependencies = true}) {
-    this.computeDartDependencies = computeDartDependencies;
-  }
-
+  TestHotRunnerConfig({@required this.successfulSetup});
   bool successfulSetup;
   bool shutdownHookCalled = false;
 

@@ -15,11 +15,8 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart/dependencies.dart';
-import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -28,8 +25,6 @@ import 'usage.dart';
 import 'vmservice.dart';
 
 class HotRunnerConfig {
-  /// Should the hot runner compute the minimal Dart dependencies?
-  bool computeDartDependencies = true;
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
   /// A hook for implementations to perform any necessary initialization prior
@@ -96,49 +91,6 @@ class HotRunner extends ResidentRunner {
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
     benchmarkData[name].add(value);
-  }
-
-  Future<bool> _refreshDartDependencies() async {
-    if (!hotRunnerConfig.computeDartDependencies) {
-      // Disabled.
-      return true;
-    }
-    if (_dartDependencies != null) {
-      // Already computed.
-      return true;
-    }
-
-    try {
-      // Will return immediately if pubspec.yaml is up-to-date.
-      await pubGet(
-        context: PubContext.pubGet,
-        directory: projectRootPath,
-      );
-    } on ToolExit catch (error) {
-      printError(
-        'Unable to reload your application because "flutter packages get" failed to update '
-        'package dependencies.\n'
-        '$error'
-      );
-      return false;
-    }
-
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    if (experimentalBuildEnabled) {
-      return true;
-    }
-    final DartDependencySetBuilder dartDependencySetBuilder = DartDependencySetBuilder(mainPath, packagesFilePath);
-    try {
-      _dartDependencies = Set<String>.from(dartDependencySetBuilder.build());
-    } on DartDependencyException catch (error) {
-      printError(
-        'Your application could not be compiled, because its dependencies could not be established.\n'
-        '$error'
-      );
-      return false;
-    }
-    return true;
   }
 
   Future<void> _reloadSourcesService(String isolateId,
@@ -288,12 +240,6 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    // Determine the Dart dependencies eagerly.
-    if (!await _refreshDartDependencies()) {
-      // Some kind of source level error or missing file in the Dart code.
-      return 1;
-    }
-
     firstBuildTime = DateTime.now();
 
     for (FlutterDevice device in flutterDevices) {
@@ -356,10 +302,6 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
-    if (!await _refreshDartDependencies()) {
-      // Did not update DevFS because of a Dart source error.
-      return UpdateFSReport(success: false);
-    }
     final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
