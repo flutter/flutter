@@ -130,7 +130,7 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     # the stable site.
     echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-    deploy 5 master-docs-flutter-io
+    deploy 5 master-docs-flutter-dev
   fi
 
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
@@ -139,7 +139,7 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://docs.flutter.io/"
     echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-    deploy 5 docs-flutter-io
+    deploy 5 docs-flutter-dev
   fi
 fi
 
