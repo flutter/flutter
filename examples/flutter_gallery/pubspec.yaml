@@ -92,6 +92,7 @@ flutter:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/people/ali_landscape.png
     - packages/flutter_gallery_assets/logos/flutter_white/logo.png
+    - packages/flutter_gallery_assets/logos/fortnightly/fortnightly_logo.png
     - packages/flutter_gallery_assets/videos/bee.mp4
     - packages/flutter_gallery_assets/videos/butterfly.mp4
     - packages/flutter_gallery_assets/animated_images/animated_flutter_lgtm.gif
@@ -99,6 +100,7 @@ flutter:
     - packages/flutter_gallery_assets/food/butternut_squash_soup.png
     - packages/flutter_gallery_assets/food/cherry_pie.png
     - packages/flutter_gallery_assets/food/chopped_beet_leaves.png
+    - packages/flutter_gallery_assets/food/fruits.png
     - packages/flutter_gallery_assets/food/pesto_pasta.png
     - packages/flutter_gallery_assets/food/roasted_chicken.png
     - packages/flutter_gallery_assets/food/spanakopita.png
@@ -241,5 +243,17 @@ flutter:
           weight: 500
         - asset: packages/flutter_gallery_assets/fonts/private/googlesans/GoogleSansDisplay-Regular.ttf
           weight: 400
+    - family: LibreFranklin
+      fonts:
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Bold.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Light.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Medium.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Regular.ttf
+    - family: Merriweather
+      fonts:
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-BlackItalic.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Italic.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
 # PUBSPEC CHECKSUM: 7b5d
