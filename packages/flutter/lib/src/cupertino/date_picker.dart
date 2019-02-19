@@ -448,7 +448,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       date.year,
       date.month,
       date.day,
-      selectedHour + selectedAmPm * 12,
+      widget.use24hFormat ? selectedHour : selectedHour % 12 + selectedAmPm * 12,
       selectedMinute,
     );
   }

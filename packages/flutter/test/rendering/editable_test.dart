@@ -168,4 +168,90 @@ void main() {
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
+
+  test('text is painted above selection', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection(
+        baseOffset: 0,
+        extentOffset: 3,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        // Check that it's the black selection box, not the red cursor.
+        ..rect(color: Colors.black)
+        ..paragraph(),
+    );
+
+    // There is exactly one rect paint (1 selection, 0 cursor).
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+  });
+
+  test('cursor can paint above or below the text', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      paintCursorAboveText: true,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      showCursor: showCursor,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 2,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        ..paragraph()
+        // Red collapsed cursor is painted, not a selection box.
+        ..rect(color: Colors.red[500]),
+    );
+
+    // There is exactly one rect paint (0 selection, 1 cursor).
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+
+    editable.paintCursorAboveText = false;
+    pumpFrame();
+
+    expect(
+      editable,
+      // The paint order is now flipped.
+      paints
+        ..rect(color: Colors.red[500])
+        ..paragraph(),
+    );
+    expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+  });
 }

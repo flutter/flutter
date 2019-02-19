@@ -68,8 +68,7 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// ## Sample Code
-///
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets and the [currentIndex] is set to index 1. The color of the selected
@@ -78,50 +77,42 @@ enum BottomNavigationBarType {
 /// the [Scaffold].
 ///
 /// ```dart
-/// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key}) : super(key: key);
+/// int _selectedIndex = 1;
+/// static const List<Widget> _widgetOptions = const <Widget>[
+///   Text('Index 0: Home'),
+///   Text('Index 1: Business'),
+///   Text('Index 2: School'),
+/// ];
 ///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+/// void _onItemTapped(int index) {
+///   setState(() {
+///     _selectedIndex = index;
+///   });
 /// }
 ///
-/// class _MyHomePageState extends State<MyHomePage> {
-///   int _selectedIndex = 1;
-///   final _widgetOptions = [
-///     Text('Index 0: Home'),
-///     Text('Index 1: Business'),
-///     Text('Index 2: School'),
-///   ];
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text('BottomNavigationBar Sample'),
-///       ),
-///       body: Center(
-///         child: _widgetOptions.elementAt(_selectedIndex),
-///       ),
-///       bottomNavigationBar: BottomNavigationBar(
-///         items: <BottomNavigationBarItem>[
-///           BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
-///           BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
-///           BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
-///         ],
-///         currentIndex: _selectedIndex,
-///         fixedColor: Colors.deepPurple,
-///         onTap: _onItemTapped,
-///       ),
-///     );
-///   }
-///
-///   void _onItemTapped(int index) {
-///     setState(() {
-///       _selectedIndex = index;
-///     });
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('BottomNavigationBar Sample'),
+///     ),
+///     body: Center(
+///       child: _widgetOptions.elementAt(_selectedIndex),
+///     ),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
+///         BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
+///         BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
+///       ],
+///       currentIndex: _selectedIndex,
+///       fixedColor: Colors.deepPurple,
+///       onTap: _onItemTapped,
+///     ),
+///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

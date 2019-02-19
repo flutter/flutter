@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
@@ -13,19 +11,19 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import 'utils.dart';
+
 void main() {
-
   group('Flutter Command', () {
-
-    MockCache cache;
+    MockitoCache cache;
+    MockitoUsage usage;
     MockClock clock;
-    MockUsage usage;
     List<int> mockTimes;
 
     setUp(() {
-      cache = MockCache();
+      cache = MockitoCache();
+      usage = MockitoUsage();
       clock = MockClock();
-      usage = MockUsage();
       when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
@@ -157,40 +155,4 @@ void main() {
     });
 
   });
-
 }
-
-typedef CommandFunction = Future<FlutterCommandResult> Function();
-
-class DummyFlutterCommand extends FlutterCommand {
-
-  DummyFlutterCommand({
-    this.shouldUpdateCache  = false,
-    this.noUsagePath  = false,
-    this.commandFunction,
-  });
-
-  final bool noUsagePath;
-  final CommandFunction commandFunction;
-
-  @override
-  final bool shouldUpdateCache;
-
-  @override
-  String get description => 'does nothing';
-
-  @override
-  Future<String> get usagePath => noUsagePath ? null : super.usagePath;
-
-  @override
-  String get name => 'dummy';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return commandFunction == null ? null : await commandFunction();
-  }
-}
-
-class MockCache extends Mock implements Cache {}
-
-class MockUsage extends Mock implements Usage {}
