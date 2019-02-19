@@ -540,6 +540,7 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
              : kInvalidArguments;
 }
 
+// Returns the blink::PointerData::Change for the given FlutterPointerPhase.
 inline blink::PointerData::Change ToPointerDataChange(
     FlutterPointerPhase phase) {
   switch (phase) {
@@ -551,6 +552,12 @@ inline blink::PointerData::Change ToPointerDataChange(
       return blink::PointerData::Change::kDown;
     case kMove:
       return blink::PointerData::Change::kMove;
+    case kAdd:
+      return blink::PointerData::Change::kAdd;
+    case kRemove:
+      return blink::PointerData::Change::kRemove;
+    case kHover:
+      return blink::PointerData::Change::kHover;
   }
   return blink::PointerData::Change::kCancel;
 }

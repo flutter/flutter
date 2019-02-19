@@ -148,6 +148,9 @@ typedef enum {
   kUp,
   kDown,
   kMove,
+  kAdd,
+  kRemove,
+  kHover,
 } FlutterPointerPhase;
 
 typedef struct {
