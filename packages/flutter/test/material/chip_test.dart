@@ -1514,6 +1514,7 @@ void main() {
       label: Text('Label'),
       elevation: 4.0,
       shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
     );
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -1521,6 +1522,18 @@ void main() {
     material = getMaterial(tester);
     expect(material.elevation, 4.0);
     expect(material.shadowColor, Colors.green);
+
+    inputChip = const InputChip(
+      label: Text('Label'),
+      selected: true,
+      shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
+    );
+
+    await tester.pumpWidget(buildChip(chipTheme));
+    await tester.pumpAndSettle();
+    material = getMaterial(tester);
+    expect(material.shadowColor, Colors.blue);
   });
 
   testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {
