@@ -41,7 +41,7 @@ void main() {
       );
       expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => MockAndroidSdk(false),
+      AndroidSdk: () => MockAndroidSdk(),
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => mockProcessManager,
     });

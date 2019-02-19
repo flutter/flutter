@@ -29,7 +29,7 @@ void main() {
   MockStdio stdio;
 
   setUp(() {
-    sdk = MockAndroidSdk(false);
+    sdk = MockAndroidSdk();
     fs = MemoryFileSystem();
     fs.directory('/home/me').createSync(recursive: true);
     processManager = MockProcessManager();
@@ -180,6 +180,8 @@ void main() {
   });
 
   testUsingContext('detects license-only SDK installation', () async {
+    when(sdk.licensesAvailable).thenReturn(true);
+    when(sdk.platformToolsAvailable).thenReturn(false);
     final ValidationResult validationResult = await AndroidValidator().validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
@@ -187,7 +189,7 @@ void main() {
       userMessages.androidSdkLicenseOnly(kAndroidHome),
     );
   }, overrides: <Type, Generator>{
-    AndroidSdk: () => MockAndroidSdk(true),
+    AndroidSdk: () => sdk,
     FileSystem: () => fs,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
@@ -196,6 +198,8 @@ void main() {
 
   testUsingContext('detects minium required SDK and buildtools', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
+    when(sdk.licensesAvailable).thenReturn(true);
+    when(sdk.platformToolsAvailable).thenReturn(true);
 
     // Test with invalid SDK and build tools
     when(mockSdkVersion.sdkLevel).thenReturn(26);

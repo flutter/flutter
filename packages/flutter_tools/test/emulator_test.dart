@@ -28,7 +28,7 @@ void main() {
   setUp(() {
     mockProcessManager = MockProcessManager();
     mockConfig = MockConfig();
-    mockSdk = MockAndroidSdk(false);
+    mockSdk = MockAndroidSdk();
     mockXcode = MockXcode();
 
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
