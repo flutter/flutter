@@ -290,30 +290,35 @@ abstract class PointerEvent extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero));
-    properties.add(IntProperty('pointer', pointer));
-    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
-    properties.add(IntProperty('device', device, defaultValue: 0));
     properties.add(DiagnosticsProperty<Offset>('position', position));
-    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero));
-    properties.add(IntProperty('buttons', buttons, defaultValue: 0));
-    properties.add(DiagnosticsProperty<bool>('down', down));
-    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured'));
-    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0));
-    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0));
-    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0));
-    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0));
-    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0));
-    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0));
-    properties.add(DoubleProperty('size', size, defaultValue: 0.0));
-    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0));
-    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0));
-    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0));
-    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0));
-    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0));
-    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0));
-    properties.add(IntProperty('platformData', platformData, defaultValue: 0));
-    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized'));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+  }
+
+  /// Returns a complete textual description of this event.
+  String toStringFull() {
+    return toString(minLevel: DiagnosticLevel.fine);
   }
 }
 
