@@ -105,7 +105,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    if (androidSdk.licensesOnly) {
+    if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(userMessages.androidSdkLicenseOnly(kAndroidHome)));
       return ValidationResult(ValidationType.partial, messages);
     }
@@ -254,7 +254,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
     }
 
-    if (!_ensureCanRunSdkManager()) {
+    if (!_canRunSdkManager()) {
       return LicensesAccepted.unknown;
     }
 
@@ -286,7 +286,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return false;
     }
 
-    if (!_ensureCanRunSdkManager()) {
+    if (!_canRunSdkManager()) {
       throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
     }
 
@@ -315,7 +315,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     return exitCode == 0;
   }
 
-  static bool _ensureCanRunSdkManager() {
+  static bool _canRunSdkManager() {
     assert(androidSdk != null);
     final String sdkManagerPath = androidSdk.sdkManagerPath;
     return processManager.canRun(sdkManagerPath);

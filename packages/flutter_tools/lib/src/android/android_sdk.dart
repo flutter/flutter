@@ -262,7 +262,7 @@ class AndroidNdk {
 }
 
 class AndroidSdk {
-  AndroidSdk(this.directory, this.licensesOnly, [this.ndk]) : assert(licensesOnly != null) {
+  AndroidSdk(this.directory, [this.ndk]) {
     _init();
   }
 
@@ -278,7 +278,22 @@ class AndroidSdk {
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
 
-  final bool licensesOnly;
+  /// Whether the `platform-tools` directory exists in the Android SDK.
+  ///
+  /// It is possible to have an Android SDK folder that is missing this with
+  /// the expectation that it will be downloaded later, e.g. by gradle or the
+  /// sdkmanager. The [licensesAvailable] property should be used to determine
+  /// whether the licenses are at least possibly accepted.
+  bool get platformToolsAvailable => fs.directory(fs.path.join(directory, 'platform-tools')).existsSync();
+
+  /// Whether the `licenses` directory exists in the Android SDK.
+  ///
+  /// The existence of this folder normally indicates that the SDK licenses have
+  /// been accepted, e.g. via the sdkmanager, Android Studio, or by copying them
+  /// from another workstation such as in CI scenarios. If these files are valid
+  /// gradle or the sdkmanager will be able to download and use other parts of
+  /// the SDK on demand.
+  bool get licensesAvailable => fs.directory(fs.path.join(directory, 'licenses')).existsSync();
 
   static AndroidSdk locateAndroidSdk() {
     String findAndroidHomeDir() {
@@ -346,10 +361,7 @@ class AndroidSdk {
       // exceptions.
     }
 
-    final bool licensesOnly = fs.directory(fs.path.join(androidHomeDir, 'licenses')).existsSync() &&
-          !fs.directory(fs.path.join(androidHomeDir, 'platform-tools')).existsSync();
-
-    return AndroidSdk(androidHomeDir, licensesOnly, ndk);
+    return AndroidSdk(androidHomeDir, ndk);
   }
 
   static bool validSdkDirectory(String dir) {

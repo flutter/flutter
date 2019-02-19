@@ -51,7 +51,9 @@ class UserMessages {
       'while gradle downloads the missing components. This functionality will '
       'only work if the licenses in the licenses folder in $envKey are valid.\n'
       'If the Android SDK has been installed to another location, set $envKey to that location.\n'
-      'You may also want to add it to your PATH environment variable.\n';
+      'You may also want to add it to your PATH environment variable.\n\n'
+      'Certain features, such as `flutter emulators` and `flutter devices`, will '
+      'not work without the currently missing SDK components.';
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
