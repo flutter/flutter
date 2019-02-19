@@ -9,8 +9,8 @@ import 'framework.dart';
 /// An interactive button within either material's [BottomNavigationBar]
 /// or the iOS themed [CupertinoTabBar] with an icon and title.
 ///
-/// This class is rarely used in isolation. Commonly embedded in one of the
-/// bottom navigation widgets above.
+/// This class is rarely used in isolation. It is typically embedded in one of
+/// the bottom navigation widgets above.
 ///
 /// See also:
 ///

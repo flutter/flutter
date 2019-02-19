@@ -313,33 +313,26 @@ void main() {
     expect(_getMaterial(tester).color, equals(itemColor));
   });
 
-  testWidgets('Fixed BottomNavigationBar uses selectedItemColor over fixedColor', (WidgetTester tester) async {
-    const Color fixedColor = Colors.black;
-    const Color selectedColor = Colors.blue;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: selectedColor,
-            fixedColor: fixedColor,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
-              ),
-            ]
-          )
-        )
-      )
+  testWidgets('Specifying both selectedItemColor and fixedColor asserts', (WidgetTester tester) async {
+    expect(
+      () {
+        return BottomNavigationBar(
+          selectedItemColor: Colors.black,
+          fixedColor: Colors.black,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('AC'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Alarm'),
+            ),
+          ],
+        );
+      },
+      throwsAssertionError,
     );
-
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
   });
 
   testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided', (WidgetTester tester) async {

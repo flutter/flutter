@@ -33,8 +33,8 @@ enum BottomNavigationBarType {
   shifting,
 }
 
-/// A material widget displayed at the bottom of an app for selecting among a
-/// small number of views, typically between three and five.
+/// A material widget that's displayed at the bottom of an app for selecting
+/// among a small number of views, typically between three and five.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
@@ -45,13 +45,13 @@ enum BottomNavigationBarType {
 /// where it is provided as the [Scaffold.bottomNavigationBar] argument.
 ///
 /// The bottom navigation bar's [type] changes how its [items] are displayed.
-/// If not specified it's automatically set to [BottomNavigationBarType.fixed]
-/// when there are less than four items, [BottomNavigationBarType.shifting]
-/// otherwise.
+/// If not specified then it's automatically set to
+/// [BottomNavigationBarType.fixed] when there are less than four items,
+/// [BottomNavigationBarType.shifting] otherwise.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
-///    four [items]. The selected item is rendered with [fixedColor] if
-///    [selectedColor] is null and if it is non-null, otherwise the theme's
+///    four [items]. The selected item is rendered with the
+///    [selectedItem Color] if it's non-null, otherwise the theme's
 ///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
@@ -65,10 +65,9 @@ enum BottomNavigationBarType {
 /// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
-/// widgets and the [currentIndex] is set to index 1. The color of the selected
-/// item is set to  a purple color. A function is called whenever any item is
-/// tapped and the function helps display the appropriate [Text] in the body of
-/// the [Scaffold].
+/// widgets and the [currentIndex] is set to index 1. The selected item is
+/// purple. The `_onItemTapped` function changes the selected item's index
+/// and displays a corresponding message in the center of the [Scaffold].
 ///
 /// ```dart
 /// int _selectedIndex = 1;
@@ -100,7 +99,7 @@ enum BottomNavigationBarType {
 ///         BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
 ///       ],
 ///       currentIndex: _selectedIndex,
-///       fixedColor: Colors.deepPurple,
+///       selectedColor: Colors.deepPurple,
 ///       onTap: _onItemTapped,
 ///     ),
 ///   );
@@ -114,28 +113,25 @@ enum BottomNavigationBarType {
 ///  * [Scaffold]
 ///  * <https://material.io/design/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
-  /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
-  /// is provided as the [Scaffold.bottomNavigationBar] argument.
+  /// Creates a bottom navigation bar which is typically used as a
+  /// [Scaffold's] [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two and each item's icon and title must be not null.
+  /// The length of [items] must be at least two and each item's icon and title
+  /// must be not null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// Prefer [selectedItemColor] over [fixedColor], since [selectedItemColor]
-  /// applies to both shifting and fixed selected item colors. If
-  /// [selectedItemColor] is null, [fixedColor] will be used for fixed
-  /// [BottomNavigationBar]s. If [selectedItemColor] and [fixedColor] are
-  /// null, then the theme's primary color, [ThemeData.primaryColor] is used.
+  /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
+  /// arguments must be non-null and non-negative.
   ///
-  /// [iconSize] must be at least 8.0 for the [Icon]s to display properly.
+  /// Only one of [selectedItemColor] and [fixedColor] can be specified. The
+  /// former is preferred, [fixedColor] only exists for the sake of
+  /// backwards compatibility.
   ///
-  /// [selectedFontSize], [unselectedFontSize], and [elevation] must be non-null
-  /// and non-negative.
+  /// The [showSelectedLabels] argument must not be non-null.
   ///
-  /// [showSelectedLabels] must not be non-null.
-  ///
-  /// [showUnselectedLabels] defaults to `true` if [type] is
+  /// The [showUnselectedLabels] argument defaults to `true` if [type] is
   /// [BottomNavigationBarType.fixed] and `false` if [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
@@ -145,10 +141,10 @@ class BottomNavigationBar extends StatefulWidget {
     this.currentIndex = 0,
     this.elevation = 8.0,
     BottomNavigationBarType type,
-    this.fixedColor,
+    Color fixedColor,
     this.backgroundColor,
     this.iconSize = 24.0,
-    this.selectedItemColor,
+    Color selectedItemColor,
     this.unselectedItemColor,
     this.selectedFontSize = 14.0,
     this.unselectedFontSize = 12.0,
@@ -162,25 +158,31 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation != null && elevation >= 0.0),
-       assert(iconSize != null && iconSize >= 8.0),
+       assert(iconSize != null && iconSize >= 0.0),
+       assert(
+         selectedItemColor != null ? fixedColor == null : true,
+         'Either selectedItemColor or fixedColor can be specified, but not both'
+       ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
        assert(showSelectedLabels != null),
        type = _type(type, items),
+       selectedItemColor = selectedItemColor ?? fixedColor,
        showUnselectedLabels = showUnselectedLabels ?? _defaultShowUnselected(_type(type, items)),
        super(key: key);
 
-  /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
+  /// Defines the appearance of the button items that are arrayed within the
+  /// bottom navigation bar.
   final List<BottomNavigationBarItem> items;
 
-  /// The callback that is called when a item is tapped.
+  /// Called when on of the [items] is tapped.
   ///
-  /// The widget creating the bottom navigation bar needs to keep track of the
-  /// current index and call `setState` to rebuild it with the newly provided
-  /// index.
+  /// The stateful widget that creates the bottom navigation bar needs to keep
+  /// track of the index of the selected [BottomNavigationBarItem] and call
+  /// `setState` to rebuild the bottom navigation bar with the new [currentIndex].
   final ValueChanged<int> onTap;
 
-  /// The index into [items] of the current active item.
+  /// The index into [items] for the current active [BottomNavigationBarItem].
   final int currentIndex;
 
   /// The z-coordinate of this [BottomNavigationBar].
@@ -192,21 +194,15 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
   ///
-  /// See documentation for [BottomNavigationBarType] for information on the meaning
-  /// of different types.
+  /// See documentation for [BottomNavigationBarType] for information on the
+  /// meaning of different types.
   final BottomNavigationBarType type;
 
-  /// Deprecated, use [selectedItemColor].
+  /// The value of [selectedItemColor].
   ///
-  /// The color of the selected item when bottom navigation bar is
-  /// [BottomNavigationBarType.fixed].
-  ///
-  /// If [fixedColor] is null then the theme's primary color,
-  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
-  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
-  ///
-  /// If [selectedItemColor] is provided, it will be used over this.
-  final Color fixedColor;
+  /// This getter only exists for backwards compatibility, the
+  /// [selectedItemColor] property is preferred.
+  Color get fixedColor => selectedItemColor;
 
   /// The color of the [BottomNavigationBar] itself.
   ///
@@ -220,14 +216,14 @@ class BottomNavigationBar extends StatefulWidget {
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
-  /// The color of the selected [BottomNavigationBarItem.icon] and [BottomNavigationBarItem.label].
+  /// The color of the selected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
-  ///
-  /// If provided, this will take precedence over [fixedColor].
   final Color selectedItemColor;
 
-  /// The color of the unselected [BottomNavigationBarItem.icon] and [BottomNavigationBarItem.label]s.
+  /// The color of the unselected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
@@ -237,7 +233,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defaults to `14.0`.
   final double selectedFontSize;
 
-  /// The font size of the [BottomNavigationBarItem] label when they are not selected.
+  /// The font size of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
   ///
   /// Defaults to `12.0`.
   final double unselectedFontSize;
@@ -273,9 +270,10 @@ class BottomNavigationBar extends StatefulWidget {
       case BottomNavigationBarType.shifting:
         return false;
       case BottomNavigationBarType.fixed:
-      default:
         return true;
     }
+    assert(false);
+    return false;
   }
 
   @override
@@ -299,9 +297,12 @@ class _BottomNavigationTile extends StatelessWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
-  }) : assert(selected != null),
-       assert(selectedFontSize != null && selectedFontSize >= 0),
-       assert(unselectedFontSize != null && unselectedFontSize >= 0);
+    }) : assert(type != null),
+         assert(item != null),
+         assert(animation != null),
+         assert(selected != null),
+         assert(selectedFontSize != null && selectedFontSize >= 0),
+         assert(unselectedFontSize != null && unselectedFontSize >= 0);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -389,7 +390,6 @@ class _BottomNavigationTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     _TileIcon(
-                      type: type,
                       colorTween: colorTween,
                       animation: animation,
                       iconSize: iconSize,
@@ -423,15 +423,15 @@ class _BottomNavigationTile extends StatelessWidget {
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
     Key key,
-    @required this.type,
     @required this.colorTween,
     @required this.animation,
     @required this.iconSize,
     @required this.selected,
     @required this.item,
-  }) : super(key: key);
+  }) : assert(selected != null),
+       assert(item != null),
+       super(key: key);
 
-  final BottomNavigationBarType type;
   final ColorTween colorTween;
   final Animation<double> animation;
   final double iconSize;
@@ -467,7 +467,14 @@ class _Label extends StatelessWidget {
     @required this.unselectedFontSize,
     @required this.showSelectedLabels,
     @required this.showUnselectedLabels,
-  }) : super(key: key);
+  }) : assert(colorTween != null),
+       assert(animation != null),
+       assert(item != null),
+       assert(selectedFontSize != null),
+       assert(unselectedFontSize != null),
+       assert(showSelectedLabels != null),
+       assert(showUnselectedLabels != null),
+       super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
