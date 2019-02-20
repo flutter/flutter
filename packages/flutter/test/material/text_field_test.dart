@@ -970,6 +970,94 @@ void main() {
     }, throwsAssertionError);
   });
 
+  testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
+    const double HEIGHT = 200.0;
+    const double PADDING = 24.0;
+    const String TEXT = 'a\n' * 11; // Just enough to overflow HEIGHT
+
+    Widget containedTextFieldBuilder({
+      Widget counter,
+      String helperText,
+      String labelText,
+    }) {
+      return boilerplate(
+        child: Container(
+          height: HEIGHT,
+          child: TextField(
+            key: textFieldKey,
+            maxLines: null,
+            decoration: InputDecoration(
+              counter: counter,
+              helperText: helperText,
+              labelText: labelText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(containedTextFieldBuilder());
+    RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
+
+    final RenderBox inputBox = findEditableText();
+    final Size emptyInputSize = inputBox.size;
+
+    // With no decoration, the EditableText takes up the full height minus the
+    // padding, so the input fits perfectly inside the parent.
+    await tester.enterText(find.byType(TextField), TEXT);
+    await tester.pump();
+    expect(findEditableText(), equals(inputBox));
+    final Size fullInputSize = inputBox.size;
+    expect(inputBox.size.height, HEIGHT - PADDING);
+
+    // Adding a counter causes the EditableText to shrink to fit the counter
+    // inside the parent as well.
+    const double COUNTER_HEIGHT = 40.0;
+    const double SUBTEXT_GAP = 8.0 * 2;
+    const double COUNTER_SPACE = COUNTER_HEIGHT + SUBTEXT_GAP;
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: COUNTER_HEIGHT),
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE);
+
+    // Including helperText causes the EditableText to shrink to fit the text
+    // inside the parent as well.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      helperText: 'I am helperText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    const double HELPER_TEXT_SPACE = 28.0;
+    expect(inputBox.size.height, HEIGHT - PADDING - HELPER_TEXT_SPACE);
+
+    // When both helperText and counter are present, EditableText shrinks by the
+    // height of the taller of the two in order to fit both within the parent.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: COUNTER_HEIGHT),
+      helperText: 'I am helperText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE);
+
+    // When a label is present, EditableText shrinks to fit it at the top so
+    // that the bottom of the input still lines up perfectly with the parent.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      labelText: 'I am labelText',
+    ));
+    const double LABEL_SPACE = 16.0;
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, HEIGHT - PADDING - LABEL_SPACE);
+
+    // When decoration is present on the top and bottom, EditableText shrinks to
+    // fit both inside the parent independently.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: COUNTER_HEIGHT),
+      labelText: 'I am labelText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE - LABEL_SPACE);
+  });
+
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
