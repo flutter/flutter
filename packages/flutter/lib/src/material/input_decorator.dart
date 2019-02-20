@@ -808,7 +808,8 @@ class _RenderDecoration extends RenderBox {
 
   EdgeInsets get contentPadding => decoration.contentPadding;
 
-  double layoutLineBox(RenderBox box, BoxConstraints constraints) {
+  // Lay out the given box if needed, and return its baseline
+  double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
     if (box == null) {
       return 0.0;
     }
@@ -830,18 +831,18 @@ class _RenderDecoration extends RenderBox {
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
 
     // Layout all the widgets used by InputDecorator
-    boxToBaseline[prefix] = layoutLineBox(prefix, boxConstraints);
-    boxToBaseline[suffix] = layoutLineBox(suffix, boxConstraints);
-    boxToBaseline[icon] = layoutLineBox(icon, boxConstraints);
-    boxToBaseline[prefixIcon] = layoutLineBox(prefixIcon, boxConstraints);
-    boxToBaseline[suffixIcon] = layoutLineBox(suffixIcon, boxConstraints);
-    boxToBaseline[label] = layoutLineBox(label, boxConstraints);
-    boxToBaseline[hint] = layoutLineBox(hint, boxConstraints);
-    boxToBaseline[counter] = layoutLineBox(counter, boxConstraints);
+    boxToBaseline[prefix] = _layoutLineBox(prefix, boxConstraints);
+    boxToBaseline[suffix] = _layoutLineBox(suffix, boxConstraints);
+    boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
+    boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
+    boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
+    boxToBaseline[label] = _layoutLineBox(label, boxConstraints);
+    boxToBaseline[hint] = _layoutLineBox(hint, boxConstraints);
+    boxToBaseline[counter] = _layoutLineBox(counter, boxConstraints);
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
-    boxToBaseline[helperError] = layoutLineBox(
+    boxToBaseline[helperError] = _layoutLineBox(
       helperError,
       boxConstraints.copyWith(
         maxWidth: math.max(0.0, boxConstraints.maxWidth
@@ -871,7 +872,7 @@ class _RenderDecoration extends RenderBox {
       counterHeight,
       helperErrorHeight,
     );
-    boxToBaseline[input] = layoutLineBox(
+    boxToBaseline[input] = _layoutLineBox(
       input,
       boxConstraints.deflate(EdgeInsets.only(
         top: contentPadding.top + topHeight,
