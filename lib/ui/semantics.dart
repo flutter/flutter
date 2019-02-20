@@ -124,7 +124,7 @@ class SemanticsAction {
   /// Paste the current content of the clipboard.
   static const SemanticsAction paste = const SemanticsAction._(_kPasteIndex);
 
-  /// Indicates that the nodes has gained accessibility focus.
+  /// Indicates that the node has gained accessibility focus.
   ///
   /// This handler is invoked when the node annotated with this handler gains
   /// the accessibility focus. The accessibility focus is the
@@ -137,7 +137,7 @@ class SemanticsAction {
   /// Accessibility focus and input focus can be held by two different nodes!
   static const SemanticsAction didGainAccessibilityFocus = const SemanticsAction._(_kDidGainAccessibilityFocusIndex);
 
-  /// Indicates that the nodes has lost accessibility focus.
+  /// Indicates that the node has lost accessibility focus.
   ///
   /// This handler is invoked when the node annotated with this handler
   /// loses the accessibility focus. The accessibility focus is
