@@ -6,17 +6,14 @@ package io.flutter.embedding.engine.systemchannels;
 
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodChannel;
 
 /**
- * Sends the platform's locales to Dart.
+ * TODO(mattcarroll): fill in javadoc for LocalizationChannel.
  */
 public class LocalizationChannel {
 
@@ -27,18 +24,12 @@ public class LocalizationChannel {
     this.channel = new MethodChannel(dartExecutor, "flutter/localization", JSONMethodCodec.INSTANCE);
   }
 
-  /**
-   * Send the given {@code locales} to Dart.
-   */
-  public void sendLocales(List<Locale> locales) {
-    List<String> data = new ArrayList<>();
-    for (Locale locale : locales) {
-      data.add(locale.getLanguage());
-      data.add(locale.getCountry());
-      data.add(locale.getScript());
-      data.add(locale.getVariant());
-    }
-    channel.invokeMethod("setLocale", data);
+  public void setLocale(String language, String country) {
+    channel.invokeMethod("setLocale", Arrays.asList(language, country));
+  }
+
+  public void setMethodCallHandler(MethodChannel.MethodCallHandler handler) {
+    channel.setMethodCallHandler(handler);
   }
 
 }
