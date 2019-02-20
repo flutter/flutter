@@ -16,8 +16,7 @@ class FortnightlyDemo extends StatelessWidget {
         body: Stack(
           children: <Widget>[
             FruitPage(),
-            Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            SafeArea(
               child: ShortAppBar(
                 onBackPressed: () {
                   Navigator.pop(context);
@@ -42,6 +41,7 @@ class ShortAppBar extends StatelessWidget {
       width: 96,
       height: 50,
       child: Material(
+        color: Theme.of(context).colorScheme.surface,
         elevation: 4,
         shape: const BeveledRectangleBorder(
           borderRadius: BorderRadius.only(bottomRight: Radius.circular(22)),
@@ -70,104 +70,91 @@ class FruitPage extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).primaryTextTheme;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-      child: Container(
-        color: Theme.of(context).colorScheme.surface,
-        child: Column(
-          children: <Widget>[
-            Container(
-              constraints: const BoxConstraints.expand(height: 248),
-              child: Image.asset(
-                'food/fruits.png',
-                package: 'flutter_gallery_assets',
-                fit: BoxFit.fitWidth,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          color: Theme.of(context).colorScheme.surface,
+          child: Column(
+            children: <Widget>[
+              Container(
+                constraints: const BoxConstraints.expand(height: 248),
+                child: Image.asset(
+                  'food/fruits.png',
+                  package: 'flutter_gallery_assets',
+                  fit: BoxFit.fitWidth,
+                ),
               ),
-            ),
-            const SizedBox(height: 17),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        'US',
-                        style: textTheme.overline,
-                      ),
-                      Text(
-                        ' ¬ ',
-                        style: textTheme.overline.apply(color: textTheme.display3.color)
-                      ),
-                      Text(
-                        'CULTURE',
-                        style: textTheme.overline,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
-                    style: textTheme.display1,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'How these crazy fruits sweetened our hearts, relationships,'
-                        'and puffed pastries',
-                    style: textTheme.body1,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Row(
+              const SizedBox(height: 17),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        CircleAvatar(
-                          backgroundImage: ExactAssetImage(
-                            'people/square/trevor.png',
-                            package: 'flutter_gallery_assets',
-                          ),
-                          radius: 20,
-                        ),
-                        const SizedBox(width: 12),
                         Text(
-                          'by',
-                          style: textTheme.display3,
+                          'US',
+                          style: textTheme.overline,
                         ),
-                        const SizedBox(width: 4),
                         Text(
-                          'Connor Eghan',
-                          style: TextStyle(
-                            fontFamily: 'Merriweather',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                          ),
-                        )
+                          ' ¬ ',
+                          style: textTheme.overline.apply(color: textTheme.display3.color)
+                        ),
+                        Text(
+                          'CULTURE',
+                          style: textTheme.overline,
+                        ),
                       ],
                     ),
-                  ),
-                  Text(
-                    'Have you ever held a quince? It\'s strange; covered in a fuzz '
-                        'somewhere between peach skin and a spider web. And it\'s '
-                        'hard as soft lumber. You\'d be forgiven for thinking it\'s '
-                        'veneered Larch-wood. But inhale the aroma and you\'ll instantly '
-                        'know you have something wonderful. Its scent can fill a '
-                        'room for days. And all this before you\'ve even cooked it.'
-                        '\n\nPomegranates on the other hand have become almost '
-                        'ubiquitous. You can find its juice in any bodega, Walmart, '
-                        'and even some gas stations. But at what cost? The pomegranate '
-                        'juice craze of the aughts made \"megafarmers\" Lynda and '
-                        'Stewart Resnick billions. Unfortunately, it takes a lot '
-                        'of water to make that much pomegranate juice. Water the '
-                        'Resnicks get from their majority stake in the Kern Water '
-                        'Bank. How did one family come to hold control over water '
-                        'meant for the whole central valley of California? The '
-                        'story will shock you.',
-                    style: textTheme.body2,
-                  ),
-                ],
-              ),
-            )
-          ],
+                    const SizedBox(height: 10),
+                    Text(
+                      'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
+                      style: textTheme.display1,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'How these crazy fruits sweetened our hearts, relationships,'
+                          'and puffed pastries',
+                      style: textTheme.body1,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Row(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: ExactAssetImage(
+                              'people/square/trevor.png',
+                              package: 'flutter_gallery_assets',
+                            ),
+                            radius: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'by',
+                            style: textTheme.display3,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Connor Eghan',
+                            style: TextStyle(
+                              fontFamily: 'Merriweather',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Text(
+                      articleString,
+                      style: textTheme.body2,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -229,3 +216,22 @@ TextTheme _buildTextTheme(TextTheme base) {
 
   return theme;
 }
+
+const String articleString = '''
+'Have you ever held a quince? It\'s strange; covered in a fuzz 
+somewhere between peach skin and a spider web. And it\'s 
+hard as soft lumber. You\'d be forgiven for thinking it\'s 
+veneered Larch-wood. But inhale the aroma and you\'ll instantly 
+know you have something wonderful. Its scent can fill a 
+room for days. And all this before you\'ve even cooked it.
+\n\nPomegranates on the other hand have become almost 
+ubiquitous. You can find its juice in any bodega, Walmart, 
+and even some gas stations. But at what cost? The pomegranate 
+juice craze of the aughts made \"megafarmers\" Lynda and 
+Stewart Resnick billions. Unfortunately, it takes a lot 
+of water to make that much pomegranate juice. Water the 
+Resnicks get from their majority stake in the Kern Water 
+Bank. How did one family come to hold control over water 
+meant for the whole central valley of California? The 
+story will shock you.
+''';

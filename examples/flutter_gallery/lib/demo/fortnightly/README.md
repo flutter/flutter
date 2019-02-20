@@ -20,7 +20,7 @@ For info on the Fortnightly Material Study, see: https://material.io/design/mate
 * CircleAvatar
 * ExactAssetImage
 * Fonts
-* MediaQuery
+* SafeArea
 * Stack
 * SingleChildScrollView
 * Text
@@ -30,8 +30,9 @@ For info on the Fortnightly Material Study, see: https://material.io/design/mate
 ## Notice
 
 * Theming is passed as a parameter in the constructor of `MaterialApp` (`theme:`).
-* `MediaQuery.of(context).padding` returns `EdgeInsets` around notches and virtual home buttons on
-    screens that have them (like iPhone X+).
+* `SafeArea` adds padding around notches and virtual home buttons on screens that have them (like
+    iPhone X+). Here, it protects the `ShortAppBar` from overlapping with the status bar (time)
+    and makes sure the bottom of the newspaper article has padding beneath it if necessary.
 * The entire newspaper article is wrapped in a `SingleChildScrollView` widget which ensures that the
     entire article can be viewed no matter what the screen's size or orientation is.
 * The `Text` widget with text ' ¬ ' has a `TextStyle` that changes one parameter of an inherited
