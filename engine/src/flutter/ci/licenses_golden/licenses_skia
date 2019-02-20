@@ -1,4 +1,4 @@
-Signature: 836e5418237608196869a1f870df54d4
+Signature: b14d48e409320424ded40cdb1731a9a2
 
 UNUSED LICENSES:
 
@@ -2325,6 +2325,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac-Clang-
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC8i5BEK-GPU-IntelIris655-x86_64-Release-All-Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC8i5BEK-GPU-IntelIris655-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-iOS-Clang-iPadPro-GPU-PowerVRGT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-wasm-Release-All-CanvasKit.json
@@ -2431,6 +2432,7 @@ FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/mac64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
+FILE: ../../../third_party/skia/infra/cross-compile/docker/cross-linux-arm64/Dockerfile
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
 FILE: ../../../third_party/skia/infra/lottiecap/docker/lottie-web-puppeteer/Dockerfile
