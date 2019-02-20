@@ -18,37 +18,37 @@ import 'edge_insets.dart';
 /// the curve parameters begins to generate a lozenge, instead of a super ellipse.
 /// As such, the shape or radius of the rectangle must be changed to maintain
 /// the desired super elliptical shape.
-enum RoundedRectCornerMode {
-  /// In an attempt to keep the corner radius of the rectangle roughly the
-  /// same regardless of dimension, the shape of the rectangle's corners will
-  /// change when its height or width is less than ~3x its radius.
-  ///
-  /// This option is best used in scenarios when a rectangle is static and a smooth
-  /// transition between different extent dimensions is not necessary.
-  ///
-  /// When the height or width is greater than 3x the radius, the shape will appear
-  /// to be a rounded rect, with 4 linear edges and 4 90º curves. When the
-  /// height or width is less than 3x the radius, the shape will appear to be
-  /// stadium shaped where the resulting shape has 2 linear edges and 2 180º
-  /// curves.
-  ///
-  /// If animating radii or side length with this option, at certain parameter
-  /// boundaries the rectangle will pop from one shape to the other.
-  dynamicShape,
-
-  /// In an attempt to keep the shape of the rectangle the same regardless of its
-  /// dimension, the radius will automatically be lessened to maximize the
-  /// roundness of the resulting rectangle if its width or height is less than
-  /// ~3x the radius.
-  ///
-  /// This option is best used in scenarios where a rectangle is not static and
-  /// will be animated between various different dimensions.
-  ///
-  /// This shape will always have 4 linear edges and 4 90º curves. However, at
-  /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
-  /// just 2 edges and 2 180º curves.
-  dynamicRadius,
-}
+//enum RoundedRectCornerMode {
+//  /// In an attempt to keep the corner radius of the rectangle roughly the
+//  /// same regardless of dimension, the shape of the rectangle's corners will
+//  /// change when its height or width is less than ~3x its radius.
+//  ///
+//  /// This option is best used in scenarios when a rectangle is static and a smooth
+//  /// transition between different extent dimensions is not necessary.
+//  ///
+//  /// When the height or width is greater than 3x the radius, the shape will appear
+//  /// to be a rounded rect, with 4 linear edges and 4 90º curves. When the
+//  /// height or width is less than 3x the radius, the shape will appear to be
+//  /// stadium shaped where the resulting shape has 2 linear edges and 2 180º
+//  /// curves.
+//  ///
+//  /// If animating radii or side length with this option, at certain parameter
+//  /// boundaries the rectangle will pop from one shape to the other.
+//  dynamicShape,
+//
+//  /// In an attempt to keep the shape of the rectangle the same regardless of its
+//  /// dimension, the radius will automatically be lessened to maximize the
+//  /// roundness of the resulting rectangle if its width or height is less than
+//  /// ~3x the radius.
+//  ///
+//  /// This option is best used in scenarios where a rectangle is not static and
+//  /// will be animated between various different dimensions.
+//  ///
+//  /// This shape will always have 4 linear edges and 4 90º curves. However, at
+//  /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
+//  /// just 2 edges and 2 180º curves.
+//  dynamicRadius,
+//}
 
 /// Creates a continuous cornered rounded rectangle.
 ///
@@ -78,11 +78,11 @@ enum RoundedRectCornerMode {
 ///
 /// * [RoundedRectangleBorder] which creates a rectangle whose corners are
 ///   precisely quarter circles.
-class ContinuousCornerRectangleBorder extends ShapeBorder {
+class ContinuousOvalBorder extends ShapeBorder {
   /// Creates a Continuous Cornered Rectangle Border.
   ///
   /// The [side], [mode] and [borderRadius] arguments must not be null.
-  const ContinuousCornerRectangleBorder({
+  const ContinuousOvalBorder({
     this.side = BorderSide.none,
     this.borderRadius = 1.0,
     this.mode = RoundedRectCornerMode.dynamicShape,
@@ -512,7 +512,7 @@ class ContinuousCornerRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return ContinuousCornerRectangleBorder(
+    return ContinuousOvalBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
       mode: mode,
@@ -522,8 +522,8 @@ class ContinuousCornerRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is ContinuousCornerRectangleBorder) {
-      return ContinuousCornerRectangleBorder(
+    if (a is ContinuousOvalBorder) {
+      return ContinuousOvalBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
         mode: a.mode,
@@ -535,8 +535,8 @@ class ContinuousCornerRectangleBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is ContinuousCornerRectangleBorder) {
-      return ContinuousCornerRectangleBorder(
+    if (b is ContinuousOvalBorder) {
+      return ContinuousOvalBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
         mode: b.mode,
@@ -549,7 +549,7 @@ class ContinuousCornerRectangleBorder extends ShapeBorder {
   bool operator == (dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final ContinuousCornerRectangleBorder typedOther = other;
+    final ContinuousOvalBorder typedOther = other;
     return side == typedOther.side && borderRadius == typedOther.borderRadius &&
            typedOther.mode == mode;
   }
