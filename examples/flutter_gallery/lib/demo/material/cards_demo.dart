@@ -135,7 +135,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
                   onTap: () {
                     print('Card was tapped');
                   },
-                  splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
                   highlightColor: Colors.transparent,
                   child: TravelDestinationContent(destination: destination),
                 ),
@@ -191,13 +191,13 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                       _isSelected = !_isSelected;
                     });
                   },
-                  splashColor: colorScheme.primary.withAlpha(30),
+                  splashColor: colorScheme.primary.withOpacity(0.12),
                   highlightColor: Colors.transparent,
                   child: Stack(
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                          ? colorScheme.primary.withAlpha(41)
+                          ? colorScheme.primary.withOpacity(0.08)
                           : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
