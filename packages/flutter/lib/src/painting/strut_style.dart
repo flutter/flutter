@@ -467,6 +467,32 @@ class StrutStyle extends Diagnosticable {
     return RenderComparison.identical;
   }
 
+  /// Returns a new strut style that inherits its null values from corresponding
+  /// properties in the [other] [TextStyle].
+  ///
+  /// The "missing" properties of the this strut style are _filled_ by the properties
+  /// of the provided [TextStyle]. This is possible because [StrutStyle] shares many of
+  /// the same basic properties as [TextStyle].
+  ///
+  /// If the given text style is null, returns this strut style.
+  StrutStyle inheritFromTextStyle(TextStyle other) {
+    if (other == null)
+      return this;
+
+    return StrutStyle(
+      fontFamily: fontFamily ?? other.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? other.fontFamilyFallback,
+      fontSize: fontSize ?? other.fontSize,
+      height: height ?? other.height,
+      leading: leading, // No equivalent property in TextStyle yet.
+      fontWeight: fontWeight ?? other.fontWeight,
+      fontStyle: fontStyle ?? other.fontStyle,
+      forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
+      debugLabel: debugLabel ?? other.debugLabel,
+      // Package is embedded within the getters for fontFamilyFallback.
+    );
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
