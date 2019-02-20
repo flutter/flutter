@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('validates name field correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: const TextFormFieldDemo()));
+    await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
 
     final Finder submitButton = find.widgetWithText(RaisedButton, 'SUBMIT');
     expect(submitButton, findsOneWidget);

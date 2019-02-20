@@ -18,7 +18,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -29,8 +29,8 @@ void main() {
       final List<String> stderr = <String>[];
       int runExitCode;
       run.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
@@ -38,13 +38,13 @@ void main() {
             ready.complete();
         });
       run.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stderr: $line');
-          stdout.add(line);
+          stderr.add(line);
         });
-      run.exitCode.then((int exitCode) { runExitCode = exitCode; });
+      run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null)
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
@@ -63,7 +63,7 @@ void main() {
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
       stdout.removeAt(0);
-      if (!stdout.first.startsWith('Gradle task \'assembleRelease\'...'))
+      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...'))
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
       stdout.removeAt(0);
       if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).')))

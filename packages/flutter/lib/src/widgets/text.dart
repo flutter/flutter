@@ -3,10 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
+
+// Examples can assume:
+// String _name;
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
 class DefaultTextStyle extends InheritedWidget {
@@ -164,7 +168,7 @@ class DefaultTextStyle extends InheritedWidget {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Text(
@@ -174,13 +178,14 @@ class DefaultTextStyle extends InheritedWidget {
 ///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// Using the [Text.rich] constructor, the [Text] widget can
 /// display a paragraph with differently styled [TextSpan]s. The sample
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// const Text.rich(
@@ -193,6 +198,7 @@ class DefaultTextStyle extends InheritedWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Interactivity
 ///
@@ -219,6 +225,7 @@ class Text extends StatelessWidget {
   const Text(this.data, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -235,6 +242,7 @@ class Text extends StatelessWidget {
   const Text.rich(this.textSpan, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -243,9 +251,9 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }): assert(textSpan != null),
-      data = null,
-      super(key: key);
+  }) : assert(textSpan != null),
+       data = null,
+       super(key: key);
 
   /// The text to display.
   ///
@@ -263,6 +271,9 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
+
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  final StrutStyle strutStyle;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -332,7 +343,6 @@ class Text extends StatelessWidget {
   ///
   /// ```dart
   /// Text(r'$$', semanticsLabel: 'Double dollars')
-  ///
   /// ```
   final String semanticsLabel;
 
@@ -352,6 +362,7 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
+      strutStyle: strutStyle,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

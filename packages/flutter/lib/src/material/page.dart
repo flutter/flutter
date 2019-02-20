@@ -5,46 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
+import 'page_transitions_theme.dart';
 import 'theme.dart';
-
-// Fractional offset from 1/4 screen below the top to fully on screen.
-final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
-  begin: const Offset(0.0, 0.25),
-  end: Offset.zero,
-);
-
-// Used for Android and Fuchsia.
-class _MountainViewPageTransition extends StatelessWidget {
-  _MountainViewPageTransition({
-    Key key,
-    @required bool fade,
-    @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
-    @required this.child,
-  }) : _positionAnimation = routeAnimation.drive(_kBottomUpTween.chain(_fastOutSlowInTween)),
-       _opacityAnimation = fade
-         ? routeAnimation.drive(_easeInTween) // Eyeballed from other Material apps.
-         : const AlwaysStoppedAnimation<double>(1.0),
-       super(key: key);
-
-  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-
-  final Animation<Offset> _positionAnimation;
-  final Animation<double> _opacityAnimation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO(ianh): tell the transform to be un-transformed for hit testing
-    return SlideTransition(
-      position: _positionAnimation,
-      child: FadeTransition(
-        opacity: _opacityAnimation,
-        child: child,
-      ),
-    );
-  }
-}
 
 /// A modal route that replaces the entire screen with a platform-adaptive
 /// transition.
@@ -71,46 +33,29 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [CupertinoPageRoute], which this [PageRoute] delegates transition
-///    animations to for iOS.
+///  * [PageTransitionsTheme], which defines the default page transitions used
+///    by [MaterialPageRoute.buildTransitions].
 class MaterialPageRoute<T> extends PageRoute<T> {
-  /// Creates a page route for use in a material design app.
+  /// Construct a MaterialPageRoute whose contents are defined by [builder].
+  ///
+  /// The values of [builder], [maintainState], and [fullScreenDialog] must not
+  /// be null.
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog) {
-    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
-    assert(opaque);
-  }
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
+       assert(opaque),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
   @override
   final bool maintainState;
-
-  /// A delegate PageRoute to which iOS themed page operations are delegated to.
-  /// It's lazily created on first use.
-  CupertinoPageRoute<T> get _cupertinoPageRoute {
-    assert(_useCupertinoTransitions);
-    _internalCupertinoPageRoute ??= CupertinoPageRoute<T>(
-      builder: builder, // Not used.
-      fullscreenDialog: fullscreenDialog,
-      hostRoute: this,
-    );
-    return _internalCupertinoPageRoute;
-  }
-  CupertinoPageRoute<T> _internalCupertinoPageRoute;
-
-  /// Whether we should currently be using Cupertino transitions. This is true
-  /// if the theme says we're on iOS, or if we're in an active gesture.
-  bool get _useCupertinoTransitions {
-    return _internalCupertinoPageRoute?.popGestureInProgress == true
-        || Theme.of(navigator.context).platform == TargetPlatform.iOS;
-  }
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -134,18 +79,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void dispose() {
-    _internalCupertinoPageRoute?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = Semantics(
-      scopesRoute: true,
-      explicitChildNodes: true,
-      child: builder(context),
-    );
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    final Widget result = builder(context);
     assert(() {
       if (result == null) {
         throw FlutterError(
@@ -155,20 +91,17 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       }
       return true;
     }());
-    return result;
+    return Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      child: result,
+    );
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (_useCupertinoTransitions) {
-      return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
-    } else {
-      return _MountainViewPageTransition(
-        routeAnimation: animation,
-        child: child,
-        fade: true,
-      );
-    }
+    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 
   @override

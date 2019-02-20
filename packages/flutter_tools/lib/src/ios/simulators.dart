@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import '../application_package.dart';
@@ -17,6 +16,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -46,7 +46,7 @@ class IOSSimulatorUtils {
     if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
-    return SimControl.instance.getConnectedDevices().map((SimDevice device) {
+    return SimControl.instance.getConnectedDevices().map<IOSSimulator>((SimDevice device) {
       return IOSSimulator(device.udid, name: device.name, category: device.category);
     }).toList();
   }
@@ -120,22 +120,44 @@ class SimControl {
   }
 
   Future<RunResult> install(String deviceId, String appPath) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to install $appPath on $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<RunResult> uninstall(String deviceId, String appId) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to uninstall $appId from $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<RunResult> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
     final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
-    return runCheckedAsync(args);
+    Future<RunResult> result;
+    try {
+      result = runCheckedAsync(args);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
+    }
+    return result;
   }
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
-    await runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
+    try {
+      await runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to take screenshot of $deviceId:\n$exception');
+    }
   }
 }
 
@@ -201,7 +223,10 @@ class IOSSimulator extends Device {
   Future<bool> get isLocalEmulator async => true;
 
   @override
-  bool get supportsHotMode => true;
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
 
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
@@ -295,7 +320,10 @@ class IOSSimulator extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
-        args.add('--enable-checked-mode');
+        args.addAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points'
+        ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
       if (debuggingOptions.skiaDeterministicRendering)
@@ -338,22 +366,9 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<bool> _applicationIsInstalledAndRunning(ApplicationPackage app) async {
-    final List<bool> criteria = await Future.wait(<Future<bool>>[
-      isAppInstalled(app),
-      exitsHappyAsync(<String>['/usr/bin/killall', 'Runner']),
-    ]);
-    return criteria.reduce((bool a, bool b) => a && b);
-  }
-
   Future<void> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
-    if (!await _applicationIsInstalledAndRunning(app))
-      return _buildAndInstallApplicationBundle(app, buildInfo, mainPath, usesTerminalUi);
-  }
-
-  Future<void> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
 
@@ -438,7 +453,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<Null> ensureLogsExists() async {
+  Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
       final File logFile = fs.file(logFilePath);
       if (!logFile.existsSync())
@@ -482,8 +497,6 @@ Future<Process> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  String _appName;
-
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
@@ -493,6 +506,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   final IOSSimulator device;
+
+  String _appName;
 
   StreamController<String> _linesController;
 
@@ -506,27 +521,27 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  Future<Null> _start() async {
+  Future<void> _start() async {
     // Device log.
     await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
-    _deviceProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
-      _systemProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort
     // cleanup in the callback.
-    _deviceProcess.exitCode.whenComplete(() { // ignore: unawaited_futures
+    unawaited(_deviceProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener)
         _linesController.close();
-    });
+    }));
   }
 
   // Match the log prefix (in order to shorten it):
@@ -629,8 +644,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 }
 
 int compareIosVersions(String v1, String v2) {
-  final List<int> v1Fragments = v1.split('.').map(int.parse).toList();
-  final List<int> v2Fragments = v2.split('.').map(int.parse).toList();
+  final List<int> v1Fragments = v1.split('.').map<int>(int.parse).toList();
+  final List<int> v2Fragments = v2.split('.').map<int>(int.parse).toList();
 
   int i = 0;
   while (i < v1Fragments.length && i < v2Fragments.length) {
@@ -695,7 +710,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
   }
 }

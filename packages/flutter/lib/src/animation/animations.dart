@@ -11,6 +11,9 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
+// Examples can assume:
+// AnimationController controller;
+
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
 
@@ -120,11 +123,7 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
 ///
 /// To define a mapping from values in the range 0..1, consider subclassing
 /// [Tween] instead.
-abstract class AnimationWithParentMixin<T> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory AnimationWithParentMixin._() => null;
-
+mixin AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
@@ -329,7 +328,7 @@ class ReverseAnimation extends Animation<double>
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
 /// animation produced by an [AnimationController] `controller`.
@@ -340,6 +339,8 @@ class ReverseAnimation extends Animation<double>
 ///   curve: Curves.ease,
 /// );
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// This second code snippet shows how to apply a different curve in the forward
 /// direction than in the reverse direction. This can't be done using a
@@ -353,6 +354,7 @@ class ReverseAnimation extends Animation<double>
 ///   reverseCurve: Curves.easeOut,
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// By default, the [reverseCurve] matches the forward [curve].
 ///
@@ -491,7 +493,7 @@ class TrainHoppingAnimation extends Animation<double>
   /// can be null. If the next train is null, then this object will just proxy
   /// the first animation and never hop.
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-    : assert(_currentTrain != null) {
+      : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain.value == _nextTrain.value) {
         _currentTrain = _nextTrain;
@@ -699,7 +701,7 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMax] itself
   /// to combine multiple animations.
-  AnimationMax(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.max(first.value, next.value);
@@ -714,7 +716,7 @@ class AnimationMin<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMin] itself
   /// to combine multiple animations.
-  AnimationMin(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.min(first.value, next.value);

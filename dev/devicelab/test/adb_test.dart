@@ -192,7 +192,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,

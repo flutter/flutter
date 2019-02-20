@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -45,6 +46,7 @@ class RenderParagraph extends RenderBox {
     double textScaleFactor = 1.0,
     int maxLines,
     Locale locale,
+    StrutStyle strutStyle,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -63,6 +65,7 @@ class RenderParagraph extends RenderBox {
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
+         strutStyle: strutStyle,
        );
 
   final TextPainter _textPainter;
@@ -194,6 +197,17 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  /// The value may be null.
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
@@ -267,15 +281,16 @@ class RenderParagraph extends RenderBox {
   @override
   void performLayout() {
     _layoutTextWithConstraints(constraints);
-    // We grab _textPainter.size here because assigning to `size` will trigger
-    // us to validate our intrinsic sizes, which will change _textPainter's
-    // layout because the intrinsic size calculations are destructive.
-    // Other _textPainter state like didExceedMaxLines will also be affected.
-    // See also RenderEditable which has a similar issue.
+    // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
+    // assigning to `size` will trigger us to validate our intrinsic sizes,
+    // which will change _textPainter's layout because the intrinsic size
+    // calculations are destructive. Other _textPainter state will also be
+    // affected. See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
+    final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't

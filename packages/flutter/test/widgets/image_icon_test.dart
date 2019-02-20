@@ -111,7 +111,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSemanticsData(find.byType(ImageIcon)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(ImageIcon)), matchesSemantics(
       label: 'test',
       textDirection: TextDirection.ltr,
     ));

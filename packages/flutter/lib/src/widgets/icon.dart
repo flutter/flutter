@@ -21,6 +21,20 @@ import 'icon_theme_data.dart';
 /// Typically this is introduced automatically by the [WidgetsApp] or
 /// [MaterialApp].
 ///
+/// {@tool sample}
+///
+/// This example shows how to use [Icon] to create an addition icon, in the
+/// color pink, and 30 pixels in size.
+///
+/// ```dart
+/// Icon(
+///   Icons.add,
+///   color: Colors.pink,
+///   size: 30.0,
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
@@ -79,10 +93,10 @@ class Icon extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  Icon(
-  ///    icon: Icons.widgets,
-  ///    color: Colors.blue.shade400,
-  ///  ),
+  /// Icon(
+  ///   icon: Icons.widgets,
+  ///   color: Colors.blue.shade400,
+  /// )
   /// ```
   final Color color;
 

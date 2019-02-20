@@ -25,7 +25,7 @@ import 'package:flutter/widgets.dart';
 ///
 ///  * [Icon]
 ///  * [IconButton]
-///  * [design.google.com/icons](https://design.google.com/icons/)
+///  * <https://design.google.com/icons/>
 class Icons {
   Icons._();
 

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'reorderable_list.dart';
+import 'text_theme.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -34,6 +36,10 @@ import 'typography.dart';
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
+//
+// 6. If you're adding a String for the sake of Flutter, not for an app-specific
+//    version of this interface, you are making a breaking API change. See
+//    https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -168,22 +174,17 @@ abstract class MaterialLocalizations {
   /// each supported layout.
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
-  /// Provides geometric text preferences for the current locale.
+  /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
-  /// This text theme is incomplete. For example, it lacks text color
-  /// information. This theme must be merged with another text theme that
-  /// provides the missing values.
+  /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
+  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// three language categories defined in https://material.io/go/design-typography.
   ///
-  /// Typically a complete theme is obtained via [Theme.of], which can be
-  /// localized using the [Localizations] widget.
-  ///
-  /// The text styles provided by this theme are expected to have their
-  /// [TextStyle.inherit] property set to false, so that the [ThemeData]
-  /// obtained from [Theme.of] no longer inherits text style properties and
-  /// contains a complete set of properties needed to style a [Text] widget.
-  ///
-  /// See also: https://material.io/go/design-typography
-  TextTheme get localTextGeometry;
+  /// Generally speaking, font sizes for [ScriptCategory.tall] and
+  /// [ScriptCategory.dense] scripts - for text styles that are smaller than the
+  /// title style - are one unit larger than they are for
+  /// [ScriptCategory.englishLike] scripts.
+  ScriptCategory get scriptCategory;
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
@@ -277,27 +278,27 @@ abstract class MaterialLocalizations {
   /// shows the list of accounts.
   String get showAccountsLabel;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the start of the list.
   String get reorderItemToStart;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the end of the list.
   String get reorderItemToEnd;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space up the list.
   String get reorderItemUp;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space down the list.
   String get reorderItemDown;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space left in the list.
   String get reorderItemLeft;
 
-  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space right in the list.
   String get reorderItemRight;
 
@@ -309,6 +310,9 @@ abstract class MaterialLocalizations {
 
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
+
+  /// The default semantics label for a [RefreshIndicator].
+  String get refreshIndicatorSemanticLabel;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -338,6 +342,9 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
 /// US English strings for the material widgets.
@@ -653,15 +660,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
   }
-
-  /// Looks up text geometry defined in [MaterialTextGeometry].
-  @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
 
   @override
   String get signedInLabel => 'Signed in';
@@ -695,6 +701,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get collapsedIconTapHint => 'Expand';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Refresh';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.

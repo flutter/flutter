@@ -1,7 +1,7 @@
-# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
-[![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
+# Flutter ![Flutter logo][]
 
+[![Gitter Channel][]][Gitter badge]
+[![Build Status - Cirrus][]][Build status]
 
 # Build beautiful native apps in record time
 
@@ -9,10 +9,16 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 
 ### Documentation
 
-* **Main site: [flutter.io][]**
+**Main site: [flutter.io][]**
 * [Install](https://flutter.io/get-started/install/)
 * [Get started](https://flutter.io/get-started/)
-* [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
+* [API documentation](https://docs.flutter.io/)
+* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
+* [How to contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+
+For announcements about new releases and breaking changes, follow the
+[flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
+mailing list.
 
 ## Fast development
 
@@ -23,13 +29,12 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
+<img src="https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive and flexible UI
 Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
-
 
 Delight your users with Flutter's built-in
 beautiful Material Design and
@@ -71,13 +76,13 @@ class CounterState extends State<Counter> {
     // build methods fast, so that you can just rebuild anything that
     // needs updating rather than having to individually change
     // instances of widgets.
-    return new Row(
+    return Row(
       children: <Widget>[
-        new RaisedButton(
+        RaisedButton(
           onPressed: increment,
-          child: new Text('Increment'),
+          child: Text('Increment'),
         ),
-        new Text('Count: $counter'),
+        Text('Count: $counter'),
       ],
     );
   }
@@ -99,7 +104,7 @@ and access native features and SDKs on Android and iOS.
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
 ```dart
-Future<Null> getBatteryLevel() async {
+Future<void> getBatteryLevel() async {
   var batteryLevel = 'unknown';
   try {
     int result = await methodChannel.invokeMethod('getBatteryLevel');
@@ -113,8 +118,8 @@ Future<Null> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
-write <a href="https://flutter.io/platform-channels/">platform channels</a>,
+Learn how to use <a href="https://flutter.io/using-packages/">packages</a> or
+write <a href="https://flutter.io/platform-channels/">platform channels</a>
 to access native code, APIs, and SDKs.
 
 ## Unified app development
@@ -127,52 +132,21 @@ If you are an experienced iOS or Android developer,
 you can use Flutter for your views and leverage much of your
 existing Java/Kotlin/ObjC/Swift investment.
 
-### Build
-
-* **Beautiful app UIs**
-    * Rich 2D GPU-accelerated APIs
-    * Reactive framework
-    * Animation/motion APIs
-    * Material Design and iOS widgets
-* **Fluid coding experience**
-    * Sub-second, stateful hot reload
-    * IntelliJ: refactor, code completion, etc
-    * Dart language and core libs
-    * Package manager
-* **Full-featured apps**
-    * Interop with mobile OS APIs & SDKs
-    * Gradle/Java/Kotlin
-    * Cocoapods/ObjC/Swift
-
-### Optimize
-
-* **Test**
-    * Unit testing
-    * Integration testing
-    * On-device testing
-* **Debug**
-    * IDE debugger
-    * Web-based debugger
-    * async/await aware
-    * Expression evaluator
-* **Profile**
-    * Timeline
-    * CPU and memory
-    * In-app perf charts
-
-### Deploy
-
-* **Compile**
-    * Native ARM code
-    * Dead code elimination
-* **Distribution**
-    * App Store
-    * Play Store
-
 Learn more about what makes Flutter special in the
 <a href="https://flutter.io/technical-overview/">technical overview</a>.
+
+# More resources
 
 Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
 
-[flutter.io]: https://flutter.io/
+# How to contribute
+
+To join the team working on Flutter, see our [contributor guide](CONTRIBUTING.md).
+
+[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
+[Build status]: https://cirrus-ci.com/github/flutter/flutter/master
+[flutter.io]: https://flutter.io
+[Flutter logo]: https://github.com/dart-lang/site-shared/blob/master/src/_assets/image/flutter/icon/64.png?raw=1
+[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
+[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge

@@ -192,6 +192,170 @@ void main() {
     expect(revealed.rect, Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
   });
 
+  testWidgets('Viewport getOffsetToReveal Sliver - down', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                  child: Container(
+                    height: 100.0,
+                    child: Text('Tile $i'),
+                  )
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            width: 200.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      width: 100.0,
+                      child: Text('Tile $i'),
+                    )
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              reverse: true,
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      height: 100.0,
+                      child: Text('Tile $i'),
+                    )
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            width: 200.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      width: 100.0,
+                      child: Text('Tile $i'),
+                    )
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final List<List<Widget>> children = List<List<Widget>>(10);
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
@@ -353,7 +517,7 @@ void main() {
   group('Nested viewports (same orientation) showOnScreen', () {
     List<Widget> children;
 
-    Future<Null> buildNestedScroller({WidgetTester tester, ScrollController inner, ScrollController outer}) {
+    Future<void> buildNestedScroller({WidgetTester tester, ScrollController inner, ScrollController outer}) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -476,6 +640,118 @@ void main() {
       expect(outer.offset, 200.0);
       expect(inner.offset, 0.0);
     });
+  });
+
+  testWidgets('Nested Viewports showOnScreen with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20893.
+
+    List<Widget> slivers;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: ListView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    children: slivers = <Widget>[
+                      Container(
+                        width: 150.0,
+                      ),
+                      Container(
+                        width: 150.0,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(slivers[1])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 50.0);
+  });
+
+  testWidgets('Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    Widget sliver;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: CustomScrollView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    slivers: <Widget>[
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: sliver = SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(sliver)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 25.0);
   });
 
   testWidgets('Viewport showOnScreen with objects larger than viewport', (WidgetTester tester) async {

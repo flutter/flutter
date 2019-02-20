@@ -115,12 +115,13 @@ abstract class PointerScrollGestureRecognizer
   double _getPrimaryValueFromOffset(Offset value);
 
   @override
-  bool get acceptsPointerGestures => true;
+  bool get acceptsPointerSignals => true;
 
   @override
   void addPointer(PointerEvent event) {
-    if (!(event is PointerScrollEvent) || event.gestureChange == null)
+    if (!(event is PointerScrollEvent))
       return;
+    assert((event as PointerScrollEvent).gestureChange != null);
 
     startTrackingPointer(event.pointer);
 
@@ -132,9 +133,10 @@ abstract class PointerScrollGestureRecognizer
 
   @override
   void handleEvent(PointerEvent event) {
-    if (!(event is PointerScrollEvent) || event.gestureChange == null)
+    if (!(event is PointerScrollEvent))
       return;
     final PointerScrollEvent pointerScrollEvent = event;
+    assert(pointerScrollEvent.gestureChange != null);
 
     if (pointerScrollEvent.gestureChange == PointerChange.move) {
       assert(_hasAccepted);

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum GridDemoTileStyle {
   imageOnly,
   oneLine,
@@ -340,6 +342,7 @@ class GridListDemoState extends State<GridListDemo> {
       appBar: AppBar(
         title: const Text('Grid list'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
@@ -371,7 +374,7 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children: photos.map((Photo photo) {
+                children: photos.map<Widget>((Photo photo) {
                   return GridDemoPhotoItem(
                     photo: photo,
                     tileStyle: _tileStyle,

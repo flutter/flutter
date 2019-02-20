@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
 
-typedef ShardRunner = Future<Null> Function();
+typedef ShardRunner = Future<void> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -21,6 +21,7 @@ final List<String> flutterTestArgs = <String>[];
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
+  'build_tests': _runBuildTests,
   'coverage': _runCoverage,
 };
 
@@ -37,7 +38,7 @@ const Duration _kShortTimeout = Duration(minutes: 5);
 /// For example:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
   final String shard = Platform.environment['SHARD'];
@@ -58,7 +59,7 @@ Future<Null> main(List<String> args) async {
   }
 }
 
-Future<Null> _runSmokeTests() async {
+Future<void> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -138,7 +139,7 @@ Future<Null> _runSmokeTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 }
 
-Future<Null> _runToolTests() async {
+Future<void> _runToolTests() async {
   await _runSmokeTests();
 
   await _pubRunTest(
@@ -149,16 +150,108 @@ Future<Null> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runTests() async {
+/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
+/// examples apps finish without crashing. It does not actually
+/// launch the apps. That happens later in the devicelab. This is
+/// just a smoke-test. In particular, this will verify we can build
+/// when there are spaces in the path name for the Flutter SDK and
+/// target app.
+Future<void> _runBuildTests() async {
+  final List<String> paths = <String>[
+    path.join('examples', 'hello_world'),
+    path.join('examples', 'flutter_gallery'),
+    path.join('examples', 'flutter_view'),
+  ];
+  for (String path in paths) {
+    await _flutterBuildAot(path);
+    await _flutterBuildApk(path);
+    await _flutterBuildIpa(path);
+  }
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+
+  print('${bold}DONE: All build tests successful.$reset');
+}
+
+Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+  print('Running Dart2JS build tests...');
+  await runCommand(flutter,
+    <String>['build', 'web', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildAot(String relativePathToApplication) async {
+  print('Running AOT build tests...');
+  await runCommand(flutter,
+    <String>['build', 'aot', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildApk(String relativePathToApplication) async {
+  // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
+  if (
+        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
+        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
+    return;
+  }
+  print('Running APK build tests...');
+  await runCommand(flutter,
+    <String>['build', 'apk', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running IPA build tests...');
+  // Install Cocoapods.  We don't have these checked in for the examples,
+  // and build ios doesn't take care of it automatically.
+  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
+  if (podfile.existsSync()) {
+    await runCommand('pod',
+      <String>['install'],
+      workingDirectory: podfile.parent.path,
+      expectNonZeroExit: false,
+      timeout: _kShortTimeout,
+    );
+  }
+  await runCommand(flutter,
+    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _runTests() async {
   await _runSmokeTests();
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+  // needs to be run with --track-widget-creation but it is nice to run
+  // all of the tests in package:flutter with the flag to ensure that
+  // the Dart kernel transformer triggered by the flag does not break anything.
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
@@ -166,12 +259,15 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  // Regression test to ensure that code outside of package:flutter can run
+  // with --track-widget-creation.
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runCoverage() async {
+Future<void> _runCoverage() async {
   final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
@@ -193,12 +289,12 @@ Future<Null> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
-Future<Null> _pubRunTest(
+Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
   bool enableFlutterToolAsserts = false
 }) {
-  final List<String> args = <String>['run', 'test', '-rcompact'];
+  final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
@@ -234,7 +330,7 @@ class EvalResult {
   final int exitCode;
 }
 
-Future<Null> _runFlutterTest(String workingDirectory, {
+Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
@@ -268,7 +364,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
   );
 }
 
-Future<Null> _verifyVersion(String filename) async {
+Future<void> _verifyVersion(String filename) async {
   if (!File(filename).existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');

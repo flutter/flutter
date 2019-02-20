@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.
-  const double kAhemBaselineRatio = 1.1662499904632568;
+  const double kAhemBaselineRatio = 1.25;
 
   test('predictably lays out a single-line paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -20,7 +20,7 @@ void main() {
       ));
       builder.addText('Test');
       final Paragraph paragraph = builder.build();
-      paragraph.layout(ParagraphConstraints(width: 400.0));
+      paragraph.layout(const ParagraphConstraints(width: 400.0));
 
       expect(paragraph.height, closeTo(fontSize, 0.001));
       expect(paragraph.width, closeTo(400.0, 0.001));

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    PersistentBottomSheetController<Null> bottomSheet;
+    PersistentBottomSheetController<void> bottomSheet;
     int buildCount = 0;
 
     await tester.pumpWidget(MaterialApp(
@@ -18,7 +18,7 @@ void main() {
       )
     ));
 
-    bottomSheet = scaffoldKey.currentState.showBottomSheet<Null>((_) {
+    bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -45,7 +45,7 @@ void main() {
       )
     ));
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -76,7 +76,7 @@ void main() {
     ));
 
     int buildCount = 0;
-    showBottomSheet<Null>(
+    showBottomSheet<void>(
       context: key.currentContext,
       builder: (BuildContext context) {
         return Builder(
@@ -114,7 +114,7 @@ void main() {
 
     await tester.pump();
 
-    showBottomSheet<Null>(
+    showBottomSheet<void>(
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
@@ -180,8 +180,8 @@ void main() {
 
     // Remove the persistent bottomSheet
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           bottomSheet: null,
           body: Placeholder(),
         ),

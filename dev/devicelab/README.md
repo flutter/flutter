@@ -102,9 +102,9 @@ reproduce a CI test failure locally.
 
 ## Prerequisites
 
-You must set the `ANDROID_HOME` environment variable to run tests on Android. If
-you have a local build of the Flutter engine, then you have a copy of the
-Android SDK at `.../engine/src/third_party/android_tools/sdk`.
+You must set the `ANDROID_HOME` or `ANDROID_SDK_ROOT` environment variable to run
+tests on Android. If you have a local build of the Flutter engine, then you have
+a copy of the Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
 You can find where your Android SDK is using `flutter doctor`.
 
@@ -119,7 +119,7 @@ Notably, it will start and stop gradle, for instance.
 To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
 
 ```sh
-dart bin/run.dart -a
+../../bin/cache/dart-sdk/bin/dart bin/run.dart -a
 ```
 
 ## Running specific tests
@@ -128,7 +128,7 @@ To run a test, use option `-t` (`--task`):
 
 ```sh
 # from the .../flutter/dev/devicelab directory
-dart bin/run.dart -t {NAME_OR_PATH_OF_TEST}
+../../bin/cache/dart-sdk/bin/dart bin/run.dart -t {NAME_OR_PATH_OF_TEST}
 ```
 
 Where `NAME_OR_PATH_OF_TEST` can be either of:
@@ -142,7 +142,7 @@ Where `NAME_OR_PATH_OF_TEST` can be either of:
 To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
 ```sh
-dart bin/run.dart -t test1 -t test2 -t test3
+../../bin/cache/dart-sdk/bin/dart bin/run.dart -t test1 -t test2 -t test3
 ```
 
 To run tests from a specific stage, use option `-s` (`--stage`).
@@ -151,7 +151,7 @@ Currently there are only three stages defined, `devicelab`,
 
 
 ```sh
-dart bin/run.dart -s {NAME_OF_STAGE}
+../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
 # Reproducing broken builds locally
@@ -162,7 +162,7 @@ failing test is `flutter_gallery__transition_perf`. This name can be passed to
 the `run.dart` command. For example:
 
 ```sh
-dart bin/run.dart -t flutter_gallery__transition_perf
+../../bin/cache/dart-sdk/bin/dart bin/run.dart -t flutter_gallery__transition_perf
 ```
 
 # Writing tests
@@ -177,7 +177,7 @@ import 'dart:async';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(() async {
     ... do something interesting ...
 

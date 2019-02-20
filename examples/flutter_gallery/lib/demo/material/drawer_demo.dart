@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+
+import '../../gallery/demo.dart';
 
 const String _kAsset0 = 'people/square/trevor.png';
 const String _kAsset1 = 'people/square/stella.png';
@@ -77,6 +80,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         leading: IconButton(
@@ -88,6 +92,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           },
         ),
         title: const Text('Navigation drawer'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DrawerDemo.routeName)],
       ),
       drawer: Drawer(
         child: Column(
@@ -103,6 +108,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               ),
               otherAccountsPictures: <Widget>[
                 GestureDetector(
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },
@@ -117,6 +123,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   ),
                 ),
                 GestureDetector(
+                  dragStartBehavior: DragStartBehavior.down,
                   onTap: () {
                     _onOtherAccountsTap(context);
                   },
@@ -146,6 +153,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               removeTop: true,
               child: Expanded(
                 child: ListView(
+                  dragStartBehavior: DragStartBehavior.down,
                   padding: const EdgeInsets.only(top: 8.0),
                   children: <Widget>[
                     Stack(
@@ -156,7 +164,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _drawerContents.map((String id) {
+                            children: _drawerContents.map<Widget>((String id) {
                               return ListTile(
                                 leading: CircleAvatar(child: Text(id)),
                                 title: Text('Drawer item $id'),

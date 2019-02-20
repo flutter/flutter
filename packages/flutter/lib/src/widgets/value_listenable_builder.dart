@@ -43,7 +43,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///  * [AnimatedBuilder], which also triggers rebuilds from a [Listenable]
 ///    without passing back a specific value from a [ValueListenable].
 ///  * [NotificationListener], which lets you rebuild based on [Notification]
-///    coming from its descendent widgets rather than a [ValueListenable] that
+///    coming from its descendant widgets rather than a [ValueListenable] that
 ///    you have a direct reference to.
 ///  * [StreamBuilder], where a builder can depend on a [Stream] rather than
 ///    a [ValueListenable] for more advanced use cases.

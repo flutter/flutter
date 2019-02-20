@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -46,9 +48,9 @@ class ChipTheme extends InheritedWidget {
     Key key,
     @required this.data,
     @required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -60,7 +62,7 @@ class ChipTheme extends InheritedWidget {
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
@@ -76,6 +78,7 @@ class ChipTheme extends InheritedWidget {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -111,7 +114,7 @@ class ChipTheme extends InheritedWidget {
 /// you get from [ChipTheme.of], or create an entirely new one with
 /// [ChipThemeData..fromDefaults].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
@@ -139,6 +142,7 @@ class ChipTheme extends InheritedWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -160,7 +164,8 @@ class ChipTheme extends InheritedWidget {
 ///  * [ThemeData], which has a default [ChipThemeData].
 class ChipThemeData extends Diagnosticable {
   /// Create a [ChipThemeData] given a set of exact values. All the values
-  /// must be specified.
+  /// must be specified except for [elevation] and [pressElevation], which may
+  /// be null.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
@@ -176,16 +181,18 @@ class ChipThemeData extends Diagnosticable {
     @required this.labelStyle,
     @required this.secondaryLabelStyle,
     @required this.brightness,
-  })  : assert(backgroundColor != null),
-        assert(disabledColor != null),
-        assert(selectedColor != null),
-        assert(secondarySelectedColor != null),
-        assert(labelPadding != null),
-        assert(padding != null),
-        assert(shape != null),
-        assert(labelStyle != null),
-        assert(secondaryLabelStyle != null),
-        assert(brightness != null);
+    this.elevation,
+    this.pressElevation,
+  }) : assert(backgroundColor != null),
+       assert(disabledColor != null),
+       assert(selectedColor != null),
+       assert(secondarySelectedColor != null),
+       assert(labelPadding != null),
+       assert(padding != null),
+       assert(shape != null),
+       assert(labelStyle != null),
+       assert(secondaryLabelStyle != null),
+       assert(brightness != null);
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
   /// style.
@@ -326,6 +333,16 @@ class ChipThemeData extends Diagnosticable {
   /// This affects various base material color choices in the chip rendering.
   final Brightness brightness;
 
+  /// The elevation to be applied to the chip.
+  ///
+  /// If null, the chip defaults to 0.
+  final double elevation;
+
+  /// The elevation to be applied to the chip during the press motion.
+  ///
+  /// If null, the chip defaults to 8.
+  final double pressElevation;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
@@ -340,6 +357,8 @@ class ChipThemeData extends Diagnosticable {
     TextStyle labelStyle,
     TextStyle secondaryLabelStyle,
     Brightness brightness,
+    double elevation,
+    double pressElevation,
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -353,6 +372,8 @@ class ChipThemeData extends Diagnosticable {
       labelStyle: labelStyle ?? this.labelStyle,
       secondaryLabelStyle: secondaryLabelStyle ?? this.secondaryLabelStyle,
       brightness: brightness ?? this.brightness,
+      elevation: elevation ?? this.elevation,
+      pressElevation: pressElevation ?? this.pressElevation,
     );
   }
 
@@ -360,17 +381,7 @@ class ChipThemeData extends Diagnosticable {
   ///
   /// The arguments must not be null.
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
-  /// that the interpolation has not started, returning `a` (or something
-  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-  /// returning `b` (or something equivalent to `b`), and values in between
-  /// meaning that the interpolation is at the relevant point on the timeline
-  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-  /// 1.0, so negative values and values greater than 1.0 are valid (and can
-  /// easily be generated by curves such as [Curves.elasticInOut]).
-  ///
-  /// Values for `t` are usually obtained from an [Animation<double>], such as
-  /// an [AnimationController].
+  /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData lerp(ChipThemeData a, ChipThemeData b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -387,6 +398,8 @@ class ChipThemeData extends Diagnosticable {
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
       secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
     );
   }
 
@@ -404,6 +417,8 @@ class ChipThemeData extends Diagnosticable {
       labelStyle,
       secondaryLabelStyle,
       brightness,
+      elevation,
+      pressElevation,
     );
   }
 
@@ -426,7 +441,9 @@ class ChipThemeData extends Diagnosticable {
         && otherData.shape == shape
         && otherData.labelStyle == labelStyle
         && otherData.secondaryLabelStyle == secondaryLabelStyle
-        && otherData.brightness == brightness;
+        && otherData.brightness == brightness
+        && otherData.elevation == elevation
+        && otherData.pressElevation == pressElevation;
   }
 
   @override
@@ -449,5 +466,7 @@ class ChipThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultData.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: defaultData.secondaryLabelStyle));
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
+    properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: defaultData.pressElevation));
   }
 }

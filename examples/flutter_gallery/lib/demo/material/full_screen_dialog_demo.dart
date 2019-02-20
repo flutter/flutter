@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // This demo is based on
-// https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs
+// https://material.io/design/components/dialogs.html#full-screen-dialog
 
 enum DismissDialogAction {
   cancel,
@@ -49,7 +49,7 @@ class DateTimeItem extends StatelessWidget {
                     firstDate: date.subtract(const Duration(days: 30)),
                     lastDate: date.add(const Duration(days: 30))
                   )
-                  .then<Null>((DateTime value) {
+                  .then<void>((DateTime value) {
                     if (value != null)
                       onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
@@ -76,7 +76,7 @@ class DateTimeItem extends StatelessWidget {
                   context: context,
                   initialTime: time
                 )
-                .then<Null>((TimeOfDay value) {
+                .then<void>((TimeOfDay value) {
                   if (value != null)
                     onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
@@ -251,7 +251,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               )
             )
           ]
-          .map((Widget child) {
+          .map<Widget>((Widget child) {
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               height: 96.0,

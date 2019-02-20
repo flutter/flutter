@@ -19,7 +19,7 @@ Widget buildFrame({ bool reverse = false, @required TextDirection textDirection 
           scrollDirection: Axis.horizontal,
           reverse: reverse,
           physics: const BouncingScrollPhysics(),
-          children: items.map((int item) {
+          children: items.map<Widget>((int item) {
             return Container(
               child: Text('$item')
             );

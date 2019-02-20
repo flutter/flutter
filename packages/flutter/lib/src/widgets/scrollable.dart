@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -80,7 +81,10 @@ class Scrollable extends StatefulWidget {
     this.physics,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
+    this.semanticChildCount,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(axisDirection != null),
+       assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
        super (key: key);
@@ -162,6 +166,43 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
+  /// The number of children that will contribute semantic information.
+  ///
+  /// The value will be null if the number of children is unknown or unbounded.
+  ///
+  /// Some subtypes of [ScrollView] can infer this value automatically. For
+  /// example [ListView] will use the number of widgets in the child list,
+  /// while the [new ListView.separated] constructor will use half that amount.
+  ///
+  /// For [CustomScrollView] and other types which do not receive a builder
+  /// or list of widgets, the child count must be explicitly provided.
+  ///
+  /// See also:
+  ///
+  ///  * [CustomScrollView], for an explanation of scroll semantics.
+  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
+  final int semanticChildCount;
+
+  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
+  /// {@template flutter.widgets.scrollable.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], scrolling drag behavior will
+  /// begin upon the detection of a drag gesture. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.down].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  /// {@endtemplate}
+  final DragStartBehavior dragStartBehavior;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -191,12 +232,12 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  static Future<Null> ensureVisible(BuildContext context, {
+  static Future<void> ensureVisible(BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final List<Future<Null>> futures = <Future<Null>>[];
+    final List<Future<void>> futures = <Future<void>>[];
 
     ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
@@ -211,10 +252,10 @@ class Scrollable extends StatefulWidget {
     }
 
     if (futures.isEmpty || duration == Duration.zero)
-      return Future<Null>.value();
+      return Future<void>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures).then((List<Null> _) => null);
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
 }
 
@@ -373,7 +414,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
             VerticalPointerScrollGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalPointerScrollGestureRecognizer>(
@@ -404,7 +446,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onCancel = _handleDragCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
             HorizontalPointerScrollGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalPointerScrollGestureRecognizer>(
@@ -504,29 +547,34 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _drag = null;
   }
 
-  // SCROLL WHEEL/GESTURE
+  // SCROLL WHEEL
 
-  /// Callback for discrete scroll events, such as a scroll wheel.
-  bool _handleDiscretePointerScroll(PointerScrollEvent event) {
-    // The gesture detector will handle gesture-based scrolls, so ignore
-    // anything that's not a discrete scroll event.
-    if (event.gestureChange != null)
-      return false;
-
+  // Returns the offset that should result from applying [event] to the current
+  // position, taking min/max scroll extent into account.
+  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
-    if (position != null) {
-      final double currentScrollOffset = position.pixels;
-      final double targetScrollOffset = math.min(
-          math.max(currentScrollOffset + delta, position.minScrollExtent),
-          position.maxScrollExtent);
-      if (targetScrollOffset != currentScrollOffset) {
-        position.jumpTo(targetScrollOffset);
-        return true;
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
+        position.maxScrollExtent);
+  }
+
+  void _receivedPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent && event.gestureChange == null && position != null) {
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      // Only express interest in the event if it would actually result in a scroll.
+      if (targetScrollOffset != position.pixels) {
+        GestureBinding.instance.pointerSignalResolver.register(event, _handleDiscretePointerScroll);
       }
     }
-    return false;
+  }
+
+  void _handleDiscretePointerScroll(PointerEvent event) {
+    assert(event is PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+    if (targetScrollOffset != position.pixels) {
+      position.jumpTo(targetScrollOffset);
+    }
   }
 
   void _handlePointerScrollStart(PointerScrollStartDetails details) {
@@ -564,23 +612,31 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(position != null);
-    // TODO(ianh): Having all these global keys is sad.
-    Widget result = Listener(
-      onPointerScroll: _handleDiscretePointerScroll,
-      child: RawGestureDetector(
-        key: _gestureDetectorKey,
-        gestures: _gestureRecognizers,
-        behavior: HitTestBehavior.opaque,
-        excludeFromSemantics: widget.excludeFromSemantics,
-        child: Semantics(
-          explicitChildNodes: !widget.excludeFromSemantics,
-          child: IgnorePointer(
-            key: _ignorePointerKey,
-            ignoring: _shouldIgnorePointer,
-            ignoringSemantics: false,
-            child: _ScrollableScope(
-              scrollable: this,
-              position: position,
+    // _ScrollableScope must be placed above the BuildContext returned by notificationContext
+    // so that we can get this ScrollableState by doing the following:
+    //
+    // ScrollNotification notification;
+    // Scrollable.of(notification.context)
+    //
+    // Since notificationContext is pointing to _gestureDetectorKey.context, _ScrollableScope
+    // must be placed above the widget using it: RawGestureDetector
+    Widget result = _ScrollableScope(
+      scrollable: this,
+      position: position,
+      // TODO(ianh): Having all these global keys is sad.
+      child: Listener(
+        onPointerSignal: _receivedPointerSignal,
+        child: RawGestureDetector(
+          key: _gestureDetectorKey,
+          gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: widget.excludeFromSemantics,
+          child: Semantics(
+            explicitChildNodes: !widget.excludeFromSemantics,
+            child: IgnorePointer(
+              key: _ignorePointerKey,
+              ignoring: _shouldIgnorePointer,
+              ignoringSemantics: false,
               child: widget.viewportBuilder(context, position),
             ),
           ),
@@ -593,7 +649,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         key: _scrollSemanticsKey,
         child: result,
         position: position,
-        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
+        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? _physics.allowImplicitScrolling,
+        semanticChildCount: widget.semanticChildCount,
       );
     }
 
@@ -626,17 +683,21 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     Key key,
     @required this.position,
     @required this.allowImplicitScrolling,
+    @required this.semanticChildCount,
     Widget child
-  }) : assert(position != null), super(key: key, child: child);
+  }) : assert(position != null),
+       super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
+  final int semanticChildCount;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
     return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
+      semanticChildCount: semanticChildCount,
     );
   }
 
@@ -644,7 +705,8 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
-      ..position = position;
+      ..position = position
+      ..semanticChildCount = semanticChildCount;
   }
 }
 
@@ -652,10 +714,13 @@ class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     @required ScrollPosition position,
     @required bool allowImplicitScrolling,
+    @required int semanticChildCount,
     RenderBox child,
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
-       assert(position != null), super(child) {
+       _semanticChildCount = semanticChildCount,
+       assert(position != null),
+       super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -682,6 +747,15 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  int get semanticChildCount => _semanticChildCount;
+  int _semanticChildCount;
+  set semanticChildCount(int value) {
+    if (value == semanticChildCount)
+      return;
+    _semanticChildCount = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -691,7 +765,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..hasImplicitScrolling = allowImplicitScrolling
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
-          ..scrollExtentMin = _position.minScrollExtent;
+          ..scrollExtentMin = _position.minScrollExtent
+          ..scrollChildCount = semanticChildCount;
     }
   }
 
@@ -709,15 +784,20 @@ class _RenderScrollSemantics extends RenderProxyBox {
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
 
+    int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling))
         excluded.add(child);
-      else
+      else {
+        if (!child.hasFlag(SemanticsFlag.isHidden))
+          firstVisibleIndex ??= child.indexInParent;
         included.add(child);
+      }
     }
+    config.scrollIndex = firstVisibleIndex;
     node.updateWith(config: null, childrenInInversePaintOrder: excluded);
     _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }

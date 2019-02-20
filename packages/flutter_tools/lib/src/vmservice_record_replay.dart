@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 const String _kManifest = 'MANIFEST.txt';
@@ -22,11 +22,6 @@ const String _kData = 'data';
 /// A [StreamChannel] that expects VM service (JSON-rpc) protocol messages and
 /// serializes all such messages to the file system for later playback.
 class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
-  final List<_Message> _messages = <_Message>[];
-
-  _RecordingStream _streamRecorder;
-  _RecordingSink _sinkRecorder;
-
   RecordingVMServiceChannel(StreamChannel<String> delegate, Directory location)
       : super(delegate) {
     addShutdownHook(() async {
@@ -41,6 +36,11 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
     }, ShutdownStage.SERIALIZE_RECORDING);
   }
 
+  final List<_Message> _messages = <_Message>[];
+
+  _RecordingStream _streamRecorder;
+  _RecordingSink _sinkRecorder;
+
   @override
   Stream<String> get stream {
     _streamRecorder ??= _RecordingStream(super.stream, _messages);
@@ -53,9 +53,6 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
 
 /// Base class for request and response JSON-rpc messages.
 abstract class _Message implements Comparable<_Message> {
-  final String type;
-  final Map<String, dynamic> data;
-
   _Message(this.type, this.data);
 
   factory _Message.fromRecording(Map<String, dynamic> recordingData) {
@@ -63,6 +60,9 @@ abstract class _Message implements Comparable<_Message> {
         ? _Request(recordingData[_kData])
         : _Response(recordingData[_kData]);
   }
+
+  final String type;
+  final Map<String, dynamic> data;
 
   int get id => data[_kId];
 
@@ -115,11 +115,6 @@ class _Transaction {
 /// A helper class that monitors a [Stream] of VM service JSON-rpc responses
 /// and saves the responses to a recording.
 class _RecordingStream {
-  final Stream<String> _delegate;
-  final StreamController<String> _controller;
-  final List<_Message> _recording;
-  StreamSubscription<String> _subscription;
-
   _RecordingStream(Stream<String> stream, this._recording)
       : _delegate = stream,
         _controller = stream.isBroadcast
@@ -144,6 +139,11 @@ class _RecordingStream {
     };
   }
 
+  final Stream<String> _delegate;
+  final StreamController<String> _controller;
+  final List<_Message> _recording;
+  StreamSubscription<String> _subscription;
+
   StreamSubscription<String> _listenToStream() {
     return _delegate.listen(
       (String element) {
@@ -162,10 +162,10 @@ class _RecordingStream {
 /// A [StreamSink] that monitors VM service JSON-rpc requests and saves the
 /// requests to a recording.
 class _RecordingSink implements StreamSink<String> {
+  _RecordingSink(this._delegate, this._recording);
+
   final StreamSink<String> _delegate;
   final List<_Message> _recording;
-
-  _RecordingSink(this._delegate, this._recording);
 
   @override
   Future<dynamic> close() => _delegate.close();
@@ -194,12 +194,12 @@ class _RecordingSink implements StreamSink<String> {
 /// to its [StreamChannel.sink], looks up those requests in a recording, and
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
+  ReplayVMServiceChannel(Directory location)
+    : _transactions = _loadTransactions(location);
+
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();
   _ReplaySink _replaySink;
-
-  ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
@@ -250,10 +250,10 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
 }
 
 class _ReplaySink implements StreamSink<String> {
-  final ReplayVMServiceChannel channel;
-  final Completer<Null> _completer = Completer<Null>();
-
   _ReplaySink(this.channel);
+
+  final ReplayVMServiceChannel channel;
+  final Completer<void> _completer = Completer<void>();
 
   @override
   Future<dynamic> close() {

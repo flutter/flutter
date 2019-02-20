@@ -4,10 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/src/binding.dart' show TestWidgetsFlutterBinding;
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
+    // Initialize all bindings because owner.flushSemantics() requires a window
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
@@ -15,6 +19,7 @@ void main() {
     });
     owner.ensureSemantics();
     renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
     owner.flushSemantics();
 
     expect(onNeedVisualUpdateCallCount, 1);

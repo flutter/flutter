@@ -576,8 +576,8 @@ class _WidgetFinder extends MatchFinder {
 
 class _WidgetPredicateFinder extends MatchFinder {
   _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
-      : _description = description,
-        super(skipOffstage: skipOffstage);
+    : _description = description,
+      super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
   final String _description;
@@ -593,8 +593,8 @@ class _WidgetPredicateFinder extends MatchFinder {
 
 class _ElementPredicateFinder extends MatchFinder {
   _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
-      : _description = description,
-        super(skipOffstage: skipOffstage);
+    : _description = description,
+      super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
   final String _description;
@@ -633,7 +633,7 @@ class _DescendantFinder extends Finder {
   @override
   Iterable<Element> get allCandidates {
     final Iterable<Element> ancestorElements = ancestor.evaluate();
-    final List<Element> candidates = ancestorElements.expand(
+    final List<Element> candidates = ancestorElements.expand<Element>(
       (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
     ).toSet().toList();
     if (matchRoot)

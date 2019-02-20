@@ -21,8 +21,11 @@ void main() {
     setUp(() {
       mockRunner = MockSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(any)).thenAnswer((_) =>
-          Future<List<String>>.value(
+      when(mockRunner.run(argThat(startsWith('/system/bin/find')))).thenAnswer(
+          (_) => Future<List<String>>.value(
+              <String>['/hub/blah/blah/blah/vmservice-port\n']));
+      when(mockRunner.run(argThat(startsWith('/system/bin/ls')))).thenAnswer(
+          (_) => Future<List<String>>.value(
               <String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
@@ -86,7 +89,10 @@ void main() {
 
       mockPeerConnections = <MockPeer>[];
       uriConnections = <Uri>[];
-      Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
+      Future<json_rpc.Peer> mockVmConnectionFunction(
+        Uri uri, {
+        Duration timeout,
+      }) {
         return Future<json_rpc.Peer>(() async {
           final MockPeer mp = MockPeer();
           mockPeerConnections.add(mp);
@@ -147,7 +153,7 @@ void main() {
     });
 
     test('env variable test without remote addr', () async {
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await FuchsiaRemoteConnection.connect();
       }
 

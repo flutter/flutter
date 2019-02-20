@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -79,42 +80,46 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// In this example, the children are spaced out equally, unless there's no
-/// more room, in which case they stack vertically and scroll.
-///
-/// ```dart
-/// LayoutBuilder(
-///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///     return SingleChildScrollView(
-///       child: ConstrainedBox(
-///         constraints: BoxConstraints(
-///           minHeight: viewportConstraints.maxHeight,
-///         ),
-///         child: Column(
-///           mainAxisSize: MainAxisSize.min,
-///           mainAxisAlignment: MainAxisAlignment.spaceAround,
-///           children: <Widget>[
-///             Container(
-///               // A fixed-height child.
-///               color: Colors.yellow,
-///               height: 120.0,
-///             ),
-///             Container(
-///               // Another fixed-height child.
-///               color: Colors.green,
-///               height: 120.0,
-///             ),
-///           ],
-///         ),
-///       ),
-///     );
-///   },
-/// )
-/// ```
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the children are spaced out equally, unless there's no more
+/// room, in which case they stack vertically and scroll.
 ///
 /// When using this technique, [Expanded] and [Flexible] are not useful, because
 /// in both cases the "available space" is infinite (since this is in a viewport).
 /// The next section describes a technique for providing a maximum height constraint.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return LayoutBuilder(
+///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///       return SingleChildScrollView(
+///         child: ConstrainedBox(
+///           constraints: BoxConstraints(
+///             minHeight: viewportConstraints.maxHeight,
+///           ),
+///           child: Column(
+///             mainAxisSize: MainAxisSize.min,
+///             mainAxisAlignment: MainAxisAlignment.spaceAround,
+///             children: <Widget>[
+///               Container(
+///                 // A fixed-height child.
+///                 color: const Color(0xff808000), // Yellow
+///                 height: 120.0,
+///               ),
+///               Container(
+///                 // Another fixed-height child.
+///                 color: const Color(0xff008000), // Green
+///                 height: 120.0,
+///               ),
+///             ],
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// ### Expanding content to fit the viewport
 ///
@@ -134,39 +139,6 @@ import 'scrollable.dart';
 /// The widget that is to grow to fit the remaining space so provided is wrapped
 /// in an [Expanded] widget.
 ///
-/// ```dart
-/// LayoutBuilder(
-///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///     return SingleChildScrollView(
-///       child: ConstrainedBox(
-///         constraints: BoxConstraints(
-///           minHeight: viewportConstraints.maxHeight,
-///         ),
-///         child: IntrinsicHeight(
-///           child: Column(
-///             children: <Widget>[
-///               Container(
-///                 // A fixed-height child.
-///                 color: Colors.yellow,
-///                 height: 120.0,
-///               ),
-///               Expanded(
-///                 // A flexible child that will grow to fit the viewport but
-///                 // still be at least as big as necessary to fit its contents.
-///                 child: Container(
-///                   color: Colors.blue,
-///                   height: 120.0,
-///                 ),
-///               ),
-///             ],
-///           ),
-///         ),
-///       ),
-///     );
-///   },
-/// )
-/// ```
-///
 /// This technique is quite expensive, as it more or less requires that the contents
 /// of the viewport be laid out twice (once to find their intrinsic dimensions, and
 /// once to actually lay them out). The number of widgets within the column should
@@ -175,16 +147,55 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the column becomes either as big as viewport, or as big as
+/// the contents, whichever is biggest.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return LayoutBuilder(
+///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///       return SingleChildScrollView(
+///         child: ConstrainedBox(
+///           constraints: BoxConstraints(
+///             minHeight: viewportConstraints.maxHeight,
+///           ),
+///           child: IntrinsicHeight(
+///             child: Column(
+///               children: <Widget>[
+///                 Container(
+///                   // A fixed-height child.
+///                   color: const Color(0xff808000), // Yellow
+///                   height: 120.0,
+///                 ),
+///                 Expanded(
+///                   // A flexible child that will grow to fit the viewport but
+///                   // still be at least as big as necessary to fit its contents.
+///                   child: Container(
+///                     color: const Color(0xff800000), // Red
+///                     height: 120.0,
+///                   ),
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
-/// * [ListView], which handles multiple children in a scrolling list.
-/// * [GridView], which handles multiple children in a scrolling grid.
-/// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable], which handles arbitrary scrolling effects.
+///  * [ListView], which handles multiple children in a scrolling list.
+///  * [GridView], which handles multiple children in a scrolling grid.
+///  * [PageView], for a scrollable that works page by page.
+///  * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
-  SingleChildScrollView({ // ignore: prefer_const_constructors_in_immutables
-                          // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
+  const SingleChildScrollView({
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -193,12 +204,14 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
+    this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(scrollDirection != null),
+       assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'
        ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);
 
   /// The axis along which the scroll view scrolls.
@@ -260,6 +273,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -274,6 +290,7 @@ class SingleChildScrollView extends StatelessWidget {
         ? PrimaryScrollController.of(context)
         : controller;
     final Scrollable scrollable = Scrollable(
+      dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,

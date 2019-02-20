@@ -103,9 +103,9 @@ void main() {
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
         final TimelineSummary summary = summarize(<Map<String, dynamic>>[
-          build(1000, 9000),
-          build(11000, 1000),
-          build(13000, 10000),
+          build(1000, 17000),
+          build(19000, 9000),
+          build(29000, 18000),
         ]);
 
         expect(summary.countFrames(), 3);
@@ -244,9 +244,9 @@ void main() {
     group('computeMissedFrameRasterizerBudgetCount', () {
       test('computes the number of missed rasterizer budgets', () {
         final TimelineSummary summary = summarize(<Map<String, dynamic>>[
-          begin(1000), end(10000),
-          begin(11000), end(12000),
-          begin(13000), end(23000),
+          begin(1000), end(18000),
+          begin(19000), end(28000),
+          begin(29000), end(47000),
         ]);
 
         expect(summary.computeMissedFrameRasterizerBudgetCount(), 2);
@@ -257,27 +257,27 @@ void main() {
       test('computes and returns summary as JSON', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(1000), end(11000),
-            begin(11000), end(13000),
-            begin(13000), end(25000),
-            build(1000, 9000),
-            build(11000, 1000),
-            build(13000, 11000),
+            begin(1000), end(19000),
+            begin(19000), end(29000),
+            begin(29000), end(49000),
+            build(1000, 17000),
+            build(19000, 9000),
+            build(29000, 19000),
           ]).summaryJson,
           <String, dynamic>{
-            'average_frame_build_time_millis': 7.0,
-            '90th_percentile_frame_build_time_millis': 11.0,
-            '99th_percentile_frame_build_time_millis': 11.0,
-            'worst_frame_build_time_millis': 11.0,
+            'average_frame_build_time_millis': 15.0,
+            '90th_percentile_frame_build_time_millis': 19.0,
+            '99th_percentile_frame_build_time_millis': 19.0,
+            'worst_frame_build_time_millis': 19.0,
             'missed_frame_build_budget_count': 2,
-            'average_frame_rasterizer_time_millis': 8.0,
-            '90th_percentile_frame_rasterizer_time_millis': 12.0,
-            '99th_percentile_frame_rasterizer_time_millis': 12.0,
-            'worst_frame_rasterizer_time_millis': 12.0,
+            'average_frame_rasterizer_time_millis': 16.0,
+            '90th_percentile_frame_rasterizer_time_millis': 20.0,
+            '99th_percentile_frame_rasterizer_time_millis': 20.0,
+            'worst_frame_rasterizer_time_millis': 20.0,
             'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
-            'frame_build_times': <int>[9000, 1000, 11000],
-            'frame_rasterizer_times': <int>[10000, 2000, 12000],
+            'frame_build_times': <int>[17000, 9000, 19000],
+            'frame_rasterizer_times': <int>[18000, 10000, 20000],
           }
         );
       });
@@ -307,29 +307,29 @@ void main() {
 
       test('writes summary to JSON file', () async {
         await summarize(<Map<String, dynamic>>[
-          begin(1000), end(11000),
-          begin(11000), end(13000),
-          begin(13000), end(25000),
-          build(1000, 9000),
-          build(11000, 1000),
-          build(13000, 11000),
+          begin(1000), end(19000),
+          begin(19000), end(29000),
+          begin(29000), end(49000),
+          build(1000, 17000),
+          build(19000, 9000),
+          build(29000, 19000),
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(json.decode(written), <String, dynamic>{
-          'average_frame_build_time_millis': 7.0,
-          'worst_frame_build_time_millis': 11.0,
-          '90th_percentile_frame_build_time_millis': 11.0,
-          '99th_percentile_frame_build_time_millis': 11.0,
+          'average_frame_build_time_millis': 15.0,
+          'worst_frame_build_time_millis': 19.0,
+          '90th_percentile_frame_build_time_millis': 19.0,
+          '99th_percentile_frame_build_time_millis': 19.0,
           'missed_frame_build_budget_count': 2,
-          'average_frame_rasterizer_time_millis': 8.0,
-          '90th_percentile_frame_rasterizer_time_millis': 12.0,
-          '99th_percentile_frame_rasterizer_time_millis': 12.0,
-          'worst_frame_rasterizer_time_millis': 12.0,
+          'average_frame_rasterizer_time_millis': 16.0,
+          '90th_percentile_frame_rasterizer_time_millis': 20.0,
+          '99th_percentile_frame_rasterizer_time_millis': 20.0,
+          'worst_frame_rasterizer_time_millis': 20.0,
           'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,
-          'frame_build_times': <int>[9000, 1000, 11000],
-          'frame_rasterizer_times': <int>[10000, 2000, 12000],
+          'frame_build_times': <int>[17000, 9000, 19000],
+          'frame_rasterizer_times': <int>[18000, 10000, 20000],
         });
       });
     });

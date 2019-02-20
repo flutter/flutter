@@ -21,13 +21,9 @@
 # When editing, make sure you keep this and /analysis_options.yaml consistent.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # allow having TODOs in the code
-    todo: ignore
 
 linter:
   rules:
@@ -66,11 +62,12 @@ linter:
     - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
+    # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     # - public_member_api_docs
     - slash_for_doc_comments
     # - sort_constructors_first
     # - sort_unnamed_constructors_first
-    - super_goes_last
+    # - super_goes_last # no longer needed w/ Dart 2
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types

@@ -54,5 +54,6 @@
   "collapsedIconTapHint": "Išskleisti",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Liko 1 simbolis",
-  "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių"
+  "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių",
+  "refreshIndicatorSemanticLabel": "Atnaujinti"
 }

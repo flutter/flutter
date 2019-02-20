@@ -10,9 +10,9 @@ class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-    void noSuchMethod(Invocation invocation) {
-      invocations.add(invocation);
-    }
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }
 
 void main() {
@@ -138,7 +138,7 @@ void main() {
     });
 
     testWidgets('tracks unstable child, then resumes animation when child stabilizes', (WidgetTester tester) async {
-      Future<Null> pumpMillis(int millis) async {
+      Future<void> pumpMillis(int millis) async {
         await tester.pump(Duration(milliseconds: millis));
       }
 

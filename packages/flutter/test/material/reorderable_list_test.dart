@@ -39,7 +39,7 @@ void main() {
             width: itemHeight * 10,
             child: ReorderableListView(
               header: header,
-              children: listItems.map(listItemToWidget).toList(),
+              children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
             ),
@@ -462,10 +462,10 @@ void main() {
           ));
 
           // Get the switch tile's semantics:
-          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+          final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
           // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
-          expect(semanticsData, matchesSemanticsData(
+          expect(semanticsNode, matchesSemantics(
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
@@ -900,6 +900,30 @@ void main() {
 
     });
 
+    testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
+      final Widget reorderableListView = ReorderableListView(
+        children: const <Widget>[
+          SizedBox(
+            key: Key('A'),
+            child: Text('A'),
+          ),
+          SizedBox(
+            key: Key('B'),
+            child: Text('B'),
+          ),
+          SizedBox(
+            key: Key('C'),
+            child: Text('C'),
+          )
+        ],
+        reverse: true,
+        onReorder: (int oldIndex, int newIndex) {},
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: reorderableListView,
+      ));
+      expect(tester.getCenter(find.text('A')), greaterThan(tester.getCenter(find.text('B'))));
+    });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
 }

@@ -28,7 +28,7 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     try {
       await runCheckedAsync(<String>[
         'git', 'rev-parse', '@{u}'
@@ -85,6 +85,8 @@ class UpgradeCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
     );
+
+    return null;
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-

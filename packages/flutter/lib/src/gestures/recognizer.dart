@@ -24,6 +24,24 @@ export 'pointer_router.dart' show PointerRouter;
 /// anonymous functions that return objects of particular types.
 typedef RecognizerCallback<T> = T Function();
 
+/// Configuration of offset passed to [DragStartDetails].
+///
+/// The settings determines when a drag formally starts when the user
+/// initiates a drag.
+///
+/// See also:
+///
+///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+enum DragStartBehavior {
+  /// Set the initial offset, at the position where the first down even was
+  /// detected.
+  down,
+
+  /// Set the initial position at the position where the drag start event was
+  /// detected.
+  start,
+}
+
 /// The base class that all gesture recognizers inherit from.
 ///
 /// Provides a basic API that can be used by classes that work with
@@ -52,7 +70,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// detector.
   ///
   /// The owner of this gesture recognizer calls addPointer() with the
-  /// PointerDownEvent (or pointer gesture start event if acceptsPointerGestures
+  /// PointerDownEvent (or pointer signal start event if acceptsPointerSignals
   /// is true) of each pointer that should be considered for this gesture.
   ///
   /// It's the GestureRecognizer's responsibility to then add itself
@@ -116,9 +134,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     return result;
   }
 
-  /// True if `addPointer` can be called with start events for pointer gestures
+  /// True if `addPointer` can be called with start events for pointer signals
   /// in addition to [PointerDownEvent] for touch-based gestures.
-  bool get acceptsPointerGestures => false;
+  bool get acceptsPointerSignals => false;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -241,8 +259,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
     if (event is PointerUpEvent || event is PointerCancelEvent ||
-        (acceptsPointerGestures && (event.gestureChange == PointerChange.up ||
-                                    event.gestureChange == PointerChange.cancel)))
+        (acceptsPointerSignals && event is PointerSignalEvent &&
+         (event.gestureChange == PointerChange.up || event.gestureChange == PointerChange.cancel)))
       stopTrackingPointer(event.pointer);
   }
 }
@@ -250,10 +268,10 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 /// The possible states of a [PrimaryPointerGestureRecognizer].
 ///
 /// The recognizer advances from [ready] to [possible] when starts tracking a
-/// primary pointer. When the primary pointer is resolve (either accepted or
-/// or rejected), the recognizers advances to [defunct]. Once the recognizer
-/// has stopped tracking any remaining pointers, the recognizer returns to
-/// [ready].
+/// primary pointer. The recognizer moves to [accepted] when resolved to win the
+/// gesture arena. It may then move to [defunct] from [accepted] or go to
+/// [defunct] directly when rejected. Once the recognizer has stopped tracking
+/// any remaining pointers, the recognizer returns to [ready].
 enum GestureRecognizerState {
   /// The recognizer is ready to start recognizing a gesture.
   ready,
@@ -262,6 +280,9 @@ enum GestureRecognizerState {
   /// gesture the recognizer is attempting to recognize but the gesture has not
   /// been accepted definitively.
   possible,
+
+  /// The gesture has been definitively accepted by the recognizer.
+  accepted,
 
   /// Further pointer events cannot cause this recognizer to recognize the
   /// gesture until the recognizer returns to the [ready] state (typically when
@@ -272,17 +293,42 @@ enum GestureRecognizerState {
 /// A base class for gesture recognizers that track a single primary pointer.
 ///
 /// Gestures based on this class will reject the gesture if the primary pointer
-/// travels beyond [kTouchSlop] pixels from the original contact point.
+/// travels beyond [preAcceptSlopTolerance] pixels from the original contact
+/// point before the gesture is accepted or beyond [postAcceptSlopTolerance]
+/// from where the pointer was after the gesture was accepted.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
     this.deadline,
+    this.preAcceptSlopTolerance = kTouchSlop,
+    this.postAcceptSlopTolerance = kTouchSlop,
     Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  }) : assert(
+         preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
+         'The preAcceptSlopTolerance must be positive or null',
+       ),
+       assert(
+         postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
+         'The postAcceptSlopTolerance must be positive or null',
+       ),
+       super(debugOwner: debugOwner);
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
   final Duration deadline;
+
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// from the initial touch down position before the gesture is accepted.
+  ///
+  /// Drifting past the allowed slop amount causes the gesture to be rejected.
+  final double preAcceptSlopTolerance;
+
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// after the gesture has been accepted.
+  ///
+  /// Drifting past the allowed slop amount causes the gesture to be rejected,
+  /// even after being accepted.
+  final double postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
   ///
@@ -312,9 +358,17 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   @override
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
-    if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
-      // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event is PointerMoveEvent && _getDistance(event) > kTouchSlop) {
+    if (event.pointer == primaryPointer) {
+      final bool isPreAcceptSlopPastTolerance =
+          state == GestureRecognizerState.possible &&
+          preAcceptSlopTolerance != null &&
+          _getDistance(event) > preAcceptSlopTolerance;
+      final bool isPostAcceptSlopPastTolerance =
+          state == GestureRecognizerState.accepted &&
+          postAcceptSlopTolerance != null &&
+          _getDistance(event) > postAcceptSlopTolerance;
+
+      if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {
@@ -337,8 +391,19 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void acceptGesture(int pointer) {
+    // Ignore state 'ready' here because that would happen if this recognizer
+    // won by a sweep.
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
+      state = GestureRecognizerState.accepted;
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    if (pointer == primaryPointer
+        && (state == GestureRecognizerState.possible ||
+            state == GestureRecognizerState.accepted)) {
       _stopTimer();
       state = GestureRecognizerState.defunct;
     }

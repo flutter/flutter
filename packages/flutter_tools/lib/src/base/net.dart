@@ -23,23 +23,31 @@ Future<List<int>> fetchUrl(Uri url) async {
     if (result != null)
       return result;
     printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await Future<Null>.delayed(Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
 }
 
-Future<List<int>> _attempt(Uri url) async {
+/// Check if the given URL points to a valid endpoint.
+Future<bool> doesRemoteFileExist(Uri url) async =>
+  (await _attempt(url, onlyHeaders: true)) != null;
+
+Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
-    httpClient = context[HttpClientFactory]();
+    httpClient = (context[HttpClientFactory] as HttpClientFactory)(); // ignore: avoid_as
   } else {
     httpClient = HttpClient();
   }
   HttpClientRequest request;
   try {
-    request = await httpClient.getUrl(url);
+    if (onlyHeaders) {
+      request = await httpClient.headUrl(url);
+    } else {
+      request = await httpClient.getUrl(url);
+    }
   } on HandshakeException catch (error) {
     printTrace(error.toString());
     throwToolExit(
@@ -53,6 +61,11 @@ Future<List<int>> _attempt(Uri url) async {
     return null;
   }
   final HttpClientResponse response = await request.close();
+  // If we're making a HEAD request, we're only checking to see if the URL is
+  // valid.
+  if (onlyHeaders) {
+    return (response.statusCode == 200) ? <int>[] : null;
+  }
   if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(

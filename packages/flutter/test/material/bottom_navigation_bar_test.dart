@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -780,6 +781,75 @@ void main() {
     await tester.pumpAndSettle();
     expect(_backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
+  });
+
+  testWidgets('BottomNavigationBar shifting backgroundColor with transition', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/22226
+
+    int _currentIndex = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              bottomNavigationBar: RepaintBoundary(
+                child: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  currentIndex: _currentIndex,
+                  onTap: (int index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      title: Text('Red'),
+                      backgroundColor: Colors.red,
+                      icon: Icon(Icons.dashboard),
+                    ),
+                    BottomNavigationBarItem(
+                      title: Text('Green'),
+                      backgroundColor: Colors.green,
+                      icon: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Green'));
+
+    for (int pump = 0; pump < 8; pump++) {
+      await tester.pump(const Duration(milliseconds: 30));
+      await expectLater(
+        find.byType(BottomNavigationBar),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+	      skip: !Platform.isLinux,
+      );
+    }
+  });
+
+  testWidgets('BottomNavigationBar item title should not be nullable',
+      (WidgetTester tester) async {
+    expect(() {
+      MaterialApp(
+          home: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('AC'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+            )
+          ])));
+    }, throwsA(isInstanceOf<AssertionError>()));
   });
 }
 

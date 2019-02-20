@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show json;
-
 import '../base/io.dart' show stdout;
+import '../convert.dart';
 import 'watcher.dart';
 
 /// Prints JSON events when running a test in --machine mode.
 class EventPrinter extends TestWatcher {
-  EventPrinter({StringSink out}) : this._out = out == null ? stdout: out;
+  EventPrinter({StringSink out}) : _out = out == null ? stdout: out;
 
   final StringSink _out;
 

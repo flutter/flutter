@@ -94,7 +94,7 @@ void main() {
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
     final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
     bool taskExecuted = false;
-    runZoned(
+    runZoned<void>(
       () {
         // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();

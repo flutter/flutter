@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
@@ -28,9 +29,9 @@ class StateMarkerState extends State<StateMarker> {
 void main() {
   testWidgets('Can nest apps', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: MaterialApp(
-          home: const Text('Home sweet home'),
+          home: Text('Home sweet home'),
         ),
       ),
     );
@@ -57,8 +58,8 @@ void main() {
     await tester.pumpWidget(FocusScope(
       autofocus: true,
       node: focusScopeNode,
-      child: MaterialApp(
-        home: const Text('Home'),
+      child: const MaterialApp(
+        home: Text('Home'),
       ),
     ));
 
@@ -67,8 +68,8 @@ void main() {
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const StateMarker(),
+      const MaterialApp(
+        home: StateMarker(),
       ),
     );
 
@@ -76,9 +77,9 @@ void main() {
     state1.marker = 'original';
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         debugShowMaterialGrid: true,
-        home: const StateMarker(),
+        home: StateMarker(),
       ),
     );
 
@@ -205,7 +206,7 @@ void main() {
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: const Text('Home')));
+    await tester.pumpWidget(const MaterialApp(home: Text('Home')));
 
     expect(find.text('Home'), findsOneWidget);
 
@@ -400,9 +401,9 @@ void main() {
       home: const Placeholder(),
     ));
     expect(key.currentState, isInstanceOf<NavigatorState>());
-    await tester.pumpWidget(MaterialApp(
-      color: const Color(0xFF112233),
-      home: const Placeholder(),
+    await tester.pumpWidget(const MaterialApp(
+      color: Color(0xFF112233),
+      home: Placeholder(),
     ));
     expect(key.currentState, isNull);
     await tester.pumpWidget(MaterialApp(
@@ -411,5 +412,188 @@ void main() {
       home: const Placeholder(),
     ));
     expect(key.currentState, isInstanceOf<NavigatorState>());
+  });
+
+  testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                Text(MaterialLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    // Default US "select all" text.
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    // Default Cupertino US "select all" text.
+    expect(find.text('Select All'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp uses regular theme when platformBrightness is light', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a light platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a dark platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.dark;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses fallback light theme when platformBrightness is dark but no theme is provided at all', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a dark platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.dark;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses fallback light theme when platformBrightness is light and a dark theme is provided', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a dark platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses dark theme when platformBrightness is dark', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a dark platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.dark;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.brightness, Brightness.dark);
+  });
+
+  testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a light platformBrightness.
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData themeBeforeBrightnessChange;
+    ThemeData themeAfterBrightnessChange;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            if (themeBeforeBrightnessChange == null) {
+              themeBeforeBrightnessChange = Theme.of(context);
+            } else {
+              themeAfterBrightnessChange = Theme.of(context);
+            }
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    // Switch the platformBrightness from light to dark and pump the widget tree
+    // to process changes.
+    binding.window.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpAndSettle();
+
+    expect(themeBeforeBrightnessChange.brightness, Brightness.light);
+    expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
 }

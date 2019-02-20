@@ -14,8 +14,8 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 const double _kActiveFontSize = 14.0;
 const double _kInactiveFontSize = 12.0;
@@ -28,7 +28,7 @@ const double _kBottomMargin = 8.0;
 ///
 ///  * [BottomNavigationBar]
 ///  * [BottomNavigationBarItem]
-///  * <https://material.google.com/components/bottom-navigation.html#bottom-navigation-specs>
+///  * <https://material.io/design/components/bottom-navigation.html#specs>
 enum BottomNavigationBarType {
   /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
   /// display their text labels, and do not shift when tapped.
@@ -68,16 +68,62 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
+/// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
+/// widgets and the [currentIndex] is set to index 1. The color of the selected
+/// item is set to  a purple color. A function is called whenever any item is
+/// tapped and the function helps display the appropriate [Text] in the body of
+/// the [Scaffold].
+///
+/// ```dart
+/// int _selectedIndex = 1;
+/// static const List<Widget> _widgetOptions = const <Widget>[
+///   Text('Index 0: Home'),
+///   Text('Index 1: Business'),
+///   Text('Index 2: School'),
+/// ];
+///
+/// void _onItemTapped(int index) {
+///   setState(() {
+///     _selectedIndex = index;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('BottomNavigationBar Sample'),
+///     ),
+///     body: Center(
+///       child: _widgetOptions.elementAt(_selectedIndex),
+///     ),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
+///         BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
+///         BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
+///       ],
+///       currentIndex: _selectedIndex,
+///       fixedColor: Colors.deepPurple,
+///       onTap: _onItemTapped,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
 ///  * [Scaffold]
-///  * <https://material.google.com/components/bottom-navigation.html>
+///  * <https://material.io/design/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two.
+  /// The length of [items] must be at least two and each item's icon and title must be not null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
@@ -95,12 +141,16 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(
+        items.every((BottomNavigationBarItem item) => item.title != null) == true,
+        'Every item must have a non-null title',
+       ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
-  /// The interactive items laid out within the bottom navigation bar.
+  /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -149,8 +199,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.flex,
     this.selected = false,
     this.indexLabel,
-    }
-  ): assert(selected != null);
+  }) : assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -162,7 +211,84 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool selected;
   final String indexLabel;
 
-  Widget _buildIcon() {
+  @override
+  Widget build(BuildContext context) {
+    // In order to use the flex container to grow the tile during animation, we
+    // need to divide the changes in flex allotment into smaller pieces to
+    // produce smooth animation. We do this by multiplying the flex value
+    // (which is an integer) by a large number.
+    int size;
+    Widget label;
+
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+        label = _FixedLabel(colorTween: colorTween, animation: animation, item: item);
+        break;
+      case BottomNavigationBarType.shifting:
+        size = (flex * 1000.0).round();
+        label = _ShiftingLabel(animation: animation, item: item);
+        break;
+    }
+
+    return Expanded(
+      flex: size,
+      child: Semantics(
+        container: true,
+        header: true,
+        selected: selected,
+        child: Stack(
+          children: <Widget>[
+            InkResponse(
+              onTap: onTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _TileIcon(
+                    type: type,
+                    colorTween: colorTween,
+                    animation: animation,
+                    iconSize: iconSize,
+                    selected: selected,
+                    item: item,
+                  ),
+                  label,
+                ],
+              ),
+            ),
+            Semantics(
+              label: indexLabel,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _TileIcon extends StatelessWidget {
+  const _TileIcon({
+    Key key,
+    @required this.type,
+    @required this.colorTween,
+    @required this.animation,
+    @required this.iconSize,
+    @required this.selected,
+    @required this.item,
+  }) : super(key: key);
+
+  final BottomNavigationBarType type;
+  final ColorTween colorTween;
+  final Animation<double> animation;
+  final double iconSize;
+  final bool selected;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     double tweenStart;
     Color iconColor;
     switch (type) {
@@ -195,8 +321,22 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildFixedLabel() {
+class _FixedLabel extends StatelessWidget {
+  const _FixedLabel({
+    Key key,
+    @required this.colorTween,
+    @required this.animation,
+    @required this.item,
+  }) : super(key: key);
+
+  final ColorTween colorTween;
+  final Animation<double> animation;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
@@ -226,8 +366,20 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildShiftingLabel() {
+class _ShiftingLabel extends StatelessWidget {
+  const _ShiftingLabel({
+    Key key,
+    @required this.animation,
+    @required this.item,
+  }) : super(key: key);
+
+  final Animation<double> animation;
+  final BottomNavigationBarItem item;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
@@ -252,53 +404,6 @@ class _BottomNavigationTile extends StatelessWidget {
             ),
             child: item.title,
           ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // In order to use the flex container to grow the tile during animation, we
-    // need to divide the changes in flex allotment into smaller pieces to
-    // produce smooth animation. We do this by multiplying the flex value
-    // (which is an integer) by a large number.
-    int size;
-    Widget label;
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        size = 1;
-        label = _buildFixedLabel();
-        break;
-      case BottomNavigationBarType.shifting:
-        size = (flex * 1000.0).round();
-        label = _buildShiftingLabel();
-        break;
-    }
-    return Expanded(
-      flex: size,
-      child: Semantics(
-        container: true,
-        header: true,
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildIcon(),
-                  label,
-                ],
-              ),
-            ),
-            Semantics(
-              label: indexLabel,
-            )
-          ],
         ),
       ),
     );
@@ -335,7 +440,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       return CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
-        reverseCurve: Curves.fastOutSlowIn.flipped
+        reverseCurve: Curves.fastOutSlowIn.flipped,
       );
     });
     _controllers[widget.currentIndex].value = 1.0;
@@ -415,10 +520,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
+    } else {
+      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+        _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
     }
-
-    if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
-      _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
   List<Widget> _createTiles() {
@@ -475,7 +580,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               flex: _evaluateFlex(_animations[i]),
               selected: i == widget.currentIndex,
               indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-            )
+            ),
           );
         }
         break;
@@ -509,43 +614,30 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
     return Semantics(
-      container: true,
       explicitChildNodes: true,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Material( // Casts shadow.
-              elevation: 8.0,
-              color: backgroundColor,
+      child: Material(
+        elevation: 8.0,
+        color: backgroundColor,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
+          child: CustomPaint(
+            painter: _RadialPainter(
+              circles: _circles.toList(),
+              textDirection: Directionality.of(context),
+            ),
+            child: Material( // Splashes.
+              type: MaterialType.transparency,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: additionalBottomPadding),
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeBottom: true,
+                  child: _createContainer(_createTiles()),
+                ),
+              ),
             ),
           ),
-          ConstrainedBox(
-            constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _RadialPainter(
-                      circles: _circles.toList(),
-                      textDirection: Directionality.of(context),
-                    ),
-                  ),
-                ),
-                Material( // Splashes.
-                  type: MaterialType.transparency,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: additionalBottomPadding),
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeBottom: true,
-                      child: _createContainer(_createTiles()),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -567,7 +659,7 @@ class _Circle {
     );
     animation = CurvedAnimation(
       parent: controller,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
     controller.forward();
   }
@@ -582,7 +674,7 @@ class _Circle {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
-      return animations.map(state._evaluateFlex).fold(0.0, (double sum, double value) => sum + value);
+      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (double sum, double value) => sum + value);
     }
 
     final double allWeights = weightSum(state._animations);

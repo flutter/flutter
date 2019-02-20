@@ -155,7 +155,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           overlayEntries.first.opaque = false;
         break;
       case AnimationStatus.dismissed:
-        assert(!overlayEntries.first.opaque);
         // We might still be the current route if a subclass is controlling the
         // the transition and hits the dismissed status. For example, the iOS
         // back gesture drives this animation to the dismissed status before
@@ -257,16 +256,55 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  /// Whether this route can perform a transition to the given route.
+  /// Returns true if this route supports a transition animation that runs
+  /// when [nextRoute] is pushed on top of it or when [nextRoute] is popped
+  /// off of it.
   ///
   /// Subclasses can override this method to restrict the set of routes they
   /// need to coordinate transitions with.
+  ///
+  /// If true, and `nextRoute.canTransitionFrom()` is true, then the
+  /// [buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
+  /// when [nextRoute] is pushed on top of this one.  Similarly, if
+  /// the [nextRoute] is popped off of this route, the
+  /// `secondaryAnimation` will run from 1.0 - 0.0.
+  ///
+  /// If false, this route's [buildTransitions] `secondaryAnimation` parameter
+  /// value will be [kAlwaysDismissedAnimation]. In other words, this route
+  /// will not animate when when [nextRoute] is pushed on top of it or when
+  /// [nextRoute] is popped off of it.
+  ///
+  /// Returns true by default.
+  ///
+  /// See also:
+  ///
+  ///  * [canTransitionFrom], which must be true for [nextRoute] for the
+  ///    [buildTransitions] `secondaryAnimation` to run.
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
 
-  /// Whether this route can perform a transition from the given route.
+  /// Returns true if [previousRoute] should animate when this route
+  /// is pushed on top of it or when then this route is popped off of it.
   ///
   /// Subclasses can override this method to restrict the set of routes they
   /// need to coordinate transitions with.
+  ///
+  /// If true, and `previousRoute.canTransitionTo()` is true, then the
+  /// previous route's [buildTransitions] `secondaryAnimation` will
+  /// run from 0.0 - 1.0 when this route is pushed on top of
+  /// it. Similarly, if this route is popped off of [previousRoute]
+  /// the previous route's `secondaryAnimation` will run from 1.0 - 0.0.
+  ///
+  /// If false, then the previous route's [buildTransitions]
+  /// `secondaryAnimation` value will be kAlwaysDismissedAnimation. In
+  /// other words [previousRoute] will not animate when this route is
+  /// pushed on top of it or when then this route is popped off of it.
+  ///
+  /// Returns true by default.
+  ///
+  /// See also:
+  ///
+  ///  * [canTransitionTo], which must be true for [previousRoute] for its
+  ///    [buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
   @override
@@ -306,16 +344,14 @@ class LocalHistoryEntry {
   }
 }
 
-/// A route that can handle back navigations internally by popping a list.
+/// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A LocalHistoryRoute handles the
+/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
-///
-/// This class is typically used as a mixin.
-abstract class LocalHistoryRoute<T> extends Route<T> {
+mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry> _localHistory;
 
   /// Adds a local history entry to this route.
@@ -327,7 +363,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
-  /// ## Sample code
+  /// {@tool sample}
   ///
   /// The following example is an app with 2 pages: `HomePage` and `SecondPage`.
   /// The `HomePage` can navigate to the `SecondPage`.
@@ -444,6 +480,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   }
   /// }
   /// ```
+  /// {@end-tool}
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
@@ -660,6 +697,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
   /// (specifically, if [isCurrent] or [canPop] change value).
+  @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
     final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
@@ -782,7 +820,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///     );
   ///   },
   /// );
-  ///```
+  /// ```
   ///
   /// We've used [PageRouteBuilder] to demonstrate the [buildTransitions] method
   /// here. The body of an override of the [buildTransitions] method would be
@@ -1028,11 +1066,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  /// * [addScopedWillPopCallback], which adds a callback to the list this
-  ///   method checks.
-  /// * [removeScopedWillPopCallback], which removes a callback from the list
-  ///   this method checks.
+  ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  ///  * [addScopedWillPopCallback], which adds a callback to the list this
+  ///    method checks.
+  ///  * [removeScopedWillPopCallback], which removes a callback from the list
+  ///    this method checks.
   @override
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
@@ -1268,7 +1306,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [PageRoute]
 /// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
@@ -1317,6 +1355,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// }
 /// ```
+/// {@end-tool}
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
@@ -1410,14 +1449,14 @@ class _DialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder transitionBuilder,
     RouteSettings settings,
-  })  : assert(barrierDismissible != null),
-        _pageBuilder = pageBuilder,
-        _barrierDismissible = barrierDismissible,
-        _barrierLabel = barrierLabel,
-        _barrierColor = barrierColor,
-        _transitionDuration = transitionDuration,
-        _transitionBuilder = transitionBuilder,
-        super(settings: settings);
+  }) : assert(barrierDismissible != null),
+       _pageBuilder = pageBuilder,
+       _barrierDismissible = barrierDismissible,
+       _barrierLabel = barrierLabel,
+       _barrierColor = barrierColor,
+       _transitionDuration = transitionDuration,
+       _transitionBuilder = transitionBuilder,
+       super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
 
@@ -1506,6 +1545,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
+///
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 Future<T> showGeneralDialog<T>({
@@ -1519,7 +1559,7 @@ Future<T> showGeneralDialog<T>({
 }) {
   assert(pageBuilder != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: true).push(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: true).push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

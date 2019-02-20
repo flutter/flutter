@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,26 +16,31 @@ import 'transitions.dart';
 // AnimatedSwitcher.child field, but is now in the process of
 // transitioning. The internal representation includes fields that we don't want
 // to expose to the public API (like the controller).
-class _AnimatedSwitcherChildEntry {
-  _AnimatedSwitcherChildEntry({
+class _ChildEntry {
+  _ChildEntry({
+    @required this.controller,
     @required this.animation,
     @required this.transition,
-    @required this.controller,
     @required this.widgetChild,
-  })  : assert(animation != null),
-        assert(transition != null),
-        assert(controller != null);
+  }) : assert(animation != null),
+       assert(transition != null),
+       assert(controller != null);
 
+  // The animation controller for the child's transition.
+  final AnimationController controller;
+
+  // The (curved) animation being used to drive the transition.
   final Animation<double> animation;
 
   // The currently built transition for this child.
   Widget transition;
 
-  // The animation controller for the child's transition.
-  final AnimationController controller;
-
   // The widget's child at the time this entry was created or updated.
+  // Used to rebuild the transition if necessary.
   Widget widgetChild;
+
+  @override
+  String toString() => 'Entry#${shortHash(this)}($widgetChild)';
 }
 
 /// Signature for builders used to generate custom transitions for
@@ -64,15 +72,22 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// one previous child can exist and be transitioning out while the newest one
 /// is transitioning in.
 ///
-/// If the "new" child is the same widget type as the "old" child, but with
-/// different parameters, then [AnimatedSwitcher] will *not* do a
+/// If the "new" child is the same widget type and key as the "old" child, but
+/// with different parameters, then [AnimatedSwitcher] will *not* do a
 /// transition between them, since as far as the framework is concerned, they
-/// are the same widget, and the existing widget can be updated with the new
-/// parameters. To force the transition to occur, set a [Key] (typically a
-/// [ValueKey] taking any widget data that would change the visual appearance
-/// of the widget) on each child widget that you wish to be considered unique.
+/// are the same widget and the existing widget can be updated with the new
+/// parameters. To force the transition to occur, set a [Key] on each child
+/// widget that you wish to be considered unique (typically a [ValueKey] on the
+/// widget data that distinguishes this child from the others).
 ///
-/// ## Sample code
+/// The same key can be used for a new child as was used for an already-outgoing
+/// child; the two will not be considered related. (For example, if a progress
+/// indicator with key A is first shown, then an image with key B, then another
+/// progress indicator with key A again, all in rapid succession, then the old
+/// progress indicator and the image will be fading out while a new progress
+/// indicator is fading in.)
+///
+/// {@tool sample}
 ///
 /// ```dart
 /// class ClickCounter extends StatefulWidget {
@@ -121,6 +136,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -140,28 +156,56 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  })  : assert(duration != null),
-        assert(switchInCurve != null),
-        assert(switchOutCurve != null),
-        assert(transitionBuilder != null),
-        assert(layoutBuilder != null),
-        super(key: key);
+  }) : assert(duration != null),
+       assert(switchInCurve != null),
+       assert(switchOutCurve != null),
+       assert(transitionBuilder != null),
+       assert(layoutBuilder != null),
+       super(key: key);
 
-  /// The current child widget to display.  If there was a previous child,
-  /// then that child will be cross faded with this child using a
-  /// [FadeTransition] using the [switchInCurve].
+  /// The current child widget to display. If there was a previous child, then
+  /// that child will be faded out using the [switchOutCurve], while the new
+  /// child is faded in with the [switchInCurve], over the [duration].
   ///
-  /// If there was no previous child, then this child will fade in over the
-  /// [duration].
+  /// If there was no previous child, then this child will fade in using the
+  /// [switchInCurve] over the [duration].
+  ///
+  /// The child is considered to be "new" if it has a different type or [Key]
+  /// (see [Widget.canUpdate]).
+  ///
+  /// To change the kind of transition used, see [transitionBuilder].
   final Widget child;
 
   /// The duration of the transition from the old [child] value to the new one.
+  ///
+  /// This duration is applied to the given [child] when that property is set to
+  /// a new child. The same duration is used when fading out. Changing
+  /// [duration] will not affect the durations of transitions already in
+  /// progress.
   final Duration duration;
 
-  /// The animation curve to use when transitioning in [child].
+  /// The animation curve to use when transitioning in a new [child].
+  ///
+  /// This curve is applied to the given [child] when that property is set to a
+  /// new child. Changing [switchInCurve] will not affect the curve of a
+  /// transition already in progress.
+  ///
+  /// The [switchOutCurve] is used when fading out, except that if [child] is
+  /// changed while the current child is in the middle of fading in,
+  /// [switchInCurve] will be run in reverse from that point instead of jumping
+  /// to the corresponding point on [switchOutCurve].
   final Curve switchInCurve;
 
-  /// The animation curve to use when transitioning the previous [child] out.
+  /// The animation curve to use when transitioning a previous [child] out.
+  ///
+  /// This curve is applied to the [child] when the child is faded in (or when
+  /// the widget is created, for the first child). Changing [switchOutCurve]
+  /// will not affect the curves of already-visible widgets, it only affects the
+  /// curves of future children.
+  ///
+  /// If [child] is changed while the current child is in the middle of fading
+  /// in, [switchInCurve] will be run in reverse from that point instead of
+  /// jumping to the corresponding point on [switchOutCurve].
   final Curve switchOutCurve;
 
   /// A function that wraps a new [child] with an animation that transitions
@@ -173,6 +217,10 @@ class AnimatedSwitcher extends StatefulWidget {
   /// using the new [transitionBuilder]. The function must not return null.
   ///
   /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
+  ///
+  /// The animation provided to the builder has the [duration] and
+  /// [switchInCurve] or [switchOutCurve] applied as provided when the
+  /// corresponding [child] was first provided.
   ///
   /// See also:
   ///
@@ -219,9 +267,8 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
     List<Widget> children = previousChildren;
-    if (currentChild != null) {
+    if (currentChild != null)
       children = children.toList()..add(currentChild);
-    }
     return Stack(
       children: children,
       alignment: Alignment.center,
@@ -230,37 +277,104 @@ class AnimatedSwitcher extends StatefulWidget {
 }
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
-  final Set<_AnimatedSwitcherChildEntry> _previousChildren = Set<_AnimatedSwitcherChildEntry>();
-  _AnimatedSwitcherChildEntry _currentChild;
-  List<Widget> _previousChildWidgetCache = const <Widget>[];
-  int serialNumber = 0;
+  _ChildEntry _currentEntry;
+  final Set<_ChildEntry> _outgoingEntries = LinkedHashSet<_ChildEntry>();
+  List<Widget> _outgoingWidgets = const <Widget>[];
+  int _childNumber = 0;
 
   @override
   void initState() {
     super.initState();
-    _addEntry(animate: false);
+    _addEntryForNewChild(animate: false);
   }
 
-  _AnimatedSwitcherChildEntry _newEntry({
+  @override
+  void didUpdateWidget(AnimatedSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If the transition builder changed, then update all of the previous
+    // transitions.
+    if (widget.transitionBuilder != oldWidget.transitionBuilder) {
+      _outgoingEntries.forEach(_updateTransitionForEntry);
+      if (_currentEntry != null)
+        _updateTransitionForEntry(_currentEntry);
+      _markChildWidgetCacheAsDirty();
+    }
+
+    final bool hasNewChild = widget.child != null;
+    final bool hasOldChild = _currentEntry != null;
+    if (hasNewChild != hasOldChild ||
+        hasNewChild && !Widget.canUpdate(widget.child, _currentEntry.widgetChild)) {
+      // Child has changed, fade current entry out and add new entry.
+      _childNumber += 1;
+      _addEntryForNewChild(animate: true);
+    } else if (_currentEntry != null) {
+      assert(hasOldChild && hasNewChild);
+      assert(Widget.canUpdate(widget.child, _currentEntry.widgetChild));
+      // Child has been updated. Make sure we update the child widget and
+      // transition in _currentEntry even though we're not going to start a new
+      // animation, but keep the key from the previous transition so that we
+      // update the transition instead of replacing it.
+      _currentEntry.widgetChild = widget.child;
+      _updateTransitionForEntry(_currentEntry); // uses entry.widgetChild
+      _markChildWidgetCacheAsDirty();
+    }
+  }
+
+  void _addEntryForNewChild({@required bool animate}) {
+    assert(animate || _currentEntry == null);
+    if (_currentEntry != null) {
+      assert(animate);
+      assert(!_outgoingEntries.contains(_currentEntry));
+      _outgoingEntries.add(_currentEntry);
+      _currentEntry.controller.reverse();
+      _markChildWidgetCacheAsDirty();
+      _currentEntry = null;
+    }
+    if (widget.child == null)
+      return;
+    final AnimationController controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    final Animation<double> animation = CurvedAnimation(
+      parent: controller,
+      curve: widget.switchInCurve,
+      reverseCurve: widget.switchOutCurve,
+    );
+    _currentEntry = _newEntry(
+      child: widget.child,
+      controller: controller,
+      animation: animation,
+      builder: widget.transitionBuilder,
+    );
+    if (animate) {
+      controller.forward();
+    } else {
+      assert(_outgoingEntries.isEmpty);
+      controller.value = 1.0;
+    }
+  }
+
+  _ChildEntry _newEntry({
+    @required Widget child,
+    @required AnimatedSwitcherTransitionBuilder builder,
     @required AnimationController controller,
     @required Animation<double> animation,
   }) {
-    final _AnimatedSwitcherChildEntry entry = _AnimatedSwitcherChildEntry(
-      widgetChild: widget.child,
-      transition: KeyedSubtree.wrap(
-        widget.transitionBuilder(
-          widget.child,
-          animation,
-        ),
-        serialNumber++,
-      ),
+    final _ChildEntry entry = _ChildEntry(
+      widgetChild: child,
+      transition: KeyedSubtree.wrap(builder(child, animation), _childNumber),
       animation: animation,
       controller: controller,
     );
     animation.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         setState(() {
-          _removeExpiredChild(entry);
+          assert(mounted);
+          assert(_outgoingEntries.contains(entry));
+          _outgoingEntries.remove(entry);
+          _markChildWidgetCacheAsDirty();
         });
         controller.dispose();
       }
@@ -268,115 +382,37 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     return entry;
   }
 
-  void _removeExpiredChild(_AnimatedSwitcherChildEntry child) {
-    assert(_previousChildren.contains(child));
-    _previousChildren.remove(child);
-    _markChildWidgetCacheAsDirty();
-  }
-
-  void _retireCurrentChild() {
-    assert(!_previousChildren.contains(_currentChild));
-    _currentChild.controller.reverse();
-    _previousChildren.add(_currentChild);
-    _markChildWidgetCacheAsDirty();
-  }
-
   void _markChildWidgetCacheAsDirty() {
-    _previousChildWidgetCache = null;
+    _outgoingWidgets = null;
   }
 
-  void _addEntry({@required bool animate}) {
-    if (widget.child == null) {
-      if (animate && _currentChild != null) {
-        _retireCurrentChild();
-      }
-      _currentChild = null;
-      return;
-    }
-    final AnimationController controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
+  void _updateTransitionForEntry(_ChildEntry entry) {
+    entry.transition = KeyedSubtree(
+      key: entry.transition.key,
+      child: widget.transitionBuilder(entry.widgetChild, entry.animation),
     );
-    if (animate) {
-      if (_currentChild != null) {
-        _retireCurrentChild();
-      }
-      controller.forward();
-    } else {
-      assert(_currentChild == null);
-      assert(_previousChildren.isEmpty);
-      controller.value = 1.0;
-    }
-    final Animation<double> animation = CurvedAnimation(
-      parent: controller,
-      curve: widget.switchInCurve,
-      reverseCurve: widget.switchOutCurve,
+  }
+
+  void _rebuildOutgoingWidgetsIfNeeded() {
+    _outgoingWidgets ??= List<Widget>.unmodifiable(
+      _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
     );
-    _currentChild = _newEntry(controller: controller, animation: animation);
+    assert(_outgoingEntries.length == _outgoingWidgets.length);
+    assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets.last);
   }
 
   @override
   void dispose() {
-    if (_currentChild != null) {
-      _currentChild.controller.dispose();
-    }
-    for (_AnimatedSwitcherChildEntry child in _previousChildren) {
-      child.controller.dispose();
-    }
+    if (_currentEntry != null)
+      _currentEntry.controller.dispose();
+    for (_ChildEntry entry in _outgoingEntries)
+      entry.controller.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(AnimatedSwitcher oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    void updateTransition(_AnimatedSwitcherChildEntry entry) {
-      entry.transition = KeyedSubtree(
-        key: entry.transition.key,
-        child: widget.transitionBuilder(entry.widgetChild, entry.animation),
-      );
-    }
-
-    // If the transition builder changed, then update all of the previous transitions
-    if (widget.transitionBuilder != oldWidget.transitionBuilder) {
-      _previousChildren.forEach(updateTransition);
-      if (_currentChild != null) {
-        updateTransition(_currentChild);
-      }
-      _markChildWidgetCacheAsDirty();
-    }
-
-    final bool hasNewChild = widget.child != null;
-    final bool hasOldChild = _currentChild != null;
-    if (hasNewChild != hasOldChild ||
-        hasNewChild && !Widget.canUpdate(widget.child, _currentChild.widgetChild)) {
-      _addEntry(animate: true);
-    } else {
-      // Make sure we update the child widget and transition in _currentChild
-      // even if we're not going to start a new animation, but keep the key from
-      // the previous transition so that we update the transition instead of
-      // replacing it.
-      if (_currentChild != null) {
-        _currentChild.widgetChild = widget.child;
-        updateTransition(_currentChild);
-        _markChildWidgetCacheAsDirty();
-      }
-    }
-  }
-
-  void _rebuildChildWidgetCacheIfNeeded() {
-    _previousChildWidgetCache ??= List<Widget>.unmodifiable(
-      _previousChildren.map<Widget>((_AnimatedSwitcherChildEntry child) {
-        return child.transition;
-      }),
-    );
-    assert(_previousChildren.length == _previousChildWidgetCache.length);
-    assert(_previousChildren.isEmpty || _previousChildren.last.transition == _previousChildWidgetCache.last);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _rebuildChildWidgetCacheIfNeeded();
-    return widget.layoutBuilder(_currentChild?.transition, _previousChildWidgetCache);
+    _rebuildOutgoingWidgetsIfNeeded();
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets);
   }
 }

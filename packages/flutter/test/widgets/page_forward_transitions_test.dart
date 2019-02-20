@@ -81,7 +81,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case '/':
-              return TestRoute<Null>(
+              return TestRoute<void>(
                 settings: settings,
                 child: Builder(
                   key: insideKey,
@@ -104,9 +104,9 @@ void main() {
                   }
                 )
               );
-            case '/2': return TestRoute<Null>(settings: settings, child: const Text('E'));
-            case '/3': return TestRoute<Null>(settings: settings, child: const Text('F'));
-            case '/4': return TestRoute<Null>(settings: settings, child: const Text('G'));
+            case '/2': return TestRoute<void>(settings: settings, child: const Text('E'));
+            case '/3': return TestRoute<void>(settings: settings, child: const Text('F'));
+            case '/4': return TestRoute<void>(settings: settings, child: const Text('G'));
           }
           return null;
         }
@@ -190,8 +190,8 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
-            case '/': return TestRoute<Null>(settings: settings, child: const Text('A'));
-            case '/1': return TestRoute<Null>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
+            case '/': return TestRoute<void>(settings: settings, child: const Text('A'));
+            case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
           return null;
         }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show AccessibilityFeatures, window;
+import 'dart:ui' as ui show AccessibilityFeatures;
 
 import 'package:flutter/foundation.dart';
 
@@ -12,11 +12,7 @@ export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
-class SemanticsBinding extends BindingBase {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SemanticsBinding._() => null;
-
+mixin SemanticsBinding on BindingBase {
   /// The current [SemanticsBinding], if one has been created.
   static SemanticsBinding get instance => _instance;
   static SemanticsBinding _instance;
@@ -25,7 +21,7 @@ class SemanticsBinding extends BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// Called when the platform accessibility features change.
@@ -33,7 +29,7 @@ class SemanticsBinding extends BindingBase {
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// The currently active set of [AccessibilityFeatures].
@@ -54,7 +50,7 @@ class SemanticsBinding extends BindingBase {
     bool value = _accessibilityFeatures.disableAnimations;
     assert(() {
       if (debugSemanticsDisableAnimations != null)
-          value = debugSemanticsDisableAnimations;
+        value = debugSemanticsDisableAnimations;
       return true;
     }());
     return value;

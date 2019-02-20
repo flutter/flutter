@@ -40,7 +40,7 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<Null> collectCoverage(Process process, Uri observatoryUri) async {
+  Future<void> collectCoverage(Process process, Uri observatoryUri) async {
     assert(process != null);
     assert(observatoryUri != null);
 
@@ -57,13 +57,7 @@ class CoverageCollector extends TestWatcher {
         if (result == null)
           throw Exception('Failed to collect coverage.');
         data = result;
-      })
-      .timeout(
-        const Duration(minutes: 10),
-        onTimeout: () {
-          throw Exception('Timed out while collecting coverage.');
-        },
-      );
+      });
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
@@ -77,12 +71,9 @@ class CoverageCollector extends TestWatcher {
   ///
   /// This will not start any collection tasks. It us up to the caller of to
   /// call [collectCoverage] for each process first.
-  ///
-  /// If [timeout] is specified, the future will timeout (with a
-  /// [TimeoutException]) after the specified duration.
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
-    Duration timeout,
+    Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
     if (_globalHitmap == null)
@@ -90,7 +81,9 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
-      final List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
+      final List<String> reportOn = coverageDirectory == null
+        ? <String>[fs.path.join(packagePath, 'lib')]
+        : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = await formatter.format(_globalHitmap);
@@ -98,10 +91,10 @@ class CoverageCollector extends TestWatcher {
     return result;
   }
 
-  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false }) async {
-    final Status status = logger.startProgress('Collecting coverage information...');
+  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
+    final Status status = logger.startProgress('Collecting coverage information...', timeout: kFastOperation);
     final String coverageData = await finalizeCoverage(
-      timeout: const Duration(seconds: 30),
+      coverageDirectory: coverageDirectory,
     );
     status.stop();
     printTrace('coverage information collection complete');

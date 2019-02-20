@@ -3,15 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const TextTheme defaultGeometryTheme = Typography.englishLike2014;
+
   test('ThemeDataTween control test', () {
     final ThemeData light = ThemeData.light();
-    final ThemeData dark = ThemeData.light();
+    final ThemeData dark = ThemeData.dark();
     final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
@@ -55,7 +58,7 @@ void main() {
       )
     );
 
-    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), MaterialTextGeometry.englishLike)));
+    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
@@ -65,20 +68,20 @@ void main() {
 
     // Same input, same output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      same(ThemeData.localize(light, MaterialTextGeometry.englishLike)),
+      ThemeData.localize(light, defaultGeometryTheme),
+      same(ThemeData.localize(light, defaultGeometryTheme)),
     );
 
     // Different text geometry, different output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      isNot(same(ThemeData.localize(light, MaterialTextGeometry.tall))),
+      ThemeData.localize(light, defaultGeometryTheme),
+      isNot(same(ThemeData.localize(light, Typography.tall2014))),
     );
 
     // Different base theme, different output.
     expect(
-      ThemeData.localize(light, MaterialTextGeometry.englishLike),
-      isNot(same(ThemeData.localize(dark, MaterialTextGeometry.englishLike))),
+      ThemeData.localize(light, defaultGeometryTheme),
+      isNot(same(ThemeData.localize(dark, defaultGeometryTheme))),
     );
   });
 
@@ -388,7 +391,7 @@ void main() {
     }
 
     for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map((TextStyle style) => _TextStyleProxy(style))) {
+      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -408,7 +411,228 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
+  });
+
+  group('Cupertino theme', () {
+    int buildCount;
+    CupertinoThemeData actualTheme;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        actualTheme = CupertinoTheme.of(context);
+        return const Placeholder();
+      },
+    );
+
+    Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
+      await tester.pumpWidget(
+        Theme(
+          data: theme,
+          child: singletonThemeSubtree,
+        ),
+      );
+      return actualTheme;
+    }
+
+    setUp(() {
+      buildCount = 0;
+      actualTheme = null;
+    });
+
+    testWidgets('Default theme has defaults', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData.light());
+
+      expect(theme.brightness, Brightness.light);
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.scaffoldBackgroundColor, Colors.grey[50]);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('Dark theme has defaults', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData.dark());
+
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('Can override material theme', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
+        ),
+      ));
+
+      expect(theme.brightness, Brightness.light);
+      // We took the scaffold background override but the rest are still cascaded
+      // to the material theme.
+      expect(theme.primaryColor, Colors.blue);
+      expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
+      expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('Can override properties that are independent of material', (WidgetTester tester) async {
+      final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          // The bar colors ignore all things material except brightness.
+          barBackgroundColor: CupertinoColors.black,
+        ),
+      ));
+
+      expect(theme.primaryColor, Colors.blue);
+      // MaterialBasedCupertinoThemeData should also function like a normal CupertinoThemeData.
+      expect(theme.barBackgroundColor, CupertinoColors.black);
+    });
+
+    testWidgets('Changing material theme triggers rebuilds', (WidgetTester tester) async {
+      CupertinoThemeData theme = await testTheme(tester, ThemeData(
+        primarySwatch: Colors.red,
+      ));
+
+      expect(buildCount, 1);
+      expect(theme.primaryColor, Colors.red);
+
+      theme = await testTheme(tester, ThemeData(
+        primarySwatch: Colors.orange,
+      ));
+
+      expect(buildCount, 2);
+      expect(theme.primaryColor, Colors.orange);
+    });
+
+    testWidgets(
+      'Changing cupertino theme override triggers rebuilds',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(buildCount, 1);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeGreen,
+          ),
+        ));
+
+        expect(buildCount, 2);
+        expect(theme.primaryColor, CupertinoColors.activeGreen);
+      },
+    );
+
+    testWidgets(
+      'Cupertino theme override blocks derivative changes',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(buildCount, 1);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+
+        // Change the upstream material primary color.
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            // But the primary material color is preempted by the override.
+            primaryColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        expect(buildCount, 2);
+        expect(theme.primaryColor, CupertinoColors.activeOrange);
+      },
+    );
+
+    testWidgets(
+      'Cupertino overrides do not block derivatives triggering rebuilds when derivatives are not overridden',
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.destructiveRed,
+          ),
+        ));
+
+        expect(buildCount, 1);
+        expect(theme.textTheme.actionTextStyle.color, Colors.purple);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+
+        theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.green,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.destructiveRed,
+          ),
+        ));
+
+        expect(buildCount, 2);
+        expect(theme.textTheme.actionTextStyle.color, Colors.green);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+      },
+    );
+
+    testWidgets(
+      'copyWith only copies the overrides, not the material or cupertino derivatives',
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+          cupertinoOverrideTheme: const CupertinoThemeData(
+            primaryContrastingColor: CupertinoColors.activeOrange,
+          ),
+        ));
+
+        final CupertinoThemeData copiedTheme = originalTheme.copyWith(
+          barBackgroundColor: CupertinoColors.destructiveRed,
+        );
+
+        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: copiedTheme,
+        ));
+
+        expect(theme.primaryColor, Colors.blue);
+        expect(theme.primaryContrastingColor, CupertinoColors.activeOrange);
+        expect(theme.barBackgroundColor, CupertinoColors.destructiveRed);
+      },
+    );
+
+    testWidgets(
+      "Material themes with no cupertino overrides can also be copyWith'ed",
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.purple,
+        ));
+
+        final CupertinoThemeData copiedTheme = originalTheme.copyWith(
+          primaryContrastingColor: CupertinoColors.destructiveRed,
+        );
+
+        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
+          primarySwatch: Colors.blue,
+          cupertinoOverrideTheme: copiedTheme,
+        ));
+
+        expect(theme.primaryColor, Colors.blue);
+        expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
+      },
+    );
   });
 }
 
@@ -447,6 +671,7 @@ class _TextStyleProxy implements TextStyle {
   @override Color get decorationColor => _delegate.decorationColor;
   @override TextDecorationStyle get decorationStyle => _delegate.decorationStyle;
   @override String get fontFamily => _delegate.fontFamily;
+  @override List<String> get fontFamilyFallback => _delegate.fontFamilyFallback;
   @override double get fontSize => _delegate.fontSize;
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
@@ -458,6 +683,7 @@ class _TextStyleProxy implements TextStyle {
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
   @override double get wordSpacing => _delegate.wordSpacing;
+  @override List<Shadow> get shadows => _delegate.shadows;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) =>
@@ -474,7 +700,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
+  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, List<String> fontFamilyFallback, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
     throw UnimplementedError();
   }
 
@@ -484,7 +710,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, List<String> fontFamilyFallback, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw UnimplementedError();
   }
 
@@ -494,7 +720,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double height, StrutStyle strutStyle}) {
     throw UnimplementedError();
   }
 

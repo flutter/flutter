@@ -68,8 +68,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   }
 }
 
-/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
-/// [InkResponse] and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -242,6 +242,12 @@ class InkResponse extends StatefulWidget {
   /// The value passed to the callback is true if this part of the material has
   /// become highlighted and false if this part of the material has stopped
   /// being highlighted.
+  ///
+  /// If all of [onTap], [onDoubleTap], and [onLongPress] become null while a
+  /// gesture is ongoing, then [onTapCancel] will be fired and
+  /// [onHighlightChanged] will be fired with the value false _during the
+  /// build_. This means, for instance, that in that scenario [State.setState]
+  /// cannot be called.
   final ValueChanged<bool> onHighlightChanged;
 
   /// Whether this ink response should be clipped its bounds.
@@ -405,7 +411,7 @@ class InkResponse extends StatefulWidget {
   }
 }
 
-class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
+class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin<T> {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;

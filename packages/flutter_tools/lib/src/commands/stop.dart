@@ -25,7 +25,7 @@ class StopCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> validateCommand() async {
+  Future<void> validateCommand() async {
     await super.validateCommand();
     device = await findTargetDevice();
     if (device == null)
@@ -33,7 +33,7 @@ class StopCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     final ApplicationPackage app = await applicationPackages.getPackageForPlatform(targetPlatform);
     if (app == null) {
@@ -43,5 +43,7 @@ class StopCommand extends FlutterCommand {
     printStatus('Stopping apps on ${device.name}.');
     if (!await device.stopApp(app))
       throwToolExit(null);
+
+    return null;
   }
 }

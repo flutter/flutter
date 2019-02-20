@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'project.dart';
 
-import 'test_project.dart';
-
-class BasicProject extends TestProject {
+class BasicProject extends Project {
 
   @override
   final String pubspec = '''
@@ -21,15 +19,22 @@ class BasicProject extends TestProject {
 
   @override
   final String main = r'''
+  import 'dart:async';
+
   import 'package:flutter/material.dart';
 
-  void main() => runApp(new MyApp());
+  Future<void> main() async {
+    while (true) {
+      runApp(new MyApp());
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+  }
 
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BREAKPOINT
+      return new MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
         home: new Container(),
       );
@@ -41,9 +46,9 @@ class BasicProject extends TestProject {
   }
   ''';
 
-  String get buildMethodBreakpointFile => breakpointFile;
-  int get buildMethodBreakpointLine => breakpointLine;
+  Uri get buildMethodBreakpointUri => mainDart;
+  int get buildMethodBreakpointLine => lineContaining(main, '// BUILD BREAKPOINT');
 
-  String get topLevelFunctionBreakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
+  Uri get topLevelFunctionBreakpointUri => mainDart;
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }

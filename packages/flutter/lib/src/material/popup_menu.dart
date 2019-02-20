@@ -21,6 +21,9 @@ import 'theme.dart';
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
+// dynamic _selection;
+// BuildContext context;
+// void setState(VoidCallback fn) { }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kBaselineOffsetFromBottom = 20.0;
@@ -93,6 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
+// ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
 class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
@@ -106,7 +110,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   final double height;
 
   @override
-  bool represents(dynamic value) => false;
+  bool represents(void value) => false;
 
   @override
   _PopupMenuDividerState createState() => _PopupMenuDividerState();
@@ -130,7 +134,7 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 /// [PopupMenuItem] is 48 pixels high. If you use a widget with a different
 /// height, it must be specified in the [height] property.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
 /// is an enum, not shown here.
@@ -141,6 +145,7 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 ///   child: Text('Working a lot harder'),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See the example at [PopupMenuButton] for how this example could be used in a
 /// complete menu, and see the example at [CheckedPopupMenuItem] for one way to
@@ -281,7 +286,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// of a [PopupMenuItem]. The horizontal layout uses a [ListTile]; the checkmark
 /// is an [Icons.done] icon, shown in the [ListTile.leading] position.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// Suppose a `Commands` enum exists that lists the possible commands from a
 /// particular popup menu, including `Commands.heroAndScholar` and
@@ -319,6 +324,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// In particular, observe how the second menu item uses a [ListTile] with a
 /// blank [Icon] in the [ListTile.leading] position to get the same alignment as
@@ -765,7 +771,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selection` field based on the selection.
@@ -798,6 +804,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -820,7 +827,9 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
+    this.offset = Offset.zero,
   }) : assert(itemBuilder != null),
+       assert(offset != null),
        assert(!(child != null && icon != null)), // fails if passed both parameters
        super(key: key);
 
@@ -864,6 +873,12 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, the icon used for this button.
   final Icon icon;
 
+  /// The offset applied to the Popup Menu Button.
+  ///
+  /// When not set, the Popup Menu Button will be positioned directly next to
+  /// the button that was used to create it.
+  final Offset offset;
+
   @override
   _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
 }
@@ -874,7 +889,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(widget.offset, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,

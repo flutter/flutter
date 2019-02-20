@@ -269,7 +269,7 @@ void main() {
 
   testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
     debugDisableShadows = false;
-    await tester.pumpWidget(MaterialApp(home: const Placeholder()));
+    await tester.pumpWidget(const MaterialApp(home: Placeholder()));
     expect(find.byType(CheckedModeBanner), paints
       ..save()
       ..translate(x: 800.0, y: 0.0)

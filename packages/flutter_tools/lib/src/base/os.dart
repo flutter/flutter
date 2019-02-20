@@ -92,7 +92,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return const <File>[];
     final String stdout = result.stdout;
-    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -166,7 +166,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       return const <File>[];
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
-      return lines.map((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => fs.file(path.trim())).toList();
     return <File>[fs.file(lines.first.trim())];
   }
 

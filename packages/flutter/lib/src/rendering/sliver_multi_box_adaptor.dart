@@ -121,17 +121,35 @@ abstract class RenderSliverBoxChildManager {
   /// true without making any assertions.
   bool debugAssertChildListLocked() => true;
 }
-
-/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox> {
-  /// The index of this child according to the [RenderSliverBoxChildManager].
-  int index;
-
+/// Parent data structure used by [RenderSliverWithKeepAliveMixin].
+mixin KeepAliveParentDataMixin implements ParentData {
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
 
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
+  bool get keptAlive;
+}
+
+/// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
+///
+/// [RenderSliverWithKeepAliveMixin.setupParentData] must be implemented to use
+/// a parentData class that uses the right mixin or whatever is appropriate.
+mixin RenderSliverWithKeepAliveMixin implements RenderSliver {
+  /// Alerts the developer that the child's parentData needs to be of type
+  /// [KeepAliveParentDataMixin].
+  @override
+  void setupParentData(RenderObject child) {
+    assert(child.parentData is KeepAliveParentDataMixin);
+  }
+}
+
+/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
+class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
+  /// The index of this child according to the [RenderSliverBoxChildManager].
+  int index;
+
+  @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
 
@@ -166,7 +184,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-       RenderSliverHelpers {
+       RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
   ///
@@ -298,6 +316,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   void visitChildren(RenderObjectVisitor visitor) {
     super.visitChildren(visitor);
     _keepAliveBucket.values.forEach(visitor);
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildren(visitor);
+    // Do not visit children in [_keepAliveBucket].
   }
 
   /// Called during layout to create and add the child with the given index and
@@ -578,7 +602,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
       for (int index in indices) {
         children.add(_keepAliveBucket[index].toDiagnosticsNode(
-          name: 'child with index $index (kept alive offstage)',
+          name: 'child with index $index (kept alive but not laid out)',
           style: DiagnosticsTreeStyle.offstage,
         ));
       }

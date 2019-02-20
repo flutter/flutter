@@ -33,7 +33,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
   }
 }
 
-Future<Null> main() async {
+Future<void> main() async {
   assert(false); // don't run this in checked mode! Use --release.
   stock_data.StockData.actuallyFetchData = false;
 

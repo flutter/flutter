@@ -14,6 +14,7 @@ import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -44,23 +45,24 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('keep-app-running',
         defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
-              'By default, "flutter drive" stops the application after tests are finished,\n'
-              'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
-              'is specified, then "flutter drive" instead defaults to leaving the application\n'
+              'By default, "flutter drive" stops the application after tests are finished, '
+              'and --keep-app-running overrides this. On the other hand, if --use-existing-app '
+              'is specified, then "flutter drive" instead defaults to leaving the application '
               'running, and --no-keep-app-running overrides it.',
       )
       ..addOption('use-existing-app',
-        help: 'Connect to an already running instance via the given observatory URL.\n'
-              'If this option is given, the application will not be automatically started,\n'
+        help: 'Connect to an already running instance via the given observatory URL. '
+              'If this option is given, the application will not be automatically started, '
               'and it will only be stopped if --no-keep-app-running is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption('driver',
-        help: 'The test file to run on the host (as opposed to the target file to run on\n'
-              'the device). By default, this file has the same base name as the target\n'
-              'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
-              'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
-              'driver will be "test_driver/main_test.dart".',
+        help: 'The test file to run on the host (as opposed to the target file to run on '
+              'the device).\n'
+              'By default, this file has the same base name as the target file, but in the '
+              '"test_driver/" directory instead, and with "_test" inserted just before the '
+              'extension, so e.g. if the target is "lib/main.dart", the driver will be '
+              '"test_driver/main_test.dart".',
         valueHelp: 'path',
       );
   }
@@ -82,7 +84,7 @@ class DriveCommand extends RunCommandBase {
   StreamSubscription<String> _deviceLogSubscription;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
     if (testFile == null)
       throwToolExit(null);
@@ -133,6 +135,8 @@ class DriveCommand extends RunCommandBase {
         await appStopper(this);
       }
     }
+
+    return null;
   }
 
   String _getTestFile() {
@@ -206,7 +210,7 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
+    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -272,13 +276,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<Null> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));

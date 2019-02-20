@@ -22,12 +22,6 @@ void _renderTemplateToFile(String template, dynamic context, String filePath) {
 }
 
 class Plugin {
-  final String name;
-  final String path;
-  final String androidPackage;
-  final String iosPrefix;
-  final String pluginClass;
-
   Plugin({
     this.name,
     this.path,
@@ -53,6 +47,12 @@ class Plugin {
       pluginClass: pluginClass,
     );
   }
+
+  final String name;
+  final String path;
+  final String androidPackage;
+  final String iosPrefix;
+  final String pluginClass;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
@@ -94,7 +94,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   final String oldContents = _readFlutterPluginsList(project);
   final String pluginManifest =
-      plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+      plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
@@ -147,7 +147,7 @@ public final class GeneratedPluginRegistrant {
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
           'name': p.name,
           'package': p.androidPackage,
           'class': p.pluginClass,
@@ -224,10 +224,11 @@ Depends on all your plugins, and provides a function to register them.
   s.homepage         = 'https://flutter.io'
   s.license          = { :type => 'BSD' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.ios.deployment_target = '7.0'
+  s.ios.deployment_target = '8.0'
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.dependency 'Flutter'
   {{#plugins}}
   s.dependency '{{name}}'
   {{/plugins}}
@@ -237,7 +238,7 @@ end
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
     'name': p.name,
     'prefix': p.iosPrefix,
     'class': p.pluginClass,
@@ -296,10 +297,17 @@ Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-  if (!project.isModule && project.ios.directory.existsSync()) {
+  if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
+    final IosProject iosProject = IosProject.fromFlutter(project);
     final CocoaPods cocoaPods = CocoaPods();
-    if (plugins.isNotEmpty)
+    if (plugins.isNotEmpty) {
       cocoaPods.setupPodfile(project.ios);
+    }
+    /// The user may have a custom maintained Podfile that they're running `pod install`
+    /// on themselves.
+    else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
+      cocoaPods.addPodsDependencyToFlutterXcconfig(iosProject);
+    }
   }
 }
 

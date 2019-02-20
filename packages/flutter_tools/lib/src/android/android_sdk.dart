@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -15,12 +13,14 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../globals.dart';
 import 'android_studio.dart' as android_studio;
 
 AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String kAndroidHome = 'ANDROID_HOME';
+const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 
 // Android SDK layout:
 
@@ -138,7 +138,8 @@ class AndroidNdk {
       return ndkDirectory;
     }
 
-    String findCompiler(String ndkDirectory) {
+    // Returns list that contains toolchain bin folder and compiler binary name.
+    List<String> findToolchainAndCompiler(String ndkDirectory) {
       String directory;
       if (platform.isLinux) {
         directory = 'linux-x86_64';
@@ -148,14 +149,16 @@ class AndroidNdk {
         throw AndroidNdkSearchError('Only Linux and macOS are supported');
       }
 
-      final String ndkCompiler = fs.path.join(ndkDirectory,
+      final String toolchainBin = fs.path.join(ndkDirectory,
           'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
-          'bin', 'arm-linux-androideabi-gcc');
+          'bin');
+      final String ndkCompiler = fs.path.join(toolchainBin,
+          'arm-linux-androideabi-gcc');
       if (!fs.isFileSync(ndkCompiler)) {
         throw AndroidNdkSearchError('Can not locate GCC binary, tried $ndkCompiler');
       }
 
-      return ndkCompiler;
+      return <String>[toolchainBin, ndkCompiler];
     }
 
     List<String> findSysroot(String ndkDirectory) {
@@ -201,9 +204,48 @@ class AndroidNdk {
       return <String>['--sysroot', armPlatform];
     }
 
+    int findNdkMajorVersion(String ndkDirectory) {
+      final String propertiesFile = fs.path.join(ndkDirectory, 'source.properties');
+      if (!fs.isFileSync(propertiesFile)) {
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile not found');
+      }
+
+      // Parse source.properties: each line has Key = Value format.
+      final Iterable<String> propertiesFileLines = fs.file(propertiesFile)
+          .readAsStringSync()
+          .split('\n')
+          .map<String>((String line) => line.trim())
+          .where((String line) => line.isNotEmpty);
+      final Map<String, String> properties = Map<String, String>.fromIterable(
+          propertiesFileLines.map<List<String>>((String line) => line.split(' = ')),
+          key: (dynamic split) => split[0],
+          value: (dynamic split) => split[1]);
+
+      if (!properties.containsKey('Pkg.Revision')) {
+        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile does not contain Pkg.Revision');
+      }
+
+      // Extract major version from Pkg.Revision property which looks like <ndk-version>.x.y.
+      return int.parse(properties['Pkg.Revision'].split('.').first);
+    }
+
     final String ndkDir = findBundle(androidHomeDir);
-    final String ndkCompiler = findCompiler(ndkDir);
+    final int ndkVersion = findNdkMajorVersion(ndkDir);
+    final List<String> ndkToolchainAndCompiler = findToolchainAndCompiler(ndkDir);
+    final String ndkToolchain = ndkToolchainAndCompiler[0];
+    final String ndkCompiler = ndkToolchainAndCompiler[1];
     final List<String> ndkCompilerArgs = findSysroot(ndkDir);
+    if (ndkVersion >= 18) {
+      // Newer versions of NDK use clang instead of gcc, which falls back to
+      // system linker instead of using toolchain linker. Force clang to
+      // use appropriate linker by passing -fuse-ld=<path-to-ld> command line
+      // flag.
+      final String ndkLinker = fs.path.join(ndkToolchain, 'arm-linux-androideabi-ld');
+      if (!fs.isFileSync(ndkLinker)) {
+        throw AndroidNdkSearchError('Can not locate linker binary, tried $ndkLinker');
+      }
+      ndkCompilerArgs.add('-fuse-ld=$ndkLinker');
+    }
     return AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
   }
 
@@ -243,6 +285,8 @@ class AndroidSdk {
         androidHomeDir = config.getValue('android-sdk');
       } else if (platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = platform.environment[kAndroidHome];
+      } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = platform.environment[kAndroidSdkRoot];
       } else if (platform.isLinux) {
         if (homeDirPath != null)
           androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');
@@ -317,14 +361,36 @@ class AndroidSdk {
 
   String get avdManagerPath => getAvdManagerPath();
 
+  Directory get _platformsDir => fs.directory(fs.path.join(directory, 'platforms'));
+
+  Iterable<Directory> get _platforms {
+    Iterable<Directory> platforms = <Directory>[];
+    if (_platformsDir.existsSync()) {
+      platforms = _platformsDir
+        .listSync()
+        .whereType<Directory>();
+    }
+    return platforms;
+  }
+
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
-    if (sdkVersions.isEmpty || latestVersion == null)
-      return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
+    if (sdkVersions.isEmpty || latestVersion == null) {
+      final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
+      if (_platforms.isEmpty) {
+        msg.write(' Directory was empty.');
+      } else {
+        msg.write(' Candidates were:\n');
+        msg.write(_platforms
+          .map((Directory dir) => '  - ${dir.basename}')
+          .join('\n'));
+      }
+      return <String>[msg.toString()];
+    }
 
     return latestVersion.validateSdkWellFormed();
   }
@@ -355,15 +421,6 @@ class AndroidSdk {
   }
 
   void _init() {
-    Iterable<Directory> platforms = <Directory>[]; // android-22, ...
-
-    final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
-    if (platformsDir.existsSync()) {
-      platforms = platformsDir
-        .listSync()
-        .whereType<Directory>();
-    }
-
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
@@ -382,7 +439,7 @@ class AndroidSdk {
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = platforms.map((Directory platformDir) {
+    _sdkVersions = _platforms.map<AndroidSdkVersion>((Directory platformDir) {
       final String platformName = platformDir.basename;
       int platformVersion;
 
@@ -394,7 +451,7 @@ class AndroidSdk {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
           final String versionString = const LineSplitter()
               .convert(buildProps)
-              .map(_sdkVersionRe.firstMatch)
+              .map<Match>(_sdkVersionRe.firstMatch)
               .firstWhere((Match match) => match != null)
               .group(1);
           platformVersion = int.parse(versionString);

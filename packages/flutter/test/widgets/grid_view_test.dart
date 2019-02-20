@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
 import 'states.dart';
@@ -14,6 +15,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
+          dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
           children: const <Widget>[],
         ),
@@ -28,9 +30,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
+          dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
@@ -99,9 +103,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.extent(
+          dragStartBehavior: DragStartBehavior.down,
           maxCrossAxisExtent: 200.0,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
