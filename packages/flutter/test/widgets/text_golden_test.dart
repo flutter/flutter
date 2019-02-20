@@ -183,7 +183,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Background.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
