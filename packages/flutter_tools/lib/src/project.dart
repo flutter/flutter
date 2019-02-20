@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:build_runner_core/build_runner_core.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -145,11 +144,6 @@ class FlutterProject {
     await android.ensureReadyForPlatformSpecificTooling();
     await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
-  }
-
-  /// Return the build_runner [PackageGraph] for this package.
-  Future<PackageGraph> get packageGraph async {
-    return PackageGraph.forPath(directory.path);
   }
 
   /// Return the set of builders used by this package.

@@ -97,6 +97,51 @@ void main() {
         }
       }
     });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 29,
+        'codePoint': 'A'.codeUnitAt(0),
+        'character': 'A',
+        'scanCode': 30,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataAndroid data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 111,
+        'codePoint': null,
+        'character': null,
+        'scanCode': 1,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataAndroid data = escapeKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 59,
+        'codePoint': null,
+        'character': null,
+        'scanCode': 42,
+        'metaState': RawKeyEventDataAndroid.modifierLeftShift,
+      });
+      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
   });
   group('RawKeyEventDataFuchsia', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -174,6 +219,45 @@ void main() {
           }
         }
       }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x00070004,
+        'codePoint': 'a'.codeUnitAt(0),
+        'character': 'a',
+      });
+      final RawKeyEventDataFuchsia data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x00070029,
+        'codePoint': null,
+        'character': null,
+      });
+      final RawKeyEventDataFuchsia data = escapeKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x000700e1,
+        'codePoint': null,
+        'character': null,
+      });
+      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
     });
   });
 }

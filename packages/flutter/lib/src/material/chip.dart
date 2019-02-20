@@ -152,6 +152,7 @@ abstract class DeletableChipAttributes {
   /// have to do something similar to the following sample:
   ///
   /// {@tool snippet --template=stateful_widget}
+  ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
   ///
