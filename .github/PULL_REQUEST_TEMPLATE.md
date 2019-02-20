@@ -33,10 +33,10 @@ to accommodate your change?
 - [ ] Yes, this is a breaking change (Please read [Handling breaking changes]).
 - [ ] No, this is *not* a breaking change.
 
-
-[Handling breaking changes]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
+<!-- Links -->
 [Contributor Guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
-[Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [Test Coverage]: https://github.com/flutter/flutter/wiki/Test-coverage-for-package%3Aflutter
+[Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [Features we expect every widget to implement]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#features-we-expect-every-widget-to-implement
 [CLA]: https://cla.developers.google.com/
+[Handling breaking changes]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
