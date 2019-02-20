@@ -49,6 +49,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.web:
         return null;
     }
     assert(platform != null);
@@ -352,6 +353,7 @@ class ApplicationPackageStore {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         return null;
     }
     return null;

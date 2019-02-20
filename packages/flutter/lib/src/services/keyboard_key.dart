@@ -32,7 +32,7 @@ import 'package:flutter/foundation.dart';
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -1655,7 +1655,7 @@ class LogicalKeyboardKey extends Diagnosticable {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
