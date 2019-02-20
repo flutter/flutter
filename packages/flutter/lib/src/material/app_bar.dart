@@ -412,6 +412,7 @@ class _AppBarState extends State<AppBar> {
     IconThemeData appBarIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
       ?? themeData.primaryIconTheme;
+    // If no actionsIconTheme is specified, then fallback on the existing iconTheme.
     IconThemeData appBarActionsIconTheme = widget.actionsIconTheme
         ?? appBarTheme.actionsIconTheme
         ?? appBarIconTheme;
