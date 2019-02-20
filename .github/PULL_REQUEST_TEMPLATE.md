@@ -9,7 +9,7 @@ you're changing visual properties, consider including before/after screenshots
 ## Checklist
 
 To ensure high-quality PRs and a smooth reviewing process to land your PR as
-quickly a possible, we ask you to confirm the following by checking the relevant
+quickly a possible, please confirm the following by checking the relevant
 checkboxes (`[x]`). PRs, that do not check all boxes, may be rejected.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for
@@ -17,7 +17,7 @@ checkboxes (`[x]`). PRs, that do not check all boxes, may be rejected.
 - [ ] My PR includes tests for *all* changed/updated/fixed behaviors (See
       [Test Coverage]).
 - [ ] All existing and new tests are passing.
-- [ ] I updated/added relevant documentation (doc comments with `\\\`).
+- [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] The analyzer (`flutter analyze --flutter-repo`) does not report any
       problems on my PR.
 - [ ] I read and followed the [Flutter Style Guide], especially
