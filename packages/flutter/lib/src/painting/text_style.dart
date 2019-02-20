@@ -850,9 +850,10 @@ class TextStyle extends Diagnosticable {
       height: height,
       locale: locale,
       foreground: foreground,
-      background: background ?? backgroundColor != null
-          ? (Paint()..color = backgroundColor)
-          : null,
+      background: background ?? (backgroundColor != null
+        ? (Paint()..color = backgroundColor)
+        : null
+      ),
       shadows: shadows,
     );
   }
