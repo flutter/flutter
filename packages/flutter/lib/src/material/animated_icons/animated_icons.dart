@@ -177,7 +177,7 @@ class _AnimatedIconPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) => null;
+  bool hitTest(Offset position, Size size) => null;
 
   @override
   bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;

@@ -258,7 +258,7 @@ abstract class CustomPainter extends Listenable {
   /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
-  bool hitTest(Offset position) => null;
+  bool hitTest(Offset position, Size size) => null;
 
   @override
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
@@ -496,14 +496,14 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-    if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
+    if (_foregroundPainter != null && (_foregroundPainter.hitTest(position, size) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
   }
 
   @override
   bool hitTestSelf(Offset position) {
-    return _painter != null && (_painter.hitTest(position) ?? true);
+    return _painter != null && (_painter.hitTest(position, size) ?? true);
   }
 
   @override

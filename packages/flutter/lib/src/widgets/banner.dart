@@ -153,7 +153,7 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) => false;
+  bool hitTest(Offset position, Size size) => false;
 
   double _translationX(double width) {
     assert(location != null);

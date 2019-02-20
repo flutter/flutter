@@ -231,7 +231,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   // Scrollbars are (currently) not interactive.
   @override
-  bool hitTest(Offset position) => null;
+  bool hitTest(Offset position, Size size) => null;
 
   @override
   bool shouldRepaint(ScrollbarPainter old) {

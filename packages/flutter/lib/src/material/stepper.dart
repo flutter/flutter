@@ -715,7 +715,7 @@ class _TrianglePainter extends CustomPainter {
   final Color color;
 
   @override
-  bool hitTest(Offset point) => true; // Hitting the rectangle is fine enough.
+  bool hitTest(Offset point, Size size) => true; // Hitting the rectangle is fine enough.
 
   @override
   bool shouldRepaint(_TrianglePainter oldPainter) {
