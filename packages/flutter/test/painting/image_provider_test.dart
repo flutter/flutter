@@ -71,4 +71,19 @@ void main() {
       expect(await caughtError.future, true);
     });
   });
+
+  test('ImageProvide.obtainKey errors will be caught', () async {
+    final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(false);
+    };
+    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+    stream.addListener((ImageInfo info, bool syncCall) {
+      caughtError.complete(false);
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      caughtError.complete(true);
+    });
+    expect(await caughtError.future, true);
+  });
 }

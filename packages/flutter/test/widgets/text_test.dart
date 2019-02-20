@@ -298,6 +298,26 @@ void main() {
 
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
