@@ -18,15 +18,15 @@ import 'edge_insets.dart';
 /// approximately a gaussian curve instead of a step function as with a
 /// traditional half circle round.
 ///
-/// In the event that the height is equal to width, this shape will appear to be
-/// a circle shape. Increasing the height or width of the shape will allow for a
-/// smooth transition into a continuous stadium-esque shape.
+/// In the event that this shape's height is equal to its width, this shape will
+/// appear to be a circle. Increasing the height or width of the shape will then
+/// allow for a smooth transition into a continuous stadium-esque shape.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: SuperEllipseRoundedRectangleBorder(
+///     shape: ContinuousOvalBorder(
 ///       borderRadius: 28.0,
 ///     ),
 ///   );
