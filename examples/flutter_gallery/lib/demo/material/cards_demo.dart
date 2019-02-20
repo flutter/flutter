@@ -168,7 +168,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
       top: false,
