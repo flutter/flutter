@@ -779,7 +779,7 @@ class TextStyle extends Diagnosticable {
       return TextStyle(
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
-        backgroundColor: Color.lerp(null, b.backgroundColor, t),
+        backgroundColor: Color.lerp(null, a.backgroundColor, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
         fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
         fontSize: t < 0.5 ? a.fontSize : null,
