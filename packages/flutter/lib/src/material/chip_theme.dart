@@ -301,13 +301,13 @@ class ChipThemeData extends Diagnosticable {
   /// The chip is selected when [selected] is true.
   final Color secondarySelectedColor;
 
-  /// Color to be used for the chip's shadow when the elevation is greater than 0.
+  /// Color of the chip's shadow when the elevation is greater than 0.
   ///
   /// If null, the chip defaults to [Colors.black].
   final Color shadowColor;
 
-  /// Color to be used for the chip's shadow when the elevation is greater than
-  /// 0 and the chip is selected.
+  /// Color of the chip's shadow when the elevation is greater than 0 and the
+  /// chip is selected.
   ///
   /// If null, the chip defaults to [Colors.black].
   final Color selectedShadowColor;

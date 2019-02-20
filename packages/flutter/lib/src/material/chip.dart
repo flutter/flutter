@@ -119,7 +119,7 @@ abstract class ChipAttributes {
   /// Defaults to 0. The value is always non-negative.
   double get elevation;
 
-  /// Color to be used for the chip's shadow when the elevation is greater than 0.
+  /// Color of the chip's shadow when the elevation is greater than 0.
   ///
   /// The default is [Colors.black].
   Color get shadowColor;
@@ -314,8 +314,8 @@ abstract class SelectableChipAttributes {
   /// The chip is selected when [selected] is true.
   Color get selectedColor;
 
-  /// Color to be used for the chip's shadow when the elevation is greater than
-  /// 0 and the chip is selected.
+  /// Color of the chip's shadow when the elevation is greater than 0 and the
+  /// chip is selected.
   ///
   /// The default is [Colors.black].
   Color get selectedShadowColor;
