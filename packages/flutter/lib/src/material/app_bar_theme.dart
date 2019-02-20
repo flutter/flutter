@@ -30,12 +30,18 @@ import 'theme.dart';
 class AppBarTheme extends Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.AppBarTheme].
   const AppBarTheme({
+    this.actionsIconTheme,
     this.brightness,
     this.color,
     this.elevation,
     this.iconTheme,
     this.textTheme,
   });
+
+  /// Default value for [AppBar.actionsIconTheme].
+  ///
+  /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
+  final IconThemeData actionsIconTheme;
 
   /// Default value for [AppBar.brightness].
   ///
@@ -65,6 +71,7 @@ class AppBarTheme extends Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
+    IconThemeData actionsIconTheme,
     Brightness brightness,
     Color color,
     double elevation,
@@ -72,6 +79,7 @@ class AppBarTheme extends Diagnosticable {
     TextTheme textTheme,
   }) {
     return AppBarTheme(
+      actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       brightness: brightness ?? this.brightness,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
@@ -93,6 +101,7 @@ class AppBarTheme extends Diagnosticable {
   static AppBarTheme lerp(AppBarTheme a, AppBarTheme b, double t) {
     assert(t != null);
     return AppBarTheme(
+      actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -104,6 +113,7 @@ class AppBarTheme extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
+      actionsIconTheme,
       brightness,
       color,
       elevation,
@@ -119,7 +129,8 @@ class AppBarTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final AppBarTheme typedOther = other;
-    return typedOther.brightness == brightness
+    return typedOther.actionsIconTheme == actionsIconTheme
+        && typedOther.brightness == brightness
         && typedOther.color == color
         && typedOther.elevation == elevation
         && typedOther.iconTheme == iconTheme
@@ -129,6 +140,7 @@ class AppBarTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));

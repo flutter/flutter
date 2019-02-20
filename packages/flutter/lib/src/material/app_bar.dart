@@ -135,10 +135,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// and [automaticallyImplyLeading] must not be null. Additionally, if
   /// [elevation] is specified, it must be non-negative.
   ///
-  /// If [backgroundColor], [elevation], [brightness], [iconTheme], or
-  /// [textTheme] are null, their [AppBarTheme] values will be used. If the
-  /// corresponding [AppBarTheme] property is null, then the default specified
-  /// in the property's documentation will be used.
+  /// If [backgroundColor], [elevation], [brightness], [iconTheme],
+  /// [actionsIconTheme], or [textTheme] are null, their [AppBarTheme] values
+  /// will be used. If the corresponding [AppBarTheme] property is null, then
+  /// the default specified in the property's documentation will be used.
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
@@ -153,6 +153,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
+    this.actionsIconTheme,
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -306,6 +307,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// if that is also null then [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
 
+  /// The color, opacity, and size to use for trailing app bar icons. This
+  /// should only be used when the trailing icons should be themed differently
+  /// than the leading icons.
+  ///
+  /// If this property is null then [ThemeData.appBarTheme.actionsIconTheme] is
+  /// used, if that is also null then this falls back to [iconTheme].
+  final IconThemeData actionsIconTheme;
+
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [brightness] [backgroundColor], [iconTheme].
   ///
@@ -403,6 +412,9 @@ class _AppBarState extends State<AppBar> {
     IconThemeData appBarIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
       ?? themeData.primaryIconTheme;
+    IconThemeData appBarActionsIconTheme = widget.actionsIconTheme
+        ?? appBarTheme.actionsIconTheme
+        ?? appBarIconTheme;
     TextStyle centerStyle = widget.textTheme?.title
       ?? appBarTheme.textTheme?.title
       ?? themeData.primaryTextTheme.title;
@@ -418,6 +430,9 @@ class _AppBarState extends State<AppBar> {
         sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
       appBarIconTheme = appBarIconTheme.copyWith(
         opacity: opacity * (appBarIconTheme.opacity ?? 1.0)
+      );
+      appBarActionsIconTheme = appBarActionsIconTheme.copyWith(
+          opacity: opacity * (appBarActionsIconTheme.opacity ?? 1.0)
       );
     }
 
@@ -476,6 +491,14 @@ class _AppBarState extends State<AppBar> {
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      );
+    }
+
+    // Allow the trailing actions to have their own theme if necessary.
+    if (actions != null) {
+      actions = IconTheme.merge(
+        data: appBarActionsIconTheme,
+        child: actions,
       );
     }
 
@@ -634,6 +657,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.backgroundColor,
     @required this.brightness,
     @required this.iconTheme,
+    @required this.actionsIconTheme,
     @required this.textTheme,
     @required this.primary,
     @required this.centerTitle,
@@ -658,6 +682,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Color backgroundColor;
   final Brightness brightness;
   final IconThemeData iconTheme;
+  final IconThemeData actionsIconTheme;
   final TextTheme textTheme;
   final bool primary;
   final bool centerTitle;
@@ -716,6 +741,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
+        actionsIconTheme: actionsIconTheme,
         textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
@@ -740,6 +766,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || backgroundColor != oldDelegate.backgroundColor
         || brightness != oldDelegate.brightness
         || iconTheme != oldDelegate.iconTheme
+        || actionsIconTheme != oldDelegate.actionsIconTheme
         || textTheme != oldDelegate.textTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
@@ -851,6 +878,7 @@ class SliverAppBar extends StatefulWidget {
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
+    this.actionsIconTheme,
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -980,6 +1008,13 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.primaryIconTheme].
   final IconThemeData iconTheme;
+
+  /// The color, opacity, and size to use for trailing app bar icons. This
+  /// should only be used when the trailing icons should be themed differently
+  /// than the leading icons.
+  ///
+  /// If this property is null then this falls back to [iconTheme].
+  final IconThemeData actionsIconTheme;
 
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [brightness] [backgroundColor], [iconTheme].
@@ -1148,6 +1183,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           backgroundColor: widget.backgroundColor,
           brightness: widget.brightness,
           iconTheme: widget.iconTheme,
+          actionsIconTheme: widget.actionsIconTheme,
           textTheme: widget.textTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,
