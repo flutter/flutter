@@ -7,10 +7,14 @@
 #include "flutter/fml/thread.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
+
+#define CURRENT_TEST_NAME                                           \
+  std::string {                                                     \
+    ::testing::UnitTest::GetInstance()->current_test_info()->name() \
+  }
 
 namespace blink {
 
@@ -20,26 +24,24 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   Settings settings = {};
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
-  auto vm = DartVMRef::Create(settings);
+  auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);
-  auto vm_data = vm->GetVMData();
-  ASSERT_TRUE(vm_data);
-  TaskRunners task_runners(testing::GetCurrentTestName(),  //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner()          //
+  TaskRunners task_runners(CURRENT_TEST_NAME,       //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
   );
   auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),         // settings
-      vm_data->GetIsolateSnapshot(),  // isolate snapshot
-      vm_data->GetSharedSnapshot(),   // shared snapshot
-      std::move(task_runners),        // task runners
-      nullptr,                        // window
-      {},                             // snapshot delegate
-      {},                             // io manager
-      "main.dart",                    // advisory uri
-      "main"                          // advisory entrypoint
+      vm.get(),                  // vm
+      vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
+      std::move(task_runners),   // task runners
+      nullptr,                   // window
+      {},                        // snapshot delegate
+      {},                        // io manager
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
@@ -51,26 +53,24 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
   Settings settings = {};
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
-  auto vm = DartVMRef::Create(settings);
+  auto vm = DartVM::ForProcess(settings);
   ASSERT_TRUE(vm);
-  auto vm_data = vm->GetVMData();
-  ASSERT_TRUE(vm_data);
-  TaskRunners task_runners(testing::GetCurrentTestName(),  //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner(),         //
-                           GetCurrentTaskRunner()          //
+  TaskRunners task_runners(CURRENT_TEST_NAME,       //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
   );
   auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),         // settings
-      vm_data->GetIsolateSnapshot(),  // isolate snapshot
-      vm_data->GetSharedSnapshot(),   // shared snapshot
-      std::move(task_runners),        // task runners
-      nullptr,                        // window
-      {},                             // snapshot delegate
-      {},                             // io manager
-      "main.dart",                    // advisory uri
-      "main"                          // advisory entrypoint
+      vm.get(),                  // vm
+      vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
+      std::move(task_runners),   // task runners
+      nullptr,                   // window
+      {},                        // snapshot delegate
+      {},                        // io manager
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
@@ -86,11 +86,8 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
 
 class AutoIsolateShutdown {
  public:
-  AutoIsolateShutdown(blink::DartVMRef vm,
-                      std::shared_ptr<blink::DartIsolate> isolate)
-      : vm_(std::move(vm)), isolate_(std::move(isolate)) {
-    FML_CHECK(vm_);
-  }
+  AutoIsolateShutdown(std::shared_ptr<blink::DartIsolate> isolate)
+      : isolate_(std::move(isolate)) {}
 
   ~AutoIsolateShutdown() {
     if (isolate_) {
@@ -122,7 +119,6 @@ class AutoIsolateShutdown {
   }
 
  private:
-  blink::DartVMRef vm_;
   std::shared_ptr<blink::DartIsolate> isolate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AutoIsolateShutdown);
@@ -132,38 +128,35 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     fml::RefPtr<fml::TaskRunner> task_runner,
     std::string entrypoint) {
   Settings settings = {};
-  settings.enable_observatory = true;
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
 
-  auto vm = DartVMRef::Create(settings);
+  auto vm = DartVM::ForProcess(settings);
+
   if (!vm) {
     return {};
   }
-
-  auto vm_data = vm->GetVMData();
-
-  TaskRunners task_runners(testing::GetCurrentTestName(),  //
-                           task_runner,                    //
-                           task_runner,                    //
-                           task_runner,                    //
-                           task_runner                     //
+  TaskRunners task_runners(CURRENT_TEST_NAME,  //
+                           task_runner,        //
+                           task_runner,        //
+                           task_runner,        //
+                           task_runner         //
   );
 
   auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),         // settings
-      vm_data->GetIsolateSnapshot(),  // isolate snapshot
-      vm_data->GetSharedSnapshot(),   // shared snapshot
-      std::move(task_runners),        // task runners
-      nullptr,                        // window
-      {},                             // snapshot delegate
-      {},                             // io manager
-      "main.dart",                    // advisory uri
-      "main"                          // advisory entrypoint
+      vm.get(),                  // vm
+      vm->GetIsolateSnapshot(),  // isolate snapshot
+      vm->GetSharedSnapshot(),   // shared snapshot
+      std::move(task_runners),   // task runners
+      nullptr,                   // window
+      {},                        // snapshot delegate
+      {},                        // io manager
+      "main.dart",               // advisory uri
+      "main"                     // advisory entrypoint
   );
 
   auto root_isolate =
-      std::make_unique<AutoIsolateShutdown>(std::move(vm), weak_isolate.lock());
+      std::make_unique<AutoIsolateShutdown>(weak_isolate.lock());
 
   if (!root_isolate->IsValid()) {
     FML_LOG(ERROR) << "Could not create isolate.";

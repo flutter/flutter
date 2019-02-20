@@ -37,8 +37,8 @@ static constexpr char kSettingsChannel[] = "flutter/settings";
 
 Engine::Engine(Delegate& delegate,
                blink::DartVM& vm,
-               fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-               fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+               fml::RefPtr<blink::DartSnapshot> isolate_snapshot,
+               fml::RefPtr<blink::DartSnapshot> shared_snapshot,
                blink::TaskRunners task_runners,
                blink::Settings settings,
                std::unique_ptr<Animator> animator,
