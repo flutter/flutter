@@ -20,7 +20,7 @@ Future<developer.ServiceExtensionResponse> _scheduleFrame(
   }));
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 void _setupHooks() {  // ignore: unused_element
   assert(() {
     // In debug mode, register the schedule frame extension.
