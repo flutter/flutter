@@ -9,58 +9,18 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// The corner mode for a [ContinuousCornerRectangleBorder].
+/// Creates a continuous stadium shape.
 ///
-/// In the event that the height or width of the rectangle is less than ~3x its
-/// radius, either the shape of the rectangle or the radius of each corner must
-/// be changed to accommodate the radius and extents of the desired rectangle.
-/// When 3 * radius is more than the width or height of the rectangle,
-/// the curve parameters begins to generate a lozenge, instead of a super ellipse.
-/// As such, the shape or radius of the rectangle must be changed to maintain
-/// the desired super elliptical shape.
-//enum RoundedRectCornerMode {
-//  /// In an attempt to keep the corner radius of the rectangle roughly the
-//  /// same regardless of dimension, the shape of the rectangle's corners will
-//  /// change when its height or width is less than ~3x its radius.
-//  ///
-//  /// This option is best used in scenarios when a rectangle is static and a smooth
-//  /// transition between different extent dimensions is not necessary.
-//  ///
-//  /// When the height or width is greater than 3x the radius, the shape will appear
-//  /// to be a rounded rect, with 4 linear edges and 4 90º curves. When the
-//  /// height or width is less than 3x the radius, the shape will appear to be
-//  /// stadium shaped where the resulting shape has 2 linear edges and 2 180º
-//  /// curves.
-//  ///
-//  /// If animating radii or side length with this option, at certain parameter
-//  /// boundaries the rectangle will pop from one shape to the other.
-//  dynamicShape,
-//
-//  /// In an attempt to keep the shape of the rectangle the same regardless of its
-//  /// dimension, the radius will automatically be lessened to maximize the
-//  /// roundness of the resulting rectangle if its width or height is less than
-//  /// ~3x the radius.
-//  ///
-//  /// This option is best used in scenarios where a rectangle is not static and
-//  /// will be animated between various different dimensions.
-//  ///
-//  /// This shape will always have 4 linear edges and 4 90º curves. However, at
-//  /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
-//  /// just 2 edges and 2 180º curves.
-//  dynamicRadius,
-//}
-
-/// Creates a continuous cornered rounded rectangle.
+/// A shape similar to a stadium, but with a smoother transition from
+/// each linear edge to its 180º curves.
 ///
-/// A shape similar to a rounded rectangle, but with a smoother transition from
-/// the sides to the rounded corners.
+/// In this shape, the curvature of each 180º curve over the arc is
+/// approximately a gaussian curve instead of a step function as with a
+/// traditional half circle round.
 ///
-/// The rendered shape roughly approximates that of a super ellipse. In this
-/// shape, the curvature of each corner over the arc is approximately a gaussian
-/// curve instead of a step function as with a traditional quarter circle round.
-/// The rendered rectangle in dynamic radius mode is roughly a super ellipse with
-/// an n value of 5. In dynamic shape mode, the n value is approximately 5 or 2
-/// depending on the desired corner radius and aspect ratio of the rectangle.
+/// In the event that the height is equal to width, this shape will appear to be
+/// a circle shape. Increasing the height or width of the shape will allow for a
+/// smooth transition into a continuous stadium-esque shape.
 ///
 /// {@tool sample}
 /// ```dart
@@ -85,9 +45,7 @@ class ContinuousOvalBorder extends ShapeBorder {
   const ContinuousOvalBorder({
     this.side = BorderSide.none,
     this.borderRadius = 1.0,
-    this.mode = RoundedRectCornerMode.dynamicShape,
   }) : assert(side != null),
-       assert(mode != null),
        assert(borderRadius != null);
 
   /// The radius for each corner.
@@ -106,21 +64,11 @@ class ContinuousOvalBorder extends ShapeBorder {
   /// By default this value is [BorderSide.none]. It also must not be null.
   final BorderSide side;
 
-  /// The corner mode of the rectangle.
-  ///
-  /// Whether or not the shape or radius will by dynamic in the event that the
-  /// width or height is smaller than 3x the radius.
-  ///
-  /// By default, this value is [RoundedRectCornerMode.dynamicShape]. It also
-  /// must not be null.
-  final RoundedRectCornerMode mode;
-
   Path _getPath(RRect rrect) {
-    // The radius multiplier where the resulting shape will perfectly concave at
-    // with a height and width of any value.
-    const double maxMultiplier = 3.0573;
+    // The multiplier of the radius in comparison to the smallest edge length
+    // used to describe the minimum radius for the dynamic shape option.
+    const double dynamicShapeMinMultiplier = 0.32708;
 
-    double limitedRadius;
     final double width = rrect.width;
     final double height = rrect.height;
     final double centerX = rrect.center.dx;
@@ -129,6 +77,8 @@ class ContinuousOvalBorder extends ShapeBorder {
     final double originY = centerY - height / 2;
     final double radius = math.max(1, borderRadius);
 
+    final double limitedRadius = math.min(radius, math.min(rrect.width, rrect.height) * dynamicShapeMinMultiplier);
+
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
     double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
@@ -136,171 +86,8 @@ class ContinuousOvalBorder extends ShapeBorder {
     double topY(double y) { return centerY + y * limitedRadius - height / 2; }
     double bottomY(double y) { return centerY - y * limitedRadius + height / 2; }
     double topMidY(double y) { return originY + y * width; }
-    double bottomMidY(double y) { return originY + height - y * limitedRadius; }
     double leftMidX(double x) { return originX + x * height; }
     double rightMidX(double x) { return originX + width - x * limitedRadius; }
-
-    // Renders the default super elliptical rounded rect shape where there are
-    // 4 straight edges and 4 90º corners. Approximately renders a super ellipse
-    // with n value of 5.
-    Path roundedRect1 () {
-      return Path()
-        ..moveTo(leftX(1.52866483), topY(0))
-        ..lineTo(rightX(1.52866471), topY(0))
-        ..cubicTo(rightX(1.08849323), topY(0),
-            rightX(0.86840689), topY(0),
-            rightX(0.66993427), topY(0.06549600))
-        ..lineTo(rightX(0.63149399), topY(0.07491100))
-        ..cubicTo(rightX(0.37282392), topY(0.16905899),
-            rightX(0.16906013), topY(0.37282401),
-            rightX(0.07491176), topY(0.63149399))
-        ..cubicTo(rightX(0), topY(0.86840701),
-            rightX(0), topY(1.08849299),
-            rightX(0), topY(1.52866483))
-        ..lineTo(rightX(0), bottomY(1.52866471))
-        ..cubicTo(rightX(0), bottomY(1.08849323),
-            rightX(0), bottomY(0.86840689),
-            rightX(0.06549600), bottomY(0.66993427))
-        ..lineTo(rightX(0.07491100), bottomY(0.63149399))
-        ..cubicTo(rightX(0.16905899), bottomY(0.37282392),
-            rightX(0.37282401), bottomY(0.16906013),
-            rightX(0.63149399), bottomY(0.07491176))
-        ..cubicTo(rightX(0.86840701), bottomY(0),
-            rightX(1.08849299), bottomY(0),
-            rightX(1.52866483), bottomY(0))
-        ..lineTo(leftX(1.52866483), bottomY(0))
-        ..cubicTo(leftX(1.08849323), bottomY(0),
-            leftX(0.86840689), bottomY(0),
-            leftX(0.66993427), bottomY(0.06549600))
-        ..lineTo(leftX(0.63149399), bottomY(0.07491100))
-        ..cubicTo(leftX(0.37282392), bottomY(0.16905899),
-            leftX(0.16906013), bottomY(0.37282401),
-            leftX(0.07491176), bottomY(0.63149399))
-        ..cubicTo(leftX(0), bottomY(0.86840701),
-            leftX(0), bottomY(1.08849299),
-            leftX(0), bottomY(1.52866483))
-        ..lineTo(leftX(0), topY(1.52866471))
-        ..cubicTo(leftX(0), topY(1.08849323),
-            leftX(0), topY(0.86840689),
-            leftX(0.06549600), topY(0.66993427))
-        ..lineTo(leftX(0.07491100), topY(0.63149399))
-        ..cubicTo(leftX(0.16905899), topY(0.37282392),
-            leftX(0.37282401), topY(0.16906013),
-            leftX(0.63149399), topY(0.07491176))
-        ..cubicTo(leftX(0.86840701), topY(0),
-            leftX(1.08849299), topY(0),
-            leftX(1.52866483), topY(0))
-        ..close();
-    }
-
-    // The secondary super elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The width is greater than the height. Approximately
-    // renders a super ellipse with an n value of 2.
-    Path roundedRect2a () {
-      return Path()
-        ..moveTo(leftX(2.00593972), topY(0))
-        ..lineTo(originX + width - 1.52866483 * radius, originY)
-        ..cubicTo(rightX(1.63527834), topY(0),
-            rightX(1.29884040), topY(0),
-            rightX(0.99544263), topY(0.10012127))
-        ..lineTo(rightX(0.93667978), topY(0.11451437))
-        ..cubicTo(rightX(0.37430558), topY(0.31920183),
-            rightX(0.00000051), topY(0.85376567),
-            rightX(0.00000051), topY(1.45223188))
-        ..cubicTo(rightMidX(0), centerY,
-            rightMidX(0), centerY,
-            rightMidX(0), centerY)
-        ..lineTo(rightMidX(0), centerY)
-        ..cubicTo(rightMidX(0), centerY,
-            rightMidX(0), centerY,
-            rightMidX(0), centerY)
-        ..lineTo(rightX(0), bottomY(1.45223165))
-        ..cubicTo(rightX(0), bottomY(0.85376561),
-            rightX(0.37430558), bottomY(0.31920174),
-            rightX(0.93667978), bottomY(0.11451438))
-        ..cubicTo(rightX(1.29884040), bottomY(0),
-            rightX(1.63527834), bottomY(0),
-            rightX(2.30815363), bottomY(0))
-        ..lineTo(originX + 1.52866483 * radius, originY + height)
-        ..cubicTo(leftX(1.63527822), bottomY(0),
-            leftX(1.29884040), bottomY(0),
-            leftX(0.99544257), bottomY(0.10012124))
-        ..lineTo(leftX(0.93667972), bottomY(0.11451438))
-        ..cubicTo(leftX(0.37430549), bottomY(0.31920174),
-            leftX(-0.00000007), bottomY(0.85376561),
-            leftX(-0.00000001), bottomY(1.45223176))
-        ..cubicTo(leftMidX(0), centerY,
-            leftMidX(0), centerY,
-            leftMidX(0), centerY)
-        ..lineTo(leftMidX(0), centerY)
-        ..cubicTo(leftMidX(0), centerY,
-            leftMidX(0), centerY,
-            leftMidX(0), centerY)
-        ..lineTo(leftX(-0.00000001), topY(1.45223153))
-        ..cubicTo(leftX(0.00000004), topY(0.85376537),
-            leftX(0.37430561), topY(0.31920177),
-            leftX(0.93667978), topY(0.11451436))
-        ..cubicTo(leftX(1.29884040), topY(0),
-            leftX(1.63527822), topY(0),
-            leftX(2.30815363), topY(0))
-        ..lineTo(originX + 1.52866483 * radius, originY)
-        ..lineTo(leftX(2.00593972), topY(0))
-        ..close();
-    }
-
-    // The secondary super elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The height is greater than the width. Approximately
-    // renders a super ellipse with an n value of 2.
-    Path roundedRect2b () {
-      return Path()
-        ..moveTo(centerX, topY(0))
-        ..lineTo(centerX, topY(0))
-        ..cubicTo(centerX, topY(0),
-            centerX, topY(0),
-            centerX, topY(0))
-        ..lineTo(rightX(1.45223153), topY(0))
-        ..cubicTo(rightX(0.85376573), topY(0.00000001),
-            rightX(0.31920189), topY(0.37430537),
-            rightX(0.11451442), topY(0.93667936))
-        ..cubicTo(rightX(0), topY(1.29884040),
-            rightX(0), topY(1.63527822),
-            rightX(0), topY(2.30815387))
-        ..lineTo(originX + width, originY + height - 1.52866483 * radius)
-        ..cubicTo(rightX(0), bottomY(1.63527822),
-            rightX(0), bottomY(1.29884028),
-            rightX(0.10012137), bottomY(0.99544269))
-        ..lineTo(rightX(0.11451442), bottomY(0.93667972))
-        ..cubicTo(rightX(0.31920189), bottomY(0.37430552),
-            rightX(0.85376549), bottomY(0),
-            rightX(1.45223165), bottomY(0))
-        ..cubicTo(centerX, bottomMidY(0),
-            centerX, bottomMidY(0),
-            centerX, bottomMidY(0))
-        ..lineTo(centerX, bottomMidY(0))
-        ..cubicTo(centerX, bottomMidY(0),
-            centerX, bottomMidY(0),
-            centerX, bottomMidY(0))
-        ..lineTo(leftX(1.45223141), bottomY(0))
-        ..cubicTo(leftX(0.85376543), bottomY(0),
-            leftX(0.31920192), bottomY(0.37430552),
-            leftX(0.11451446), bottomY(0.93667972))
-        ..cubicTo(leftX(0), bottomY(1.29884028),
-            leftX(0), bottomY(1.63527822),
-            leftX(0), bottomY(2.30815387))
-        ..lineTo(originX, originY + 1.52866483 * radius)
-        ..cubicTo(leftX(0), topY(1.63527822),
-            leftX(0), topY(1.29884040),
-            leftX(0.10012126), topY(0.99544257))
-        ..lineTo(leftX(0.11451443), topY(0.93667966))
-        ..cubicTo(leftX(0.31920189), topY(0.37430552),
-            leftX(0.85376549), topY(0),
-            leftX(1.45223153), topY(0))
-        ..cubicTo(centerX, topY(0),
-            centerX, topY(0),
-            centerX, topY(0))
-        ..lineTo(centerX, topY(0))
-        ..close();
-    }
 
     // The third super elliptical shape where there are only 2 straight edges
     // and two 180º curves. The height is greater than the width. Approximately
@@ -430,56 +217,7 @@ class ContinuousOvalBorder extends ShapeBorder {
         ..close();
     }
 
-
-    // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for the dynamic shape option.
-    const double dynamicShapeMinMultiplier = 0.32708;
-
-    // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for the dynamic radius round option.
-    const double dynamicRadiusMinMultiplier = 2.0;
-
-    // The edge length at which the corner radius multiplier must be at its
-    // maximum so as to maintain a the appearance of a perfectly concave,
-    // non-lozenge shape.
-    const double minRadiusEdgeLength = 200.0;
-
-    // The maximum difference of the aspect ratio of the width and height of
-    // the rectangle and 1 before shape 3 is rendered.
-    const double maxAspectRatioDifferenceForShape2 = 0.3;
-
-    switch(mode) {
-      case RoundedRectCornerMode.dynamicShape:
-        final double aspectRatio = width / height;
-        final bool aspectRatioInRangeForShape2 = (aspectRatio - 1).abs() > maxAspectRatioDifferenceForShape2;
-        limitedRadius = math.min(radius, math.min(rrect.width, rrect.height) * dynamicShapeMinMultiplier);
-        if (width > maxMultiplier * radius && height > maxMultiplier * radius)
-          return roundedRect1();
-        else if (width > maxMultiplier * radius || (width > height && aspectRatioInRangeForShape2))
-          return roundedRect2a();
-        else if (height > maxMultiplier * radius || (height > width && aspectRatioInRangeForShape2))
-          return roundedRect2b();
-        else if (height > width)
-          return roundedRect3a();
-        return roundedRect3b();
-
-      case RoundedRectCornerMode.dynamicRadius:
-        final double min = math.min(rrect.width, rrect.height);
-
-        // As the minimum side edge length (where the round is occurring)
-        // approaches 0, the limitedRadius approaches 2.0 so as to maximize
-        // roundness. As the edge length approaches 200, the limitedRadius
-        // approaches ~3 –- the multiplier of the radius value where the
-        // resulting shape is perfectly concave at any dimension.
-        final double multiplier = ui.lerpDouble(
-          dynamicRadiusMinMultiplier,
-          maxMultiplier,
-          min / minRadiusEdgeLength
-        );
-        limitedRadius = math.min(radius, min / multiplier);
-        return roundedRect1();
-    }
-    return Path();
+    return height > width ? roundedRect3a() : roundedRect3b();
   }
 
   @override
@@ -515,7 +253,6 @@ class ContinuousOvalBorder extends ShapeBorder {
     return ContinuousOvalBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
-      mode: mode,
     );
   }
 
@@ -526,7 +263,6 @@ class ContinuousOvalBorder extends ShapeBorder {
       return ContinuousOvalBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
-        mode: a.mode,
       );
     }
     return super.lerpFrom(a, t);
@@ -539,7 +275,6 @@ class ContinuousOvalBorder extends ShapeBorder {
       return ContinuousOvalBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
-        mode: b.mode,
       );
     }
     return super.lerpTo(b, t);
@@ -550,15 +285,14 @@ class ContinuousOvalBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousOvalBorder typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius &&
-           typedOther.mode == mode;
+    return side == typedOther.side && borderRadius == typedOther.borderRadius;
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius, mode);
+  int get hashCode => hashValues(side, borderRadius);
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius, $mode)';
+    return '$runtimeType($side, $borderRadius)';
   }
 }

@@ -25,18 +25,15 @@ import 'edge_insets.dart';
 /// roundness of the resulting rectangle if its width or height is less than
 /// ~3x the radius.
 ///
-/// This option is best used in scenarios where a rectangle is not static and
-/// will be animated between various different dimensions.
-///
 /// This shape will always have 4 linear edges and 4 90º curves. However, at
 /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
-/// just 2 edges and 2 180º curves.
+/// just 2 linear edges and 2 180º curves.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: SuperEllipseRoundedRectangleBorder(
+///     shape: ContinuousRectangleBorder(
 ///       borderRadius: 28.0,
 ///     ),
 ///   );
@@ -48,6 +45,8 @@ import 'edge_insets.dart';
 ///
 /// * [RoundedRectangleBorder] which creates a rectangle whose corners are
 ///   precisely quarter circles.
+/// * [ContinuousStadiumBorder] which creates a stadium whose two edges have a
+///   continuous transition into it's two 180º curves.
 class ContinuousRectangleBorder extends ShapeBorder {
   /// Creates a Continuous Cornered Rectangle Border.
   ///
@@ -240,10 +239,10 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius, mode);
+  int get hashCode => hashValues(side, borderRadius);
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius, $mode)';
+    return '$runtimeType($side, $borderRadius)';
   }
 }
