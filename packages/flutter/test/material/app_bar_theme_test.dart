@@ -17,7 +17,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share))
+          IconButton(icon: const Icon(Icons.share), onPressed: () {})
         ],
       )),
     ));
@@ -43,7 +43,7 @@ void main() {
       home: Scaffold(appBar: AppBar(
         title: const Text('App Bar Title'),
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share))
+          IconButton(icon: const Icon(Icons.share), onPressed: () {})
         ],
       )),
     ));
@@ -81,7 +81,7 @@ void main() {
         actionsIconTheme: actionsIconThemeData,
         textTheme: textTheme,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share))
+          IconButton(icon: const Icon(Icons.share), onPressed: () {})
         ],
       )),
     ));
@@ -107,7 +107,7 @@ void main() {
       theme: themeData,
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share))
+          IconButton(icon: const Icon(Icons.share), onPressed: () {})
         ],
       )),
     ));
@@ -132,7 +132,7 @@ void main() {
       theme: themeData,
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share))
+          IconButton(icon: const Icon(Icons.share), onPressed: () {})
         ],
       )),
     ));
