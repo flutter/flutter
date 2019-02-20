@@ -791,7 +791,7 @@ class Window {
   AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
   AccessibilityFeatures _accessibilityFeatures;
 
-  /// A callback that is invoked when the value of [accessibilityFlags] changes.
+  /// A callback that is invoked when the value of [accessibilityFeatures] changes.
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
