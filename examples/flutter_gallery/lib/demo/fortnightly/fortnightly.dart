@@ -10,7 +10,7 @@ class FortnightlyDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Typography Demo',
+      title: 'Fortnightly Demo',
       theme: _fortnightlyTheme,
       home: Scaffold(
         body: Stack(
@@ -32,13 +32,13 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({this.onBackPressed});
+  const ShortAppBar({ this.onBackPressed });
 
   final VoidCallback onBackPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 96,
       height: 50,
       child: Material(
@@ -72,7 +72,7 @@ class FruitPage extends StatelessWidget {
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
       child: Container(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         child: Column(
           children: <Widget>[
             Container(
@@ -97,8 +97,7 @@ class FruitPage extends StatelessWidget {
                       ),
                       Text(
                         ' ¬ ',
-                        style: textTheme.overline.apply(
-                            color: Theme.of(context).textTheme.display3.color),
+                        style: textTheme.overline.apply(color: textTheme.display3.color)
                       ),
                       Text(
                         'CULTURE',
