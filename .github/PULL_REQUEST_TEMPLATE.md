@@ -8,9 +8,9 @@ you're changing visual properties, consider including before/after screenshots
 
 ## Checklist
 
-To ensure high-quality PRs and a smooth reviewing process to land your PR as
-quickly a possible, please confirm the following by checking the relevant
-checkboxes (`[x]`). PRs, that do not check all boxes, may be rejected.
+Before you submit this PR confirm that it meets all requirements listed below
+by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick
+review process.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for
       submitting PRs.
