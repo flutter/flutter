@@ -8,7 +8,7 @@ you're changing visual properties, consider including before/after screenshots
 
 ## Checklist
 
-Before you submit this PR confirm that it meets all requirements listed below
+Before you create this PR confirm that it meets all requirements listed below
 by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick
 review process.
 
