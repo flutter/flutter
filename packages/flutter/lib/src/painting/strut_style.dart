@@ -13,7 +13,8 @@ import 'text_style.dart';
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
 /// if a zero width space was included at the beginning of each line in the
 /// paragraph. This imaginary space is 'shaped' according the properties defined
-/// in this class.
+/// in this class. Flutter's strut is based on [typesetting strut](https://en.wikipedia.org/wiki/Strut_(typesetting))
+/// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
 ///
 /// No lines may be shorter than the strut. The ascent and descent of the strut
 /// are calculated, and any laid out text that has a shorter ascent or descent than
