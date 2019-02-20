@@ -1302,6 +1302,11 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
       if (line.end != line.end_including_newline && line.end >= start &&
           line.end_including_newline <= end) {
         SkScalar x = line_widths_[line_number];
+        // Move empty box to center if center aligned and is an empty line.
+        if (x == 0 && !isinf(width_) &&
+            paragraph_style_.effective_align() == TextAlign::center) {
+          x = width_ / 2;
+        }
         SkScalar top = (line_number > 0) ? line_heights_[line_number - 1] : 0;
         SkScalar bottom = line_heights_[line_number];
         line_metrics[line_number].boxes.emplace_back(
