@@ -136,6 +136,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
                     print('Card was tapped');
                   },
                   splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  highlightColor: Colors.transparent,
                   child: TravelDestinationContent(destination: destination),
                 ),
               ),
@@ -167,6 +168,8 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SafeArea(
       top: false,
       bottom: false,
@@ -188,27 +191,28 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                       _isSelected = !_isSelected;
                     });
                   },
-                  splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  splashColor: colorScheme.primary.withAlpha(30),
+                  highlightColor: Colors.transparent,
                   child: Stack(
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                          ? Theme.of(context).colorScheme.primary.withAlpha(41)
+                          ? colorScheme.primary.withAlpha(41)
                           : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
                         alignment: Alignment.topRight,
                         child: Padding(
-                          padding: const EdgeInsets.all(4.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.check_circle,
-                            color: _isSelected ? Colors.white : Colors.transparent,
+                            color: _isSelected ? colorScheme.primary : Colors.transparent,
                           ),
                         )
                       ),
                     ],
-                  )
+                  ),
                 ),
               ),
             ),
