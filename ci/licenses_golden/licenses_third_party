@@ -1,4 +1,4 @@
-Signature: a76c88a9ff389b1401e9df71fb13c1f6
+Signature: 5f4a380cb378e7c1d8b1cc1d6742d9a0
 
 UNUSED LICENSES:
 
@@ -5707,6 +5707,8 @@ FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_patch.dart
+FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
+FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier.cc
@@ -5751,6 +5753,7 @@ FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_x64.cc
 FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
+FILE: ../../../third_party/dart/samples/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_data.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_dynamic_library.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
