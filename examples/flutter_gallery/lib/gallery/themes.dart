@@ -43,6 +43,12 @@ ThemeData _buildDarkTheme() {
       colorScheme: colorScheme,
       textTheme: ButtonTextTheme.primary,
     ),
+    sliderTheme: SliderThemeData.fromPrimaryColors(
+      primaryColor: primaryColor,
+      primaryColorDark: primaryColor,
+      primaryColorLight: primaryColor,
+      valueIndicatorTextStyle: _buildTextTheme(base.textTheme).body1,
+    ),
     textTheme: _buildTextTheme(base.textTheme),
     primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
     accentTextTheme: _buildTextTheme(base.accentTextTheme),
