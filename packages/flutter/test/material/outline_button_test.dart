@@ -81,6 +81,10 @@ void main() {
               shape: const RoundedRectangleBorder(), // default border radius is 0
               clipBehavior: Clip.antiAlias,
               color: fillColor,
+              // Causes the button to be filled with the theme's canvasColor
+              // instead of Colors.transparent before the button material's
+              // elevation is animated to 2.0.
+              highlightElevation: 2.0,
               highlightedBorderColor: highlightedBorderColor,
               disabledBorderColor: disabledBorderColor,
               borderSide: const BorderSide(
@@ -108,7 +112,7 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
     expect(
-      outlineButton, //find.byType(OutlineButton),
+      outlineButton,
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
@@ -323,6 +327,10 @@ void main() {
           body: Center(
             child: OutlineButton(
               onPressed: () {},
+              // Causes the button to be filled with the theme's canvasColor
+              // instead of Colors.transparent before the button material's
+              // elevation is animated to 2.0.
+              highlightElevation: 2.0,
               child: const Text('Hello'),
             ),
           ),

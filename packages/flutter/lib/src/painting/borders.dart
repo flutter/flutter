@@ -265,8 +265,9 @@ class BorderSide {
 ///
 /// This class handles how to add multiple borders together. Subclasses define
 /// various shapes, like circles ([CircleBorder]), rounded rectangles
-/// ([RoundedRectangleBorder]), superellipses ([SuperellipseShape]), or beveled
-/// rectangles ([BeveledRectangleBorder]).
+/// ([RoundedRectangleBorder]), continuous rectangles
+/// ([ContinuousRectangleBorder]), or beveled rectangles
+/// ([BeveledRectangleBorder]).
 ///
 /// See also:
 ///

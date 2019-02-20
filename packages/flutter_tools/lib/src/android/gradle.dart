@@ -42,9 +42,29 @@ enum FlutterPluginVersion {
 // Investigation documented in #13975 suggests the filter should be a subset
 // of the impact of -q, but users insist they see the error message sometimes
 // anyway.  If we can prove it really is impossible, delete the filter.
+// This technically matches everything *except* the NDK message, since it's
+// passed to a function that filters out all lines that don't match a filter.
 final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+
+// This regex is intentionally broad. AndroidX errors can manifest in multiple
+// different ways and each one depends on the specific code config and
+// filesystem paths of the project. Throwing the broadest net possible here to
+// catch all known and likely cases.
+//
+// Example stack traces:
+//
+// https://github.com/flutter/flutter/issues/27226 "AAPT: error: resource android:attr/fontVariationSettings not found."
+// https://github.com/flutter/flutter/issues/27106 "Android resource linking failed|Daemon: AAPT2|error: failed linking references"
+// https://github.com/flutter/flutter/issues/27493 "error: cannot find symbol import androidx.annotation.NonNull;"
+// https://github.com/flutter/flutter/issues/23995 "error: package android.support.annotation does not exist import android.support.annotation.NonNull;"
+final RegExp androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
+
+final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
+  r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
+  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
+  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.hostAppGradleRoot.childFile(
@@ -253,9 +273,9 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = buildInfo.buildName ?? manifest.buildName;
+    final String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
-    final int buildNumber = buildInfo.buildNumber ?? manifest.buildNumber;
+    final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
@@ -405,17 +425,41 @@ Future<void> _buildGradleProjectV2(
     command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
 
   command.add(assembleTask);
+  bool potentialAndroidXFailure = false;
   final int exitCode = await runCommandAndStreamOutput(
     command,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
-    filter: logger.isVerbose ? null : ndkMessageFilter,
+    // TODO(mklim): if AndroidX warnings are no longer required, this
+    // mapFunction and all its associated variabled can be replaced with just
+    // `filter: ndkMessagefilter`.
+    mapFunction: (String line) {
+      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
+      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
+        potentialAndroidXFailure = true;
+      }
+      // Always print the full line in verbose mode.
+      if (logger.isVerbose) {
+        return line;
+      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
+        return null;
+      }
+
+      return line;
+    }
   );
   status.stop();
 
-  if (exitCode != 0)
+  if (exitCode != 0) {
+    if (potentialAndroidXFailure) {
+      printError('*******************************************************************************************');
+      printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
+      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
+      printError('*******************************************************************************************');
+    }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
+  }
 
   if(!isBuildingBundle) {
     final File apkFile = _findApkFile(project, buildInfo);
@@ -459,12 +503,20 @@ Future<void> _buildGradleProjectV2(
 
       final Archive update = Archive();
       for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile || !newFile.name.startsWith('assets/flutter_assets/'))
+        if (!newFile.isFile)
+          continue;
+
+        // Ignore changes to signature manifests.
+        if (newFile.name.startsWith('META-INF/'))
           continue;
 
         final ArchiveFile oldFile = oldApk.findFile(newFile.name);
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
+
+        // Only allow changes under assets/.
+        if (!newFile.name.startsWith('assets/'))
+          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
         update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
@@ -483,11 +535,21 @@ Future<void> _buildGradleProjectV2(
         printStatus('No changes detected, creating rollback patch.');
       }
 
-      final ArchiveFile oldFile = oldApk.findFile('assets/flutter_assets/isolate_snapshot_data');
-      if (oldFile == null)
-        throwToolExit('Error: Could not find baseline assets/flutter_assets/isolate_snapshot_data.');
+      final List<String> checksumFiles = <String>[
+        'assets/isolate_snapshot_data',
+        'assets/isolate_snapshot_instr',
+        'assets/flutter_assets/isolate_snapshot_data',
+      ];
 
-      final int baselineChecksum = getCrc32(oldFile.content);
+      int baselineChecksum = 0;
+      for (String fn in checksumFiles) {
+        final ArchiveFile oldFile = oldApk.findFile(fn);
+        if (oldFile != null)
+          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
+      }
+      if (baselineChecksum == 0)
+        throwToolExit('Error: Could not find baseline VM snapshot.');
+
       final Map<String, dynamic> manifest = <String, dynamic>{
         'baselineChecksum': baselineChecksum,
         'buildNumber': package.versionCode,

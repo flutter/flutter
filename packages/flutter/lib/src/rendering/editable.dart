@@ -1529,19 +1529,28 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
+    bool showSelection = false;
+    bool showCaret = false;
+
+    if (_selection != null && !_floatingCursorOn) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null)
+        showCaret = true;
+      else if (!_selection.isCollapsed && _selectionColor != null)
+        showSelection = true;
+    }
+
+    if (showSelection) {
+      _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+      _paintSelection(context.canvas, effectiveOffset);
+    }
+
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
     if (paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
-    if (_selection != null && !_floatingCursorOn) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
-        _paintCaret(context.canvas, effectiveOffset, _selection.extent);
-      } else if (!_selection.isCollapsed && _selectionColor != null) {
-        _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
-        _paintSelection(context.canvas, effectiveOffset);
-      }
-    }
+    if (showCaret)
+      _paintCaret(context.canvas, effectiveOffset, _selection.extent);
 
     if (!paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);

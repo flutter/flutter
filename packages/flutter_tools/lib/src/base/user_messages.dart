@@ -229,9 +229,7 @@ class UserMessages {
       'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
   String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
-  String get flutterBaselineRequiresDynamic => 'Error: --baseline is allowed only when --dynamic is specified.';
   String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
-  String get flutterPatchRequiresDynamic => 'Error: --patch is allowed only when --dynamic is specified.';
   String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
 
   // Messages used in FlutterCommandRunner
@@ -245,8 +243,8 @@ class UserMessages {
       'Warning: this bug report contains local paths, device identifiers, and log snippets.';
   String get runnerNoRecordTo => 'record-to location not specified';
   String get runnerNoReplayFrom => 'replay-from location not specified';
-  String runnerNoEngineBuildDir(String enginePackageName, String engineEnvVar) =>
-      'Unable to detect local Flutter engine build directory.\n'
+  String runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine src directory.\n'
       'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
       'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
       'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
@@ -283,4 +281,12 @@ class UserMessages {
       'This can happen when you have multiple copies of flutter installed. Please check '
       'your system path to verify that you are running the expected version (run '
       '\'flutter --version\' to see which flutter is on your path).\n';
+  String invalidVersionSettingHintMessage(String invalidVersion) =>
+      'Invalid version $invalidVersion found, default value will be used.\n'
+      'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
+      'In Android, build-name is used as versionName while build-number used as versionCode.\n'
+      'Read more about Android versioning at https://developer.android.com/studio/publish/versioning\n'
+      'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
+      'Read more about iOS versioning at\n'
+      'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 }

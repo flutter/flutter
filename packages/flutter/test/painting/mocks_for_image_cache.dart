@@ -94,4 +94,16 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   }
 }
 
+class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
+  @override
+  ImageStreamCompleter load(ObtainKeyErrorImageProvider key) {
+    throw Error();
+  }
+
+  @override
+  Future<ObtainKeyErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    throw Error();
+  }
+}
+
 class TestImageStreamCompleter extends ImageStreamCompleter {}

@@ -114,7 +114,7 @@ class IMobileDevice {
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode != 0 || result.stdout.isEmpty)
+    if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
     // Check that we can look up the names of any attached devices.
@@ -134,7 +134,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
@@ -294,6 +294,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
+  IOSArch activeArch,
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
@@ -433,6 +434,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.addAll(<String>['-sdk', 'iphoneos']);
   } else {
     buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+  }
+
+  if (activeArch != null) {
+    final String activeArchName = getNameForIOSArch(activeArch);
+    if (activeArchName != null) {
+      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+      buildCommands.add('ARCHS=$activeArchName');
+    }
   }
 
   if (!codesign) {

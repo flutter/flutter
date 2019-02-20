@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -246,4 +247,93 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
+
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.clip,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: ellipsis', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.ellipsis,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), paints..clipRect(rect: Rect.fromLTWH(0, 0, 50, 50)));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.ellipsis,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: fade', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.fade,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), paints..clipRect(rect: Rect.fromLTWH(0, 0, 50, 50)));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.fade,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+}
+
+Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          child: Text(
+            text,
+            overflow: overflow,
+          ),
+        ),
+      ),
+    ),
+  );
 }
