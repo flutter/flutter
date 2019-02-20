@@ -6,7 +6,7 @@ changing it, and what motivated the change. If you're changing visual
 properties, consider including before/after screenshots (and runnable code
 snippets to reproduce them).*
 
-## Related issues Issues
+## Related Issues
 
 *Replace this paragraph with a list of issues related to this PR from our
 [issue database]. Indicate, which of these issues are resolved or fixed by this
