@@ -132,7 +132,7 @@ class UnsupportedCodeGenerator extends CodeGenerator {
 
 abstract class CodegenDaemon {
   /// Whether the previously enqueued build was successful.
-  Stream<bool> get buildResults;
+  Stream<CodegenStatus> get buildResults;
 
   /// Starts a new build.
   void startBuild();
@@ -229,14 +229,19 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       trackWidgetCreation: trackWidgetCreation,
     );
     codegenDaemon.startBuild();
-    await codegenDaemon.buildResults.firstWhere((bool result) => result);
+    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+    });
+    if (status == CodegenStatus.Failed) {
+      printError('Codegeneration failed, halting build.');
+    }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: codegenDaemon.packagesFile.path,
       fileSystemRoots: <String>[
-        flutterProject.generated.absolute.path,
-        flutterProject.directory.path,
+        fs.path.join(flutterProject.generated.absolute.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
       fileSystemScheme: _kMultiRootScheme,
       targetModel: TargetModel.flutter,
@@ -261,7 +266,12 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   @override
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     _codegenDaemon.startBuild();
-    await _codegenDaemon.buildResults.first;
+    final CodegenStatus status = await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+    });
+    if (status == CodegenStatus.Failed) {
+      printError('Codegeneration failed, halting build.');
+    }
     // Delete this file so that the frontend_server can handle multi-root.
     // TODO(jonahwilliams): investigate frontend_server behavior in the presence
     // of multi-root and initialize from dill.
@@ -290,4 +300,17 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   Future<void> shutdown() {
     return _residentCompiler.shutdown();
   }
+}
+
+/// The current status of a codegen build.
+enum CodegenStatus {
+  /// The build has started running.
+  ///
+  /// If this is the current status when running a hot reload, an additional build does
+  /// not need to be started.
+  Started,
+  /// The build succeeded.
+  Succeeded,
+  /// The build failed.
+  Failed
 }

@@ -4,8 +4,9 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
-import 'package:build_runner_core/build_runner_core.dart';
+import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
@@ -87,7 +88,7 @@ class BuildRunner extends CodeGenerator {
           .stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
-          .listen(printStatus);
+          .listen(printTrace);
       buildProcess
           .stderr
           .transform(utf8.decoder)
@@ -153,7 +154,7 @@ class BuildRunner extends CodeGenerator {
       final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
       final StringBuffer stringBuffer = StringBuffer();
 
-      stringBuffer.writeln('name: synthetic_example');
+      stringBuffer.writeln('name: flutter_tool');
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = await flutterProject.builders;
       for (String name in builders.keys) {
@@ -252,8 +253,17 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
   final File dillFile;
 
   @override
-  Stream<bool> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {
-    return results.results.first.status == build.BuildStatus.succeeded;
+  Stream<CodegenStatus> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {
+    if (results.results.first.status == BuildStatus.failed) {
+      return CodegenStatus.Failed;
+    }
+    if (results.results.first.status == BuildStatus.started) {
+      return CodegenStatus.Started;
+    }
+    if (results.results.first.status == BuildStatus.succeeded) {
+      return CodegenStatus.Succeeded;
+    }
+    return null;
   });
 
   @override

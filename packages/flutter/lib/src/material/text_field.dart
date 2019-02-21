@@ -564,15 +564,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    // iOS cursor doesn't move via a selection handle. The scroll happens
-    // directly from new text selection changes.
-    if (Theme.of(context).platform == TargetPlatform.iOS
-        && cause == SelectionChangedCause.longPress) {
-      _editableTextKey.currentState?.bringIntoView(selection.base);
-    }
-  }
-
   InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -646,14 +637,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
-  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
+  void _handleSingleLongTapDown() {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
-          _renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
+          _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -661,33 +649,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           Feedback.forLongPress(context);
           break;
       }
+      _editableTextKey.currentState.showToolbar();
     }
     _confirmCurrentSplash();
-  }
-
-  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
-    if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          _renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          _renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
-    }
-  }
-
-  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
-    _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
@@ -808,7 +772,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
-        onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         inputFormatters: formatters,
@@ -857,9 +820,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
-          onSingleLongTapStart: _handleSingleLongTapStart,
-          onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
-          onSingleLongTapUp: _handleSingleLongTapUp,
+          onSingleLongTapDown: _handleSingleLongTapDown,
           onDoubleTapDown: _handleDoubleTapDown,
           behavior: HitTestBehavior.translucent,
           child: child,
