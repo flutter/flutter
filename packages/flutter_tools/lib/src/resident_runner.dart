@@ -139,7 +139,8 @@ class FlutterDevice {
     await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () { });
   }
 
-  Future<Uri> setupDevFS(String fsName,
+  Future<Uri> setupDevFS(
+    String fsName,
     Directory rootDirectory, {
     String packagesFilePath
   }) {
@@ -470,7 +471,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+  String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
@@ -969,7 +970,7 @@ class OperationResult {
 
 /// Given the value of the --target option, return the path of the Dart file
 /// where the app's main function should be.
-String findMainDartFile([String target]) {
+String findMainDartFile([ String target ]) {
   target ??= '';
   final String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))

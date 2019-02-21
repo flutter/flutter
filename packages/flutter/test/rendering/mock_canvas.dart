@@ -164,7 +164,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipPath] call are ignored.
-  void clipPath({Matcher pathMatcher});
+  void clipPath({ Matcher pathMatcher });
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -571,8 +571,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   }
 
   @override
-  bool _evaluatePredicates(Iterable<RecordedInvocation> calls,
-      StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
     for(RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
@@ -710,7 +709,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void clipPath({Matcher pathMatcher}) {
+  void clipPath({ Matcher pathMatcher }) {
     _predicates.add(_FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 

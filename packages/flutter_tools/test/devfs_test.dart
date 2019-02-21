@@ -230,7 +230,8 @@ class MockVM implements VM {
   }
 
   @override
-  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+  Future<Map<String, dynamic>> invokeRpcRaw(
+    String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
     bool timeoutFatal = true,

@@ -374,7 +374,7 @@ class IOSDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
     _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
   }
@@ -551,7 +551,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect)
       hostPort = 1024;

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -75,25 +77,16 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
-             ipv6: ipv6) {
-                watcher = DirectoryWatcher(projectRootPath ?? fs.currentDirectory.path);
-                watcher.events.listen((WatchEvent event) {
-                  if (event.type == ChangeType.REMOVE) {
-                    return;
-                  }
-                  if (event.path.endsWith('.dart')) {
-                    _invalidatedFiles.add(event.path);
-                  }
-                });
-             }
+             ipv6: ipv6)  {
+    watcher = ProjectWatcher(projectRootPath, packagesFilePath);
+  }
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
   final String dillOutputPath;
-  final List<String> _invalidatedFiles = <String>[];
-  Watcher watcher;
+  ProjectWatcher watcher;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -128,10 +121,15 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<String> _compileExpressionService(String isolateId, String expression,
-      List<String> definitions, List<String> typeDefinitions,
-      String libraryUri, String klass, bool isStatic,
-      ) async {
+  Future<String> _compileExpressionService(
+    String isolateId,
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  ) async {
     for (FlutterDevice device in flutterDevices) {
       if (device.generator != null) {
         final CompilerOutput compilerOutput =
@@ -321,8 +319,6 @@ class HotRunner extends ResidentRunner {
     }
 
     final UpdateFSReport results = UpdateFSReport(success: true);
-    final List<String> invalidatedFiles = List<String>.from(_invalidatedFiles);
-    _invalidatedFiles.clear();
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
         mainPath: mainPath,
@@ -334,7 +330,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
-        invalidatedFiles: invalidatedFiles,
+        invalidatedFiles: watcher.invalidatedFiles,
       ));
     }
     return results;
@@ -362,10 +358,12 @@ class HotRunner extends ResidentRunner {
     await Future.wait(futures);
   }
 
-  Future<void> _launchInView(FlutterDevice device,
-                             Uri entryUri,
-                             Uri packagesUri,
-                             Uri assetsDirectoryUri) {
+  Future<void> _launchInView(
+    FlutterDevice device,
+    Uri entryUri,
+    Uri packagesUri,
+    Uri assetsDirectoryUri,
+  ) {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
@@ -467,8 +465,10 @@ class HotRunner extends ResidentRunner {
 
   /// Returns [true] if the reload was successful.
   /// Prints errors if [printErrors] is [true].
-  static bool validateReloadReport(Map<String, dynamic> reloadReport,
-      { bool printErrors = true }) {
+  static bool validateReloadReport(
+    Map<String, dynamic> reloadReport, {
+    bool printErrors = true,
+  }) {
     if (reloadReport == null) {
       if (printErrors)
         printError('Hot reload did not receive reload report.');
@@ -914,5 +914,46 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAtFinish() async {
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
+  }
+}
+
+
+class ProjectWatcher {
+  ProjectWatcher(String projectDirectory, String packagesPath) {
+    _watches.add(
+      DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path),
+    );
+    print('setting up watches: $packagesPath');
+    if (packagesPath != null) {
+      final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
+      for (String dependency in packageMap.keys) {
+        final String path = packageMap[dependency].path;
+        if (path.contains(pubCachePath)) {
+          print('skipping $path');
+          continue;
+        }
+        final String filePath = Uri.file(path, windows: platform.isWindows).path;
+        print('adding: $filePath');
+        _watches.add(DirectoryWatcher(filePath));
+      }
+    }
+    for (Watcher watcher in _watches) {
+      watcher.events.listen(_onWatchEvent);
+    }
+  }
+
+  // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
+  // that actually switches the directory.
+  static const String pubCachePath = '.pub-cache';
+
+  final List<Watcher> _watches = <Watcher>[];
+
+  final List<String> invalidatedFiles = <String>[];
+
+  void _onWatchEvent(WatchEvent watchEvent) {
+    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.endsWith('dart')) {
+      return;
+    }
+    invalidatedFiles.add(watchEvent.path);
   }
 }
