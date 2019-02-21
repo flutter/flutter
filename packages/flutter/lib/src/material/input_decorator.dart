@@ -823,7 +823,6 @@ class _RenderDecoration extends RenderBox {
   // of the renderers. This method applies layout to all of the renderers
   // except the container. For convenience, the container is laid out
   // in performLayout().
-  // TODO(justinmc): Get expands working.
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
@@ -881,26 +880,45 @@ class _RenderDecoration extends RenderBox {
       )),
     );
 
-    // The baseline that will be used to draw the actual input text content.
-    final double inputBaseline = contentPadding.top + topHeight + boxToBaseline[input];
     final double inputHeight = input?.size?.height == null ? 0 : input.size.height;
 
     // The height of the visible input container box. What would be outlined.
-    // TODO(justinmc): The existing behavior is to actually allow the invisible
-    // part of the input to expand to the full size of its parent by default, so
-    // that if you click outside the visible input but inside the parent, the
-    // input will be focused. Is that desired?
+    // TODO(justinmc): Consider prefixIcon and suffixIcon too. Then make sure
+    // that the numbers match the original _layout.
+    final double prefixHeight = prefix == null ? 0 : prefix.size.height;
+    final double suffixHeight = prefix == null ? 0 : suffix.size.height;
+    final double fixHeight = math.max(
+      boxToBaseline[prefix],
+      boxToBaseline[suffix],
+    );
+    final double fixAboveInput = math.max(0, fixHeight - boxToBaseline[input]);
+    final double fixBelowBaseline = math.max(
+      prefixHeight - boxToBaseline[prefix],
+      suffixHeight - boxToBaseline[suffix],
+    );
+    final double fixBelowInput = math.max(
+      0,
+      fixBelowBaseline - (inputHeight - boxToBaseline[input]),
+    );
+    final double contentHeight = topHeight
+      + contentPadding.top
+      + fixAboveInput
+      + inputHeight
+      + fixBelowInput
+      + contentPadding.bottom;
     final double containerHeight = expands
       ? boxConstraints.maxHeight - bottomHeight
-      : topHeight
-      + contentPadding.top
-      + inputHeight
-      + contentPadding.bottom;
+      : math.min(contentHeight, boxConstraints.maxHeight);
+
+    // Always position the prefix/suffix in the same place (baseline).
+    final double overflow = math.max(0, contentHeight - boxConstraints.maxHeight);
+    final double baselineAdjustment = fixAboveInput - overflow;
+    //print('justin overflow $overflow, btw $baselineAdjustment $contentHeight $fixAboveInput $inputHeight $fixBelowInput');
 
     // TODO(justinmc): What exactly is outlineBaseline and how did the original
     // calculation work? It seems like it's used as the inputBaseline when there
     // is a border present. It doesn't seem to be the baseline for the text in
-    // the border, which is what it sounds like it should be.
+    // the border.
     //
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
@@ -909,8 +927,16 @@ class _RenderDecoration extends RenderBox {
     final double outlineBaseline = aboveBaseline +
       (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
       */
+    /*
     final double outlineBaseline = boxToBaseline[input] +
-      (containerHeight - (2.0 + inputHeight)) / 2.0;
+      (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
+      */
+    // The baselines that will be used to draw the actual input text content.
+    final double inputBaseline = contentPadding.top
+      + topHeight
+      + boxToBaseline[input]
+      + baselineAdjustment;
+    final double outlineBaseline = inputBaseline - 5; // TODO fudge factor
 
     double subtextCounterBaseline = 0;
     double subtextHelperBaseline = 0;
@@ -935,7 +961,6 @@ class _RenderDecoration extends RenderBox {
       subtextHelperHeight,
     );
 
-    /*
     print('''justin return
       containerHeight: $containerHeight,
       inputBaseline: $inputBaseline,
@@ -944,7 +969,6 @@ class _RenderDecoration extends RenderBox {
       subtextHeight: $subtextHeight,
       btw expnads $expands
     ''');
-    */
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
@@ -1010,6 +1034,7 @@ class _RenderDecoration extends RenderBox {
       + aboveBaseline
       + belowBaseline
       + contentPadding.bottom;
+    print('justin containerHeight = ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom}');
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -1024,7 +1049,6 @@ class _RenderDecoration extends RenderBox {
       math.max(
         _boxSize(suffixIcon).height,
         _boxSize(prefixIcon).height));
-    //print('justin containerHeight sum: ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom} maybe+ ${decoration.floatingLabelHeight} maybe+ prefix/suffix = $containerHeight, btw inputsizeheight: ${input.size.height}, boxtobaselineinput: ${boxToBaseline[input]}, btbl[label] ${boxToBaseline[label]}');
 
     // Inline text within an outline border is centered within the container
     // less 2.0 dps at the top to account for the vertical space occupied
