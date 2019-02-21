@@ -460,6 +460,7 @@ class DevFS {
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
+    int syncedBytes = 0;
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       String archivePath;
       if (deviceUri.path.startsWith(assetBuildDirPrefix))
@@ -469,6 +470,7 @@ class DevFS {
       // files to incremental compiler next time user does hot reload.
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
+        syncedBytes += content.size;
         if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
@@ -511,7 +513,7 @@ class DevFS {
       }
     }
     printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: 0,
+    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
   }
 

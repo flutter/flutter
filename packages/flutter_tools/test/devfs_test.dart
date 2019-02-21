@@ -89,26 +89,9 @@ void main() {
     });
   });
 
-  group('devfs local', () {
-    final MockDevFSOperations devFSOperations = MockDevFSOperations();
-
-    setUpAll(() {
-      tempDir = _newTempDir(fs);
-      basePath = tempDir.path;
-    });
-    tearDownAll(_cleanupTempDirs);
-
-    testUsingContext('delete dev file system', () async {
-      await devFS.destroy();
-      devFSOperations.expectMessages(<String>['destroy test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-    });
-  });
-
   group('devfs remote', () {
     MockVMService vmService;
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
@@ -119,6 +102,37 @@ void main() {
     tearDownAll(() async {
       await vmService.tearDown();
       _cleanupTempDirs();
+    });
+
+    testUsingContext('create dev file system', () async {
+      // simulate workspace
+      final File file = fs.file(fs.path.join(basePath, filePath));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+
+      // simulate package
+      await _createPackage(fs, 'somepkg', 'somefile.txt');
+
+      devFS = DevFS(vmService, 'test', tempDir);
+      await devFS.create();
+      vmService.expectMessages(<String>['create test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+
+      final UpdateFSReport report = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <String>[],
+      );
+      vmService.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(report.syncedBytes, 0);
+      expect(report.success, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
 
     testUsingContext('delete dev file system', () async {
@@ -277,3 +291,4 @@ Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {
   });
   fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
+
