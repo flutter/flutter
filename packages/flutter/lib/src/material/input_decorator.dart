@@ -835,6 +835,8 @@ class _RenderDecoration extends RenderBox {
     boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
+    // TODO(justinmc): In the old layout, there was inputWidth that constrained
+    // some of these, but including it here breaks tests for me.
     boxToBaseline[label] = _layoutLineBox(label, boxConstraints);
     boxToBaseline[hint] = _layoutLineBox(hint, boxConstraints);
     boxToBaseline[counter] = _layoutLineBox(counter, boxConstraints);
