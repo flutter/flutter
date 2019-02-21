@@ -263,7 +263,7 @@ class AndroidNdk {
 
 class AndroidSdk {
   AndroidSdk(this.directory, [this.ndk]) {
-    _init();
+    reinitialize();
   }
 
   static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
@@ -277,6 +277,23 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
+
+  /// Whether the `platform-tools` directory exists in the Android SDK.
+  ///
+  /// It is possible to have an Android SDK folder that is missing this with
+  /// the expectation that it will be downloaded later, e.g. by gradle or the
+  /// sdkmanager. The [licensesAvailable] property should be used to determine
+  /// whether the licenses are at least possibly accepted.
+  bool get platformToolsAvailable => fs.directory(fs.path.join(directory, 'platform-tools')).existsSync();
+
+  /// Whether the `licenses` directory exists in the Android SDK.
+  ///
+  /// The existence of this folder normally indicates that the SDK licenses have
+  /// been accepted, e.g. via the sdkmanager, Android Studio, or by copying them
+  /// from another workstation such as in CI scenarios. If these files are valid
+  /// gradle or the sdkmanager will be able to download and use other parts of
+  /// the SDK on demand.
+  bool get licensesAvailable => fs.directory(fs.path.join(directory, 'licenses')).existsSync();
 
   static AndroidSdk locateAndroidSdk() {
     String findAndroidHomeDir() {
@@ -348,7 +365,7 @@ class AndroidSdk {
   }
 
   static bool validSdkDirectory(String dir) {
-    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
+    return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
   }
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
@@ -376,8 +393,8 @@ class AndroidSdk {
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
-    if (!processManager.canRun(adbPath))
-      return <String>['Android SDK file not found: $adbPath.'];
+    if (adbPath == null || !processManager.canRun(adbPath))
+      return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
 
     if (sdkVersions.isEmpty || latestVersion == null) {
       final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
@@ -396,7 +413,10 @@ class AndroidSdk {
   }
 
   String getPlatformToolsPath(String binaryName) {
-    return fs.path.join(directory, 'platform-tools', binaryName);
+    final String path = fs.path.join(directory, 'platform-tools', binaryName);
+    if (fs.file(path).existsSync())
+      return path;
+    return null;
   }
 
   String getEmulatorPath() {
@@ -420,7 +440,11 @@ class AndroidSdk {
     return null;
   }
 
-  void _init() {
+  /// Sets up various paths used internally.
+  ///
+  /// This method should be called in a case where the tooling may have updated
+  /// SDK artifacts, such as after running a gradle build.
+  void reinitialize() {
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
