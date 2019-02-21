@@ -990,7 +990,6 @@ class CupertinoTimerPickerController {
   /// After this function returns, the [reset] and [set] methods on this
   /// controller will reset and set the attached picker.
   void attachTimeState(_CupertinoTimerPickerState state) {
-    assert(_cupertinoTimerPickerState == null);
     _cupertinoTimerPickerState = state;
   }
 
@@ -1113,6 +1112,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   int selectedMinute;
   int selectedSecond;
 
+  CupertinoTimerPickerController timerController;
+
   @override
   void initState() {
     super.initState();
@@ -1130,7 +1131,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = initialDuration.inSeconds % 60;
 
-    widget.controller?.attachTimeState(this);
+    timerController = widget.controller ?? CupertinoTimerPickerController();
+    timerController.attachTimeState(this);
 
     hourController = FixedExtentScrollController(initialItem: selectedHour);
     minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
@@ -1139,7 +1141,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   void didUpdateWidget(CupertinoTimerPicker oldWidget) {
-    widget.controller?.attachTimeState(this);
+    timerController ??= widget.controller;
+    timerController.attachTimeState(this);
     super.didUpdateWidget(oldWidget);
   }
 
