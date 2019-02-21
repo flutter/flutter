@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -76,10 +77,10 @@ void main() {
         },
       );
       await _flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
-      sawTick1.future.timeout( // ignore: unawaited_futures
+      unawaited(sawTick1.future.timeout(
         const Duration(seconds: 5),
         onTimeout: () { print('The test app is taking longer than expected to print its synchronization line...'); },
-      );
+      ));
       await sawTick1.future; // after this, app is in steady state
       await _flutter.addBreakpoint(
         _project.scheduledBreakpointUri,

@@ -115,7 +115,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = await fuchsiaSdk.listDevices();
-    if (text == null) {
+    if (text == null || text.isEmpty) {
       return <Device>[];
     }
     final List<FuchsiaDevice> devices = parseListDevices(text);
@@ -133,6 +133,9 @@ List<FuchsiaDevice> parseListDevices(String text) {
     final String line = rawLine.trim();
     // ['ip', 'device name']
     final List<String> words = line.split(' ');
+    if (words.length < 2) {
+      continue;
+    }
     final String name = words[1];
     final String id = words[0];
     devices.add(FuchsiaDevice(id, name: name));
@@ -403,11 +406,11 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
     final Process process = await processManager.start(command);
-    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+    unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
       }
-    });
+    }));
     _processes[hostPort] = process;
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;

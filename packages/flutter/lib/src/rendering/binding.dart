@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,6 +19,9 @@ import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
+// Examples can assume:
+// dynamic context;
+
 /// The glue between the render tree and the Flutter engine.
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
@@ -31,9 +33,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    ui.window
+    window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
@@ -94,8 +97,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       return true;
     }());
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
       registerSignalServiceExtension(
         name: 'debugDumpRenderTree',
@@ -131,7 +133,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
-    renderView = RenderView(configuration: createViewConfiguration());
+    renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.scheduleInitialFrame();
   }
 
@@ -170,6 +172,42 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleTextScaleFactorChanged() { }
 
+  /// {@template on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// The current platform brightness can be queried either from a Flutter
+  /// binding, or from a [MediaQuery] widget.
+  ///
+  /// {@tool sample}
+  /// Querying [Window.platformBrightness].
+  ///
+  /// ```dart
+  /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample}
+  /// Querying [MediaQuery] directly.
+  ///
+  /// ```dart
+  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample}
+  /// Querying [MediaQueryData].
+  ///
+  /// ```dart
+  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+  /// final Brightness brightness = mediaQueryData.platformBrightness;
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See [Window.onPlatformBrightnessChanged].
+  /// {@endtemplate}
+  @protected
+  void handlePlatformBrightnessChanged() { }
+
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///
@@ -181,9 +219,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final double devicePixelRatio = window.devicePixelRatio;
     return ViewConfiguration(
-      size: ui.window.physicalSize / devicePixelRatio,
+      size: window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -198,12 +236,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // the logical coordinates of the event location back to device pixels
       // here.
       return renderView.layer
-          .find<MouseTrackerAnnotation>(offset * ui.window.devicePixelRatio);
+          .find<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
     });
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(ui.window.semanticsEnabled);
+    setSemanticsEnabled(window.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree
@@ -240,8 +278,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
-  /// frame.
+  /// automatically by the engine when it is time to lay out and paint a frame.
   ///
   /// Each frame consists of the following phases:
   ///

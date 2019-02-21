@@ -48,7 +48,7 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
   const FlatButton({

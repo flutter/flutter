@@ -17,7 +17,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [GridTile]
-///  * <https://material.google.com/components/grid-lists.html#grid-lists-specs>
+///  * <https://material.io/design/components/image-lists.html#anatomy>
 class GridTileBar extends StatelessWidget {
   /// Creates a grid tile bar.
   ///

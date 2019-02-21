@@ -43,7 +43,7 @@ function retry_upgrade {
   local total_tries="10"
   local remaining_tries=$(($total_tries - 1))
   while [[ "$remaining_tries" > 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY" --no-packages-dir) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY") && break
     echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$(($remaining_tries - 1))
     sleep 5
@@ -162,7 +162,7 @@ if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
   echo "Error: The Flutter directory is not a clone of the GitHub project."
   echo "       The flutter tool requires Git in order to operate properly;"
   echo "       to set up Flutter, run the following command:"
-  echo "       git clone -b beta https://github.com/flutter/flutter.git"
+  echo "       git clone -b stable https://github.com/flutter/flutter.git"
   exit 1
 fi
 

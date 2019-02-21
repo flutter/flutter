@@ -44,6 +44,20 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// `children` property, and then provide the children to that widget.
 /// {@endtemplate}
 
+/// {@template flutter.widgets.subscriptions}
+/// If a [State]'s [build] method depends on an object that can itself
+/// change state, for example a [ChangeNotifier] or [Stream], or some
+/// other object to which one can subscribe to receive notifications, then
+/// be sure to subscribe and unsubscribe properly in [initState],
+/// [didUpdateWidget], and [dispose]:
+///
+///  * In [initState], subscribe to the object.
+///  * In [didUpdateWidget] unsubscribe from the old object and subscribe
+///    to the new one if the updated widget configuration requires
+///    replacing the object.
+///  * In [dispose], unsubscribe from the object.
+/// {@endtemplate}
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -124,7 +138,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   const GlobalKey.constructor() : super.empty();
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
-  static final Set<GlobalKey> _removedKeys = HashSet<GlobalKey>();
   static final Set<Element> _debugIllFatedElements = HashSet<Element>();
   static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
 
@@ -150,10 +163,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       }
       return true;
     }());
-    if (_registry[this] == element) {
+    if (_registry[this] == element)
       _registry.remove(this);
-      _removedKeys.add(this);
-    }
   }
 
   void _debugReserveFor(Element parent) {
@@ -982,12 +993,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// location at which this object was inserted into the tree (i.e., [context])
   /// or on the widget used to configure this object (i.e., [widget]).
   ///
-  /// If a [State]'s [build] method depends on an object that can itself change
-  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
-  /// which one can subscribe to receive notifications, then the [State] should
-  /// subscribe to that object during [initState], unsubscribe from the old
-  /// object and subscribe to the new object when it changes in
-  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
+  /// {@macro flutter.widgets.subscriptions}
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
@@ -1016,12 +1022,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// The framework always calls [build] after calling [didUpdateWidget], which
   /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
-  /// If a [State]'s [build] method depends on an object that can itself change
-  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
-  /// which one can subscribe to receive notifications, then the [State] should
-  /// subscribe to that object during [initState], unsubscribe from the old
-  /// object and subscribe to the new object when it changes in
-  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
+  /// {@macro flutter.widgets.subscriptions}
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateWidget(oldWidget).
@@ -1174,12 +1175,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// Subclasses should override this method to release any resources retained
   /// by this object (e.g., stop any active animations).
   ///
-  /// If a [State]'s [build] method depends on an object that can itself change
-  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
-  /// which one can subscribe to receive notifications, then the [State] should
-  /// subscribe to that object during [initState], unsubscribe from the old
-  /// object and subscribe to the new object when it changes in
-  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
+  /// {@macro flutter.widgets.subscriptions}
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -3435,6 +3431,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       widget.debugFillProperties(properties);
     }
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
+    if (_dependencies != null && _dependencies.isNotEmpty) {
+      final List<DiagnosticsNode> diagnosticsDependencies = _dependencies
+        .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
+        .toList();
+      properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
+    }
   }
 
   @override

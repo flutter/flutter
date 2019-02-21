@@ -7,6 +7,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -336,7 +337,7 @@ class _DevFSHttpWriter {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
         // Synchronization is handled by the _completer below.
-        _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
+        unawaited(_scheduleWrite(deviceUri, content, retry + 1));
         return;
       } else {
         printError('Error writing "$deviceUri" to DevFS: $e');

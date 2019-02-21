@@ -54,7 +54,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 }
 
 // TODO(eseidel): Toolbar needs to change size based on orientation:
-// http://material.google.com/layout/structure.html#structure-app-bar
+// https://material.io/design/components/app-bars-top.html#specs
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
@@ -127,7 +127,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -228,25 +228,28 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// {@tool snippet --template=stateless_widget}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
-  /// Scaffold(
-  ///   appBar: AppBar(
-  ///     title: Text('Hello World'),
-  ///     actions: <Widget>[
-  ///       IconButton(
-  ///         icon: Icon(Icons.shopping_cart),
-  ///         tooltip: 'Open shopping cart',
-  ///         onPressed: () {
-  ///           // ...
-  ///         },
-  ///       ),
-  ///     ],
-  ///   ),
-  /// )
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text('Ready, Set, Shop!'),
+  ///       actions: <Widget>[
+  ///         IconButton(
+  ///           icon: Icon(Icons.shopping_cart),
+  ///           tooltip: 'Open shopping cart',
+  ///           onPressed: () {
+  ///             // Implement navigation to shopping cart page here...
+  ///             print('Shopping cart opened.');
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   final List<Widget> actions;
@@ -829,7 +832,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   ///

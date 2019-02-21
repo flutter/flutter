@@ -720,7 +720,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double height, StrutStyle strutStyle}) {
     throw UnimplementedError();
   }
 

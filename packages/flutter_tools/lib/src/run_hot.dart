@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/dependencies.dart';
@@ -122,8 +123,12 @@ class HotRunner extends ResidentRunner {
       return false;
     }
 
-    final DartDependencySetBuilder dartDependencySetBuilder =
-        DartDependencySetBuilder(mainPath, packagesFilePath);
+    /// When using the build system, dependency analysis is handled by build
+    /// runner instead.
+    if (experimentalBuildEnabled) {
+      return true;
+    }
+    final DartDependencySetBuilder dartDependencySetBuilder = DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = Set<String>.from(dartDependencySetBuilder.build());
     } on DartDependencyException catch (error) {
@@ -483,7 +488,7 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       for (FlutterDevice device in flutterDevices) {
         if (device.generator != null)
-          device.generator.reject();
+          await device.generator.reject();
       }
       return OperationResult(1, 'DevFS synchronization failed');
     }
@@ -502,13 +507,17 @@ class HotRunner extends ResidentRunner {
           // Reload the isolate.
           final Completer<void> completer = Completer<void>();
           futures.add(completer.future);
-          view.uiIsolate.reload().then((ServiceObject _) { // ignore: unawaited_futures
-            final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-            if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
-              // Resume the isolate so that it can be killed by the embedder.
-              return view.uiIsolate.resume();
-            }
-          }).whenComplete(() { completer.complete(null); });
+          unawaited(view.uiIsolate.reload().then(
+            (ServiceObject _) {
+              final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+              if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
+                // Resume the isolate so that it can be killed by the embedder.
+                return view.uiIsolate.resume();
+              }
+            },
+          ).whenComplete(
+            () { completer.complete(null); },
+          ));
         }
       }
     }
@@ -681,15 +690,19 @@ class HotRunner extends ResidentRunner {
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause
         );
-        Future.wait(reportFutures).then((List<Map<String, dynamic>> reports) { // ignore: unawaited_futures
-          // TODO(aam): Investigate why we are validating only first reload report,
-          // which seems to be current behavior
-          final Map<String, dynamic> firstReport = reports.first;
-          // Don't print errors because they will be printed further down when
-          // `validateReloadReport` is called again.
-          device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
-          completer.complete(DeviceReloadReport(device, reports));
-        });
+        unawaited(Future.wait(reportFutures).then(
+          (List<Map<String, dynamic>> reports) async {
+            // TODO(aam): Investigate why we are validating only first reload report,
+            // which seems to be current behavior
+            final Map<String, dynamic> firstReport = reports.first;
+            // Don't print errors because they will be printed further down when
+            // `validateReloadReport` is called again.
+            await device.updateReloadStatus(
+              validateReloadReport(firstReport, printErrors: false),
+            );
+            completer.complete(DeviceReloadReport(device, reports));
+          },
+        ));
       }
       final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
       for (DeviceReloadReport report in reports) {
@@ -749,9 +762,9 @@ class HotRunner extends ResidentRunner {
         futuresViews.add(view.uiIsolate.reload());
       }
       final Completer<void> deviceCompleter = Completer<void>();
-      Future.wait(futuresViews).whenComplete(() { // ignore: unawaited_futures
+      unawaited(Future.wait(futuresViews).whenComplete(() {
         deviceCompleter.complete(device.refreshViews());
-      });
+      }));
       allDevices.add(deviceCompleter.future);
     }
     await Future.wait(allDevices);

@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Shadow;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'strut_style.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -812,17 +813,35 @@ class TextStyle extends Diagnosticable {
       String ellipsis,
       int maxLines,
       Locale locale,
+      String fontFamily,
+      double fontSize,
+      FontWeight fontWeight,
+      FontStyle fontStyle,
+      double height,
+      StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      fontFamily: fontFamily,
-      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
-      lineHeight: height,
+      // Here, we stablish the contents of this TextStyle as the paragraph's default font
+      // unless an override is passed in.
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
+      height: height ?? this.height,
+      strutStyle: strutStyle == null ? null : ui.StrutStyle(
+        fontFamily: strutStyle.fontFamily,
+        fontFamilyFallback: strutStyle.fontFamilyFallback,
+        fontSize: strutStyle.fontSize,
+        height: strutStyle.height,
+        leading: strutStyle.leading,
+        fontWeight: strutStyle.fontWeight,
+        fontStyle: strutStyle.fontStyle,
+        forceStrutHeight: strutStyle.forceStrutHeight,
+      ),
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -928,35 +947,7 @@ class TextStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      switch (fontWeight) {
-        case FontWeight.w100:
-          weightDescription = '100';
-          break;
-        case FontWeight.w200:
-          weightDescription = '200';
-          break;
-        case FontWeight.w300:
-          weightDescription = '300';
-          break;
-        case FontWeight.w400:
-          weightDescription = '400';
-          break;
-        case FontWeight.w500:
-          weightDescription = '500';
-          break;
-        case FontWeight.w600:
-          weightDescription = '600';
-          break;
-        case FontWeight.w700:
-          weightDescription = '700';
-          break;
-        case FontWeight.w800:
-          weightDescription = '800';
-          break;
-        case FontWeight.w900:
-          weightDescription = '900';
-          break;
-      }
+      weightDescription = '${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

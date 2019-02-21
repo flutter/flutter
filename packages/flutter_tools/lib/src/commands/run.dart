@@ -10,6 +10,8 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../codegen.dart';
+import '../compile.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
@@ -345,6 +347,10 @@ class RunCommand extends RunCommandBase {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
 
+    ResidentCompiler residentCompiler;
+    if (experimentalBuildEnabled) {
+      residentCompiler = await CodeGeneratingResidentCompiler.create(mainPath: argResults['target']);
+    }
     final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
       return FlutterDevice(
         device,
@@ -354,6 +360,7 @@ class RunCommand extends RunCommandBase {
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
+        generator: residentCompiler,
       );
     }).toList();
 
@@ -398,9 +405,9 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
-    appStartedTimeRecorder.future.then<void>( // ignore: unawaited_futures
+    unawaited(appStartedTimeRecorder.future.then<void>(
       (_) { appStartedTime = systemClock.now(); }
-    );
+    ));
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
