@@ -30,8 +30,6 @@ DevFSConfig get devFSConfig => context[DevFSConfig];
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  //bool _exists = true;
-
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
