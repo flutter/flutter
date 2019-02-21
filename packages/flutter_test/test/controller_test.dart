@@ -15,8 +15,8 @@ void main() {
     'the drag goes outside the touch slop values',
     (WidgetTester tester) async {
       // The first Offset in every sub array (ie. offsetResults[i][0]) is (touchSlopX, touchSlopY).
-      // The second Offset ... (ie. offsetResults[i][1]) will be the total move offset.
-      // The remaining values ... are the expected separated drag offsets.
+      // The second Offset in every sub array (ie. offsetResults[i][1]) will be the total move offset.
+      // The remaining values in every sub array are the expected separated drag offsets.
       final List<List<Offset>> offsetResults = <List<Offset>>[
         <Offset>[
           const Offset(10.0, 10.0),
@@ -171,8 +171,8 @@ void main() {
 
       final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
 
-      for (int resultI = 0; resultI < offsetResults.length; resultI += 1) {
-        final List<Offset> testResult = offsetResults[resultI];
+      for (int resultIndex = 0; resultIndex < offsetResults.length; resultIndex += 1) {
+        final List<Offset> testResult = offsetResults[resultIndex];
         await spyController.drag(
           find.text('test'),
           testResult[1],
@@ -181,7 +181,7 @@ void main() {
         );
         final List<Offset> dragOffsets = spyController.testGestureSpy.offsets;
         expect(
-          offsetResults[resultI].length - 2,
+          offsetResults[resultIndex].length - 2,
           dragOffsets.length,
 
           reason:
@@ -189,13 +189,13 @@ void main() {
             'Touch Slop: ' + testResult[0].toString() + '\n'
             'Delta:      ' + testResult[1].toString() + '\n',
         );
-        for (int valueI = 2; valueI < offsetResults[resultI].length; valueI += 1) {
+        for (int valueIndex = 2; valueIndex < offsetResults[resultIndex].length; valueIndex += 1) {
           expect(
-            offsetResults[resultI][valueI],
-            dragOffsets[valueI - 2],
+            offsetResults[resultIndex][valueIndex],
+            dragOffsets[valueIndex - 2],
             reason:
               'There is a difference in the expected and actual value of the ' +
-              (valueI == 2 ? 'first' : valueI == 3 ? 'second' : 'third') +
+              (valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third') +
               ' split offset for the drag with:\n'
               'Touch slop: ' + testResult[0].toString() + '\n'
               'Delta:      ' + testResult[1].toString() + '\n',

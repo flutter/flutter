@@ -419,7 +419,8 @@ abstract class WidgetController {
   /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
   /// {@end template}
-  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = 20.0, double touchSlopY = 20.0 }) {
+    // The default touch slop values must be greater than kTouchSlop.
     return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
@@ -431,8 +432,8 @@ abstract class WidgetController {
   /// instead.
   ///
   /// {@macro flutter.flutter_test.drag}
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kTouchSlop, double touchSlopY = kTouchSlop }) {
-    assert(touchSlopX >= 0 && touchSlopY >= 0);
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = 20.0, double touchSlopY = 20.0 }) {
+    // The default touch slop values must be greater than kTouchSlop.
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
