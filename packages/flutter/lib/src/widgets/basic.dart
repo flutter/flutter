@@ -340,10 +340,6 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [child] (or one of its descendants) is actually going to paint in regardless
 /// of the actual size of [child].
 ///
-/// In more technical terms, [BackdropFilter] will only apply the filter to the
-/// area of the background that is covered by the [Scene] defined by [child]
-/// and its descendants.
-///
 /// {@tool sample}
 /// Even though the [BackdropFilter] is wrapping the [Container] below, the
 /// background will only be blurred in the area defined by the bounding box
