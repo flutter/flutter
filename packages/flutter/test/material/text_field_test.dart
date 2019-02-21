@@ -975,7 +975,6 @@ void main() {
   testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
     const double HEIGHT = 200.0;
     const double PADDING = 24.0;
-    const String TEXT = 'a\n' * 11; // Just enough to overflow HEIGHT
 
     Widget containedTextFieldBuilder({
       Widget counter,
@@ -1002,14 +1001,13 @@ void main() {
     RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
 
     final RenderBox inputBox = findEditableText();
-    final Size emptyInputSize = inputBox.size;
 
-    // With no decoration, the EditableText takes up the full height minus the
-    // padding, so the input fits perfectly inside the parent.
-    await tester.enterText(find.byType(TextField), TEXT);
+    // With no decoration and when overflowing with content, the EditableText
+    // takes up the full height minus the padding, so the input fits perfectly
+    // inside the parent.
+    await tester.enterText(find.byType(TextField), 'a\n' * 11);
     await tester.pump();
     expect(findEditableText(), equals(inputBox));
-    final Size fullInputSize = inputBox.size;
     expect(inputBox.size.height, HEIGHT - PADDING);
 
     // Adding a counter causes the EditableText to shrink to fit the counter
