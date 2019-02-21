@@ -949,9 +949,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 ///
 /// See also:
 ///
+///  * [CupertinoTimerPicker] which creates a Cupertino themed time picker which
+///    uses this controller.
 ///  * [CupertinoDatePicker] which creates a Cupertino themed date picker.
-///  * [CupertinoDateTimePickerController] which creates a controller for a
-///    [CupertinoDatePicker].
+///
 class CupertinoTimerPickerController {
   /// Creates a CupertinoTimerPickerController.
   ///
