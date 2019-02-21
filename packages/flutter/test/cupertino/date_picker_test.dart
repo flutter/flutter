@@ -89,6 +89,42 @@ void main() {
     expect(duration, initialDuration);
   });
 
+  testWidgets('time picker scrolls to desired duration after set', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 200);
+    const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
+    final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
+      resetAnimationDuration: animationDuration,
+      initialTimerDuration: initialDuration,
+    );
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 300,
+                child: CupertinoTimerPicker(
+                  controller: controller,
+                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const Duration desiredDuration = Duration(hours: 10, seconds: 34, minutes: 10);
+
+    controller.set(desiredDuration);
+    await tester.pump();
+    await tester.pump(animationDuration);
+
+    expect(duration, desiredDuration);
+  });
+
   group('Countdown timer picker', () {
     testWidgets('onTimerDurationChanged is not null', (WidgetTester tester) async {
       expect(

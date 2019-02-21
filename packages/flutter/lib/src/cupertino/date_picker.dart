@@ -941,7 +941,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 // layout will be broken.
 
 
-/// Controls a Cupertino timer picker widget.
+/// Controls a [CupertinoTimerPicker] widget.
 ///
 /// Each controller can only be used with a single Cupertino timer picker.
 ///
@@ -953,13 +953,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 ///  * [CupertinoDateTimePickerController] which creates a controller for a
 ///    [CupertinoDatePicker].
 class CupertinoTimerPickerController {
-  /// Creates a DatePickerController.
+  /// Creates a CupertinoTimerPickerController.
   ///
-  /// The [resetAnimationDuration] argument must not be null.
+  /// The [resetAnimationDuration] and [initialTimerDuration] arguments must not be null.
   CupertinoTimerPickerController({
     this.initialTimerDuration = Duration.zero,
     this.resetAnimationDuration = const Duration(milliseconds: 300),
-  }) : assert(resetAnimationDuration != null);
+  }) : assert(resetAnimationDuration != null),
+       assert(initialTimerDuration != null);
 
   /// The initial duration of the countdown timer.
   final Duration initialTimerDuration;
@@ -972,7 +973,7 @@ class CupertinoTimerPickerController {
   _CupertinoTimerPickerState _cupertinoTimerPickerState;
 
   /// Resets the attached picker to the initial date or time or date/time as
-  /// specified when creating the attached [CupertinoDatePicker].
+  /// specified when creating the attached [CupertinoTimerPicker].
   void reset() {
    set(initialTimerDuration);
   }
@@ -985,8 +986,8 @@ class CupertinoTimerPickerController {
 
   /// Registers the a date picker state with this controller.
   ///
-  /// After this function returns, the [reset] method on this
-  /// controller will reset the attached picker.
+  /// After this function returns, the [reset] and [set] methods on this
+  /// controller will reset and set the attached picker.
   void attachTimeState(_CupertinoTimerPickerState state) {
     assert(_cupertinoTimerPickerState == null);
     _cupertinoTimerPickerState = state;
@@ -994,8 +995,8 @@ class CupertinoTimerPickerController {
 
   /// Unregister the given date picker state with this controller.
   ///
-  /// After this function returns, the [reset] method on this
-  /// controller will not rest the attached picker.
+  /// After this function returns, the [reset] and [set] methods on this
+  /// controller will not affect anything.
   void detach() {
     assert(_cupertinoTimerPickerState != null);
     _cupertinoTimerPickerState = null;
