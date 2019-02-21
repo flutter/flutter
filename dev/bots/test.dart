@@ -386,7 +386,7 @@ Future<void> _runIntegrationTests() async {
   if (Platform.isLinux) {
     await _runDevicelabTest('flutter_create_offline_test_linux');
   } else if (Platform.isWindows) {
-    await _runDevicelabTest('flutter_create_offline_test_win');
+    await _runDevicelabTest('flutter_create_offline_test_windows');
   } else if (Platform.isMacOS) {
     await _runDevicelabTest('flutter_create_offline_test_mac');
     await _runDevicelabTest('module_test_ios');
@@ -412,7 +412,7 @@ Future<void> _integrationTestsAndroidSdk() async {
     return;
   }
 
-  Map<String, String> env = <String, String> {
+  final Map<String, String> env = <String, String> {
     'ANDROID_HOME': androidSdkRoot,
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
