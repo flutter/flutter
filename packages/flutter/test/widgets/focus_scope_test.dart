@@ -43,9 +43,10 @@ class TestFocusableState extends State<TestFocusable> {
       child: AnimatedBuilder(
         animation: focusNode,
         builder: (BuildContext context, Widget child) {
-          return Text(focusNode.hasFocus
-              ? '${widget.name.toUpperCase()} FOCUSED'
-              : widget.name.toLowerCase(), textDirection: TextDirection.ltr);
+          return Text(
+            focusNode.hasFocus ? '${widget.name.toUpperCase()} FOCUSED' : widget.name.toLowerCase(),
+            textDirection: TextDirection.ltr,
+          );
         },
       ),
     );
@@ -57,47 +58,51 @@ void main() {
     final GlobalKey<TestFocusableState> key = GlobalKey();
 
     await tester.pumpWidget(
-      TestFocusable(key: key),
+      TestFocusable(key: key, name: 'a'),
     );
 
     expect(key.currentState.focusNode.hasFocus, isFalse);
 
     FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
-    await tester.idle();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
   });
 
-  testWidgets('Can blur', (WidgetTester tester) async {
+  testWidgets('Can unfocus', (WidgetTester tester) async {
     final GlobalKey<TestFocusableState> keyA = GlobalKey();
     final GlobalKey<TestFocusableState> keyB = GlobalKey();
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          TestFocusable(key: keyA),
-          TestFocusable(key: keyB),
+          TestFocusable(key: keyA, name: 'a'),
+          TestFocusable(key: keyB, name: 'b'),
         ],
       ),
     );
 
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    await tester.idle();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     // Set focus to the "B" node to unfocus the "A" node.
     FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
-    await tester.idle();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('B FOCUSED'), findsOneWidget);
   });
 
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
@@ -122,53 +127,57 @@ void main() {
 
     // Autofocus is delayed one frame.
     await tester.pump();
-
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
-    await tester.idle();
-    await tester.pump();
-    expect(keyA.currentState.focusNode.hasFocus, isTrue);
-    expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
     await tester.tap(find.text('A FOCUSED'));
-    await tester.idle();
     await tester.pump();
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
     await tester.tap(find.text('b'));
-    await tester.idle();
     await tester.pump();
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('B FOCUSED'), findsOneWidget);
     await tester.tap(find.text('a'));
-    await tester.idle();
     await tester.pump();
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
-  });
+    expect(find.text('b'), findsOneWidget);
+ });
 
+  // This moves a focus node first into a focus scope that is added to its
+  // parent, and then out of that focus scope again.
   testWidgets('Can move focus in and out of FocusScope', (WidgetTester tester) async {
     final FocusScopeNode parentFocusScope = FocusScopeNode();
     final FocusScopeNode childFocusScope = FocusScopeNode();
     final GlobalKey<TestFocusableState> key = GlobalKey();
 
+    // Initially create the focus inside of the parent FocusScope.
     await tester.pumpWidget(
       FocusScope(
         node: parentFocusScope,
         autofocus: true,
         child: Column(
           children: <Widget>[
-            TestFocusable(key: key),
+            TestFocusable(key: key, name: 'a'),
           ],
         ),
       ),
     );
 
     expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
-    await tester.idle();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
 
     expect(parentFocusScope, hasAGoodToStringDeep);
     expect(
@@ -185,9 +194,11 @@ void main() {
           '     focus: FocusNode#00000(FOCUSED)\n'),
     );
 
+    // Add the child focus scope to the focus tree.
     parentFocusScope.setFirstFocus(childFocusScope);
-    await tester.idle();
+    expect(childFocusScope.isFirstFocus, isTrue);
 
+    // Now add the child focus scope with no focus node in it to the tree.
     await tester.pumpWidget(
       FocusScope(
         node: parentFocusScope,
@@ -204,7 +215,29 @@ void main() {
     );
 
     expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
 
+    // Now move the existing focus node into the child focus scope.
+    await tester.pumpWidget(
+      FocusScope(
+        node: parentFocusScope,
+        child: Column(
+          children: <Widget>[
+            FocusScope(
+              node: childFocusScope,
+              child: TestFocusable(key: key),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
+
+    // Now remove the child focus scope.
     await tester.pumpWidget(
       FocusScope(
         node: parentFocusScope,
@@ -216,13 +249,10 @@ void main() {
       ),
     );
 
-    expect(key.currentState.focusNode.hasFocus, isTrue);
-
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
-
-    parentFocusScope.detach();
+    expect(find.text('A FOCUSED'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -247,10 +277,12 @@ void main() {
 
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     await tester.pumpWidget(
       Column(
@@ -266,6 +298,7 @@ void main() {
     await tester.pump();
 
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 
   testWidgets('Adding a new FocusScope attaches the child it to its parent.', (WidgetTester tester) async {
@@ -286,9 +319,10 @@ void main() {
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(childFocusScope.isFirstFocus, isTrue);
 
     await tester.pumpWidget(
@@ -308,6 +342,7 @@ void main() {
 
     expect(childFocusScope.isFirstFocus, isTrue);
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -338,10 +373,12 @@ void main() {
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     await tester.pumpWidget(
       FocusScope(
@@ -360,8 +397,10 @@ void main() {
     await tester.pump();
 
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 
+  // By "pinned", it means kept in the tree by a GlobalKey.
   testWidgets('Removing pinned focused scope moves focus to focused widget within next FocusScope', (WidgetTester tester) async {
     final GlobalKey<TestFocusableState> keyA = GlobalKey();
     final GlobalKey<TestFocusableState> keyB = GlobalKey();
@@ -406,11 +445,13 @@ void main() {
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyB.currentContext));
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(FocusScope.of(keyA.currentContext).isFirstFocus, isTrue);
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     // Since the FocusScope widgets are pinned with GlobalKeys, when the first
     // one gets removed, the second one stays registered with the focus
@@ -439,6 +480,7 @@ void main() {
     await tester.pump();
 
     expect(keyB.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('B FOCUSED'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -482,11 +524,13 @@ void main() {
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyB.currentContext));
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(FocusScope.of(keyA.currentContext).isFirstFocus, isTrue);
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     // If the FocusScope widgets are not pinned with GlobalKeys, then the first
     // one remains and gets its guts replaced with the parentFocusScope2 and the
@@ -513,6 +557,7 @@ void main() {
     await tester.pump();
 
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -554,10 +599,12 @@ void main() {
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     await tester.pumpWidget(
       Column(
@@ -591,7 +638,9 @@ void main() {
     await tester.pump();
 
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -633,10 +682,12 @@ void main() {
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
+    expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
 
     // This just swaps the FocusScopeNodes that the FocusScopes have in them.
     await tester.pumpWidget(
@@ -671,6 +722,8 @@ void main() {
     await tester.pump();
 
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 }

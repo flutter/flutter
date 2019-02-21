@@ -329,7 +329,6 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   /// the child.
   void setFirstFocus(FocusScopeNode child) {
     assert(child != null);
-    assert(child._parent == null || child._parent == this, "Child's parent ${child._parent} != $this");
     if (_firstChild == child)
       return;
     child.detach();
@@ -352,7 +351,6 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
     if (child._parent == null || child._parent == this)
       return;
     if (child.isFirstFocus) {
-      child.detach();
       setFirstFocus(child);
     } else {
       child.detach();
@@ -399,8 +397,9 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
 
 /// Manages the focus tree.
 ///
-/// The focus tree keeps track of which [FocusNode] is the user's current focus.
-/// The widget that owns the [FocusNode] often listens for keyboard events.
+/// The focus tree keeps track of which [FocusNode] is the user's current
+/// keyboard focus. The widget that owns the [FocusNode] often listens for
+/// keyboard events.
 ///
 /// The focus manager is responsible for holding the [FocusScopeNode] that is
 /// the root of the focus tree and tracking which [FocusNode] has the overall
@@ -413,9 +412,9 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
 ///
 /// The [FocusManager] knows nothing about [FocusNode]s other than the one that
 /// is currently focused. If a [FocusScopeNode] is removed, then the
-/// [FocusManager] will attempt to focus the next node in the tree, but if the
-/// current focus in that scope node is null, it will stop there, and no
-/// [FocusNode] will have focus.
+/// [FocusManager] will attempt to focus the next [FocusScopeNode] in the focus
+/// tree that it maintains, but if the current focus in that [FocusScopeNode] is
+/// null, it will stop there, and no [FocusNode] will have focus.
 ///
 /// See also:
 ///
