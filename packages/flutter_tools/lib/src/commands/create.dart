@@ -90,9 +90,10 @@ class CreateCommand extends FlutterCommand {
       'sample',
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app.',
+        '--template=app. The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.io).',
       defaultsTo: null,
-      valueHelp: 'the sample ID of the desired sample from the API documentation website (http://docs.flutter.io)'
+      valueHelp: 'id',
     );
     argParser.addFlag(
       'overwrite',
