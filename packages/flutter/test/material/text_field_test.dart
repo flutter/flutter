@@ -2190,7 +2190,6 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     });
 
-
     testWidgets('Down and up test 2', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
@@ -4143,7 +4142,7 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap (iOS)',
+    'long press tap is not a double tap (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -4180,161 +4179,6 @@ void main() {
       expect(find.byType(CupertinoButton), findsNothing);
     },
   );
-
-  testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(50.0, 5.0));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Long press on iOS shows collapsed selection cursor.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(50, 0));
-      await tester.pump();
-
-      // The selection position is now moved with the drag.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(50, 0));
-      await tester.pump();
-
-      // The selection position is now moved with the drag.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.up();
-      await tester.pump();
-
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-    },
-  );
-
-  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                maxLines: 1,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final RenderEditable renderEditable = findRenderEditable(tester);
-
-      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
-
-      expect(lastCharEndpoint.length, 1);
-      // Just testing the test and making sure that the last character is off
-      // the right side of the screen.
-      expect(lastCharEndpoint[0].point.dx, 1056);
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(300, 5));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(600, 0));
-      // To the edge of the screen basically.
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
-      );
-      // Keep moving out.
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
-      );
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      ); // We're at the edge now.
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.up();
-      await tester.pump();
-
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
-
-      expect(lastCharEndpoint.length, 1);
-      // The last character is now on screen.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798.6666870117188));
-
-      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // First character's position.
-      );
-      expect(firstCharEndpoint.length, 1);
-      // The first character is now offscreen to the left.
-      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.33331298828125));
-  });
 
   testWidgets(
     'long tap after a double tap select is not affected (iOS)',
@@ -4507,12 +4351,21 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 5.0);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0
+      ),
+    );
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -4541,8 +4394,19 @@ void main() {
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+    final Offset offset = textfieldStart + const Offset(150.0, 5.0);
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+    );
+
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     // We expect the force press to select a word at the given location.
     expect(
