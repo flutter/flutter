@@ -8,6 +8,7 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace shell {
 
@@ -44,6 +45,14 @@ class GPUSurfaceGLDelegate {
   // Get a reference to the external views embedder. This happens on the same
   // thread that the renderer is operating on.
   virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
+
+  sk_sp<const GrGLInterface> GetGLInterface() const;
+
+  // TODO(chinmaygarde): The presence of this method is to work around the fact
+  // that not all platforms can accept a custom GL proc table. Migrate all
+  // platforms to move GL proc resolution to the embedder and remove this
+  // method.
+  static sk_sp<const GrGLInterface> GetDefaultPlatformGLInterface();
 
   using GLProcResolver =
       std::function<void* /* proc name */ (const char* /* proc address */)>;
