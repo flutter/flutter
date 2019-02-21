@@ -11,122 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -32.0);
 
 void main() {
-  testWidgets('date picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
-    final CupertinoPickerController controller = CupertinoPickerController();
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            children: <Widget>[
-              CupertinoButton(
-                child: const Text('Reset Picker'),
-                onPressed: () { controller.reset(); },
-              ),
-              Container(
-                height: 300,
-                child: CupertinoDatePicker(
-                  controller: controller,
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: DateTime(2018, 3, 20),
-                  onDateTimeChanged: (DateTime newDate) {},
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.drag(find.text('20'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('March'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('2018'), const Offset(0.0, 60.0));
-
-    expect(
-      tester.getTopLeft(find.text('2016')).dy,
-      tester.getTopLeft(find.text('18')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('2016')).dy,
-      tester.getTopLeft(find.text('January')).dy,
-    );
-
-    await tester.pumpAndSettle();
-    controller.reset();
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.getTopLeft(find.text('March')).dy,
-      tester.getTopLeft(find.text('20')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('March')).dy,
-      tester.getTopLeft(find.text('2018')).dy,
-    );
-  });
-
-  testWidgets('date time picker scrolls to 3/20/18 after reset', (WidgetTester tester) async {
-    final CupertinoPickerController controller = CupertinoPickerController();
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            children: <Widget>[
-              CupertinoButton(
-                child: const Text('Reset Picker'),
-                onPressed: () { controller.reset(); },
-              ),
-              Container(
-                height: 300,
-                child: CupertinoDatePicker(
-                  controller: controller,
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: DateTime(2018, 3, 20),
-                  onDateTimeChanged: (DateTime newDate) {},
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.drag(find.text('12'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('Tue Mar 20'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('00'), const Offset(0.0, 60.0));
-    await tester.drag(find.text('AM'), const Offset(0.0, -60.0));
-
-    expect(
-      tester.getTopLeft(find.text('Sun Mar 18')).dy,
-      tester.getTopLeft(find.text('10')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('10')).dy,
-      tester.getTopLeft(find.text('58')).dy,
-    );
-
-    await tester.pumpAndSettle();
-    controller.reset();
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.getTopLeft(find.text('Tue Mar 20')).dy,
-      tester.getTopLeft(find.text('00')).dy,
-    );
-
-    expect(
-      tester.getTopLeft(find.text('00')).dy,
-      tester.getTopLeft(find.text('12')).dy,
-    );
-  });
-
   testWidgets('time picker scrolls to 00:00:00 after reset', (WidgetTester tester) async {
-    final CupertinoPickerController controller = CupertinoPickerController();
+    const Duration animationTime = Duration(milliseconds: 200);
+    final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
+        resetAnimationDuration: animationTime,
+    );
     Duration duration;
     await tester.pumpWidget(
       CupertinoApp(
@@ -134,15 +23,11 @@ void main() {
           padding: const EdgeInsets.all(40.0),
           child: Column(
             children: <Widget>[
-              CupertinoButton(
-                child: const Text('Reset Picker'),
-                onPressed: () { controller.reset(); },
-              ),
               Container(
                 height: 300,
                 child: CupertinoTimerPicker(
                   controller: controller,
-                  onTimerDurationChanged: (Duration dur) { duration = dur;},
+                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
                 ),
               ),
             ],
@@ -151,16 +36,57 @@ void main() {
       ),
     );
 
-    await tester.drag(find.text('0').first, const Offset(0.0, -60.0));
-    await tester.drag(find.text('0').at(1), const Offset(0.0, -90.0));
-    await tester.drag(find.text('0').last, const Offset(0.0, -120.0));
+    await tester.drag(find.text('0').first, _kRowOffset * 2);
+    await tester.drag(find.text('0').at(1), _kRowOffset * 3);
+    await tester.drag(find.text('0').last, _kRowOffset * 4);
 
     expect(duration, const Duration(hours: 2, minutes: 3, seconds: 4));
 
     controller.reset();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(animationTime);
 
     expect(duration, const Duration());
+  });
+
+  testWidgets('time picker scrolls to initial duration after reset', (WidgetTester tester) async {
+    const Duration animationTime = Duration(milliseconds: 200);
+    const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
+    final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
+      resetAnimationDuration: animationTime,
+      initialTimerDuration: initialDuration,
+    );
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 300,
+                child: CupertinoTimerPicker(
+                  controller: controller,
+                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('5'), _kRowOffset * 2);
+    await tester.drag(find.text('45'), _kRowOffset * 3);
+    await tester.drag(find.text('23'), _kRowOffset * 4);
+
+    expect(duration, const Duration(hours: 7, minutes: 48, seconds: 27));
+
+    controller.reset();
+    await tester.pump();
+    await tester.pump(animationTime);
+
+    expect(duration, initialDuration);
   });
 
   group('Countdown timer picker', () {

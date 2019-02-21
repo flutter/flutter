@@ -1115,13 +1115,18 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void initState() {
     super.initState();
 
-    selectedMinute = widget.initialTimerDuration.inMinutes % 60;
+    // TODO(jslavitz): Remove this check and fully deprecate widget.initialTimerDuration
+    final Duration initialDuration =
+      widget.initialTimerDuration != Duration.zero ?
+      widget.initialTimerDuration : widget.controller.initialTimerDuration;
+
+    selectedMinute = initialDuration.inMinutes % 60;
 
     if (widget.mode != CupertinoTimerPickerMode.ms)
-      selectedHour = widget.initialTimerDuration.inHours;
+      selectedHour = initialDuration.inHours;
 
     if (widget.mode != CupertinoTimerPickerMode.hm)
-      selectedSecond = widget.initialTimerDuration.inSeconds % 60;
+      selectedSecond = initialDuration.inSeconds % 60;
 
     widget.controller?.attachTimeState(this);
 
