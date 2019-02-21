@@ -93,18 +93,13 @@ executable("flow_unittests") {
   testonly = true
 
   sources = [
-    "flow_run_all_unittests.cc",
-    "flow_test_utils.h",
-    "flow_test_utils.cc",
     "matrix_decomposition_unittests.cc",
     "raster_cache_unittests.cc",
-    "layers/performance_overlay_layer_unittests.cc",
   ]
 
   deps = [
     ":flow",
-    "$flutter_root/fml",
-    "//third_party/googletest:gtest",
+    "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
     "//third_party/skia",
   ]
