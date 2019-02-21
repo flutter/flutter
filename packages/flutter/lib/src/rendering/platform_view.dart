@@ -367,7 +367,9 @@ class RenderUiKitView extends RenderBox {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
+  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories, {
+    PointerDeviceKind kind,
+  }): super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -387,7 +389,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   final UiKitViewController controller;
 
   @override
-  void addPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
@@ -427,7 +429,9 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 // When the team wins the recognizer sends all the cached point events to the embedded Android view, and
 // sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories) {
+  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories, {
+    PointerDeviceKind kind,
+  }): super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -456,7 +460,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   Set<OneSequenceGestureRecognizer> _gestureRecognizers;
 
   @override
-  void addPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);

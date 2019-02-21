@@ -33,7 +33,7 @@ typedef RecognizerCallback<T> = T Function();
 ///
 ///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
 enum DragStartBehavior {
-  /// Set the initial offset, at the position where the first down even was
+  /// Set the initial offset, at the position where the first down event was
   /// detected.
   down,
 
@@ -151,10 +151,50 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 /// simultaneous touches to each result in a separate tap.
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
-  OneSequenceGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@template flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
+  /// by providing the optional [kind] argument. If [kind] is null,
+  /// the recognizer will accept pointer events from all device kinds.
+  /// {@endtemplate}
+  OneSequenceGestureRecognizer({
+    Object debugOwner,
+    @required PointerDeviceKind kind,
+  }) :  _kind = kind,
+        super(debugOwner: debugOwner);
+
+  /// The kind of device that's allowed to be recognized. If null, events from
+  /// all device kinds will be tracked and recognized.
+  final PointerDeviceKind _kind;
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    if (isPointerAllowed(event)) {
+      addAllowedPointer(event);
+    } else {
+      resolve(GestureDisposition.rejected);
+    }
+  }
+
+  /// Registers a new pointer that's been checked to be allowed by this gesture
+  /// recognizer.
+  ///
+  /// Subclasses of [OneSequenceGestureRecognizer] are supposed to override this
+  /// method instead of [addPointer] because [addPointer] will be called for each
+  /// pointer being added while [addAllowedPointer] is only called for pointers
+  /// that are allowed by this recognizer.
+  @protected
+  void addAllowedPointer(PointerDownEvent event) { }
+
+  /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
+  bool isPointerAllowed(PointerDownEvent event) {
+    // Currently, it only checks for device kind. But in the future we could check
+    // for other things e.g. mouse button.
+    return _kind == null || _kind == event.kind;
+  }
 
   /// Called when a pointer event is routed to this recognizer.
   @protected
@@ -291,11 +331,14 @@ enum GestureRecognizerState {
 /// in the gesture arena, the gesture will be rejected.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
+  ///
+  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     Object debugOwner,
+    PointerDeviceKind kind,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -304,7 +347,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        ),
-       super(debugOwner: debugOwner);
+       super(debugOwner: debugOwner, kind: kind);
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
@@ -346,7 +389,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   Timer _timer;
 
   @override
-  void addPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer);
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;

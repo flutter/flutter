@@ -8,7 +8,7 @@ import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -19,6 +19,8 @@ import 'overlay.dart';
 import 'transitions.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
+
+const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 /// Which type of selection handle to be displayed.
 ///
@@ -63,6 +65,26 @@ enum _TextSelectionHandlePosition { start, end }
 ///
 /// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
 typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
+
+/// Signature for when a pointer has started dragging to select text.
+///
+/// The [details] argument is the same as the one passed to [DragGestureRecognizer.onStart].
+typedef DragSelectionStartCallback = void Function(DragStartDetails details);
+
+/// Signature for when a pointer that's dragging to select text has moved again.
+///
+/// The first argument [startDetails] contains the details of the event that
+/// initiated the dragging.
+///
+/// The second argument [updateDetails] contains the details of the current
+/// pointer movement. It's the same as the one passed to [DragGestureRecognizer.onUpdate].
+typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
+
+/// Signature for when a pointer that has been dragging to select text is no
+/// longer doing so.
+///
+/// The [details] argument is the same as the one passed to [DragGestureRecognizer.onEnd].
+typedef DragSelectionEndCallback = void Function(DragEndDetails details);
 
 /// An interface for building the selection UI, to be provided by the
 /// implementor of the toolbar widget.
@@ -620,6 +642,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
     this.onDoubleTapDown,
+    this.onDragSelectionStart,
+    this.onDragSelectionUpdate,
+    this.onDragSelectionEnd,
     this.behavior,
     @required this.child,
   }) : assert(child != null),
@@ -663,6 +688,15 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
+
+  /// Called when a mouse starts dragging to select text.
+  final DragSelectionStartCallback onDragSelectionStart;
+
+  /// Called repeatedly as a mouse moves while dragging.
+  final DragSelectionUpdateCallback onDragSelectionUpdate;
+
+  /// Called when a mouse that was previously dragging is released.
+  final DragSelectionEndCallback onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -730,6 +764,51 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
+  DragStartDetails _lastDragStartDetails;
+
+  void _handleDragStart(DragStartDetails details) {
+    assert(_lastDragStartDetails == null);
+    _lastDragStartDetails = details;
+    if (widget.onDragSelectionStart != null) {
+      widget.onDragSelectionStart(details);
+    }
+  }
+
+  Timer _dragUpdateTimer;
+  DragUpdateDetails _lastDragUpdateDetails;
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    _lastDragUpdateDetails = details;
+    // Only schedule a new timer if there's no one pending.
+    _dragUpdateTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
+  }
+
+  void _handleDragUpdateThrottled() {
+    assert(_lastDragStartDetails != null);
+    assert(_lastDragUpdateDetails != null);
+    if (widget.onDragSelectionUpdate != null) {
+      widget.onDragSelectionUpdate(_lastDragStartDetails, _lastDragUpdateDetails);
+    }
+    _dragUpdateTimer = null;
+    _lastDragUpdateDetails = null;
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    assert(_lastDragStartDetails != null);
+    if (_dragUpdateTimer != null) {
+      // If there's already an update scheduled, trigger it immediately and
+      // cancel the timer.
+      _dragUpdateTimer.cancel();
+      _handleDragUpdateThrottled();
+    }
+    if (widget.onDragSelectionEnd != null) {
+      widget.onDragSelectionEnd(details);
+    }
+    _dragUpdateTimer = null;
+    _lastDragStartDetails = null;
+    _lastDragUpdateDetails = null;
+  }
+
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
@@ -754,7 +833,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  void _handleLongPressUp(LongPressEndDetails details) {
+  void _handleLongPressEnd(LongPressEndDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd(details);
     }
@@ -778,15 +857,63 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
-      onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
-      onTapCancel: _handleTapCancel,
-      onLongPressStart: _handleLongPressStart,
-      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
-      onLongPressEnd: _handleLongPressUp,
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+
+    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(debugOwner: this),
+          (TapGestureRecognizer instance) {
+        instance
+          ..onTapDown = _handleTapDown
+          ..onTapUp = _handleTapUp
+          ..onTapCancel = _handleTapCancel;
+      },
+    );
+
+    if (widget.onSingleLongTapStart != null ||
+        widget.onSingleLongTapMoveUpdate != null ||
+        widget.onSingleLongTapEnd != null) {
+      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.touch),
+            (LongPressGestureRecognizer instance) {
+          instance
+            ..onLongPressStart = _handleLongPressStart
+            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+            ..onLongPressEnd = _handleLongPressEnd;
+        },
+      );
+    }
+
+    if (widget.onDragSelectionStart != null ||
+        widget.onDragSelectionUpdate != null ||
+        widget.onDragSelectionEnd != null) {
+      // TODO(mdebbar): Support dragging in any direction (for multiline text).
+      gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+            () => HorizontalDragGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.mouse),
+            (HorizontalDragGestureRecognizer instance) {
+          instance
+            // Text selection should start from the position of the first pointer
+            // down event.
+            ..dragStartBehavior = DragStartBehavior.down
+            ..onStart = _handleDragStart
+            ..onUpdate = _handleDragUpdate
+            ..onEnd = _handleDragEnd;
+        },
+      );
+    }
+
+    if (widget.onForcePressStart != null || widget.onForcePressEnd != null) {
+      gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+            () => ForcePressGestureRecognizer(debugOwner: this),
+            (ForcePressGestureRecognizer instance) {
+          instance
+            ..onStart = widget.onForcePressStart != null ? _forcePressStarted : null
+            ..onEnd = widget.onForcePressEnd != null ? _forcePressEnded : null;
+        },
+      );
+    }
+
+    return RawGestureDetector(
+      gestures: gestures,
       excludeFromSemantics: true,
       behavior: widget.behavior,
       child: widget.child,
