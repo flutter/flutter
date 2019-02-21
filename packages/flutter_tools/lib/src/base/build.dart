@@ -46,11 +46,13 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
+    @required String packagesPath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
+      '--packages=$packagesPath',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
@@ -191,6 +193,7 @@ class AOTSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
+      packagesPath: packageMap.packagesPath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -534,6 +537,7 @@ class JITSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
+      packagesPath: packagesPath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
