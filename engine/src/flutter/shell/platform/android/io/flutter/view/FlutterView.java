@@ -15,6 +15,7 @@ import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -29,17 +30,18 @@ import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
+import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.plugin.common.*;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
-import org.json.JSONException;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
@@ -87,18 +89,21 @@ public class FlutterView extends SurfaceView
     }
 
     private final DartExecutor dartExecutor;
+    private final AccessibilityChannel accessibilityChannel;
     private final NavigationChannel navigationChannel;
     private final KeyEventChannel keyEventChannel;
     private final LifecycleChannel lifecycleChannel;
+    private final LocalizationChannel localizationChannel;
+    private final PlatformChannel platformChannel;
     private final SettingsChannel settingsChannel;
     private final SystemChannel systemChannel;
     private final InputMethodManager mImm;
     private final TextInputPlugin mTextInputPlugin;
     private final AndroidKeyProcessor androidKeyProcessor;
+    private AccessibilityBridge mAccessibilityNodeProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
     private final AccessibilityManager mAccessibilityManager;
-    private final MethodChannel mFlutterLocalizationChannel;
     private final List<ActivityLifecycleListener> mActivityLifecycleListeners;
     private final List<FirstFrameListener> mFirstFrameListeners;
     private final AtomicLong nextTextureId = new AtomicLong(0L);
@@ -124,7 +129,8 @@ public class FlutterView extends SurfaceView
         } else {
             mNativeView = nativeView;
         }
-        dartExecutor = new DartExecutor(mNativeView.getFlutterJNI());
+
+        dartExecutor = mNativeView.getDartExecutor();
         mIsSoftwareRenderingEnabled = FlutterJNI.nativeGetIsSoftwareRenderingEnabled();
         mAnimationScaleObserver = new AnimationScaleObserver(new Handler());
         mMetrics = new ViewportMetrics();
@@ -160,23 +166,25 @@ public class FlutterView extends SurfaceView
         mActivityLifecycleListeners = new ArrayList<>();
         mFirstFrameListeners = new ArrayList<>();
 
-        // Configure the platform plugins and flutter channels.
+        // Create all platform channels
+        accessibilityChannel = new AccessibilityChannel(dartExecutor);
         navigationChannel = new NavigationChannel(dartExecutor);
         keyEventChannel = new KeyEventChannel(dartExecutor);
         lifecycleChannel = new LifecycleChannel(dartExecutor);
+        localizationChannel = new LocalizationChannel(dartExecutor);
+        platformChannel = new PlatformChannel(dartExecutor);
         systemChannel = new SystemChannel(dartExecutor);
         settingsChannel = new SettingsChannel(dartExecutor);
-        mFlutterLocalizationChannel = new MethodChannel(this, "flutter/localization", JSONMethodCodec.INSTANCE);
 
-        PlatformPlugin platformPlugin = new PlatformPlugin(activity);
-        MethodChannel flutterPlatformChannel = new MethodChannel(this, "flutter/platform", JSONMethodCodec.INSTANCE);
-        flutterPlatformChannel.setMethodCallHandler(platformPlugin);
+        // Create and setup plugins
+        PlatformPlugin platformPlugin = new PlatformPlugin(activity, platformChannel);
         addActivityLifecycleListener(platformPlugin);
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mTextInputPlugin = new TextInputPlugin(this);
+        mTextInputPlugin = new TextInputPlugin(this, dartExecutor);
         androidKeyProcessor = new AndroidKeyProcessor(keyEventChannel);
 
-        setLocales(getResources().getConfiguration());
+        // Send initial platform information to Dart
+        sendLocalesToDart(getResources().getConfiguration());
         sendUserPlatformSettingsToDart();
     }
 
@@ -311,39 +319,21 @@ public class FlutterView extends SurfaceView
             .send();
     }
 
-    private void setLocales(Configuration config) {
-        if (Build.VERSION.SDK_INT >= 24) {
-            try {
-                // Passes the full list of locales for android API >= 24 with reflection.
-                Object localeList = config.getClass().getDeclaredMethod("getLocales").invoke(config);
-                Method localeListGet = localeList.getClass().getDeclaredMethod("get", int.class);
-                Method localeListSize = localeList.getClass().getDeclaredMethod("size");
-                int localeCount = (int)localeListSize.invoke(localeList);
-                List<String> data = new ArrayList<>();
-                for (int index = 0; index < localeCount; ++index) {
-                    Locale locale = (Locale)localeListGet.invoke(localeList, index);
-                    data.add(locale.getLanguage());
-                    data.add(locale.getCountry());
-                    data.add(locale.getScript());
-                    data.add(locale.getVariant());
-                }
-                mFlutterLocalizationChannel.invokeMethod("setLocale", data);
-                return;
-            } catch (Exception exception) {
-                // Any exception is a failure. Resort to fallback of sending only one locale.
-            }
+    private void sendLocalesToDart(Configuration config) {
+        LocaleList localeList = config.getLocales();
+        int localeCount = localeList.size();
+        List<Locale> locales = new ArrayList<>();
+        for (int index = 0; index < localeCount; ++index) {
+            Locale locale = localeList.get(index);
+            locales.add(locale);
         }
-        // Fallback single locale passing for android API < 24. Should work always.
-        @SuppressWarnings("deprecation")
-        Locale locale = config.locale;
-        // getScript() is gated because it is added in API 21.
-        mFlutterLocalizationChannel.invokeMethod("setLocale", Arrays.asList(locale.getLanguage(), locale.getCountry(), Build.VERSION.SDK_INT >= 21 ? locale.getScript() : "", locale.getVariant()));
+        localizationChannel.sendLocales(locales);
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        setLocales(newConfig);
+        sendLocalesToDart(newConfig);
         sendUserPlatformSettingsToDart();
     }
 
@@ -374,13 +364,7 @@ public class FlutterView extends SurfaceView
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        try {
-            mLastInputConnection = mTextInputPlugin.createInputConnection(this, outAttrs);
-            return mLastInputConnection;
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to create input connection", e);
-            return null;
-        }
+        return mTextInputPlugin.createInputConnection(this, outAttrs);
     }
 
     // Must match the PointerChange enum in pointer.dart.
@@ -1006,14 +990,12 @@ public class FlutterView extends SurfaceView
         return null;
     }
 
-    private AccessibilityBridge mAccessibilityNodeProvider;
-
     void ensureAccessibilityEnabled() {
         if (!isAttached())
             return;
         mAccessibilityEnabled = true;
         if (mAccessibilityNodeProvider == null) {
-            mAccessibilityNodeProvider = new AccessibilityBridge(this);
+            mAccessibilityNodeProvider = new AccessibilityBridge(this, accessibilityChannel);
         }
         mNativeView.getFlutterJNI().setSemanticsEnabled(true);
         mAccessibilityNodeProvider.setAccessibilityEnabled(true);
