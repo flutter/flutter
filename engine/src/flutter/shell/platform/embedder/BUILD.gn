@@ -80,6 +80,34 @@ executable("embedder_unittests") {
   }
 }
 
+test_fixtures("fixtures_a11y") {
+  fixtures = [ "fixtures/a11y_main.dart" ]
+}
+
+executable("embedder_a11y_unittests") {
+  testonly = true
+
+  include_dirs = [ "." ]
+
+  sources = [
+    "tests/embedder_a11y_unittests.cc",
+  ]
+
+  deps = [
+    ":embedder",
+    ":fixtures_a11y",
+    "$flutter_root/lib/ui:ui",
+    "$flutter_root/shell/common",
+    "$flutter_root/testing",
+    "//third_party/skia",
+    "//third_party/tonic",
+  ]
+
+  if (is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
+}
+
 shared_library("flutter_engine_library") {
   visibility = [ ":*" ]
 

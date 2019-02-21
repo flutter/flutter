@@ -11,6 +11,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
 namespace shell {
@@ -49,6 +50,14 @@ class EmbedderEngine {
   bool UnregisterTexture(int64_t texture);
 
   bool MarkTextureFrameAvailable(int64_t texture);
+
+  bool SetSemanticsEnabled(bool enabled);
+
+  bool SetAccessibilityFeatures(int32_t flags);
+
+  bool DispatchSemanticsAction(int id,
+                               blink::SemanticsAction action,
+                               std::vector<uint8_t> args);
 
  private:
   const ThreadHost thread_host_;

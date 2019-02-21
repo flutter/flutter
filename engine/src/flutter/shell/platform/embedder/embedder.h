@@ -31,6 +31,127 @@ typedef enum {
   kSoftware,
 } FlutterRendererType;
 
+// Additional accessibility features that may be enabled by the platform.
+//
+// Must match the |AccessibilityFeatures| enum in window.dart.
+typedef enum {
+  // Indicate there is a running accessibility service which is changing the
+  // interaction model of the device.
+  kFlutterAccessibilityFeatureAccessibleNavigation = 1 << 0,
+  // Indicate the platform is inverting the colors of the application.
+  kFlutterAccessibilityFeatureInvertColors = 1 << 1,
+  // Request that animations be disabled or simplified.
+  kFlutterAccessibilityFeatureDisableAnimations = 1 << 2,
+  // Request that text be rendered at a bold font weight.
+  kFlutterAccessibilityFeatureBoldText = 1 << 3,
+  // Request that certain animations be simplified and parallax effects
+  // removed.
+  kFlutterAccessibilityFeatureReduceMotion = 1 << 4,
+} FlutterAccessibilityFeature;
+
+// The set of possible actions that can be conveyed to a semantics node.
+//
+// Must match the |SemanticsAction| enum in semantics.dart.
+typedef enum {
+  // The equivalent of a user briefly tapping the screen with the finger without
+  // moving it.
+  kFlutterSemanticsActionTap = 1 << 0,
+  // The equivalent of a user pressing and holding the screen with the finger
+  // for a few seconds without moving it.
+  kFlutterSemanticsActionLongPress = 1 << 1,
+  // The equivalent of a user moving their finger across the screen from right
+  // to left.
+  kFlutterSemanticsActionScrollLeft = 1 << 2,
+  // The equivalent of a user moving their finger across the screen from left to
+  // right.
+  kFlutterSemanticsActionScrollRight = 1 << 3,
+  // The equivalent of a user moving their finger across the screen from bottom
+  // to top.
+  kFlutterSemanticsActionScrollUp = 1 << 4,
+  // The equivalent of a user moving their finger across the screen from top to
+  // bottom.
+  kFlutterSemanticsActionScrollDown = 1 << 5,
+  // Increase the value represented by the semantics node.
+  kFlutterSemanticsActionIncrease = 1 << 6,
+  // Decrease the value represented by the semantics node.
+  kFlutterSemanticsActionDecrease = 1 << 7,
+  // A request to fully show the semantics node on screen.
+  kFlutterSemanticsActionShowOnScreen = 1 << 8,
+  // Move the cursor forward by one character.
+  kFlutterSemanticsActionMoveCursorForwardByCharacter = 1 << 9,
+  // Move the cursor backward by one character.
+  kFlutterSemanticsActionMoveCursorBackwardByCharacter = 1 << 10,
+  // Set the text selection to the given range.
+  kFlutterSemanticsActionSetSelection = 1 << 11,
+  // Copy the current selection to the clipboard.
+  kFlutterSemanticsActionCopy = 1 << 12,
+  // Cut the current selection and place it in the clipboard.
+  kFlutterSemanticsActionCut = 1 << 13,
+  // Paste the current content of the clipboard.
+  kFlutterSemanticsActionPaste = 1 << 14,
+  // Indicate that the node has gained accessibility focus.
+  kFlutterSemanticsActionDidGainAccessibilityFocus = 1 << 15,
+  // Indicate that the node has lost accessibility focus.
+  kFlutterSemanticsActionDidLoseAccessibilityFocus = 1 << 16,
+  // Indicate that the user has invoked a custom accessibility action.
+  kFlutterSemanticsActionCustomAction = 1 << 17,
+  // A request that the node should be dismissed.
+  kFlutterSemanticsActionDismiss = 1 << 18,
+} FlutterSemanticsAction;
+
+// The set of properties that may be associated with a semantics node.
+//
+// Must match the |SemanticsFlag| enum in semantics.dart.
+typedef enum {
+  // The semantics node has the quality of either being "checked" or
+  // "unchecked".
+  kFlutterSemanticsFlagHasCheckedState = 1 << 0,
+  // Whether a semantics node is checked.
+  kFlutterSemanticsFlagIsChecked = 1 << 1,
+  // Whether a semantics node is selected.
+  kFlutterSemanticsFlagIsSelected = 1 << 2,
+  // Whether the semantic node represents a button.
+  kFlutterSemanticsFlagIsButton = 1 << 3,
+  // Whether the semantic node represents a text field.
+  kFlutterSemanticsFlagIsTextField = 1 << 4,
+  // Whether the semantic node currently holds the user's focus.
+  kFlutterSemanticsFlagIsFocused = 1 << 5,
+  // The semantics node has the quality of either being "enabled" or "disabled".
+  kFlutterSemanticsFlagHasEnabledState = 1 << 6,
+  // Whether a semantic node that hasEnabledState is currently enabled.
+  kFlutterSemanticsFlagIsEnabled = 1 << 7,
+  // Whether a semantic node is in a mutually exclusive group.
+  kFlutterSemanticsFlagIsInMutuallyExclusiveGroup = 1 << 8,
+  // Whether a semantic node is a header that divides content into sections.
+  kFlutterSemanticsFlagIsHeader = 1 << 9,
+  // Whether the value of the semantics node is obscured.
+  kFlutterSemanticsFlagIsObscured = 1 << 10,
+  // Whether the semantics node is the root of a subtree for which a route name
+  // should be announced.
+  kFlutterSemanticsFlagScopesRoute = 1 << 11,
+  // Whether the semantics node label is the name of a visually distinct route.
+  kFlutterSemanticsFlagNamesRoute = 1 << 12,
+  // Whether the semantics node is considered hidden.
+  kFlutterSemanticsFlagIsHidden = 1 << 13,
+  // Whether the semantics node represents an image.
+  kFlutterSemanticsFlagIsImage = 1 << 14,
+  // Whether the semantics node is a live region.
+  kFlutterSemanticsFlagIsLiveRegion = 1 << 15,
+  // The semantics node has the quality of either being "on" or "off".
+  kFlutterSemanticsFlagHasToggledState = 1 << 16,
+  // If true, the semantics node is "on". If false, the semantics node is "off".
+  kFlutterSemanticsFlagIsToggled = 1 << 17,
+} FlutterSemanticsFlag;
+
+typedef enum {
+  // Text has unknown text direction.
+  kFlutterTextDirectionUnknown = 0,
+  // Text is read from right to left.
+  kFlutterTextDirectionRTL = 1,
+  // Text is read from left to right.
+  kFlutterTextDirectionLTR = 2,
+} FlutterTextDirection;
+
 typedef struct _FlutterEngine* FlutterEngine;
 
 typedef struct {
@@ -191,6 +312,111 @@ typedef void (*FlutterPlatformMessageCallback)(
     void* /* user data */);
 
 typedef struct {
+  double left;
+  double top;
+  double right;
+  double bottom;
+} FlutterRect;
+
+// A node that represents some semantic data.
+//
+// The semantics tree is maintained during the semantics phase of the pipeline
+// (i.e., during PipelineOwner.flushSemantics), which happens after
+// compositing. Updates are then pushed to embedders via the registered
+// |FlutterUpdateSemanticsNodeCallback|.
+typedef struct {
+  // The size of this struct. Must be sizeof(FlutterSemanticsNode).
+  size_t struct_size;
+  // The unique identifier for this node.
+  int32_t id;
+  // The set of semantics flags associated with this node.
+  FlutterSemanticsFlag flags;
+  // The set of semantics actions applicable to this node.
+  FlutterSemanticsAction actions;
+  // The position at which the text selection originates.
+  int32_t textSelectionBase;
+  // The position at which the text selection terminates.
+  int32_t textSelectionExtent;
+  // The total number of scrollable children that contribute to semantics.
+  int32_t scrollChildren;
+  // The index of the first visible semantic child of a scroll node.
+  int32_t scrollIndex;
+  // The current scrolling position in logical pixels if the node is scrollable.
+  double scrollPosition;
+  // The maximum in-range value for |scrollPosition| if the node is scrollable.
+  double scrollExtentMax;
+  // The minimum in-range value for |scrollPosition| if the node is scrollable.
+  double scrollExtentMin;
+  // The elevation along the z-axis at which the rect of this semantics node is
+  // located above its parent.
+  double elevation;
+  // Describes how much space the semantics node takes up along the z-axis.
+  double thickness;
+  // A textual description of the node.
+  const char* label;
+  // A brief description of the result of performing an action on the node.
+  const char* hint;
+  // A textual description of the current value of the node.
+  const char* value;
+  // A value that |value| will have after a kFlutterSemanticsActionIncrease|
+  // action has been performed.
+  const char* increasedValue;
+  // A value that |value| will have after a kFlutterSemanticsActionDecrease|
+  // action has been performed.
+  const char* decreasedValue;
+  // The reading direction for |label|, |value|, |hint|, |increasedValue|, and
+  // |decreasedValue|.
+  FlutterTextDirection textDirection;
+  // The bounding box for this node in its coordinate system.
+  FlutterRect rect;
+  // The transform from this node's coordinate system to its parent's coordinate
+  // system.
+  FlutterTransformation transform;
+  // The number of children this node has.
+  size_t child_count;
+  // Array of child node IDs in traversal order. Has length |child_count|.
+  const int32_t* children_in_traversal_order;
+  // Array of child node IDs in hit test order. Has length |child_count|.
+  const int32_t* children_in_hit_test_order;
+  // The number of custom accessibility action associated with this node.
+  size_t custom_accessibility_actions_count;
+  // Array of |FlutterSemanticsCustomAction| IDs associated with this node.
+  // Has length |custom_accessibility_actions_count|.
+  const int32_t* custom_accessibility_actions;
+} FlutterSemanticsNode;
+
+// A custom semantics action, or action override.
+//
+// Custom actions can be registered by applications in order to provide
+// semantic actions other than the standard actions available through the
+// |FlutterSemanticsAction| enum.
+//
+// Action overrides are custom actions that the application developer requests
+// to be used in place of the standard actions in the |FlutterSemanticsAction|
+// enum.
+typedef struct {
+  // The size of the struct. Must be sizeof(FlutterSemanticsCustomAction).
+  size_t struct_size;
+  // The unique custom action or action override ID.
+  int32_t id;
+  // For overriden standard actions, corresponds to the
+  // |FlutterSemanticsAction| to override.
+  FlutterSemanticsAction override_action;
+  // The user-readable name of this custom semantics action.
+  const char* label;
+  // The hint description of this custom semantics action.
+  const char* hint;
+} FlutterSemanticsCustomAction;
+
+typedef void (*FlutterUpdateSemanticsNodeCallback)(
+    const FlutterSemanticsNode* /* semantics node */,
+    void* /* user data */);
+
+typedef void (*FlutterUpdateSemanticsCustomActionCallback)(
+    const FlutterSemanticsCustomAction* /* semantics custom action */,
+    void* /* user data */);
+
+typedef struct {
   // The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
   // The path to the Flutter assets directory containing project assets. The
@@ -268,6 +494,17 @@ typedef struct {
   // The callback invoked by the engine in root isolate scope. Called
   // immediately after the root isolate has been created and marked runnable.
   VoidCallback root_isolate_create_callback;
+  // The callback invoked by the engine in order to give the embedder the
+  // chance to respond to semantics node updates from the Dart application. The
+  // callback will be invoked on the thread on which the |FlutterEngineRun|
+  // call is made.
+  FlutterUpdateSemanticsNodeCallback update_semantics_node_callback;
+  // The callback invoked by the engine in order to give the embedder the
+  // chance to respond to updates to semantics custom actions from the Dart
+  // application. The callback will be invoked on the thread on which the
+  // |FlutterEngineRun| call is made.
+  FlutterUpdateSemanticsCustomActionCallback
+      update_semantics_custom_action_callback;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT
@@ -330,6 +567,30 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     FlutterEngine engine,
     int64_t texture_identifier);
+
+// Enable or disable accessibility semantics.
+//
+// When enabled, changes to the semantic contents of the window are sent via
+// the |FlutterUpdateSemanticsNodeCallback| registered to
+// |update_semantics_node_callback| in |FlutterProjectArgs|;
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(FlutterEngine engine,
+                                                        bool enabled);
+
+// Sets additional accessibility features.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
+    FlutterEngine engine,
+    FlutterAccessibilityFeature features);
+
+// Dispatch a semantics action to the specified semantics node.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineDispatchSemanticsAction(
+    FlutterEngine engine,
+    uint64_t id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length);
 
 #if defined(__cplusplus)
 }  // extern "C"

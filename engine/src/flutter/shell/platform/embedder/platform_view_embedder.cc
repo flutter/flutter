@@ -30,6 +30,19 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+void PlatformViewEmbedder::UpdateSemantics(
+    blink::SemanticsNodeUpdates update,
+    blink::CustomAccessibilityActionUpdates actions) {
+  if (platform_dispatch_table_.update_semantics_nodes_callback != nullptr) {
+    platform_dispatch_table_.update_semantics_nodes_callback(std::move(update));
+  }
+  if (platform_dispatch_table_.update_semantics_custom_actions_callback !=
+      nullptr) {
+    platform_dispatch_table_.update_semantics_custom_actions_callback(
+        std::move(actions));
+  }
+}
+
 void PlatformViewEmbedder::HandlePlatformMessage(
     fml::RefPtr<blink::PlatformMessage> message) {
   if (!message) {
