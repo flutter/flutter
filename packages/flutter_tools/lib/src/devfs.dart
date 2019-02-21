@@ -57,13 +57,6 @@ abstract class DevFSContent {
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
-  static DevFSFileContent clone(DevFSFileContent fsFileContent) {
-    final DevFSFileContent newFsFileContent = DevFSFileContent(fsFileContent.file);
-    newFsFileContent._linkTarget = fsFileContent._linkTarget;
-    newFsFileContent._fileStat = fsFileContent._fileStat;
-    return newFsFileContent;
-  }
-
   final FileSystemEntity file;
   FileSystemEntity _linkTarget;
   FileStat _fileStat;
@@ -466,23 +459,26 @@ class DevFS {
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-        _entries.forEach((Uri deviceUri, DevFSContent content) {
-      String archivePath;
-      if (deviceUri.path.startsWith(assetBuildDirPrefix))
-        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart, copy content so that isModified does not
-      // reset last check timestamp because we want to report all modified
-      // files to incremental compiler next time user does hot reload.
-      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
-        dirtyEntries[deviceUri] = content;
-        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
-          assetPathsToEvict.add(archivePath);
-      }
-    });
-    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+
+    // Assets are only updated on restart.
     if (fullRestart) {
+      _entries.forEach((Uri deviceUri, DevFSContent content) {
+        String archivePath;
+        if (deviceUri.path.startsWith(assetBuildDirPrefix))
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        // When doing full restart, copy content so that isModified does not
+        // reset last check timestamp because we want to report all modified
+        // files to incremental compiler next time user does hot reload.
+        if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
+          dirtyEntries[deviceUri] = content;
+          if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
+            assetPathsToEvict.add(archivePath);
+        }
+      });
       generator.reset();
     }
+
+    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
