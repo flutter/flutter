@@ -45,8 +45,8 @@ ThemeData _buildDarkTheme() {
     ),
     sliderTheme: SliderThemeData.fromPrimaryColors(
       primaryColor: primaryColor,
-      primaryColorDark: primaryColor,
-      primaryColorLight: primaryColor,
+      primaryColorDark: Color(0xFF0050a0),
+      primaryColorLight: secondaryColor,
       valueIndicatorTextStyle: _buildTextTheme(base.textTheme).body1,
     ),
     textTheme: _buildTextTheme(base.textTheme),
