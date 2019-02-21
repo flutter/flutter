@@ -119,97 +119,6 @@ enum _PickerColumnType {
   dayPeriod,
 }
 
-/// Controls a Cupertino Date Time or Date picker widget.
-///
-/// Each controller can only be used with a single Cupertino Date Time or Date
-/// picker.
-///
-/// Used with [CupertinoDatePicker].
-///
-/// See also:
-///
-///  * [CupertinoDatePicker] which creates a Cupertino themed date picker.
-class CupertinoPickerController {
-  /// Creates a DatePickerController.
-  ///
-  /// The [resetDuration] argument must not be null.
-  CupertinoPickerController({
-    this.resetDuration = const Duration(milliseconds: 300),
-  }) : assert(resetDuration != null);
-
-  /// The time for each picker wheel to swing back to their initial positions.
-  ///
-  /// By default the duration is 300 milliseconds.
-  final Duration resetDuration;
-
-  _CupertinoDatePickerDateTimeState _cupertinoDateTimePickerState;
-  _CupertinoDatePickerDateState _cupertinoDatePickerState;
-  _CupertinoTimerPickerState _cupertinoTimerPickerState;
-
-  /// Resets the attached picker to the initial date or time or date/time as
-  /// specified when creating the attached [CupertinoDatePicker].
-  void reset() {
-    _cupertinoDateTimePickerState?.reset(resetDuration);
-    _cupertinoDatePickerState?.reset(resetDuration);
-    _cupertinoTimerPickerState?.reset(resetDuration);
-  }
-
-  /// Registers the a date time picker state with this controller.
-  ///
-  /// After this function returns, the [reset] method on this
-  /// controller will reset the attached picker.
-  void attachDateTimeState(_CupertinoDatePickerDateTimeState state) {
-    assert(
-      _cupertinoDateTimePickerState == null &&
-      _cupertinoDatePickerState == null &&
-      _cupertinoTimerPickerState == null
-    );
-    _cupertinoDateTimePickerState = state;
-  }
-
-  /// Registers the a date picker state with this controller.
-  ///
-  /// After this function returns, the [reset] method on this
-  /// controller will reset the attached picker.
-  void attachDateState(_CupertinoDatePickerDateState state) {
-    assert(
-    _cupertinoDateTimePickerState == null &&
-    _cupertinoDatePickerState == null &&
-    _cupertinoTimerPickerState == null
-    );
-    _cupertinoDatePickerState = state;
-  }
-
-  /// Registers the a date picker state with this controller.
-  ///
-  /// After this function returns, the [reset] method on this
-  /// controller will reset the attached picker.
-  void attachTimeState(_CupertinoTimerPickerState state) {
-    assert(
-    _cupertinoDateTimePickerState == null &&
-    _cupertinoDatePickerState == null &&
-    _cupertinoTimerPickerState == null
-    );
-    _cupertinoTimerPickerState = state;
-  }
-
-  /// Unregister the given date picker state with this controller.
-  ///
-  /// After this function returns, the [reset] method on this
-  /// controller will not rest the attached picker.
-  void detach() {
-    assert(
-      _cupertinoDatePickerState != null ||
-      _cupertinoDateTimePickerState != null ||
-      _cupertinoTimerPickerState != null
-    );
-    _cupertinoDateTimePickerState = null;
-    _cupertinoDatePickerState = null;
-    _cupertinoTimerPickerState = null;
-  }
-}
-
-
 /// A date picker widget in iOS style.
 ///
 /// There are several modes of the date picker listed in [CupertinoDatePickerMode].
@@ -266,7 +175,6 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-    this.controller,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
@@ -337,10 +245,6 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. Must not be
   /// null.
   final ValueChanged<DateTime> onDateTimeChanged;
-
-  /// An optional controller used to animate the picker back to its
-  /// initialization state.
-  final CupertinoPickerController controller;
 
   @override
   State<StatefulWidget> createState() {
@@ -482,13 +386,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     dateController = FixedExtentScrollController(initialItem: selectedDayFromInitial);
     hourController = FixedExtentScrollController(initialItem: selectedHour);
     minuteController = FixedExtentScrollController(initialItem: selectedMinute);
-    widget.controller?.attachDateTimeState(this);
   }
 
   @override
   void didUpdateWidget(CupertinoDatePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    widget.controller?.attachDateTimeState(this);
 
     assert(
       oldWidget.mode == widget.mode,
@@ -507,16 +409,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
 
     estimatedColumnWidths.clear();
-  }
-
-  /// Resets the picker to the initial date time as originally specified upon
-  /// creation of the [CupertionDatePicker] widget.
-  void reset(Duration resetDuration) {
-    dateController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    amPmController?.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    minuteController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
-    if (hourController.selectedItem != 12)
-      hourController.animateToItem(0, duration: resetDuration, curve: Curves.easeOut);
   }
 
   // Lazily calculate the column width of the column being displayed only.
@@ -805,13 +697,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     dayController = FixedExtentScrollController(initialItem: selectedDay - 1);
     monthController = FixedExtentScrollController(initialItem: selectedMonth - 1);
     yearController = FixedExtentScrollController(initialItem: selectedYear);
-    widget.controller?.attachDateState(this);
-  }
-
-  @override
-  void didUpdateWidget(CupertinoDatePicker oldWidget) {
-    widget.controller?.attachDateState(this);
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -827,26 +712,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     estimatedColumnWidths[_PickerColumnType.dayOfMonth.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.dayOfMonth, localizations, context);
     estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context);
     estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context);
-  }
-
-  /// Resets the picker to the initial date time as originally specified upon
-  /// creation of the [CupertionDatePicker] widget.
-  void reset(Duration resetDuration) {
-    dayController.animateToItem(
-      widget.initialDateTime.day - 1,
-      duration: resetDuration,
-      curve: Curves.easeOut,
-    );
-    monthController.animateToItem(
-      widget.initialDateTime.month - 1,
-      duration: resetDuration,
-      curve: Curves.easeOut,
-    );
-    yearController.animateToItem(
-      widget.initialDateTime.year,
-      duration: resetDuration,
-      curve: Curves.easeOut,
-    );
   }
 
   Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
@@ -1051,6 +916,67 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 // layout will be broken.
 
 
+/// Controls a Cupertino timer picker widget.
+///
+/// Each controller can only be used with a single Cupertino timer picker.
+///
+/// Used with [CupertinoTimerPicker].
+///
+/// See also:
+///
+///  * [CupertinoDatePicker] which creates a Cupertino themed date picker.
+///  * [CupertinoDateTimePickerController] which creates a controller for a
+///    [CupertinoDatePicker].
+class CupertinoTimerPickerController {
+  /// Creates a DatePickerController.
+  ///
+  /// The [resetAnimationDuration] argument must not be null.
+  CupertinoTimerPickerController({
+    this.initialTimerDuration = Duration.zero,
+    this.resetAnimationDuration = const Duration(milliseconds: 300),
+  }) : assert(resetAnimationDuration != null);
+
+  /// The initial duration of the countdown timer.
+  final Duration initialTimerDuration;
+
+  /// The time for each picker wheel to swing back to their initial positions.
+  ///
+  /// By default the duration is 300 milliseconds.
+  final Duration resetAnimationDuration;
+
+  _CupertinoTimerPickerState _cupertinoTimerPickerState;
+
+  /// Resets the attached picker to the initial date or time or date/time as
+  /// specified when creating the attached [CupertinoDatePicker].
+  void reset() {
+   set(initialTimerDuration);
+  }
+
+  /// Sets the attached picker to the specified time.
+  void set(Duration duration) {
+    assert(_cupertinoTimerPickerState != null);
+    _cupertinoTimerPickerState.set(duration, resetAnimationDuration);
+  }
+
+  /// Registers the a date picker state with this controller.
+  ///
+  /// After this function returns, the [reset] method on this
+  /// controller will reset the attached picker.
+  void attachTimeState(_CupertinoTimerPickerState state) {
+    assert(_cupertinoTimerPickerState == null);
+    _cupertinoTimerPickerState = state;
+  }
+
+  /// Unregister the given date picker state with this controller.
+  ///
+  /// After this function returns, the [reset] method on this
+  /// controller will not rest the attached picker.
+  void detach() {
+    assert(_cupertinoTimerPickerState != null);
+    _cupertinoTimerPickerState = null;
+  }
+}
+
 /// Different modes of [CupertinoTimerPicker].
 ///
 /// See also:
@@ -1103,7 +1029,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// positive integer factor of 60.
   CupertinoTimerPicker({
     this.mode = CupertinoTimerPickerMode.hms,
-    this.initialTimerDuration = Duration.zero,
+    @Deprecated('Migration to use controller') this.initialTimerDuration = Duration.zero,
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.controller,
@@ -1136,7 +1062,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// An optional controller used to animate the picker back to its
   /// initialization state.
-  final CupertinoPickerController controller;
+  final CupertinoTimerPickerController controller;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -1151,10 +1077,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   Alignment alignCenterLeft;
   Alignment alignCenterRight;
 
-  ScrollController hourController;
-  ScrollController minuteController;
-  ScrollController secondController;
-
+  FixedExtentScrollController hourController;
+  FixedExtentScrollController minuteController;
+  FixedExtentScrollController secondController;
 
   // The currently selected values of the picker.
   int selectedHour;
@@ -1195,11 +1120,19 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  /// Resets the picker to be the initial time.
-  void reset(Duration resetDuration) {
-    hourController.animateTo(0, duration: resetDuration, curve: Curves.easeOut);
-    minuteController.animateTo(0, duration: resetDuration, curve: Curves.easeOut);
-    secondController.animateTo(0, duration: resetDuration, curve: Curves.easeOut);
+  /// Sets the picker to be the initial time.
+  void set(Duration resetDuration, Duration animationDuration) {
+    selectedMinute = resetDuration.inMinutes % 60;
+
+    if (widget.mode != CupertinoTimerPickerMode.ms)
+      selectedHour = resetDuration.inHours;
+
+    if (widget.mode != CupertinoTimerPickerMode.hm)
+      selectedSecond = resetDuration.inSeconds % 60;
+
+    hourController.animateToItem(selectedHour, duration: animationDuration, curve: Curves.easeOut);
+    minuteController.animateToItem(selectedMinute, duration: animationDuration, curve: Curves.easeOut);
+    secondController.animateToItem(selectedSecond, duration: animationDuration, curve: Curves.easeOut);
   }
 
   @override
@@ -1214,7 +1147,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker() {
-
     return CupertinoPicker(
       scrollController: hourController,
       offAxisFraction: -0.5 * textDirectionFactor,
@@ -1291,7 +1223,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     else
       offAxisFraction = -0.5 * textDirectionFactor;
 
-
     return CupertinoPicker(
       scrollController: minuteController,
       offAxisFraction: offAxisFraction,
@@ -1354,7 +1285,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   Widget _buildMinuteColumn() {
     Widget minuteLabel;
-
     if (widget.mode == CupertinoTimerPickerMode.hm) {
       minuteLabel = IgnorePointer(
         child: Container(
