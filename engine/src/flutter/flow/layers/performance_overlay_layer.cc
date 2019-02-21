@@ -15,8 +15,12 @@ namespace {
 void DrawStatisticsText(SkCanvas& canvas,
                         const std::string& string,
                         int x,
-                        int y) {
+                        int y,
+                        const std::string& font_path) {
   SkFont font;
+  if (font_path != "") {
+    font = SkFont(SkTypeface::MakeFromFile(font_path.c_str()));
+  }
   font.setSize(15);
   font.setLinearMetrics(false);
   SkPaint paint;
@@ -33,7 +37,8 @@ void VisualizeStopWatch(SkCanvas& canvas,
                         SkScalar height,
                         bool show_graph,
                         bool show_labels,
-                        const std::string& label_prefix) {
+                        const std::string& label_prefix,
+                        const std::string& font_path) {
   const int label_x = 8;    // distance from x
   const int label_y = -10;  // distance from y+height
 
@@ -51,14 +56,20 @@ void VisualizeStopWatch(SkCanvas& canvas,
     stream << label_prefix << "  "
            << "max " << max_ms_per_frame << " ms/frame, "
            << "avg " << average_ms_per_frame << " ms/frame";
-    DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y);
+    DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y,
+                       font_path);
   }
 }
 
 }  // namespace
 
-PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options)
-    : options_(options) {}
+PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options,
+                                                 const char* font_path)
+    : options_(options) {
+  if (font_path != nullptr) {
+    font_path_ = font_path;
+  }
+}
 
 void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   const int padding = 8;
@@ -73,15 +84,15 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   SkScalar height = paint_bounds().height() / 2;
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
 
-  VisualizeStopWatch(*context.leaf_nodes_canvas, context.frame_time, x, y,
-                     width, height - padding,
-                     options_ & kVisualizeRasterizerStatistics,
-                     options_ & kDisplayRasterizerStatistics, "GPU");
+  VisualizeStopWatch(
+      *context.leaf_nodes_canvas, context.frame_time, x, y, width,
+      height - padding, options_ & kVisualizeRasterizerStatistics,
+      options_ & kDisplayRasterizerStatistics, "GPU", font_path_);
 
   VisualizeStopWatch(*context.leaf_nodes_canvas, context.engine_time, x,
                      y + height, width, height - padding,
                      options_ & kVisualizeEngineStatistics,
-                     options_ & kDisplayEngineStatistics, "UI");
+                     options_ & kDisplayEngineStatistics, "UI", font_path_);
 }
 
 }  // namespace flow
