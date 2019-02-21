@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
+  const Offset forcePressOffset = Offset(400.0, 50.0);
+
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double updatedDragDelta;
@@ -367,9 +369,20 @@ void main() {
         ),
       ),
     );
-
-    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
     const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
@@ -428,9 +441,23 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
     const int pointerValue = 1;
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    const double maxPressure = 6.0;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: maxPressure,
+        pressureMin: 0.0
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -442,7 +469,7 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -467,8 +494,21 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
     const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
