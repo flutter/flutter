@@ -9,15 +9,14 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a superellipse - a shape similar to a rounded rectangle, but with
-/// a smoother transition from the sides to the rounded corners and greater
-/// curve continuity.
+/// A rectangular border with smooth continuous transitions between the straight
+/// sides and the rounded corners.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
-///     shape: SuperellipseShape(
+///     shape: ContinuousRectangleBorder(
 ///       borderRadius: BorderRadius.circular(28.0),
 ///     ),
 ///   );
@@ -27,12 +26,13 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] Which creates a square with rounded corners,
-///   however it doesn't allow the corners to bend the sides of the square
-///   like a superellipse, resulting in a more square shape.
-class SuperellipseShape extends ShapeBorder {
+/// * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
+///   however its straight sides change into a rounded corner with a circular
+///   radius in a step function instead of gradually like the
+///   [ContinuousRectangleBorder].
+class ContinuousRectangleBorder extends ShapeBorder {
   /// The arguments must not be null.
-  const SuperellipseShape({
+  const ContinuousRectangleBorder({
     this.side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
@@ -52,7 +52,7 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return SuperellipseShape(
+    return ContinuousRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
     );
@@ -61,8 +61,8 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is SuperellipseShape) {
-      return SuperellipseShape(
+    if (a is ContinuousRectangleBorder) {
+      return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
@@ -73,8 +73,8 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is SuperellipseShape) {
-      return SuperellipseShape(
+    if (b is ContinuousRectangleBorder) {
+      return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
@@ -123,17 +123,17 @@ class SuperellipseShape extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     if (rect.isEmpty)
       return;
     switch (side.style) {
@@ -151,7 +151,7 @@ class SuperellipseShape extends ShapeBorder {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final SuperellipseShape typedOther = other;
+    final ContinuousRectangleBorder typedOther = other;
     return side == typedOther.side
         && borderRadius == typedOther.borderRadius;
   }

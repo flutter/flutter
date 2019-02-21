@@ -1692,7 +1692,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addIfNonNull(List<LayoutId> children, Widget child, Object childId, {
+  void _addIfNonNull(
+    List<LayoutId> children,
+    Widget child,
+    Object childId, {
     @required bool removeLeftPadding,
     @required bool removeTopPadding,
     @required bool removeRightPadding,

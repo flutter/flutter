@@ -69,7 +69,7 @@ void main() {
       mockLogger = BufferLogger();
     });
 
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, {List<String> stderr = const <String>[]}) {
+    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, { List<String> stderr = const <String>[] }) {
       final Stream<List<int>> stdoutStream =
           Stream<List<int>>.fromIterable(stdout.map<List<int>>((String s) => s.codeUnits));
       final Stream<List<int>> stderrStream =

@@ -991,7 +991,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
+Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
   return MaterialApp(
     home: Material(
       child: Center(

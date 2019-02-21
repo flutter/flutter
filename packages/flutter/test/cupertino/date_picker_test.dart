@@ -813,7 +813,7 @@ void main() {
   });
 }
 
-Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {
+Widget _buildPicker({ FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CupertinoPicker(
