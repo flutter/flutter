@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
@@ -21,17 +20,13 @@ class HelloWorldMemoryTest extends MemoryTest {
   @override
   Future<void> useMemory() async {
     print('launching $project$test on device...');
-    if (device is! AndroidDevice || apkFile == null || !apkFile.existsSync()) {
-      await flutter('run', options: <String>[
-        '--verbose',
-        '--release',
-        '--no-resident',
-        '-d', device.deviceId,
-        test,
-      ]);
-    } else {
-      adbReinstallApk();
-    }
+    await flutter('run', options: <String>[
+      '--verbose',
+      '--release',
+      '--no-resident',
+      '-d', device.deviceId,
+      test,
+    ]);
     await Future<void>.delayed(const Duration(milliseconds: 1500));
     await recordStart();
     await Future<void>.delayed(const Duration(milliseconds: 3000));

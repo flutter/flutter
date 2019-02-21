@@ -277,9 +277,16 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        releaseSizeInBytes = apkFile.lengthSync();
+        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
+        File apk = file(apkPath);
+        if (!apk.existsSync()) {
+          // Pre Android SDK 26 path
+          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
+          apk = file(apkPath);
+        }
+        releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes)
-          metrics.addAll(await getSizesFromApk(apkFile.path));
+          metrics.addAll(await getSizesFromApk(apkPath));
         break;
     }
 
@@ -429,12 +436,6 @@ class MemoryTest {
         },
       );
 
-      // Ensure we're not using an old build of the APK.  Existince of this file
-      // will make us skip rebuilding it.
-      if (apkFile.existsSync()) {
-        await apkFile.delete();
-      }
-
       for (int iteration = 0; iteration < iterationCount; iteration += 1) {
         print('running memory test iteration $iteration...');
         _startMemoryUsage = null;
@@ -468,41 +469,19 @@ class MemoryTest {
     });
   }
 
-  /// For Android devices, uninstalls, reinstalls, and starts the app without
-  /// doing a rebuild.
-  ///
-  /// This method should be preferred when doing iterative tests that are not
-  /// trying to directly test flutter build performance.
-  Future<void> adbReinstallApk() async {
-    if (device is! AndroidDevice) {
-      return;
-    }
-    final AndroidDevice androidDevice = device;
-    await androidDevice.adb(<String>['uninstall', package]);
-    await androidDevice.adb(<String>['install', apkFile.path]);
-    await androidDevice.shellExec(
-      'monkey',
-      <String>['-p', package, '-c', 'android.intent.category.LAUNCHER', '1'],
-    );
-  }
-
   /// Starts the app specified by [test] on the [device].
   ///
   /// The [run] method will terminate it by its package name ([package]).
   Future<void> launchApp() async {
     prepareForNextMessage('READY');
     print('launching $project$test on device...');
-    if (device is! AndroidDevice || apkFile == null || !apkFile.existsSync()) {
-      await flutter('run', options: <String>[
-        '--verbose',
-        '--release',
-        '--no-resident',
-        '-d', device.deviceId,
-        test,
-      ]);
-    } else if (device is AndroidDevice) {
-      await adbReinstallApk();
-    }
+    await flutter('run', options: <String>[
+      '--verbose',
+      '--release',
+      '--no-resident',
+      '-d', device.deviceId,
+      test,
+    ]);
     print('awaiting "ready" message...');
     await receivedNextMessage;
   }

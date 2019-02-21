@@ -18,18 +18,6 @@ import 'adb.dart';
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
-/// Tries to find a built version of the APK file.
-File get apkFile {
-  String candidateApkPath ='$cwd/build/app/outputs/apk/app.apk';
-  File apk = file(candidateApkPath);
-  if (!apk.existsSync()) {
-    // Pre Android SDK 26 path
-    candidateApkPath = '$cwd/build/app/outputs/apk/app-release.apk';
-    apk = file(candidateApkPath);
-  }
-  return apk;
-}
-
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
