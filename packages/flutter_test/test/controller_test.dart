@@ -17,6 +17,11 @@ void main() {
       // The first Offset in every sub array (ie. offsetResults[i][0]) is (touchSlopX, touchSlopY).
       // The second Offset in every sub array (ie. offsetResults[i][1]) will be the total move offset.
       // The remaining values in every sub array are the expected separated drag offsets.
+
+      // This test checks to make sure that the total drag will be correctly split into
+      // pieces such that the first (and potentially second) moveBy function call(s) in
+      // controller.drag() will never have a component greater than the touch
+      // slop in that component's respective axis.
       final List<List<Offset>> offsetResults = <List<Offset>>[
         <Offset>[
           const Offset(10.0, 10.0),

@@ -13,6 +13,7 @@ import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
 
+const double kdragSlopDefault = 20.0;
 /// Class that programmatically interacts with widgets.
 ///
 /// For a variant of this class suited specifically for unit tests, see
@@ -413,14 +414,14 @@ abstract class WidgetController {
   ///
   /// {@template flutter.flutter_test.drag}
   /// By default, if the x or y component of offset is greater than [kTouchSlop], the
-  /// gesture is broken up into two separate moves calls. Changing [touchSlopX] or
+  /// gesture is broken up into two separate moves calls. Changing 'touchSlopX' or
   /// `touchSlopY` will change the minimum amount of movement in the respective axis
-  /// before the drag will be broken into multiply calls. To always send the
+  /// before the drag will be broken into multiple calls. To always send the
   /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
   /// {@end template}
-  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = 20.0, double touchSlopY = 20.0 }) {
-    // The default touch slop values must be greater than kTouchSlop.
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kdragSlopDefault, double touchSlopY = kdragSlopDefault }) {
+    assert(kdragSlopDefault > kTouchSlop);
     return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
@@ -432,8 +433,8 @@ abstract class WidgetController {
   /// instead.
   ///
   /// {@macro flutter.flutter_test.drag}
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = 20.0, double touchSlopY = 20.0 }) {
-    // The default touch slop values must be greater than kTouchSlop.
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kdragSlopDefault, double touchSlopY = kdragSlopDefault }) {
+    assert(kdragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
