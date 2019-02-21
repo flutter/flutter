@@ -363,14 +363,12 @@ class ScrollDragController implements Drag {
     // (configured in [BouncingScrollPhysics]). The 2 operations below are
     // no-ops on Android.
     _maybeLoseMomentum(offset, details.sourceTimeStamp);
-
     offset = _adjustForScrollStartThreshold(offset, details.sourceTimeStamp);
     if (offset == 0.0) {
       return;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
-
     delegate.applyUserOffset(offset);
   }
 
