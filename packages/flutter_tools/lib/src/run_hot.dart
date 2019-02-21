@@ -728,6 +728,8 @@ class HotRunner extends ResidentRunner {
         return OperationResult(OperationResult.ok.code, reloadMessage);
       }
     }
+    printTrace('Evicting dirty assets');
+    await _evictDirtyAssets();
     assert(reassembleViews.isNotEmpty);
     printTrace('Reassembling application');
     bool failedReassemble = false;
@@ -871,6 +873,24 @@ class HotRunner extends ResidentRunner {
     } else {
       printStatus('For a more detailed help message, press "h". $quitMessage');
     }
+  }
+
+  Future<void> _evictDirtyAssets() {
+    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];	
+    for (FlutterDevice device in flutterDevices) {
+      if (device.devFS.assetPathsToEvict.isEmpty)
+        continue;
+      if (device.views.first.uiIsolate == null) {
+        printError('Application isolate not found for $device');
+        continue;
+      }
+      for (String assetPath in device.devFS.assetPathsToEvict) {
+        print(assetPath);
+        futures.add(device.views.first.uiIsolate.flutterEvictAsset(assetPath));
+      }
+      device.devFS.assetPathsToEvict.clear();
+    }
+    return Future.wait<Map<String, dynamic>>(futures);
   }
 
   @override

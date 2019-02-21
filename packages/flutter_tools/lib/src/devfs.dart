@@ -460,21 +460,21 @@ class DevFS {
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
-    // Assets are only updated on restart.
+    _entries.forEach((Uri deviceUri, DevFSContent content) {
+      String archivePath;
+      if (deviceUri.path.startsWith(assetBuildDirPrefix))
+        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+      // When doing full restart, copy content so that isModified does not
+      // reset last check timestamp because we want to report all modified
+      // files to incremental compiler next time user does hot reload.
+      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
+        dirtyEntries[deviceUri] = content;
+        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
+          assetPathsToEvict.add(archivePath);
+      }
+    });
+
     if (fullRestart) {
-      _entries.forEach((Uri deviceUri, DevFSContent content) {
-        String archivePath;
-        if (deviceUri.path.startsWith(assetBuildDirPrefix))
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        // When doing full restart, copy content so that isModified does not
-        // reset last check timestamp because we want to report all modified
-        // files to incremental compiler next time user does hot reload.
-        if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
-          dirtyEntries[deviceUri] = content;
-          if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
-            assetPathsToEvict.add(archivePath);
-        }
-      });
       generator.reset();
     }
 
@@ -514,7 +514,6 @@ class DevFS {
     return UpdateFSReport(success: true, syncedBytes: 0,
          invalidatedSourcesCount: invalidatedFiles.length);
   }
-
 
   void _scanBundleEntry(String archivePath, DevFSContent content) {
     // We write the assets into the AssetBundle working dir so that they
