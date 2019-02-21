@@ -3,18 +3,24 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:process/process.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -24,7 +30,78 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
+class MockitoProcessManager extends Mock implements ProcessManager {}
+class MockitoAndroidSdk extends Mock implements AndroidSdk {}
+class MockitoAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
+
 void main() {
+  group('Apk with partial Android SDK works', () {
+    AndroidSdk sdk;
+    ProcessManager mockProcessManager;
+    MemoryFileSystem fs;
+    File gradle;
+    final Map<Type, Generator> overrides = <Type, Generator>{
+      AndroidSdk: () => sdk,
+      ProcessManager: () => mockProcessManager,
+      FileSystem: () => fs,
+    };
+
+    setUp(() async {
+      sdk = MockitoAndroidSdk();
+      mockProcessManager = MockitoProcessManager();
+      fs = MemoryFileSystem();
+      Cache.flutterRoot = '../..';
+      when(sdk.licensesAvailable).thenReturn(true);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+      when(mockProcessManager.run(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, 'stdout', 'stderr'));
+      when(mockProcessManager.runSync(any)).thenReturn(ProcessResult(1, 0, 'stdout', 'stderr'));
+      final FlutterProject project = await FlutterProject.current();
+      gradle = fs.file(project.android.hostAppGradleRoot.childFile(
+        platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      ).path)..createSync(recursive: true);
+    });
+
+    testUsingContext('Licenses available, build tools not, apk exists', () async {
+      when(sdk.latestVersion).thenReturn(null);
+      final FlutterProject project = await FlutterProject.current();
+      final File gradle = project.android.hostAppGradleRoot.childFile(
+        platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      )..createSync(recursive: true);
+
+      await ApplicationPackageFactory.instance.getPackageForPlatform(
+        TargetPlatform.android_arm,
+        applicationBinary: fs.file('app.apk'),
+      );
+      verify(
+        mockProcessManager.run(
+          argThat(equals(<String>[gradle.path, 'dependencies'])),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        ),
+      ).called(1);
+    }, overrides: overrides);
+
+    testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
+      final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
+      when(sdk.latestVersion).thenReturn(sdkVersion);
+
+      await ApplicationPackageFactory.instance.getPackageForPlatform(
+        TargetPlatform.android_arm,
+      );
+      verifyNever(
+        mockProcessManager.run(
+          argThat(equals(<String>[gradle.path, 'dependencies'])),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        ),
+      );
+    }, overrides: overrides);
+  });
+
   group('ApkManifestData', () {
     test('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);

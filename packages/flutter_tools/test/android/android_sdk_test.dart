@@ -226,6 +226,7 @@ class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
   }) {
     final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
 
+    _createSdkFile(dir, 'licenses/dummy');
     _createSdkFile(dir, 'platform-tools/adb');
 
     _createSdkFile(dir, 'build-tools/sda/aapt');
