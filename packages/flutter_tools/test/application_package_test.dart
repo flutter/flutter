@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
@@ -39,11 +40,17 @@ void main() {
     ProcessManager mockProcessManager;
     MemoryFileSystem fs;
     File gradle;
+    final Map<Type, Generator> overrides = <Type, Generator>{
+      AndroidSdk: () => sdk,
+      ProcessManager: () => mockProcessManager,
+      FileSystem: () => fs,
+    };
+
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
       fs = MemoryFileSystem();
-
+      Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.run(
@@ -76,31 +83,7 @@ void main() {
           environment: anyNamed('environment'),
         ),
       ).called(1);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => sdk,
-      ProcessManager: () => mockProcessManager,
-      FileSystem: () => fs,
-    });
-
-    testUsingContext('Licenses available, build tools not, apk not exists', () async {
-      when(sdk.latestVersion).thenReturn(null);
-
-      await ApplicationPackageFactory.instance.getPackageForPlatform(
-        TargetPlatform.android_arm,
-        applicationBinary: null,
-      );
-      verify(
-        mockProcessManager.run(
-          argThat(equals(<String>[gradle.path, 'dependencies'])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      ).called(1);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => sdk,
-      ProcessManager: () => mockProcessManager,
-      FileSystem: () => fs,
-    });
+    }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
@@ -116,11 +99,7 @@ void main() {
           environment: anyNamed('environment'),
         ),
       );
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => sdk,
-      ProcessManager: () => mockProcessManager,
-      FileSystem: () => fs,
-    });
+    }, overrides: overrides);
   });
 
   group('ApkManifestData', () {

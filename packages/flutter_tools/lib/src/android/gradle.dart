@@ -117,7 +117,6 @@ Future<void> checkGradleDependencies() async {
   final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: kSlowOperation);
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
-  print(gradle);
   await runCheckedAsync(
     <String>[gradle, 'dependencies'],
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
