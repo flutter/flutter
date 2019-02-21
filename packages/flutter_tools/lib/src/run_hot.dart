@@ -880,7 +880,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<void> _evictDirtyAssets() {
-    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];	
+    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty)
         continue;
