@@ -78,7 +78,10 @@ class HotRunner extends ResidentRunner {
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6)  {
-    watcher = ProjectWatcher(projectRootPath, packagesFilePath);
+    watcher = ProjectWatcher(
+      projectRootPath,
+      packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+    );
   }
 
   final bool benchmarkMode;
@@ -333,6 +336,7 @@ class HotRunner extends ResidentRunner {
         invalidatedFiles: watcher.invalidatedFiles,
       ));
     }
+    watcher.invalidatedFiles.clear();
     return results;
   }
 
@@ -885,7 +889,6 @@ class HotRunner extends ResidentRunner {
         continue;
       }
       for (String assetPath in device.devFS.assetPathsToEvict) {
-        print(assetPath);
         futures.add(device.views.first.uiIsolate.flutterEvictAsset(assetPath));
       }
       device.devFS.assetPathsToEvict.clear();
@@ -917,37 +920,29 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-
+// Watches non pubspec dependencies from the .packages file for changes.
 class ProjectWatcher {
   ProjectWatcher(String projectDirectory, String packagesPath) {
-    _watches.add(
-      DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path),
-    );
-    print('setting up watches: $packagesPath');
-    if (packagesPath != null) {
-      final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
-      for (String dependency in packageMap.keys) {
-        final String path = packageMap[dependency].path;
-        if (path.contains(pubCachePath)) {
-          print('skipping $path');
-          continue;
-        }
-        final String filePath = Uri.file(path, windows: platform.isWindows).path;
-        print('adding: $filePath');
-        _watches.add(DirectoryWatcher(filePath));
+    _watches.add(DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path));
+    final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
+    for (String dependency in packageMap.keys) {
+      final String path = packageMap[dependency].path;
+      if (path.contains(pubCachePath)) {
+        continue;
       }
-    }
-    for (Watcher watcher in _watches) {
+      final String filePath = Uri.file(path, windows: platform.isWindows).path;
+      final Watcher watcher = DirectoryWatcher(filePath);
       watcher.events.listen(_onWatchEvent);
+      _watches.add(watcher);
     }
   }
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
-  // that actually switches the directory.
+  // because that actually switches the directory and requires a corresponding
+  // update to .packages
   static const String pubCachePath = '.pub-cache';
 
   final List<Watcher> _watches = <Watcher>[];
-
   final List<String> invalidatedFiles = <String>[];
 
   void _onWatchEvent(WatchEvent watchEvent) {
