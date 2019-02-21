@@ -353,7 +353,8 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// arrow before the refresh is triggered, a [CupertinoActivityIndicator]
   /// during the refresh and fades the [CupertinoActivityIndicator] away when
   /// the refresh is done.
-  static Widget buildSimpleRefreshIndicator(BuildContext context,
+  static Widget buildSimpleRefreshIndicator(
+    BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,
     double refreshTriggerPullDistance,

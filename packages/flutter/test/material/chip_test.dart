@@ -554,7 +554,7 @@ void main() {
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
-    Future<void> pushChip({Widget avatar}) async {
+    Future<void> pushChip({ Widget avatar }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -668,7 +668,7 @@ void main() {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
     bool wasDeleted = false;
-    Future<void> pushChip({bool deletable = false}) async {
+    Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -783,7 +783,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({Widget avatar, bool selectable = false}) async {
+    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -866,7 +866,7 @@ void main() {
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({bool selectable = false}) async {
+    Future<void> pushChip({ bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -942,7 +942,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({Widget avatar, bool selectable = false}) async {
+    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(

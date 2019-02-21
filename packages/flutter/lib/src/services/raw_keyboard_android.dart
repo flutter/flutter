@@ -170,7 +170,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
     assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:

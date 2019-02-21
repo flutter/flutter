@@ -276,12 +276,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object obj = '']) {
+  void writeln([ Object obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
     for (dynamic object in objects) {
       if (addSeparator) {
@@ -293,7 +293,7 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [StackTrace stackTrace]) {
+  void addError(dynamic error, [ StackTrace stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -490,7 +490,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     return null;
   }
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
     fs.file(outputPath).createSync(recursive: true);
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0);

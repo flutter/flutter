@@ -22,7 +22,7 @@ import 'globals.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
 
-typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
+typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -101,7 +101,7 @@ class StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({bool suppressCompilerMessages = false}) {
+  void reset({ bool suppressCompilerMessages = false }) {
     boundaryKey = null;
     compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
@@ -397,8 +397,12 @@ class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
-      {@required String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(
+    String mainPath,
+    List<String> invalidatedFiles, {
+    @required String outputPath,
+    String packagesFilePath,
+  }) async {
     assert (outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -466,8 +470,11 @@ class ResidentCompiler {
     }
   }
 
-  Future<CompilerOutput> _compile(String scriptUri, String outputPath,
-      String packagesFilePath) async {
+  Future<CompilerOutput> _compile(
+    String scriptUri,
+    String outputPath,
+    String packagesFilePath,
+  ) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -535,8 +542,14 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
-      List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+  Future<CompilerOutput> compileExpression(
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  ) {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -549,8 +562,7 @@ class ResidentCompiler {
     return completer.future;
   }
 
-  Future<CompilerOutput> _compileExpression(
-      _CompileExpressionRequest request) async {
+  Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true);
 
     // 'compile-expression' should be invoked after compiler has been started,

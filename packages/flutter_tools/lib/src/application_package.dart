@@ -26,8 +26,9 @@ class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
