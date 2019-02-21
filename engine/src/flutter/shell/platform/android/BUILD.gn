@@ -168,6 +168,10 @@ java_library("flutter_shell_java") {
     "io/flutter/view/VsyncWaiter.java",
   ]
 
+  java_files += [
+    "$flutter_root/third_party/bsdiff/io/flutter/util/BSDiff.java",
+  ]
+
   deps = [
     ":android_support_v13",
     ":android_support_annotations",
