@@ -146,4 +146,49 @@ bool EmbedderEngine::MarkTextureFrameAvailable(int64_t texture) {
   return true;
 }
 
+bool EmbedderEngine::SetSemanticsEnabled(bool enabled) {
+  if (!IsValid()) {
+    return false;
+  }
+  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [engine = shell_->GetEngine(), enabled] {
+        if (engine) {
+          engine->SetSemanticsEnabled(enabled);
+        }
+      });
+  return true;
+}
+
+bool EmbedderEngine::SetAccessibilityFeatures(int32_t flags) {
+  if (!IsValid()) {
+    return false;
+  }
+  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [engine = shell_->GetEngine(), flags] {
+        if (engine) {
+          engine->SetAccessibilityFeatures(flags);
+        }
+      });
+  return true;
+}
+
+bool EmbedderEngine::DispatchSemanticsAction(int id,
+                                             blink::SemanticsAction action,
+                                             std::vector<uint8_t> args) {
+  if (!IsValid()) {
+    return false;
+  }
+  shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
+      fml::MakeCopyable([engine = shell_->GetEngine(),  // engine
+                         id,                            // id
+                         action,                        // action
+                         args = std::move(args)         // args
+  ]() mutable {
+        if (engine) {
+          engine->DispatchSemanticsAction(id, action, std::move(args));
+        }
+      }));
+  return true;
+}
+
 }  // namespace shell

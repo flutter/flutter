@@ -18,10 +18,17 @@ namespace shell {
 
 class PlatformViewEmbedder final : public PlatformView {
  public:
+  using UpdateSemanticsNodesCallback =
+      std::function<void(blink::SemanticsNodeUpdates update)>;
+  using UpdateSemanticsCustomActionsCallback =
+      std::function<void(blink::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
       std::function<void(fml::RefPtr<blink::PlatformMessage>)>;
 
   struct PlatformDispatchTable {
+    UpdateSemanticsNodesCallback update_semantics_nodes_callback;  // optional
+    UpdateSemanticsCustomActionsCallback
+        update_semantics_custom_actions_callback;  // optional
     PlatformMessageResponseCallback
         platform_message_response_callback;  // optional
   };
@@ -41,6 +48,11 @@ class PlatformViewEmbedder final : public PlatformView {
       PlatformDispatchTable platform_dispatch_table);
 
   ~PlatformViewEmbedder() override;
+
+  // |shell::PlatformView|
+  void UpdateSemantics(
+      blink::SemanticsNodeUpdates update,
+      blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(

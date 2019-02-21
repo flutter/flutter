@@ -883,6 +883,9 @@ class Window {
 /// It is not possible to enable these settings from Flutter, instead they are
 /// used by the platform to indicate that additional accessibility features are
 /// enabled.
+//
+// When changes are made to this class, the equivalent APIs in each of the
+// embedders *must* be updated.
 class AccessibilityFeatures {
   const AccessibilityFeatures._(this._index);
 

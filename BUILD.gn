@@ -57,6 +57,7 @@ group("flutter") {
       "$flutter_root/runtime:runtime_unittests",
       "$flutter_root/shell/common:shell_unittests",
       "$flutter_root/shell/platform/embedder:embedder_unittests",
+      "$flutter_root/shell/platform/embedder:embedder_a11y_unittests", # TODO(cbracken) build these into a different kernel blob in the embedder tests and load that in a test in embedder_unittests
       "$flutter_root/synchronization:synchronization_unittests",
       "$flutter_root/third_party/txt:txt_unittests",
     ]

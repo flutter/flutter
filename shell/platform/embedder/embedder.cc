@@ -383,6 +383,74 @@ FlutterEngineResult FlutterEngineRun(size_t version,
       thread_host.io_thread->GetTaskRunner()           // io
   );
 
+  shell::PlatformViewEmbedder::UpdateSemanticsNodesCallback
+      update_semantics_nodes_callback = nullptr;
+  if (SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr) {
+    update_semantics_nodes_callback =
+        [ptr = args->update_semantics_node_callback,
+         user_data](blink::SemanticsNodeUpdates update) {
+          for (const auto& value : update) {
+            const auto& node = value.second;
+            const auto& transform = node.transform;
+            auto flutter_transform = FlutterTransformation{
+                transform.get(0, 0), transform.get(0, 1), transform.get(0, 2),
+                transform.get(1, 0), transform.get(1, 1), transform.get(1, 2),
+                transform.get(2, 0), transform.get(2, 1), transform.get(2, 2)};
+            const FlutterSemanticsNode embedder_node = {
+                sizeof(FlutterSemanticsNode),
+                node.id,
+                static_cast<FlutterSemanticsFlag>(node.flags),
+                static_cast<FlutterSemanticsAction>(node.actions),
+                node.textSelectionBase,
+                node.textSelectionExtent,
+                node.scrollChildren,
+                node.scrollIndex,
+                node.scrollPosition,
+                node.scrollExtentMax,
+                node.scrollExtentMin,
+                node.elevation,
+                node.thickness,
+                node.label.c_str(),
+                node.hint.c_str(),
+                node.value.c_str(),
+                node.increasedValue.c_str(),
+                node.decreasedValue.c_str(),
+                static_cast<FlutterTextDirection>(node.textDirection),
+                FlutterRect{node.rect.fLeft, node.rect.fTop, node.rect.fRight,
+                            node.rect.fBottom},
+                flutter_transform,
+                node.childrenInTraversalOrder.size(),
+                &node.childrenInTraversalOrder[0],
+                &node.childrenInHitTestOrder[0],
+                node.customAccessibilityActions.size(),
+                &node.customAccessibilityActions[0],
+            };
+            ptr(&embedder_node, user_data);
+          }
+        };
+  }
+
+  shell::PlatformViewEmbedder::UpdateSemanticsCustomActionsCallback
+      update_semantics_custom_actions_callback = nullptr;
+  if (SAFE_ACCESS(args, update_semantics_custom_action_callback, nullptr) !=
+      nullptr) {
+    update_semantics_custom_actions_callback =
+        [ptr = args->update_semantics_custom_action_callback,
+         user_data](blink::CustomAccessibilityActionUpdates actions) {
+          for (const auto& value : actions) {
+            const auto& action = value.second;
+            const FlutterSemanticsCustomAction embedder_action = {
+                sizeof(FlutterSemanticsCustomAction),
+                action.id,
+                static_cast<FlutterSemanticsAction>(action.overrideId),
+                action.label.c_str(),
+                action.hint.c_str(),
+            };
+            ptr(&embedder_action, user_data);
+          }
+        };
+  }
+
   shell::PlatformViewEmbedder::PlatformMessageResponseCallback
       platform_message_response_callback = nullptr;
   if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
@@ -403,6 +471,7 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   }
 
   shell::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table = {
+      update_semantics_nodes_callback, update_semantics_custom_actions_callback,
       platform_message_response_callback,  // platform_message_response_callback
   };
 
@@ -684,6 +753,50 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
   }
   if (!reinterpret_cast<shell::EmbedderEngine*>(engine)
            ->MarkTextureFrameAvailable(texture_identifier)) {
+    return kInternalInconsistency;
+  }
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(FlutterEngine engine,
+                                                        bool enabled) {
+  if (engine == nullptr) {
+    return kInvalidArguments;
+  }
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)->SetSemanticsEnabled(
+          enabled)) {
+    return kInternalInconsistency;
+  }
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
+    FlutterEngine engine,
+    FlutterAccessibilityFeature flags) {
+  if (engine == nullptr) {
+    return kInvalidArguments;
+  }
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)
+           ->SetAccessibilityFeatures(flags)) {
+    return kInternalInconsistency;
+  }
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineDispatchSemanticsAction(
+    FlutterEngine engine,
+    uint64_t id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length) {
+  if (engine == nullptr) {
+    return kInvalidArguments;
+  }
+  auto engine_action = static_cast<blink::SemanticsAction>(action);
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)
+           ->DispatchSemanticsAction(
+               id, engine_action,
+               std::vector<uint8_t>({data, data + data_length}))) {
     return kInternalInconsistency;
   }
   return kSuccess;

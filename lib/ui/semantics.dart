@@ -6,6 +6,9 @@ part of dart.ui;
 
 /// The possible actions that can be conveyed from the operating system
 /// accessibility APIs to a semantics node.
+//
+// When changes are made to this class, the equivalent APIs in each of the
+// embedders *must* be updated.
 class SemanticsAction {
   const SemanticsAction._(this.index);
 
@@ -260,6 +263,9 @@ class SemanticsAction {
 }
 
 /// A Boolean value that can be associated with a semantics node.
+//
+// When changes are made to this class, the equivalent APIs in each of the
+// embedders *must* be updated.
 class SemanticsFlag {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
