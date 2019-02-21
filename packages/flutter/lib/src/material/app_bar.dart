@@ -409,13 +409,13 @@ class _AppBarState extends State<AppBar> {
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
-    IconThemeData appBarIconTheme = widget.iconTheme
+    IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
       ?? themeData.primaryIconTheme;
-    // If no actionsIconTheme is specified, then fallback on the existing iconTheme.
-    IconThemeData appBarActionsIconTheme = widget.actionsIconTheme
+    // If no actionsIconTheme is specified, then fallback on the overallIconTheme.
+    IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
-      ?? appBarIconTheme;
+      ?? overallIconTheme;
     TextStyle centerStyle = widget.textTheme?.title
       ?? appBarTheme.textTheme?.title
       ?? themeData.primaryTextTheme.title;
@@ -429,11 +429,11 @@ class _AppBarState extends State<AppBar> {
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
         sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
-      appBarIconTheme = appBarIconTheme.copyWith(
-        opacity: opacity * (appBarIconTheme.opacity ?? 1.0)
+      overallIconTheme = overallIconTheme.copyWith(
+        opacity: opacity * (overallIconTheme.opacity ?? 1.0)
       );
-      appBarActionsIconTheme = appBarActionsIconTheme.copyWith(
-          opacity: opacity * (appBarActionsIconTheme.opacity ?? 1.0)
+      actionsIconTheme = actionsIconTheme.copyWith(
+          opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
       );
     }
 
@@ -498,7 +498,7 @@ class _AppBarState extends State<AppBar> {
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
       actions = IconTheme.merge(
-        data: appBarActionsIconTheme,
+        data: actionsIconTheme,
         child: actions,
       );
     }
@@ -517,7 +517,7 @@ class _AppBarState extends State<AppBar> {
       child: CustomSingleChildLayout(
         delegate: const _ToolbarContainerLayout(),
         child: IconTheme.merge(
-          data: appBarIconTheme,
+          data: overallIconTheme,
           child: DefaultTextStyle(
             style: sideStyle,
             child: toolbar,

@@ -24,14 +24,14 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
-    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+    final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
+    expect(actionIconText.text.style.color, Colors.white);
     expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1));
   });
 
@@ -50,14 +50,14 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
-    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+    final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
-    expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
+    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
     expect(text.style, appBarTheme.textTheme.body1);
   });
 
@@ -88,15 +88,38 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
-    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+    final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(iconTheme.data, iconThemeData);
-    expect(actionsIconTheme.data, actionsIconThemeData);
+    expect(actionIconText.text.style.color, actionsIconThemeData.color);
     expect(text.style, textTheme.body1);
+  });
+
+  testWidgets('AppBar icon color takes priority over everything', (WidgetTester tester) async {
+    const Color color = Colors.lime;
+    const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
+    const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
+
+    final ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(appBar: AppBar(
+        backgroundColor: color,
+        iconTheme: iconThemeData,
+        actionsIconTheme: actionsIconThemeData,
+        actions: <Widget>[
+          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () {})
+        ],
+      )),
+    ));
+
+    final RichText actionIconText = _getAppBarIconRichText(tester);
+    expect(actionIconText.text.style.color, color);
   });
 
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
@@ -114,14 +137,14 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
-    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+    final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
-    expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
+    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
     expect(text.style, appBarTheme.textTheme.body1);
   });
 
@@ -139,14 +162,14 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
-    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+    final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
     expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, themeData.primaryIconTheme);
-    expect(actionsIconTheme.data, themeData.primaryIconTheme);
+    expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
     expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1).merge(themeData.primaryTextTheme.body1));
   });
 }
@@ -195,15 +218,14 @@ IconTheme _getAppBarIconTheme(WidgetTester tester) {
   );
 }
 
-IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
-  return tester.widget<IconTheme>(
+RichText _getAppBarIconRichText(WidgetTester tester) {
+  return tester.widget<RichText>(
     find.descendant(
-      of: find.byType(NavigationToolbar),
-      matching: find.byType(IconTheme),
+      of: find.byType(Icon),
+      matching: find.byType(RichText),
     ).first,
   );
 }
-
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
     find.descendant(
