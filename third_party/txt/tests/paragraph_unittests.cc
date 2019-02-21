@@ -2496,7 +2496,7 @@ TEST_F(ParagraphTest, Ellipsize) {
 
   // Check that the ellipsizer limited the text to one line and did not wrap
   // to a second line.
-  ASSERT_EQ(paragraph->records_.size(), 2ull);
+  ASSERT_EQ(paragraph->records_.size(), 1ull);
 }
 
 // Test for shifting when identical runs of text are built as multiple runs.
