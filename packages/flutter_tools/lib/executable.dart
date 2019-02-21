@@ -41,7 +41,6 @@ import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
-import 'src/globals.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
@@ -56,7 +55,6 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
-  disableTrace = verbose;
 
   await runner.run(args, <FlutterCommand>[
     AnalyzeCommand(verboseHelp: verboseHelp),
