@@ -23,7 +23,7 @@ class BackButtonMemoryTest extends MemoryTest {
 
   /// Perform a series of back button suspend and resume cycles.
   @override
-  Future<void> useMemory() async {
+  Future<void> useMemory({String apkPath}) async {
     await launchApp();
     await recordStart();
     for (int iteration = 0; iteration < 10; iteration += 1) {
