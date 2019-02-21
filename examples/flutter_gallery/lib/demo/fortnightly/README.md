@@ -36,7 +36,7 @@ For info on the Fortnightly Material Study, see: https://material.io/design/mate
 * The entire newspaper article is wrapped in a `SingleChildScrollView` widget which ensures that the
     entire article can be viewed no matter what the screen's size or orientation is.
 * The `Text` widget with text ' ¬ ' has a `TextStyle` that changes one parameter of an inherited
-    `TextStyle` using `.apply().
+    `TextStyle` using `.apply()``.
 * The `Text` widget with text 'Connor Eghan' has a `TextStyle` created explicitly instead of
     inheriting from theming.
 * You can break up long strings in your source files by putting them on multiple lines.
