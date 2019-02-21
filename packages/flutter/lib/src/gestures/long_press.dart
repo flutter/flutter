@@ -96,7 +96,8 @@ class LongPressEndDetails {
 ///
 /// The gesture must not deviate in position from its touch down point for 500ms
 /// until it's recognized. Once the gesture is accepted, the finger can be
-/// moved, triggering [onLongPressMoveUpdate] callbacks.
+/// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
+/// [postAcceptSlopTolerance] constructor argument is overriden.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///

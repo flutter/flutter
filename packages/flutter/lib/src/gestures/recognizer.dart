@@ -285,8 +285,8 @@ enum GestureRecognizerState {
 /// pointer travels beyond [preAcceptSlopTolerance] or [postAcceptSlopTolerance]
 /// pixels from the original contact point of the gesture.
 ///
-/// If the [preAcceptSlopTolerance] was breached the gesture was accepted in
-/// the gesture arena, the gesture will be rejected.
+/// If the [preAcceptSlopTolerance] was breached before the gesture was accepted
+/// in the gesture arena, the gesture will be rejected.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
