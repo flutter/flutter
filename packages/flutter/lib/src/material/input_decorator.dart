@@ -823,11 +823,10 @@ class _RenderDecoration extends RenderBox {
   // of the renderers. This method applies layout to all of the renderers
   // except the container. For convenience, the container is laid out
   // in performLayout().
+  // TODO(justinmc): Get expands working.
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
-
-    // TODO(justinmc): this loosen removes the minheight used by Expanded
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
 
     // Layout all the widgets used by InputDecorator
@@ -888,7 +887,13 @@ class _RenderDecoration extends RenderBox {
     //print('justin inputB ${contentPadding.top} + $topHeight + ${boxToBaseline[input]} = $inputBaseline btw labelheight $labelHeight ${decoration.floatingLabelHeight}');
 
     // The height of the visible input container box. What would be outlined.
-    final double containerHeight = topHeight
+    // TODO(justinmc): The existing behavior is to actually allow the invisible
+    // part of the input to expand to the full size of its parent by default, so
+    // that if you click outside the visible input but inside the parent, the
+    // input will be focused. Is that desired?
+    final double containerHeight = expands
+      ? boxConstraints.maxHeight - bottomHeight
+      : topHeight
       + contentPadding.top
       + inputHeight
       + contentPadding.bottom;
@@ -918,13 +923,14 @@ class _RenderDecoration extends RenderBox {
       subtextHeight = helperError.size.height + SUBTEXT_GAP;
     }
 
-  /*
+    /*
     print('''justin return
       containerHeight: $containerHeight,
       inputBaseline: $inputBaseline,
       outlineBaseline: $outlineBaseline,
       subtextBaseline: $subtextBaseline,
       subtextHeight: $subtextHeight,
+      btw expnads $expands
     ''');
     */
     return _RenderDecorationLayout(

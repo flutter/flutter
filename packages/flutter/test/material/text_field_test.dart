@@ -946,20 +946,22 @@ void main() {
 
     await tester.pumpWidget(expandedTextFieldBuilder());
 
-    RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
+    RenderBox findBorder() {
+      return tester.renderObject(find.descendant(
+        of: find.byType(InputDecorator),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+      ));
+    }
+    final RenderBox border = findBorder();
 
     // Without expanded: true and maxLines: null, the TextField does not expand
     // to fill its parent when wrapped in an Expanded widget.
-    final RenderBox editableText = findEditableText();
-    final Size unexpandedInputSize = editableText.size;
+    final Size unexpandedInputSize = border.size;
 
     // It does expand to fill its parent when expands: true, maxLines: null, and
     // it's wrapped in an Expanded widget.
-    // TODO(justinmc): failing this test because expands: true is not supported
-    // in new _layout yet.
     await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: null));
-    expect(findEditableText(), equals(editableText));
-    expect(editableText.size.height, greaterThan(unexpandedInputSize.height));
+    expect(border.size.height, greaterThan(unexpandedInputSize.height));
 
     // min/maxLines that is not null and expands: true contradict each other.
     expect(() async {
