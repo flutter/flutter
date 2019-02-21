@@ -887,8 +887,6 @@ void main() {
     expect(lastSelectedItem, 1);
     handle.dispose();
   });
-
-
 }
 
 Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {
