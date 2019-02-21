@@ -308,7 +308,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Offset localToGlobal(Offset point) => point;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
+  void dispatchEvent(
+    PointerEvent event,
+    HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     assert(source == TestBindingEventSource.test);
@@ -441,7 +443,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
-  Future<void> _runTest(Future<void> testBody(), VoidCallback invariantTester, String description, {
+  Future<void> _runTest(
+    Future<void> testBody(),
+    VoidCallback invariantTester,
+    String description, {
     Future<void> timeout,
   }) {
     assert(description != null);
@@ -874,7 +879,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, {
+  Future<void> runTest(
+    Future<void> testBody(),
+    VoidCallback invariantTester, {
     String description = '',
     Duration timeout = const Duration(seconds: 2),
   }) {
@@ -1183,7 +1190,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   HitTestDispatcher deviceEventDispatcher;
 
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult, {
+  void dispatchEvent(
+    PointerEvent event,
+    HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device
   }) {
     switch (source) {
@@ -1524,7 +1533,7 @@ class _MockHttpClient implements HttpClient {
   set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
 
   @override
-  void close({bool force = false}) {}
+  void close({ bool force = false }) {}
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
@@ -1612,7 +1621,7 @@ class _MockHttpRequest extends HttpClientRequest {
   void add(List<int> data) {}
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {}
+  void addError(Object error, [ StackTrace stackTrace ]) {}
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
@@ -1648,13 +1657,13 @@ class _MockHttpRequest extends HttpClientRequest {
   void write(Object obj) {}
 
   @override
-  void writeAll(Iterable<Object> objects, [String separator = '']) {}
+  void writeAll(Iterable<Object> objects, [ String separator = '' ]) {}
 
   @override
   void writeCharCode(int charCode) {}
 
   @override
-  void writeln([Object obj = '']) {}
+  void writeln([ Object obj = '' ]) {}
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
@@ -1683,7 +1692,7 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   bool get isRedirect => false;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
     return const Stream<List<int>>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
@@ -1694,7 +1703,7 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   String get reasonPhrase => null;
 
   @override
-  Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
+  Future<HttpClientResponse> redirect([ String method, Uri url, bool followLoops ]) {
     return Future<HttpClientResponse>.error(UnsupportedError('Mocked response'));
   }
 

@@ -30,7 +30,7 @@ enum Artifact {
   kernelWorkerSnapshot,
 }
 
-String _artifactToFileName(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -101,18 +101,18 @@ abstract class Artifacts {
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]);
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]);
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
-  String getEngineType(TargetPlatform platform, [BuildMode mode]);
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts extends Artifacts {
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:
@@ -135,7 +135,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(_getEngineArtifactsPath(platform, mode));
   }
 
@@ -207,7 +207,7 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
+  String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
     final String engineDir = cache.getArtifactDirectory('engine').path;
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
@@ -252,7 +252,7 @@ class LocalEngineArtifacts extends Artifacts {
   String _hostEngineOutPath;
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
@@ -287,7 +287,7 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(engineOutPath);
   }
 
@@ -340,7 +340,7 @@ class OverrideArtifacts implements Artifacts {
   final File flutterPatchedSdk;
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
       return frontendServer.path;
     }
@@ -357,5 +357,5 @@ class OverrideArtifacts implements Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) => parent.getEngineType(platform, mode);
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) => parent.getEngineType(platform, mode);
 }

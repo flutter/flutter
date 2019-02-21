@@ -142,7 +142,7 @@ void main() {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({double size, RenderAnimatedSizeState state}) {
+      void verify({ double size, RenderAnimatedSizeState state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {

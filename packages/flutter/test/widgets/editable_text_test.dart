@@ -1634,8 +1634,7 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<void> _buildApp(
-        MockTextSelectionControls controls, WidgetTester tester) {
+    Future<void> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,

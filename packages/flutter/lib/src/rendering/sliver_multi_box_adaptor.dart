@@ -65,7 +65,8 @@ abstract class RenderSliverBoxChildManager {
   /// Must return the total distance from the start of the child with the
   /// earliest possible index to the end of the child with the last possible
   /// index.
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -370,7 +371,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during this layout pass. No child should be added during that call except
   /// for the one that is created and returned by `createChild`.
   @protected
-  RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutLeadingChild(
+    BoxConstraints childConstraints, {
     bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
@@ -397,7 +399,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Children after the `after` child may be removed in the process. Only the
   /// new child may be added.
   @protected
-  RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutChild(
+    BoxConstraints childConstraints, {
     @required RenderBox after,
     bool parentUsesSize = false,
   }) {
