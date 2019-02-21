@@ -1246,12 +1246,12 @@ class RenderEditable extends RenderBox {
   /// If you have a [TextEditingController], it's generally easier to
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
-  void selectPosition({@required SelectionChangedCause cause}) {
+  void selectPosition({ @required SelectionChangedCause cause }) {
     selectPositionAt(from: _lastTapDownPosition, cause: cause);
   }
 
   /// Select text between the global positions [from] and [to].
-  void selectPositionAt({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
+  void selectPositionAt({ @required Offset from, Offset to, @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
