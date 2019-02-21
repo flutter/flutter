@@ -186,7 +186,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       } else {
         _pendingDragOffset += delta;
         _lastPendingEventTimestamp = event.timeStamp;
-        print('drag offset' + _pendingDragOffset.dx.toString());
         if (_hasSufficientPendingDragDeltaToAccept)
           resolve(GestureDisposition.accepted);
       }
