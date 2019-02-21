@@ -263,7 +263,7 @@ class AndroidNdk {
 
 class AndroidSdk {
   AndroidSdk(this.directory, [this.ndk]) {
-    _init();
+    reinitialize();
   }
 
   static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
@@ -440,7 +440,11 @@ class AndroidSdk {
     return null;
   }
 
-  void _init() {
+  /// Sets up various paths used internally.
+  ///
+  /// This method should be called in a case where the tooling may have updated
+  /// SDK artifacts, such as after running a gradle build.
+  void reinitialize() {
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));

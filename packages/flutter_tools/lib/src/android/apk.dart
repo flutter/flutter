@@ -31,10 +31,11 @@ Future<void> buildApk({
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
 
-  return buildGradleProject(
+  await buildGradleProject(
     project: project,
     buildInfo: buildInfo,
     target: target,
     isBuildingBundle: false
   );
+  androidSdk.reinitialize();
 }
