@@ -67,7 +67,7 @@ static sk_sp<const GrGLInterface> CreateGLInterface(
   };
 
   ProcResolverContext context = {
-      .resolver = proc_resolver,
+      proc_resolver
   };
 
   GrGLGetProc gl_get_proc = [](void* context,
