@@ -1246,7 +1246,7 @@ class RenderEditable extends RenderBox {
   /// If you have a [TextEditingController], it's generally easier to
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
-  void selectPosition({@required SelectionChangedCause cause}) {
+  void selectPosition({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
@@ -1259,7 +1259,7 @@ class RenderEditable extends RenderBox {
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWord({@required SelectionChangedCause cause}) {
+  void selectWord({ @required SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
 
@@ -1269,7 +1269,7 @@ class RenderEditable extends RenderBox {
   /// beginning and end of a word respectively.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
+  void selectWordsInRange({ @required Offset from, Offset to, @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
@@ -1291,7 +1291,7 @@ class RenderEditable extends RenderBox {
   /// Move the selection to the beginning or end of a word.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWordEdge({@required SelectionChangedCause cause}) {
+  void selectWordEdge({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);

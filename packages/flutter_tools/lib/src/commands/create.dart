@@ -395,7 +395,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return null;
   }
 
-  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -414,7 +414,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -431,7 +431,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -463,7 +463,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
@@ -536,7 +536,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, {bool overwrite = false}) {
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
     final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: overwrite);
   }

@@ -137,7 +137,9 @@ Future<void> flingElementFromZero(WidgetTester tester, Finder finder, { @require
   await flingElement(tester, finder, gestureDirection: gestureDirection, initialOffsetFactor: -1.0);
 }
 
-Future<void> dismissItem(WidgetTester tester, int item, {
+Future<void> dismissItem(
+  WidgetTester tester,
+  int item, {
   @required AxisDirection gestureDirection,
   DismissMethod mechanism = dismissElement,
 }) async {
@@ -154,7 +156,9 @@ Future<void> dismissItem(WidgetTester tester, int item, {
   await tester.pump(); // rebuild after the callback removes the entry
 }
 
-Future<void> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
+Future<void> checkFlingItemBeforeMovementEnd(
+  WidgetTester tester,
+  int item, {
   @required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement
 }) async {
@@ -168,7 +172,9 @@ Future<void> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
   await tester.pump(const Duration(milliseconds: 100));
 }
 
-Future<void> checkFlingItemAfterMovement(WidgetTester tester, int item, {
+Future<void> checkFlingItemAfterMovement(
+  WidgetTester tester,
+  int item, {
   @required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement
 }) async {
