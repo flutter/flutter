@@ -54,6 +54,6 @@ abstract class ClipContext {
   ///
   /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
   void clipRectAndPaint(Rect rect, Clip clipBehavior, Rect bounds, void painter()) {
-    _clipAndPaint((bool doAntiAias) => canvas.clipRect(rect, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
+    _clipAndPaint((bool doAntiAlias) => canvas.clipRect(rect, doAntiAlias: doAntiAlias), clipBehavior, bounds, painter);
   }
 }
