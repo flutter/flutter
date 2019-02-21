@@ -8,9 +8,15 @@ import 'dart:ui';
 /// Having that time as a startup latency is much better than having a jank in
 /// the middle of an animation.
 ///
-/// Therefore we use during the [runApp] call to move common shader compilations
-/// from animation time to startup time. By default, a [DefaultShaderWarmUp] is
-/// used. Create a custom [ShaderWarmUp] subclass to replace it if needed.
+/// Therefore we use this during the [runApp] call to move common shader
+/// compilations from animation time to startup time. By default, a
+/// [DefaultShaderWarmUp] is used. Create a custom [ShaderWarmUp] subclass to
+/// replace it if needed.
+///
+/// This warm up needs to be run on each individual device because the shader
+/// compilation depends on the specific GPU hardware and driver a device has. It
+/// can't be pre-computed during the Flutter engine compilation as the engine is
+/// device agnostic.
 abstract class ShaderWarmUp {
   /// Allow const constructors for subclasses.
   const ShaderWarmUp();
@@ -43,6 +49,24 @@ abstract class ShaderWarmUp {
 }
 
 /// Default way of warming up Skia shader compilations.
+///
+/// The draw operations being warmed up here are decided according to Flutter
+/// engineers' observation and experience based on the apps and the performance
+/// issues seen so far.
+///
+/// To decide which draw operations to be added to your custom warm up process,
+/// try capture an skp using `flutter screenshot --observatory- port=<port>
+/// --type=skia` and analyze it with https://debugger.skia.org. Alternatively,
+/// one may run the app with `flutter run --trace-skia` and then examine the GPU
+/// thread in the observatory timeline to see which Skia draw operations are
+/// commonly used, and which shader compilations are causing janks.
+///
+/// The size of [width]=[height]=1000 here are picked arbitrarily. The only goal
+/// is to have them not too far away from the actual resolution (very few mobile
+/// devices seem to have a resolution that is 10x larger or 10x smaller than
+/// 1000x1000). The size should have little effect on the shader warm-up. A
+/// custom shader warm up can pick another arbitrary number that's close to the
+/// targeted devices.
 class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
   const DefaultShaderWarmUp();

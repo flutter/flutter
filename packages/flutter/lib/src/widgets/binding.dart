@@ -766,6 +766,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 /// installation or a data wipe. The warm up does not block the main thread so
 /// there should be no "Application Not Responding" warning.
 ///
+/// Currently the warm-up happens synchronously on the GPU thread which means
+/// the rendering of the first frame on the GPU thread will be postponed until
+/// the warm-up is finished.
+///
 /// See also:
 ///
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
