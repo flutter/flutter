@@ -1,4 +1,4 @@
-Signature: 4d97ab682f6fb8caddbd4000b3db475c
+Signature: 6d414f70a2508ca7c53b28f953a9811a
 
 UNUSED LICENSES:
 
@@ -4900,6 +4900,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/compositor_quads.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/compositor_quads.cpp
+FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
