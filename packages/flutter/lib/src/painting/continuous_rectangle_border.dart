@@ -95,7 +95,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // Renders the default super elliptical rounded rect shape where there are
     // 4 straight edges and 4 90º corners. Approximately renders a super ellipse
     // with n value of 5.
-    Path roundedRect1 () {
+    Path roundedRect () {
       return Path()
         ..moveTo(leftX(1.52866483), topY(0))
         ..lineTo(rightX(1.52866471), topY(0))
@@ -167,7 +167,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
       min / minRadiusEdgeLength
     );
     limitedRadius = math.min(radius, min / multiplier);
-    return roundedRect1();
+    return roundedRect();
   }
 
   @override

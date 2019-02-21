@@ -41,7 +41,7 @@ import 'edge_insets.dart';
 class ContinuousOvalBorder extends ShapeBorder {
   /// Creates a Continuous Cornered Rectangle Border.
   ///
-  /// The [side], [mode] and [borderRadius] arguments must not be null.
+  /// The [side] and [borderRadius] arguments must not be null.
   const ContinuousOvalBorder({
     this.side = BorderSide.none,
     this.borderRadius = 1.0,
@@ -93,7 +93,7 @@ class ContinuousOvalBorder extends ShapeBorder {
     // and two 180º curves. The height is greater than the width. Approximately
     // renders a super ellipse with an n value of 2. Only used in cases where
     // the width:height aspect ratio is close to 1.
-    Path roundedRect3a () {
+    Path roundedRectVertical () {
       return Path()
         ..moveTo(centerX, topMidY(0))
         ..lineTo(centerX, topMidY(0))
@@ -157,7 +157,7 @@ class ContinuousOvalBorder extends ShapeBorder {
     // and two 180º curves. The width is greater than the height. Approximately
     // renders a super ellipse with an n value of 2. Only used in cases where
     // the width:height aspect ratio is close to 1.
-    Path roundedRect3b () {
+    Path roundedRectHorizontal () {
       return Path()
         ..moveTo(centerX, topMidY(0))
         ..lineTo(centerX, topMidY(0))
@@ -217,7 +217,7 @@ class ContinuousOvalBorder extends ShapeBorder {
         ..close();
     }
 
-    return height > width ? roundedRect3a() : roundedRect3b();
+    return height > width ? roundedRectVertical() : roundedRectHorizontal();
   }
 
   @override

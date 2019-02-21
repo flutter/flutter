@@ -97,7 +97,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // The secondary super elliptical shape where there are only 2 straight edges
     // and two 180º curves. The width is greater than the height. Approximately
     // renders a super ellipse with an n value of 2.
-    Path roundedRect2a () {
+    Path roundedRectHorizontal () {
       return Path()
         ..moveTo(leftX(2.00593972), topY(0))
         ..lineTo(originX + width - 1.52866483 * radius, originY)
@@ -152,7 +152,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // The secondary super elliptical shape where there are only 2 straight edges
     // and two 180º curves. The height is greater than the width. Approximately
     // renders a super ellipse with an n value of 2.
-    Path roundedRect2b () {
+    Path roundedRectVertical () {
       return Path()
         ..moveTo(centerX, topY(0))
         ..lineTo(centerX, topY(0))
@@ -203,7 +203,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    return width > maxMultiplier * radius ? roundedRect2a() : roundedRect2b();
+    return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
   }
 
   @override
