@@ -11,6 +11,12 @@
 #include "flutter/testing/thread_test.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG
+#define SKIP_IF_AOT() GTEST_SKIP()
+#else
+#define SKIP_IF_AOT() (void)0
+#endif
+
 #define CURRENT_TEST_NAME                                           \
   std::string {                                                     \
     ::testing::UnitTest::GetInstance()->current_test_info()->name() \
@@ -213,18 +219,21 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
 }
 
 TEST_F(DartIsolateTest, IsolateCanLoadAndRunDartCode) {
+  SKIP_IF_AOT();
   auto isolate = RunDartCodeInIsolate(GetCurrentTaskRunner(), "main");
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 }
 
 TEST_F(DartIsolateTest, IsolateCannotLoadAndRunUnknownDartEntrypoint) {
+  SKIP_IF_AOT();
   auto isolate =
       RunDartCodeInIsolate(GetCurrentTaskRunner(), "thisShouldNotExist");
   ASSERT_FALSE(isolate);
 }
 
 TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
+  SKIP_IF_AOT();
   auto isolate = RunDartCodeInIsolate(GetCurrentTaskRunner(), "main");
 
   ASSERT_TRUE(isolate);

@@ -93,6 +93,7 @@ executable("runtime_unittests") {
   deps = [
     ":runtime",
     ":runtime_fixtures",
+    "$flutter_root/common",
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
     "$flutter_root/testing",
