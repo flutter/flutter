@@ -24,6 +24,7 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
@@ -31,6 +32,7 @@ void main() {
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
+    expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style.color, Colors.white);
     expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1));
   });
@@ -50,6 +52,7 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
@@ -57,6 +60,7 @@ void main() {
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
+    expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
     expect(text.style, appBarTheme.textTheme.body1);
   });
@@ -88,6 +92,7 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
@@ -95,6 +100,7 @@ void main() {
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(iconTheme.data, iconThemeData);
+    expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style.color, actionsIconThemeData.color);
     expect(text.style, textTheme.body1);
   });
@@ -137,6 +143,7 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
@@ -144,6 +151,7 @@ void main() {
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(iconTheme.data, appBarTheme.iconTheme);
+    expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
     expect(text.style, appBarTheme.textTheme.body1);
   });
@@ -162,6 +170,7 @@ void main() {
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
+    final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
@@ -169,6 +178,7 @@ void main() {
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
     expect(iconTheme.data, themeData.primaryIconTheme);
+    expect(actionsIconTheme.data, themeData.primaryIconTheme);
     expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
     expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1).merge(themeData.primaryTextTheme.body1));
   });
@@ -213,6 +223,15 @@ IconTheme _getAppBarIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
     find.descendant(
       of: find.byType(AppBar),
+      matching: find.byType(IconTheme),
+    ).first,
+  );
+}
+
+IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
+  return tester.widget<IconTheme>(
+    find.descendant(
+      of: find.byType(NavigationToolbar),
       matching: find.byType(IconTheme),
     ).first,
   );
