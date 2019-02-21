@@ -28,6 +28,7 @@ source_set("gpu_surface_gl") {
   sources = [
     "$gpu_dir/gpu_surface_gl.cc",
     "$gpu_dir/gpu_surface_gl.h",
+    "$gpu_dir/gpu_surface_gl_delegate.cc",
     "$gpu_dir/gpu_surface_gl_delegate.h",
   ]
 

@@ -21,7 +21,8 @@ class IOManager : public blink::IOManager {
   // the IOManager. The platforms may create the context themselves if they so
   // desire.
   static sk_sp<GrContext> CreateCompatibleResourceLoadingContext(
-      GrBackend backend);
+      GrBackend backend,
+      sk_sp<const GrGLInterface> gl_interface);
 
   IOManager(sk_sp<GrContext> resource_context,
             fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);

@@ -46,7 +46,6 @@ class GPUSurfaceGL : public Surface {
 
  private:
   GPUSurfaceGLDelegate* delegate_;
-  GPUSurfaceGLDelegate::GLProcResolver proc_resolver_;
   sk_sp<GrContext> context_;
   sk_sp<SkSurface> onscreen_surface_;
   sk_sp<SkSurface> offscreen_surface_;
@@ -61,8 +60,6 @@ class GPUSurfaceGL : public Surface {
       const SkMatrix& root_surface_transformation);
 
   bool PresentSurface(SkCanvas* canvas);
-
-  bool IsProcResolverOpenGLES();
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };

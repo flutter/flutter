@@ -404,6 +404,7 @@ FILE: ../../../flutter/shell/common/vsync_waiter_fallback.cc
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl.h
+FILE: ../../../flutter/shell/gpu/gpu_surface_gl_delegate.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl_delegate.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h

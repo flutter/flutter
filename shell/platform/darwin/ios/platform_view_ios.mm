@@ -12,6 +12,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
@@ -82,7 +83,8 @@ sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
     return nullptr;
   }
 
-  return IOManager::CreateCompatibleResourceLoadingContext(GrBackend::kOpenGL_GrBackend);
+  return IOManager::CreateCompatibleResourceLoadingContext(
+      GrBackend::kOpenGL_GrBackend, GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
 }
 
 // |shell::PlatformView|

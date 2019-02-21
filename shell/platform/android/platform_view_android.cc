@@ -9,6 +9,7 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
@@ -379,7 +380,8 @@ sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
     // the OpenGL surface will be able to make a resource context current. If
     // this changes, this assumption breaks. Handle the same.
     resource_context = IOManager::CreateCompatibleResourceLoadingContext(
-        GrBackend::kOpenGL_GrBackend);
+        GrBackend::kOpenGL_GrBackend,
+        GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
   } else {
     FML_DLOG(ERROR) << "Could not make the resource context current.";
   }
