@@ -14,6 +14,9 @@ Cache get cache => Cache.instance;
 Config get config => Config.instance;
 Artifacts get artifacts => Artifacts.instance;
 
+/// Disables the trace logger entirely.
+bool disableTrace = false;
+
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
 ///
@@ -71,4 +74,4 @@ void printStatus(
 
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
-void printTrace(String message) => logger.printTrace(message);
+void printTrace(String message) => disableTrace ? logger.printTrace(message) : null;

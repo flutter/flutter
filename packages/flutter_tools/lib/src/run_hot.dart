@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:watcher/watcher.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -74,14 +75,25 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
-             ipv6: ipv6);
+             ipv6: ipv6) {
+                watcher = DirectoryWatcher(projectRootPath ?? fs.currentDirectory.path);
+                watcher.events.listen((WatchEvent event) {
+                  if (event.type == ChangeType.REMOVE) {
+                    return;
+                  }
+                  if (event.path.endsWith('.dart')) {
+                    _invalidatedFiles.add(event.path);
+                  }
+                });
+             }
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
-  Set<String> _dartDependencies;
   final String dillOutputPath;
+  final List<String> _invalidatedFiles = <String>[];
+  Watcher watcher;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -201,7 +213,6 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      // TODO(johnmccutchan): Modify script entry point.
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -274,8 +285,6 @@ class HotRunner extends ResidentRunner {
         result = await restart(fullRestart: false);
       }
       if (!result.isOk) {
-        // TODO(johnmccutchan): Attempt to determine the number of errors that
-        // occurred and tighten this message.
         printStatus('Try again after fixing the above error(s).', emphasis: true);
       }
     } else if (lower == 'l') {
@@ -312,6 +321,8 @@ class HotRunner extends ResidentRunner {
     }
 
     final UpdateFSReport results = UpdateFSReport(success: true);
+    final List<String> invalidatedFiles = List<String>.from(_invalidatedFiles);
+    _invalidatedFiles.clear();
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
         mainPath: mainPath,
@@ -320,37 +331,13 @@ class HotRunner extends ResidentRunner {
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
         bundleDirty: isFirstUpload == false && rebuildBundle,
-        fileFilter: _dartDependencies,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
+        invalidatedFiles: invalidatedFiles,
       ));
     }
-    if (!results.success) {
-      return results;
-    }
-
-    if (!hotRunnerConfig.stableDartDependencies) {
-      // Clear the set after the sync so they are recomputed next time.
-      _dartDependencies = null;
-    }
     return results;
-  }
-
-  Future<void> _evictDirtyAssets() {
-    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
-    for (FlutterDevice device in flutterDevices) {
-      if (device.devFS.assetPathsToEvict.isEmpty)
-        continue;
-      if (device.views.first.uiIsolate == null) {
-        printError('Application isolate not found for $device');
-        continue;
-      }
-      for (String assetPath in device.devFS.assetPathsToEvict)
-        futures.add(device.views.first.uiIsolate.flutterEvictAsset(assetPath));
-      device.devFS.assetPathsToEvict.clear();
-    }
-    return Future.wait<Map<String, dynamic>>(futures);
   }
 
   void _resetDirtyAssets() {
@@ -742,8 +729,6 @@ class HotRunner extends ResidentRunner {
       }
     }
     assert(reassembleViews.isNotEmpty);
-    printTrace('Evicting dirty assets');
-    await _evictDirtyAssets();
     printTrace('Reassembling application');
     bool failedReassemble = false;
     final List<Future<void>> futures = <Future<void>>[];
@@ -755,12 +740,6 @@ class HotRunner extends ResidentRunner {
           failedReassemble = true;
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
           return;
-        }
-        try {
-          await view.uiIsolate.uiWindowScheduleFrame();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
         }
       }());
     }
@@ -816,7 +795,6 @@ class HotRunner extends ResidentRunner {
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadDuration);
-
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,

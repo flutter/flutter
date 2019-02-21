@@ -9,7 +9,6 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  analyzer: 0.35.1
   archive: 2.0.8
   args: 1.5.1
   cli_util: 0.1.3+2
