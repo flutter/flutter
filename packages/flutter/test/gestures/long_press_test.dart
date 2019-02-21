@@ -91,7 +91,7 @@ void main() {
       longPress.dispose();
     });
 
-    testGesture('Moving after accept cancels', (GestureTester tester) {
+    testGesture('Moving after accept is ok', (GestureTester tester) {
       longPress.addPointer(down);
       tester.closeArena(5);
       expect(longPressDown, isFalse);
@@ -102,10 +102,8 @@ void main() {
       tester.route(move);
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      // longPressDown is still true since it already happened but up never
-      // happens because it's been canceled since.
       expect(longPressDown, isTrue);
-      expect(longPressUp, isFalse);
+      expect(longPressUp, isTrue);
 
       longPress.dispose();
     });
@@ -192,23 +190,23 @@ void main() {
   });
 
   group('long press drag', () {
-    LongPressDragGestureRecognizer longPressDrag;
+    LongPressGestureRecognizer longPressDrag;
     bool longPressStart;
     bool longPressUp;
     Offset longPressDragUpdate;
 
     setUp(() {
-      longPressDrag = LongPressDragGestureRecognizer();
+      longPressDrag = LongPressGestureRecognizer();
       longPressStart = false;
-      longPressDrag.onLongPressStart = (GestureLongPressDragStartDetails details) {
+      longPressDrag.onLongPressStart = (LongPressStartDetails details) {
         longPressStart = true;
       };
       longPressUp = false;
-      longPressDrag.onLongPressUp = (GestureLongPressDragUpDetails details) {
+      longPressDrag.onLongPressEnd = (LongPressEndDetails details) {
         longPressUp = true;
       };
       longPressDragUpdate = null;
-      longPressDrag.onLongPressDragUpdate = (GestureLongPressDragUpdateDetails details) {
+      longPressDrag.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
         longPressDragUpdate = details.globalPosition;
       };
     });

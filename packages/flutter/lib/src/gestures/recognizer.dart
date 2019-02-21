@@ -259,13 +259,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   }
 }
 
-/// The possible states of a [PrimaryPointerGestureRecognizer].
-///
 /// The recognizer advances from [ready] to [possible] when starts tracking a
-/// primary pointer. The recognizer moves to [accepted] when resolved to win the
-/// gesture arena. It may then move to [defunct] from [accepted] or go to
-/// [defunct] directly when rejected. Once the recognizer has stopped tracking
-/// any remaining pointers, the recognizer returns to [ready].
+/// primary pointer. When the primary pointer is resolved in the gesture
+/// arena (either accepted or or rejected), the recognizers advances to
+/// [defunct]. Once the recognizer has stopped tracking any remaining pointers,
+/// the recognizer returns to [ready].
 enum GestureRecognizerState {
   /// The recognizer is ready to start recognizing a gesture.
   ready,
@@ -275,9 +273,6 @@ enum GestureRecognizerState {
   /// been accepted definitively.
   possible,
 
-  /// The gesture has been definitively accepted by the recognizer.
-  accepted,
-
   /// Further pointer events cannot cause this recognizer to recognize the
   /// gesture until the recognizer returns to the [ready] state (typically when
   /// all the pointers the recognizer is tracking are removed from the screen).
@@ -286,10 +281,12 @@ enum GestureRecognizerState {
 
 /// A base class for gesture recognizers that track a single primary pointer.
 ///
-/// Gestures based on this class will reject the gesture if the primary pointer
-/// travels beyond [preAcceptSlopTolerance] pixels from the original contact
-/// point before the gesture is accepted or beyond [postAcceptSlopTolerance]
-/// from where the pointer was after the gesture was accepted.
+/// Gestures based on this class will stop tracking the gesture if the primary
+/// pointer travels beyond [preAcceptSlopTolerance] or [postAcceptSlopTolerance]
+/// pixels from the original contact point of the gesture.
+///
+/// If the [preAcceptSlopTolerance] was breached the gesture was accepted in
+/// the gesture arena, the gesture will be rejected.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   PrimaryPointerGestureRecognizer({
@@ -315,13 +312,19 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// from the initial touch down position before the gesture is accepted.
   ///
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
+  ///
+  /// Can be null to indicate that the gesture can drift for any distance.
+  /// Defaults to 18 logical pixels.
   final double preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// after the gesture has been accepted.
   ///
-  /// Drifting past the allowed slop amount causes the gesture to be rejected,
-  /// even after being accepted.
+  /// Drifting past the allowed slop amount causes the gesture to stop tracking
+  /// and signaling subsequent callbacks.
+  ///
+  /// Can be null to indicate that the gesture can drift for any distance.
+  /// Defaults to 18 logical pixels.
   final double postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
@@ -335,6 +338,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The global location at which the primary pointer contacted the screen.
   Offset initialPosition;
 
+  // Whether this pointer is accepted by winning the arena or as defined by
+  // a subclass calling acceptGesture.
+  bool _gestureAccepted = false;
   Timer _timer;
 
   @override
@@ -354,11 +360,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     assert(state != GestureRecognizerState.ready);
     if (event.pointer == primaryPointer) {
       final bool isPreAcceptSlopPastTolerance =
-          state == GestureRecognizerState.possible &&
+          !_gestureAccepted &&
           preAcceptSlopTolerance != null &&
           _getDistance(event) > preAcceptSlopTolerance;
       final bool isPostAcceptSlopPastTolerance =
-          state == GestureRecognizerState.accepted &&
+          _gestureAccepted &&
           postAcceptSlopTolerance != null &&
           _getDistance(event) > postAcceptSlopTolerance;
 
@@ -386,18 +392,12 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void acceptGesture(int pointer) {
-    // Ignore state 'ready' here because that would happen if this recognizer
-    // won by a sweep.
-    if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
-      state = GestureRecognizerState.accepted;
-    }
+    _gestureAccepted = true;
   }
 
   @override
   void rejectGesture(int pointer) {
-    if (pointer == primaryPointer
-        && (state == GestureRecognizerState.possible ||
-            state == GestureRecognizerState.accepted)) {
+    if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
       state = GestureRecognizerState.defunct;
     }

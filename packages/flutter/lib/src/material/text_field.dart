@@ -646,7 +646,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
-  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
+  void _handleSingleLongTapStart(LongPressStartDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
@@ -665,7 +665,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _confirmCurrentSplash();
   }
 
-  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
+  void _handleSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
@@ -686,7 +686,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
+  void _handleSingleLongTapEnd(LongPressEndDetails details) {
     _editableTextKey.currentState.showToolbar();
   }
 
@@ -858,8 +858,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,
           onSingleLongTapStart: _handleSingleLongTapStart,
-          onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
-          onSingleLongTapUp: _handleSingleLongTapUp,
+          onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+          onSingleLongTapEnd: _handleSingleLongTapEnd,
           onDoubleTapDown: _handleDoubleTapDown,
           behavior: HitTestBehavior.translucent,
           child: child,

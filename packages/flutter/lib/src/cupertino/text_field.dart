@@ -478,25 +478,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _requestKeyboard();
   }
 
-  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
+  void _handleSingleLongTapStart(LongPressStartDetails details) {
     _renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.longPress,
     );
   }
 
-  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
+  void _handleSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     _renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.longPress,
     );
   }
 
-  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
-    _renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.longPress
-    );
+  void _handleSingleLongTapEnd(LongPressEndDetails details) {
     _editableTextKey.currentState.showToolbar();
   }
 
@@ -706,8 +702,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onForcePressEnd: _handleForcePressEnded,
               onSingleTapUp: _handleSingleTapUp,
               onSingleLongTapStart: _handleSingleLongTapStart,
-              onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
-              onSingleLongTapUp: _handleSingleLongTapUp,
+              onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+              onSingleLongTapEnd: _handleSingleLongTapEnd,
               onDoubleTapDown: _handleDoubleTapDown,
               behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable, textStyle),
