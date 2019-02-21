@@ -114,6 +114,7 @@ over water meant for the whole central valley of California? The story will shoc
                         ),
                         Text(
                           ' ¬ ',
+                          // TODO(larche): Replace textTheme.display3.color with a ColorScheme value when known.
                           style: textTheme.overline.apply(color: textTheme.display3.color)
                         ),
                         Text(
