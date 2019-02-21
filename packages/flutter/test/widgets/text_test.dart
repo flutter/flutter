@@ -299,7 +299,7 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 }
-
+//
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
   return tester.pumpWidget(
     Directionality(
