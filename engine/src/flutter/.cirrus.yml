@@ -24,7 +24,19 @@ task:
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --unoptimized
         ninja -C out/host_debug_unopt
-      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh
+      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_debug_unopt
+    - name: build_and_test_host_profile
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode profile --no-lto
+        ninja -C out/host_profile
+      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_profile
+    - name: build_and_test_host_release
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode release --no-lto
+        ninja -C out/host_release
+      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_release
     - name: build_android
       compile_host_script: |
         cd $ENGINE_PATH/src
