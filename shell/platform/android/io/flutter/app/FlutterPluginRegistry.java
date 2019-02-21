@@ -7,6 +7,8 @@ package io.flutter.app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewRegistry;
@@ -45,6 +47,12 @@ public class FlutterPluginRegistry
 
     public FlutterPluginRegistry(FlutterNativeView nativeView, Context context) {
         mNativeView = nativeView;
+        mAppContext = context;
+        mPlatformViewsController = new PlatformViewsController();
+    }
+
+    public FlutterPluginRegistry(FlutterEngine engine, Context context) {
+        // TODO(mattcarroll): implement use of engine instead of nativeView.
         mAppContext = context;
         mPlatformViewsController = new PlatformViewsController();
     }
