@@ -1895,6 +1895,7 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      // TODO(justinmc): This fails due to same prefix/suffix space change
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),

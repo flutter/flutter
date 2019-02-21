@@ -878,13 +878,10 @@ class _RenderDecoration extends RenderBox {
         bottom: contentPadding.bottom + bottomHeight,
       )),
     );
-    //print('justin deflate ${contentPadding.top} + $topHeight | ${contentPadding.bottom} + $bottomHeight');
 
     // The baseline that will be used to draw the actual input text content.
     final double inputBaseline = contentPadding.top + topHeight + boxToBaseline[input];
     final double inputHeight = input?.size?.height == null ? 0 : input.size.height;
-
-    //print('justin inputB ${contentPadding.top} + $topHeight + ${boxToBaseline[input]} = $inputBaseline btw labelheight $labelHeight ${decoration.floatingLabelHeight}');
 
     // The height of the visible input container box. What would be outlined.
     // TODO(justinmc): The existing behavior is to actually allow the invisible
@@ -897,7 +894,6 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.top
       + inputHeight
       + contentPadding.bottom;
-    //print('justin containerHeight $topHeight + ${contentPadding.top} + $inputHeight + ${contentPadding.bottom} = $containerHeight');
 
     // TODO(justinmc): What exactly is outlineBaseline and how did the original
     // calculation work? It seems like it's used as the inputBaseline when there
@@ -908,20 +904,34 @@ class _RenderDecoration extends RenderBox {
     // less 2.0 dps at the top to account for the vertical space occupied
     // by the floating label.
     /*
-    final double outlineBaseline = topHeight +
-      (containerHeight - (2.0 + topHeight + bottomHeight)) / 2.0;
-    */
-    final double outlineBaseline = inputBaseline;
+    final double outlineBaseline = aboveBaseline +
+      (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
+      */
+    final double outlineBaseline = boxToBaseline[input] +
+      (containerHeight - (2.0 + inputHeight)) / 2.0;
 
-    double subtextBaseline = 0.0;
-    double subtextHeight = 0.0;
+    double subtextCounterBaseline = 0;
+    double subtextHelperBaseline = 0;
+    double subtextCounterHeight = 0;
+    double subtextHelperHeight = 0;
     if (counter != null) {
-      subtextBaseline = containerHeight + SUBTEXT_GAP + boxToBaseline[counter];
-      subtextHeight = counter.size.height + SUBTEXT_GAP;
-    } else if (helperErrorWidget.helperText != null) {
-      subtextBaseline = containerHeight + SUBTEXT_GAP + boxToBaseline[helperError];
-      subtextHeight = helperError.size.height + SUBTEXT_GAP;
+      subtextCounterBaseline =
+        containerHeight + SUBTEXT_GAP + boxToBaseline[counter];
+      subtextCounterHeight = counter.size.height + SUBTEXT_GAP;
     }
+    if (helperErrorWidget.helperText != null) {
+      subtextHelperBaseline =
+        containerHeight + SUBTEXT_GAP + boxToBaseline[helperError];
+      subtextHelperHeight = helperError.size.height + SUBTEXT_GAP;
+    }
+    final double subtextBaseline = math.max(
+      subtextCounterBaseline,
+      subtextHelperBaseline,
+    );
+    final double subtextHeight = math.max(
+      subtextCounterHeight,
+      subtextHelperHeight,
+    );
 
     /*
     print('''justin return
@@ -944,7 +954,7 @@ class _RenderDecoration extends RenderBox {
   }
 
   /*
-  _RenderDecorationLayout _layoutOld(BoxConstraints layoutConstraints) {
+  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     BoxConstraints boxConstraints = layoutConstraints.loosen();
     double aboveBaseline = 0.0;
@@ -1005,7 +1015,7 @@ class _RenderDecoration extends RenderBox {
       containerHeight += decoration.floatingLabelHeight;
       inputBaseline += decoration.floatingLabelHeight;
     }
-    print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
+    //print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
 
     containerHeight = math.max(
       containerHeight,
@@ -1019,7 +1029,7 @@ class _RenderDecoration extends RenderBox {
     // by the floating label.
     final double outlineBaseline = aboveBaseline +
       (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
-    print('justin old outlinebaseline $outlineBaseline');
+    //print('justin old outlinebaseline $aboveBaseline + ($containerHeight - (2.0 + $aboveBaseline + $belowBaseline)) / 2.0');
 
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
