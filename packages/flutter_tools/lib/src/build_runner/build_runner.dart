@@ -158,9 +158,11 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('name: flutter_tool');
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = await flutterProject.builders;
-      for (String name in builders.keys) {
-        final YamlNode node = builders[name];
-        stringBuffer.writeln('  $name: $node');
+      if (builders != null) {
+        for (String name in builders.keys) {
+          final YamlNode node = builders[name];
+          stringBuffer.writeln('  $name: $node');
+        }
       }
       stringBuffer.writeln('  build_runner: any');
       stringBuffer.writeln('  flutter_build:');
@@ -253,18 +255,22 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
   final File packagesFile;
   @override
   final File dillFile;
+  @override
+  CodegenStatus get lastStatus => _lastStatus;
+  CodegenStatus _lastStatus;
 
   @override
   Stream<CodegenStatus> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {
     if (results.results.first.status == BuildStatus.failed) {
-      return CodegenStatus.Failed;
+      return _lastStatus = CodegenStatus.Failed;
     }
     if (results.results.first.status == BuildStatus.started) {
-      return CodegenStatus.Started;
+      return _lastStatus = CodegenStatus.Started;
     }
     if (results.results.first.status == BuildStatus.succeeded) {
-      return CodegenStatus.Succeeded;
+      return _lastStatus = CodegenStatus.Succeeded;
     }
+    _lastStatus = null;
     return null;
   });
 
