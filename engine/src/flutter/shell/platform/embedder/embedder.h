@@ -505,6 +505,10 @@ typedef struct {
   // |FlutterEngineRun| call is made.
   FlutterUpdateSemanticsCustomActionCallback
       update_semantics_custom_action_callback;
+  // Path to a directory used to store data that is cached across runs of a
+  // Flutter application (such as compiled shader programs used by Skia).
+  // This is optional.  The string must be NULL terminated.
+  const char* persistent_cache_path;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT

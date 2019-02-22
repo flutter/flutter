@@ -21,6 +21,8 @@ class PersistentCache : public GrContextOptions::PersistentCache {
  public:
   static PersistentCache* GetCacheForProcess();
 
+  static void SetCacheDirectoryPath(std::string path);
+
   ~PersistentCache() override;
 
   void AddWorkerTaskRunner(fml::RefPtr<fml::TaskRunner> task_runner);
@@ -28,6 +30,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   void RemoveWorkerTaskRunner(fml::RefPtr<fml::TaskRunner> task_runner);
 
  private:
+  static std::string cache_base_path_;
   std::shared_ptr<fml::UniqueFD> cache_directory_;
   mutable std::mutex worker_task_runners_mutex_;
   std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_
