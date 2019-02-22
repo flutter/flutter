@@ -40,6 +40,9 @@ void main() {
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
+    // Will need to be changed if the animation curve or duration changes.
+    expect(widget1TransientTopLeft.dx, closeTo(130, 1.0));
+
     await tester.pumpAndSettle();
 
     // Page 2 covers page 1.
@@ -61,6 +64,9 @@ void main() {
     expect(widget1InitialTopLeft.dy, equals(widget2TopLeft.dy));
     // Page 2 is leaving towards the right.
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
+
+    // Will need to be changed if the animation curve or duration changes.
+    expect(widget1TransientTopLeft.dx, closeTo(249, 1.0));
 
     await tester.pumpAndSettle();
 
@@ -222,7 +228,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(seconds: 1));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
@@ -285,7 +291,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(seconds: 2));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       CupertinoPageRoute<void>(
@@ -293,7 +299,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
@@ -332,7 +338,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       CupertinoPageRoute<void>(
@@ -341,7 +347,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
@@ -379,7 +385,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);

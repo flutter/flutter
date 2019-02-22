@@ -16,9 +16,9 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
     if (callback != null)
       callback(event);
-    super.handleEvent(event, entry);
   }
 }
 
@@ -26,6 +26,7 @@ TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
   _binding ??= TestGestureFlutterBinding();
+  PointerEventConverter.clearPointers();
   assert(GestureBinding.instance != null);
 }
 
@@ -66,6 +67,34 @@ void main() {
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
     expect(events[2].runtimeType, equals(PointerUpEvent));
+  });
+
+  test('Pointer hover events', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.hover),
+          ui.PointerData(change: ui.PointerChange.hover),
+          ui.PointerData(change: ui.PointerChange.remove),
+          ui.PointerData(change: ui.PointerChange.hover),
+        ]
+    );
+
+    final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
+    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
+
+    ui.window.onPointerDataPacket(packet);
+    expect(events.length, 0);
+    expect(pointerRouterEvents.length, 6,
+        reason: 'pointerRouterEvents contains: $pointerRouterEvents');
+    expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));
+    expect(pointerRouterEvents[1].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[2].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[3].runtimeType, equals(PointerRemovedEvent));
+    expect(pointerRouterEvents[4].runtimeType, equals(PointerAddedEvent));
+    expect(pointerRouterEvents[5].runtimeType, equals(PointerHoverEvent));
   });
 
   test('Synthetic move events', () {

@@ -609,6 +609,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Call [beginActivity] to change the current activity.
   @protected
+  @visibleForTesting
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 

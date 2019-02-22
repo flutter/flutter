@@ -297,6 +297,31 @@ void main() {
     expect(boxG1, isNot(equals(boxG2)));
   });
 
+  testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27083
+    const SizedBox cell = SizedBox(width: 16, height: 16);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    // If the above bug is present this test will never terminate.
+  });
+
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
+export 'dart:ui' show Brightness;
+
 /// Specifies a particular device orientation.
 ///
 /// To determine which values correspond to which orientations, first position
@@ -76,21 +78,6 @@ enum SystemUiOverlay {
   /// The status bar provided by the embedder on the bottom of the application
   /// surface, if any.
   bottom,
-}
-
-/// Describes the contrast needs of a color.
-enum Brightness {
-  /// The color is dark and will require a light text color to achieve readable
-  /// contrast.
-  ///
-  /// For example, the color might be dark grey, requiring white text.
-  dark,
-
-  /// The color is light and will require a dark text color to achieve readable
-  /// contrast.
-  ///
-  /// For example, the color might be bright white, requiring black text.
-  light,
 }
 
 /// Specifies a preference for the style of the system overlays.

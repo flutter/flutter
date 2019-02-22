@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
+import 'rendering_tester.dart';
 
 class FakeEditableTextState extends TextSelectionDelegate {
   @override
@@ -26,10 +27,6 @@ class FakeEditableTextState extends TextSelectionDelegate {
 }
 
 void main() {
-
-  final TextEditingController controller = TextEditingController();
-  const TextStyle textStyle = TextStyle();
-
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -99,67 +96,76 @@ void main() {
     );
   });
 
-  RenderEditable findRenderEditable(WidgetTester tester) {
-    final RenderObject root = tester.renderObject(find.byType(EditableText));
-    expect(root, isNotNull);
+  test('Can change cursor color, radius, visibility', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    EditableText.debugDeterministicCursor = true;
 
-    RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditable) {
-        renderEditable = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderEditable, isNotNull);
-    return renderEditable;
-  }
-
-  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
-    final FocusNode focusNode = FocusNode();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-          ),
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      textDirection: TextDirection.ltr,
+      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
       ),
     );
 
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable editable = findRenderEditable(tester);
-    editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+    layout(editable);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
-    await tester.pump();
-
-    expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(464.5, 0, 467.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    expect(
+      editable,
+      // Draw no cursor by default.
+      paintsExactlyCountTimes(#drawRect, 0),
     );
 
-    // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(-250, 20)));
+    editable.showCursor = showCursor;
+    pumpFrame();
 
-    expect(find.byType(EditableText), paints..rrect(
-      rrect: RRect.fromRectAndRadius(Rect.fromLTRB(194.5, 0, 197.5, 16.0), const Radius.circular(1.0)), color: const Color(0xff4285f4))
-    );
+    expect(editable, paints..rect(
+      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      rect: Rect.fromLTWH(40, 2, 1, 6),
+    ));
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    // Now change to a rounded caret.
+    editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
+    editable.cursorWidth = 4;
+    editable.cursorRadius = const Radius.circular(3);
+    pumpFrame();
 
-    await tester.pumpAndSettle();
+    expect(editable, paints..rrect(
+      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(40, 2, 4, 6),
+        const Radius.circular(3),
+      ),
+    ));
 
-    debugDefaultTargetPlatformOverride = null;
+    editable.textScaleFactor = 2;
+    pumpFrame();
+
+    // Now the caret height is much bigger due to the bigger font scale.
+    expect(editable, paints..rrect(
+      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(80, 2, 4, 16),
+        const Radius.circular(3),
+      ),
+    ));
+
+    // Can turn off caret.
+    showCursor.value = false;
+    pumpFrame();
+
+    expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
 }

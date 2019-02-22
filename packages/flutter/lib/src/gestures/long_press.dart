@@ -21,7 +21,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// Consider assigning the [onLongPress] callback after creating this object.
   LongPressGestureRecognizer({ Object debugOwner })
-      : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
+    : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
 
   bool _longPressAccepted = false;
 

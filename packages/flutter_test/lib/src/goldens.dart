@@ -149,8 +149,8 @@ class LocalFileComparator implements GoldenFileComparator {
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
-      : basedir = _getBasedir(testFile, pathStyle),
-        _path = _getPath(pathStyle);
+    : basedir = _getBasedir(testFile, pathStyle),
+      _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style style) {
     return path.Context(style: style ?? path.Style.platform);

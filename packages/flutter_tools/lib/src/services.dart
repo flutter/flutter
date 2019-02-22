@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
 import 'android/android_sdk.dart';
 import 'base/file_system.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 

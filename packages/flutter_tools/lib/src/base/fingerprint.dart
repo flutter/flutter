@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart' show hash2;
 
+import '../convert.dart' show json;
 import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';

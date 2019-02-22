@@ -263,7 +263,17 @@ class BorderSide {
 
 /// Base class for shape outlines.
 ///
-/// This class handles how to add multiple borders together.
+/// This class handles how to add multiple borders together. Subclasses define
+/// various shapes, like circles ([CircleBorder]), rounded rectangles
+/// ([RoundedRectangleBorder]), superellipses ([SuperellipseShape]), or beveled
+/// rectangles ([BeveledRectangleBorder]).
+///
+/// See also:
+///
+///  * [ShapeDecoration], which can be used with [DecoratedBox] to show a shape.
+///  * [Material] (and many other widgets in the Material library), which takes
+///    a [ShapeBorder] to define its shape.
+///  * [NotchedShape], which describes a shape with a hole in it.
 @immutable
 abstract class ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide

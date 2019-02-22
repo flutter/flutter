@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show base64;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -19,6 +18,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
+import 'convert.dart' show base64;
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
@@ -1305,7 +1305,7 @@ class Isolate extends ServiceObjectOwner {
     final Map<String, dynamic> result =
       await invokeFlutterExtensionRpcRaw('ext.flutter.saveCompilationTrace');
     if (result != null && result['value'] is List<dynamic>)
-        return result['value'].cast<int>();
+      return result['value'].cast<int>();
     return null;
   }
 
@@ -1384,7 +1384,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
   @override
   void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
-  Map<RK, RV> retype<RK, RV>() => _map.cast<RK, RV>(); // ignore: annotate_overrides
+  Map<RK, RV> retype<RK, RV>() => _map.cast<RK, RV>();
   @override
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }

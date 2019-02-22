@@ -533,6 +533,14 @@ class ArchivePublisher {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
+    if (platform.isWindows) {
+      return _processRunner.runProcess(
+        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--']..addAll(args),
+        workingDirectory: workingDirectory,
+        failOk: failOk,
+      );
+    }
+
     return _processRunner.runProcess(
       <String>['gsutil.py', '--']..addAll(args),
       workingDirectory: workingDirectory,

@@ -231,9 +231,9 @@ class TextSelectionOverlay {
     this.selectionControls,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.down,
-  }): assert(value != null),
-      assert(context != null),
-      _value = value {
+  }) : assert(value != null),
+       assert(context != null),
+       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
     _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);

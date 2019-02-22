@@ -22,6 +22,23 @@ ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
 ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
+  command -v curl > /dev/null 2>&1 || {
+    echo
+    echo 'Missing "curl" tool. Unable to download Dart SDK.'
+    case "$(uname -s)" in
+      Darwin)
+        echo 'Consider running "brew install curl".'
+        ;;
+      Linux)
+        echo 'Consider running "sudo apt-get install curl".'
+        ;;
+      *)
+        echo "Please install curl."
+        ;;
+    esac
+    echo
+    exit 1
+  }
   echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
   case "$(uname -s)" in

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' as convert;
 
 import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
@@ -12,6 +11,7 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'convert.dart' as convert;
 import 'globals.dart';
 
 final RegExp _versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');

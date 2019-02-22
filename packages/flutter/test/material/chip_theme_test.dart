@@ -20,6 +20,15 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
 IconThemeData getIconData(WidgetTester tester) {
   final IconTheme iconTheme = tester.firstWidget(
     find.descendant(
@@ -110,6 +119,7 @@ void main() {
     final ChipThemeData customTheme = chipTheme.copyWith(
       backgroundColor: Colors.purple,
       deleteIconColor: Colors.purple.withAlpha(0x3d),
+      elevation: 3.0,
     );
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
@@ -148,8 +158,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderBox materialBox = getMaterialBox(tester);
+    final Material material = getMaterial(tester);
 
     expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
+    expect(material.elevation, customTheme.elevation);
   });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
@@ -217,12 +229,21 @@ void main() {
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
       labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+    ).copyWith(
+      elevation: 1.0,
+      pressElevation: 4.0,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
       labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
-    ).copyWith(padding: const EdgeInsets.all(2.0), labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0));
+    ).copyWith(
+      padding: const EdgeInsets.all(2.0),
+      labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      elevation: 5.0,
+      pressElevation: 10.0,
+    );
+
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);
     expect(lerp.backgroundColor, equals(middleGrey.withAlpha(0x1f)));
@@ -236,6 +257,8 @@ void main() {
     expect(lerp.labelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.secondaryLabelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.brightness, equals(Brightness.light));
+    expect(lerp.elevation, 3.0);
+    expect(lerp.pressElevation, 7.0);
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
@@ -251,6 +274,8 @@ void main() {
     expect(lerpANull25.labelStyle.color, equals(Colors.black.withAlpha(0x38)));
     expect(lerpANull25.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0x38)));
     expect(lerpANull25.brightness, equals(Brightness.light));
+    expect(lerpANull25.elevation, 1.25);
+    expect(lerpANull25.pressElevation, 2.5);
 
     final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75);
     expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
@@ -264,6 +289,8 @@ void main() {
     expect(lerpANull75.labelStyle.color, equals(Colors.black.withAlpha(0xa7)));
     expect(lerpANull75.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0xa7)));
     expect(lerpANull75.brightness, equals(Brightness.light));
+    expect(lerpANull75.elevation, 3.75);
+    expect(lerpANull75.pressElevation, 7.5);
 
     final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25);
     expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
@@ -277,6 +304,8 @@ void main() {
     expect(lerpBNull25.labelStyle.color, equals(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0xa7)));
     expect(lerpBNull25.brightness, equals(Brightness.dark));
+    expect(lerpBNull25.elevation, 0.75);
+    expect(lerpBNull25.pressElevation, 3.0);
 
     final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75);
     expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
@@ -290,5 +319,7 @@ void main() {
     expect(lerpBNull75.labelStyle.color, equals(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0x38)));
     expect(lerpBNull75.brightness, equals(Brightness.light));
+    expect(lerpBNull75.elevation, 0.25);
+    expect(lerpBNull75.pressElevation, 1.0);
   });
 }

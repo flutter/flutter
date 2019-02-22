@@ -168,7 +168,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   _LineBetweenPointers _initialLine;
   _LineBetweenPointers _currentLine;
   Map<int, Offset> _pointerLocations;
-  List<int> _pointerQueue; /// A queue to sort pointers in order of entrance
+  List<int> _pointerQueue; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;

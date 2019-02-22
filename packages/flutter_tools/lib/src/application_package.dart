@@ -18,6 +18,7 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 
@@ -42,6 +43,9 @@ class ApplicationPackageFactory {
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
+        return applicationBinary != null
+          ? MacOSApp.fromPrebuiltApp(applicationBinary)
+          : null;
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:

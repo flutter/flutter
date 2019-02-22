@@ -42,12 +42,13 @@ function create_offline_zip() {
 function create_docset() {
   # Must be run from "$FLUTTER_ROOT/dev/docs"
   # Must have dashing installed: go get -u github.com/technosophos/dashing
-  # Dashing produces a LOT of output (~30MB), so we redirect it, and just show
-  # the end of it if there was a problem.
+  # Dashing produces a LOT of log output (~30MB), so we redirect it, and just
+  # show the end of it if there was a problem.
   echo "Building Flutter docset."
   rm -rf flutter.docset
   (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
+  "$DART" ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
 }
 
@@ -103,7 +104,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.28.0
+"$PUB" global activate dartdoc 0.28.1+2
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
@@ -20,6 +19,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -106,7 +106,7 @@ Future<GradleProject> _readGradleProject() async {
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:tasks', '--all'],
+      <String>[gradle, 'app:tasks', '--all', '--console=auto'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
@@ -448,8 +448,9 @@ Future<void> _buildGradleProjectV2(
 
     if (buildInfo.createPatch) {
       final AndroidApk package = AndroidApk.fromApk(apkFile);
-    final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-    final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');if (!baselineApkFile.existsSync())
+      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
+      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
+      if (!baselineApkFile.existsSync())
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');

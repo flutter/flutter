@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show AsciiDecoder;
 
+import '../convert.dart';
 import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
@@ -42,9 +42,9 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  })  : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
-        _overrideWrapColumn = wrapColumn,
-        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+  }) : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+       _overrideWrapColumn = wrapColumn,
+       showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be

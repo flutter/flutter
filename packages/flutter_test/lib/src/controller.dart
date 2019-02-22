@@ -38,15 +38,13 @@ abstract class WidgetController {
     return finder.evaluate().isNotEmpty;
   }
 
-
   /// All widgets currently in the widget tree (lazy pre-order traversal).
   ///
   /// Can contain duplicates, since widgets can be used in multiple
   /// places in the widget tree.
   Iterable<Widget> get allWidgets {
     TestAsyncUtils.guardSync();
-    return allElements
-           .map<Widget>((Element element) => element.widget);
+    return allElements.map<Widget>((Element element) => element.widget);
   }
 
   /// The matching widget in the widget tree.
@@ -83,7 +81,6 @@ abstract class WidgetController {
       return result;
     });
   }
-
 
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
@@ -127,7 +124,6 @@ abstract class WidgetController {
     return finder.evaluate();
   }
 
-
   /// All states currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -135,9 +131,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
-    return allElements
-           .whereType<StatefulElement>()
-           .map<State>((StatefulElement element) => element.state);
+    return allElements.whereType<StatefulElement>().map<State>((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -183,7 +177,6 @@ abstract class WidgetController {
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
-
   /// Render objects of all the widgets currently in the widget tree
   /// (lazy pre-order traversal).
   ///
@@ -193,8 +186,7 @@ abstract class WidgetController {
   /// their own render object.
   Iterable<RenderObject> get allRenderObjects {
     TestAsyncUtils.guardSync();
-    return allElements
-           .map<RenderObject>((Element element) => element.renderObject);
+    return allElements.map<RenderObject>((Element element) => element.renderObject);
   }
 
   /// The render object of the matching widget in the widget tree.
@@ -232,7 +224,6 @@ abstract class WidgetController {
     });
   }
 
-
   /// Returns a list of all the [Layer] objects in the rendering.
   List<Layer> get layers => _walkLayers(binding.renderView.layer).toList();
   Iterable<Layer> _walkLayers(Layer layer) sync* {
@@ -248,7 +239,6 @@ abstract class WidgetController {
     }
   }
 
-
   // INTERACTION
 
   /// Dispatch a pointer down / pointer up sequence at the center of
@@ -256,12 +246,12 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> tap(Finder finder, { int pointer }) {
+  Future<void> tap(Finder finder, {int pointer}) {
     return tapAt(getCenter(finder), pointer: pointer);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, { int pointer }) {
+  Future<void> tapAt(Offset location, {int pointer}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
@@ -273,7 +263,7 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<TestGesture> press(Finder finder, { int pointer }) {
+  Future<TestGesture> press(Finder finder, {int pointer}) {
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(getCenter(finder), pointer: pointer);
     });
@@ -285,13 +275,13 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> longPress(Finder finder, { int pointer }) {
+  Future<void> longPress(Finder finder, {int pointer}) {
     return longPressAt(getCenter(finder), pointer: pointer);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, { int pointer }) {
+  Future<void> longPressAt(Offset location, {int pointer}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await pump(kLongPressTimeout + kPressTimeout);
@@ -319,7 +309,10 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
-  Future<void> fling(Finder finder, Offset offset, double speed, {
+  Future<void> fling(
+    Finder finder,
+    Offset offset,
+    double speed, {
     int pointer,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -361,7 +354,10 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
-  Future<void> flingFrom(Offset startLocation, Offset offset, double speed, {
+  Future<void> flingFrom(
+    Offset startLocation,
+    Offset offset,
+    double speed, {
     int pointer,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -414,7 +410,7 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<void> drag(Finder finder, Offset offset, { int pointer }) {
+  Future<void> drag(Finder finder, Offset offset, {int pointer}) {
     return dragFrom(getCenter(finder), offset, pointer: pointer);
   }
 
@@ -424,7 +420,7 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
+  Future<void> dragFrom(Offset startLocation, Offset offset, {int pointer}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
@@ -445,15 +441,30 @@ abstract class WidgetController {
     return result;
   }
 
-  /// Begins a gesture at a particular point, and returns the
-  /// [TestGesture] object which you can use to continue the gesture.
-  Future<TestGesture> startGesture(Offset downLocation, { int pointer }) {
-    return TestGesture.down(
-      downLocation,
-      pointer: pointer ?? _getNextPointer(),
+  /// Creates gesture and returns the [TestGesture] object which you can use
+  /// to continue the gesture using calls on the [TestGesture] object.
+  ///
+  /// You can use [startGesture] instead if your gesture begins with a down
+  /// event.
+  Future<TestGesture> createGesture({int pointer, PointerDeviceKind kind = PointerDeviceKind.touch}) async {
+    return TestGesture(
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
+      kind: kind,
+      pointer: pointer ?? _getNextPointer(),
     );
+  }
+
+  /// Creates a gesture with an initial down gesture at a particular point, and
+  /// returns the [TestGesture] object which you can use to continue the
+  /// gesture.
+  ///
+  /// You can use [createGesture] if your gesture doesn't begin with an initial
+  /// down gesture.
+  Future<TestGesture> startGesture(Offset downLocation, {int pointer}) async {
+    final TestGesture result = await createGesture(pointer: pointer);
+    await result.down(downLocation);
+    return result;
   }
 
   /// Forwards the given location to the binding's hitTest logic.
@@ -469,7 +480,6 @@ abstract class WidgetController {
       binding.dispatchEvent(event, result);
     });
   }
-
 
   // GEOMETRY
 

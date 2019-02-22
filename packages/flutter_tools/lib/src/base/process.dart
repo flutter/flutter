@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
+import '../convert.dart';
 import '../globals.dart';
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
@@ -193,7 +194,7 @@ Future<int> runInteractively(List<String> command, {
   );
   // The real stdin will never finish streaming. Pipe until the child process
   // finishes.
-  process.stdin.addStream(stdin); // ignore: unawaited_futures
+  unawaited(process.stdin.addStream(stdin));
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -361,7 +362,9 @@ class ProcessExit implements Exception {
 }
 
 class RunResult {
-  RunResult(this.processResult, this._command) : assert(_command != null), assert(_command.isNotEmpty);
+  RunResult(this.processResult, this._command)
+    : assert(_command != null),
+      assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -381,8 +384,8 @@ class RunResult {
     return out.toString().trimRight();
   }
 
- /// Throws a [ProcessException] with the given `message`.
- void throwException(String message) {
+  /// Throws a [ProcessException] with the given `message`.
+  void throwException(String message) {
     throw ProcessException(
       _command.first,
       _command.skip(1).toList(),

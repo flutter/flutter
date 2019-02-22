@@ -26,6 +26,15 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
 IconThemeData getIconData(WidgetTester tester) {
   final IconTheme iconTheme = tester.firstWidget(
     find.descendant(
@@ -1484,7 +1493,7 @@ void main() {
 
     final ChipThemeData chipTheme = theme.chipTheme;
 
-    InputChip inputChip = const InputChip(label: Text('Label'), pressElevation: 8.0);
+    InputChip inputChip = const InputChip(label: Text('Label'));
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
@@ -1497,13 +1506,18 @@ void main() {
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
-    expect(inputChip.pressElevation, 8.0);
+    Material material = getMaterial(tester);
+    expect(material.elevation, 0.0);
 
-    inputChip = const InputChip(label: Text('Label'), pressElevation: 12.0);
+    inputChip = const InputChip(
+      label: Text('Label'),
+      elevation: 4.0,
+    );
 
     await tester.pumpWidget(buildChip(chipTheme));
     await tester.pumpAndSettle();
-    expect(inputChip.pressElevation, 12.0);
+    material = getMaterial(tester);
+    expect(material.elevation, 4.0);
   });
 
   testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {

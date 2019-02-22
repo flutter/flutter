@@ -30,8 +30,7 @@ double getScrollOffset(WidgetTester tester) {
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset;
-  // Access for test only.
-  return position.activity.velocity; // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+  return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {

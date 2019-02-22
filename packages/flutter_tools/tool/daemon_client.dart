@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-
 import 'dart:io';
+
+import 'package:flutter_tools/src/base/common.dart';
 
 Process daemon;
 
@@ -82,10 +83,10 @@ Future<void> main() async {
   });
 
   // Print in the callback can't fail.
-  daemon.exitCode.then<void>((int code) { // ignore: unawaited_futures
+  unawaited(daemon.exitCode.then<void>((int code) {
     print('daemon exiting ($code)');
     exit(code);
-  });
+  }));
 }
 
 int id = 0;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -20,6 +19,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -163,7 +163,7 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
-        // Ignore: return null below.
+        // Ignored, return null below.
       }
     }
     return _xcodeSelectPath;
@@ -467,7 +467,8 @@ Future<XcodeBuildResult> buildXcodeProject({
             return;
           }
         } else {
-          initialBuildStatus.cancel();
+          initialBuildStatus?.cancel();
+          initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
             timeout: kSlowOperation,
@@ -479,13 +480,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Starting Xcode build...', timeout: kFastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: kFastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
@@ -494,7 +495,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
+  buildSubStatus = null;
   initialBuildStatus?.cancel();
+  initialBuildStatus = null;
   buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
@@ -719,58 +722,19 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
   assert(await xcodeProjectFile.exists());
   final List<String> lines = await xcodeProjectFile.readAsLines();
 
-  if (lines.any((String line) => line.contains('flutter_assets in Resources')))
-    return true;
-
-  const String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
-  const String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
-  const String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
-  const String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
-  const String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
-  const String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
-  const String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
-  const String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
-
-
-  printStatus("Upgrading project.pbxproj of ${project.hostAppBundleName}' to include the "
-              "'flutter_assets' directory");
-
-  if (!lines.contains(l1) || !lines.contains(l3) ||
-      !lines.contains(l5) || !lines.contains(l7)) {
-    printError('Automatic upgrade of project.pbxproj failed.');
-    printError(' To manually upgrade, open ${xcodeProjectFile.path}:');
-    printError(' Add the following line in the "PBXBuildFile" section');
-    printError(l2);
-    printError(' Add the following line in the "PBXFileReference" section');
-    printError(l4);
-    printError(' Add the following line in the "children" list of the "Flutter" group in the "PBXGroup" section');
-    printError(l6);
-    printError(' Add the following line in the "files" list of "Resources" in the "PBXResourcesBuildPhase" section');
-    printError(l8);
-    return false;
-  }
-
-  lines.insert(lines.indexOf(l1) + 1, l2);
-  lines.insert(lines.indexOf(l3) + 1, l4);
-  lines.insert(lines.indexOf(l5) + 1, l6);
-  lines.insert(lines.indexOf(l7) + 1, l8);
-
-  const String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
-  const String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
-  const String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
-  const String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
-
-  if (lines.contains(l9)) {
-    printStatus('Removing app.flx from project.pbxproj since it has been '
-        'replaced with flutter_assets.');
-    lines.remove(l9);
-    lines.remove(l10);
-    lines.remove(l11);
-    lines.remove(l12);
-  }
-
+  final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
-  lines.forEach(buffer.writeln);
+  final Set<String> printedStatuses = Set<String>();
+
+  for (final String line in lines) {
+    final Match match = oldAssets.firstMatch(line);
+    if (match != null) {
+      if (printedStatuses.add(match.group(1)))
+        printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+    } else {
+      buffer.writeln(line);
+    }
+  }
   await xcodeProjectFile.writeAsString(buffer.toString());
   return true;
 }

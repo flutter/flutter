@@ -185,7 +185,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool applicationNeedsRebuild = false,
-    bool usesTerminalUi = false,
+    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
 
@@ -403,11 +403,11 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
     ];
     final Process process = await processManager.start(command);
-    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+    unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
       }
-    });
+    }));
     _processes[hostPort] = process;
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;

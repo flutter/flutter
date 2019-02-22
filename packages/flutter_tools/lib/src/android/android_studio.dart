@@ -26,12 +26,14 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
+final RegExp _pathsSelectorMatcher =
+    RegExp(r'"idea.paths.selector" = "AndroidStudio[^;]+"');
 
 String get javaPath => androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
-      {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
+      {Version version, this.configured, this.studioAppName = 'AndroidStudio', this.pathsSelectorPath})
       : version = version ?? Version.unknown {
     _init();
   }
@@ -47,7 +49,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Version version;
     if (versionString != null)
       version = Version.parse(versionString);
-    return AndroidStudio(studioPath, version: version);
+
+    final String plistValue = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      null,
+    );
+    final String pathsSelectorValue = _pathsSelectorMatcher.stringMatch(plistValue).split('=').last.trim().replaceAll('"', '');
+    return AndroidStudio(studioPath, version: version, pathsSelectorPath: pathsSelectorValue);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -83,6 +91,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String studioAppName;
   final Version version;
   final String configured;
+  final String pathsSelectorPath;
 
   String _pluginsPath;
   String _javaPath;
@@ -102,7 +111,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             homeDirPath,
             'Library',
             'Application Support',
-            'AndroidStudio$major.$minor');
+            '$pathsSelectorPath');
       } else {
         _pluginsPath = fs.path.join(homeDirPath,
             '.$studioAppName$major.$minor',

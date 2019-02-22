@@ -102,6 +102,7 @@ void main() {
       MockArtifacts mockArtifacts;
       MockKernelCompiler mockKernelCompiler;
       MockProcessManager mockProcessManager;
+      MockKernelCompilerFactory mockKernelCompilerFactory;
       MockProcess mockProcess;
 
       final Map<Type, Generator> startOverrides = <Type, Generator>{
@@ -109,7 +110,7 @@ void main() {
         FileSystem: () => fs,
         Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
-        KernelCompiler: () => mockKernelCompiler,
+        KernelCompilerFactory: () => mockKernelCompilerFactory,
         Artifacts: () => mockArtifacts,
       };
 
@@ -135,6 +136,10 @@ void main() {
         when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
+        mockKernelCompilerFactory = MockKernelCompilerFactory();
+        when(mockKernelCompilerFactory.create()).thenAnswer((Invocation invocation) async {
+          return mockKernelCompiler;
+        });
       });
 
       testUsingContext('not debug', () async {
@@ -194,3 +199,4 @@ Hello!
 
 class MockArtifacts extends Mock implements Artifacts {}
 class MockKernelCompiler extends Mock implements KernelCompiler {}
+class MockKernelCompilerFactory extends Mock implements KernelCompilerFactory {}

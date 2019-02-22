@@ -348,7 +348,7 @@ void _maybeWarnAboutStorageOverride(String overrideUrl) {
 
 /// A cached artifact containing fonts used for Material Design.
 class MaterialFonts extends CachedArtifact {
-  MaterialFonts(Cache cache): super('material_fonts', cache);
+  MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
   Future<void> updateInner() {
@@ -359,7 +359,7 @@ class MaterialFonts extends CachedArtifact {
 
 /// A cached artifact containing the Flutter engine binaries.
 class FlutterEngine extends CachedArtifact {
-  FlutterEngine(Cache cache): super('engine', cache);
+  FlutterEngine(Cache cache) : super('engine', cache);
 
   List<String> _getPackageDirs() => const <String>['sky_engine'];
 
@@ -574,7 +574,7 @@ class FlutterEngine extends CachedArtifact {
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
 class GradleWrapper extends CachedArtifact {
-  GradleWrapper(Cache cache): super('gradle_wrapper', cache);
+  GradleWrapper(Cache cache) : super('gradle_wrapper', cache);
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
 

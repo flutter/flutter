@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 const String _kManifest = 'MANIFEST.txt';
@@ -195,7 +195,7 @@ class _RecordingSink implements StreamSink<String> {
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
+    : _transactions = _loadTransactions(location);
 
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();

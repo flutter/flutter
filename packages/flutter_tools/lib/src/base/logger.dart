@@ -467,6 +467,7 @@ abstract class Status {
   final Stopwatch _stopwatch = Stopwatch();
 
   @protected
+  @visibleForTesting
   bool get seemsSlow => timeout != null && _stopwatch.elapsed > timeout;
 
   @protected
