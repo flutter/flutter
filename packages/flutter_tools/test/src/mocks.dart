@@ -44,24 +44,16 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     int ndkVersion = 16,
     bool withNdkSysroot = false,
     bool withSdkManager = true,
-    bool withPlatformTools = true,
-    bool withBuildTools = true,
   }) {
     final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
 
-    _createDir(dir, 'licenses');
+    _createSdkFile(dir, 'platform-tools/adb');
 
-    if (withPlatformTools) {
-      _createSdkFile(dir, 'platform-tools/adb');
-    }
-
-    if (withBuildTools) {
-      _createSdkFile(dir, 'build-tools/19.1.0/aapt');
-      _createSdkFile(dir, 'build-tools/22.0.1/aapt');
-      _createSdkFile(dir, 'build-tools/23.0.2/aapt');
-      if (withAndroidN)
-        _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
-    }
+    _createSdkFile(dir, 'build-tools/19.1.0/aapt');
+    _createSdkFile(dir, 'build-tools/22.0.1/aapt');
+    _createSdkFile(dir, 'build-tools/23.0.2/aapt');
+    if (withAndroidN)
+      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
 
     _createSdkFile(dir, 'platforms/android-22/android.jar');
     _createSdkFile(dir, 'platforms/android-23/android.jar');
