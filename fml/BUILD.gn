@@ -13,7 +13,6 @@ source_set("fml") {
     "command_line.h",
     "compiler_specific.h",
     "eintr_wrapper.h",
-    "export.h",
     "file.cc",
     "file.h",
     "icu_util.cc",
