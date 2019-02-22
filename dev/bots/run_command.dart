@@ -49,10 +49,10 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     environment: environment,
   );
 
-  await for (List<int> data in process.stdout) {
-    yield utf8.decode(data);
+  final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+  await for (String line in lines) {
+    yield line;
   }
-
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');

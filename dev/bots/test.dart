@@ -351,6 +351,11 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
+
+  if (!expectFailure) {
+    args.add('--machine');
+  }
+
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
     if (!FileSystemEntity.isFileSync(fullScriptPath)) {
@@ -374,7 +379,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
       timeout: timeout,
     );
   }
-  args.add('--machine');
   final Stream<String> testOutput = runAndGetStdout(flutter, args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
