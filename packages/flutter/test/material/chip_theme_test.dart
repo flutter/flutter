@@ -120,6 +120,7 @@ void main() {
       backgroundColor: Colors.purple,
       deleteIconColor: Colors.purple.withAlpha(0x3d),
       elevation: 3.0,
+      shadowColor: Colors.pink,
     );
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
@@ -162,6 +163,7 @@ void main() {
 
     expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
     expect(material.elevation, customTheme.elevation);
+    expect(material.shadowColor, customTheme.shadowColor);
   });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
@@ -232,6 +234,8 @@ void main() {
     ).copyWith(
       elevation: 1.0,
       pressElevation: 4.0,
+      shadowColor: Colors.black,
+      selectedShadowColor: Colors.black,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
@@ -242,6 +246,8 @@ void main() {
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
       elevation: 5.0,
       pressElevation: 10.0,
+      shadowColor: Colors.white,
+      selectedShadowColor: Colors.white,
     );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
@@ -251,6 +257,8 @@ void main() {
     expect(lerp.disabledColor, equals(middleGrey.withAlpha(0x0c)));
     expect(lerp.selectedColor, equals(middleGrey.withAlpha(0x3d)));
     expect(lerp.secondarySelectedColor, equals(middleGrey.withAlpha(0x3d)));
+    expect(lerp.shadowColor, equals(middleGrey));
+    expect(lerp.selectedShadowColor, equals(middleGrey));
     expect(lerp.labelPadding, equals(const EdgeInsets.all(4.0)));
     expect(lerp.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerp.shape, equals(isInstanceOf<StadiumBorder>()));
@@ -268,6 +276,8 @@ void main() {
     expect(lerpANull25.disabledColor, equals(Colors.black.withAlpha(0x03)));
     expect(lerpANull25.selectedColor, equals(Colors.black.withAlpha(0x0f)));
     expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
+    expect(lerpANull25.shadowColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 2.0, right: 0.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
     expect(lerpANull25.shape, equals(isInstanceOf<StadiumBorder>()));
@@ -283,6 +293,8 @@ void main() {
     expect(lerpANull75.disabledColor, equals(Colors.black.withAlpha(0x09)));
     expect(lerpANull75.selectedColor, equals(Colors.black.withAlpha(0x2e)));
     expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
+    expect(lerpANull75.shadowColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 6.0, right: 0.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
     expect(lerpANull75.shape, equals(isInstanceOf<StadiumBorder>()));
@@ -298,6 +310,8 @@ void main() {
     expect(lerpBNull25.disabledColor, equals(Colors.white.withAlpha(0x09)));
     expect(lerpBNull25.selectedColor, equals(Colors.white.withAlpha(0x2e)));
     expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
+    expect(lerpBNull25.shadowColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, top: 0.0, right: 6.0, bottom: 0.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerpBNull25.shape, equals(isInstanceOf<StadiumBorder>()));
@@ -313,6 +327,8 @@ void main() {
     expect(lerpBNull75.disabledColor, equals(Colors.white.withAlpha(0x03)));
     expect(lerpBNull75.selectedColor, equals(Colors.white.withAlpha(0x0f)));
     expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
+    expect(lerpBNull75.shadowColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, top: 0.0, right: 2.0, bottom: 0.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
     expect(lerpBNull75.shape, equals(isInstanceOf<StadiumBorder>()));
