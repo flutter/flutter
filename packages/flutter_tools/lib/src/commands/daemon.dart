@@ -585,14 +585,15 @@ class DeviceDomain extends Domain {
     deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
-  void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
+  void addDeviceDiscoverer(DeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform)
       return;
 
     _discoverers.add(discoverer);
-
-    discoverer.onAdded.listen(_onDeviceEvent('device.added'));
-    discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
+    if (discoverer is PollingDeviceDiscovery) {
+      discoverer.onAdded.listen(_onDeviceEvent('device.added'));
+      discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
+    }
   }
 
   Future<void> _serializeDeviceEvents = Future<void>.value();
