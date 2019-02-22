@@ -757,19 +757,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
-/// If the application has scenes that require the compilation of complex
-/// shaders that are not covered by [DefaultShaderWarmUp], it may cause jank
-/// in the middle of an animation or interaction. In that case, provide a custom
-/// [ShaderWarmUp] and paint the scene there so Flutter can pre-compile
-/// and cache the shaders during startup. The warm up is only costly (100ms-
-/// 200ms, depending on the shaders to compile) during the first run after the
-/// installation or a data wipe. The warm up does not block the main thread so
-/// there should be no "Application Not Responding" warning.
-///
-/// Currently the warm-up happens synchronously on the GPU thread which means
-/// the rendering of the first frame on the GPU thread will be postponed until
-/// the warm-up is finished.
-///
 /// See also:
 ///
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
@@ -778,13 +765,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///    element for the element hierarchy.
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
-///  * [DefaultShaderWarmUp], which will be used to warm up Skia shader
-///    compilations by default.
-void runApp(Widget app, {ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp()}) {
+void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
     ..scheduleWarmUpFrame();
-  shaderWarmUp.execute();
 }
 
 /// Print a string representation of the currently running app.

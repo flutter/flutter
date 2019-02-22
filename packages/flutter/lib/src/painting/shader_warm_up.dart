@@ -14,18 +14,21 @@ import 'package:meta/meta.dart';
 /// Having that time as a startup latency is often better than having a jank in
 /// the middle of an animation.
 ///
-/// Therefore, we use this during the [runApp] call to move common shader
-/// compilations from animation time to startup time. By default, a
-/// [DefaultShaderWarmUp] is used. Create a custom [ShaderWarmUp] subclass to
-/// replace it if needed.
+/// Therefore, we use this during the [PaintingBinding.initInstances] call to
+/// move common shader compilations from animation time to startup time. By
+/// default, a [DefaultShaderWarmUp] is used. Create a custom [ShaderWarmUp]
+/// subclass to replace [PaintingBinding.shaderWarmUp] before
+/// [PaintingBinding.initInstances] is called. Usually, that can be done before
+/// calling [runApp].
 ///
 /// This warm up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
 /// can't be pre-computed during the Flutter engine compilation as the engine is
 /// device agnostic.
 ///
-/// If no warm up is desired (e.g., when the startup latency is crucial), send a
-/// custom ShaderWarmUp with an empty [warmUpOnCanvas] to [runApp]
+/// If no warm up is desired (e.g., when the startup latency is crucial), set
+/// [PaintingBinding.shaderWarmUp] either to a custom ShaderWarmUp with an empty
+/// [warmUpOnCanvas] or null.
 abstract class ShaderWarmUp {
   /// Allow const constructors for subclasses.
   const ShaderWarmUp();

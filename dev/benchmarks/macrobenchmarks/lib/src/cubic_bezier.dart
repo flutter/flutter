@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
-// Copied from https://github.com/eseidelGoogle/bezier_perf/blob/master/lib/main.dart
+// Based on https://github.com/eseidelGoogle/bezier_perf/blob/master/lib/main.dart
 class CubicBezierPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
