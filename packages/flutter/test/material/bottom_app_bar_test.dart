@@ -68,7 +68,7 @@ void main() {
       );
     }
     // TODO(jslavitz): Change these golden tests
-//    await pump(FloatingActionButtonLocation.endDocked);
+    await pump(FloatingActionButtonLocation.endDocked);
 //    await expectLater(
 //      find.byKey(key),
 //      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
