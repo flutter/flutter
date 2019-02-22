@@ -1055,7 +1055,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// positive integer factor of 60.
   CupertinoTimerPicker({
     this.mode = CupertinoTimerPickerMode.hms,
-    @Deprecated('Migration to use controller') this.initialTimerDuration = Duration.zero,
+    this.initialTimerDuration, // ignore: deprecated_member_use
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.controller,
@@ -1073,6 +1073,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   final CupertinoTimerPickerMode mode;
 
   /// The initial duration of the countdown timer.
+  @Deprecated('Migration to use controller')
   final Duration initialTimerDuration;
 
   /// The granularity of the minute spinner. Must be a positive integer factor
@@ -1120,8 +1121,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     // TODO(jslavitz): Remove this check and fully deprecate widget.initialTimerDuration
     final Duration initialDuration =
-      widget.initialTimerDuration != Duration.zero ?
-      widget.initialTimerDuration : widget.controller.initialTimerDuration;
+      widget.initialTimerDuration != Duration.zero ? // ignore: deprecated_member_use
+      widget.initialTimerDuration : widget.controller.initialTimerDuration; // ignore: deprecated_member_use
 
     selectedMinute = initialDuration.inMinutes % 60;
 
