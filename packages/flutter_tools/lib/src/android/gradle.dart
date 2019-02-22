@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/bsdiff.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -354,11 +353,12 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
 }
 
 Future<void> _buildGradleProjectV2(
-    FlutterProject flutterProject,
-    String gradle,
-    BuildInfo buildInfo,
-    String target,
-    bool isBuildingBundle) async {
+  FlutterProject flutterProject,
+  String gradle,
+  BuildInfo buildInfo,
+  String target,
+  bool isBuildingBundle,
+) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;
@@ -499,7 +499,6 @@ Future<void> _buildGradleProjectV2(
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
-      printStatus('Creating dynamic patch...');
       final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
       final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
 
@@ -521,14 +520,7 @@ Future<void> _buildGradleProjectV2(
           throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
         final String name = fs.path.relative(newFile.name, from: 'assets/');
-        if (name.contains('_snapshot_')) {
-          final List<int> diff = bsdiff(oldFile.content, newFile.content);
-          final int ratio = 100 * diff.length ~/ newFile.content.length;
-          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
-          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
-        } else {
-          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
-        }
+        update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
       }
 
       File updateFile;
@@ -576,8 +568,7 @@ Future<void> _buildGradleProjectV2(
 
       updateFile.parent.createSync(recursive: true);
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      final String patchSize = getSizeAsMB(updateFile.lengthSync());
-      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
+      printStatus('Created dynamic patch ${updateFile.path}.');
     }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);

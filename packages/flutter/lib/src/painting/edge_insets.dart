@@ -588,7 +588,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     double top,
     double right,
     double bottom,
-}) {
+  }) {
     return EdgeInsets.only(
       left: left ?? this.left,
       top: top ?? this.top,

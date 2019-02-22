@@ -2223,7 +2223,7 @@ class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
-  void buildScope(Element context, [VoidCallback callback]) {
+  void buildScope(Element context, [ VoidCallback callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
     assert(context != null);
@@ -2666,11 +2666,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The default implementation defers to [visitChildren] and therefore treats
   /// the element as onstage.
   ///
-  /// This method should only be used in tests and debug code. In production,
-  /// the vague concept of "onstage" vs "offstage" is meaningless and should not
-  /// be used to affect widget behavior; this method does nothing in release
-  /// builds.
-  ///
   /// See also:
   ///
   ///  * [Offstage] widget that hides its children.
@@ -2678,9 +2673,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///  * [RenderObject.visitChildrenForSemantics], in contrast to this method,
   ///    designed specifically for excluding parts of the UI from the semantics
   ///    tree.
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    assert(() { visitChildren(visitor); return true; }());
-  }
+  void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
 
   /// Wrapper around [visitChildren] for [BuildContext].
   @override
@@ -3696,7 +3689,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel});
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///

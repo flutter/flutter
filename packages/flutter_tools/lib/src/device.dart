@@ -247,7 +247,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ApplicationPackage app});
+  DeviceLogReader getLogReader({ ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -425,7 +425,7 @@ abstract class DevicePortForwarder {
   /// Forward [hostPort] on the host to [devicePort] on the device.
   /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, {int hostPort});
+  Future<int> forward(int devicePort, { int hostPort });
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
@@ -471,7 +471,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   const NoOpDevicePortForwarder();
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+  Future<int> forward(int devicePort, { int hostPort }) async => devicePort;
 
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];

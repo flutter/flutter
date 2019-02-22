@@ -151,7 +151,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget}
+  /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -207,7 +207,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return Center(child: CastList());
   /// }
   /// ```
   /// {@end-tool}
@@ -1682,7 +1682,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     // Only redirects hit detection which occurs above and below the render object.
@@ -2200,7 +2200,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;

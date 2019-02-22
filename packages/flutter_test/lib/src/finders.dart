@@ -32,7 +32,8 @@ class CommonFinders {
   /// expect(find.text('Back'), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
@@ -50,7 +51,8 @@ class CommonFinders {
   /// tester.tap(find.widgetWithText(Button, 'Update'));
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithText(Type widgetType, String text, { bool skipOffstage = true }) {
     return find.ancestor(
       of: find.text(text, skipOffstage: skipOffstage),
@@ -66,7 +68,8 @@ class CommonFinders {
   /// expect(find.byKey(backKey), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byKey(Key key, { bool skipOffstage = true }) => _KeyFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets with a particular type.
@@ -83,7 +86,8 @@ class CommonFinders {
   /// expect(find.byType(IconButton), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byType(Type type, { bool skipOffstage = true }) => _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds [Icon] widgets containing icon data equal to the `icon`
@@ -95,7 +99,8 @@ class CommonFinders {
   /// expect(find.byIcon(Icons.inbox), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byIcon(IconData icon, { bool skipOffstage = true }) => _WidgetIconFinder(icon, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
@@ -113,7 +118,8 @@ class CommonFinders {
   /// tester.tap(find.widgetWithIcon(Button, Icons.arrow_forward));
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage = true }) {
     return find.ancestor(
       of: find.byIcon(icon),
@@ -135,7 +141,8 @@ class CommonFinders {
   /// expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byElementType(Type type, { bool skipOffstage = true }) => _ElementTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets whose current widget is the instance given by the
@@ -153,7 +160,8 @@ class CommonFinders {
   /// tester.tap(find.byWidget(myButton));
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byWidget(Widget widget, { bool skipOffstage = true }) => _WidgetFinder(widget, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget [predicate].
@@ -172,7 +180,8 @@ class CommonFinders {
   /// fails to locate the desired widget. Otherwise, the description prints the
   /// signature of the predicate function.
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage = true }) {
     return _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
@@ -185,7 +194,8 @@ class CommonFinders {
   /// expect(find.byTooltip('Back'), findsOneWidget);
   /// ```
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(String message, { bool skipOffstage = true }) {
     return byWidgetPredicate(
       (Widget widget) => widget is Tooltip && widget.message == message,
@@ -212,7 +222,8 @@ class CommonFinders {
   /// fails to locate the desired widget. Otherwise, the description prints the
   /// signature of the predicate function.
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage = true }) {
     return _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
@@ -231,13 +242,9 @@ class CommonFinders {
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the descendants.
   ///
-  /// The `skipOffstage` argument maps to [Finder.skipOffstage] (q.v.).
-  Finder descendant({
-    @required Finder of,
-    @required Finder matching,
-    bool matchRoot = false,
-    bool skipOffstage = true,
-  }) {
+  /// If the [skipOffstage] argument is true (the default), then nodes that are
+  /// [Offstage] or that are from inactive [Route]s are skipped.
+  Finder descendant({ Finder of, Finder matching, bool matchRoot = false, bool skipOffstage = true }) {
     return _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
@@ -262,7 +269,7 @@ class CommonFinders {
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
-  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false}) {
+  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 }
@@ -289,25 +296,9 @@ abstract class Finder {
 
   /// Whether this finder skips nodes that are offstage.
   ///
-  /// By default, finders skip nodes that are considered "offstage". The term is
-  /// very loosely defined and is only meaningful in a debug environment; it is
-  /// not a term that applies in production. A widget is considered "offstage"
-  /// if it is "not really visible".
-  ///
-  /// If [skipOffstage] is true, then the elements are walked using
-  /// [Element.debugVisitOnstageChildren]. This skips hidden children of
-  /// [Offstage] widgets, children of inactive [Route]s, some non-visible
-  /// children in viewports, and other nodes that are generally considered to be
-  /// "not there" when considering what the user can see.
-  ///
-  /// The [skipOffstage] argument can be set to `false` to match _all_ nodes
-  /// regardless of this status. This is useful to test for the presence of
-  /// widgets being kept alive using [KeepAlive], for instance.
-  ///
-  /// See also:
-  ///
-  ///  * [Element.debugVisitOnstageChildren], which can be overriden to
-  ///    decide whether a child is onstage or offstage.
+  /// If this is true, then the elements are walked using
+  /// [Element.debugVisitOnstageChildren]. This skips offstage children of
+  /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
   /// Returns all the [Element]s that will be considered by this finder.

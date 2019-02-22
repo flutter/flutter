@@ -427,27 +427,27 @@ class FlutterDriver {
   }
 
   /// Checks the status of the Flutter Driver extension.
-  Future<Health> checkHealth({Duration timeout}) async {
+  Future<Health> checkHealth({ Duration timeout }) async {
     return Health.fromJson(await _sendCommand(GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
-  Future<RenderTree> getRenderTree({Duration timeout}) async {
+  Future<RenderTree> getRenderTree({ Duration timeout }) async {
     return RenderTree.fromJson(await _sendCommand(GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<void> tap(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> tap(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(Tap(finder, timeout: timeout));
   }
 
   /// Waits until [finder] locates the target.
-  Future<void> waitFor(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitFor(finder, timeout: timeout));
   }
 
   /// Waits until [finder] can no longer locate the target.
-  Future<void> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
@@ -455,7 +455,7 @@ class FlutterDriver {
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
-  Future<void> waitUntilNoTransientCallbacks({Duration timeout}) async {
+  Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
@@ -509,7 +509,9 @@ class FlutterDriver {
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is to not time out.
-  Future<void> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
+  Future<void> scrollUntilVisible(
+    SerializableFinder scrollable,
+    SerializableFinder item, {
     double alignment = 0.0,
     double dxScroll = 0.0,
     double dyScroll = 0.0,

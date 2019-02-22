@@ -26,8 +26,9 @@ class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -49,6 +50,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.web:
         return null;
     }
     assert(platform != null);
@@ -352,6 +354,7 @@ class ApplicationPackageStore {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         return null;
     }
     return null;
