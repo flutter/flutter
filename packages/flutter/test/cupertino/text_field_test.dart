@@ -1108,6 +1108,7 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
       );
+      // Toolbar only shows up on long press up.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.moveBy(const Offset(50, 0));

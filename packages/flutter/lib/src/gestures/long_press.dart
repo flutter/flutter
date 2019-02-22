@@ -7,24 +7,35 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Signature for when a pointer has remained in contact with the screen at the
+/// Callback signature for [LongPressGestureRecognizer.onLongPress].
+///
+/// Called when a pointer has remained in contact with the screen at the
 /// same location for a long period of time.
 typedef GestureLongPressCallback = void Function();
 
-/// Signature for when a pointer stops contacting the screen after a long press
+/// Callback signature for [LongPressGestureRecognizer.onLongPressUp].
+///
+/// Called when a pointer stops contacting the screen after a long press
 /// gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
 
-/// Signature for when a pointer has remained in contact with the screen at the
+/// Callback signature for [LongPressGestureRecognizer.onLongPressStart].
+///
+/// Called when a pointer has remained in contact with the screen at the
 /// same location for a long period of time. Also reports the long press down
 /// position.
 typedef GestureLongPressStartCallback = void Function(LongPressStartDetails details);
 
-/// Signature from a [LongPressGestureRecognizer] when a pointer is moving
-/// after being held in contact at the same location for a long period of time.
+/// Callback signature for [LongPressGestureRecognizer.onLongPressMoveUpdate].
+///
+/// Called when a pointer is moving after being held in contact at the same
+/// location for a long period of time. Reports the new position and its offset
+/// from the original down position.
 typedef GestureLongPressMoveUpdateCallback = void Function(LongPressMoveUpdateDetails details);
 
-/// Signature for when a pointer stops contacting the screen after a long press
+/// Callback signature for [LongPressGestureRecognizer.onLongPressEnd].
+///
+/// Called when a pointer stops contacting the screen after a long press
 /// gesture was detected. Also reports the position where the pointer stopped
 /// contacting the screen.
 typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details);
@@ -68,8 +79,8 @@ class LongPressMoveUpdateDetails {
   final Offset globalPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
-  /// the screen to the point where the pointer is currently located when
-  /// this callback is triggered.
+  /// the screen to the point where the pointer is currently located (the
+  /// present [globalPosition]) when this callback is triggered.
   final Offset offsetFromOrigin;
 }
 
@@ -97,7 +108,7 @@ class LongPressEndDetails {
 /// The gesture must not deviate in position from its touch down point for 500ms
 /// until it's recognized. Once the gesture is accepted, the finger can be
 /// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
-/// [postAcceptSlopTolerance] constructor argument is overriden.
+/// [postAcceptSlopTolerance] constructor argument is specified.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
@@ -107,7 +118,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// The [postAcceptSlopTolerance] argument can be used to specify a maximum
   /// allowed distance for the gesture to deviate from the starting point once
   /// the long press has triggered. If the gesture deviates past that point,
-  /// subsequent callbacks will stop.
+  /// subsequent callbacks ([onLongPressMoveUpdate], [onLongPressUp],
+  /// [onLongPressEnd]) will stop. Defaults to null, which means the gesture
+  /// can be moved without limit once the long press is accepted.
   LongPressGestureRecognizer({
     double postAcceptSlopTolerance,
     Object debugOwner,
@@ -122,23 +135,37 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   Offset _longPressOrigin;
 
   /// Called when a long press gesture has been recognized.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressStart], which has the same timing but has data for the
+  ///    press location.
   GestureLongPressCallback onLongPress;
 
-   /// Called when a long press gesture has been recognized. Similar
-   /// to [onLongPress] but also reports the original touch down position.
+  /// Callback for long press start with gesture location.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPress], which has the same timing but without the location data.
   GestureLongPressStartCallback onLongPressStart;
 
-  /// Called as the primary pointer is dragged after the long press.
+  /// Callback for moving the gesture after the lang press is recognized.
   GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
-  /// Called when the pointer stops contacting the screen after the long-press
-  /// gesture has been recognized. Similar to [onLongPressUp] but also reports
-  /// the touch up position.
-  GestureLongPressEndCallback onLongPressEnd;
-
-  /// Called when the pointer stops contacting the screen after the long-press
-  /// gesture has been recognized.
+  /// Called when the pointer stops contacting the screen after the long-press.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressEnd], which has the same timing but has data for the up
+  ///    gesture location.
   GestureLongPressUpCallback onLongPressUp;
+
+  /// Callback for long press end with gesture location.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressUp], which has the same timing but without the location data.
+  GestureLongPressEndCallback onLongPressEnd;
 
   @override
   void didExceedDeadline() {

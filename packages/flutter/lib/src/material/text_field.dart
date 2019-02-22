@@ -567,9 +567,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
     // iOS cursor doesn't move via a selection handle. The scroll happens
     // directly from new text selection changes.
-    if (Theme.of(context).platform == TargetPlatform.iOS
-        && cause == SelectionChangedCause.longPress) {
-      _editableTextKey.currentState?.bringIntoView(selection.base);
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+        if (cause == SelectionChangedCause.longPress) {
+          _editableTextKey.currentState?.bringIntoView(selection.base);
+        }
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        // Do nothing.
     }
   }
 

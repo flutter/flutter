@@ -19,9 +19,9 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
-  GestureLongPressUpCallback,
   GestureLongPressStartCallback,
   GestureLongPressMoveUpdateCallback,
+  GestureLongPressUpCallback,
   GestureLongPressEndCallback,
   GestureDragDownCallback,
   GestureDragStartCallback,
@@ -266,24 +266,43 @@ class GestureDetector extends StatelessWidget {
   /// succession.
   final GestureTapCallback onDoubleTap;
 
-  /// A pointer has remained in contact with the screen at the same location for
-  /// a long period of time.
+  /// Called when a long press gesture has been recognized.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressStart], which has the same timing but has data for the
+  ///    press location.
   final GestureLongPressCallback onLongPress;
 
-  /// A pointer that has triggered a long-press has stopped contacting the screen.
-  final GestureLongPressUpCallback onLongPressUp;
-
-  /// A pointer has remained in contact with the screen at the same location for
-  /// a long period of time. Similar to [onLongPress] but reports the location
-  /// of the original long press down position.
+  /// Callback for long press start with gesture location.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPress], which has the same timing but without the location data.
   final GestureLongPressStartCallback onLongPressStart;
 
   /// A pointer has been drag-moved after a long press.
   final GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
-  /// Similar to [onLongPressUp] but reports the position on of the screen where
-  /// the pointer stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressEnd], which has the same timing but has data for the up
+  ///    gesture location.
+  final GestureLongPressUpCallback onLongPressUp;
+
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressUp], which has the same timing but without the location data.
   final GestureLongPressEndCallback onLongPressEnd;
 
   /// A pointer has contacted the screen and might begin to move vertically.
