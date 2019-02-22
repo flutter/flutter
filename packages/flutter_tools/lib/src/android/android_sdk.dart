@@ -372,7 +372,7 @@ class AndroidSdk {
 
   AndroidSdkVersion get latestVersion => _latestVersion;
 
-  String get adbPath => getPlatformToolsPath('adb');
+  String get adbPath => getPlatformToolsPath(platform.isWindows ? 'adb.exe' : 'adb');
 
   String get emulatorPath => getEmulatorPath();
 
