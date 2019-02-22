@@ -18,6 +18,7 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
+    
   });
 
 // TODO(jslavitz): Run golden tests.

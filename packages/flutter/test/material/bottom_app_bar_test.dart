@@ -53,13 +53,13 @@ void main() {
                   onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
-                bottomNavigationBar: BottomAppBar(
+                bottomNavigationBar: const BottomAppBar(
                   shape: AutomaticNotchedShape(
                     ContinuousRectangleBorder(borderRadius: 30.0),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
-                  child: const SizedBox(height: 100.0),
+                  child: SizedBox(height: 100.0),
                 ),
               ),
             ),
