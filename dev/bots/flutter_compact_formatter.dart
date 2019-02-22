@@ -46,11 +46,11 @@ class FlutterCompactFormatter {
   int skips = 0;
   int successes = 0;
 
-  void processRawOutput(String raw) {
+  TestResult processRawOutput(String raw) {
     // We might be getting messages from Flutter Tool about updating/building.
     if (!raw.startsWith('{')) {
       print(raw);
-      return;
+      return null;
     }
     final Map<String, dynamic> decoded = json.decode(raw);
     final TestResult originalResult = tests[decoded['testID']];
@@ -60,12 +60,10 @@ class FlutterCompactFormatter {
         stdout.write('$_bold${_stopwatch.elapsed}$_noColor ');
         stdout.writeln(
             '$_green+$successes $_yellow~$skips $_red-$failures:$_bold$_gray Done.$_noColor');
-        // _done();
         break;
       case 'testStart':
         final Map<String, dynamic> testData = decoded['test'];
         if (testData['url'] == null) {
-          // load a test file.
           started += 1;
           stdout.write(_clearLine);
           stdout.write('$_bold${_stopwatch.elapsed}$_noColor ');
@@ -119,6 +117,7 @@ class FlutterCompactFormatter {
       default:
         break;
     }
+    return originalResult;
   }
 
   void finish() {

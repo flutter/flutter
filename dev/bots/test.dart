@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
+import 'flutter_compact_formatter.dart';
 
 typedef ShardRunner = Future<void> Function();
 
@@ -293,8 +294,8 @@ Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
   bool enableFlutterToolAsserts = false
-}) {
-  final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
+}) async {
+  final List<String> args = <String>['run', 'test', '-rjson', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
@@ -311,11 +312,20 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
-  return runCommand(
-    pub, args,
+  final Stream<String> testOutput = runAndGetStdout(pub, args,
     workingDirectory: workingDirectory,
-    environment: pubEnvironment,
   );
+  await _processTestOutput(testOutput);
+}
+
+Future<void> _processTestOutput(Stream<String> testOutput) async {
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  await for (String line in testOutput) {
+    final TestResult result = formatter.processRawOutput(line);
+    if (result != null) {
+      // TODO(dnfield): send this to bq
+    }
+  }
 }
 
 class EvalResult {
@@ -337,7 +347,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> options = const <String>[],
   bool skip = false,
   Duration timeout = _kLongTimeout,
-}) {
+}) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
@@ -355,13 +365,13 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
-  return runCommand(flutter, args,
+  args.add('--machine');
+  final Stream<String> testOutput = runAndGetStdout(flutter, args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
-    printOutput: printOutput,
-    skip: skip,
     timeout: timeout,
   );
+  await _processTestOutput(testOutput);
 }
 
 Future<void> _verifyVersion(String filename) async {

@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -156,7 +155,6 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {

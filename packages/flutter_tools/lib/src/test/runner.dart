@@ -15,7 +15,6 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import 'flutter_compact_formatter.dart';
 import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
@@ -42,11 +41,11 @@ Future<int> runTests(
     testArgs.addAll(<String>['--no-color']);
   }
 
-  // if (machine) {
-  testArgs.addAll(<String>['-r', 'json']);
-  // } else {
-  //   testArgs.addAll(<String>['-r', 'compact']);
-  // }
+  if (machine) {
+    testArgs.addAll(<String>['-r', 'json']);
+  } else {
+    testArgs.addAll(<String>['-r', 'compact']);
+  }
 
   testArgs.add('--concurrency=$concurrency');
 
@@ -97,20 +96,7 @@ Future<int> runTests(
     }
 
     printTrace('running test package with arguments: $testArgs');
-    if (!machine) {
-      final FlutterCompactFormatter flutterCompactFormatter =
-          FlutterCompactFormatter();
-      final ZoneSpecification spec = ZoneSpecification(
-        print: (_, __, ___, String message) =>
-            flutterCompactFormatter.processRawOutput(message),
-      );
-      await Zone.current
-          .fork(specification: spec)
-          .runUnary<dynamic, List<String>>(test.main, testArgs);
-      flutterCompactFormatter.finish();
-    } else {
-      await test.main(testArgs);
-    }
+    await test.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
     printTrace('test package returned with exit code $exitCode');
