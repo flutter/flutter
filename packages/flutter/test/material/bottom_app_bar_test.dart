@@ -55,7 +55,7 @@ void main() {
                 floatingActionButtonLocation: location,
                 bottomNavigationBar: BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                    ContinuousRectangleBorder(borderRadius: 30.0),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
