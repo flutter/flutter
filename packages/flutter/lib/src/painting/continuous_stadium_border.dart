@@ -58,7 +58,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     const double maxMultiplier = 3.0573;
 
     // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for the dynamic shape option.
+    // used to describe the minimum radius for this shape.
     const double dynamicShapeMinMultiplier = 1 / maxMultiplier;
 
     // The maximum aspect ratio of the width and height of the given rect before

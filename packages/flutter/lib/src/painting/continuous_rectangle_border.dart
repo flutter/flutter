@@ -55,7 +55,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     this.side = BorderSide.none,
     this.borderRadius = 1.0,
   }) : assert(side != null),
-        assert(borderRadius != null);
+       assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
@@ -146,7 +146,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     }
 
     // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for the dynamic radius round option.
+    // used to describe the minimum radius for this shape.
     const double dynamicRadiusMinMultiplier = 2.0;
 
     // The edge length at which the corner radius multiplier must be at its

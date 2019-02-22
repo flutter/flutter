@@ -149,4 +149,30 @@ void main() {
       skip: !Platform.isLinux,
     );
   });
+
+  testWidgets('Golden test equal dimensions', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Container(
+          alignment: Alignment.center,
+          child: Material(
+            color: Colors.blueAccent[400],
+            shape: const ContinuousStadiumBorder(),
+            child: const SizedBox(
+              height: 200,
+              width: 200,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('continuous_stadium_border.golden_test_equal_dimensions.png'),
+      skip: !Platform.isLinux,
+    );
+  });
 }
