@@ -240,12 +240,33 @@ class ResourceExtractor {
         }
 
         for (String asset : mResources) {
-            final String resource = "assets/" + asset;
-            ZipEntry entry = zipFile.getEntry(resource);
+            String resource = null;
+            ZipEntry entry = null;
+            if (asset.endsWith(".so")) {
+                // Replicate library lookup logic.
+                for (String abi : Build.SUPPORTED_ABIS) {
+                    resource = "lib/" + abi + "/" + asset;
+                    entry = zipFile.getEntry(resource);
+                    if (entry == null) {
+                        entry = zipFile.getEntry(resource + ".bzdiff40");
+                        if (entry == null) {
+                            continue;
+                        }
+                    }
+
+                    // Stop after the first match.
+                    break;
+                }
+            }
+
             if (entry == null) {
-                entry = zipFile.getEntry(resource + ".bzdiff40");
+                resource = "assets/" + asset;
+                entry = zipFile.getEntry(resource);
                 if (entry == null) {
-                    continue;
+                    entry = zipFile.getEntry(resource + ".bzdiff40");
+                    if (entry == null) {
+                        continue;
+                    }
                 }
             }
 
@@ -265,10 +286,27 @@ class ResourceExtractor {
                     }
 
                     ByteArrayOutputStream orig = new ByteArrayOutputStream();
-                    try (InputStream is = manager.open(asset)) {
-                        copy(is, orig);
-                    } catch (FileNotFoundException e) {
-                        throw new IOException("Could not find APK resource " + resource);
+                    if (asset.endsWith(".so")) {
+                        ZipFile apkFile = new ZipFile(getAPKPath());
+                        if (apkFile == null) {
+                            throw new IOException("Could not find APK");
+                        }
+
+                        ZipEntry origEntry = apkFile.getEntry(resource);
+                        if (origEntry == null) {
+                            throw new IOException("Could not find APK resource " + resource);
+                        }
+
+                        try (InputStream is = apkFile.getInputStream(origEntry)) {
+                            copy(is, orig);
+                        }
+
+                    } else {
+                        try (InputStream is = manager.open(asset)) {
+                            copy(is, orig);
+                        } catch (FileNotFoundException e) {
+                            throw new IOException("Could not find APK resource " + resource);
+                        }
                     }
 
                     try (OutputStream os = new FileOutputStream(output)) {
@@ -354,6 +392,15 @@ class ResourceExtractor {
         byte[] buf = new byte[16 * 1024];
         for (int i; (i = in.read(buf)) >= 0; ) {
             out.write(buf, 0, i);
+        }
+    }
+
+    private String getAPKPath() {
+        try {
+            return mContext.getPackageManager().getApplicationInfo(
+                mContext.getPackageName(), 0).publicSourceDir;
+        } catch (Exception e) {
+            return null;
         }
     }
 }
