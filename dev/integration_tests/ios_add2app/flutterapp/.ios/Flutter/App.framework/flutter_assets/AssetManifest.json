@@ -1,0 +1,1 @@
+{"packages/cupertino_icons/assets/CupertinoIcons.ttf":["packages/cupertino_icons/assets/CupertinoIcons.ttf"]}

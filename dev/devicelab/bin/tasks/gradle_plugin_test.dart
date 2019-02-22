@@ -273,7 +273,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
     args.addAll(options);
   }
   return Process.run(
-    './gradlew',
+    Platform.isWindows ? 'gradlew.bat' : './gradlew',
     args,
     workingDirectory: workingDirectory,
     environment: <String, String>{ 'JAVA_HOME': javaHome }

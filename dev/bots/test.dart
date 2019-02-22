@@ -378,7 +378,6 @@ Future<void> _verifyVersion(String filename) async {
 
 Future<void> _runIntegrationTests() async {
   print('Platform env vars:');
-  print(Platform.environment);
 
   await _runDevicelabTest('dartdocs');
   await _runDevicelabTest('technical_debt__cost');
