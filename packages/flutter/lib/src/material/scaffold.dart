@@ -275,6 +275,76 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   }
 }
 
+// Used to communicate the height of the Scaffold's bottomNavigationBar and
+// persistentFooterButtons to the LayoutBuilder which builds the Scaffold's body.
+//
+// Scaffold expects a _BodyBoxConstraints to be passed to the _BodyBuilder
+// widget's LayoutBuilder, see _ScaffoldLayout.performLayout(). The BoxConstraints
+// methods that construct new BoxConstraints objects, like copyWith() have not
+// been overridden here because we expect the _BodyBoxConstraintsObject to be
+// passed along unmodified to the LayoutBuilder. If that changes in the future
+// then _BodyBuilder will assert.
+class _BodyBoxConstraints extends BoxConstraints {
+  const _BodyBoxConstraints({
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+    double minHeight = 0.0,
+    double maxHeight = double.infinity,
+    @required this.bottomWidgetsHeight,
+  }) :  assert(bottomWidgetsHeight != null),
+        assert(bottomWidgetsHeight >= 0),
+        super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
+
+  final double bottomWidgetsHeight;
+
+  // RenderObject.layout() will only short-circuit its call to its performLayout
+  // method if the new layout constraints are not == to the current constraints.
+  // If the height of the bottom widgets has changed, even though the constraints'
+  // min and max values have not, we still want performLayout to happen.
+  @override
+  bool operator ==(dynamic other) {
+    if (super != other)
+      return false;
+    final _BodyBoxConstraints typedOther = other;
+    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight;
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(super.hashCode, bottomWidgetsHeight);
+  }
+}
+
+// Used when Scaffold.extendBody is true to wrap the scaffold's body in a MediaQuery
+// whose padding accounts for the height of the bottomNavigationBar and/or the
+// persistentFooterButtons.
+//
+// The bottom widgets' height is passed along via the _BodyBoxConstraints parameter.
+// The constraints parameter is constructed in_ScaffoldLayout.performLayout().
+class _BodyBuilder extends StatelessWidget {
+  const _BodyBuilder({ Key key, this.body }) : super(key: key);
+
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final _BodyBoxConstraints bodyConstraints = constraints;
+        final MediaQueryData metrics = MediaQuery.of(context);
+        return MediaQuery(
+          data: metrics.copyWith(
+            padding: metrics.padding.copyWith(
+              bottom: math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight),
+            ),
+          ),
+          child: body,
+        );
+      },
+    );
+  }
+}
+
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.minInsets,
@@ -285,12 +355,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
+    @required this.extendBody,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
-       assert(currentFloatingActionButtonLocation != null);
+       assert(currentFloatingActionButtonLocation != null),
+       assert(extendBody != null);
 
+  final bool extendBody;
   final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
@@ -343,9 +416,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
-      final BoxConstraints bodyConstraints = BoxConstraints(
+      double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
+
+      if (extendBody) {
+        bodyMaxHeight += bottomWidgetsHeight;
+        assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
+      }
+
+      final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop),
+        maxHeight: bodyMaxHeight,
+        bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, Offset(0.0, contentTop));
@@ -795,10 +876,28 @@ class Scaffold extends StatefulWidget {
     this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
     this.primary = true,
+    this.extendBody = false,
     this.drawerDragStartBehavior = DragStartBehavior.down,
   }) : assert(primary != null),
+       assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
        super(key: key);
+
+  /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
+  /// is specified, then the [body] extends to the bottom of the Scaffold,
+  /// instead of only extending to the top of the [bottomNavigationBar]
+  /// or the [persistentFooterButtons].
+  ///
+  /// If true, a [MediaQuery] widget whose bottom padding matches the
+  /// the height of the [bottomNavigationBar] will be added above the
+  /// scaffold's [body].
+  ///
+  /// This property is often useful when the [bottomNavigationBar] has
+  /// a non-rectangular shape, like [CircularNotchedRectangle], which
+  /// adds a [FloatingActionButton] sized notch to the top edge of the bar.
+  /// In this case specifying `extendBody: true` ensures that that scaffold's
+  /// body will be visible through the bottom navigation bar's notch.
+  final bool extendBody;
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -1593,7 +1692,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addIfNonNull(List<LayoutId> children, Widget child, Object childId, {
+  void _addIfNonNull(
+    List<LayoutId> children,
+    Widget child,
+    Object childId, {
     @required bool removeLeftPadding,
     @required bool removeTopPadding,
     @required bool removeRightPadding,
@@ -1697,7 +1799,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _addIfNonNull(
       children,
-      widget.body,
+      widget.body != null && widget.extendBody ? _BodyBuilder(body: widget.body) : widget.body,
       _ScaffoldSlot.body,
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
@@ -1850,6 +1952,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
     );
 
+    // extendBody locked when keyboard is open
+    final bool _extendBody = minInsets.bottom > 0 ? false : widget.extendBody;
+
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -1861,6 +1966,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return CustomMultiChildLayout(
               children: children,
               delegate: _ScaffoldLayout(
+                extendBody: _extendBody,
                 minInsets: minInsets,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,

@@ -141,8 +141,11 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future<void> _reloadSourcesService(String isolateId,
-      { bool force = false, bool pause = false }) async {
+  Future<void> _reloadSourcesService(
+    String isolateId, {
+    bool force = false,
+    bool pause = false,
+  }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -164,10 +167,15 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<String> _compileExpressionService(String isolateId, String expression,
-      List<String> definitions, List<String> typeDefinitions,
-      String libraryUri, String klass, bool isStatic,
-      ) async {
+  Future<String> _compileExpressionService(
+    String isolateId,
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  ) async {
     for (FlutterDevice device in flutterDevices) {
       if (device.generator != null) {
         final CompilerOutput compilerOutput =
@@ -433,10 +441,12 @@ class HotRunner extends ResidentRunner {
     await Future.wait(futures);
   }
 
-  Future<void> _launchInView(FlutterDevice device,
-                             Uri entryUri,
-                             Uri packagesUri,
-                             Uri assetsDirectoryUri) {
+  Future<void> _launchInView(
+    FlutterDevice device,
+    Uri entryUri,
+    Uri packagesUri,
+    Uri assetsDirectoryUri,
+  ) {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in device.views)
       futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
@@ -538,8 +548,10 @@ class HotRunner extends ResidentRunner {
 
   /// Returns [true] if the reload was successful.
   /// Prints errors if [printErrors] is [true].
-  static bool validateReloadReport(Map<String, dynamic> reloadReport,
-      { bool printErrors = true }) {
+  static bool validateReloadReport(
+    Map<String, dynamic> reloadReport, {
+    bool printErrors = true,
+  }) {
     if (reloadReport == null) {
       if (printErrors)
         printError('Hot reload did not receive reload report.');

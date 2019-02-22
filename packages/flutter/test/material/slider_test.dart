@@ -1313,7 +1313,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled = true}) {
+    Widget buildApp({ SliderThemeData sliderTheme, int divisions, bool enabled = true }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return Directionality(
         textDirection: TextDirection.ltr,

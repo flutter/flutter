@@ -96,9 +96,14 @@ BuildApp() {
 
   RunCommand rm -rf -- "${derived_dir}/App.framework"
 
+  local flutter_engine_flag=""
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
+
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
+  fi
 
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
@@ -114,8 +119,8 @@ BuildApp() {
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
-    flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -168,6 +173,7 @@ BuildApp() {
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
+      ${flutter_engine_flag}                                                \
       ${local_engine_flag}                                                  \
       ${track_widget_creation_flag}
 
@@ -244,6 +250,7 @@ BuildApp() {
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
     ${precompilation_flag}                                                  \
+    ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
     ${track_widget_creation_flag}
 

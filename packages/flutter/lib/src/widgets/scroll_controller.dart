@@ -142,7 +142,8 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<void> animateTo(double offset, {
+  Future<void> animateTo(
+    double offset, {
     @required Duration duration,
     @required Curve curve,
   }) {

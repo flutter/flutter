@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
+import 'package:bsdiff/bsdiff.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/bsdiff.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -354,11 +354,12 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
 }
 
 Future<void> _buildGradleProjectV2(
-    FlutterProject flutterProject,
-    String gradle,
-    BuildInfo buildInfo,
-    String target,
-    bool isBuildingBundle) async {
+  FlutterProject flutterProject,
+  String gradle,
+  BuildInfo buildInfo,
+  String target,
+  bool isBuildingBundle,
+) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;

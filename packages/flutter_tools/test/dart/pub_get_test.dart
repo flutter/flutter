@@ -200,7 +200,7 @@ class MockStream<T> implements Stream<T> {
   Stream<T> where(bool test(T event)) => MockStream<T>();
 
   @override
-  StreamSubscription<T> listen(void onData(T event), {Function onError, void onDone(), bool cancelOnError}) {
+  StreamSubscription<T> listen(void onData(T event), { Function onError, void onDone(), bool cancelOnError }) {
     return MockStreamSubscription<T>();
   }
 
@@ -210,7 +210,7 @@ class MockStream<T> implements Stream<T> {
 
 class MockStreamSubscription<T> implements StreamSubscription<T> {
   @override
-  Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
+  Future<E> asFuture<E>([ E futureValue ]) => Future<E>.value();
 
   @override
   Future<void> cancel() async { }
@@ -236,7 +236,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
+  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
     return MockRandomAccessFile();
   }
 

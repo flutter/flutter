@@ -30,7 +30,7 @@ void main() {
       );
     }
 
-    Widget build({Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr}) {
+    Widget build({ Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
