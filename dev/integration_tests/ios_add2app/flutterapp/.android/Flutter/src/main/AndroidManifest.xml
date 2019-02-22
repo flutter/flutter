@@ -1,5 +1,0 @@
-<!-- Generated file. Do not edit. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.iosadd2appflutter">
-  <uses-permission android:name="android.permission.INTERNET"/>
-</manifest>
