@@ -15,7 +15,7 @@ import 'test_pointer.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
 /// smaller moves. This value must be greater than [kTouchSlop].
-const double kdragSlopDefault = 20.0;
+const double kDragSlopDefault = 20.0;
 
 /// Class that programmatically interacts with widgets.
 ///
@@ -423,8 +423,8 @@ abstract class WidgetController {
   /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
   /// {@end template}
-  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kdragSlopDefault, double touchSlopY = kdragSlopDefault }) {
-    assert(kdragSlopDefault > kTouchSlop);
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+    assert(kDragSlopDefault > kTouchSlop);
     return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
@@ -436,8 +436,8 @@ abstract class WidgetController {
   /// instead.
   ///
   /// {@macro flutter.flutter_test.drag}
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kdragSlopDefault, double touchSlopY = kdragSlopDefault }) {
-    assert(kdragSlopDefault > kTouchSlop);
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+    assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
