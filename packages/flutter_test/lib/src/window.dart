@@ -59,10 +59,12 @@ class TestWindow implements Window {
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio] instead.
   set devicePixelRatioTestValue(double devicePixelRatio) {
     _devicePixelRatio = devicePixelRatio;
+    onMetricsChanged();
   }
   /// Deletes any existing test device pixel ratio and returns to using the real device pixel ratio.
   void clearDevicePixelRatioTestValue() {
     _devicePixelRatio = null;
+    onMetricsChanged();
   }
 
   @override
@@ -71,10 +73,12 @@ class TestWindow implements Window {
   /// Hides the real physical size and reports the given [physicalSizeTestValue] instead.
   set physicalSizeTestValue (Size physicalSizeTestValue) {
     _physicalSizeTestValue = physicalSizeTestValue;
+    onMetricsChanged();
   }
   /// Deletes any existing test physical size and returns to using the real physical size.
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
+    onMetricsChanged();
   }
 
   @override
@@ -83,10 +87,12 @@ class TestWindow implements Window {
   /// Hides the real view insets and reports the given [viewInsetsTestValue] instead.
   set viewInsetsTestValue(WindowPadding viewInsetsTestValue) {
     _viewInsetsTestValue = viewInsetsTestValue;
+    onMetricsChanged();
   }
   /// Deletes any existing test view insets and returns to using the real view insets.
   void clearViewInsetsTestValue() {
     _viewInsetsTestValue = null;
+    onMetricsChanged();
   }
 
   @override
@@ -95,10 +101,12 @@ class TestWindow implements Window {
   /// Hides the real padding and reports the given [paddingTestValue] instead.
   set paddingTestValue(WindowPadding paddingTestValue) {
     _paddingTestValue = paddingTestValue;
+    onMetricsChanged();
   }
   /// Deletes any existing test padding and returns to using the real padding.
   void clearPaddingTestValue() {
     _paddingTestValue = null;
+    onMetricsChanged();
   }
 
   @override
@@ -114,10 +122,12 @@ class TestWindow implements Window {
   /// Hides the real locale and reports the given [localeTestValue] instead.
   set localeTestValue(Locale localeTestValue) {
     _localeTestValue = localeTestValue;
+    onLocaleChanged();
   }
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
     _localeTestValue = null;
+    onLocaleChanged();
   }
 
   @override
@@ -126,10 +136,12 @@ class TestWindow implements Window {
   /// Hides the real locales and reports the given [localesTestValue] instead.
   set localesTestValue(List<Locale> localesTestValue) {
     _localesTestValue = localesTestValue;
+    onLocaleChanged();
   }
   /// Deletes any existing test locales and returns to using the real locales.
   void clearLocalesTestValue() {
     _localesTestValue = null;
+    onLocaleChanged();
   }
 
   @override
@@ -145,10 +157,12 @@ class TestWindow implements Window {
   /// Hides the real text scale factor and reports the given [textScaleFactorTestValue] instead.
   set textScaleFactorTestValue(double textScaleFactorTestValue) {
     _textScaleFactorTestValue = textScaleFactorTestValue;
+    onTextScaleFactorChanged();
   }
   /// Deletes any existing test text scale factor and returns to using the real text scale factor.
   void clearTextScaleFactorTestValue() {
     _textScaleFactorTestValue = null;
+    onTextScaleFactorChanged();
   }
 
   @override
@@ -158,15 +172,17 @@ class TestWindow implements Window {
   VoidCallback get onPlatformBrightnessChanged => _window.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(VoidCallback callback) {
-    _window.onPlatformBrightnessChanged =callback;
+    _window.onPlatformBrightnessChanged = callback;
   }
   /// Hides the real text scale factor and reports the given [platformBrightnessTestValue] instead.
   set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
     _platformBrightnessTestValue = platformBrightnessTestValue;
+    onPlatformBrightnessChanged();
   }
   /// Deletes any existing test platform brightness and returns to using the real platform brightness.
   void clearPlatformBrightnessTestValue() {
     _platformBrightnessTestValue = null;
+    onPlatformBrightnessChanged();
   }
 
   @override
@@ -237,10 +253,12 @@ class TestWindow implements Window {
   /// Hides the real semantics enabled and reports the given [semanticsEnabledTestValue] instead.
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
+    onSemanticsEnabledChanged();
   }
   /// Deletes any existing test semantics enabled and returns to using the real semantics enabled.
   void clearSemanticsEnabledTestValue() {
     _semanticsEnabledTestValue = null;
+    onSemanticsEnabledChanged();
   }
 
   @override
@@ -263,10 +281,12 @@ class TestWindow implements Window {
   /// Hides the real accessibility features and reports the given [accessibilityFeaturesTestValue] instead.
   set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
+    onAccessibilityFeaturesChanged();
   }
   /// Deletes any existing test accessibility features and returns to using the real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
     _accessibilityFeaturesTestValue = null;
+    onAccessibilityFeaturesChanged();
   }
 
   @override

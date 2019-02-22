@@ -22,6 +22,9 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.pi;
 const Duration _kVibrateCommitDelay = Duration(milliseconds: 100);
@@ -451,8 +454,10 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header format with up to two pieces.
-  _TimePickerHeaderFormat format(_TimePickerHeaderPiece piece1,
-      [ _TimePickerHeaderPiece piece2 ]) {
+  _TimePickerHeaderFormat format(
+    _TimePickerHeaderPiece piece1, [
+    _TimePickerHeaderPiece piece2,
+  ]) {
     final List<_TimePickerHeaderPiece> pieces = <_TimePickerHeaderPiece>[];
     switch (context.textDirection) {
       case TextDirection.ltr:
@@ -477,8 +482,13 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header piece with up to three fragments.
-  _TimePickerHeaderPiece piece({ int pivotIndex = -1, double bottomMargin = 0.0,
-      _TimePickerHeaderFragment fragment1, _TimePickerHeaderFragment fragment2, _TimePickerHeaderFragment fragment3 }) {
+  _TimePickerHeaderPiece piece({
+    int pivotIndex = -1,
+    double bottomMargin = 0.0,
+    _TimePickerHeaderFragment fragment1,
+    _TimePickerHeaderFragment fragment2,
+    _TimePickerHeaderFragment fragment3,
+  }) {
     final List<_TimePickerHeaderFragment> fragments = <_TimePickerHeaderFragment>[fragment1];
     if (fragment2 != null) {
       fragments.add(fragment2);
@@ -1651,17 +1661,57 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
-/// To show a dialog with [initialTime] equal to the current time:
+/// {@tool sample}
+/// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
-/// showTimePicker(
+/// Future<TimeOfDay> selectedTime = showTimePicker(
 ///   initialTime: TimeOfDay.now(),
 ///   context: context,
 /// );
 /// ```
+/// {@end-tool}
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
+/// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
+///
+/// The [builder] parameter can be used to wrap the dialog widget
+/// to add inherited widgets like [Localizations.override],
+/// [Directionality], or [MediaQuery].
+///
+/// {@tool sample}
+/// Show a dialog with the text direction overridden to be [TextDirection.rtl].
+///
+/// ```dart
+/// Future<TimeOfDay> selectedTimeRTL = showTimePicker(
+///   context: context,
+///   initialTime: TimeOfDay.now(),
+///   builder: (BuildContext context, Widget child) {
+///     return Directionality(
+///       textDirection: TextDirection.rtl,
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// Show a dialog with time unconditionally displayed in 24 hour format.
+///
+/// ```dart
+/// Future<TimeOfDay> selectedTime24Hour = showTimePicker(
+///   context: context,
+///   initialTime: TimeOfDay(hour: 10, minute: 47),
+///   builder: (BuildContext context, Widget child) {
+///     return MediaQuery(
+///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1669,15 +1719,19 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///    date picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
-  @required TimeOfDay initialTime
+  @required TimeOfDay initialTime,
+  TransitionBuilder builder,
 }) async {
   assert(context != null);
   assert(initialTime != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
+  final Widget dialog = _TimePickerDialog(initialTime: initialTime);
   return await showDialog<TimeOfDay>(
     context: context,
-    builder: (BuildContext context) => _TimePickerDialog(initialTime: initialTime),
+    builder: (BuildContext context) {
+      return builder == null ? dialog : builder(context, dialog);
+    },
   );
 }
 

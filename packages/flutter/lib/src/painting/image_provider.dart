@@ -280,13 +280,28 @@ abstract class ImageProvider<T> {
         }
       );
     }
-    obtainKey(configuration).then<void>((T key) {
+
+    // `obtainKey` can throw both sync and async errors.
+    // `catchError` handles cases where async errors are thrown and the try block is for sync errors.
+    //
+    // `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return stream;
+    }
+
+    key.then<void>((T key) {
       obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+      final ImageStreamCompleter completer = PaintingBinding.instance
+          .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
       if (completer != null) {
         stream.setCompleter(completer);
       }
     }).catchError(handleError);
+
     return stream;
   }
 
@@ -328,7 +343,7 @@ abstract class ImageProvider<T> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  Future<bool> evict({ ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);

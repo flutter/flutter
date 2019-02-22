@@ -65,12 +65,12 @@ example:file:///example/lib/
       const String multiRootPackagesContents = r'''
 xml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/xml-3.2.3/lib/
 yaml:file:///Users/flutter_user/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/
-example:org-dartlang-app:///lib/
+example:org-dartlang-app:/
 ''';
       when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(multiRootPackagesContents));
 
       testUsingContext('Maps main file from same package on multiroot scheme', () async {
-        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example', '/gen']);
+        final PackageUriMapper packageUriMapper = PackageUriMapper('/example/lib/main.dart', '.packages', 'org-dartlang-app', <String>['/example/lib/', '/gen/lib/']);
         expect(packageUriMapper.map('/example/lib/main.dart').toString(), 'package:example/main.dart');
       }, overrides: <Type, Generator>{
         FileSystem: () => mockFileSystem,
@@ -118,7 +118,6 @@ example:org-dartlang-app:///lib/
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
             ))
           ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -142,7 +141,6 @@ example:org-dartlang-app:///lib/
               'result abc\nline1\nline2\nabc'
             ))
           ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -168,7 +166,6 @@ example:org-dartlang-app:///lib/
               'result abc\nline1\nline2\nabc'
           ))
       ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(
         sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
@@ -505,9 +502,12 @@ example:org-dartlang-app:///lib/
   });
 }
 
-Future<void> _recompile(StreamController<List<int>> streamController,
-  ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-  String mockCompilerOutput) async {
+Future<void> _recompile(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {
@@ -568,12 +568,12 @@ class MockStdIn extends Mock implements IOSink {
   }
 
   @override
-  void write([Object o = '']) {
+  void write([ Object o = '' ]) {
     _stdInWrites.write(o);
   }
 
   @override
-  void writeln([Object o = '']) {
+  void writeln([ Object o = '' ]) {
     _stdInWrites.writeln(o);
   }
 }

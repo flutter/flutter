@@ -388,7 +388,7 @@ flutter:
       String manifest,
       String expectedAppVersion,
       String expectedBuildName,
-      int expectedBuildNumber,
+      String expectedBuildNumber,
     }) async {
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.appVersion, expectedAppVersion);
@@ -396,7 +396,7 @@ flutter:
       expect(flutterManifest.buildNumber, expectedBuildNumber);
     }
 
-    test('parses major.minor.patch+build version clause', () async {
+    test('parses major.minor.patch+build version clause 1', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+2
@@ -409,7 +409,24 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0.0+2',
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: 2,
+        expectedBuildNumber: '2',
+      );
+    });
+
+    test('parses major.minor.patch+build version clause 2', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0-beta+exp.sha.5114f85
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0.0-beta+exp.sha.5114f85',
+        expectedBuildName: '1.0.0-beta',
+        expectedBuildNumber: 'exp.sha.5114f85',
       );
     });
 
@@ -426,41 +443,7 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0+2',
         expectedBuildName: '1.0',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major+build version clause', () async {
-      const String manifest = '''
-name: test
-version: 1+2
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1+2',
-        expectedBuildName: '1',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major version clause', () async {
-      const String manifest = '''
-name: test
-version: 1
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1',
-        expectedBuildName: '1',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '2',
       );
     });
 
@@ -511,8 +494,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void testUsingContextAndFs(String description, FileSystem filesystem,
-        dynamic testMethod()) {
+    void testUsingContextAndFs(
+      String description,
+      FileSystem filesystem,
+      dynamic testMethod(),
+    ) {
       testUsingContext(description,
               () async {
             writeEmptySchemaFile(filesystem);

@@ -574,6 +574,63 @@ void main() {
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 48.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
+
+    testWidgets('body size with extendBody', (WidgetTester tester) async {
+      final Key bodyKey = UniqueKey();
+      double mediaQueryBottom;
+
+      Widget buildFrame({ bool extendBody, bool resizeToAvoidBottomInset, double viewInsetBottom = 0.0 }) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: viewInsetBottom),
+            ),
+            child: Scaffold(
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+              extendBody: extendBody,
+              body: Builder(
+                builder: (BuildContext context) {
+                  mediaQueryBottom = MediaQuery.of(context).padding.bottom;
+                  return Container(key: bodyKey);
+                },
+              ),
+              bottomNavigationBar: const BottomAppBar(
+                child: SizedBox(height: 48.0,),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(extendBody: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(mediaQueryBottom, 48.0);
+
+      await tester.pumpWidget(buildFrame(extendBody: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 552.0)); // 552 = 600 - 48 (BAB height)
+      expect(mediaQueryBottom, 0.0);
+
+      // If resizeToAvoidBottomInsets is false, same results as if it was unspecified (null).
+      await tester.pumpWidget(buildFrame(extendBody: true, resizeToAvoidBottomInset: false, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(mediaQueryBottom, 48.0);
+
+      await tester.pumpWidget(buildFrame(extendBody: false, resizeToAvoidBottomInset: false, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 552.0));
+      expect(mediaQueryBottom, 0.0);
+
+      // If resizeToAvoidBottomInsets is true and viewInsets.bottom is > the bottom
+      // navigation bar's height then the body always resizes and the MediaQuery
+      // isn't adjusted. This case corresponds to the keyboard appearing.
+      await tester.pumpWidget(buildFrame(extendBody: true, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+      expect(mediaQueryBottom, 0.0);
+
+      await tester.pumpWidget(buildFrame(extendBody: false, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+      expect(mediaQueryBottom, 0.0);
+   });
   });
 
   testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {

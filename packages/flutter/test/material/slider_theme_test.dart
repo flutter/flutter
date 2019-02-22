@@ -284,7 +284,7 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
-    Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
+    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -589,6 +589,152 @@ void main() {
         color: sliderTheme.overlayColor,
       )
     );
+  });
+
+  // Only the thumb, overlay, and tick mark have special shortcuts to provide
+  // no-op or empty shapes.
+  //
+  // The track can also be skipped by providing 0 height.
+  //
+  // The value indicator can be skipped by passing the appropriate
+  // [ShowValueIndicator].
+  testWidgets('The slider can skip all of its comoponent painting', (WidgetTester tester) async {
+    // Pump a slider with all shapes skipped.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(sliderBox, paintsNothing);
+  });
+
+  testWidgets('The slider can skip all component painting except the track', (WidgetTester tester) async {
+    // Pump a slider with just a track.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Only 2 track segments.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+  });
+
+  testWidgets('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
+    // Pump a slider with just tick marks.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Only 5 tick marks.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 5));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+  });
+
+  testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
+    // Pump a slider with just a thumb.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Only 1 thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+  });
+
+  testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
+    // Pump a slider with just an overlay.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Tap the center of the track and wait for animations to finish.
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Only 1 overlay.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+
+    await gesture.up();
+  });
+
+  testWidgets('The slider can skip all component painting except the value indicator', (WidgetTester tester) async {
+    // Pump a slider with just a value indicator.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
+      value: 0.5,
+      divisions: 4
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Tap the center of the track and wait for animations to finish.
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Only 1 value indicator.
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 1));
+
+    await gesture.up();
   });
 }
 

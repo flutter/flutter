@@ -27,9 +27,9 @@ task:
       env:
         SHARD: docs
         # For uploading master docs to Firebase master branch staging site
-        FIREBASE_MASTER_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
+        FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading beta docs to Firebase public live site
-        FIREBASE_PUBLIC_TOKEN: ENCRYPTED[c422da192f06da7b4449ca8e7aa866dabeb8a0f8d7488497c2e7e447e6fd31d917e6c813db081dc4e2a7a63afdf41864]
+        FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
       only_if: $CIRRUS_BRANCH == 'dev'
@@ -46,12 +46,12 @@ task:
       test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
       test_script:
-        - dart ./dev/bots/analyze.dart
+        - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
         SHARD: tests
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
@@ -59,7 +59,7 @@ task:
       env:
         SHARD: tool_tests
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
@@ -77,7 +77,7 @@ task:
         - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
         - export CIRRUS_CHANGE_MESSAGE=""
         - export CIRRUS_COMMIT_MESSAGE=""
-        - dart ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
         - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
       container:
@@ -192,7 +192,7 @@ task:
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    bin/cache/dart-sdk/bin/dart -c dev/bots/test.dart
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
     - name: tests-macos
       env:

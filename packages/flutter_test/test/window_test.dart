@@ -136,20 +136,6 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake semantics enabled', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<bool>(
-      tester: tester,
-      realValue: ui.window.semanticsEnabled,
-      fakeValue: !ui.window.semanticsEnabled,
-      propertyRetriever: () {
-        return WidgetsBinding.instance.window.semanticsEnabled;
-      },
-      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
-        binding.window.semanticsEnabledTestValue = fakeValue;
-      }
-    );
-  });
-
   testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<AccessibilityFeatures>(
       tester: tester,

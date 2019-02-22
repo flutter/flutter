@@ -84,6 +84,11 @@ class FlutterKernelBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    // Do not resolve dependencies if this does not correspond to the main
+    // entrypoint.
+    if (!mainPath.contains(buildStep.inputId.path)) {
+      return;
+    }
     final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
     final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
@@ -97,9 +102,8 @@ class FlutterKernelBuilder implements Builder {
       return;
     }
 
-    // Do not generate kernel if it has been disabled or if this asset does not
-    // correspond to the current entrypoint.
-    if (disabled || !mainPath.contains(buildStep.inputId.path)) {
+    // Do not generate kernel if it has been disabled.
+    if (disabled) {
       return;
     }
 
@@ -118,8 +122,14 @@ class FlutterKernelBuilder implements Builder {
     // Note: currently we only replace the root package with a multiroot
     // scheme. To support codegen on arbitrary packages we will need to do
     // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:///lib/');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/');
     await packagesFile.writeAsString(newPackagesContents);
+    String absoluteMainPath;
+    if (path.isAbsolute(mainPath)) {
+      absoluteMainPath = mainPath;
+    } else {
+      absoluteMainPath = path.join(projectDir.absolute.path, mainPath);
+    }
 
     // start up the frontend server with configuration.
     final List<String> arguments = <String>[
@@ -145,14 +155,15 @@ class FlutterKernelBuilder implements Builder {
     if (incrementalCompilerByteStorePath != null) {
       arguments.add('--incremental');
     }
-    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName');
+    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName', 'lib${Platform.pathSeparator}');
+    final String normalRoot =  path.join(projectDir.absolute.path, 'lib${Platform.pathSeparator}');
     arguments.addAll(<String>[
       '--packages',
-      packagesFile.path,
+      Uri.file(packagesFile.path).toString(),
       '--output-dill',
       outputFile.path,
       '--filesystem-root',
-      projectDir.absolute.path,
+      normalRoot,
       '--filesystem-root',
       generatedRoot,
       '--filesystem-scheme',
@@ -162,12 +173,12 @@ class FlutterKernelBuilder implements Builder {
       arguments.addAll(extraFrontEndOptions);
     }
     final Uri mainUri = _PackageUriMapper.findUri(
-      mainPath,
+      absoluteMainPath,
       packagesFile.path,
       multiRootScheme,
-      <String>[projectDir.absolute.path, generatedRoot],
+      <String>[normalRoot, generatedRoot],
     );
-    arguments.add(mainUri.toString());
+    arguments.add(mainUri?.toString() ?? absoluteMainPath);
     // Invoke the frontend server and copy the dill back to the output
     // directory.
     try {
@@ -202,7 +213,6 @@ class _StdoutHandler {
   bool _suppressCompilerMessages;
 
   void handler(String message) {
-    log.info(message);
     const String kResultPrefix = 'result ';
     if (boundaryKey == null) {
       if (message.startsWith(kResultPrefix))
@@ -256,7 +266,7 @@ class _PackageUriMapper {
       if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file('$name/lib/', windows: Platform.isWindows).toString())
+          .map((String name) => Uri.file(name, windows: Platform.isWindows).toString())
           .toList();
         return;
       }
