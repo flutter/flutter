@@ -572,5 +572,5 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
-ProcessResult exitsWithError([String stdout = '']) => ProcessResult(1, 1, stdout, '');
-ProcessResult exitsHappy([String stdout = '']) => ProcessResult(1, 0, stdout, '');
+ProcessResult exitsWithError([ String stdout = '' ]) => ProcessResult(1, 1, stdout, '');
+ProcessResult exitsHappy([ String stdout = '' ]) => ProcessResult(1, 0, stdout, '');

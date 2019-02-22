@@ -1438,9 +1438,9 @@ class Navigator extends StatefulWidget {
   /// instances of [Navigator].
   static NavigatorState of(
     BuildContext context, {
-      bool rootNavigator = false,
-      bool nullOk = false,
-    }) {
+    bool rootNavigator = false,
+    bool nullOk = false,
+  }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());

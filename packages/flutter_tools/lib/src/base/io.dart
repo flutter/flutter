@@ -95,7 +95,7 @@ ExitFunction get exit => _exitFunction;
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ExitFunction exitFunction]) {
+void setExitFunctionForTests([ ExitFunction exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };

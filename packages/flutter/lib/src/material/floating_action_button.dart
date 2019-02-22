@@ -92,10 +92,10 @@ class FloatingActionButton extends StatelessWidget {
        disabledElevation = disabledElevation ?? elevation,
        super(key: key);
 
-  /// Creates a wider [StadiumBorder]-shaped floating action button with both
-  /// an [icon] and a [label].
+  /// Creates a wider [StadiumBorder]-shaped floating action button with
+  /// an optional [icon] and a [label].
   ///
-  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior] and
+  /// The [label], [elevation], [highlightElevation], [clipBehavior] and
   /// [shape] arguments must not be null. Additionally, [elevation]
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
@@ -113,7 +113,7 @@ class FloatingActionButton extends StatelessWidget {
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
-    @required Widget icon,
+    Widget icon,
     @required Widget label,
   }) : assert(elevation != null && elevation >= 0.0),
        assert(highlightElevation != null && highlightElevation >= 0.0),
@@ -127,13 +127,19 @@ class FloatingActionButton extends StatelessWidget {
        child = _ChildOverflowBox(
          child: Row(
            mainAxisSize: MainAxisSize.min,
-           children: <Widget>[
-             const SizedBox(width: 16.0),
-             icon,
-             const SizedBox(width: 8.0),
-             label,
-             const SizedBox(width: 20.0),
-           ],
+           children: icon == null
+             ? <Widget>[
+                 const SizedBox(width: 20.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ]
+             : <Widget>[
+                 const SizedBox(width: 16.0),
+                 icon,
+                 const SizedBox(width: 8.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ],
          ),
        ),
        super(key: key);

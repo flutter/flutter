@@ -1203,7 +1203,7 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// down events by calling this method.
   void handleTapDown(TapDownDetails details) {
-    _lastTapDownPosition = details.globalPosition - _paintOffset;
+    _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
@@ -1258,35 +1258,20 @@ class RenderEditable extends RenderBox {
   /// If you have a [TextEditingController], it's generally easier to
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
-  void selectPosition({@required SelectionChangedCause cause}) {
-    selectPositionAt(from: _lastTapDownPosition, cause: cause);
-  }
-
-  /// Select text between the global positions [from] and [to].
-  void selectPositionAt({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
+  void selectPosition({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
-      final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-      final TextPosition toPosition = to == null
-        ? null
-        : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-      onSelectionChanged(
-        TextSelection(
-          baseOffset: fromPosition.offset,
-          extentOffset: toPosition?.offset ?? fromPosition.offset,
-          affinity: fromPosition.affinity,
-        ),
-        this,
-        cause,
-      );
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(TextSelection.fromPosition(position), this, cause);
     }
   }
 
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWord({@required SelectionChangedCause cause}) {
+  void selectWord({ @required SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
 
@@ -1296,14 +1281,14 @@ class RenderEditable extends RenderBox {
   /// beginning and end of a word respectively.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
+  void selectWordsInRange({ @required Offset from, Offset to, @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
-      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+      final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from + -_paintOffset));
       final TextSelection firstWord = _selectWordAtOffset(firstPosition);
       final TextSelection lastWord = to == null ?
-        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
+        firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to + -_paintOffset)));
 
       onSelectionChanged(
         TextSelection(
@@ -1318,7 +1303,7 @@ class RenderEditable extends RenderBox {
   /// Move the selection to the beginning or end of a word.
   ///
   /// {@macro flutter.rendering.editable.select}
-  void selectWordEdge({@required SelectionChangedCause cause}) {
+  void selectWordEdge({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
