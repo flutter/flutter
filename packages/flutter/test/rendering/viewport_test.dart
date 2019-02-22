@@ -517,7 +517,7 @@ void main() {
   group('Nested viewports (same orientation) showOnScreen', () {
     List<Widget> children;
 
-    Future<void> buildNestedScroller({WidgetTester tester, ScrollController inner, ScrollController outer}) {
+    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

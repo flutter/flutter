@@ -203,8 +203,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerNumericServiceExtension(
         name: 'timeDilation',
         getter: () async => timeDilation,
@@ -297,7 +296,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [Priority.animation] won't run (at least, not with the
   /// [defaultSchedulingStrategy]; this can be configured using
   /// [schedulingStrategy]).
-  Future<T> scheduleTask<T>(TaskCallback<T> task, Priority priority, {
+  Future<T> scheduleTask<T>(
+    TaskCallback<T> task,
+    Priority priority, {
     String debugLabel,
     Flow flow,
   }) {

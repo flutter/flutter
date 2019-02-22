@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -41,6 +42,16 @@ void main() {
     resultOfPodVersion = () async => exitsHappy(versionText);
   }
 
+  void podsIsInHomeDir() {
+    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
+  }
+
+  String podsIsInCustomDir({String cocoapodsReposDir}) {
+    cocoapodsReposDir ??= fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
+    fs.directory(fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
+    return cocoapodsReposDir;
+  }
+
   setUp(() async {
     Cache.flutterRoot = 'flutter';
     fs = MemoryFileSystem();
@@ -60,7 +71,6 @@ void main() {
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift podfile template');
-    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
     when(mockProcessManager.run(
       <String>['pod', '--version'],
       workingDirectory: anyNamed('workingDirectory'),
@@ -232,6 +242,10 @@ void main() {
   });
 
   group('Process pods', () {
+    setUp(() {
+      podsIsInHomeDir();
+    });
+
     testUsingContext('prints error, if CocoaPods is not installed', () async {
       pretendPodIsNotInstalled();
       projectUnderTest.ios.podfile.createSync();
@@ -519,10 +533,44 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       ProcessManager: () => mockProcessManager,
     });
   });
+
+  group('Pods repos dir is custom', () {
+    String cocoapodsRepoDir;
+    Map<String, String> environment;
+    setUp(() {
+      cocoapodsRepoDir = podsIsInCustomDir();
+      environment = <String, String>{
+        'FLUTTER_FRAMEWORK_DIR': 'engine/path',
+        'COCOAPODS_DISABLE_STATS': 'true',
+        'CP_REPOS_DIR': cocoapodsRepoDir,
+      };
+    });
+
+    testUsingContext('succeeds, if specs repo is in CP_REPOS_DIR.', () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      when(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: environment,
+      )).thenAnswer((_) async => exitsHappy());
+      final bool success = await cocoaPodsUnderTest.processPods(
+        iosProject: projectUnderTest.ios,
+        iosEngineDir: 'engine/path',
+      );
+      expect(success, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(environment: environment),
+    });
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
-ProcessResult exitsWithError([String stdout = '']) => ProcessResult(1, 1, stdout, '');
-ProcessResult exitsHappy([String stdout = '']) => ProcessResult(1, 0, stdout, '');
+ProcessResult exitsWithError([ String stdout = '' ]) => ProcessResult(1, 1, stdout, '');
+ProcessResult exitsHappy([ String stdout = '' ]) => ProcessResult(1, 0, stdout, '');

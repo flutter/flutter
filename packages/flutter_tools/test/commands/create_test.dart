@@ -56,7 +56,7 @@ void main() {
       projectDir,
       <String>[],
       <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
         'ios/Flutter/AppFrameworkInfo.plist',
@@ -74,7 +74,7 @@ void main() {
       projectDir,
       <String>[],
       <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
         'ios/Flutter/AppFrameworkInfo.plist',
@@ -120,7 +120,7 @@ void main() {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childDirectory('.idea').create(recursive: true);
     await _createAndAnalyzeProject(projectDir, <String>[], <String>[
-      'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       'flutter_project.iml',
       'ios/Flutter/AppFrameworkInfo.plist',
@@ -136,7 +136,7 @@ void main() {
     await projectDir.absolute.childDirectory('lib').create(recursive: true);
     await projectDir.absolute.childDirectory('ios').create(recursive: true);
     await _createAndAnalyzeProject(projectDir, <String>[], <String>[
-      'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       'flutter_project.iml',
       'ios/Flutter/AppFrameworkInfo.plist',
@@ -155,8 +155,8 @@ void main() {
       projectDir,
       <String>[],
       <String>[
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
@@ -180,9 +180,9 @@ void main() {
         'test/flutter_project_test.dart',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
@@ -203,14 +203,14 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=app', '--android-language=kotlin', '--ios-language=swift'],
       <String>[
-        'android/app/src/main/kotlin/com/example/flutterproject/MainActivity.kt',
+        'android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
         'ios/Runner/AppDelegate.swift',
         'ios/Runner/Runner-Bridging-Header.h',
         'lib/main.dart',
         '.idea/libraries/KotlinJavaRuntime.xml',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'ios/Runner/AppDelegate.h',
         'ios/Runner/AppDelegate.m',
         'ios/Runner/main.m',
@@ -227,9 +227,9 @@ void main() {
         'test/flutter_project_test.dart',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
@@ -251,8 +251,8 @@ void main() {
       projectDir,
       <String>['--template=plugin'],
       <String>[
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
@@ -271,8 +271,8 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
       <String>[
-        'android/src/main/kotlin/com/example/flutterproject/FlutterProjectPlugin.kt',
-        'example/android/app/src/main/kotlin/com/example/flutterprojectexample/MainActivity.kt',
+        'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
+        'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
         'example/ios/Runner/AppDelegate.swift',
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
@@ -282,8 +282,8 @@ void main() {
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
@@ -296,12 +296,12 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
       <String>[
-        'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/bar/foo/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
       ],
       unexpectedPaths: <String>[
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
       ],
     );
   }, timeout: allowForCreateFlutterProject);
@@ -312,11 +312,11 @@ void main() {
       <String>['--no-pub', '--template=plugin', '--project-name', 'xyz'],
       <String>[
         'android/src/main/java/com/example/xyz/XyzPlugin.java',
-        'example/android/app/src/main/java/com/example/xyzexample/MainActivity.java',
+        'example/android/app/src/main/java/com/example/xyz_example/MainActivity.java',
       ],
       unexpectedPaths: <String>[
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
       ],
     );
   }, timeout: allowForCreateFlutterProject);
@@ -518,6 +518,54 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
+  testUsingContext('has correct application id for android and bundle id for ios', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    String tmpProjectDir = fs.path.join(tempDir.path, 'hello_flutter');
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.example', tmpProjectDir]);
+    FlutterProject project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    expect(
+        project.ios.productBundleIdentifier,
+        'com.example.helloFlutter'
+    );
+    expect(
+        project.android.applicationId,
+        'com.example.hello_flutter'
+    );
+
+    tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
+    project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    expect(
+        project.ios.productBundleIdentifier,
+        'abc.1.testAbc'
+    );
+    expect(
+        project.android.applicationId,
+        'abc.u1.test_abc'
+    );
+
+    tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', '#+^%', tmpProjectDir]);
+    project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    expect(
+        project.ios.productBundleIdentifier,
+        'flutterProject.untitled'
+    );
+    expect(
+        project.android.applicationId,
+        'flutter_project.untitled'
+    );
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => mockFlutterVersion,
+    Platform: _kNoColorTerminalPlatform,
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('can re-gen default template over existing project', () async {
     Cache.flutterRoot = '../..';
 
@@ -616,7 +664,7 @@ void main() {
       projectDir,
       <String>[],
       <String>[
-        '.android/app/src/main/java/com/bar/foo/flutterproject/host/MainActivity.java',
+        '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
       ],
     );
   }, timeout: allowForRemotePubInvocation);
@@ -647,10 +695,10 @@ void main() {
       projectDir,
       <String>['--no-pub'],
       <String>[
-        'android/app/src/main/java/com/bar/foo/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/bar/foo/flutter_project/MainActivity.java',
       ],
       unexpectedPaths: <String>[
-        'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
       ],
     );
   }, timeout: allowForCreateFlutterProject);
@@ -682,12 +730,12 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin'],
       <String>[
-        'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
+        'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
         'ios/Classes/FlutterProjectPlugin.h',
       ],
       unexpectedPaths: <String>[
-        'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
-        'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
       ],
     );
     final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
@@ -908,7 +956,7 @@ Future<void> _analyzeProject(String workingDir) async {
   expect(exec.exitCode, 0);
 }
 
-Future<void> _runFlutterTest(Directory workingDir, {String target}) async {
+Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -1009,8 +1057,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(void onData(List<int> event), {
-    Function onError, void onDone(), bool cancelOnError
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
+    Function onError,
+    void onDone(),
+    bool cancelOnError
   }) {
     return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

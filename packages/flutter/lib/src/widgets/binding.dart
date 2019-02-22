@@ -213,6 +213,9 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
+  /// {@macro on_platform_brightness_change}
+  void didChangePlatformBrightness() { }
+
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
@@ -406,6 +409,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     super.handleTextScaleFactorChanged();
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeTextScaleFactor();
+  }
+
+  @override
+  void handlePlatformBrightnessChanged() {
+    super.handlePlatformBrightnessChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangePlatformBrightness();
   }
 
   @override
@@ -829,7 +839,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
+  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T> element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();

@@ -351,16 +351,35 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // in the widget after first build is ignored.
   DateTime initialDateTime;
 
-  // The currently selected values of the date picker.
-  int selectedDayFromInitial; // The difference in days between the initial date and the currently selected date.
+  // The difference in days between the initial date and the currently selected date.
+  int selectedDayFromInitial;
+
+  // The current selection of the hour picker.
+  //
+  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
+  // range from 1-12.
   int selectedHour;
+
+  // The previous selection index of the hour column.
+  //
+  // This ranges from 0-23 even if [widget.use24hFormat] is false. As a result,
+  // it can be used for determining if we just changed from AM -> PM or vice
+  // versa.
+  int previousHourIndex;
+
+  // The current selection of the minute picker. Values range from 0 to 59.
   int selectedMinute;
-  int selectedAmPm; // 0 means AM, 1 means PM.
+
+  // The current selection of the AM/PM picker.
+  //
+  // - 0 means AM
+  // - 1 means PM
+  int selectedAmPm;
 
   // The controller of the AM/PM column.
   FixedExtentScrollController amPmController;
 
-  // Estimated width of columns.
+  // The estimated width of columns.
   final Map<int, double> estimatedColumnWidths = <int, double>{};
 
   @override
@@ -380,6 +399,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
       amPmController = FixedExtentScrollController(initialItem: selectedAmPm);
     }
+
+    previousHourIndex = selectedHour;
   }
 
   @override
@@ -427,7 +448,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       date.year,
       date.month,
       date.day,
-      selectedHour + selectedAmPm * 12,
+      widget.use24hFormat ? selectedHour : selectedHour % 12 + selectedAmPm * 12,
       selectedMinute,
     );
   }
@@ -477,25 +498,29 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         if (widget.use24hFormat) {
           selectedHour = index;
           widget.onDateTimeChanged(_getDateTime());
-        }
-        else {
-          final int currentHourIn24h = selectedHour + selectedAmPm * 12;
+        } else {
+          selectedHour = index % 12;
+
           // Automatically scrolls the am/pm column when the hour column value
-          // goes far enough. This behavior is similar to
-          // iOS picker version.
-          if (currentHourIn24h ~/ 12 != index ~/ 12) {
-            selectedHour = index % 12;
+          // goes far enough.
+
+          final bool wasAm = previousHourIndex >=0 && previousHourIndex <= 11;
+          final bool isAm = index >= 0 && index <= 11;
+
+          if (wasAm != isAm) {
+            // Animation values obtained by comparing with iOS version.
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
-              duration: const Duration(milliseconds: 300), // Set by comparing with iOS version.
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-            ); // Set by comparing with iOS version.
+            );
           }
           else {
-            selectedHour = index % 12;
             widget.onDateTimeChanged(_getDateTime());
           }
         }
+
+        previousHourIndex = index;
       },
       children: List<Widget>.generate(24, (int index) {
         int hour = index;
@@ -1125,7 +1150,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedMinute = index;
+          selectedMinute = index * widget.minuteInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,
@@ -1237,7 +1262,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
         setState(() {
-          selectedSecond = index;
+          selectedSecond = index * widget.secondInterval;
           widget.onTimerDurationChanged(
             Duration(
               hours: selectedHour ?? 0,

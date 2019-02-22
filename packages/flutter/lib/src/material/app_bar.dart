@@ -228,25 +228,28 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// {@tool snippet --template=stateless_widget}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
-  /// Scaffold(
-  ///   appBar: AppBar(
-  ///     title: Text('Hello World'),
-  ///     actions: <Widget>[
-  ///       IconButton(
-  ///         icon: Icon(Icons.shopping_cart),
-  ///         tooltip: 'Open shopping cart',
-  ///         onPressed: () {
-  ///           // ...
-  ///         },
-  ///       ),
-  ///     ],
-  ///   ),
-  /// )
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text('Ready, Set, Shop!'),
+  ///       actions: <Widget>[
+  ///         IconButton(
+  ///           icon: Icon(Icons.shopping_cart),
+  ///           tooltip: 'Open shopping cart',
+  ///           onPressed: () {
+  ///             // Implement navigation to shopping cart page here...
+  ///             print('Shopping cart opened.');
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   final List<Widget> actions;

@@ -45,6 +45,10 @@ enum SelectionChangedCause {
   /// location of the cursor) to change.
   longPress,
 
+  /// The user force-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  forcePress,
+
   /// The user used the keyboard to change the selection or the location of the
   /// cursor.
   ///
@@ -737,12 +741,12 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
-  ///{@template flutter.rendering.editable.paintCursorOnTop}
+  /// {@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
-  /// {@end template}
+  /// {@endtemplate}
   bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
   set paintCursorAboveText(bool value) {
@@ -759,7 +763,7 @@ class RenderEditable extends RenderBox {
   /// (-[cursorWidth] * 0.5, 0.0) on iOS platforms and (0, 0) on Android
   /// platforms. The origin from where the offset is applied to is the arbitrary
   /// location where the cursor ends up being rendered from by default.
-  /// {@end template}
+  /// {@endtemplate}
   Offset get cursorOffset => _cursorOffset;
   Offset _cursorOffset;
   set cursorOffset(Offset value) {
@@ -1233,7 +1237,16 @@ class RenderEditable extends RenderBox {
   }
 
   /// Move selection to the location of the last tap down.
-  void selectPosition({@required SelectionChangedCause cause}) {
+  ///
+  /// {@template flutter.rendering.editable.select}
+  /// This method is mainly used to translate user inputs in global positions
+  /// into a [TextSelection]. When used in conjunction with a [EditableText],
+  /// the selection change is fed back into [TextEditingController.selection].
+  ///
+  /// If you have a [TextEditingController], it's generally easier to
+  /// programmatically manipulate its `value` or `selection` directly.
+  /// {@endtemplate}
+  void selectPosition({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
@@ -1244,7 +1257,9 @@ class RenderEditable extends RenderBox {
   }
 
   /// Select a word around the location of the last tap down.
-  void selectWord({@required SelectionChangedCause cause}) {
+  ///
+  /// {@macro flutter.rendering.editable.select}
+  void selectWord({ @required SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
 
@@ -1252,7 +1267,9 @@ class RenderEditable extends RenderBox {
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
-  void selectWordsInRange({@required Offset from, Offset to, @required SelectionChangedCause cause}) {
+  ///
+  /// {@macro flutter.rendering.editable.select}
+  void selectWordsInRange({ @required Offset from, Offset to, @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     if (onSelectionChanged != null) {
@@ -1272,7 +1289,9 @@ class RenderEditable extends RenderBox {
   }
 
   /// Move the selection to the beginning or end of a word.
-  void selectWordEdge({@required SelectionChangedCause cause}) {
+  ///
+  /// {@macro flutter.rendering.editable.select}
+  void selectWordEdge({ @required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
@@ -1510,19 +1529,28 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
+    bool showSelection = false;
+    bool showCaret = false;
+
+    if (_selection != null && !_floatingCursorOn) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null)
+        showCaret = true;
+      else if (!_selection.isCollapsed && _selectionColor != null)
+        showSelection = true;
+    }
+
+    if (showSelection) {
+      _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+      _paintSelection(context.canvas, effectiveOffset);
+    }
+
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
     if (paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
-    if (_selection != null && !_floatingCursorOn) {
-      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
-        _paintCaret(context.canvas, effectiveOffset, _selection.extent);
-      } else if (!_selection.isCollapsed && _selectionColor != null) {
-        _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
-        _paintSelection(context.canvas, effectiveOffset);
-      }
-    }
+    if (showCaret)
+      _paintCaret(context.canvas, effectiveOffset, _selection.extent);
 
     if (!paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);

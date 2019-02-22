@@ -476,10 +476,21 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
 
   final _TabBarState tabBar;
 
+  bool _initialViewportDimensionWasZero;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     bool result = true;
-    if (pixels == null) {
+    if (_initialViewportDimensionWasZero != true) {
+      // If the viewport never had a non-zero dimension, we just want to jump
+      // to the initial scroll position to avoid strange scrolling effects in
+      // release mode: In release mode, the viewport temporarily may have a
+      // dimension of zero before the actual dimension is calculated. In that
+      // scenario, setting the actual dimension would cause a strange scroll
+      // effect without this guard because the super call below would starts a
+      // ballistic scroll activity.
+      assert(viewportDimension != null);
+      _initialViewportDimensionWasZero = viewportDimension != 0.0;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
     }

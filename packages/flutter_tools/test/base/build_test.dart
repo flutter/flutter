@@ -852,7 +852,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -905,7 +905,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -966,7 +966,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 
@@ -1009,7 +1009,7 @@ void main() {
         outputPath: 'build/foo',
         compilationTraceFilePath: kTrace,
         createPatch: true,
-        buildNumber: 100,
+        buildNumber: '100',
         baselineDir: '.baseline',
       );
 

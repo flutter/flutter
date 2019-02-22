@@ -379,8 +379,10 @@ String _stripRef(String type) => _hasRef(type) ? type.substring(1) : type;
 /// recursively walk the response and replace values that are service maps with
 /// actual [ServiceObject]s. During the upgrade the owner is given a chance
 /// to return a cached / canonicalized object.
-void _upgradeCollection(dynamic collection,
-                        ServiceObjectOwner owner) {
+void _upgradeCollection(
+  dynamic collection,
+  ServiceObjectOwner owner,
+) {
   if (collection is ServiceMap)
     return;
   if (collection is Map<String, dynamic>) {
@@ -827,7 +829,8 @@ class VM extends ServiceObjectOwner {
   }
 
   /// Invoke the RPC and return the raw response.
-  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+  Future<Map<String, dynamic>> invokeRpcRaw(
+    String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
   }) async {
     printTrace('Sending to VM service: $method($params)');
@@ -847,7 +850,8 @@ class VM extends ServiceObjectOwner {
   }
 
   /// Invoke the RPC and return a [ServiceObject] response.
-  Future<T> invokeRpc<T extends ServiceObject>(String method, {
+  Future<T> invokeRpc<T extends ServiceObject>(
+    String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
   }) async {
     final Map<String, dynamic> response = await invokeRpcRaw(
@@ -873,7 +877,8 @@ class VM extends ServiceObjectOwner {
   }
 
   // Write one file into a file system.
-  Future<Map<String, dynamic>> writeDevFSFile(String fsName, {
+  Future<Map<String, dynamic>> writeDevFSFile(
+    String fsName, {
     @required String path,
     @required List<int> fileContents
   }) {
@@ -911,10 +916,12 @@ class VM extends ServiceObjectOwner {
     return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{ 'fsName': fsName });
   }
 
-  Future<ServiceMap> runInView(String viewId,
-                               Uri main,
-                               Uri packages,
-                               Uri assetsDirectory) {
+  Future<ServiceMap> runInView(
+    String viewId,
+    Uri main,
+    Uri packages,
+    Uri assetsDirectory,
+  ) {
     return invokeRpc<ServiceMap>('_flutter.runInView',
       params: <String, dynamic> {
         'viewId': viewId,
@@ -1090,7 +1097,8 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> _fetchDirect() => invokeRpcRaw('getIsolate');
 
   /// Invoke the RPC and return the raw response.
-  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+  Future<Map<String, dynamic>> invokeRpcRaw(
+    String method, {
     Map<String, dynamic> params,
   }) {
     // Inject the 'isolateId' parameter.
@@ -1134,10 +1142,11 @@ class Isolate extends ServiceObjectOwner {
 
   static const int kIsolateReloadBarred = 1005;
 
-  Future<Map<String, dynamic>> reloadSources(
-      { bool pause = false,
-        Uri rootLibUri,
-        Uri packagesUri}) async {
+  Future<Map<String, dynamic>> reloadSources({
+    bool pause = false,
+    Uri rootLibUri,
+    Uri packagesUri,
+  }) async {
     try {
       final Map<String, dynamic> arguments = <String, dynamic>{
         'pause': pause
@@ -1222,9 +1231,8 @@ class Isolate extends ServiceObjectOwner {
   // available, returns null.
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
     String method, {
-      Map<String, dynamic> params,
-    }
-  ) async {
+    Map<String, dynamic> params,
+  }) async {
     try {
       return await invokeRpcRaw(method, params: params);
     } on rpc.RpcException catch (e) {
@@ -1314,7 +1322,7 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.exit');
   }
 
-  Future<String> flutterPlatformOverride([String platform]) async {
+  Future<String> flutterPlatformOverride([ String platform ]) async {
     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
@@ -1386,7 +1394,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
   Map<RK, RV> retype<RK, RV>() => _map.cast<RK, RV>();
   @override
-  dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
+  dynamic update(String key, dynamic update(dynamic value), { dynamic ifAbsent() }) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 
 /// Peered to an Android/iOS FlutterView widget on a device.
@@ -1404,9 +1412,11 @@ class FlutterView extends ServiceObject {
   }
 
   // TODO(johnmccutchan): Report errors when running failed.
-  Future<void> runFromSource(Uri entryUri,
-                             Uri packagesUri,
-                             Uri assetsDirectoryUri) async {
+  Future<void> runFromSource(
+    Uri entryUri,
+    Uri packagesUri,
+    Uri assetsDirectoryUri,
+  ) async {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<void> completer = Completer<void>();

@@ -524,8 +524,10 @@ class FlutterEngine extends CachedArtifact {
     }
   }
 
-  Future<bool> areRemoteArtifactsAvailable({String engineVersion,
-                                            bool includeAllPlatforms = true}) async {
+  Future<bool> areRemoteArtifactsAvailable({
+    String engineVersion,
+    bool includeAllPlatforms = true,
+  }) async {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
 

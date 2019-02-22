@@ -3,38 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'basic_types.dart';
+import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a continuous cornered rounded rectangle.
-///
-/// A shape similar to a rounded rectangle, but with a smoother transition from
-/// the sides to the rounded corners.
-///
-/// The rendered shape roughly approximates that of a super ellipse. In this
-/// shape, the curvature of each corner over the arc is approximately a gaussian
-/// curve instead of a step function as with a traditional quarter circle round.
-/// The rendered rectangle in dynamic radius mode is roughly a super ellipse with
-/// an n value of 5.
-///
-/// In an attempt to keep the shape of the rectangle the same regardless of its
-/// dimension, the radius will automatically be lessened to maximize the
-/// roundness of the resulting rectangle if its width or height is less than
-/// ~3x the radius.
-///
-/// This shape will always have 4 linear edges and 4 90º curves. However, at
-/// small extent values (ie.  <20 lpx), the rendered shape will appear to have
-/// just 2 linear edges and 2 180º curves.
+/// A rectangular border with smooth continuous transitions between the straight
+/// sides and the rounded corners.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     shape: ContinuousRectangleBorder(
-///       borderRadius: 28.0,
+///       borderRadius: BorderRadius.circular(28.0),
 ///     ),
 ///   );
 /// }
@@ -43,157 +26,26 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] which creates a rectangle whose corners are
-///   precisely quarter circles.
-/// * [ContinuousStadiumBorder] which creates a stadium whose two edges have a
-///   continuous transition into it's two 180º curves.
+/// * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
+///   however its straight sides change into a rounded corner with a circular
+///   radius in a step function instead of gradually like the
+///   [ContinuousRectangleBorder].
 class ContinuousRectangleBorder extends ShapeBorder {
-  /// Creates a Continuous Cornered Rectangle Border.
-  ///
-  /// The [side], [mode] and [borderRadius] arguments must not be null.
+  /// The arguments must not be null.
   const ContinuousRectangleBorder({
     this.side = BorderSide.none,
-    this.borderRadius = 1.0,
+    this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
        assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
-  /// The radius will be clamped to 1 if a value less than 1 is entered as the
-  /// radius.
-  ///
-  /// By default the radius is 1.0. This value must not be null.
-  ///
-  /// Unlike [RoundedRectangleBorder], there is only a single border radius used
-  /// to describe the radius for every corner.
-  final double borderRadius;
+  /// Negative radius values are clamped to 0.0 by [getInnerPath] and
+  /// [getOuterPath].
+  final BorderRadiusGeometry borderRadius;
 
   /// The style of this border.
-  ///
-  /// By default this value is [BorderSide.none]. It also must not be null.
   final BorderSide side;
-
-  Path _getPath(RRect rrect) {
-    // The radius multiplier where the resulting shape will perfectly concave at
-    // with a height and width of any value.
-    const double maxMultiplier = 3.0573;
-
-    double limitedRadius;
-    final double width = rrect.width;
-    final double height = rrect.height;
-    final double centerX = rrect.center.dx;
-    final double centerY = rrect.center.dy;
-    final double radius = math.max(1, borderRadius);
-
-    // These equations give the x and y values for each of the 8 mid and corner
-    // points on a rectangle.
-    double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
-    double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
-    double topY(double y) { return centerY + y * limitedRadius - height / 2; }
-    double bottomY(double y) { return centerY - y * limitedRadius + height / 2; }
-
-    // Renders the default super elliptical rounded rect shape where there are
-    // 4 straight edges and 4 90º corners. Approximately renders a super ellipse
-    // with n value of 5.
-    Path roundedRect () {
-      return Path()
-        ..moveTo(leftX(1.52866483), topY(0))
-        ..lineTo(rightX(1.52866471), topY(0))
-        ..cubicTo(rightX(1.08849323), topY(0),
-            rightX(0.86840689), topY(0),
-            rightX(0.66993427), topY(0.06549600))
-        ..lineTo(rightX(0.63149399), topY(0.07491100))
-        ..cubicTo(rightX(0.37282392), topY(0.16905899),
-            rightX(0.16906013), topY(0.37282401),
-            rightX(0.07491176), topY(0.63149399))
-        ..cubicTo(rightX(0), topY(0.86840701),
-            rightX(0), topY(1.08849299),
-            rightX(0), topY(1.52866483))
-        ..lineTo(rightX(0), bottomY(1.52866471))
-        ..cubicTo(rightX(0), bottomY(1.08849323),
-            rightX(0), bottomY(0.86840689),
-            rightX(0.06549600), bottomY(0.66993427))
-        ..lineTo(rightX(0.07491100), bottomY(0.63149399))
-        ..cubicTo(rightX(0.16905899), bottomY(0.37282392),
-            rightX(0.37282401), bottomY(0.16906013),
-            rightX(0.63149399), bottomY(0.07491176))
-        ..cubicTo(rightX(0.86840701), bottomY(0),
-            rightX(1.08849299), bottomY(0),
-            rightX(1.52866483), bottomY(0))
-        ..lineTo(leftX(1.52866483), bottomY(0))
-        ..cubicTo(leftX(1.08849323), bottomY(0),
-            leftX(0.86840689), bottomY(0),
-            leftX(0.66993427), bottomY(0.06549600))
-        ..lineTo(leftX(0.63149399), bottomY(0.07491100))
-        ..cubicTo(leftX(0.37282392), bottomY(0.16905899),
-            leftX(0.16906013), bottomY(0.37282401),
-            leftX(0.07491176), bottomY(0.63149399))
-        ..cubicTo(leftX(0), bottomY(0.86840701),
-            leftX(0), bottomY(1.08849299),
-            leftX(0), bottomY(1.52866483))
-        ..lineTo(leftX(0), topY(1.52866471))
-        ..cubicTo(leftX(0), topY(1.08849323),
-            leftX(0), topY(0.86840689),
-            leftX(0.06549600), topY(0.66993427))
-        ..lineTo(leftX(0.07491100), topY(0.63149399))
-        ..cubicTo(leftX(0.16905899), topY(0.37282392),
-            leftX(0.37282401), topY(0.16906013),
-            leftX(0.63149399), topY(0.07491176))
-        ..cubicTo(leftX(0.86840701), topY(0),
-            leftX(1.08849299), topY(0),
-            leftX(1.52866483), topY(0))
-        ..close();
-    }
-
-    // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for the dynamic radius round option.
-    const double dynamicRadiusMinMultiplier = 2.0;
-
-    // The edge length at which the corner radius multiplier must be at its
-    // maximum so as to maintain a the appearance of a perfectly concave,
-    // non-lozenge shape.
-    const double minRadiusEdgeLength = 200.0;
-
-    final double min = math.min(rrect.width, rrect.height);
-
-    // As the minimum side edge length (where the round is occurring)
-    // approaches 0, the limitedRadius approaches 2.0 so as to maximize
-    // roundness. As the edge length approaches 200, the limitedRadius
-    // approaches ~3 –- the multiplier of the radius value where the
-    // resulting shape is perfectly concave at any dimension.
-    final double multiplier = ui.lerpDouble(
-      dynamicRadiusMinMultiplier,
-      maxMultiplier,
-      min / minRadiusEdgeLength
-    );
-    limitedRadius = math.min(radius, min / multiplier);
-    return roundedRect();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
-    if (rect.isEmpty)
-      return;
-    switch (side.style) {
-      case BorderStyle.none:
-        break;
-      case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
-        final Paint paint = side.toPaint();
-        canvas.drawPath(path, paint);
-        break;
-    }
-  }
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)).deflate(side.width));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)));
-  }
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
@@ -212,7 +64,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -224,18 +76,84 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
   }
 
+  double _clampToShortest(RRect rrect, double value) {
+    return value > rrect.shortestSide ? rrect.shortestSide : value;
+  }
+
+  Path _getPath(RRect rrect) {
+    final double left = rrect.left;
+    final double right = rrect.right;
+    final double top = rrect.top;
+    final double bottom = rrect.bottom;
+    //  Radii will be clamped to the value of the shortest side
+    /// of [rrect] to avoid strange tie-fighter shapes.
+    final double tlRadiusX =
+      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
+    final double tlRadiusY =
+      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
+    final double trRadiusX =
+      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
+    final double trRadiusY =
+      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
+    final double blRadiusX =
+      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
+    final double blRadiusY =
+      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
+    final double brRadiusX =
+      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
+    final double brRadiusY =
+      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
+
+    return Path()
+      ..moveTo(left, top + tlRadiusX)
+      ..cubicTo(left, top, left, top, left + tlRadiusY, top)
+      ..lineTo(right - trRadiusX, top)
+      ..cubicTo(right, top, right, top, right, top + trRadiusY)
+      ..lineTo(right, bottom - blRadiusX)
+      ..cubicTo(right, bottom, right, bottom, right - blRadiusY, bottom)
+      ..lineTo(left + brRadiusX, bottom)
+      ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
+      ..close();
+  }
+
   @override
-  bool operator == (dynamic other) {
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+    if (rect.isEmpty)
+      return;
+    switch (side.style) {
+      case BorderStyle.none:
+      break;
+      case BorderStyle.solid:
+        final Path path = getOuterPath(rect, textDirection: textDirection);
+        final Paint paint = side.toPaint();
+        canvas.drawPath(path, paint);
+        break;
+    }
+  }
+
+  @override
+  bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousRectangleBorder typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius;
+    return side == typedOther.side
+        && borderRadius == typedOther.borderRadius;
   }
 
   @override

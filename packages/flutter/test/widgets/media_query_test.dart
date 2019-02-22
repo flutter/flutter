@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Brightness;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -45,6 +46,7 @@ void main() {
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
+    expect(data.platformBrightness, Brightness.light);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -60,6 +62,7 @@ void main() {
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
     expect(copied.boldText, data.boldText);
+    expect(copied.platformBrightness, data.platformBrightness);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -75,6 +78,7 @@ void main() {
       invertColors: true,
       disableAnimations: true,
       boldText: true,
+      platformBrightness: Brightness.dark,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -86,6 +90,7 @@ void main() {
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
     expect(copied.boldText, true);
+    expect(copied.platformBrightness, Brightness.dark);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -222,6 +227,33 @@ void main() {
    expect(outsideTextScaleFactor, 1.0);
    expect(insideTextScaleFactor, 4.0);
  });
+
+  testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
+    Brightness outsideBrightness;
+    Brightness insideBrightness;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideBrightness = MediaQuery.platformBrightnessOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(
+              platformBrightness: Brightness.dark,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideBrightness = MediaQuery.platformBrightnessOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideBrightness, Brightness.light);
+    expect(insideBrightness, Brightness.dark);
+  });
 
   testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
     bool outsideBoldTextOverride;

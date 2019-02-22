@@ -93,11 +93,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     await server.start();
     // Completing the future in the callback can't fail.
-    server.onExit.then<void>((int exitCode) { // ignore: unawaited_futures
+    unawaited(server.onExit.then<void>((int exitCode) {
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
-    });
+    }));
 
     Cache.releaseLockEarly();
 

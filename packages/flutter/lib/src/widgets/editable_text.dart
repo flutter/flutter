@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -527,8 +528,12 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
-  /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
-  /// This property is most useful for testing purposes.
+  /// Setting this property to true makes the cursor stop blinking or fading
+  /// on and off once the cursor appears on focus. This property is useful for
+  /// testing purposes.
+  ///
+  /// It does not affect the necessity to focus the EditableText for the cursor
+  /// to appear in the first place.
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
@@ -745,7 +750,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
       if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.tap);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -923,8 +928,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
-      if (longPress || cause == SelectionChangedCause.doubleTap)
-        _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
@@ -1150,6 +1153,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.jumpTo(_getScrollOffsetForCaret(renderEditable.getLocalRectForCaret(position)));
   }
 
+  /// Shows the selection toolbar at the location of the current cursor.
+  ///
+  /// Returns `false` if a toolbar couldn't be shown such as when no text
+  /// selection currently exists.
+  bool showToolbar() {
+    if (_selectionOverlay == null)
+      return false;
+
+    _selectionOverlay.showToolbar();
+    return true;
+  }
+
   @override
   void hideToolbar() {
     _selectionOverlay?.hide();
@@ -1175,6 +1190,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
 

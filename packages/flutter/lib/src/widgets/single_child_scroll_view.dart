@@ -80,42 +80,46 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// In this example, the children are spaced out equally, unless there's no
-/// more room, in which case they stack vertically and scroll.
-///
-/// ```dart
-/// LayoutBuilder(
-///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///     return SingleChildScrollView(
-///       child: ConstrainedBox(
-///         constraints: BoxConstraints(
-///           minHeight: viewportConstraints.maxHeight,
-///         ),
-///         child: Column(
-///           mainAxisSize: MainAxisSize.min,
-///           mainAxisAlignment: MainAxisAlignment.spaceAround,
-///           children: <Widget>[
-///             Container(
-///               // A fixed-height child.
-///               color: Colors.yellow,
-///               height: 120.0,
-///             ),
-///             Container(
-///               // Another fixed-height child.
-///               color: Colors.green,
-///               height: 120.0,
-///             ),
-///           ],
-///         ),
-///       ),
-///     );
-///   },
-/// )
-/// ```
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the children are spaced out equally, unless there's no more
+/// room, in which case they stack vertically and scroll.
 ///
 /// When using this technique, [Expanded] and [Flexible] are not useful, because
 /// in both cases the "available space" is infinite (since this is in a viewport).
 /// The next section describes a technique for providing a maximum height constraint.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return LayoutBuilder(
+///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///       return SingleChildScrollView(
+///         child: ConstrainedBox(
+///           constraints: BoxConstraints(
+///             minHeight: viewportConstraints.maxHeight,
+///           ),
+///           child: Column(
+///             mainAxisSize: MainAxisSize.min,
+///             mainAxisAlignment: MainAxisAlignment.spaceAround,
+///             children: <Widget>[
+///               Container(
+///                 // A fixed-height child.
+///                 color: const Color(0xff808000), // Yellow
+///                 height: 120.0,
+///               ),
+///               Container(
+///                 // Another fixed-height child.
+///                 color: const Color(0xff008000), // Green
+///                 height: 120.0,
+///               ),
+///             ],
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// ### Expanding content to fit the viewport
 ///
@@ -135,39 +139,6 @@ import 'scrollable.dart';
 /// The widget that is to grow to fit the remaining space so provided is wrapped
 /// in an [Expanded] widget.
 ///
-/// ```dart
-/// LayoutBuilder(
-///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///     return SingleChildScrollView(
-///       child: ConstrainedBox(
-///         constraints: BoxConstraints(
-///           minHeight: viewportConstraints.maxHeight,
-///         ),
-///         child: IntrinsicHeight(
-///           child: Column(
-///             children: <Widget>[
-///               Container(
-///                 // A fixed-height child.
-///                 color: Colors.yellow,
-///                 height: 120.0,
-///               ),
-///               Expanded(
-///                 // A flexible child that will grow to fit the viewport but
-///                 // still be at least as big as necessary to fit its contents.
-///                 child: Container(
-///                   color: Colors.blue,
-///                   height: 120.0,
-///                 ),
-///               ),
-///             ],
-///           ),
-///         ),
-///       ),
-///     );
-///   },
-/// )
-/// ```
-///
 /// This technique is quite expensive, as it more or less requires that the contents
 /// of the viewport be laid out twice (once to find their intrinsic dimensions, and
 /// once to actually lay them out). The number of widgets within the column should
@@ -175,6 +146,46 @@ import 'scrollable.dart';
 /// dimensions can be wrapped in a [SizedBox] that has tight vertical constraints,
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
+///
+/// {@tool snippet --template=stateless_widget}
+/// In this example, the column becomes either as big as viewport, or as big as
+/// the contents, whichever is biggest.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return LayoutBuilder(
+///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///       return SingleChildScrollView(
+///         child: ConstrainedBox(
+///           constraints: BoxConstraints(
+///             minHeight: viewportConstraints.maxHeight,
+///           ),
+///           child: IntrinsicHeight(
+///             child: Column(
+///               children: <Widget>[
+///                 Container(
+///                   // A fixed-height child.
+///                   color: const Color(0xff808000), // Yellow
+///                   height: 120.0,
+///                 ),
+///                 Expanded(
+///                   // A flexible child that will grow to fit the viewport but
+///                   // still be at least as big as necessary to fit its contents.
+///                   child: Container(
+///                     color: const Color(0xff800000), // Red
+///                     height: 120.0,
+///                   ),
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -553,7 +564,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     rect ??= target.paintBounds;
     if (target is! RenderBox)
       return RevealedOffset(offset: offset.pixels, rect: rect);
