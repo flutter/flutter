@@ -179,6 +179,7 @@ class ResourceExtractor {
 
         for (String asset : mResources) {
             try {
+                final String resource = "assets/" + asset;
                 final File output = new File(dataDir, asset);
                 if (output.exists()) {
                     continue;
@@ -192,7 +193,7 @@ class ResourceExtractor {
                     copy(is, os);
                 }
 
-                Log.i(TAG, "Extracted baseline resource " + asset);
+                Log.i(TAG, "Extracted baseline resource " + resource);
 
             } catch (FileNotFoundException fnfe) {
                 continue;
@@ -239,11 +240,10 @@ class ResourceExtractor {
         }
 
         for (String asset : mResources) {
-            boolean useDiff = false;
-            ZipEntry entry = zipFile.getEntry(asset);
+            final String resource = "assets/" + asset;
+            ZipEntry entry = zipFile.getEntry(resource);
             if (entry == null) {
-                useDiff = true;
-                entry = zipFile.getEntry(asset + ".bzdiff40");
+                entry = zipFile.getEntry(resource + ".bzdiff40");
                 if (entry == null) {
                     continue;
                 }
@@ -258,7 +258,7 @@ class ResourceExtractor {
             }
 
             try {
-                if (useDiff) {
+                if (entry.getName().endsWith(".bzdiff40")) {
                     ByteArrayOutputStream diff = new ByteArrayOutputStream();
                     try (InputStream is = zipFile.getInputStream(entry)) {
                         copy(is, diff);
@@ -267,6 +267,8 @@ class ResourceExtractor {
                     ByteArrayOutputStream orig = new ByteArrayOutputStream();
                     try (InputStream is = manager.open(asset)) {
                         copy(is, orig);
+                    } catch (FileNotFoundException e) {
+                        throw new IOException("Could not find APK resource " + resource);
                     }
 
                     try (OutputStream os = new FileOutputStream(output)) {
@@ -280,7 +282,7 @@ class ResourceExtractor {
                     }
                 }
 
-                Log.i(TAG, "Extracted override resource " + asset);
+                Log.i(TAG, "Extracted override resource " + entry.getName());
 
             } catch (FileNotFoundException fnfe) {
                 continue;
