@@ -134,7 +134,7 @@ class FlutterCompactFormatter {
               '${_yellow}Skipped ${result.name} (${result.pathLineColumn}).$_noColor');
           break;
         case TestStatus.failed:
-          failed.addAll([
+          failed.addAll(<String>[
             '$_bold${_red}Failed ${result.name} (${result.pathLineColumn}):',
             result.errorMessage,
             _noColor + _red,

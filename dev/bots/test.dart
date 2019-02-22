@@ -7,8 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'run_command.dart';
 import 'flutter_compact_formatter.dart';
+import 'run_command.dart';
 
 typedef ShardRunner = Future<void> Function();
 
