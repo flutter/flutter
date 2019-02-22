@@ -5,10 +5,10 @@
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
 import 'image_cache.dart';
+import 'shader_warm_up.dart';
 
 const double _kDefaultDecodedCacheRatioCap = 0.0;
 
