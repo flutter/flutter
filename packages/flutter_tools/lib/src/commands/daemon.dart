@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -17,22 +16,14 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../desktop.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
-import '../ios/devices.dart';
-import '../ios/simulators.dart';
-import '../linux/linux_device.dart';
-import '../macos/macos_device.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
-import '../windows/windows_device.dart';
 
 const String protocolVersion = '0.4.2';
 
@@ -589,16 +580,9 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
-    addDeviceDiscoverer(FuchsiaDevices());
-    addDeviceDiscoverer(AndroidDevices());
-    addDeviceDiscoverer(IOSDevices());
-    addDeviceDiscoverer(IOSSimulators());
-    addDeviceDiscoverer(FlutterTesterDevices());
-    if (flutterDesktopEnabled) {
-      addDeviceDiscoverer(MacOSDevices());
-      addDeviceDiscoverer(LinuxDevices());
-      addDeviceDiscoverer(WindowsDevices());
-    }
+    // Use the device manager discovery so that client provided device types
+    // are usable via the daemon protocol.
+    deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
