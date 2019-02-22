@@ -923,6 +923,10 @@ class HotRunner extends ResidentRunner {
 // Watches non pubspec dependencies from the .packages file for changes.
 class ProjectWatcher {
   ProjectWatcher(String projectDirectory, String packagesPath) {
+    final String projectPath = projectDirectory ?? fs.currentDirectory.path;
+    if (!fs.directory(projectPath).existsSync()) {
+      return;
+    }
     _watches.add(DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path));
     final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
     for (String dependency in packageMap.keys) {
@@ -930,8 +934,11 @@ class ProjectWatcher {
       if (path.contains(pubCachePath)) {
         continue;
       }
-      final String filePath = Uri.file(path, windows: platform.isWindows).path;
-      final Watcher watcher = DirectoryWatcher(filePath);
+      final String packagePath = Uri.file(path, windows: platform.isWindows).path;
+      if (!fs.directory(packagePath).existsSync()) {
+        continue;
+      }
+      final Watcher watcher = DirectoryWatcher(packagePath);
       watcher.events.listen(_onWatchEvent);
       _watches.add(watcher);
     }
