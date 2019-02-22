@@ -17,8 +17,8 @@ import '../web/compile.dart';
 
 ChromeLauncher get chromeLauncher => context[ChromeLauncher];
 
-// Only launch or display desktop embedding devices if
-// `FLUTTER_DESKTOP_EMBEDDING` environment variable is set to true.
+// Only launch or display web devices if `FLUTTER_WEB`
+// environment variable is set to true.
 bool get flutterWebEnabled {
   _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
   return _flutterWebEnabled;
