@@ -12,6 +12,7 @@ dependencies:
   analyzer: 0.35.1
   archive: 2.0.8
   args: 1.5.1
+  bsdiff: 0.1.0
   completion: 0.2.1+1
   coverage: 0.12.4
   crypto: 2.0.6
