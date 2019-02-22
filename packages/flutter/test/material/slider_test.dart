@@ -1014,12 +1014,11 @@ void main() {
     // 5 tick marks and a thumb.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
 
-    // 100 is the min value, 0, subtracted from the max value, 100.
-    // This translates to attempting to put a tick mark for every integer value,
+    // 200 divisions will produce a tick interval off less than 6,
     // which would be too dense to draw.
     await tester.pumpWidget(
       buildSlider(
-        divisions: 100,
+        divisions: 200,
       ),
     );
 
