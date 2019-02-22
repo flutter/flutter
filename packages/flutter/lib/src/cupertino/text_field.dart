@@ -478,37 +478,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _requestKeyboard();
   }
 
-  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) {
-    _renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.longPress,
-    );
-  }
-
-  void _handleSingleLongTapDragUpdate(GestureLongPressDragUpdateDetails details) {
-    _renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.longPress,
-    );
-  }
-
-  void _handleSingleLongTapUp(GestureLongPressDragUpDetails details) {
-    _renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.longPress
-    );
+  void _handleSingleLongTapDown() {
+    _renderEditable.selectPosition(cause: SelectionChangedCause.longPress);
     _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     _renderEditable.selectWord(cause: SelectionChangedCause.tap);
     _editableTextKey.currentState.showToolbar();
-  }
-
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    if (cause == SelectionChangedCause.longPress) {
-      _editableTextKey.currentState?.bringIntoView(selection.base);
-    }
   }
 
   @override
@@ -664,7 +641,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           selectionColor: _kSelectionHighlightColor,
           selectionControls: cupertinoTextSelectionControls,
           onChanged: widget.onChanged,
-          onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           inputFormatters: formatters,
@@ -705,9 +681,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onForcePressStart: _handleForcePressStarted,
               onForcePressEnd: _handleForcePressEnded,
               onSingleTapUp: _handleSingleTapUp,
-              onSingleLongTapStart: _handleSingleLongTapStart,
-              onSingleLongTapDragUpdate: _handleSingleLongTapDragUpdate,
-              onSingleLongTapUp: _handleSingleLongTapUp,
+              onSingleLongTapDown: _handleSingleLongTapDown,
               onDoubleTapDown: _handleDoubleTapDown,
               behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable, textStyle),

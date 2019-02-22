@@ -248,6 +248,7 @@ void main() {
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
 
+
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
@@ -292,6 +293,26 @@ void main() {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.fade,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
       text: 'Hi',
     );
 

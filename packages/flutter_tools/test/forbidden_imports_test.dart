@@ -78,6 +78,34 @@ void main() {
       }
     }
   });
+
+  test('no unauthorized imports of build_runner', () {
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'test', 'src', 'build_runner'),
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner'),
+      fs.path.join(flutterTools, 'lib', 'executable.dart')
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => !entity.path.contains(path));
+
+    for (String dirName in <String>['lib']) {
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotWhitelisted)
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
+              line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
+              line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
+              line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail('$relativePath imports a build_runner package');
+          }
+        }
+      }
+    }
+  });
 }
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');

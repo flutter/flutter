@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -82,7 +83,10 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+  );
 
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -139,7 +143,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
-  void usesFilesystemOptions({@required bool hide}) {
+  void usesFilesystemOptions({ @required bool hide }) {
     argParser
       ..addOption('output-dill',
         hide: hide,
@@ -216,7 +220,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesIsolateFilterOption({@required bool hide}) {
+  void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
       hide: hide,
@@ -224,7 +228,7 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -242,7 +246,7 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
-  void addDynamicModeFlags({bool verboseHelp = false}) {
+  void addDynamicModeFlags({ bool verboseHelp = false }) {
     argParser.addOption('compilation-trace-file',
         defaultsTo: 'compilation.txt',
         hide: !verboseHelp,
@@ -260,7 +264,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+  void addDynamicPatchingFlags({ bool verboseHelp = false }) {
     argParser.addOption('patch-number',
         hide: !verboseHelp,
         help: 'An integer used as an internal version number for dynamic patch.\n'
@@ -291,7 +295,7 @@ abstract class FlutterCommand extends Command<void> {
     addDynamicBaselineFlags(verboseHelp: verboseHelp);
   }
 
-  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+  void addDynamicBaselineFlags({ bool verboseHelp = false }) {
     argParser.addOption('baseline-dir',
         defaultsTo: '.baseline',
         hide: !verboseHelp,
@@ -301,7 +305,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesFuchsiaOptions({bool hide = false}) {
+  void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
       help: 'Target model that determines what core libraries are available',

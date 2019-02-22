@@ -284,7 +284,7 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
-    Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
+    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(

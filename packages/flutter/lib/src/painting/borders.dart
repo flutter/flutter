@@ -265,8 +265,9 @@ class BorderSide {
 ///
 /// This class handles how to add multiple borders together. Subclasses define
 /// various shapes, like circles ([CircleBorder]), rounded rectangles
-/// ([RoundedRectangleBorder]), superellipses ([SuperellipseShape]), or beveled
-/// rectangles ([BeveledRectangleBorder]).
+/// ([RoundedRectangleBorder]), continuous rectangles
+/// ([ContinuousRectangleBorder]), or beveled rectangles
+/// ([BeveledRectangleBorder]).
 ///
 /// See also:
 ///
@@ -651,7 +652,9 @@ class _CompoundBorder extends ShapeBorder {
 ///  * [Border], which uses this function to paint its border when the border is
 ///    not uniform.
 ///  * [BoxDecoration], which describes its border using the [Border] class.
-void paintBorder(Canvas canvas, Rect rect, {
+void paintBorder(
+  Canvas canvas,
+  Rect rect, {
   BorderSide top = BorderSide.none,
   BorderSide right = BorderSide.none,
   BorderSide bottom = BorderSide.none,

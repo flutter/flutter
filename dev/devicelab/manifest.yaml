@@ -76,6 +76,14 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  codegen_integration_test:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter

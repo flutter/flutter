@@ -294,4 +294,58 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).foreground.color, red);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
   });
+
+  test('backgroundColor', () {
+    const TextStyle s1 = TextStyle();
+    expect(s1.backgroundColor, isNull);
+    expect(s1.toString(), 'TextStyle(<all styles inherited>)');
+
+    const TextStyle s2 = TextStyle(backgroundColor: Color(0xFF00FF00));
+    expect(s2.backgroundColor, const Color(0xFF00FF00));
+    expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
+
+    final ui.TextStyle ts2 = s2.getTextStyle();
+    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+  });
+
+  test('TextStyle background and backgroundColor combos', () {
+    const Color red = Color.fromARGB(255, 255, 0, 0);
+    const Color blue = Color.fromARGB(255, 0, 0, 255);
+    const TextStyle redTextStyle = TextStyle(backgroundColor: red);
+    const TextStyle blueTextStyle = TextStyle(backgroundColor: blue);
+    final TextStyle redPaintTextStyle = TextStyle(background: Paint()..color = red);
+    final TextStyle bluePaintTextStyle = TextStyle(background: Paint()..color = blue);
+
+    // merge/copyWith
+    final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);
+    expect(redBlueBothForegroundMerged.backgroundColor, blue);
+    expect(redBlueBothForegroundMerged.foreground, isNull);
+
+    final TextStyle redBlueBothPaintMerged = redPaintTextStyle.merge(bluePaintTextStyle);
+    expect(redBlueBothPaintMerged.backgroundColor, null);
+    expect(redBlueBothPaintMerged.background, bluePaintTextStyle.background);
+
+    final TextStyle redPaintBlueColorMerged = redPaintTextStyle.merge(blueTextStyle);
+    expect(redPaintBlueColorMerged.backgroundColor, null);
+    expect(redPaintBlueColorMerged.background, redPaintTextStyle.background);
+
+    final TextStyle blueColorRedPaintMerged = blueTextStyle.merge(redPaintTextStyle);
+    expect(blueColorRedPaintMerged.backgroundColor, null);
+    expect(blueColorRedPaintMerged.background, redPaintTextStyle.background);
+
+    // apply
+    expect(redPaintTextStyle.apply(backgroundColor: blue).backgroundColor, isNull);
+    expect(redPaintTextStyle.apply(backgroundColor: blue).background.color, red);
+    expect(redTextStyle.apply(backgroundColor: blue).backgroundColor, blue);
+
+    // lerp
+    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25).backgroundColor, Color.lerp(red, blue, .25));
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).background.color, red);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).background.color, blue);
+
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).background.color, red);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).background.color, blue);
+  });
 }

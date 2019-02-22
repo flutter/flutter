@@ -121,7 +121,7 @@ abstract class RawKeyEventData {
   /// side of the keyboard. Defaults to checking for the key being down on
   /// either side of the keyboard. If there is only one instance of the key on
   /// the keyboard, then [side] is ignored.
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
+  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any });
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.

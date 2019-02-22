@@ -192,44 +192,47 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// ## Sample Code:
+  /// {@tool snippet --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
-  /// Stepper(
-  ///   controlsBuilder:
-  ///     (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-  ///        return Row(
-  ///          children: <Widget>[
-  ///            FlatButton(
-  ///              onPressed: onStepContinue,
-  ///              child: const Text('My Awesome Continue Message!'),
-  ///            ),
-  ///            FlatButton(
-  ///              onPressed: onStepCancel,
-  ///              child: const Text('My Awesome Cancel Message!'),
-  ///            ),
-  ///          ],
-  ///        ),
-  ///     },
-  ///   steps: const <Step>[
-  ///     Step(
-  ///       title: Text('A'),
-  ///       content: SizedBox(
-  ///         width: 100.0,
-  ///         height: 100.0,
+  /// Widget build(BuildContext context) {
+  ///   return Stepper(
+  ///     controlsBuilder:
+  ///       (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+  ///          return Row(
+  ///            children: <Widget>[
+  ///              FlatButton(
+  ///                onPressed: onStepContinue,
+  ///                child: const Text('CONTINUE'),
+  ///              ),
+  ///              FlatButton(
+  ///                onPressed: onStepCancel,
+  ///                child: const Text('CANCEL'),
+  ///              ),
+  ///            ],
+  ///          );
+  ///       },
+  ///     steps: const <Step>[
+  ///       Step(
+  ///         title: Text('A'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
   ///       ),
-  ///     ),
-  ///     Step(
-  ///       title: Text('B'),
-  ///       content: SizedBox(
-  ///         width: 100.0,
-  ///         height: 100.0,
+  ///       Step(
+  ///         title: Text('B'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
   ///       ),
-  ///     ),
-  ///   ],
-  /// )
+  ///     ],
+  ///   );
+  /// }
   /// ```
+  /// {@end-tool}
   final ControlsWidgetBuilder controlsBuilder;
 
   @override
