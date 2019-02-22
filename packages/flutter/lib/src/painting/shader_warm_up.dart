@@ -5,7 +5,7 @@
 import 'dart:developer';
 import 'dart:ui' as ui;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 /// Interface for drawing an image to warm up Skia shader compilations.
 ///
