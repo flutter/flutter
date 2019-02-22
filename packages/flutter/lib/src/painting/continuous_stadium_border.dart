@@ -58,27 +58,23 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // with a height and width of any value.
     const double maxMultiplier = 3.0573;
 
+    const double maxAspectRatio = 0.8;
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for the dynamic shape option.
     const double dynamicShapeMinMultiplier = 1 / maxMultiplier;
 
-    final double width = rect.width;
-    final double height = rect.height;
+    final double rectWidth = rect.width;
+    final double rectHeight = rect.height;
+    final bool widthLessThanHeight = rectWidth < rectHeight;
+    final double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxAspectRatio * rectHeight) : rectWidth;
+    final double height = widthLessThanHeight ? rect.height : rectHeight.clamp(0.0, maxAspectRatio * rectWidth);
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
     final double originX = centerX - width / 2;
     final double originY = centerY - height / 2;
     final double minDimension = math.min(rect.width, rect.height);
     final double radius = minDimension * dynamicShapeMinMultiplier;
-
-    final double limitedRadius =
-//    math.max(
-//      maxMultiplier * minDimension,
-      math.min(
-        radius,
-        minDimension * dynamicShapeMinMultiplier,
-      );
-//    );
+    final double limitedRadius = math.min(radius, minDimension * dynamicShapeMinMultiplier);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
@@ -199,8 +195,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-//    if (width)math.max(radius * maxMultiplier,
-        return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
+    return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
   }
 
   @override
