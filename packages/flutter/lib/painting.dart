@@ -32,7 +32,6 @@ export 'src/painting/box_shadow.dart';
 export 'src/painting/circle_border.dart';
 export 'src/painting/clip.dart';
 export 'src/painting/colors.dart';
-export 'src/painting/continuous_oval_border.dart';
 export 'src/painting/continuous_rectangle_border.dart';
 export 'src/painting/continuous_stadium_border.dart';
 export 'src/painting/debug.dart';
