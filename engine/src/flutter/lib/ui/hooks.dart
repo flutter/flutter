@@ -16,7 +16,7 @@ dynamic _decodeJSON(String message) {
   return message != null ? json.decode(message) : null;
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _updateWindowMetrics(double devicePixelRatio,
                           double width,
@@ -54,11 +54,11 @@ String _localeClosure() {
   return window.locale.toString();
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _updateLocales(List<String> locales) {
   const int stringsPerLocale = 4;
@@ -77,7 +77,7 @@ void _updateLocales(List<String> locales) {
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _updateUserSettingsData(String jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData);
@@ -103,14 +103,14 @@ void _updatePlatformBrightness(String brightnessName) {
   _invoke(window.onPlatformBrightnessChanged, window._onPlatformBrightnessChangedZone);
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _updateSemanticsEnabled(bool enabled) {
   window._semanticsEnabled = enabled;
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _updateAccessibilityFeatures(int values) {
   final AccessibilityFeatures newFeatures = new AccessibilityFeatures._(values);
@@ -120,7 +120,7 @@ void _updateAccessibilityFeatures(int values) {
   _invoke(window.onAccessibilityFeaturesChanged, window._onAccessibilityFlagsChangedZone);
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   if (window.onPlatformMessage != null) {
     _invoke3<String, ByteData, PlatformMessageResponseCallback>(
@@ -137,14 +137,14 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   }
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _dispatchSemanticsAction(int id, int action, ByteData args) {
   _invoke3<int, SemanticsAction, ByteData>(
@@ -156,13 +156,13 @@ void _dispatchSemanticsAction(int id, int action, ByteData args) {
   );
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _beginFrame(int microseconds) {
   _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, new Duration(microseconds: microseconds));
 }
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _drawFrame() {
   _invoke(window.onDrawFrame, window._onDrawFrameZone);
@@ -173,7 +173,7 @@ typedef _UnaryFunction(Null args);
 // ignore: always_declare_return_types, prefer_generic_function_type_aliases
 typedef _BinaryFunction(Null args, Null message);
 
-@pragma('vm:entry-point', 'call')
+@pragma('vm:entry-point')
 // ignore: unused_element
 void _runMainZoned(Function startMainIsolateFunction, Function userMainFunction) {
   startMainIsolateFunction((){
