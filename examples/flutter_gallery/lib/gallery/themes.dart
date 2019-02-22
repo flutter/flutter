@@ -47,7 +47,7 @@ ThemeData _buildDarkTheme() {
       primaryColor: primaryColor,
       primaryColorDark: const Color(0xFF0050a0),
       primaryColorLight: secondaryColor,
-      valueIndicatorTextStyle: _buildTextTheme(base.textTheme).body1,
+      valueIndicatorTextStyle: _buildTextTheme(base.textTheme).body2,
     ),
     textTheme: _buildTextTheme(base.textTheme),
     primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
