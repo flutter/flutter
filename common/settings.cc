@@ -43,6 +43,8 @@ std::string Settings::ToString() const {
   stream << "enable_software_rendering: " << enable_software_rendering
          << std::endl;
   stream << "log_tag: " << log_tag << std::endl;
+  stream << "icu_initialization_required: " << icu_initialization_required
+         << std::endl;
   stream << "icu_data_path: " << icu_data_path << std::endl;
   stream << "assets_dir: " << assets_dir << std::endl;
   stream << "assets_path: " << assets_path << std::endl;

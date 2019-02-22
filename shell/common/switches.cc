@@ -224,15 +224,17 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
-                              &settings.icu_data_path);
-  if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
-    std::string icu_symbol_prefix;
-    command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),
-                                &icu_symbol_prefix);
-    settings.icu_mapper = [icu_symbol_prefix] {
-      return GetSymbolMapping(icu_symbol_prefix);
-    };
+  if (settings.icu_initialization_required) {
+    command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
+                                &settings.icu_data_path);
+    if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
+      std::string icu_symbol_prefix;
+      command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),
+                                  &icu_symbol_prefix);
+      settings.icu_mapper = [icu_symbol_prefix] {
+        return GetSymbolMapping(icu_symbol_prefix);
+      };
+    }
   }
 
   settings.use_test_fonts =
