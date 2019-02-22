@@ -115,7 +115,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(appBar: AppBar(
-        backgroundColor: color,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[

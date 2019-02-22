@@ -307,9 +307,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// if that is also null, then [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
 
-  /// The color, opacity, and size to use for trailing app bar icons. This
-  /// should only be used when the trailing icons should be themed differently
-  /// than the leading icons.
+  /// The color, opacity, and size to use for the icons that appear in the app
+  /// bar's [actions]. This should only be used when the [actions] should be
+  /// themed differently than the icon that appears in the app bar's [leading]
+  /// widget.
   ///
   /// If this property is null, then [ThemeData.appBarTheme.actionsIconTheme] is
   /// used, if that is also null, then this falls back to [iconTheme].
@@ -412,7 +413,6 @@ class _AppBarState extends State<AppBar> {
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
       ?? themeData.primaryIconTheme;
-    // If no actionsIconTheme is specified, then fallback on the overallIconTheme.
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
@@ -433,7 +433,7 @@ class _AppBarState extends State<AppBar> {
         opacity: opacity * (overallIconTheme.opacity ?? 1.0)
       );
       actionsIconTheme = actionsIconTheme.copyWith(
-          opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
+        opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
       );
     }
 
