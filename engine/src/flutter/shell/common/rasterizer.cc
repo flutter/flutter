@@ -181,10 +181,6 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
       surface_->GetContext(), canvas, external_view_embedder,
       surface_->GetRootTransformation(), true);
 
-  if (canvas) {
-    canvas->clear(SK_ColorTRANSPARENT);
-  }
-
   if (compositor_frame && compositor_frame->Raster(layer_tree, false)) {
     frame->Submit();
     if (external_view_embedder != nullptr) {
