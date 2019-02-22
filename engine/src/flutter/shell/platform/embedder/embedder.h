@@ -204,6 +204,7 @@ typedef bool (*TextureFrameCallback)(void* /* user data */,
                                      size_t /* width */,
                                      size_t /* height */,
                                      FlutterOpenGLTexture* /* texture out */);
+typedef void (*VsyncCallback)(void* /* user data */, intptr_t /* baton */);
 
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
@@ -509,6 +510,14 @@ typedef struct {
   // Flutter application (such as compiled shader programs used by Skia).
   // This is optional.  The string must be NULL terminated.
   const char* persistent_cache_path;
+  // A callback that gets invoked by the engine when it attempts to wait for
+  // a platform vsync event. The engine will give the platform a baton that
+  // needs to be returned back to the engine via |FlutterEngineOnVsync|. All
+  // vsync operations must occur on the thread that made the call to
+  // |FlutterEngineRun|. All batons must be retured to the engine before
+  // initializing a |FlutterEngineShutdown|. Not doing the same will result in a
+  // memory leak.
+  VsyncCallback vsync_callback;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT
@@ -595,6 +604,14 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
+
+// Notify the engine that a vsync event occured. A baton passed to the platform
+// via the vsync callback must be returned.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
+                                         intptr_t baton,
+                                         uint64_t frame_start_time_nanos,
+                                         uint64_t frame_target_time_nanos);
 
 // A profiling utility. Logs a trace duration begin event to the timeline. If
 // the timeline is unavailable or disabled, this has no effect. Must be

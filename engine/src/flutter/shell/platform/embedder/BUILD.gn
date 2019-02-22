@@ -30,6 +30,8 @@ source_set("embedder") {
     "embedder_surface_software.h",
     "platform_view_embedder.cc",
     "platform_view_embedder.h",
+    "vsync_waiter_embedder.cc",
+    "vsync_waiter_embedder.h",
   ]
 
   deps = [

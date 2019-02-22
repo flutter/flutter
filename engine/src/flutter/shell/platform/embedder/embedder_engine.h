@@ -59,6 +59,10 @@ class EmbedderEngine {
                                blink::SemanticsAction action,
                                std::vector<uint8_t> args);
 
+  bool OnVsyncEvent(intptr_t baton,
+                    fml::TimePoint frame_start_time,
+                    fml::TimePoint frame_target_time);
+
  private:
   const ThreadHost thread_host_;
   std::unique_ptr<Shell> shell_;

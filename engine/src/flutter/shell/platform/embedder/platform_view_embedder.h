@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "flutter/shell/platform/embedder/embedder_surface_gl.h"
 #include "flutter/shell/platform/embedder/embedder_surface_software.h"
+#include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
 namespace shell {
 
@@ -30,7 +31,8 @@ class PlatformViewEmbedder final : public PlatformView {
     UpdateSemanticsCustomActionsCallback
         update_semantics_custom_actions_callback;  // optional
     PlatformMessageResponseCallback
-        platform_message_response_callback;  // optional
+        platform_message_response_callback;             // optional
+    VsyncWaiterEmbedder::VsyncCallback vsync_callback;  // optional
   };
 
   // Creates a platform view that sets up an OpenGL rasterizer.
@@ -67,6 +69,9 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |shell::PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
+
+  // |shell::PlatformView|
+  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };

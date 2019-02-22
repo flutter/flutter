@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
 namespace shell {
 
@@ -189,6 +190,17 @@ bool EmbedderEngine::DispatchSemanticsAction(int id,
         }
       }));
   return true;
+}
+
+bool EmbedderEngine::OnVsyncEvent(intptr_t baton,
+                                  fml::TimePoint frame_start_time,
+                                  fml::TimePoint frame_target_time) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  return VsyncWaiterEmbedder::OnEmbedderVsync(baton, frame_start_time,
+                                              frame_target_time);
 }
 
 }  // namespace shell
