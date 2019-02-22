@@ -9,16 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Continuous rectangle border scale and lerp', () {
-    const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: BorderSide(width: 10.0), borderRadius: 100.0);
-    const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: BorderSide(width: 15.0), borderRadius: 150.0);
-    const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: BorderSide(width: 20.0), borderRadius: 200.0);
+    final ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: BorderSide(width: 10.0), borderRadius: 100.0);
+    final ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: BorderSide(width: 15.0), borderRadius: 150.0);
+    final ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: BorderSide(width: 20.0), borderRadius: 200.0);
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
-    
   });
 
 // TODO(jslavitz): Run golden tests.
