@@ -653,6 +653,8 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/a11y_main.dart
 FILE: ../../../flutter/shell/platform/embedder/fixtures/simple_main.dart
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h
+FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.cc
+FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
 FILE: ../../../flutter/sky/tools/roll/patches/chromium/android_build.patch
 FILE: ../../../flutter/synchronization/pipeline.cc

@@ -16,10 +16,6 @@
 
 namespace shell {
 
-static void ConsumePendingCallback(jlong java_baton,
-                                   fml::TimePoint frame_start_time,
-                                   fml::TimePoint frame_target_time);
-
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 
@@ -30,8 +26,7 @@ VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
 // |shell::VsyncWaiter|
 void VsyncWaiterAndroid::AwaitVSync() {
-  std::weak_ptr<VsyncWaiter>* weak_this =
-      new std::weak_ptr<VsyncWaiter>(shared_from_this());
+  auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
   jlong java_baton = reinterpret_cast<jlong>(weak_this);
 
   task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
@@ -43,11 +38,25 @@ void VsyncWaiterAndroid::AwaitVSync() {
   });
 }
 
-static void OnNativeVsync(JNIEnv* env,
-                          jclass jcaller,
-                          jlong frameTimeNanos,
-                          jlong frameTargetTimeNanos,
-                          jlong java_baton) {
+float VsyncWaiterAndroid::GetDisplayRefreshRate() const {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  if (g_vsync_waiter_class == nullptr) {
+    return kUnknownRefreshRateFPS;
+  }
+  jclass clazz = g_vsync_waiter_class->obj();
+  if (clazz == nullptr) {
+    return kUnknownRefreshRateFPS;
+  }
+  jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
+  return env->GetStaticFloatField(clazz, fid);
+}
+
+// static
+void VsyncWaiterAndroid::OnNativeVsync(JNIEnv* env,
+                                       jclass jcaller,
+                                       jlong frameTimeNanos,
+                                       jlong frameTargetTimeNanos,
+                                       jlong java_baton) {
   auto frame_time = fml::TimePoint::FromEpochDelta(
       fml::TimeDelta::FromNanoseconds(frameTimeNanos));
   auto target_time = fml::TimePoint::FromEpochDelta(
@@ -56,6 +65,21 @@ static void OnNativeVsync(JNIEnv* env,
   ConsumePendingCallback(java_baton, frame_time, target_time);
 }
 
+// static
+void VsyncWaiterAndroid::ConsumePendingCallback(
+    jlong java_baton,
+    fml::TimePoint frame_start_time,
+    fml::TimePoint frame_target_time) {
+  auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
+  auto shared_this = weak_this->lock();
+  delete weak_this;
+
+  if (shared_this) {
+    shared_this->FireCallback(frame_start_time, frame_target_time);
+  }
+}
+
+// static
 bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {{
       .name = "nativeOnVsync",
@@ -79,34 +103,6 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   FML_CHECK(g_async_wait_for_vsync_method_ != nullptr);
 
   return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
-}
-
-float VsyncWaiterAndroid::GetDisplayRefreshRate() const {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (g_vsync_waiter_class == nullptr) {
-    return kUnknownRefreshRateFPS;
-  }
-  jclass clazz = g_vsync_waiter_class->obj();
-  if (clazz == nullptr) {
-    return kUnknownRefreshRateFPS;
-  }
-  jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
-  // We can safely read this 32-bit float from Java in any thread because
-  // 32-bits read and write are guaranteed to be atomic:
-  // https://stackoverflow.com/questions/11459543/should-getters-and-setters-be-synchronized/11459616#11459616
-  return env->GetStaticFloatField(clazz, fid);
-}
-
-static void ConsumePendingCallback(jlong java_baton,
-                                   fml::TimePoint frame_start_time,
-                                   fml::TimePoint frame_target_time) {
-  auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
-  auto shared_this = weak_this->lock();
-  delete weak_this;
-
-  if (shared_this) {
-    shared_this->FireCallback(frame_start_time, frame_target_time);
-  }
 }
 
 }  // namespace shell

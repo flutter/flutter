@@ -478,9 +478,18 @@ FlutterEngineResult FlutterEngineRun(size_t version,
         };
   }
 
+  shell::VsyncWaiterEmbedder::VsyncCallback vsync_callback = nullptr;
+  if (SAFE_ACCESS(args, vsync_callback, nullptr) != nullptr) {
+    vsync_callback = [ptr = args->vsync_callback, user_data](intptr_t baton) {
+      return ptr(user_data, baton);
+    };
+  }
+
   shell::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table = {
-      update_semantics_nodes_callback, update_semantics_custom_actions_callback,
-      platform_message_response_callback,  // platform_message_response_callback
+      update_semantics_nodes_callback,           //
+      update_semantics_custom_actions_callback,  //
+      platform_message_response_callback,        //
+      vsync_callback,                            //
   };
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
@@ -807,6 +816,28 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
                std::vector<uint8_t>({data, data + data_length}))) {
     return kInternalInconsistency;
   }
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
+                                         intptr_t baton,
+                                         uint64_t frame_start_time_nanos,
+                                         uint64_t frame_target_time_nanos) {
+  if (engine == nullptr) {
+    return kInvalidArguments;
+  }
+
+  auto start_time = fml::TimePoint::FromEpochDelta(
+      fml::TimeDelta::FromNanoseconds(frame_start_time_nanos));
+
+  auto target_time = fml::TimePoint::FromEpochDelta(
+      fml::TimeDelta::FromNanoseconds(frame_target_time_nanos));
+
+  if (!reinterpret_cast<shell::EmbedderEngine*>(engine)->OnVsyncEvent(
+          baton, start_time, target_time)) {
+    return kInternalInconsistency;
+  }
+
   return kSuccess;
 }
 

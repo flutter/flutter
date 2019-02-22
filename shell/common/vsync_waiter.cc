@@ -52,4 +52,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
       });
 }
 
+float VsyncWaiter::GetDisplayRefreshRate() const {
+  return kUnknownRefreshRateFPS;
+}
+
 }  // namespace shell
