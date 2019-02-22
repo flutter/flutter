@@ -1045,6 +1045,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// [onTimerDurationChanged] is the callback called when the selected duration
   /// changes and must not be null.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// [initialTimerDuration] defaults to 0 second and is limited from 0 second
   /// to 23 hours 59 minutes 59 seconds.
   ///
@@ -1121,8 +1122,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     // TODO(jslavitz): Remove this check and fully deprecate widget.initialTimerDuration
     final Duration initialDuration =
-      widget.initialTimerDuration != Duration.zero ? // ignore: deprecated_member_use
-      widget.initialTimerDuration : widget.controller.initialTimerDuration; // ignore: deprecated_member_use
+      widget.initialTimerDuration != Duration.zero ? // ignore: deprecated_member_use_from_same_package
+      widget.initialTimerDuration : widget.controller.initialTimerDuration; // ignore: deprecated_member_use_from_same_package
 
     selectedMinute = initialDuration.inMinutes % 60;
 
