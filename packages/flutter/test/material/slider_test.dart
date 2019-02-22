@@ -28,17 +28,17 @@ class LoggingThumbShape extends SliderComponentShape {
   void paint(
       PaintingContext context,
       Offset thumbCenter, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isEnabled,
-      bool isDiscrete,
-      bool onActiveTrack,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    }) {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isEnabled,
+        bool isDiscrete,
+        bool onActiveTrack,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+      }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
@@ -558,8 +558,8 @@ void main() {
       final ValueChanged<double> onChanged = !enabled
           ? null
           : (double d) {
-              value = d;
-            };
+        value = d;
+      };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -979,42 +979,32 @@ void main() {
   });
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
-    double value = 25.0;
-
     Widget buildSlider({
       int divisions,
-      TextDirection textDirection,
     }) {
       return Directionality(
-        textDirection: textDirection,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return MediaQuery(
-              data: MediaQueryData.fromWindow(window),
-              child: Material(
-                child: Center(
-                  child: Slider(
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: divisions,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
-                ),
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Slider(
+                min: 0.0,
+                max: 100.0,
+                divisions: divisions,
+                value: 0.25,
+                onChanged: (double newValue) { },
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }
 
+    // Pump a slider with a reasonable amount of divisions to verify that the
+    // tick marks are drawn when the number of tick marks is not too dense.
     await tester.pumpWidget(
       buildSlider(
-        textDirection: TextDirection.ltr,
         divisions: 4,
       ),
     );
@@ -1024,14 +1014,17 @@ void main() {
     // 5 tick marks and a thumb.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
 
+    // 100 is the min value, 0, subtracted from the max value, 100.
+    // This translates to attempting to put a tick mark for every integer value,
+    // which would be too dense to draw.
     await tester.pumpWidget(
       buildSlider(
-        textDirection: TextDirection.ltr,
-        divisions: 500,
+        divisions: 100,
       ),
     );
 
-    // No tick marks because they are too dense, just a thumb.
+    // No tick marks are drawn because they are too dense, but the thumb is
+    // still drawn.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
@@ -1249,21 +1242,21 @@ void main() {
     );
 
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 2,
-            value: '50%',
-            increasedValue: '60%',
-            decreasedValue: '40%',
-            textDirection: TextDirection.ltr,
-            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-          ),
-        ]),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+        semantics,
+        hasSemantics(
+          TestSemantics.root(children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 2,
+              value: '50%',
+              increasedValue: '60%',
+              decreasedValue: '40%',
+              textDirection: TextDirection.ltr,
+              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+            ),
+          ]),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
     semantics.dispose();
   });
 
