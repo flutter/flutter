@@ -28,17 +28,17 @@ class LoggingThumbShape extends SliderComponentShape {
   void paint(
       PaintingContext context,
       Offset thumbCenter, {
-        Animation<double> activationAnimation,
-        Animation<double> enableAnimation,
-        bool isEnabled,
-        bool isDiscrete,
-        bool onActiveTrack,
-        TextPainter labelPainter,
-        RenderBox parentBox,
-        SliderThemeData sliderTheme,
-        TextDirection textDirection,
-        double value,
-      }) {
+      Animation<double> activationAnimation,
+      Animation<double> enableAnimation,
+      bool isEnabled,
+      bool isDiscrete,
+      bool onActiveTrack,
+      TextPainter labelPainter,
+      RenderBox parentBox,
+      SliderThemeData sliderTheme,
+      TextDirection textDirection,
+      double value,
+    }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
