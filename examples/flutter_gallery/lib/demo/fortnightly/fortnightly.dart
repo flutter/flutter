@@ -50,6 +50,7 @@ class ShortAppBar extends StatelessWidget {
           children: <Widget>[
             IconButton(
               icon: const Icon(Icons.arrow_back),
+              tooltip: 'Back',
               onPressed: onBackPressed,
             ),
             const SizedBox(width: 12),
