@@ -5,6 +5,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:googleapis/bigquery/v2.dart' as bq;
+import 'package:googleapis/cloudkms/v1.dart' as kms;
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
@@ -140,12 +144,28 @@ Future<void> _runSmokeTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 }
 
+Future<bq.BigqueryApi> _getBigqueryApi() async {
+  final kms.DecryptRequest request = kms.DecryptRequest()..ciphertextAsBytes = await File(
+    path.join(Directory.current.path, 'dev', 'bots', 'serviceaccount.enc'),
+  ).readAsBytes();
+  final kms.DecryptResponse response = await kms.CloudkmsApi(http.Client()).projects.locations.keyRings.cryptoKeys.decrypt(
+    request,
+    'projects/flutter-infra/locations/global/keyRings/luci/cryptoKeys/bigquery',
+  );
+  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials.fromJson(response.plaintext);
+  final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
+  final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
+  return bq.BigqueryApi(client);
+}
+
 Future<void> _runToolTests() async {
+  final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
+    tableData: bigqueryApi.tabledata,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -238,32 +258,33 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
 }
 
 Future<void> _runTests() async {
+  final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), tableData: bigqueryApi.tabledata);
   // Only packages/flutter/test/widgets/widget_inspector_test.dart really
   // needs to be run with --track-widget-creation but it is nice to run
   // all of the tests in package:flutter with the flag to ensure that
   // the Dart kernel transformer triggered by the flag does not break anything.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation'], tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi.tabledata);
   // Regression test to ensure that code outside of package:flutter can run
   // with --track-widget-creation.
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation']);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi.tabledata);
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -293,7 +314,8 @@ Future<void> _runCoverage() async {
 Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool enableFlutterToolAsserts = false
+  bool enableFlutterToolAsserts = false,
+  bq.TabledataResourceApi tableData,
 }) async {
   final List<String> args = <String>['run', 'test', '-rjson', '-j1'];
   if (!hasColor)
@@ -315,17 +337,55 @@ Future<void> _pubRunTest(
   final Stream<String> testOutput = runAndGetStdout(pub, args,
     workingDirectory: workingDirectory,
   );
-  await _processTestOutput(testOutput);
+  await _processTestOutput(testOutput, tableData);
 }
 
-Future<void> _processTestOutput(Stream<String> testOutput) async {
+Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceApi tableData) async {
   final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  await for (String line in testOutput) {
-    final TestResult result = formatter.processRawOutput(line);
-    if (result != null) {
-      // TODO(dnfield): send this to bq
-    }
+  await testOutput.forEach(formatter.processRawOutput);
+  if (tableData == null) {
+    return;
   }
+  final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
+  request.rows = List<bq.TableDataInsertAllRequestRows>.from(
+    formatter.tests.map<bq.TableDataInsertAllRequestRows>((TestResult result) =>
+      bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
+        'json': <String, dynamic>{
+          'source': <String, dynamic>{
+            'provider': 'dnfield',
+            'url': 'http://localhost',
+            'platform': <String, dynamic>{
+              'os': Platform.operatingSystem,
+              'version': Platform.operatingSystemVersion,
+            },
+          },
+          'test': <String, dynamic>{
+            'name': result.name,
+            'result': result.status.toString(),
+            'file': result.path,
+            'line': result.line,
+            'column': result.column,
+          },
+          'git': <String, dynamic>{
+            'author': <String>['dnfield'],
+            'pull_request': -1,
+            'commit': 'deadbeef',
+            'organization': 'flutter',
+            'repository': 'flutter',
+          },
+          'error': result.status != TestStatus.failed ? null : <String, dynamic>{
+            'message': result.errorMessage,
+            'stack_trace': result.stackTrace,
+          },
+          'information': result.messages,
+        },
+      }),
+    ),
+    growable: false,
+  );
+  print(request.rows.length);
+  var response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
+  print(response.toJson());
 }
 
 class EvalResult {
@@ -347,6 +407,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> options = const <String>[],
   bool skip = false,
   Duration timeout = _kLongTimeout,
+  bq.TabledataResourceApi tableData,
 }) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -384,7 +445,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     expectNonZeroExit: expectFailure,
     timeout: timeout,
   );
-  await _processTestOutput(testOutput);
+  await _processTestOutput(testOutput, tableData);
 }
 
 Future<void> _verifyVersion(String filename) async {

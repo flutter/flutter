@@ -40,7 +40,9 @@ class FlutterCompactFormatter {
   /// this is Windows or not outputting to a termianl.
   String get _clearLine => useColor ? '\x1b[2K\r' : '\r';
 
-  final Map<int, TestResult> tests = <int, TestResult>{};
+  final Map<int, TestResult> _tests = <int, TestResult>{};
+
+  Iterable<TestResult> get tests => _tests.values;
   int started = 0;
   int failures = 0;
   int skips = 0;
@@ -53,7 +55,7 @@ class FlutterCompactFormatter {
       return null;
     }
     final Map<String, dynamic> decoded = json.decode(raw);
-    final TestResult originalResult = tests[decoded['testID']];
+    final TestResult originalResult = _tests[decoded['testID']];
     switch (decoded['type']) {
       case 'done':
         stdout.write(_clearLine);
@@ -71,7 +73,7 @@ class FlutterCompactFormatter {
               '$_green+$successes $_yellow~$skips $_red-$failures: $_gray${testData['name']}$_noColor');
           break;
         }
-        tests[testData['id']] = TestResult(
+        _tests[testData['id']] = TestResult(
           id: testData['id'],
           name: testData['name'],
           line: testData['root_line'] ?? testData['line'],
@@ -90,7 +92,7 @@ class FlutterCompactFormatter {
           originalResult.status = TestStatus.skipped;
         } else {
           if (decoded['result'] == 'success') {
-            tests.remove(originalResult.id);
+            _tests.remove(originalResult.id);
             // originalResult.status = TestStatus.succeeded;
             successes += 1;
           } else {
@@ -123,7 +125,7 @@ class FlutterCompactFormatter {
   void finish() {
     final List<String> skipped = <String>[];
     final List<String> failed = <String>[];
-    for (TestResult result in tests.values) {
+    for (TestResult result in _tests.values) {
       switch (result.status) {
         case TestStatus.started:
           failed.add('${_red}Unexpectedly failed to complete a test!');
