@@ -117,7 +117,8 @@ class PackageUriMapper {
 
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
-      if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
+      // Only perform a multi-root mapping if there are multiple roots.
+      if (fileSystemScheme != null && fileSystemRoots != null && fileSystemRoots.length > 1 && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
           .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
