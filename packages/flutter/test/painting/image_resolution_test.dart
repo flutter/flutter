@@ -167,14 +167,16 @@ void main() {
     });
   });
 
-  group(
-      'Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
+  group('Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
     const String mainAssetPath = 'assets/normalFolder/normalFile.png';
     const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
 
-    void _buildBundleAndTestVariantLogic(double deviceRatio, double chosenAssetRatio,
-        String expectedAssetPath) {
+    void _buildBundleAndTestVariantLogic(
+      double deviceRatio,
+      double chosenAssetRatio,
+      String expectedAssetPath,
+    ) {
       final Map<String, List<String>> assetBundleMap =
       <String, List<String>>{};
 

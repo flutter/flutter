@@ -275,18 +275,19 @@ class AttachCommand extends FlutterCommand {
 }
 
 class HotRunnerFactory {
-  HotRunner build(List<FlutterDevice> devices, {
-      String target,
-      DebuggingOptions debuggingOptions,
-      bool usesTerminalUI = true,
-      bool benchmarkMode = false,
-      File applicationBinary,
-      bool hostIsIde = false,
-      String projectRootPath,
-      String packagesFilePath,
-      String dillOutputPath,
-      bool stayResident = true,
-      bool ipv6 = false,
+  HotRunner build(
+    List<FlutterDevice> devices, {
+    String target,
+    DebuggingOptions debuggingOptions,
+    bool usesTerminalUI = true,
+    bool benchmarkMode = false,
+    File applicationBinary,
+    bool hostIsIde = false,
+    String projectRootPath,
+    String packagesFilePath,
+    String dillOutputPath,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) => HotRunner(
     devices,
     target: target,

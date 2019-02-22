@@ -634,11 +634,12 @@ class DevFS {
     return false;
   }
 
-  bool _shouldSkip(FileSystemEntity file,
-                   String relativePath,
-                   Uri directoryUriOnDevice, {
-                   bool ignoreDotFiles = true,
-                   }) {
+  bool _shouldSkip(
+    FileSystemEntity file,
+    String relativePath,
+    Uri directoryUriOnDevice, {
+    bool ignoreDotFiles = true,
+  }) {
     if (file is Directory) {
       // Skip non-files.
       return true;
@@ -653,8 +654,7 @@ class DevFS {
     return false;
   }
 
-  Uri _directoryUriOnDevice(Uri directoryUriOnDevice,
-                            Directory directory) {
+  Uri _directoryUriOnDevice(Uri directoryUriOnDevice, Directory directory) {
     if (directoryUriOnDevice == null) {
       final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
       if (relativeRootPath == '.') {
@@ -668,10 +668,12 @@ class DevFS {
 
   /// Scan all files from the [fileFilter] that are contained in [directory] and
   /// pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
-                                      Directory directory,
-                                      {Uri directoryUriOnDevice,
-                                       bool ignoreDotFiles = true}) async {
+  Future<bool> _scanFilteredDirectory(
+    Set<String> fileFilter,
+    Directory directory, {
+    Uri directoryUriOnDevice,
+    bool ignoreDotFiles = true,
+  }) async {
     directoryUriOnDevice =
         _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
@@ -700,11 +702,13 @@ class DevFS {
   }
 
   /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanDirectory(Directory directory,
-                              {Uri directoryUriOnDevice,
-                               bool recursive = false,
-                               bool ignoreDotFiles = true,
-                               Set<String> fileFilter}) async {
+  Future<bool> _scanDirectory(
+    Directory directory, {
+    Uri directoryUriOnDevice,
+    bool recursive = false,
+    bool ignoreDotFiles = true,
+    Set<String> fileFilter,
+  }) async {
     directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
     if ((fileFilter != null) && fileFilter.isNotEmpty) {
       // When the fileFilter isn't empty, we can skip crawling the directory
