@@ -128,18 +128,18 @@ class FloatingActionButton extends StatelessWidget {
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: icon == null
-               ? <Widget>[
-                   const SizedBox(width: 20.0),
-                   label,
-                   const SizedBox(width: 20.0),
-                 ]
-               : <Widget>[
-                   const SizedBox(width: 16.0),
-                   icon,
-                   const SizedBox(width: 8.0),
-                   label,
-                   const SizedBox(width: 20.0),
-                 ],
+             ? <Widget>[
+                 const SizedBox(width: 20.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ]
+             : <Widget>[
+                 const SizedBox(width: 16.0),
+                 icon,
+                 const SizedBox(width: 8.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ],
          ),
        ),
        super(key: key);
