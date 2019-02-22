@@ -32,14 +32,14 @@ import 'edge_insets.dart';
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
-///   child: Material(
+///   return Material(
 ///     color: Colors.blueAccent[400],
 ///     shape: const ContinuousStadiumBorder(),
 ///     child: const SizedBox(
 ///       height: 100,
 ///       width: 200,
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
