@@ -961,7 +961,11 @@ class CupertinoTimerPickerController {
     this.initialTimerDuration = Duration.zero,
     this.resetAnimationDuration = const Duration(milliseconds: 300),
   }) : assert(resetAnimationDuration != null),
-       assert(initialTimerDuration != null);
+       assert(initialTimerDuration != null),
+  assert(initialTimerDuration >= Duration.zero),
+  assert(initialTimerDuration < const Duration(days: 1)),
+        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
+        assert(initialTimerDuration.inSeconds % secondInterval == 0);
 
   /// The initial duration of the countdown timer.
   final Duration initialTimerDuration;
@@ -1056,7 +1060,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// positive integer factor of 60.
   CupertinoTimerPicker({
     this.mode = CupertinoTimerPickerMode.hms,
-    this.initialTimerDuration, // ignore: deprecated_member_use
+    this.initialTimerDuration = Duration.zero, // ignore: deprecated_member_use
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.controller,
