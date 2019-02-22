@@ -1025,10 +1025,10 @@ void main() {
     expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
 
     // Now try scrolling by dragging the selection handle.
-    // Long press the 'i' in 'Fourth line' to select the word.
+    // Long press the middle of the word "won't" in the fourth line.
     final Offset selectedWordPos = textOffsetToPosition(
       tester,
-      kMoreThanFourLines.indexOf('Fourth line') + 8,
+      kMoreThanFourLines.indexOf('Fourth line') + 14,
     );
 
     gesture = await tester.startGesture(selectedWordPos, pointer: 7);
@@ -1037,8 +1037,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(controller.selection.base.offset, 91);
-    expect(controller.selection.extent.offset, 94);
+    expect(controller.selection.base.offset, 77);
+    expect(controller.selection.extent.offset, 82);
+    // Sanity check for the word selected is the intended one.
+    expect(
+      controller.text.substring(controller.selection.baseOffset, controller.selection.extentOffset),
+      "won't",
+    );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
