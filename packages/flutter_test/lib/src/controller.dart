@@ -13,7 +13,10 @@ import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
 
+/// The default drag touch slop used to break up a large drag into multiple
+/// smaller moves. This value must be greater than [kTouchSlop].
 const double kdragSlopDefault = 20.0;
+
 /// Class that programmatically interacts with widgets.
 ///
 /// For a variant of this class suited specifically for unit tests, see
