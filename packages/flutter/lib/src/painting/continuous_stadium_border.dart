@@ -24,11 +24,14 @@ import 'edge_insets.dart';
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Material(
-///     shape: ContinuousStadiumBorder(
-///       borderRadius: 28.0,
+///   child: Material(
+///     color: Colors.blueAccent[400],
+///     shape: const ContinuousStadiumBorder(),
+///     child: const SizedBox(
+///       height: 100,
+///       width: 200,
 ///     ),
-///   );
+///   ),
 /// }
 /// ```
 /// {@end-tool}
