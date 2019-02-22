@@ -40,7 +40,7 @@ abstract class ShaderWarmUp {
   /// order of magnitude of most devices.
   ///
   /// A custom shader warm up can override this based on targeted devices.
-  ui.Size get size => const ui.Size(1024, 1024);
+  ui.Size get size => const ui.Size(1024.0, 1024.0);
 
   /// Trigger draw operations on a given canvas to warm up GPU shader
   /// compilation cache.
