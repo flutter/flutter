@@ -14,12 +14,21 @@ const String purpleMarqueeRouteName = 'marquee_purple';
 const String fullscreenRouteName = 'full';
 const String hybridRouteName = 'hybrid';
 
+/// Channel used to let the Flutter app know to reset the app to a specific
+/// route.  See the [run] method.
+///
+/// Note that we shouldn't use the `setInitialRoute` method on the system
+/// navigation channel, as that never gets propagated back to Flutter after the
+/// initial call.
 const String _kReloadChannelName = 'reload';
 const BasicMessageChannel<String> _kReloadChannel =
     BasicMessageChannel<String>(_kReloadChannelName, StringCodec());
 
 void main() {
+  // Start listening immediately for messages from the iOS side. ObjC calls
+  // will be made to let us know when we should be changing the app state.
   _kReloadChannel.setMessageHandler(run);
+  // Start off with whatever the initial route is supposed to be.
   run(ui.window.defaultRouteName);
 }
 
@@ -28,8 +37,8 @@ Future<String> run(String name) async {
   // view (or view controller for iOS) to set [ui.window.defaultRouteName].
   // We then dispatch based on the route names to show different Flutter
   // widgets.
-  // Since we don't really care about navigating in this app, we're not using
-  // a regular routes map.
+  // Since we don't really care about Flutter-side navigation in this app, we're
+  // not using a regular routes map.
   switch (name) {
     case greenMarqueeRouteName:
       runApp(Marquee(color: Colors.green[400]));
@@ -146,8 +155,9 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 Center(
                   child: Text(
-                      '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.',
-                      style: const TextStyle(fontSize: 17.0)),
+                    '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                    style: const TextStyle(fontSize: 17.0),
+                  ),
                 ),
                 const FlatButton(
                   child: Text('POP'),

@@ -6,7 +6,7 @@ interaction.
 
 The following functionality is currently implemented:
 
-1. A regular iOS view controller, similar to the default `flutter create` template.
+1. A regular iOS view controller (UIViewController), similar to the default `flutter create` template.
 1. A FlutterViewController subclass that takes over full screen. Demos showing this both from a cold/fresh engine state and a warm engine state.
 1. A demo of pushing a FlutterViewController on as a child view.
 1. A demo of showing both the native and the Flutter views using a platform channel to to interact with each other.

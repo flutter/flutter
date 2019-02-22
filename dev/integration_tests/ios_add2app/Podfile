@@ -13,7 +13,6 @@ if !File.exist?(engine_dir)
 end
 
 target 'ios_add2app' do
-
   eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
 end
 

@@ -135,5 +135,4 @@ static void waitForInitialFlutterRender() {
     assertWithMatcher:grey_text(platformCountStr)] assertWithMatcher:grey_sufficientlyVisible()];
 }
 
-
 @end
