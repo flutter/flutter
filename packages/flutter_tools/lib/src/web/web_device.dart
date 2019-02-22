@@ -114,6 +114,7 @@ class WebDevice extends Device {
     _package = package;
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     _server.listen(_basicAssetServer);
+    printStatus('Serving assets from http:localhost:${_server.port}');
     await chromeLauncher.launch('http:localhost:${_server.port}');
     return LaunchResult.succeeded(observatoryUri: null);
   }
@@ -193,9 +194,9 @@ class ChromeLauncher {
 
   static const String _kMacosLocation = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
 
-  Future<Process> launch(String host) async {
+  Future<void> launch(String host) async {
     if (platform.isMacOS) {
-      return processManager.start(<String>[
+      await processManager.start(<String>[
         _kMacosLocation,
         host,
       ]);
