@@ -55,10 +55,9 @@ const Duration kZoomControlsTimeout = Duration(milliseconds: 3000);
 /// touch can travel before the framework becomes confident that it is not a
 /// tap.
 ///
-/// Mathematically speaking, if a touch moves with a total delta in the range
-/// [0, 'kTouchSlop'] it is not considered to be a drag, whereas if the total
-/// delta is in the range ('kTouchSlop', Infinity), it is considered to be a
-/// drag.
+/// A total delta less than or equal to [kTouchSlop] is not considered to be a
+/// drag, whereas if the delta is greater than [kTouchSlop] it is considered to
+/// be a drag.
 // This value was empirically derived. We started at 8.0 and increased it to
 // 18.0 after getting complaints that it was too difficult to hit targets.
 const double kTouchSlop = 18.0; // Logical pixels
