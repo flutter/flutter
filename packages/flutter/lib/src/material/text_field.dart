@@ -25,17 +25,15 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget Function(
   /// The build context for the TextField
-  BuildContext context,
-  {
-    /// The length of the string currently in the input.
-    @required int currentLength,
-    /// The maximum string length that can be entered into the TextField.
-    @required int maxLength,
-    /// Whether or not the TextField is currently focused.  Mainly provided for
-    /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
-    @required bool isFocused,
-  }
-);
+  BuildContext context, {
+  /// The length of the string currently in the input.
+  @required int currentLength,
+  /// The maximum string length that can be entered into the TextField.
+  @required int maxLength,
+  /// Whether or not the TextField is currently focused.  Mainly provided for
+  /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+  @required bool isFocused,
+});
 
 /// A material design text field.
 ///
@@ -742,7 +740,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         //
         // This value is in device pixels, not logical pixels as is typically used
         // throughout the codebase.
-        const int _iOSHorizontalOffset = 2;
+        const int _iOSHorizontalOffset = -2;
         cursorOffset = Offset(_iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 

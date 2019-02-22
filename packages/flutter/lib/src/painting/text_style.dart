@@ -807,18 +807,18 @@ class TextStyle extends Diagnosticable {
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.
   ui.ParagraphStyle getParagraphStyle({
-      TextAlign textAlign,
-      TextDirection textDirection,
-      double textScaleFactor = 1.0,
-      String ellipsis,
-      int maxLines,
-      Locale locale,
-      String fontFamily,
-      double fontSize,
-      FontWeight fontWeight,
-      FontStyle fontStyle,
-      double height,
-      StrutStyle strutStyle,
+    TextAlign textAlign,
+    TextDirection textDirection,
+    double textScaleFactor = 1.0,
+    String ellipsis,
+    int maxLines,
+    Locale locale,
+    String fontFamily,
+    double fontSize,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    double height,
+    StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);

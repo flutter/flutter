@@ -42,7 +42,7 @@ abstract class ListWheelChildManager {
   /// nothing.
   ///
   /// It is possible to create children with negative indices.
-  void createChild(int index, {@required RenderBox after});
+  void createChild(int index, { @required RenderBox after });
 
   /// Removes the child element corresponding with the given RenderBox.
   void removeChild(RenderBox child);
@@ -572,7 +572,7 @@ class RenderListWheelViewport
   /// Returns the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  void _createChild(int index, {RenderBox after}) {
+  void _createChild(int index, { RenderBox after }) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.createChild(index, after: after);
@@ -804,12 +804,12 @@ class RenderListWheelViewport
   /// Paint child with the magnifier active - the child will be rendered
   /// differently if it intersects with the magnifier.
   void _paintChildWithMagnifier(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
-      Offset untransformedPaintingCoordinates,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
+    Offset untransformedPaintingCoordinates,
   ) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
@@ -884,11 +884,11 @@ class RenderListWheelViewport
 
   // / Paint the child cylindrically at given offset.
   void _paintChildCylindrically(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
   ) {
     context.pushTransform(
       // Text with TransformLayers and no cullRects currently have an issue rendering
@@ -952,7 +952,7 @@ class RenderListWheelViewport
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.

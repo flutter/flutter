@@ -216,16 +216,16 @@ class _NoopIOSink implements IOSink {
   void write(_) {}
 
   @override
-  void writeAll(_, [__ = '']) {}
+  void writeAll(_, [ __ = '' ]) {}
 
   @override
-  void writeln([_ = '']) {}
+  void writeln([ _ = '' ]) {}
 
   @override
   void writeCharCode(_) {}
 
   @override
-  void addError(_, [__]) {}
+  void addError(_, [ __ ]) {}
 
   @override
   Future<dynamic> addStream(_) async {}

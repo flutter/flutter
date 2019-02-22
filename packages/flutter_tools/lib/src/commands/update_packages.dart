@@ -390,7 +390,7 @@ class _DependencyLink {
 /// "dependency_overrides" sections, as well as the "name" and "version" fields
 /// in the pubspec header bucketed into [header]. The others are all bucketed
 /// into [other].
-enum Section { header, dependencies, devDependencies, dependencyOverrides, other }
+enum Section { header, dependencies, devDependencies, dependencyOverrides, builders, other }
 
 /// The various kinds of dependencies we know and care about.
 enum DependencyKind {
@@ -504,6 +504,11 @@ class PubspecYaml {
             seenDev = true;
           }
           result.add(header);
+        } else if (section == Section.builders) {
+          // Do nothing.
+          // This line isn't a section header, and we're not in a section we care about.
+          // We just stick the line into the output unmodified.
+          result.add(PubspecLine(line));
         } else if (section == Section.other) {
           if (line.contains(kDependencyChecksum)) {
             // This is the pubspec checksum. After computing it, we remove it from the output data
@@ -878,6 +883,8 @@ class PubspecHeader extends PubspecLine {
         return PubspecHeader(line, Section.devDependencies);
       case 'dependency_overrides':
         return PubspecHeader(line, Section.dependencyOverrides);
+      case 'builders':
+        return PubspecHeader(line, Section.builders);
       case 'name':
       case 'version':
         return PubspecHeader(line, Section.header, name: sectionName, value: value);
@@ -1180,7 +1187,8 @@ class PubDependencyTree {
 
   /// The transitive closure of all the dependencies for the given package,
   /// excluding any listen in `seen`.
-  Iterable<String> getTransitiveDependenciesFor(String package, {
+  Iterable<String> getTransitiveDependenciesFor(
+    String package, {
     @required Set<String> seen,
     @required Set<String> exclude,
   }) sync* {

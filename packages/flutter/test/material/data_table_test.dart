@@ -210,4 +210,61 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, lessThan(800.0));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('DataTable column onSort test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Dessert'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Dessert'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Dessert'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Lollipop'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
 }

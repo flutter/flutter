@@ -17,18 +17,22 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../desktop.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../linux/linux_device.dart';
+import '../macos/macos_device.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
+import '../windows/windows_device.dart';
 
 const String protocolVersion = '0.4.2';
 
@@ -157,7 +161,7 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({dynamic error}) {
+  void shutdown({ dynamic error }) {
     _commandSubscription?.cancel();
     for (Domain domain in _domainMap.values)
       domain.dispose();
@@ -206,7 +210,7 @@ abstract class Domain {
     });
   }
 
-  void sendEvent(String name, [dynamic args]) {
+  void sendEvent(String name, [ dynamic args ]) {
     final Map<String, dynamic> map = <String, dynamic>{ 'event': name };
     if (args != null)
       map['params'] = _toJsonable(args);
@@ -329,8 +333,12 @@ class AppDomain extends Domain {
   final List<AppInstance> _apps = <AppInstance>[];
 
   Future<AppInstance> startApp(
-    Device device, String projectDirectory, String target, String route,
-    DebuggingOptions options, bool enableHotReload, {
+    Device device,
+    String projectDirectory,
+    String target,
+    String route,
+    DebuggingOptions options,
+    bool enableHotReload, {
     File applicationBinary,
     @required bool trackWidgetCreation,
     String projectRootPath,
@@ -396,16 +404,19 @@ class AppDomain extends Domain {
       projectDirectory,
       enableHotReload,
       cwd,
+      LaunchMode.run,
     );
   }
 
   Future<AppInstance> launch(
-      ResidentRunner runner,
-      _RunOrAttach runOrAttach,
-      Device device,
-      String projectDirectory,
-      bool enableHotReload,
-      Directory cwd) async {
+    ResidentRunner runner,
+    _RunOrAttach runOrAttach,
+    Device device,
+    String projectDirectory,
+    bool enableHotReload,
+    Directory cwd,
+    LaunchMode launchMode,
+  ) async {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
@@ -413,6 +424,7 @@ class AppDomain extends Domain {
       'deviceId': device.id,
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
+      'launchMode': launchMode.toString(),
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -555,7 +567,7 @@ class AppDomain extends Domain {
     return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
 
-  void _sendAppEvent(AppInstance app, String name, [Map<String, dynamic> args]) {
+  void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
     final Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
     if (args != null)
       eventArgs.addAll(args);
@@ -582,6 +594,11 @@ class DeviceDomain extends Domain {
     addDeviceDiscoverer(IOSDevices());
     addDeviceDiscoverer(IOSSimulators());
     addDeviceDiscoverer(FlutterTesterDevices());
+    if (flutterDesktopEnabled) {
+      addDeviceDiscoverer(MacOSDevices());
+      addDeviceDiscoverer(LinuxDevices());
+      addDeviceDiscoverer(WindowsDevices());
+    }
   }
 
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
@@ -608,7 +625,7 @@ class DeviceDomain extends Domain {
 
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
-  Future<List<Map<String, dynamic>>> getDevices([Map<String, dynamic> args]) async {
+  Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
     final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
 
     for (PollingDeviceDiscovery discoverer in _discoverers) {
@@ -749,27 +766,27 @@ class NotifyingLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis = false,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis = false,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
-      String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    bool newline = true,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _messageController.add(LogMessage('status', message));
   }
 
@@ -839,7 +856,7 @@ class EmulatorDomain extends Domain {
 
   EmulatorManager emulators = EmulatorManager();
 
-  Future<List<Map<String, dynamic>>> getEmulators([Map<String, dynamic> args]) async {
+  Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
     return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
@@ -886,14 +903,14 @@ class _AppRunLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-      StackTrace stackTrace,
-      bool emphasis,
-      TerminalColor color,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     if (parent != null) {
       parent.printError(
         message,
@@ -921,14 +938,14 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-      String message, {
-      bool emphasis = false,
-      TerminalColor color,
-      bool newline = true,
-      int indent,
-      int hangingIndent,
-      bool wrap,
-    }) {
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    bool newline = true,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     if (parent != null) {
       parent.printStatus(
         message,
@@ -1011,4 +1028,20 @@ class LogMessage {
   final String level;
   final String message;
   final StackTrace stackTrace;
+}
+
+/// The method by which the flutter app was launched.
+class LaunchMode {
+  const LaunchMode._(this._value);
+
+  /// The app was launched via `flutter run`.
+  static const LaunchMode run = LaunchMode._('run');
+
+  /// The app was launched via `flutter attach`.
+  static const LaunchMode attach = LaunchMode._('attach');
+
+  final String _value;
+
+  @override
+  String toString() => _value;
 }

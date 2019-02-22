@@ -634,18 +634,22 @@ class _CupertinoBackGestureController<T> {
       controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
     }
 
-    assert(controller.isAnimating);
-    assert(controller.status != AnimationStatus.completed);
-    assert(controller.status != AnimationStatus.dismissed);
+    if (controller.isAnimating) {
+      // Don't end the gesture until the transition completes.
+      _animating = true;
+      controller.addStatusListener(_handleStatusChanged);
+    } else {
+      // Animate calls could return inline if already at the target destination
+      // value.
+      return _handleStatusChanged(controller.status);
+    }
 
-    // Don't end the gesture until the transition completes.
-    _animating = true;
-    controller.addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    assert(_animating);
-    controller.removeStatusListener(_handleStatusChanged);
+    if (_animating) {
+      controller.removeStatusListener(_handleStatusChanged);
+    }
     _animating = false;
     if (status == AnimationStatus.dismissed)
       navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
@@ -726,7 +730,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
+  _CupertinoEdgeShadowPainter createBoxPainter([ VoidCallback onChanged ]) {
     return _CupertinoEdgeShadowPainter(this, onChanged);
   }
 

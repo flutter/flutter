@@ -139,7 +139,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
-  void usesFilesystemOptions({@required bool hide}) {
+  void usesFilesystemOptions({ @required bool hide }) {
     argParser
       ..addOption('output-dill',
         hide: hide,
@@ -199,12 +199,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
-        help: 'An integer used as an internal version number.\n'
-              'Each build must have a unique number to differentiate it from previous builds.\n'
+        help: 'An identifier used as an internal version number.\n'
+              'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as \'versionCode\'.\n'
               'On Xcode builds it is used as \'CFBundleVersion\'',
-        valueHelp: 'int');
+    );
   }
 
   void usesBuildNameOption() {
@@ -216,7 +216,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesIsolateFilterOption({@required bool hide}) {
+  void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
       hide: hide,
@@ -224,7 +224,7 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -242,7 +242,7 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
-  void addDynamicModeFlags({bool verboseHelp = false}) {
+  void addDynamicModeFlags({ bool verboseHelp = false }) {
     argParser.addOption('compilation-trace-file',
         defaultsTo: 'compilation.txt',
         hide: !verboseHelp,
@@ -260,7 +260,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+  void addDynamicPatchingFlags({ bool verboseHelp = false }) {
     argParser.addOption('patch-number',
         hide: !verboseHelp,
         help: 'An integer used as an internal version number for dynamic patch.\n'
@@ -291,7 +291,7 @@ abstract class FlutterCommand extends Command<void> {
     addDynamicBaselineFlags(verboseHelp: verboseHelp);
   }
 
-  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+  void addDynamicBaselineFlags({ bool verboseHelp = false }) {
     argParser.addOption('baseline-dir',
         defaultsTo: '.baseline',
         hide: !verboseHelp,
@@ -301,7 +301,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesFuchsiaOptions({bool hide = false}) {
+  void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
       help: 'Target model that determines what core libraries are available',
@@ -370,15 +370,9 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['track-widget-creation']
         : false;
 
-    int buildNumber;
-    try {
-      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
+    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+        ? argResults['build-number']
+        : null;
 
     int patchNumber;
     try {

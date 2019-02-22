@@ -4,17 +4,15 @@
 
 import 'dart:async';
 
-import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
-import 'convert.dart' as convert;
 import 'globals.dart';
-
-final RegExp _versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -76,14 +74,27 @@ class FlutterManifest {
   /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
+  // Flag to avoid printing multiple invalid version messages.
+  bool _hasShowInvalidVersionMsg = false;
+
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String get appVersion {
-    final String version = _descriptor['version']?.toString();
-    if (version != null && _versionPattern.hasMatch(version))
-      return version;
-    else
+    final String verStr = _descriptor['version']?.toString();
+    if (verStr == null) {
       return null;
+    }
+
+    Version version;
+    try {
+      version = Version.parse(verStr);
+    } on Exception {
+      if (!_hasShowInvalidVersionMsg) {
+        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        _hasShowInvalidVersionMsg = true;
+      }
+    }
+    return version?.toString();
   }
 
   /// The build version name from the `pubspec.yaml` file.
@@ -91,16 +102,17 @@ class FlutterManifest {
   String get buildName {
     if (appVersion != null && appVersion.contains('+'))
       return appVersion.split('+')?.elementAt(0);
-    else
+    else {
       return appVersion;
+    }
   }
 
   /// The build version number from the `pubspec.yaml` file.
   /// Can be null if version isn't set or has a wrong format.
-  int get buildNumber {
+  String get buildNumber {
     if (appVersion != null && appVersion.contains('+')) {
       final String value = appVersion.split('+')?.elementAt(1);
-      return value == null ? null : int.tryParse(value);
+      return value;
     } else {
       return null;
     }
@@ -275,18 +287,152 @@ String buildSchemaPath(FileSystem fs) {
   );
 }
 
-Future<bool> _validate(dynamic manifest) async {
-  final String schemaPath = buildSchemaPath(fs);
+/// This method should be kept in sync with the schema in
+/// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
+/// but avoid introducing depdendencies on packages for simple validation.
+Future<bool> _validate(YamlMap manifest) async {
+  final List<String> errors = <String>[];
+  for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
+    if (kvp.key is! String) {
+      errors.add('Expected YAML key to be a a string, but got ${kvp.key}.');
+      continue;
+    }
+    switch (kvp.key) {
+      case 'name':
+        if (kvp.value is! String) {
+          errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
+        }
+        break;
+      case 'flutter':
+        if (kvp.value == null) {
+          continue;
+        }
+        if (kvp.value is! YamlMap) {
+          errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+        }
+        _validateFlutter(kvp.value, errors);
+        break;
+      default:
+        // additionalProperties are allowed.
+        break;
+    }
+  }
 
-  final String schemaData = fs.file(schemaPath).readAsStringSync();
-  final Schema schema = await Schema.createSchema(
-      convert.json.decode(schemaData));
-  final Validator validator = Validator(schema);
-  if (validator.validate(manifest)) {
-    return true;
-  } else {
+  if (errors.isNotEmpty) {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(validator.errors.join('\n'));
+    printError(errors.join('\n'));
     return false;
+  }
+
+  return true;
+}
+
+void _validateFlutter(YamlMap yaml, List<String> errors) {
+  if (yaml == null || yaml.entries == null) {
+    return;
+  }
+  for (final MapEntry<dynamic, dynamic> kvp in yaml.entries) {
+    if (kvp.key is! String) {
+      errors.add('Expected YAML key to be a a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
+      continue;
+    }
+    switch (kvp.key) {
+      case 'uses-material-design':
+        if (kvp.value is! bool) {
+          errors.add('Expected "${kvp.key}" to be a bool, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        }
+        break;
+      case 'assets':
+      case 'services':
+        if (kvp.value is! YamlList || kvp.value[0] is! String) {
+          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        }
+        break;
+      case 'fonts':
+        if (kvp.value is! YamlList || kvp.value[0] is! YamlMap) {
+          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        }
+        _validateFonts(kvp.value, errors);
+        break;
+      case 'module':
+        if (kvp.value is! YamlMap) {
+          errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        }
+
+        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
+          errors.add('The "androidPackage" value must be a string if set.');
+        }
+        if (kvp.value['iosBundleIdentifier'] != null && kvp.value['iosBundleIdentifier'] is! String) {
+          errors.add('The "iosBundleIdentifier" section must be a string if set.');
+        }
+        break;
+      case 'plugin':
+        if (kvp.value is! YamlMap) {
+          errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        }
+        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
+          errors.add('The "androidPackage" must either be null or a string.');
+        }
+        if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
+          errors.add('The "iosPrefix" must eithe rbe null or a string.');
+        }
+        if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
+          errors.add('The "pluginClass" must either be null or a string..');
+        }
+        break;
+      default:
+        errors.add('Unexpected child "${kvp.key}" found under "flutter".');
+        break;
+    }
+  }
+}
+
+void _validateFonts(YamlList fonts, List<String> errors) {
+  if (fonts == null) {
+    return;
+  }
+  final Set<int> fontWeights = Set<int>.from(const <int>[
+    100, 200, 300, 400, 500, 600, 700, 800, 900,
+  ]);
+  for (final YamlMap fontMap in fonts) {
+    for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
+      errors.add('Unexpected child "$key" found under "fonts".');
+    }
+    if (fontMap['family'] != null && fontMap['family'] is! String) {
+      errors.add('Font family must either be null or a String.');
+    }
+    if (fontMap['fonts'] != null && fontMap['fonts'] is! YamlList) {
+      errors.add('Expected "fonts" to either be null or a list.');
+    }
+    if (fontMap['fonts'] == null) {
+      continue;
+    }
+    for (final YamlMap fontListItem in fontMap['fonts']) {
+      for (final MapEntry<dynamic, dynamic> kvp in fontListItem.entries) {
+        if (kvp.key is! String) {
+          errors.add('Expected "${kvp.key}" under "fonts" to be a string.');
+        }
+        switch(kvp.key) {
+          case 'asset':
+            if (kvp.value is! String) {
+              errors.add('Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');
+            }
+            break;
+          case 'weight':
+            if (!fontWeights.contains(kvp.value)) {
+              errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
+            }
+            break;
+          case 'style':
+            if (kvp.value != 'normal' && kvp.value != 'italic') {
+              errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> style.');
+            }
+            break;
+          default:
+            errors.add('Unexpected key ${kvp.key} ((${kvp.value.runtimeType})) under font.');
+            break;
+        }
+      }
+    }
   }
 }

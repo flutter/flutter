@@ -26,9 +26,11 @@ enum Artifact {
   frontendServerSnapshotForEngineDartSdk,
   engineDartSdkPath,
   engineDartBinary,
+  dart2jsSnapshot,
+  kernelWorkerSnapshot,
 }
 
-String _artifactToFileName(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -70,6 +72,10 @@ String _artifactToFileName(Artifact artifact, [TargetPlatform platform, BuildMod
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
       return 'dart';
+    case Artifact.dart2jsSnapshot:
+      return 'flutter_dart2js.dart.snapshot';
+    case Artifact.kernelWorkerSnapshot:
+      return 'flutter_kernel_worker.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -95,18 +101,18 @@ abstract class Artifacts {
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]);
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]);
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
-  String getEngineType(TargetPlatform platform, [BuildMode mode]);
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts extends Artifacts {
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:
@@ -121,6 +127,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         return _getHostArtifactPath(artifact, platform, mode);
     }
     assert(false, 'Invalid platform $platform.');
@@ -128,7 +135,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(_getEngineArtifactsPath(platform, mode));
   }
 
@@ -183,20 +190,24 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath,'bin', _artifactToFileName(artifact));
+        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath();
+      case Artifact.dart2jsSnapshot:
+        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.kernelWorkerSnapshot:
+        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
   }
 
-  String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
+  String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
     final String engineDir = cache.getArtifactDirectory('engine').path;
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
@@ -205,6 +216,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
@@ -240,7 +252,7 @@ class LocalEngineArtifacts extends Artifacts {
   String _hostEngineOutPath;
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
@@ -265,13 +277,17 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'dart-sdk');
       case Artifact.engineDartBinary:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact));
+      case Artifact.dart2jsSnapshot:
+        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.kernelWorkerSnapshot:
+        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(engineOutPath);
   }
 
@@ -324,7 +340,7 @@ class OverrideArtifacts implements Artifacts {
   final File flutterPatchedSdk;
 
   @override
-  String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
+  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
     if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
       return frontendServer.path;
     }
@@ -341,5 +357,5 @@ class OverrideArtifacts implements Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]) => parent.getEngineType(platform, mode);
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) => parent.getEngineType(platform, mode);
 }

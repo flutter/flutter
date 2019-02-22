@@ -98,6 +98,9 @@ typedef GestureForceInterpolation = double Function(double pressureMin, double p
 /// force touch functionality, with the exception of the iPhone XR. In addition,
 /// a small handful of Android devices have this functionality as well.
 ///
+/// Devices with faux screen pressure sensors like the Pixel 2 and 3 will not
+/// send any force press related callbacks.
+///
 /// Reported pressure will always be in the range 0.0 to 1.0, where 1.0 is
 /// maximum pressure and 0.0 is minimum pressure. If using a custom
 /// [interpolation] callback, the pressure reported will correspond to that
@@ -203,10 +206,19 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer);
-    if (_state == _ForceState.ready) {
-      _state = _ForceState.possible;
-      _lastPosition = event.position;
+    assert(event.pressureMax >= 1.0);
+    // If the device has a maximum pressure of less than or equal to 1,
+    // indicating a faux pressure sensor on this device or a device without a
+    // pressure sensor (ie. on a non iOS device) we want do not want any
+    // callbacks to be called.
+    if (!(event is PointerUpEvent) && event.pressureMax == 1.0) {
+      resolve(GestureDisposition.rejected);
+    } else {
+      startTrackingPointer(event.pointer);
+      if (_state == _ForceState.ready) {
+        _state = _ForceState.possible;
+        _lastPosition = event.position;
+      }
     }
   }
 
@@ -215,13 +227,20 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _ForceState.ready);
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
+      if (event.pressure > event.pressureMax || event.pressure < event.pressureMin) {
+        debugPrint(
+          'The reported device pressure ' + event.pressure.toString() +
+          ' is outside of the device pressure range where: ' +
+          event.pressureMin.toString() + ' <= pressure <= ' + event.pressureMax.toString(),
+        );
+      }
+
       final double pressure = interpolation(event.pressureMin, event.pressureMax, event.pressure);
       assert(
-        event.pressure < event.pressureMin || // contract is undefined for underflowing pressures...
-        event.pressure > event.pressureMax || // contract is undefined for overflowing pressures...
-        pressure.isNaN || // and interpolation may return NaN for values it doesn't want to support...
-        (pressure <= 1.0 && pressure >= 0.0) // but if everything is going well, it must be in the range 1.0..0.0.
+        (pressure >= 0.0 && pressure <= 1.0) || // Interpolated pressure must be between 1.0 and 0.0...
+        pressure.isNaN // and interpolation may return NaN for values it doesn't want to support...
       );
+
       _lastPosition = event.position;
       _lastPressure = pressure;
 
@@ -254,7 +273,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
           )));
         }
       }
-      if (onUpdate != null &&
+      if (onUpdate != null &&  !pressure.isNaN &&
          (_state == _ForceState.started || _state == _ForceState.peaked)) {
         if (onUpdate != null) {
           invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
@@ -306,7 +325,13 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   static double _inverseLerp(double min, double max, double t) {
     assert(min <= max);
-    return (t - min) / (max - min);
+    double value = (t - min) / (max - min);
+
+    // If the device incorrectly reports a pressure outside of pressureMin
+    // and pressureMax, we still want this recognizer to respond normally.
+    if (!value.isNaN)
+      value = value.clamp(0.0, 1.0);
+    return value;
   }
 
   @override

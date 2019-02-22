@@ -42,7 +42,8 @@ Future<void> main() async {
         'method': 'app.start',
         'params': <String, dynamic> {
           'deviceId': words[1],
-          'projectDirectory': words[2]
+          'projectDirectory': words[2],
+          'launchMode': words[3],
         }
       });
     } else if (words.first == 'stop') {

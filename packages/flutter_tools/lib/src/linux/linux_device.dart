@@ -17,7 +17,7 @@ class LinuxDevice extends Device {
   void clearLogs() {}
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('linux');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('linux');
 
   @override
   Future<bool> installApp(ApplicationPackage app) {
@@ -50,7 +50,8 @@ class LinuxDevice extends Device {
   Future<String> get sdkNameAndVersion async => os.name;
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package, {
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
