@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart' show ExitStatus, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
@@ -30,6 +31,11 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String target = argResults['target'];
+    /// Ensure we have generated any necessary html or plugin files.
+    final FlutterProject project = await FlutterProject.current();
+    await project.ensureReadyForPlatformSpecificTooling();
+
+    /// Compile to JavaScript.
     final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
     final int result = await webCompiler.compile(target: target);
     status.stop();

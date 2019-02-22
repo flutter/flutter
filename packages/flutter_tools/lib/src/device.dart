@@ -19,6 +19,7 @@ import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
@@ -38,6 +39,7 @@ class DeviceManager {
     MacOSDevices(),
     LinuxDevices(),
     WindowsDevices(),
+    WebDevices(),
   ]);
 
   String _specifiedDeviceId;

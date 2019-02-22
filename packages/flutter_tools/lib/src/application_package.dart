@@ -21,6 +21,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
@@ -47,10 +48,11 @@ class ApplicationPackageFactory {
         return applicationBinary != null
           ? MacOSApp.fromPrebuiltApp(applicationBinary)
           : null;
+      case TargetPlatform.web:
+        return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.web:
         return null;
     }
     assert(platform != null);
