@@ -128,7 +128,6 @@ FILE: ../../../flutter/fml/command_line.h
 FILE: ../../../flutter/fml/command_line_unittest.cc
 FILE: ../../../flutter/fml/compiler_specific.h
 FILE: ../../../flutter/fml/eintr_wrapper.h
-FILE: ../../../flutter/fml/export.h
 FILE: ../../../flutter/fml/file.cc
 FILE: ../../../flutter/fml/file.h
 FILE: ../../../flutter/fml/file_unittest.cc
