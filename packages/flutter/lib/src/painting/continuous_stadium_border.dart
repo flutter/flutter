@@ -46,43 +46,39 @@ class ContinuousStadiumBorder extends ShapeBorder {
   /// The [side], and [borderRadius] arguments must not be null.
   const ContinuousStadiumBorder({
     this.side = BorderSide.none,
-    this.borderRadius = 1.0,
-  }) : assert(side != null),
-       assert(borderRadius != null);
-
-  /// The radius for each 180º curve.
-  ///
-  /// The radius will be clamped to 1 if a value less than 1 is entered as the
-  /// radius.
-  ///
-  /// By default the radius is 1.0. This value must not be null.
-  ///
-  /// Unlike [RoundedStadiumBorder], there is only a single border radius used
-  /// to describe the radius for both 180º curves.
-  final double borderRadius;
+  }) : assert(side != null);
 
   /// The style of this border.
   ///
   /// By default this value is [BorderSide.none]. It also must not be null.
   final BorderSide side;
 
-  Path _getPath(RRect rrect) {
+  Path _getPath(Rect rect) {
     // The radius multiplier where the resulting shape will perfectly concave at
     // with a height and width of any value.
     const double maxMultiplier = 3.0573;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for the dynamic shape option.
-    const double dynamicShapeMinMultiplier = 0.32708;
+    const double dynamicShapeMinMultiplier = 1 / maxMultiplier;
 
-    final double width = rrect.width;
-    final double height = rrect.height;
-    final double centerX = rrect.center.dx;
-    final double centerY = rrect.center.dy;
+    final double width = rect.width;
+    final double height = rect.height;
+    final double centerX = rect.center.dx;
+    final double centerY = rect.center.dy;
     final double originX = centerX - width / 2;
     final double originY = centerY - height / 2;
-    final double radius = math.max(1, borderRadius);
-    final double limitedRadius = math.min(radius, math.min(rrect.width, rrect.height) * dynamicShapeMinMultiplier);
+    final double minDimension = math.min(rect.width, rect.height);
+    final double radius = minDimension * dynamicShapeMinMultiplier;
+
+    final double limitedRadius =
+//    math.max(
+//      maxMultiplier * minDimension,
+      math.min(
+        radius,
+        minDimension * dynamicShapeMinMultiplier,
+      );
+//    );
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
@@ -203,7 +199,8 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
+//    if (width)math.max(radius * maxMultiplier,
+        return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
   }
 
   @override
@@ -223,12 +220,12 @@ class ContinuousStadiumBorder extends ShapeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)).deflate(side.width));
+    return _getPath(rect.deflate(side.width));
   }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)));
+    return _getPath(rect);
   }
 
   @override
@@ -238,7 +235,6 @@ class ContinuousStadiumBorder extends ShapeBorder {
   ShapeBorder scale(double t) {
     return ContinuousStadiumBorder(
       side: side.scale(t),
-      borderRadius: borderRadius * t,
     );
   }
 
@@ -248,7 +244,6 @@ class ContinuousStadiumBorder extends ShapeBorder {
     if (a is ContinuousStadiumBorder) {
       return ContinuousStadiumBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -260,7 +255,6 @@ class ContinuousStadiumBorder extends ShapeBorder {
     if (b is ContinuousStadiumBorder) {
       return ContinuousStadiumBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -271,14 +265,14 @@ class ContinuousStadiumBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousStadiumBorder typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius;
+    return side == typedOther.side;
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius);
+  int get hashCode => side.hashCode;
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '$runtimeType($side)';
   }
 }
