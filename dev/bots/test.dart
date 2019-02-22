@@ -145,14 +145,12 @@ Future<void> _runSmokeTests() async {
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
-  final kms.DecryptRequest request = kms.DecryptRequest()..ciphertextAsBytes = await File(
-    path.join(Directory.current.path, 'dev', 'bots', 'serviceaccount.enc'),
-  ).readAsBytes();
-  final kms.DecryptResponse response = await kms.CloudkmsApi(http.Client()).projects.locations.keyRings.cryptoKeys.decrypt(
-    request,
-    'projects/flutter-infra/locations/global/keyRings/luci/cryptoKeys/bigquery',
-  );
-  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials.fromJson(response.plaintext);
+  // TODO(dnfield): How will we do this on LUCI?
+  final String credentials = Platform.environment['GCLOUD_SERVICE_ACCOUNT'];
+  if (credentials == null || credentials.isEmpty) {
+    return null;
+  }
+  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials.fromJson(credentials);
   final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
   final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
   return bq.BigqueryApi(client);
@@ -165,7 +163,7 @@ Future<void> _runToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
-    tableData: bigqueryApi.tabledata,
+    tableData: bigqueryApi?.tabledata,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -216,7 +214,6 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication) async {
-  // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
   if (
         (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
         (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
@@ -261,30 +258,30 @@ Future<void> _runTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), tableData: bigqueryApi?.tabledata);
   // Only packages/flutter/test/widgets/widget_inspector_test.dart really
   // needs to be run with --track-widget-creation but it is nice to run
   // all of the tests in package:flutter with the flag to ensure that
   // the Dart kernel transformer triggered by the flag does not break anything.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation'], tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi?.tabledata);
   // Regression test to ensure that code outside of package:flutter can run
   // with --track-widget-creation.
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -340,6 +337,69 @@ Future<void> _pubRunTest(
   await _processTestOutput(testOutput, tableData);
 }
 
+enum CiProviders {
+  cirrus,
+  luci,
+}
+
+CiProviders _getCiProvider() {
+  if (Platform.environment['CIRRUS_CI'] == 'true') {
+    return CiProviders.cirrus;
+  }
+  if (Platform.environment['LUCI_CONTEXT'] != null) {
+    return CiProviders.luci;
+  }
+}
+
+String _getCiProviderName() {
+  switch(_getCiProvider()) {
+    case CiProviders.cirrus:
+      return 'cirrusci';
+    case CiProviders.luci:
+      return 'luci';
+  }
+  return 'unknown';
+}
+
+int _getPrNumber() {
+  switch(_getCiProvider()) {
+    case CiProviders.cirrus:
+      return int.tryParse(Platform.environment['CIRRUS_PR']);
+    case CiProviders.luci:
+      return -1; // LUCI doesn't know about this.
+  }
+  return -1;
+}
+
+List<String> _getAuthors() {
+  switch(_getCiProvider()) {
+    case CiProviders.cirrus:
+      return <String>['unknown']; // TODO(dnfield): https://github.com/cirruslabs/cirrus-ci-docs/issues/166
+    case CiProviders.luci:
+      return <String>['unknown']; // TODO(dnfield): Figure out how to get this on LUCI.
+  }
+}
+
+String _getCiUrl() {
+  switch(_getCiProvider()) {
+    case CiProviders.cirrus:
+      return 'https://cirrus-ci.com/task/${Platform.environment['CIRRUS_TASK_ID']}';
+    case CiProviders.luci:
+      return 'https://ci.chromium.org/p/flutter/g/framework/console'; // TODO(dnfield): can we get a direct link to the actual build?
+  }
+  return '';
+}
+
+String _getGitHash() {
+  switch(_getCiProvider()) {
+    case CiProviders.cirrus:
+      return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
+    case CiProviders.luci:
+      return 'unknown'; // TODO(dnfield): Set this in the env for LUCI.
+  }
+  return '';
+}
+
 Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceApi tableData) async {
   final FlutterCompactFormatter formatter = FlutterCompactFormatter();
   await testOutput.forEach(formatter.processRawOutput);
@@ -352,8 +412,8 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
       bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
         'json': <String, dynamic>{
           'source': <String, dynamic>{
-            'provider': 'dnfield',
-            'url': 'http://localhost',
+            'provider': _getCiProviderName(),
+            'url': _getCiUrl(),
             'platform': <String, dynamic>{
               'os': Platform.operatingSystem,
               'version': Platform.operatingSystemVersion,
@@ -367,9 +427,9 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
             'column': result.column,
           },
           'git': <String, dynamic>{
-            'author': <String>['dnfield'],
-            'pull_request': -1,
-            'commit': 'deadbeef',
+            'author': _getAuthors(),
+            'pull_request': _getPrNumber(),
+            'commit': _getGitHash(),
             'organization': 'flutter',
             'repository': 'flutter',
           },
@@ -383,9 +443,12 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     ),
     growable: false,
   );
-  print(request.rows.length);
-  var response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
-  print(response.toJson());
+  final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
+  if (response.insertErrors != null && response.insertErrors.isNotEmpty) {
+    print('${red}BigQuery insert errors:');
+    print(response.toJson());
+    print(reset);
+  }
 }
 
 class EvalResult {

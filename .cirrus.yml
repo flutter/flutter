@@ -49,6 +49,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -57,6 +58,7 @@ task:
         memory: 12G
     - name: tool_tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tool_tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -119,9 +121,11 @@ task:
   matrix:
     - name: tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tests
     - name: tool_tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tool_tests
     - name: build_tests-windows
       env:
@@ -196,9 +200,11 @@ task:
   matrix:
     - name: tests-macos
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tests
     - name: tool_tests-macos
       env:
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
         SHARD: tool_tests
     - name: build_tests-macos
       env:
