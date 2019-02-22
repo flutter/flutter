@@ -187,12 +187,14 @@ static void PerformInitializationTasks(const blink::Settings& settings) {
       FML_DLOG(INFO) << "Skia deterministic rendering is enabled.";
     }
 
-    if (settings.icu_data_path.size() != 0) {
-      fml::icu::InitializeICU(settings.icu_data_path);
-    } else if (settings.icu_mapper) {
-      fml::icu::InitializeICUFromMapping(settings.icu_mapper());
-    } else {
-      FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
+    if (settings.icu_initialization_required) {
+      if (settings.icu_data_path.size() != 0) {
+        fml::icu::InitializeICU(settings.icu_data_path);
+      } else if (settings.icu_mapper) {
+        fml::icu::InitializeICUFromMapping(settings.icu_mapper());
+      } else {
+        FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
+      }
     }
   });
 }
