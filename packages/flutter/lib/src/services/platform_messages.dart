@@ -65,7 +65,10 @@ class BinaryMessages {
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   static Future<void> handlePlatformMessage(
-        String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
+    String channel,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) async {
     ByteData response;
     try {
       final _MessageHandler handler = _handlers[channel];

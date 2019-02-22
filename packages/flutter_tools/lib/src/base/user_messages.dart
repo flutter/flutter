@@ -243,8 +243,8 @@ class UserMessages {
       'Warning: this bug report contains local paths, device identifiers, and log snippets.';
   String get runnerNoRecordTo => 'record-to location not specified';
   String get runnerNoReplayFrom => 'replay-from location not specified';
-  String runnerNoEngineBuildDir(String enginePackageName, String engineEnvVar) =>
-      'Unable to detect local Flutter engine build directory.\n'
+  String runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine src directory.\n'
       'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
       'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
       'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';

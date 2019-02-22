@@ -389,7 +389,7 @@ class VerboseLogger extends Logger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace stackTrace]) {
+  void _emit(_LogType type, String message, [ StackTrace stackTrace ]) {
     if (message.trim().isEmpty)
       return;
 

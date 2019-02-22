@@ -32,8 +32,11 @@ final Logger _log = Logger('FuchsiaRemoteConnection');
 /// `interface` and `configFile`. The config file is used primarily for the
 /// default SSH port forwarding configuration.
 typedef PortForwardingFunction = Future<PortForwarder> Function(
-    String address, int remotePort,
-    [String interface, String configFile]);
+  String address,
+  int remotePort, [
+  String interface,
+  String configFile,
+]);
 
 /// The function for forwarding the local machine's ports to a remote Fuchsia
 /// device.
@@ -128,8 +131,7 @@ class FuchsiaRemoteConnection {
 
   /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
   /// [SshCommandRunner] instance.
-  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
-      SshCommandRunner commandRunner) async {
+  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(SshCommandRunner commandRunner) async {
     final FuchsiaRemoteConnection connection = FuchsiaRemoteConnection._(
         isIpV6Address(commandRunner.address), commandRunner);
     await connection._forwardLocalPortsToDeviceServicePorts();
@@ -474,7 +476,7 @@ class FuchsiaRemoteConnection {
   /// Runs a dummy heartbeat command on all Dart VM instances.
   ///
   /// Removes any failing ports from the cache.
-  Future<void> _checkPorts([bool queueEvents = true]) async {
+  Future<void> _checkPorts([ bool queueEvents = true ]) async {
     // Filters out stale ports after connecting. Ignores results.
     await _invokeForAllVms<Map<String, dynamic>>(
       (DartVm vmService) async {
@@ -591,8 +593,12 @@ class _SshPortForwarder implements PortForwarder {
 
   /// Starts SSH forwarding through a subprocess, and returns an instance of
   /// [_SshPortForwarder].
-  static Future<_SshPortForwarder> start(String address, int remotePort,
-      [String interface, String sshConfigPath]) async {
+  static Future<_SshPortForwarder> start(
+    String address,
+    int remotePort, [
+    String interface,
+    String sshConfigPath,
+  ]) async {
     final bool isIpV6 = isIpV6Address(address);
     final ServerSocket localSocket = await _createLocalSocket();
     if (localSocket == null || localSocket.port == 0) {
