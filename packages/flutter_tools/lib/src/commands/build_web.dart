@@ -7,7 +7,6 @@ import 'dart:async';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show ExitStatus, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
