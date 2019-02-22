@@ -437,7 +437,6 @@ class DevFS {
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
-    Set<String> fileFilter,
     @required ResidentCompiler generator,
     String dillOutputPath,
     @required bool trackWidgetCreation,

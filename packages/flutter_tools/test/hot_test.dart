@@ -105,7 +105,6 @@ void main() {
       firstBuildTime: anyNamed('firstBuildTime'),
       bundleFirstUpload: anyNamed('bundleFirstUpload'),
       bundleDirty: anyNamed('bundleDirty'),
-      fileFilter: anyNamed('fileFilter'),
       generator: anyNamed('generator'),
       fullRestart: anyNamed('fullRestart'),
       dillOutputPath: anyNamed('dillOutputPath'),
@@ -121,18 +120,6 @@ void main() {
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
-    });
-
-    testUsingContext('no setup', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(true);
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
-      ];
-      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, false);
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('Does not hot restart when device does not support it', () async {
