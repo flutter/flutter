@@ -24,6 +24,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -325,6 +326,12 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
     icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
+  }
+
+  if (SAFE_ACCESS(args, persistent_cache_path, nullptr) != nullptr) {
+    std::string persistent_cache_path =
+        SAFE_ACCESS(args, persistent_cache_path, nullptr);
+    shell::PersistentCache::SetCacheDirectoryPath(persistent_cache_path);
   }
 
   fml::CommandLine command_line;

@@ -17,6 +17,8 @@
 
 namespace shell {
 
+std::string PersistentCache::cache_base_path_;
+
 static std::string SkKeyToFilePath(const SkData& data) {
   if (data.data() == nullptr || data.size() == 0) {
     return "";
@@ -40,16 +42,26 @@ PersistentCache* PersistentCache::GetCacheForProcess() {
   return gPersistentCache.get();
 }
 
-PersistentCache::PersistentCache()
-    : cache_directory_(std::make_shared<fml::UniqueFD>(
-          CreateDirectory(fml::paths::GetCachesDirectory(),
-                          {
-                              "flutter_engine",                  //
-                              blink::GetFlutterEngineVersion(),  //
-                              "skia",                            //
-                              blink::GetSkiaVersion()            //
-                          },
-                          fml::FilePermission::kReadWrite))) {
+void PersistentCache::SetCacheDirectoryPath(std::string path) {
+  cache_base_path_ = path;
+}
+
+PersistentCache::PersistentCache() {
+  fml::UniqueFD cache_base_dir;
+  if (cache_base_path_.length()) {
+    cache_base_dir = fml::OpenDirectory(cache_base_path_.c_str(), false,
+                                        fml::FilePermission::kRead);
+  } else {
+    cache_base_dir = fml::paths::GetCachesDirectory();
+  }
+
+  if (cache_base_dir.is_valid()) {
+    cache_directory_ = std::make_shared<fml::UniqueFD>(
+        CreateDirectory(cache_base_dir,
+                        {"flutter_engine", blink::GetFlutterEngineVersion(),
+                         "skia", blink::GetSkiaVersion()},
+                        fml::FilePermission::kReadWrite));
+  }
   if (!IsValid()) {
     FML_LOG(WARNING) << "Could not acquire the persistent cache directory. "
                         "Caching of GPU resources on disk is disabled.";
