@@ -365,6 +365,15 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
+  if (expectFailure) {
+    return runCommand(flutter, args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: true,
+      printOutput: printOutput,
+      skip: skip,
+      timeout: timeout,
+    );
+  }
   args.add('--machine');
   final Stream<String> testOutput = runAndGetStdout(flutter, args,
     workingDirectory: workingDirectory,
