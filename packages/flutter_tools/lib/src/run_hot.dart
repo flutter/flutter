@@ -924,7 +924,7 @@ class HotRunner extends ResidentRunner {
 class ProjectWatcher {
   ProjectWatcher(String projectDirectory, String packagesPath) {
     final String projectPath = projectDirectory ?? fs.currentDirectory.path;
-    if (!fs.directory(projectPath).existsSync() || !fs.directory(packagesPath).existsSync()) {
+    if (!fs.directory(projectPath).existsSync() || !fs.file(packagesPath).existsSync()) {
       return;
     }
     _watches.add(DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path));
