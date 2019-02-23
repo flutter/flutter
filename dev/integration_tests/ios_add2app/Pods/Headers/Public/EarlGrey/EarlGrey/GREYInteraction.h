@@ -1,1 +1,0 @@
-../../../../EarlGrey/EarlGrey/EarlGrey.framework/Headers/GREYInteraction.h
