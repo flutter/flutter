@@ -371,13 +371,10 @@ int _getPrNumber() {
   return -1;
 }
 
-List<String> _getAuthors() {
-  switch(_getCiProvider()) {
-    case CiProviders.cirrus:
-      return <String>['unknown']; // TODO(dnfield): https://github.com/cirruslabs/cirrus-ci-docs/issues/166
-    case CiProviders.luci:
-      return <String>['unknown']; // TODO(dnfield): Figure out how to get this on LUCI.
-  }
+Future<List<String>> _getAuthors() async {
+  final String exe = Platform.isWindows ? '.exe' : '';
+  final String author = await runAndGetStdout('git$exe', <String>['log', _getGitHash(), '--pretty=format"%an <%ae>"']).first;
+  return <String>[author];
 }
 
 String _getCiUrl() {
@@ -407,6 +404,7 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     return;
   }
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
+  final List<String> authors = await _getAuthors();
   request.rows = List<bq.TableDataInsertAllRequestRows>.from(
     formatter.tests.map<bq.TableDataInsertAllRequestRows>((TestResult result) =>
       bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
@@ -427,7 +425,7 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
             'column': result.column,
           },
           'git': <String, dynamic>{
-            'author': _getAuthors(),
+            'author': authors,
             'pull_request': _getPrNumber(),
             'commit': _getGitHash(),
             'organization': 'flutter',
