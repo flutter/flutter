@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:googleapis/bigquery/v2.dart' as bq;
-import 'package:googleapis/cloudkms/v1.dart' as kms;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
