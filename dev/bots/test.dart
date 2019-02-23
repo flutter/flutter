@@ -349,6 +349,7 @@ CiProviders _getCiProvider() {
   if (Platform.environment['LUCI_CONTEXT'] != null) {
     return CiProviders.luci;
   }
+  return null;
 }
 
 String _getCiProviderName() {
