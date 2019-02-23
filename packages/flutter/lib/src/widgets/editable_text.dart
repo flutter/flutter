@@ -300,7 +300,7 @@ class EditableText extends StatefulWidget {
   ///
   /// To disable strut-based vertical alignment and allow dynamic vertical
   /// layout based on the glyphs typed, use [StrutStyle.disabled].
-  /// 
+  ///
   /// Flutter's strut is based on [typesetting strut](https://en.wikipedia.org/wiki/Strut_(typesetting))
   /// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
   /// {@endtemplate}
