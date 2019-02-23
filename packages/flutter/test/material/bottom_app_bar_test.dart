@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -72,12 +74,14 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+      skip: !Platform.isLinux,
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+      skip: !Platform.isLinux,
     );
   });
 
