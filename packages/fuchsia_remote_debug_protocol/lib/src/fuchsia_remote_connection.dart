@@ -526,14 +526,14 @@ class FuchsiaRemoteConnection {
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
     final List<String> portPaths = await _sshCommandRunner
-        .run('/system/bin/find /hub -name vmservice-port');
+        .run('/bin/find /hub -name vmservice-port');
     final List<int> ports = <int>[];
     for (String path in portPaths) {
       if (path == '') {
         continue;
       }
       final List<String> lsOutput =
-          await _sshCommandRunner.run('/system/bin/ls $path');
+          await _sshCommandRunner.run('/bin/ls $path');
       for (String line in lsOutput) {
         if (line == '') {
           continue;
