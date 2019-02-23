@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'text_style.dart';
 
 /// Defines the strut, which sets the minimum height a line can be
 /// relative to the baseline. Strut applies to all lines in the pararaph.
@@ -12,7 +13,8 @@ import 'basic_types.dart';
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
 /// if a zero width space was included at the beginning of each line in the
 /// paragraph. This imaginary space is 'shaped' according the properties defined
-/// in this class.
+/// in this class. Flutter's strut is based on [typesetting strut](https://en.wikipedia.org/wiki/Strut_(typesetting))
+/// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
 ///
 /// No lines may be shorter than the strut. The ascent and descent of the strut
 /// are calculated, and any laid out text that has a shorter ascent or descent than
@@ -263,6 +265,8 @@ class StrutStyle extends Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be zero or positive.
   const StrutStyle({
     String fontFamily,
     List<String> fontFamilyFallback,
@@ -280,6 +284,56 @@ class StrutStyle extends Diagnosticable {
        assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
+
+  /// Builds a StrutStyle that contains values of the equivalent properties in
+  /// the provided [textStyle].
+  ///
+  /// The [textStyle] parameter must not be null.
+  ///
+  /// The named parameters override the [textStyle]'s argument's properties.
+  /// Since TextStyle does not contain [leading] or [forceStrutHeight], these values
+  /// will take on default values (null and false) unless otherwise specified.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be zero or positive.
+  ///
+  /// When [textStyle] has a package and a new [package] is also specified, the entire
+  /// font family fallback list should be redefined since the [textStyle]'s package data
+  /// is inherited by being prepended onto the font family names. If
+  /// [fontFamilyFallback] is meant to be empty, pass an empty list instead of null.
+  /// This prevents the previous package name from being prepended twice.
+  StrutStyle.fromTextStyle(TextStyle textStyle, {
+    String fontFamily,
+    List<String> fontFamilyFallback,
+    double fontSize,
+    double height,
+    this.leading, // TextStyle does not have an equivalent (yet).
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    this.forceStrutHeight,
+    String debugLabel,
+    String package,
+  }) : assert(textStyle != null),
+       assert(fontSize == null || fontSize > 0),
+       assert(leading == null || leading >= 0),
+       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
+       _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
+       height = height ?? textStyle.height,
+       fontSize = fontSize ?? textStyle.fontSize,
+       fontWeight = fontWeight ?? textStyle.fontWeight,
+       fontStyle = fontStyle ?? textStyle.fontStyle,
+       debugLabel = debugLabel ?? textStyle.debugLabel,
+       _package = package; // the textStyle._package data is embedded in the fontFamily names,
+                           // so we no longer need it.
+
+  /// A [StrutStyle] that will have no impact on the text layout.
+  ///
+  /// Equivalent to having no strut at all. All lines will be laid out according to
+  /// the properties defined in [TextStyle].
+  static const StrutStyle disabled = StrutStyle(
+    height: 0,
+    leading: 0,
+  );
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
@@ -413,6 +467,32 @@ class StrutStyle extends Diagnosticable {
     return RenderComparison.identical;
   }
 
+  /// Returns a new strut style that inherits its null values from corresponding
+  /// properties in the [other] [TextStyle].
+  ///
+  /// The "missing" properties of the this strut style are _filled_ by the properties
+  /// of the provided [TextStyle]. This is possible because [StrutStyle] shares many of
+  /// the same basic properties as [TextStyle].
+  ///
+  /// If the given text style is null, returns this strut style.
+  StrutStyle inheritFromTextStyle(TextStyle other) {
+    if (other == null)
+      return this;
+
+    return StrutStyle(
+      fontFamily: fontFamily ?? other.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? other.fontFamilyFallback,
+      fontSize: fontSize ?? other.fontSize,
+      height: height ?? other.height,
+      leading: leading, // No equivalent property in TextStyle yet.
+      fontWeight: fontWeight ?? other.fontWeight,
+      fontStyle: fontStyle ?? other.fontStyle,
+      forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
+      debugLabel: debugLabel ?? other.debugLabel,
+      // Package is embedded within the getters for fontFamilyFallback.
+    );
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -442,6 +522,9 @@ class StrutStyle extends Diagnosticable {
     );
   }
 
+  @override
+  String toStringShort() => '$runtimeType';
+
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
@@ -454,7 +537,7 @@ class StrutStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      weightDescription = '${fontWeight.index + 1}00';
+      weightDescription = 'w${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

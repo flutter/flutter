@@ -270,7 +270,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.png'),
+      matchesGoldenFile('text_golden.Strut.1.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -299,7 +299,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.png'),
+      matchesGoldenFile('text_golden.Strut.2.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -351,7 +351,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.png'),
+      matchesGoldenFile('text_golden.Strut.3.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -387,7 +387,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.png'),
+      matchesGoldenFile('text_golden.Strut.4.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -439,7 +439,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.png'),
+      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.

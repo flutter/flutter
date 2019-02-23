@@ -140,6 +140,7 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
+    StrutStyle strutStyle,
     Color selectionColor,
     double textScaleFactor = 1.0,
     TextSelection selection,
@@ -174,6 +175,7 @@ class RenderEditable extends RenderBox {
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          locale: locale,
+         strutStyle: strutStyle,
        ),
        _cursorColor = cursorColor,
        _backgroundCursorColor = backgroundCursorColor,
@@ -590,6 +592,16 @@ class RenderEditable extends RenderBox {
     if (_textPainter.locale == value)
       return;
     _textPainter.locale = value;
+    markNeedsTextLayout();
+  }
+
+  /// The [StrutStyle] used by the renderer's internal [TextPainter] to
+  /// determine the strut to use.
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
     markNeedsTextLayout();
   }
 
