@@ -126,7 +126,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoTimerPicker(
-                controller: CupertinoTimerPickerController(initialTimerDuration: timer),
+                controller: CupertinoTimerPickerController(desiredTimerDuration: timer),
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
                 },
