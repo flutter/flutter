@@ -124,6 +124,7 @@ class TextField extends StatefulWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
+    this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.autofocus = false,
@@ -230,6 +231,9 @@ class TextField extends StatefulWidget {
   ///
   /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
+
+  /// {@macro flutter.widgets.editableText.strutStyle}
+  final StrutStyle strutStyle;
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
@@ -763,6 +767,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         textInputAction: widget.textInputAction,
         textCapitalization: widget.textCapitalization,
         style: style,
+        strutStyle: widget.strutStyle,
         textAlign: widget.textAlign,
         textDirection: widget.textDirection,
         autofocus: widget.autofocus,
