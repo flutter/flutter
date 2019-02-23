@@ -23,6 +23,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
+  'add2app_test': _runAdd2AppTest,
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
@@ -230,6 +231,21 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _runAdd2AppTest() async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running Add2App iOS integration tests...');
+  final String add2AppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
+  await runCommand('./build_and_test.sh',
+    <String>[],
+    workingDirectory: add2AppDir,
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
