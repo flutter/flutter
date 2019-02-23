@@ -46,14 +46,6 @@ TaskFunction createCullOpacityPerfTest() {
   ).run;
 }
 
-TaskFunction createCubicBezierPerfTest() {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
-    'cubic_bezier_perf',
-  ).run;
-}
-
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
