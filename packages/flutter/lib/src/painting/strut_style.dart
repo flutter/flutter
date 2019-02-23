@@ -331,8 +331,8 @@ class StrutStyle extends Diagnosticable {
   /// Equivalent to having no strut at all. All lines will be laid out according to
   /// the properties defined in [TextStyle].
   static const StrutStyle disabled = StrutStyle(
-    height: 0,
-    leading: 0,
+    height: 0.0,
+    leading: 0.0,
   );
 
   /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
