@@ -338,6 +338,49 @@ void main() {
     expect(tester.getSize(fabFinder).width, 168);
   });
 
+  testWidgets('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
+    final Finder fabFinder = find.byType(FloatingActionButton);
+
+    FloatingActionButton getFabWidget() {
+      return tester.widget<FloatingActionButton>(fabFinder);
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const SizedBox(
+              width: 100.0,
+              child: Text('label'),
+            ),
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(getFabWidget().isExtended, true);
+    expect(getFabWidget().shape, const StadiumBorder());
+    expect(find.text('label'), findsOneWidget);
+    expect(find.byType(Icon), findsNothing);
+
+    // Verify that the widget's height is 48 and that its internal
+    /// horizontal layout is: 20 label 20
+    expect(tester.getSize(fabFinder).height, 48.0);
+
+    final double fabLeft = tester.getTopLeft(fabFinder).dx;
+    final double fabRight = tester.getTopRight(fabFinder).dx;
+    final double labelLeft = tester.getTopLeft(find.text('label')).dx;
+    final double labelRight = tester.getTopRight(find.text('label')).dx;
+    expect(labelLeft - fabLeft, 20.0);
+    expect(fabRight - labelRight, 20.0);
+
+    // The overall width of the button is:
+    // 140 = 20 + 100(label) + 20
+    expect(tester.getSize(find.text('label')).width, 100.0);
+    expect(tester.getSize(fabFinder).width, 140);
+  });
+
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
     BuildContext theContext;
     await tester.pumpWidget(

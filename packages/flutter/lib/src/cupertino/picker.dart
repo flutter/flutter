@@ -42,6 +42,10 @@ class CupertinoPicker extends StatefulWidget {
   /// than using [Colors.transparent]. Also, if it has transparency, no gradient
   /// effect will be rendered.
   ///
+  /// The [scrollController] argument can be used to specify a custom
+  /// [FixedExtentScrollController] for programmatically reading or changing
+  /// the current picker index or for selecting an initial index value.
+  ///
   /// The [looping] argument decides whether the child list loops and can be
   /// scrolled infinitely.  If set to true, scrolling past the end of the list
   /// will loop the list back to the beginning.  If set to false, the list will
