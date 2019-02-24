@@ -152,7 +152,7 @@ class FruitPage extends StatelessWidget {
                             style: textTheme.display3,
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          const Text(
                             'Connor Eghan',
                             style: TextStyle(
                               fontFamily: 'Merriweather',
@@ -224,7 +224,7 @@ TextTheme _buildTextTheme(TextTheme base) {
       height: 1.4,
       letterSpacing: .25,
     ),
-    overline: TextStyle(
+    overline: const TextStyle(
       fontFamily: 'LibreFranklin',
       fontSize: 10,
       fontWeight: FontWeight.w700,
