@@ -182,6 +182,8 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
+    // Wait for filesystem watchers to be ready.
+    await watcher.onReady;
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -321,6 +323,8 @@ class HotRunner extends ResidentRunner {
         return UpdateFSReport(success: false);
     }
 
+    final List<String> invalidatedFiles = watcher.invalidatedFiles.toList();
+    watcher.invalidatedFiles.clear();
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -333,10 +337,9 @@ class HotRunner extends ResidentRunner {
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
-        invalidatedFiles: watcher.invalidatedFiles,
+        invalidatedFiles: invalidatedFiles,
       ));
     }
-    watcher.invalidatedFiles.clear();
     return results;
   }
 
@@ -927,7 +930,10 @@ class ProjectWatcher {
     if (!fs.directory(projectPath).existsSync() || !fs.file(packagesPath).existsSync()) {
       return;
     }
-    _watches.add(DirectoryWatcher(projectDirectory ?? fs.currentDirectory.path));
+    final List<Future<void>> _watchersReady = <Future<void>>[];
+    final Watcher watcher = DirectoryWatcher(projectPath);
+    watcher.events.listen(_onWatchEvent);
+    _watchersReady.add(watcher.ready);
     final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
     for (String dependency in packageMap.keys) {
       final String path = packageMap[dependency].path;
@@ -940,22 +946,28 @@ class ProjectWatcher {
       }
       final Watcher watcher = DirectoryWatcher(packagePath);
       watcher.events.listen(_onWatchEvent);
-      _watches.add(watcher);
+      _watchersReady.add(watcher.ready);
     }
+    _onReady = Future.wait(_watchersReady);
   }
+
+  /// Called when all listeners have finished initializing.
+  Future<void> get onReady => _onReady;
+  Future<void> _onReady;
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
   // because that actually switches the directory and requires a corresponding
   // update to .packages
   static const String pubCachePath = '.pub-cache';
 
-  final List<Watcher> _watches = <Watcher>[];
   final List<String> invalidatedFiles = <String>[];
 
   void _onWatchEvent(WatchEvent watchEvent) {
-    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.endsWith('dart')) {
+    printTrace('WATCH: ${watchEvent.path}|${watchEvent.type}');
+    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.trimRight().endsWith('dart')) {
       return;
     }
+    printTrace('Added: ${watchEvent.path}');
     invalidatedFiles.add(watchEvent.path);
   }
 }
