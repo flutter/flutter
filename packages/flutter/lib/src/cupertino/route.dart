@@ -369,8 +369,8 @@ class CupertinoPageTransition extends StatelessWidget {
        ).drive(_kRightMiddleTween),
        _secondaryPositionAnimation = CurvedAnimation(
          parent: secondaryRouteAnimation,
-         curve: Curves.linearToEaseOut,
-         reverseCurve: Curves.easeInToLinear,
+         curve: Curves.linear,
+         reverseCurve: Curves.linear,
        ).drive(_kMiddleLeftTween),
        _primaryShadowAnimation = CurvedAnimation(
          parent: primaryRouteAnimation,
