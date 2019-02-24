@@ -120,6 +120,7 @@ class Hero extends StatefulWidget {
   const Hero({
     Key key,
     @required this.tag,
+    this.groupTag,
     this.createRectTween,
     this.flightShuttleBuilder,
     this.placeholderBuilder,
@@ -134,6 +135,13 @@ class Hero extends StatefulWidget {
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
   /// a hero animation will be triggered.
   final Object tag;
+
+  /// The group that this hero belongs to, which determines when this hero will
+  /// be animated. See [HeroController.groupTag].
+  ///
+  /// If this property is null, the default, then this hero will be animated by
+  /// the [HeroController] created by [MaterialApp].
+  final Object groupTag;
 
   /// Defines how the destination hero's bounds change as it flies from the starting
   /// route to the destination route.
@@ -193,8 +201,12 @@ class Hero extends StatefulWidget {
   /// Defaults to false and cannot be null.
   final bool transitionOnUserGestures;
 
-  // Returns a map of all of the heroes in context, indexed by hero tag.
-  static Map<Object, _HeroState> _allHeroesFor(BuildContext context, bool isUserGestureTransition) {
+  // Returns a map of all of the heroes in context having groupTag, indexed by hero tag.
+  static Map<Object, _HeroState> _allHeroesFor(
+      BuildContext context,
+      bool isUserGestureTransition,
+      Object groupTag,
+  ) {
     assert(context != null);
     assert(isUserGestureTransition != null);
     final Map<Object, _HeroState> result = <Object, _HeroState>{};
@@ -203,23 +215,26 @@ class Hero extends StatefulWidget {
         final StatefulElement hero = element;
         final Hero heroWidget = element.widget;
         if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
-          final Object tag = heroWidget.tag;
-          assert(tag != null);
-          assert(() {
-            if (result.containsKey(tag)) {
-              throw FlutterError(
-                'There are multiple heroes that share the same tag within a subtree.\n'
-                'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
-                'each Hero must have a unique non-null tag.\n'
-                'In this case, multiple heroes had the following tag: $tag\n'
-                'Here is the subtree for one of the offending heroes:\n'
-                '${element.toStringDeep(prefixLineOne: "# ")}'
-              );
-            }
-            return true;
-          }());
-          final _HeroState heroState = hero.state;
-          result[tag] = heroState;
+          if (heroWidget.groupTag == groupTag) {
+            final Object tag = heroWidget.tag;
+            assert(tag != null);
+            assert(() {
+              if (result.containsKey(tag)) {
+                throw FlutterError(
+                    'There are multiple heroes that share the same tag within a subtree.\n'
+                        'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
+                        'each Hero must have a unique non-null tag.\n'
+                        'In this case, multiple heroes had the following tag: $tag\n'
+                        'When using nested Navigators, specify a different groupTag for each HeroController.\n'
+                        'Here is the subtree for one of the offending heroes:\n'
+                        '${element.toStringDeep(prefixLineOne: "# ")}'
+                );
+              }
+              return true;
+            }());
+            final _HeroState heroState = hero.state;
+            result[tag] = heroState;
+          }
         }
       }
       element.visitChildren(visitor);
@@ -553,7 +568,16 @@ class HeroController extends NavigatorObserver {
   ///
   /// The [createRectTween] argument is optional. If null, the controller uses a
   /// linear [Tween<Rect>].
-  HeroController({ this.createRectTween });
+  HeroController({ this.groupTag, this.createRectTween });
+
+  /// Only [Hero]s with a [Hero.groupTag] identical this [groupTag] will be
+  /// considered for hero animations by this controller.
+  ///
+  /// This is useful with nested [Navigator]s. To prevent the outer [Navigator]
+  /// from animating [Hero]s that are meant to be animated by the inner
+  /// [Navigator], the inner [Navigator]'s [HeroController] and those [Hero]s
+  /// should be given a unique [groupTag].
+  Object groupTag;
 
   /// Used to create [RectTween]s that interpolate the position of heroes in flight.
   ///
@@ -652,8 +676,8 @@ class HeroController extends NavigatorObserver {
     final Rect navigatorRect = _globalBoundingBoxFor(navigator.context);
 
     // At this point the toHeroes may have been built and laid out for the first time.
-    final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext, isUserGestureTransition);
-    final Map<Object, _HeroState> toHeroes = Hero._allHeroesFor(to.subtreeContext, isUserGestureTransition);
+    final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext, isUserGestureTransition, groupTag);
+    final Map<Object, _HeroState> toHeroes = Hero._allHeroesFor(to.subtreeContext, isUserGestureTransition, groupTag);
 
     // If the `to` route was offstage, then we're implicitly restoring its
     // animation value back to what it was before it was "moved" offstage.
