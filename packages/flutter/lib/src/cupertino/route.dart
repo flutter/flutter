@@ -476,7 +476,9 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   @override
   void initState() {
     super.initState();
-    _recognizer = HorizontalDragGestureRecognizer(debugOwner: this)
+    // Use a slop larger than the default to give gesture detectors (e.g. a slider)
+    // below our Listener precedence.
+    _recognizer = HorizontalDragGestureRecognizer(slop: kPagingTouchSlop, debugOwner: this)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd

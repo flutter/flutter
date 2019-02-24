@@ -59,11 +59,10 @@ const Duration kZoomControlsTimeout = Duration(milliseconds: 3000);
 const double kTouchSlop = 18.0; // Logical pixels
 
 /// The distance a touch has to travel for the framework to be confident that
-/// the gesture is a paging gesture. (Currently not used, because paging uses a
-/// regular drag gesture, which uses kTouchSlop.)
-// TODO(ianh): Create variants of HorizontalDragGestureRecognizer et al for
-// paging, which use this constant.
-const double kPagingTouchSlop = kTouchSlop * 2.0; // Logical pixels
+/// the gesture is a paging gesture.
+// This value is larger than kPanSlop to give regular gesture detectors on
+// a page precedence over paging.
+const double kPagingTouchSlop = kTouchSlop * 3.0; // Logical pixels
 
 /// The distance a touch has to travel for the framework to be confident that
 /// the gesture is a panning gesture.

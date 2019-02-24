@@ -296,7 +296,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
-  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  VerticalDragGestureRecognizer({ this.slop = kTouchSlop, Object debugOwner })
+      : super(debugOwner: debugOwner);
+
+  /// The minimum distance over which the pointer must have been dragged for
+  /// being considered by this recognizer.
+  final double slop;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -306,7 +311,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dy.abs() > kTouchSlop;
+  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dy.abs() > slop;
 
   @override
   Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
@@ -330,7 +335,12 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({ this.slop = kTouchSlop, Object debugOwner })
+      : super(debugOwner: debugOwner);
+
+  /// The minimum distance over which the pointer must have been dragged for
+  /// being considered by this recognizer.
+  final double slop;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -340,7 +350,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dx.abs() > kTouchSlop;
+  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dx.abs() > slop;
 
   @override
   Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
