@@ -387,13 +387,13 @@ int _getPrNumber() {
   return -1;
 }
 
-Future<List<String>> _getAuthors() async {
+Future<String> _getAuthors() async {
   final String exe = Platform.isWindows ? '.exe' : '';
   final String author = await runAndGetStdout(
-    'git$exe', <String>['log', _getGitHash(), '--pretty="format:%an <%ae>"'],
+    'git$exe', <String>['log', _getGitHash(), '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,
   ).first;
-  return <String>[author];
+  return author;
 }
 
 String _getCiUrl() {
@@ -423,7 +423,7 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     return;
   }
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
-  final List<String> authors = await _getAuthors();
+  final String authors = await _getAuthors();
   request.rows = List<bq.TableDataInsertAllRequestRows>.from(
     formatter.tests.map<bq.TableDataInsertAllRequestRows>((TestResult result) =>
       bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
@@ -460,7 +460,7 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     ),
     growable: false,
   );
-  final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
+  final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'ci');
   if (response.insertErrors != null && response.insertErrors.isNotEmpty) {
     print('${red}BigQuery insert errors:');
     print(response.toJson());
