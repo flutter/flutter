@@ -856,10 +856,12 @@ class _RenderDecoration extends RenderBox {
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
     const double SUBTEXT_GAP = 8.0;
-    // TODO(justinmc): Do I ever need to use label.size.height instead?
+    // TODO(justinmc): When to use decoration.floatingLabelHeight vs.
+    // label.size.height? Or always floating?
     final double labelHeight = label == null
       ? 0
       : decoration.floatingLabelHeight;
+    //print('justin label $labelHeight ${labelHeight - boxToBaseline[label]}');
     final double topHeight = decoration.border.isOutline
         ? math.max(labelHeight - boxToBaseline[label], 0)
         : labelHeight;
@@ -880,35 +882,48 @@ class _RenderDecoration extends RenderBox {
       )),
     );
 
-    final double inputHeight = input?.size?.height == null ? 0 : input.size.height;
+    // The field can be occupied by a hint or by the input itself
+    final double hintHeight = hint == null ? 0 : hint.size.height;
+    final double inputDirectHeight = input?.size?.height == null ? 0 : input.size.height;
+    final double inputHeight = math.max(hintHeight, inputDirectHeight);
+    final double inputInternalBaseline = math.max(
+      boxToBaseline[input],
+      boxToBaseline[hint],
+    );
 
     // The height of the visible input container box. What would be outlined.
-    // TODO(justinmc): Consider prefixIcon and suffixIcon too. Then make sure
-    // that the numbers match the original _layout.
     final double prefixHeight = prefix == null ? 0 : prefix.size.height;
-    final double suffixHeight = prefix == null ? 0 : suffix.size.height;
+    final double suffixHeight = suffix == null ? 0 : suffix.size.height;
     final double fixHeight = math.max(
       boxToBaseline[prefix],
       boxToBaseline[suffix],
     );
-    final double fixAboveInput = math.max(0, fixHeight - boxToBaseline[input]);
+    final double fixAboveInput = math.max(0, fixHeight - inputInternalBaseline);
     final double fixBelowBaseline = math.max(
       prefixHeight - boxToBaseline[prefix],
       suffixHeight - boxToBaseline[suffix],
     );
     final double fixBelowInput = math.max(
       0,
-      fixBelowBaseline - (inputHeight - boxToBaseline[input]),
+      fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
-    final double contentHeight = topHeight
+
+    final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
+    final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
+    final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
+    final double contentHeight = math.max(
+      fixIconHeight,
+      topHeight
       + contentPadding.top
       + fixAboveInput
       + inputHeight
       + fixBelowInput
-      + contentPadding.bottom;
+      + contentPadding.bottom,
+    );
     final double containerHeight = expands
       ? boxConstraints.maxHeight - bottomHeight
       : math.min(contentHeight, boxConstraints.maxHeight);
+    //print('justin contentHeight $topHeight + ${contentPadding.top} + $fixAboveInput + $inputHeight + $fixBelowInput + ${contentPadding.bottom} or ${boxConstraints.maxHeight}');
 
     // Always position the prefix/suffix in the same place (baseline).
     final double overflow = math.max(0, contentHeight - boxConstraints.maxHeight);
@@ -928,15 +943,18 @@ class _RenderDecoration extends RenderBox {
       (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
       */
     /*
-    final double outlineBaseline = boxToBaseline[input] +
+    final double outlineBaseline = inputInternalBaseline +
       (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
       */
     // The baselines that will be used to draw the actual input text content.
     final double inputBaseline = contentPadding.top
       + topHeight
-      + boxToBaseline[input]
+      + inputInternalBaseline
       + baselineAdjustment;
-    final double outlineBaseline = inputBaseline - 5; // TODO fudge factor
+    //print('justin inputBaseline ${contentPadding.top} + $topHeight + inputInternalBaseline + $baselineAdjustment');
+    //final double outlineBaseline = inputBaseline - 5;
+    final double outlineBaseline = inputInternalBaseline +
+      (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
 
     double subtextCounterBaseline = 0;
     double subtextHelperBaseline = 0;
@@ -961,6 +979,7 @@ class _RenderDecoration extends RenderBox {
       subtextHelperHeight,
     );
 
+    /*
     print('''justin return
       containerHeight: $containerHeight,
       inputBaseline: $inputBaseline,
@@ -969,6 +988,7 @@ class _RenderDecoration extends RenderBox {
       subtextHeight: $subtextHeight,
       btw expnads $expands
     ''');
+    */
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
@@ -1034,7 +1054,7 @@ class _RenderDecoration extends RenderBox {
       + aboveBaseline
       + belowBaseline
       + contentPadding.bottom;
-    print('justin containerHeight = ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom}');
+    print('justin old containerHeight = ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom}');
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
@@ -1042,8 +1062,9 @@ class _RenderDecoration extends RenderBox {
       containerHeight += decoration.floatingLabelHeight;
       inputBaseline += decoration.floatingLabelHeight;
     }
-    //print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
+    print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
 
+    //print('justin old maybe expand containerheight for icon height $containerHeight ${_boxSize(prefixIcon).height} ${_boxSize(suffixIcon).height} ${prefixIcon.size.height}');
     containerHeight = math.max(
       containerHeight,
       math.max(

@@ -942,8 +942,6 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
-  // TODO(justinmc): fails because prefix/suffix no longer change input size
-  // Change these values so that input doesnt change with prefix/suffix?
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
     const Key pKey = Key('p');
     const Key sKey = Key('s');
@@ -995,7 +993,6 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx));
   });
 
-  // TODO(justinmc): Fails b/c icons used to increase size of input, now dont
   testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1031,7 +1028,6 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
-  // TODO(justinmc): fails because prefix/suffix no longer change input size
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
@@ -1057,7 +1053,6 @@ void main() {
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 16.0);
   });
 
-  // TODO(justinmc): fails because prefix/suffix no longer change input size
   testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
@@ -1928,7 +1923,6 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      // TODO(justinmc): This fails due to same prefix/suffix space change
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
