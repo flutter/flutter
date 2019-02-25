@@ -335,19 +335,19 @@ typedef struct {
   // The set of semantics actions applicable to this node.
   FlutterSemanticsAction actions;
   // The position at which the text selection originates.
-  int32_t textSelectionBase;
+  int32_t text_selection_base;
   // The position at which the text selection terminates.
-  int32_t textSelectionExtent;
+  int32_t text_selection_extent;
   // The total number of scrollable children that contribute to semantics.
-  int32_t scrollChildren;
+  int32_t scroll_child_count;
   // The index of the first visible semantic child of a scroll node.
-  int32_t scrollIndex;
+  int32_t scroll_index;
   // The current scrolling position in logical pixels if the node is scrollable.
-  double scrollPosition;
+  double scroll_position;
   // The maximum in-range value for |scrollPosition| if the node is scrollable.
-  double scrollExtentMax;
+  double scroll_extent_max;
   // The minimum in-range value for |scrollPosition| if the node is scrollable.
-  double scrollExtentMin;
+  double scroll_extent_min;
   // The elevation along the z-axis at which the rect of this semantics node is
   // located above its parent.
   double elevation;
@@ -361,13 +361,13 @@ typedef struct {
   const char* value;
   // A value that |value| will have after a kFlutterSemanticsActionIncrease|
   // action has been performed.
-  const char* increasedValue;
+  const char* increased_value;
   // A value that |value| will have after a kFlutterSemanticsActionDecrease|
   // action has been performed.
-  const char* decreasedValue;
+  const char* decreased_value;
   // The reading direction for |label|, |value|, |hint|, |increasedValue|, and
   // |decreasedValue|.
-  FlutterTextDirection textDirection;
+  FlutterTextDirection text_direction;
   // The bounding box for this node in its coordinate system.
   FlutterRect rect;
   // The transform from this node's coordinate system to its parent's coordinate
