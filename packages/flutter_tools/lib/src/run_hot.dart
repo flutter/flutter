@@ -13,6 +13,7 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -935,14 +936,15 @@ class ProjectWatcher {
     _watchersReady.add(watcher.ready);
     final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
     for (String dependency in packageMap.keys) {
-      final String path = packageMap[dependency].path;
-      if (path.contains(pubCachePath)) {
+      final String scriptPath = packageMap[dependency].path;
+      final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+      if (scriptUri.contains(pubCachePath)) {
         continue;
       }
-      if (!fs.directory(path).existsSync()) {
+      if (!fs.directory(scriptUri).existsSync()) {
         continue;
       }
-      final Watcher watcher = DirectoryWatcher(path);
+      final Watcher watcher = DirectoryWatcher(scriptUri);
       watcher.events.listen(_onWatchEvent);
       _watchersReady.add(watcher.ready);
     }
