@@ -151,6 +151,8 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
     return null;
   }
   final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials.fromJson(credentials);
+  print(accountCredentials.email);
+  print(accountCredentials.clientId);
   final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
   final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
   return bq.BigqueryApi(client);
