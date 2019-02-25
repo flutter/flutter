@@ -15,7 +15,7 @@ import '../src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
-Future<Null> _testExclusionLock;
+Future<void> _testExclusionLock;
 
 void main() {
   group('flutter test should', () {
@@ -90,7 +90,7 @@ void main() {
   });
 }
 
-Future<Null> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
+Future<void> _testFile(String testName, String workingDirectory, String testDirectory, { Matcher exitCode }) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
@@ -116,7 +116,11 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   int outputLineNumber = 0;
   bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
-    expect(output, hasLength(greaterThan(outputLineNumber)));
+    expect(
+      output,
+      hasLength(greaterThan(outputLineNumber)),
+      reason: 'Failure in $testName to compare to $fullTestExpectation',
+    );
     final String expectationLine = expectations[expectationLineNumber];
     final String outputLine = output[outputLineNumber];
     if (expectationLine == '<<skip until matching line>>') {
@@ -167,7 +171,7 @@ Future<ProcessResult> _runFlutterTest(
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  final Completer<Null> testExclusionCompleter = Completer<Null>();
+  final Completer<void> testExclusionCompleter = Completer<void>();
   _testExclusionLock = testExclusionCompleter.future;
   try {
     return await Process.run(

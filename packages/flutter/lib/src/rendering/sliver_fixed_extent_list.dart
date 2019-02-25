@@ -93,7 +93,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///  * [computeMaxScrollOffset], which is similar but must provide a precise
   ///    value.
   @protected
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -297,7 +298,8 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   RenderSliverFixedExtentList({
     @required RenderSliverBoxChildManager childManager,
     double itemExtent,
-  }) : _itemExtent = itemExtent, super(childManager: childManager);
+  }) : _itemExtent = itemExtent,
+       super(childManager: childManager);
 
   @override
   double get itemExtent => _itemExtent;

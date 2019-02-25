@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -16,11 +18,84 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
+
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockIosProject extends Mock implements IosProject {}
 
 void main() {
+  group('PropertyList', () {
+    MockProcessManager mockProcessManager;
+    MemoryFileSystem fs;
+    Directory workspaceDirectory;
+    File workspaceSettingsFile;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      fs = MemoryFileSystem();
+      workspaceDirectory = fs.directory('Runner.xcworkspace');
+      workspaceSettingsFile = workspaceDirectory.childDirectory('xcshareddata').childFile('WorkspaceSettings.xcsettings');
+    });
+
+    testUsingContext('does nothing if workspace directory does not exist', () async {
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verifyNever(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('creates dict-based plist if settings file does not exist', () async {
+      workspaceSettingsFile.parent.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Clear dict', workspaceSettingsFile.path]));
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('writes legacy build mode settings if requested and not present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('updates legacy build mode setting if requested and existing setting is present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'FancyNewOne', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Set BuildSystemType Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('deletes legacy build mode setting if modern build mode requested', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'Original', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: true);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Delete BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
   group('IMobileDevice', () {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
@@ -50,6 +125,14 @@ void main() {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
           .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
+      when(mockProcessManager.run(<String>['ideviceinfo', '-u', 'foo', '-k', 'bar']))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -271,7 +354,7 @@ Error launching application on iPhone.''',
         testLogger.errorText,
         contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
       );
-    });
+    }, overrides: noColorTerminalOverride);
 
     testUsingContext('No development team shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
@@ -351,6 +434,64 @@ Could not build the precompiled application for the device.''',
       expect(
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
+      );
+    }, overrides: noColorTerminalOverride);
+  });
+
+  group('Upgrades project.pbxproj for old asset usage', () {
+    const List<String> flutterAssetPbxProjLines = <String>[
+      '/* flutter_assets */',
+      '/* App.framework',
+      'another line'
+    ];
+
+    const List<String> appFlxPbxProjLines = <String>[
+      '/* app.flx',
+      '/* App.framework',
+      'another line',
+    ];
+
+    const List<String> cleanPbxProjLines = <String>[
+      '/* App.framework',
+      'another line',
+    ];
+
+    testUsingContext('upgradePbxProjWithFlutterAssets', () async {
+      final MockIosProject project = MockIosProject();
+      final MockFile pbxprojFile = MockFile();
+
+      when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
+      when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
+      when(pbxprojFile.readAsLines())
+          .thenAnswer((_) => Future<List<String>>.value(flutterAssetPbxProjLines));
+      when(pbxprojFile.exists())
+          .thenAnswer((_) => Future<bool>.value(true));
+
+      bool result = await upgradePbxProjWithFlutterAssets(project);
+      expect(result, true);
+      expect(
+        testLogger.statusText,
+        contains('Removing obsolete reference to flutter_assets'),
+      );
+      testLogger.clear();
+
+      when(pbxprojFile.readAsLines())
+          .thenAnswer((_) => Future<List<String>>.value(appFlxPbxProjLines));
+      result = await upgradePbxProjWithFlutterAssets(project);
+      expect(result, true);
+      expect(
+        testLogger.statusText,
+        contains('Removing obsolete reference to app.flx'),
+      );
+      testLogger.clear();
+
+      when(pbxprojFile.readAsLines())
+          .thenAnswer((_) => Future<List<String>>.value(cleanPbxProjLines));
+      result = await upgradePbxProjWithFlutterAssets(project);
+      expect(result, true);
+      expect(
+        testLogger.statusText,
+        isEmpty,
       );
     });
   });

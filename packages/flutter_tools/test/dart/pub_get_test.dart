@@ -32,7 +32,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -102,7 +102,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -128,7 +128,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -146,7 +146,7 @@ void main() {
   });
 }
 
-typedef void StartCallback(List<dynamic> command);
+typedef StartCallback = void Function(List<dynamic> command);
 
 class MockProcessManager implements ProcessManager {
   MockProcessManager(this.fakeExitCode);
@@ -200,7 +200,7 @@ class MockStream<T> implements Stream<T> {
   Stream<T> where(bool test(T event)) => MockStream<T>();
 
   @override
-  StreamSubscription<T> listen(void onData(T event), {Function onError, void onDone(), bool cancelOnError}) {
+  StreamSubscription<T> listen(void onData(T event), { Function onError, void onDone(), bool cancelOnError }) {
     return MockStreamSubscription<T>();
   }
 
@@ -210,10 +210,10 @@ class MockStream<T> implements Stream<T> {
 
 class MockStreamSubscription<T> implements StreamSubscription<T> {
   @override
-  Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
+  Future<E> asFuture<E>([ E futureValue ]) => Future<E>.value();
 
   @override
-  Future<Null> cancel() => null;
+  Future<void> cancel() async { }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -236,7 +236,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
+  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
     return MockRandomAccessFile();
   }
 
@@ -251,12 +251,12 @@ class MockFile implements File {
 }
 
 class MockDirectory implements Directory {
-  static bool findCache = false;
-
   MockDirectory(this.path);
 
   @override
   final String path;
+
+  static bool findCache = false;
 
   @override
   bool existsSync() => findCache && path.endsWith('.pub-cache');

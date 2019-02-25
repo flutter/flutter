@@ -30,6 +30,7 @@ const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionIcudtl = 'icudtl';
 const String _kOptionTests = 'tests';
+const String _kOptionCoverageDirectory = 'coverage-directory';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -42,12 +43,12 @@ const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
-  runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+  runInContext<void>(() => run(args), overrides: <Type, Generator>{
     Usage: () => DisabledUsage(),
   });
 }
 
-Future<Null> run(List<String> args) async {
+Future<void> run(List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
@@ -55,6 +56,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -85,9 +87,17 @@ Future<Null> run(List<String> args) async {
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
+    Directory coverageDirectory;
+    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
+    if (coverageDirectoryPath != null) {
+      if (!fs.isDirectorySync(coverageDirectoryPath)) {
+        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+      }
+      coverageDirectory = fs.directory(coverageDirectoryPath);
+    }
 
     // Put the tester shell where runTests expects it.
-    // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
+    // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
     final Link testerDestLink =
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
@@ -131,9 +141,14 @@ Future<Null> run(List<String> args) async {
 
     if (collector != null) {
       // collector expects currentDirectory to be the root of the dart
-      // package (i.e. contains lib/ and test/ sub-dirs).
-      fs.currentDirectory = testDirectory.parent;
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath]))
+      // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
+      // test files may appear to be in the root directory.
+      if (coverageDirectory == null) {
+        fs.currentDirectory = testDirectory.parent;
+      } else {
+        fs.currentDirectory = testDirectory;
+      }
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {

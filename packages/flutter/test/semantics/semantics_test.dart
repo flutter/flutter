@@ -348,9 +348,13 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   scrollChildren: null\n'
+      '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
+      '   elevation: 0.0\n'
+      '   thicknes: 0.0\n'
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -438,9 +442,13 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   scrollChildren: null\n'
+      '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
+      '   elevation: 0.0\n'
+      '   thicknes: 0.0\n'
     );
 
   });

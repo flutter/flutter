@@ -7,6 +7,48 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'date_picker.dart';
+
+/// Determines the order of the columns inside [CupertinoDatePicker] in
+/// time and date time mode.
+enum DatePickerDateTimeOrder {
+  /// Order of the columns, from left to right: date, hour, minute, am/pm.
+  ///
+  /// Example: Fri Aug 31 | 02 | 08 | PM.
+  date_time_dayPeriod,
+  /// Order of the columns, from left to right: date, am/pm, hour, minute.
+  ///
+  /// Example: Fri Aug 31 | PM | 02 | 08.
+  date_dayPeriod_time,
+  /// Order of the columns, from left to right: hour, minute, am/pm, date.
+  ///
+  /// Example: 02 | 08 | PM | Fri Aug 31.
+  time_dayPeriod_date,
+  /// Order of the columns, from left to right: am/pm, hour, minute, date.
+  ///
+  /// Example: PM | 02 | 08 | Fri Aug 31.
+  dayPeriod_time_date,
+}
+
+/// Determines the order of the columns inside [CupertinoDatePicker] in date mode.
+enum DatePickerDateOrder {
+  /// Order of the columns, from left to right: day, month, year.
+  ///
+  /// Example: 12 | March | 1996
+  dmy,
+  /// Order of the columns, from left to right: month, day, year.
+  ///
+  /// Example: March | 12 | 1996
+  mdy,
+  /// Order of the columns, from left to right: year, month, day.
+  ///
+  /// Example: 1996 | March | 12
+  ymd,
+  /// Order of the columns, from left to right: year, day, month.
+  ///
+  /// Example: 1996 | 12 | March
+  ydm,
+}
 
 /// Defines the localized resource values used by the Cupertino widgets.
 ///
@@ -57,9 +99,12 @@ abstract class CupertinoLocalizations {
   ///
   /// Examples: datePickerHour(1) in:
   ///
-  ///  - US English: 01
+  ///  - US English: 1
   ///  - Arabic: ٠١
   String datePickerHour(int hour);
+
+  /// Semantics label for the given hour value in [CupertinoDatePicker].
+  String datePickerHourSemanticsLabel(int hour);
 
   /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given minute value.
@@ -70,9 +115,14 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ٠١
   String datePickerMinute(int minute);
 
+  /// Semantics label for the given minute value in [CupertinoDatePicker].
+  String datePickerMinuteSemanticsLabel(int minute);
+
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
-  /// Can be any permutation of 'DMY' ('D': day, 'M': month, 'Y': year).
-  String get datePickerDateOrder;
+  DatePickerDateOrder get datePickerDateOrder;
+
+  /// The order of the time elements that will be shown in [CupertinoDatePicker].
+  DatePickerDateTimeOrder get datePickerDateTimeOrder;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   String get anteMeridiemAbbreviation;
@@ -83,7 +133,7 @@ abstract class CupertinoLocalizations {
   /// The term used by the system to announce dialog alerts.
   String get alertDialogLabel;
 
-  /// Hour that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
   ///
   /// Examples: timerPickerHour(1) in:
@@ -92,7 +142,7 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ١
   String timerPickerHour(int hour);
 
-  /// Minute that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Minute that is shown in [CupertinoTimerPicker] corresponding to
   /// the given minute value.
   ///
   /// Examples: timerPickerMinute(1) in:
@@ -101,7 +151,7 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ١
   String timerPickerMinute(int minute);
 
-  /// Second that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// Second that is shown in [CupertinoTimerPicker] corresponding to
   /// the given second value.
   ///
   /// Examples: timerPickerSecond(1) in:
@@ -111,19 +161,31 @@ abstract class CupertinoLocalizations {
   String timerPickerSecond(int second);
 
   /// Label that appears next to the hour picker in
-  /// [CupertinoCountdownTimerPicker] when selected hour value is `hour`.
+  /// [CupertinoTimerPicker] when selected hour value is `hour`.
   /// This function will deal with pluralization based on the `hour` parameter.
   String timerPickerHourLabel(int hour);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is `minute`.
+  /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   String timerPickerMinuteLabel(int minute);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is `second`.
+  /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   String timerPickerSecondLabel(int second);
+
+  /// The term used for cutting
+  String get cutButtonLabel;
+
+  /// The term used for copying
+  String get copyButtonLabel;
+
+  /// The term used for pasting
+  String get pasteButtonLabel;
+
+  /// The term used for selecting everything
+  String get selectAllButtonLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -153,6 +215,9 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
 
   @override
   bool shouldReload(_CupertinoLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
 }
 
 /// US English strings for the cupertino widgets.
@@ -204,6 +269,8 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
     'December',
   ];
 
+
+
   @override
   String datePickerYear(int yearIndex) => yearIndex.toString();
 
@@ -214,20 +281,33 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
 
   @override
-  String datePickerHour(int hour) => hour.toString().padLeft(2, '0');
+  String datePickerHour(int hour) => hour.toString();
+
+  @override
+  String datePickerHourSemanticsLabel(int hour) => hour.toString() + " o'clock";
 
   @override
   String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
 
   @override
-  String datePickerMediumDate(DateTime date) {
-    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
-      '${_shortMonths[date.month - DateTime.january]} '
-      '${date.day}';
+  String datePickerMinuteSemanticsLabel(int minute) {
+    if (minute == 1)
+      return '1 minute';
+    return minute.toString() + ' minutes';
   }
 
   @override
-  String get datePickerDateOrder => 'MDY';
+  String datePickerMediumDate(DateTime date) {
+    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
+      '${_shortMonths[date.month - DateTime.january]} '
+      '${date.day.toString().padRight(2)}';
+  }
+
+  @override
+  DatePickerDateOrder get datePickerDateOrder => DatePickerDateOrder.mdy;
+
+  @override
+  DatePickerDateTimeOrder get datePickerDateTimeOrder => DatePickerDateTimeOrder.date_time_dayPeriod;
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -255,6 +335,18 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String timerPickerSecondLabel(int second) => 'sec';
+
+  @override
+  String get cutButtonLabel => 'Cut';
+
+  @override
+  String get copyButtonLabel => 'Copy';
+
+  @override
+  String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get selectAllButtonLabel => 'Select All';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.

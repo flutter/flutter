@@ -119,7 +119,10 @@ class TextSelection extends TextRange {
   const TextSelection.collapsed({
     @required int offset,
     this.affinity = TextAffinity.downstream
-  }) : baseOffset = offset, extentOffset = offset, isDirectional = false, super.collapsed(offset);
+  }) : baseOffset = offset,
+       extentOffset = offset,
+       isDirectional = false,
+       super.collapsed(offset);
 
   /// Creates a collapsed selection at the given text position.
   ///

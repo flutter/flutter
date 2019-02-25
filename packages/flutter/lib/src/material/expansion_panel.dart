@@ -43,11 +43,11 @@ class _SaltedKey<S, V> extends LocalKey {
 ///
 /// The position of the panel within an [ExpansionPanelList] is given by
 /// [panelIndex].
-typedef void ExpansionPanelCallback(int panelIndex, bool isExpanded);
+typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 
 /// Signature for the callback that's called when the header of the
 /// [ExpansionPanel] needs to rebuild.
-typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded);
+typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -59,7 +59,7 @@ typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded
 /// See also:
 ///
 ///  * [ExpansionPanelList]
-///  * <https://material.google.com/components/expansion-panels.html>
+///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   ///
@@ -114,7 +114,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// See also:
 ///
 ///  * [ExpansionPanel]
-///  * <https://material.google.com/components/expansion-panels.html>
+///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
@@ -128,7 +128,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
-       this.initialOpenPanelValue = null,
+       initialOpenPanelValue = null,
        super(key: key);
 
   /// Creates a radio expansion panel list widget.
@@ -140,12 +140,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// of [ExpansionPanelRadio].
   const ExpansionPanelList.radio({
     Key key,
-    List<ExpansionPanelRadio> children = const <ExpansionPanelRadio>[],
+    this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, // ignore: prefer_initializing_formals
-       assert(children != null),
+  }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
        super(key: key);

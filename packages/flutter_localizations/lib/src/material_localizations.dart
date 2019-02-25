@@ -14,10 +14,6 @@ import 'l10n/date_localizations.dart' as date_localizations;
 import 'l10n/localizations.dart';
 import 'widgets_localizations.dart';
 
-// Watch out: the supported locales list in the doc comment below must be kept
-// in sync with the list we test, see test/translations_test.dart, and of course
-// the actual list of supported locales in _MaterialLocalizationsDelegate.
-
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.
 ///
@@ -100,19 +96,19 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : assert(localeName != null),
-       this._localeName = localeName,
+       _localeName = localeName,
        assert(fullYearFormat != null),
-       this._fullYearFormat = fullYearFormat,
+       _fullYearFormat = fullYearFormat,
        assert(mediumDateFormat != null),
-       this._mediumDateFormat = mediumDateFormat,
+       _mediumDateFormat = mediumDateFormat,
        assert(longDateFormat != null),
-       this._longDateFormat = longDateFormat,
+       _longDateFormat = longDateFormat,
        assert(yearMonthFormat != null),
-       this._yearMonthFormat = yearMonthFormat,
+       _yearMonthFormat = yearMonthFormat,
        assert(decimalFormat != null),
-       this._decimalFormat = decimalFormat,
+       _decimalFormat = decimalFormat,
        assert(twoDigitZeroPaddedFormat != null),
-       this._twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
@@ -252,7 +248,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -502,18 +498,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
   }
 
-  /// The script category used by [localTextGeometry]. Must be one of the strings
-  /// declared in [MaterialTextGeometry].
-  //
-  // TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
-  // TODO(ianh): drop the constructor on MaterialTextGeometry.
-  // TODO(ianh): drop the strings on MaterialTextGeometry.
-  @protected
-  String get scriptCategory;
-
-  /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(scriptCategory);
+  ScriptCategory get scriptCategory;
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.
@@ -582,7 +568,27 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   /// data. Subsequent invocations have no effect.
   static void _loadDateIntlDataIfNotLoaded() {
     if (!_dateIntlDataInitialized) {
+      // TODO(garyq): Add support for scriptCodes. Do not strip scriptCode from string.
+
+      // Keep track of initialzed locales, or will fail on attempted double init.
+      // This can only happen if a locale with a stripped scriptCode has already
+      // been initialzed. This should be removed when scriptCode stripping is removed.
+      final Set<String> initializedLocales = Set<String>();
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+        // Strip scriptCode from the locale, as we do not distinguish between scripts
+        // for dates.
+        final List<String> codes = locale.split('_');
+        String countryCode;
+        if (codes.length == 2) {
+          countryCode = codes[1].length < 4 ? codes[1] : null;
+        } else if (codes.length == 3) {
+          countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
+        }
+        locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
+        if (initializedLocales.contains(locale))
+          return;
+        initializedLocales.add(locale);
+        // Perform initialization.
         assert(date_localizations.datePatterns.containsKey(locale));
         final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
         date_symbol_data_custom.initializeDateFormattingCustom(
@@ -655,4 +661,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'GlobalMaterialLocalizations.delegate(${kSupportedLanguages.length} locales)';
 }

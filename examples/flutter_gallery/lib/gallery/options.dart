@@ -252,7 +252,7 @@ class _TextScaleFactorItem extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
-              return kAllGalleryTextScaleValues.map((GalleryTextScaleValue scaleValue) {
+              return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((GalleryTextScaleValue scaleValue) {
                 return PopupMenuItem<GalleryTextScaleValue>(
                   value: scaleValue,
                   child: Text(scaleValue.label),

@@ -1,6 +1,7 @@
 # Flutter gallery
 
-Demo app for the material design widgets and other features provided by Flutter.
+A demo app for Flutter's material design and cupertino widgets, as
+well as many other features of the Flutter SDK.
 
 ## Building
 
@@ -15,7 +16,7 @@ the [Flutter Setup](https://flutter.io/setup/) guide.
 ### Building and installing the Flutter app
 
 * `cd $FLUTTER_ROOT/examples/flutter_gallery`
-* `flutter upgrade`
+* `flutter packages get`
 * `flutter run --release`
 
 The `flutter run --release` command both builds and installs the Flutter app.

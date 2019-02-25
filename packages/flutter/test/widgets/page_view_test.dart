@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'semantics_tester.dart';
 import 'states.dart';
@@ -19,8 +20,10 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
+        dragStartBehavior: DragStartBehavior.down,
         children: kStates.map<Widget>((String state) {
           return GestureDetector(
+            dragStartBehavior: DragStartBehavior.down,
             onTap: () {
               log.add(state);
             },
@@ -329,7 +332,7 @@ void main() {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
-    Widget build(PageController controller, {Size size}) {
+    Widget build(PageController controller, { Size size }) {
       final Widget pageView = Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(

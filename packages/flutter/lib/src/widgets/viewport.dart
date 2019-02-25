@@ -239,7 +239,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
 ///    use.
 ///  * [SliverToBoxAdapter], which allows a box widget to be placed inside a
 ///    sliver context (the opposite of this widget).
-///  * [Viewport], a viewport that does not shrink-wrap its contents
+///  * [Viewport], a viewport that does not shrink-wrap its contents.
 class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside and shrink wraps its
   /// children in the main axis.

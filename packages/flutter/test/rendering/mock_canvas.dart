@@ -28,7 +28,7 @@ import 'recording_canvas.dart';
 /// To specify the pattern, call the methods on the returned object. For example:
 ///
 /// ```dart
-///  expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
+/// expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
 /// ```
 ///
 /// This particular pattern would verify that the render object `myRenderObject`
@@ -64,13 +64,13 @@ Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
 /// ```dart
 /// if (methodName == #drawCircle) { ... }
 /// ```
-typedef bool PaintPatternPredicate(Symbol methodName, List<dynamic> arguments);
+typedef PaintPatternPredicate = bool Function(Symbol methodName, List<dynamic> arguments);
 
 /// The signature of [RenderObject.paint] functions.
-typedef void _ContextPainterFunction(PaintingContext context, Offset offset);
+typedef _ContextPainterFunction = void Function(PaintingContext context, Offset offset);
 
 /// The signature of functions that paint directly on a canvas.
-typedef void _CanvasPainterFunction(Canvas canvas);
+typedef _CanvasPainterFunction = void Function(Canvas canvas);
 
 /// Builder interface for patterns used to match display lists (canvas calls).
 ///
@@ -164,7 +164,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipPath] call are ignored.
-  void clipPath({Matcher pathMatcher});
+  void clipPath({ Matcher pathMatcher });
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -558,11 +558,12 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
 }
 
 class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
+  _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
+    : _methodName = methodName,
+      _count = count;
+
   final Symbol _methodName;
   final int _count;
-
-  _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
-      : _methodName = methodName, _count = count;
 
   @override
   Description describe(Description description) {
@@ -570,8 +571,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   }
 
   @override
-  bool _evaluatePredicates(Iterable<RecordedInvocation> calls,
-      StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
     for(RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
@@ -709,7 +709,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void clipPath({Matcher pathMatcher}) {
+  void clipPath({ Matcher pathMatcher }) {
     _predicates.add(_FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 
@@ -1024,16 +1024,49 @@ class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
   );
 }
 
-class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
-  _RRectPaintPredicate({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
+  _RRectPaintPredicate({ this.rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawRRect,
     'a rounded rectangle',
-    expected: rrect,
+    2,
+    1,
     color: color,
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
-    style: style,
+    style: style
   );
+
+  final RRect rrect;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    const double eps = .0001;
+    final RRect actual = arguments[0];
+    if (rrect != null &&
+       ((actual.left - rrect.left).abs() > eps ||
+        (actual.right - rrect.right).abs() > eps ||
+        (actual.top - rrect.top).abs() > eps ||
+        (actual.bottom - rrect.bottom).abs() > eps ||
+        (actual.blRadiusX - rrect.blRadiusX).abs() > eps ||
+        (actual.blRadiusY - rrect.blRadiusY).abs() > eps ||
+        (actual.brRadiusX - rrect.brRadiusX).abs() > eps ||
+        (actual.brRadiusY - rrect.brRadiusY).abs() > eps ||
+        (actual.tlRadiusX - rrect.tlRadiusX).abs() > eps ||
+        (actual.tlRadiusY - rrect.tlRadiusY).abs() > eps ||
+        (actual.trRadiusX - rrect.trRadiusX).abs() > eps ||
+        (actual.trRadiusY - rrect.trRadiusY).abs() > eps)) {
+      throw 'It called $methodName with RRect, $actual, which was not exactly the expected RRect ($rrect).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (rrect != null) {
+      description.add('RRect: $rrect');
+    }
+  }
 }
 
 class _DRRectPaintPredicate extends _TwoParameterPaintPredicate<RRect, RRect> {
@@ -1149,10 +1182,10 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
     final Offset p1Argument = arguments[0];
     final Offset p2Argument = arguments[1];
     if (p1 != null && p1Argument != p1) {
-        throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
+      throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
     }
     if (p2 != null && p2Argument != p2) {
-        throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
+      throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
     }
   }
 

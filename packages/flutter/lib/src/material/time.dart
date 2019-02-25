@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show hashValues;
+
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'material_localizations.dart';
+
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -19,7 +22,21 @@ enum DayPeriod {
 /// A value representing a time during the day, independent of the date that
 /// day might fall on or the time zone.
 ///
-/// The time is represented by [hour] and [minute] pair.
+/// The time is represented by [hour] and [minute] pair. Once created, both
+/// values cannot be changed.
+///
+/// You can create TimeOfDay using the constructor which requires both hour and
+/// minute or using [DateTime] object.
+/// Hours are specified between 0 and 23, as in a 24-hour clock.
+///
+/// {@tool sample}
+///
+/// ```dart
+/// TimeOfDay now = TimeOfDay.now();
+/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -30,15 +47,6 @@ enum DayPeriod {
 ///    time zones.
 @immutable
 class TimeOfDay {
-  /// The number of hours in one day, i.e. 24.
-  static const int hoursPerDay = 24;
-
-  /// The number of hours in one day period (see also [DayPeriod]), i.e. 12.
-  static const int hoursPerPeriod = 12;
-
-  /// The number of minutes in one hour, i.e. 60.
-  static const int minutesPerHour = 60;
-
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
@@ -49,13 +57,24 @@ class TimeOfDay {
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
+  TimeOfDay.fromDateTime(DateTime time)
+    : hour = time.hour,
+      minute = time.minute;
 
   /// Creates a time of day based on the current time.
   ///
   /// The [hour] is set to the current hour and the [minute] is set to the
   /// current minute in the local time zone.
   factory TimeOfDay.now() { return TimeOfDay.fromDateTime(DateTime.now()); }
+
+  /// The number of hours in one day, i.e. 24.
+  static const int hoursPerDay = 24;
+
+  /// The number of hours in one day period (see also [DayPeriod]), i.e. 12.
+  static const int hoursPerPeriod = 12;
+
+  /// The number of minutes in one hour, i.e. 60.
+  static const int minutesPerHour = 60;
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
@@ -83,7 +102,8 @@ class TimeOfDay {
   ///
   /// This is a shortcut for [MaterialLocalizations.formatTimeOfDay].
   String format(BuildContext context) {
-    debugCheckHasMediaQuery(context);
+    assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(
       this,

@@ -17,7 +17,7 @@ import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
-typedef Drag GestureMultiDragStartCallback(Offset position);
+typedef GestureMultiDragStartCallback = Drag Function(Offset position);
 
 /// Per-pointer state for a [MultiDragGestureRecognizer].
 ///
@@ -439,8 +439,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 
 class _DelayedPointerState extends MultiDragPointerState {
   _DelayedPointerState(Offset initialPosition, Duration delay)
-    : assert(delay != null),
-      super(initialPosition) {
+      : assert(delay != null),
+        super(initialPosition) {
     _timer = Timer(delay, _delayPassed);
   }
 

@@ -30,6 +30,22 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createHomeScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'test_driver/scroll_perf.dart',
+    'home_scroll_perf',
+  ).run;
+}
+
+TaskFunction createCullOpacityPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cull_opacity_perf.dart',
+    'cull_opacity_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -75,8 +91,8 @@ TaskFunction createBasicMaterialCompileTest() {
 
     rmTree(sampleDir);
 
-    await inDirectory(Directory.systemTemp, () async {
-      await flutter('create', options: <String>[sampleAppName]);
+    await inDirectory<void>(Directory.systemTemp, () async {
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     if (!(await sampleDir.exists()))
@@ -95,7 +111,7 @@ class StartupTest {
   final bool reportMetrics;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
@@ -131,7 +147,7 @@ class PerfTest {
   final String timelineFileName;
 
   Future<TaskResult> run() {
-    return inDirectory(testDirectory, () async {
+    return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
@@ -162,8 +178,11 @@ class PerfTest {
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
         'missed_frame_build_budget_count',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
         'average_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
+        'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
       ]);
@@ -180,7 +199,7 @@ class CompileTest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    return await inDirectory(testDirectory, () async {
+    return await inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
@@ -348,16 +367,14 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
     final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
     final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
-      'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
-      'icudtl_compressed_bytes': icudtl.compressedSize,
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
       'libflutter_compressed_bytes': libflutter.compressedSize,
       'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
@@ -368,6 +385,8 @@ class CompileTest {
           isolateSnapshotInstr.compressedSize +
           vmSnapshotData.compressedSize +
           vmSnapshotInstr.compressedSize,
+      'license_uncompressed_bytes': license.uncompressedSize,
+      'license_compressed_bytes': license.compressedSize,
     };
   }
 }
@@ -393,13 +412,13 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
-  int get iterationCount => 15;
+  int get iterationCount => 10;
 
   Device get device => _device;
   Device _device;
 
   Future<TaskResult> run() {
-    return inDirectory(project, () async {
+    return inDirectory<TaskResult>(project, () async {
       // This test currently only works on Android, because device.logcat,
       // device.getMemoryStats, etc, aren't implemented for iOS.
 

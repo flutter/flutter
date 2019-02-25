@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(home: const Material(
+    await tester.pumpWidget(const MaterialApp(home: Material(
       child: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),
@@ -92,12 +92,18 @@ void main() {
                     label: 'Alert',
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(label: 'The Title'),
                           TestSemantics(label: 'Content'),
                         ],
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(
                             flags: <SemanticsFlag>[SemanticsFlag.isButton],
@@ -672,14 +678,15 @@ void main() {
     // the dividers also paints a white background the size of Rect.largest.
     // That background ends up being clipped by the containing ScrollView.
     //
-    // Here we test that the largest Rect is contained within the painted Path.
+    // Here we test that the Rect(0.0, 0.0, renderBox.size.width, renderBox.size.height)
+    // is contained within the painted Path.
     // We don't test for exclusion because for some reason the Path is reporting
     // that even points beyond Rect.largest are within the Path. That's not an
     // issue for our use-case, so we don't worry about it.
     expect(actionsSectionBox, paints..path(
       includes: <Offset>[
-        Offset(Rect.largest.left, Rect.largest.top),
-        Offset(Rect.largest.right, Rect.largest.bottom),
+        const Offset(0.0, 0.0),
+        Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
       ],
     ));
   });
@@ -984,7 +991,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
+Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
   return MaterialApp(
     home: Material(
       child: Center(

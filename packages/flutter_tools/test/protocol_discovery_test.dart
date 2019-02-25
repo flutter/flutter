@@ -30,8 +30,8 @@ void main() {
       /// This also exists for cases where our initialization requires access to
       /// a `Context` object, which is only set up inside the zone.
       ///
-      /// Note that these issues do not pertain to real code and are a test-only
-      /// concern, since in real code, the zone is set-up in `main()`.
+      /// These issues do not pertain to real code and are a test-only concern,
+      /// because in real code, the zone is set up in `main()`.
       ///
       /// See also: [runZoned]
       void initialize() {
@@ -223,11 +223,12 @@ void main() {
 }
 
 class MockPortForwarder extends DevicePortForwarder {
-  final int availablePort;
   MockPortForwarder([this.availablePort]);
 
+  final int availablePort;
+
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
       return availablePort;
@@ -239,7 +240,7 @@ class MockPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => throw 'not implemented';
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) {
+  Future<void> unforward(ForwardedPort forwardedPort) {
     throw 'not implemented';
   }
 }

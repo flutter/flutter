@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
@@ -39,13 +38,13 @@ set timeDilation(double value) {
 /// scheduler's epoch. Use timeStamp to determine how far to advance animation
 /// timelines so that all the animations in the system are synchronized to a
 /// common time base.
-typedef void FrameCallback(Duration timeStamp);
+typedef FrameCallback = void Function(Duration timeStamp);
 
 /// Signature for [Scheduler.scheduleTask] callbacks.
 ///
 /// The type argument `T` is the task's return value. Consider [void] if the
 /// task does not return a value.
-typedef T TaskCallback<T>();
+typedef TaskCallback<T> = T Function();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
@@ -55,7 +54,7 @@ typedef T TaskCallback<T>();
 /// at this time, false otherwise.
 ///
 /// See also [defaultSchedulingStrategy].
-typedef bool SchedulingStrategy({ int priority, SchedulerBinding scheduler });
+typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
@@ -186,17 +185,13 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-abstract class SchedulerBinding extends BindingBase with ServicesBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SchedulerBinding._() => null;
-
+mixin SchedulerBinding on BindingBase, ServicesBinding {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onBeginFrame = _handleBeginFrame;
-    ui.window.onDrawFrame = _handleDrawFrame;
+    window.onBeginFrame = _handleBeginFrame;
+    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
   }
 
@@ -207,13 +202,16 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    registerNumericServiceExtension(
-      name: 'timeDilation',
-      getter: () async => timeDilation,
-      setter: (double value) async {
-        timeDilation = value;
-      }
-    );
+
+    if (!kReleaseMode) {
+      registerNumericServiceExtension(
+        name: 'timeDilation',
+        getter: () async => timeDilation,
+        setter: (double value) async {
+          timeDilation = value;
+        },
+      );
+    }
   }
 
   /// Whether the application is visible, and if so, whether it is currently
@@ -250,7 +248,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     }
   }
 
-  Future<String> _handleLifecycleMessage(String message) {
+  Future<String> _handleLifecycleMessage(String message) async {
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
     return null;
   }
@@ -298,7 +296,9 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// [Priority.animation] won't run (at least, not with the
   /// [defaultSchedulingStrategy]; this can be configured using
   /// [schedulingStrategy]).
-  Future<T> scheduleTask<T>(TaskCallback<T> task, Priority priority, {
+  Future<T> scheduleTask<T>(
+    TaskCallback<T> task,
+    Priority priority, {
     String debugLabel,
     Flow flow,
   }) {
@@ -513,7 +513,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// To call this function, use the following code:
   ///
   /// ```dart
-  ///   SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
+  /// SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
   /// ```
   static void debugPrintTransientCallbackRegistrationStack() {
     assert(() {
@@ -575,7 +575,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     _postFrameCallbacks.add(callback);
   }
 
-  Completer<Null> _nextFrameCompleter;
+  Completer<void> _nextFrameCompleter;
 
   /// Returns a Future that completes after the frame completes.
   ///
@@ -586,11 +586,11 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// If the device's screen is currently turned off, this may wait a very long
   /// time, since frames are not scheduled while the device's screen is turned
   /// off.
-  Future<Null> get endOfFrame {
+  Future<void> get endOfFrame {
     if (_nextFrameCompleter == null) {
       if (schedulerPhase == SchedulerPhase.idle)
         scheduleFrame();
-      _nextFrameCompleter = Completer<Null>();
+      _nextFrameCompleter = Completer<void>();
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter.complete();
         _nextFrameCompleter = null;
@@ -682,7 +682,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -713,7 +713,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

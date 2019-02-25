@@ -212,7 +212,7 @@ bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirect
   return null;
 }
 
-typedef double _ChildSizingFunction(RenderBox child, double extent);
+typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 
 /// Displays its children in a one-dimensional array.
 ///
@@ -453,8 +453,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           assert(verticalDirection != null, 'Vertical $runtimeType with $mainAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
       }
-   }
-   if (crossAxisAlignment == CrossAxisAlignment.start ||
+    }
+    if (crossAxisAlignment == CrossAxisAlignment.start ||
         crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
@@ -707,7 +707,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '  https://flutter.io/debugging/#rendering-layer\n'
             '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new'
+            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }());
         totalFlex += childParentData.flex;

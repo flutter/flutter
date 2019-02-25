@@ -12,7 +12,7 @@ import 'binding.dart';
 ///
 /// The argument is the time that the object had spent enabled so far
 /// at the time of the callback being called.
-typedef void TickerCallback(Duration elapsed);
+typedef TickerCallback = void Function(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///
@@ -299,7 +299,7 @@ class Ticker {
       // We intentionally don't null out _startTime. This means that if start()
       // was ever called, the object is now in a bogus state. This weakly helps
       // catch cases of use-after-dispose.
-      _startTime = const Duration();
+      _startTime = Duration.zero;
       return true;
     }());
   }
@@ -347,7 +347,7 @@ class Ticker {
 ///
 /// To run a callback when either this future resolves or when the ticker is
 /// canceled, use [whenCompleteOrCancel].
-class TickerFuture implements Future<Null> {
+class TickerFuture implements Future<void> {
   TickerFuture._();
 
   /// Creates a [TickerFuture] instance that represents an already-complete
@@ -361,8 +361,8 @@ class TickerFuture implements Future<Null> {
     _complete();
   }
 
-  final Completer<Null> _primaryCompleter = Completer<Null>();
-  Completer<Null> _secondaryCompleter;
+  final Completer<void> _primaryCompleter = Completer<void>();
+  Completer<void> _secondaryCompleter;
   bool _completed; // null means unresolved, true means complete, false means canceled
 
   void _complete() {
@@ -385,11 +385,10 @@ class TickerFuture implements Future<Null> {
   /// future, so even if the [orCancel] property is accessed, canceling the
   /// ticker will not cause an uncaught exception in the current zone.
   void whenCompleteOrCancel(VoidCallback callback) {
-    Null thunk(dynamic value) {
+    void thunk(dynamic value) {
       callback();
-      return null;
     }
-    orCancel.then(thunk, onError: thunk);
+    orCancel.then<void>(thunk, onError: thunk);
   }
 
   /// A future that resolves when this future resolves or throws when the ticker
@@ -400,12 +399,12 @@ class TickerFuture implements Future<Null> {
   /// corresponding ticker is canceled, then the [Future] returned by this
   /// getter will complete with an error, and if that error is not caught, there
   /// will be an uncaught exception in the current zone.
-  Future<Null> get orCancel {
+  Future<void> get orCancel {
     if (_secondaryCompleter == null) {
-      _secondaryCompleter = Completer<Null>();
+      _secondaryCompleter = Completer<void>();
       if (_completed != null) {
         if (_completed) {
-          _secondaryCompleter.complete(null);
+          _secondaryCompleter.complete();
         } else {
           _secondaryCompleter.completeError(const TickerCanceled());
         }
@@ -415,27 +414,27 @@ class TickerFuture implements Future<Null> {
   }
 
   @override
-  Stream<Null> asStream() {
+  Stream<void> asStream() {
     return _primaryCompleter.future.asStream();
   }
 
   @override
-  Future<Null> catchError(Function onError, { bool test(dynamic error) }) {
+  Future<void> catchError(Function onError, { bool test(dynamic error) }) {
     return _primaryCompleter.future.catchError(onError, test: test);
   }
 
   @override
-  Future<E> then<E>(dynamic f(Null value), { Function onError }) {
+  Future<E> then<E>(dynamic f(void value), { Function onError }) {
     return _primaryCompleter.future.then<E>(f, onError: onError);
   }
 
   @override
-  Future<Null> timeout(Duration timeLimit, { dynamic onTimeout() }) {
+  Future<void> timeout(Duration timeLimit, { dynamic onTimeout() }) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<Null> whenComplete(dynamic action()) {
+  Future<void> whenComplete(dynamic action()) {
     return _primaryCompleter.future.whenComplete(action);
   }
 

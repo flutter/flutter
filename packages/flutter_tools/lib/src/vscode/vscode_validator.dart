@@ -4,43 +4,36 @@
 
 import 'dart:async';
 
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
-  static const String extensionMarketplaceUrl =
-    'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
-  final VsCode _vsCode;
+  VsCodeValidator(this._vsCode) : super(_vsCode.productName);
 
-  VsCodeValidator(this._vsCode) : super(_vsCode.productName, ValidatorCategory.ide);
+  final VsCode _vsCode;
 
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
         .allInstalled()
-        .map((VsCode vsCode) => VsCodeValidator(vsCode));
+        .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType type = ValidationType.missing;
     final String vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
-        : 'version ${_vsCode.version}';
-    messages.add(ValidationMessage('VS Code at ${_vsCode.directory}'));
-    if (_vsCode.isValid) {
-      type = ValidationType.installed;
-      messages.addAll(_vsCode.validationMessages
-          .map((String m) => ValidationMessage(m)));
-    } else {
-      type = ValidationType.partial;
-      messages.addAll(_vsCode.validationMessages
-          .map((String m) => ValidationMessage.error(m)));
-      messages.add(ValidationMessage(
-          'Flutter extension not installed; install from\n$extensionMarketplaceUrl'));
-    }
+        : userMessages.vsCodeVersion(_vsCode.version.toString());
 
-    return ValidationResult(type, messages, statusInfo: vsCodeVersionText);
+    final ValidationType validationType = _vsCode.isValid
+        ? ValidationType.installed
+        : ValidationType.partial;
+
+    return ValidationResult(
+      validationType,
+      _vsCode.validationMessages,
+      statusInfo: vsCodeVersionText,
+    );
   }
 }

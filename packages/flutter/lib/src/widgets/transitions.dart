@@ -23,6 +23,58 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
+///{@tool sample}
+///
+/// This code defines a widget called `Spinner` that spins a green square
+/// continually. It is built with an [AnimatedWidget].
+///
+/// ```dart
+/// class Spinner extends StatefulWidget {
+///   @override
+///   _SpinnerState createState() => _SpinnerState();
+/// }
+///
+/// class _SpinnerState extends State<Spinner> with TickerProviderStateMixin {
+///   AnimationController _controller;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       duration: const Duration(seconds: 10),
+///       vsync: this,
+///     )..repeat();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return SpinningContainer(controller: _controller);
+///   }
+/// }
+///
+/// class SpinningContainer extends AnimatedWidget {
+///   const SpinningContainer({Key key, AnimationController controller})
+///       : super(key: key, listenable: controller);
+///
+///   Animation<double> get _progress => listenable;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Transform.rotate(
+///       angle: _progress.value * 2.0 * math.pi,
+///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
 ///
@@ -203,7 +255,8 @@ class ScaleTransition extends AnimatedWidget {
     @required Animation<double> scale,
     this.alignment = Alignment.center,
     this.child,
-  }) : super(key: key, listenable: scale);
+  }) : assert(scale != null),
+       super(key: key, listenable: scale);
 
   /// The animation that controls the scale of the child.
   ///
@@ -254,14 +307,23 @@ class RotationTransition extends AnimatedWidget {
   const RotationTransition({
     Key key,
     @required Animation<double> turns,
+    this.alignment = Alignment.center,
     this.child,
-  }) : super(key: key, listenable: turns);
+  }) : assert(turns != null),
+       super(key: key, listenable: turns);
 
   /// The animation that controls the rotation of the child.
   ///
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
   Animation<double> get turns => listenable;
+
+  /// The alignment of the origin of the coordinate system around which the
+  /// rotation occurs, relative to the size of the box.
+  ///
+  /// For example, to set the origin of the rotation to top right corner, use
+  /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
+  final Alignment alignment;
 
   /// The widget below this widget in the tree.
   ///
@@ -274,7 +336,7 @@ class RotationTransition extends AnimatedWidget {
     final Matrix4 transform = Matrix4.rotationZ(turnsValue * math.pi * 2.0);
     return Transform(
       transform: transform,
-      alignment: Alignment.center,
+      alignment: alignment,
       child: child,
     );
   }
@@ -391,7 +453,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     @required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(opacity != null),
+       super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -483,7 +546,8 @@ class PositionedTransition extends AnimatedWidget {
     Key key,
     @required Animation<RelativeRect> rect,
     @required this.child,
-  }) : super(key: key, listenable: rect);
+  }) : assert(rect != null),
+       super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
   Animation<RelativeRect> get rect => listenable;
@@ -535,7 +599,10 @@ class RelativePositionedTransition extends AnimatedWidget {
     @required Animation<Rect> rect,
     @required this.size,
     @required this.child,
-  }) : super(key: key, listenable: rect);
+  }) : assert(rect != null),
+       assert(size != null),
+       assert(child != null),
+       super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
   ///
@@ -573,9 +640,9 @@ class RelativePositionedTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DecoratedBox], which also draws a [Decoration] but is not animated.
-/// * [AnimatedContainer], a more full-featured container that also animates on
-///   decoration using an internal animation.
+///  * [DecoratedBox], which also draws a [Decoration] but is not animated.
+///  * [AnimatedContainer], a more full-featured container that also animates on
+///    decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
@@ -584,13 +651,15 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new DecoratedBox].
+  ///  * [new DecoratedBox]
   const DecoratedBoxTransition({
     Key key,
     @required this.decoration,
     this.position = DecorationPosition.background,
     @required this.child,
-  }) : super(key: key, listenable: decoration);
+  }) : assert(decoration != null),
+       assert(child != null),
+       super(key: key, listenable: decoration);
 
   /// Animation of the decoration to paint.
   ///
@@ -638,14 +707,16 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  /// * [new Align].
+  ///  * [new Align].
   const AlignTransition({
     Key key,
     @required Animation<AlignmentGeometry> alignment,
     @required this.child,
     this.widthFactor,
     this.heightFactor,
-  }) : super(key: key, listenable: alignment);
+  }) : assert(alignment != null),
+       assert(child != null),
+       super(key: key, listenable: alignment);
 
   /// The animation that controls the child's alignment.
   Animation<AlignmentGeometry> get alignment => listenable;
@@ -677,8 +748,8 @@ class AlignTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
-///   but is not animated.
+///  * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
+///    but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
   /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
   /// the widget.
@@ -690,7 +761,9 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-  }) : super(key: key, listenable: style);
+  }) : assert(style != null),
+       assert(child != null),
+       super(key: key, listenable: style);
 
   /// The animation that controls the descendants' text style.
   Animation<TextStyle> get style => listenable;
@@ -752,7 +825,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
@@ -797,6 +870,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///
@@ -806,7 +880,8 @@ class AnimatedBuilder extends AnimatedWidget {
     @required Listenable animation,
     @required this.builder,
     this.child,
-  }) : assert(builder != null),
+  }) : assert(animation != null),
+       assert(builder != null),
        super(key: key, listenable: animation);
 
   /// Called every time the animation changes value.

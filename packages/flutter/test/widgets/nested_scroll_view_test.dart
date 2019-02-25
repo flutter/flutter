@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
 
@@ -22,7 +23,7 @@ class _CustomPhysics extends ClampingScrollPhysics {
   }
 }
 
-Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
+Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -34,9 +35,11 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: Scaffold(
+          drawerDragStartBehavior: DragStartBehavior.down,
           body: DefaultTabController(
             length: 4,
             child: NestedScrollView(
+              dragStartBehavior: DragStartBehavior.down,
               controller: controller,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
@@ -79,6 +82,7 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
                     ],
                   ),
                   ListView(
+                    dragStartBehavior: DragStartBehavior.down,
                     children: <Widget>[
                       Container(
                         height: 100.0,
@@ -90,6 +94,7 @@ Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
                     child: const Center(child: Text('ccc1')),
                   ),
                   ListView(
+                    dragStartBehavior: DragStartBehavior.down,
                     children: <Widget>[
                       Container(
                         height: 10000.0,
@@ -361,6 +366,7 @@ void main() {
         DefaultTabController(
           length: _tabs.length, // This is the number of tabs.
           child: NestedScrollView(
+            dragStartBehavior: DragStartBehavior.down,
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
               buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
               // These are the slivers that show up in the "outer" scroll view.
@@ -389,15 +395,17 @@ void main() {
                     forceElevated: innerBoxIsScrolled,
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab bar.
-                      tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),
                 ),
               ];
             },
             body: TabBarView(
+              dragStartBehavior: DragStartBehavior.down,
               // These are the contents of the tab views, below the tabs.
-              children: _tabs.map((String name) {
+              children: _tabs.map<Widget>((String name) {
                 return SafeArea(
                   top: false,
                   bottom: false,
@@ -416,6 +424,7 @@ void main() {
                         // it allows the list to remember its scroll position when
                         // the tab view is not on the screen.
                         key: PageStorageKey<String>(name),
+                        dragStartBehavior: DragStartBehavior.down,
                         slivers: <Widget>[
                           SliverOverlapInjector(
                             // This is the flip side of the SliverOverlapAbsorber above.
@@ -590,6 +599,7 @@ void main() {
           child: DefaultTabController(
             length: 1,
             child: NestedScrollView(
+              dragStartBehavior: DragStartBehavior.down,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   const SliverPersistentHeader(
@@ -598,6 +608,7 @@ void main() {
                 ];
               },
               body: SingleChildScrollView(
+                dragStartBehavior: DragStartBehavior.down,
                 child: Container(
                   height: 1000.0,
                   child: const Placeholder(key: key2),

@@ -20,7 +20,7 @@ const Duration _kDefaultTaskTimeout = Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
-typedef Future<TaskResult> TaskFunction();
+typedef TaskFunction = Future<TaskResult> Function();
 
 bool _isTaskRegistered = false;
 
@@ -49,17 +49,6 @@ Future<TaskResult> task(TaskFunction task) {
 }
 
 class _TaskRunner {
-  static final Logger logger = Logger('TaskRunner');
-
-  final TaskFunction task;
-
-  // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
-  RawReceivePort _keepAlivePort;
-  Timer _startTaskTimeout;
-  bool _taskStarted = false;
-
-  final Completer<TaskResult> _completer = Completer<TaskResult>();
-
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
@@ -74,6 +63,17 @@ class _TaskRunner {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
+
+  final TaskFunction task;
+
+  // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
+  RawReceivePort _keepAlivePort;
+  Timer _startTaskTimeout;
+  bool _taskStarted = false;
+
+  final Completer<TaskResult> _completer = Completer<TaskResult>();
+
+  static final Logger logger = Logger('TaskRunner');
 
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
@@ -148,8 +148,8 @@ class _TaskRunner {
 class TaskResult {
   /// Constructs a successful result.
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
-      : this.succeeded = true,
-        this.message = 'success' {
+      : succeeded = true,
+        message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (String key in benchmarkScoreKeys) {
@@ -173,9 +173,9 @@ class TaskResult {
 
   /// Constructs an unsuccessful result.
   TaskResult.failure(this.message)
-      : this.succeeded = false,
-        this.data = null,
-        this.benchmarkScoreKeys = const <String>[];
+      : succeeded = false,
+        data = null,
+        benchmarkScoreKeys = const <String>[];
 
   /// Whether the task succeeded.
   final bool succeeded;

@@ -4,13 +4,15 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum GridDemoTileStyle {
   imageOnly,
   oneLine,
   twoLine
 }
 
-typedef void BannerTapCallback(Photo photo);
+typedef BannerTapCallback = void Function(Photo photo);
 
 const double _kMinFlingVelocity = 800.0;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
@@ -117,10 +119,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size).shortestSide;
-    _flingAnimation = Tween<Offset>(
+    _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
       end: _clampOffset(_offset + direction * distance)
-    ).animate(_controller);
+    ));
     _controller
       ..value = 0.0
       ..fling(velocity: magnitude / 1000.0);
@@ -340,6 +342,7 @@ class GridListDemoState extends State<GridListDemo> {
       appBar: AppBar(
         title: const Text('Grid list'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
@@ -371,7 +374,7 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children: photos.map((Photo photo) {
+                children: photos.map<Widget>((Photo photo) {
                   return GridDemoPhotoItem(
                     photo: photo,
                     tileStyle: _tileStyle,

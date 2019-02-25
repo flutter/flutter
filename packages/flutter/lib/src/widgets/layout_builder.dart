@@ -9,7 +9,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);
+typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
@@ -25,9 +25,9 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 ///
 /// See also:
 ///
-/// * [Builder], which calls a `builder` function at build time.
-/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-/// * [CustomSingleChildLayout], which positions its child during layout.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///

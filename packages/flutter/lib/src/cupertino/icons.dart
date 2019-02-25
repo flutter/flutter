@@ -58,8 +58,33 @@ class CupertinoIcons {
   ///  * [share_up], for another (pre-iOS 7) version of this icon.
   static const IconData share_solid = IconData(0xf4cb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A book silhouette spread open.
+  /// A book silhouette spread open. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book_solid], which is similar, but filled in.
   static const IconData book = IconData(0xf3e7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book], which is similar, but not filled in.
+  static const IconData book_solid = IconData(0xf3e8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark_solid], which is similar, but filled in.
+  static const IconData bookmark = IconData(0xf3e9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark], which is similar, but not filled in.
+  static const IconData bookmark_solid = IconData(0xf3ea, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A letter 'i' in a circle.
   static const IconData info = IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -464,4 +489,349 @@ class CupertinoIcons {
 
   /// A symbol representing a single musical note.
   static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow_solid], which is similar, but filled in.
+  static const IconData play_arrow = IconData(0xf487, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow], which is similar, but not filled in.
+  static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause_solid], which is similar, but filled in.
+  static const IconData pause = IconData(0xf477, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause], which is similar, but not filled in.
+  static const IconData pause_solid = IconData(0xf478, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [loop_thick], which is similar, but thicker.
+  static const IconData loop = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [loop], which is similar, but thinner.
+  static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a single small sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is similar, but with an additional larger sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which has an additional larger sound wave next to the small one.
+  static const IconData volume_down = IconData(0xf3b7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but adds a small sound wave.
+  ///  * [volume_off], which is similar, but adds a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which is similar, but has a small and a large sound wave.
+  static const IconData volume_mute = IconData(0xf3b8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but not crossed out and only has the small wave.
+  ///  * [volume_mute], which is similar, but not crossed out.
+  ///  * [volume_up], which is the version of this icon that is not crossed out.
+  static const IconData volume_off = IconData(0xf3b9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but only has the small sound wave.
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is the crossed out version of this icon.
+  static const IconData volume_up = IconData(0xf3ba, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing inwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen_exit], which is similar, but has the corners facing outwards.
+  static const IconData fullscreen = IconData(0xf386, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing outwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen], which is similar, but has the corners facing inwards.
+  static const IconData fullscreen_exit = IconData(0xf37d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in microphone with a diagonal line crossing it.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in and without a diagonal line.
+  ///  * [mic_solid], which is similar, but without a diagonal line.
+  static const IconData mic_off = IconData(0xf45f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic_solid], which is similar, but filled in.
+  ///  * [mic_off], which is similar, but filled in and with a diagonal line crossing the icon.
+  static const IconData mic = IconData(0xf460, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in.
+  ///  * [mic_off], which is similar, but with a diagonal line crossing the icon.
+  static const IconData mic_solid = IconData(0xf461, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A circle with a dotted clock face inside with hands showing 10:30.
+  ///
+  /// See also:
+  ///
+  ///  * [clock_solid], which is similar, but filled in.
+  ///  * [time], which is similar, but without dots on the clock face.
+  ///  * [time_solid], which is similar, but filled in and without dots on the clock face.
+  static const IconData clock = IconData(0xf4be, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in circle with a dotted clock face inside with hands showing 10:30.
+  ///
+  /// See also:
+  ///
+  ///  * [clock], which is similar, but not filled in.
+  ///  * [time], which is similar, but not filled in and without dots on the clock face.
+  ///  * [time_solid], which is similar, but without dots on the clock face.
+  static const IconData clock_solid = IconData(0xf4bf, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  ///
+  /// See also:
+  ///
+  ///  * [time_solid], which is similar, but filled in.
+  ///  * [clock], which is similar, but with dots on the clockface.
+  ///  * [clock_solid], which is similar, but filled in and with dots on the clockface.
+  static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  ///
+  /// See also:
+  ///
+  ///  * [time], which is similar, but not filled in.
+  ///  * [clock], which is similar, but not filled in and with dots on the clockface.
+  ///  * [clock_solid], which is similar, but with dots on the clockface.
+  static const IconData time_solid = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An unlocked padlock.
+  ///
+  /// See also:
+  ///
+  ///  * [padlock_solid], which is similar, but filled in.
+  static const IconData padlock = IconData(0xf4c8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An unlocked padlock.
+  ///
+  /// See also:
+  ///
+  ///  * [padlock], which is similar, but not filled in.
+  static const IconData padlock_solid = IconData(0xf4c9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An open eye.
+  ///
+  /// See also:
+  ///
+  ///  * [eye_solid], which is similar, but filled in.
+  static const IconData eye = IconData(0xf424, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An open eye.
+  ///
+  /// See also:
+  ///
+  ///  * [eye], which is similar, but not filled in.
+  static const IconData eye_solid = IconData(0xf425, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_solid], which is similar, but filled in.
+  ///  * [person_add], which has an additional plus sign next to the person.
+  ///  * [group], which consists of three people.
+  static const IconData person = IconData(0xf47d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person], which is similar, but not filled in.
+  ///  * [person_add_solid], which has an additional plus sign next to the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_solid = IconData(0xf47e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add_solid], which is similar, but filled in.
+  ///  * [person], which is just the person.
+  ///  * [group], which consists of three people.
+  static const IconData person_add = IconData(0xf47f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add], which is similar, but not filled in.
+  ///  * [person_solid], which is just the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_add_solid = IconData(0xf480, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group_solid], which is similar, but filled in.
+  ///  * [person], which is just a single person.
+  static const IconData group = IconData(0xf47b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group], which is similar, but not filled in.
+  ///  * [person_solid], which is just a single person.
+  static const IconData group_solid = IconData(0xf47c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a closed mail envelope.
+  static const IconData mail = IconData(0xf422, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A closed mail envelope. This icon is filled in.
+  static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a location pin.
+  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A location pin. This icon is filled in.
+  static const IconData location_solid = IconData(0xf456, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a sticker tag.
+  ///
+  /// See also:
+  ///
+  ///  * [tags], similar but with 2 overlapping tags.
+  static const IconData tag = IconData(0xf48c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A sticker tag. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tags_solid], similar but with 2 overlapping tags.
+  static const IconData tag_solid = IconData(0xf48d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outlines of 2 overlapping sticker tags.
+  ///
+  /// See also:
+  ///
+  ///  * [tag], similar but with only one tag.
+  static const IconData tags = IconData(0xf48e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// 2 overlapping sticker tags. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tag_solid], similar but with only one tag.
+  static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in bus.
+  static const IconData bus = IconData(0xf36d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in car.
+  ///
+  /// See also:
+  ///
+  ///  * [car_detailed], similar, but a more detailed and realistic representation.
+  static const IconData car = IconData(0xf36f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in detailed, realistic car.
+  ///
+  /// See also:
+  ///
+  ///  * [car], similar, but a more simple representation.
+  static const IconData car_detailed = IconData(0xf2c1, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window divided in half and two headlights.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_two], similar, but with a full, undivided window and a single, centered headlight.
+  static const IconData train_style_one = IconData(0xf3af, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window and a single, centered headlight.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_one], similar, but with a with a window divided in half and two headlights.
+  static const IconData train_style_two = IconData(0xf3b4, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw_solid], similar, but filled in.
+  static const IconData paw = IconData(0xf479, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw], similar, but not filled in.
+  static const IconData paw_solid = IconData(0xf47a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller_solid], similar, but filled in.
+  static const IconData game_controller = IconData(0xf43a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller], similar, but not filled in.
+  static const IconData game_controller_solid = IconData(0xf43b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask_solid], similar, but filled in.
+  static const IconData lab_flask = IconData(0xf430, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask], similar, but not filled in.
+  static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

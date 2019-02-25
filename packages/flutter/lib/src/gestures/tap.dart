@@ -36,7 +36,7 @@ class TapDownDetails {
 ///
 ///  * [GestureDetector.onTapDown], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapDownCallback(TapDownDetails details);
+typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
 /// Details for [GestureTapUpCallback], such as position.
 ///
@@ -65,7 +65,7 @@ class TapUpDetails {
 ///
 ///  * [GestureDetector.onTapUp], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapUpCallback(TapUpDetails details);
+typedef GestureTapUpCallback = void Function(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
 ///
@@ -73,7 +73,7 @@ typedef void GestureTapUpCallback(TapUpDetails details);
 ///
 ///  * [GestureDetector.onTap], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapCallback();
+typedef GestureTapCallback = void Function();
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDownCallback] will not end up causing a tap.
@@ -82,7 +82,7 @@ typedef void GestureTapCallback();
 ///
 ///  * [GestureDetector.onTapCancel], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef void GestureTapCancelCallback();
+typedef GestureTapCancelCallback = void Function();
 
 /// Recognizes taps.
 ///

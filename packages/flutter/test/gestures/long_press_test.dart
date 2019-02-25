@@ -137,4 +137,25 @@ void main() {
     drag.dispose();
   });
 
+  testGesture('Should recognize long press up', (GestureTester tester) {
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+
+    bool longPressUpRecognized = false;
+    longPress.onLongPressUp = () {
+      longPressUpRecognized = true;
+    };
+
+    longPress.addPointer(down);
+    tester.closeArena(5);
+    expect(longPressUpRecognized, isFalse);
+    tester.route(down); // kLongPressTimeout = 500;
+    expect(longPressUpRecognized, isFalse);
+    tester.async.elapse(const Duration(milliseconds: 300));
+    expect(longPressUpRecognized, isFalse);
+    tester.async.elapse(const Duration(milliseconds: 700));
+    tester.route(up);
+    expect(longPressUpRecognized, isTrue);
+
+    longPress.dispose();
+  });
 }

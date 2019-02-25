@@ -12,7 +12,7 @@ const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
-final Tween<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
+final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
   begin: const BorderRadius.only(
     topLeft: Radius.circular(12.0),
     topRight: Radius.circular(12.0),
@@ -199,6 +199,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   AnimationController _controller;
   Animation<double> _frontOpacity;
 
+  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
+    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+
   @override
   void initState() {
     super.initState();
@@ -207,14 +210,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
-
-    _frontOpacity =
-      Tween<double>(begin: 0.2, end: 1.0).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
-        ),
-      );
+    _frontOpacity = _controller.drive(_frontOpacityTween);
   }
 
   @override
@@ -254,10 +250,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    final Animation<RelativeRect> frontRelativeRect = RelativeRectTween(
+    final Animation<RelativeRect> frontRelativeRect = _controller.drive(RelativeRectTween(
       begin: RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
-    ).animate(_controller);
+    ));
 
     final List<Widget> layers = <Widget>[
       // Back layer
@@ -301,7 +297,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               color: Theme.of(context).canvasColor,
               clipper: ShapeBorderClipper(
                 shape: BeveledRectangleBorder(
-                  borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
+                  borderRadius: _kFrontHeadingBevelRadius.transform(_controller.value),
                 ),
               ),
               clipBehavior: Clip.antiAlias,

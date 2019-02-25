@@ -8,11 +8,12 @@ import 'dart:collection';
 // COMMON SIGNATURES
 
 export 'dart:ui' show VoidCallback;
+export 'bitfield.dart' if (dart.library.html) 'bitfield_unsupported.dart';
 
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also [ValueSetter].
-typedef void ValueChanged<T>(T value);
+typedef ValueChanged<T> = void Function(T value);
 
 /// Signature for callbacks that report that a value has been set.
 ///
@@ -26,7 +27,7 @@ typedef void ValueChanged<T>(T value);
 ///
 ///  * [ValueGetter], the getter equivalent of this signature.
 ///  * [AsyncValueSetter], an asynchronous version of this signature.
-typedef void ValueSetter<T>(T value);
+typedef ValueSetter<T> = void Function(T value);
 
 /// Signature for callbacks that are to report a value on demand.
 ///
@@ -34,10 +35,10 @@ typedef void ValueSetter<T>(T value);
 ///
 ///  * [ValueSetter], the setter equivalent of this signature.
 ///  * [AsyncValueGetter], an asynchronous version of this signature.
-typedef T ValueGetter<T>();
+typedef ValueGetter<T> = T Function();
 
 /// Signature for callbacks that filter an iterable.
-typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
+typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
 
 /// Signature of callbacks that have no arguments and return no data, but that
 /// return a [Future] to indicate when their work is complete.
@@ -47,7 +48,7 @@ typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
 ///  * [VoidCallback], a synchronous version of this signature.
 ///  * [AsyncValueGetter], a signature for asynchronous getters.
 ///  * [AsyncValueSetter], a signature for asynchronous setters.
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<void> Function();
 
 /// Signature for callbacks that report that a value has been set and return a
 /// [Future] that completes when the value has been saved.
@@ -56,7 +57,7 @@ typedef Future<Null> AsyncCallback();
 ///
 ///  * [ValueSetter], a synchronous version of this signature.
 ///  * [AsyncValueGetter], the getter equivalent of this signature.
-typedef Future<Null> AsyncValueSetter<T>(T value);
+typedef AsyncValueSetter<T> = Future<void> Function(T value);
 
 /// Signature for callbacks that are to asynchronously report a value on demand.
 ///
@@ -64,70 +65,7 @@ typedef Future<Null> AsyncValueSetter<T>(T value);
 ///
 ///  * [ValueGetter], a synchronous version of this signature.
 ///  * [AsyncValueSetter], the setter equivalent of this signature.
-typedef Future<T> AsyncValueGetter<T>();
-
-
-// BITFIELD
-
-/// The largest SMI value.
-///
-/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
-const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
-
-/// A BitField over an enum (or other class whose values implement "index").
-/// Only the first 62 values of the enum can be used as indices.
-class BitField<T extends dynamic> {
-  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
-  static const int _allZeros = 0;
-  static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
-
-  /// Creates a bit field of all zeros.
-  ///
-  /// The given length must be at most 62.
-  BitField(this._length)
-    : assert(_length <= _smiBits),
-      _bits = _allZeros;
-
-  /// Creates a bit field filled with a particular value.
-  ///
-  /// If the value argument is true, the bits are filled with ones. Otherwise,
-  /// the bits are filled with zeros.
-  ///
-  /// The given length must be at most 62.
-  BitField.filled(this._length, bool value)
-    : assert(_length <= _smiBits),
-      _bits = value ? _allOnes : _allZeros;
-
-  final int _length;
-  int _bits;
-
-  /// Returns whether the bit with the given index is set to one.
-  bool operator [](T index) {
-    assert(index.index < _length);
-    return (_bits & 1 << index.index) > 0;
-  }
-
-  /// Sets the bit with the given index to the given value.
-  ///
-  /// If value is true, the bit with the given index is set to one. Otherwise,
-  /// the bit is set to zero.
-  void operator []=(T index, bool value) {
-    assert(index.index < _length);
-    if (value)
-      _bits = _bits | (1 << index.index);
-    else
-      _bits = _bits & ~(1 << index.index);
-  }
-
-  /// Sets all the bits to the given value.
-  ///
-  /// If the value is true, the bits are all set to one. Otherwise, the bits are
-  /// all set to zero. Defaults to setting all the bits to zero.
-  void reset([ bool value = false ]) {
-    _bits = value ? _allOnes : _allZeros;
-  }
-}
-
+typedef AsyncValueGetter<T> = Future<T> Function();
 
 // LAZY CACHING ITERATOR
 
@@ -280,3 +218,23 @@ class _LazyListIterator<E> implements Iterator<E> {
     return true;
   }
 }
+
+/// A factory interface that also reports the type of the created objects.
+class Factory<T> {
+  /// Creates a new factory.
+  ///
+  /// The `constructor` parameter must not be null.
+  const Factory(this.constructor) : assert(constructor != null);
+
+  /// Creates a new object of type T.
+  final ValueGetter<T> constructor;
+
+  /// The type of the objects created by this factory.
+  Type get type => T;
+
+  @override
+  String toString() {
+    return 'Factory(type: $type)';
+  }
+}
+

@@ -22,7 +22,25 @@ export 'pointer_router.dart' show PointerRouter;
 /// [GestureRecognizer.invokeCallback]. This allows the
 /// [GestureRecognizer.invokeCallback] mechanism to be generically used with
 /// anonymous functions that return objects of particular types.
-typedef T RecognizerCallback<T>();
+typedef RecognizerCallback<T> = T Function();
+
+/// Configuration of offset passed to [DragStartDetails].
+///
+/// The settings determines when a drag formally starts when the user
+/// initiates a drag.
+///
+/// See also:
+///
+///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+enum DragStartBehavior {
+  /// Set the initial offset, at the position where the first down even was
+  /// detected.
+  down,
+
+  /// Set the initial position at the position where the drag start event was
+  /// detected.
+  start,
+}
 
 /// The base class that all gesture recognizers inherit from.
 ///

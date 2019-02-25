@@ -41,8 +41,26 @@ void main() {
         await getValueAsString('FontManifest.json', asset),
         '[{"family":"packages/font/test_font","fonts":[{"asset":"packages/font/test_font_file"}]}]',
       );
+      expect(asset.wasBuiltOnce(), true);
     });
 
+    testUsingContext('handles empty pubspec with .packages', () async {
+      final String dataPath = fs.path.join(
+        getFlutterRoot(),
+        'packages',
+        'flutter_tools',
+        'test',
+        'data',
+        'fuchsia_test',
+      );
+      final AssetBundle asset = AssetBundleFactory.instance.createBundle();
+      await asset.build(
+        manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
+        packagesPath: fs.path.join(dataPath, 'main', '.packages'),
+        includeDefaultFonts: false,
+      );
+      expect(asset.wasBuiltOnce(), true);
+    });
   });
 }
 

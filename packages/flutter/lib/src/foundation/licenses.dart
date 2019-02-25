@@ -5,7 +5,7 @@
 import 'dart:async';
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
-typedef Stream<LicenseEntry> LicenseEntryCollector();
+typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
 
 /// A string that represents one paragraph in a [LicenseEntry].
 ///
@@ -54,7 +54,8 @@ abstract class LicenseEntry {
 }
 
 enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph, inParagraph,
+  beforeParagraph,
+  inParagraph,
 }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
@@ -63,7 +64,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// unless they start with the same number of spaces as the previous line, in
 /// which case it's assumed they are a continuation of an indented paragraph.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// For example, the BSD license in this format could be encoded as follows:
 ///
@@ -101,6 +102,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///   });
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// This would result in a license with six [paragraphs], the third, fourth, and
 /// fifth being indented one level.

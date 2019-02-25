@@ -4,16 +4,16 @@
 
 import 'dart:io';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 
-export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 // Defines a 'package:test' shim.
 // TODO(ianh): Clean this up once https://github.com/dart-lang/matcher/issues/98 is fixed
 
 /// A matcher that compares the type of the actual value to the type argument T.
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that

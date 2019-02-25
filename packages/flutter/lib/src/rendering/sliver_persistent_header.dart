@@ -356,7 +356,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : _snapConfiguration = snapConfiguration, super(child: child);
+  }) : _snapConfiguration = snapConfiguration,
+       super(child: child);
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -393,6 +394,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       return;
     if (value == null) {
       _controller?.dispose();
+      _controller = null;
     } else {
       if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
         _controller?.resync(value.vsync);
@@ -439,15 +441,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         markNeedsLayout();
       });
 
-    // Recreating the animation rather than updating a cached value, only
-    // to avoid the extra complexity of managing the animation's lifetime.
-    _animation = Tween<double>(
-      begin: _effectiveScrollOffset,
-      end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: snapConfiguration.curve,
-    ));
+    _animation = _controller.drive(
+      Tween<double>(
+        begin: _effectiveScrollOffset,
+        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
+      ).chain(CurveTween(
+        curve: snapConfiguration.curve,
+      )),
+    );
 
     _controller.forward(from: 0.0);
   }
@@ -516,13 +517,16 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   @override
   double updateGeometry() {
     final double minExtent = this.minExtent;
+    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent ? minExtent : constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double clampedPaintExtent = paintExtent.clamp(minAllowedExtent, constraints.remainingPaintExtent);
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
-      paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
-      layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
+      paintOrigin: math.min(constraints.overlap, 0.0),
+      paintExtent: clampedPaintExtent,
+      layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.

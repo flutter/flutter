@@ -41,7 +41,7 @@ void main() {
 
       // Bring up keyboard
       await driver.tap(textFieldFinder);
-      await Future<Null>.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       // Ensure that TextField is visible again
       await driver.waitFor(textFieldFinder);

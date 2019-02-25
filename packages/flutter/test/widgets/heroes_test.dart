@@ -14,13 +14,19 @@ Key homeRouteKey = const Key('homeRoute');
 Key routeTwoKey = const Key('routeTwo');
 Key routeThreeKey = const Key('routeThree');
 
+bool transitionFromUserGestures = false;
+
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => Material(
     child: ListView(
       key: homeRouteKey,
       children: <Widget>[
         Container(height: 100.0, width: 100.0),
-        Card(child: Hero(tag: 'a', child: Container(height: 100.0, width: 100.0, key: firstKey))),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: Container(height: 100.0, width: 100.0, key: firstKey),
+        )),
         Container(height: 100.0, width: 100.0),
         FlatButton(
           child: const Text('two'),
@@ -42,7 +48,11 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           onPressed: () { Navigator.pop(context); }
         ),
         Container(height: 150.0, width: 150.0),
-        Card(child: Hero(tag: 'a', child: Container(height: 150.0, width: 150.0, key: secondKey))),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: Container(height: 150.0, width: 150.0, key: secondKey),
+        )),
         Container(height: 150.0, width: 150.0),
         FlatButton(
           child: const Text('three'),
@@ -67,7 +77,11 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         Card(
           child: Padding(
             padding: const EdgeInsets.only(left: 50.0),
-            child: Hero(tag: 'a', child: Container(height: 150.0, width: 150.0, key: secondKey))
+            child: Hero(
+              tag: 'a',
+              transitionOnUserGestures: transitionFromUserGestures,
+              child: Container(height: 150.0, width: 150.0, key: secondKey),
+            )
           ),
         ),
         Container(height: 150.0, width: 150.0),
@@ -78,7 +92,6 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       ]
     )
   ),
-
 };
 
 class ThreeRoute extends MaterialPageRoute<void> {
@@ -121,6 +134,10 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 }
 
 void main() {
+  setUp(() {
+    transitionFromUserGestures = false;
+  });
+
   testWidgets('Heroes animate', (WidgetTester tester) async {
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -948,7 +965,7 @@ void main() {
 
     // One Opacity widget per Hero, only one now has opacity 0.0
     final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
-    final Iterable<double> opacities = renderers.map((RenderOpacity r) => r.opacity);
+    final Iterable<double> opacities = renderers.map<double>((RenderOpacity r) => r.opacity);
     expect(opacities.singleWhere((double opacity) => opacity == 0.0), 0.0);
 
     // Hero BC's flight finishes normally.
@@ -1334,5 +1351,101 @@ void main() {
     expect(find.text('Wolverine'), findsOneWidget);
     expect(find.text('Venom'), findsOneWidget);
     expect(find.text('Joker'), findsOneWidget);
+  });
+
+  testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture  gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(180.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+
+    await tester.pump();
+
+    // Both Heros exist and seated in their normal parents.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    // To make sure the hero had all chances of starting.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+  });
+
+  testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
+    transitionFromUserGestures = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(200.0, 0.0));
+    await tester.pump();
+
+    // We're going to page 1 so page 1's Hero is lifted into flight.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // Move further along.
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+
+    // Same results.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await gesture.up();
+    // Finish transition.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Hero A is back in the card.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      initialRoute: '/two',
+    ));
+    expect(find.text('two'), findsOneWidget);
   });
 }

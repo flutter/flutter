@@ -26,11 +26,10 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<void>((Null result) {
-      expectSync(result, isNull);
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
 
@@ -48,11 +47,10 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((Null result) {
-      expectSync(result, isNull);
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
     await tester.pump(); // bottom sheet show animation starts
@@ -83,7 +81,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet')
@@ -137,7 +135,7 @@ void main() {
       )
     ));
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet')

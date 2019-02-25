@@ -13,10 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle(this._assetBundleMap);
 
   Map<String, List<String>> _assetBundleMap;
-
-  TestAssetBundle(this._assetBundleMap);
 
   Map<String, int> loadCallCount = <String, int>{};
 
@@ -168,14 +167,16 @@ void main() {
     });
   });
 
-  group(
-      'Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
+  group('Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
     const String mainAssetPath = 'assets/normalFolder/normalFile.png';
     const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
 
-    void _buildBundleAndTestVariantLogic(double deviceRatio, double chosenAssetRatio,
-        String expectedAssetPath) {
+    void _buildBundleAndTestVariantLogic(
+      double deviceRatio,
+      double chosenAssetRatio,
+      String expectedAssetPath,
+    ) {
       final Map<String, List<String>> assetBundleMap =
       <String, List<String>>{};
 

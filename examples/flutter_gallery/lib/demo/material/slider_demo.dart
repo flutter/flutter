@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class SliderDemo extends StatefulWidget {
   static const String routeName = '/material/slider';
 
@@ -35,7 +37,7 @@ class _CustomThumbShape extends SliderComponentShape {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
-  static final Tween<double> sizeTween = Tween<double>(
+  static final Animatable<double> sizeTween = Tween<double>(
     begin: _disabledThumbSize,
     end: _thumbSize,
   );
@@ -74,7 +76,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     return Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
 
-  static final Tween<double> sizeTween = Tween<double>(
+  static final Animatable<double> sizeTween = Tween<double>(
     begin: _disabledIndicatorSize,
     end: _indicatorSize,
   );
@@ -132,7 +134,10 @@ class _SliderDemoState extends State<SliderDemo> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Sliders')),
+      appBar: AppBar(
+        title: const Text('Sliders'),
+        actions: <Widget>[MaterialDemoDocumentationButton(SliderDemo.routeName)],
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Column(
@@ -152,6 +157,49 @@ class _SliderDemoState extends State<SliderDemo> {
                   },
                 ),
                 const Text('Continuous'),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Slider(
+                        value: _value,
+                        min: 0.0,
+                        max: 100.0,
+                        onChanged: (double value) {
+                          setState(() {
+                            _value = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Editable numerical value',
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        child: TextField(
+                          onSubmitted: (String value) {
+                            final double newValue = double.tryParse(value);
+                            if (newValue != null && newValue != _value) {
+                              setState(() {
+                                _value = newValue.clamp(0, 100);
+                              });
+                            }
+                          },
+                          keyboardType: TextInputType.number,
+                          controller: TextEditingController(
+                            text: _value.toStringAsFixed(0),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Text('Continuous with Editable Numerical Value'),
               ],
             ),
             Column(

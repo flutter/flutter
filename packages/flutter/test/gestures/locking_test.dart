@@ -10,7 +10,7 @@ import 'package:flutter/gestures.dart';
 
 import '../flutter_test_alternative.dart';
 
-typedef void HandleEventCallback(PointerEvent event);
+typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback callback;
@@ -29,7 +29,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
     ]
   );
 
-  Future<Null> test(VoidCallback callback) {
+  Future<void> test(VoidCallback callback) {
     assert(callback != null);
     return _binding.lockEvents(() async {
       ui.window.onPointerDataPacket(packet);

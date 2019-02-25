@@ -57,4 +57,16 @@ void main() {
       expect(log.length, 2);
     });
   });
+
+  test('debugPrint can print null', () {
+    expect(
+      captureOutput(() { debugPrintThrottled(null); }),
+      equals(<String>['null']),
+    );
+
+    expect(
+      captureOutput(() { debugPrintThrottled(null, wrapWidth: 80); }),
+      equals(<String>['null']),
+    );
+  });
 }

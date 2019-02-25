@@ -28,7 +28,7 @@ void main() {
     );
   });
   testWidgets('Table widget - control test', (WidgetTester tester) async {
-    Future<Null> run(TextDirection textDirection) async {
+    Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: textDirection,
@@ -208,7 +208,7 @@ void main() {
   });
 
   testWidgets('Table border - smoke test', (WidgetTester tester) async {
-    Future<Null> run(TextDirection textDirection) async {
+    Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: textDirection,
@@ -295,6 +295,31 @@ void main() {
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
     expect(boxG1, isNot(equals(boxG2)));
+  });
+
+  testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27083
+    const SizedBox cell = SizedBox(width: 16, height: 16);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    // If the above bug is present this test will never terminate.
   });
 
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
@@ -771,25 +796,25 @@ void main() {
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'Table-[GlobalKey#00000](renderObject: RenderTable#00000)\n'
+        'Table-[GlobalKey#00000](dependencies: [Directionality], renderObject: RenderTable#00000)\n'
         '├Text("A")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("B")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("C")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("D")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("EEE")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("F")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("G")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("H")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '└Text("III")\n'
-        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
       ),
     );
   });

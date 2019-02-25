@@ -19,8 +19,6 @@
 # Android Studio, and the `flutter analyze` command.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -30,6 +28,10 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    # Ignore analyzer hints for updating pubspecs when using Future or
+    # Stream and not importing dart:async
+    # Please see https://github.com/flutter/flutter/pull/24528 for details.
+    sdk_version_async_exported_from_core: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively
@@ -58,6 +60,7 @@ linter:
     - avoid_empty_else
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
+    # - avoid_implementing_value_types # not yet tested
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
@@ -67,8 +70,11 @@ linter:
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # there are plenty of valid reasons to return null
+    # - avoid_returning_null_for_future # not yet tested
+    - avoid_returning_null_for_void
     # - avoid_returning_this # there are plenty of valid reasons to return this
     # - avoid_setters_without_getters # not yet tested
+    # - avoid_shadowing_type_parameters # not yet tested
     # - avoid_single_cascade_in_expression_statements # not yet tested
     - avoid_slow_async_io
     - avoid_types_as_parameter_names
@@ -89,6 +95,7 @@ linter:
     - empty_constructor_bodies
     - empty_statements
     # - file_names # not yet tested
+    - flutter_style_todos
     - hash_and_equals
     - implementation_imports
     # - invariant_booleans # too many false positives: https://github.com/dart-lang/linter/issues/811
@@ -113,8 +120,7 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
-    - prefer_collection_literals
+    # - prefer_collection_literals # temporary until all platforms support set literals
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
@@ -128,26 +134,30 @@ linter:
     - prefer_final_locals
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
-    # - prefer_generic_function_type_aliases # not yet tested
+    - prefer_generic_function_type_aliases
     - prefer_initializing_formals
+    # - prefer_int_literals # not yet tested
     # - prefer_interpolation_to_compose_strings # not yet tested
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_iterable_whereType
+    # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
-    # - prefer_void_to_null # not yet tested
+    - prefer_void_to_null
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first
+    - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    - super_goes_last
+    # - super_goes_last # no longer needed w/ Dart 2
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives
+    # - unnecessary_await_in_return # not yet tested
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     - unnecessary_getters_setters
@@ -160,6 +170,7 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    # - use_function_type_syntax_for_parameters # not yet tested
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182

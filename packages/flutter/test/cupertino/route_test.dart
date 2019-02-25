@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const Placeholder(),
+      const CupertinoApp(
+        home: Placeholder(),
       ),
     );
 
@@ -39,8 +39,8 @@ void main() {
 
   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const Placeholder(),
+      const CupertinoApp(
+        home: Placeholder(),
       ),
     );
 
@@ -48,9 +48,9 @@ void main() {
       CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
-          return CupertinoPageScaffold(
+          return const CupertinoPageScaffold(
             child: CustomScrollView(
-              slivers: const <Widget>[
+              slivers: <Widget>[
                 CupertinoSliverNavigationBar(),
               ],
             ),
@@ -80,7 +80,7 @@ void main() {
           );
         });
 
-    final Iterable<double> opacities = titles.map((Element element) {
+    final Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity =
           element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
       return renderOpacity.opacity.value;
@@ -104,8 +104,8 @@ void main() {
 
   testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const Placeholder(),
+      const CupertinoApp(
+        home: Placeholder(),
       ),
     );
 
@@ -150,8 +150,8 @@ void main() {
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const Placeholder(),
+      const CupertinoApp(
+        home: Placeholder(),
       ),
     );
 
@@ -193,8 +193,8 @@ void main() {
 
   testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const Placeholder(),
+      const CupertinoApp(
+        home: Placeholder(),
       ),
     );
 

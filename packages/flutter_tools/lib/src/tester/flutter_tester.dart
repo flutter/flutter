@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +14,7 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -22,15 +22,15 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  final Directory _directory;
-
   factory FlutterTesterApp.fromCurrentDirectory() {
     return FlutterTesterApp._(fs.currentDirectory);
   }
 
   FlutterTesterApp._(Directory directory)
-      : _directory = directory,
-        super(id: directory.path);
+    : _directory = directory,
+      super(id: directory.path);
+
+  final Directory _directory;
 
   @override
   String get name => _directory.basename;
@@ -71,7 +71,7 @@ class FlutterTesterDevice extends Device {
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
@@ -127,8 +127,10 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath =
-        fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill');
+    final String applicationKernelFilePath = bundle.getKernelPathForTransformerOptions(
+      fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+    );
     await bundle.build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
@@ -138,10 +140,7 @@ class FlutterTesterDevice extends Device {
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 
-    // TODO(scheglov): Either remove the check, or make it fail earlier.
-    if (applicationKernelFilePath != null) {
-      command.add(applicationKernelFilePath);
-    }
+    command.add(applicationKernelFilePath);
 
     try {
       printTrace(command.join(' '));
@@ -153,16 +152,16 @@ class FlutterTesterDevice extends Device {
         },
       );
       // Setting a bool can't fail in the callback.
-      _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
+      unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
       _process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });
       _process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });
@@ -236,7 +235,7 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
 /// where the VM is running on the same machine and does not need ports forwarding.
 class _NoopPortForwarder extends DevicePortForwarder {
   @override
-  Future<int> forward(int devicePort, {int hostPort}) {
+  Future<int> forward(int devicePort, { int hostPort }) {
     if (hostPort != null && hostPort != devicePort)
       throw 'Forwarding to a different port is not supported by flutter tester';
     return Future<int>.value(devicePort);
@@ -246,5 +245,5 @@ class _NoopPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) => null;
+  Future<void> unforward(ForwardedPort forwardedPort) async { }
 }

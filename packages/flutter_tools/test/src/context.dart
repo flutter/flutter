@@ -12,17 +12,18 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import 'common.dart';
 
@@ -34,10 +35,12 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
-void testUsingContext(String description, dynamic testMethod(), {
+void testUsingContext(
+  String description,
+  dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
@@ -76,16 +79,18 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
+          OutputPreferences: () => OutputPreferences(showColor: false),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),
           XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
 
-          return runZoned(() {
+          return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -176,9 +181,12 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
-class MockAndroidWorkflowValidator extends AndroidValidator {
+class MockAndroidLicenseValidator extends AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -198,9 +206,9 @@ class MockDoctor extends Doctor {
   /// the Doctor.
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
-    return superValidators.map((DoctorValidator v) {
-      if (v is AndroidValidator) {
-        return MockAndroidWorkflowValidator();
+    return superValidators.map<DoctorValidator>((DoctorValidator v) {
+      if (v is AndroidLicenseValidator) {
+        return MockAndroidLicenseValidator();
       }
       return v;
     }).toList();
@@ -261,7 +269,7 @@ class MockUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
+  Future<void> ensureAnalyticsSent() => Future<void>.value();
 
   @override
   void printWelcome() { }
@@ -297,6 +305,16 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 
-class MockClock extends Mock implements Clock {}
+class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
+
+class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
+  @override
+  set currentDirectory(dynamic value) {
+    throw 'fs.currentDirectory should not be set on the local file system during '
+          'tests as this can cause race conditions with concurrent tests. '
+          'Consider using a MemoryFileSystem for testing if possible or refactor '
+          'code to not require setting fs.currentDirectory.';
+  }
+}

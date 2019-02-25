@@ -77,14 +77,22 @@ BorderSide getBorderSide(WidgetTester tester) {
   return getBorder(tester)?.borderSide;
 }
 
+BorderRadius getBorderRadius(WidgetTester tester) {
+  final InputBorder border = getBorder(tester);
+  if (border is UnderlineInputBorder) {
+    return border.borderRadius;
+  }
+  return null;
+}
+
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
-double getHintOpacity(WidgetTester tester) {
+double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
     find.ancestor(
-      of: find.text('hint'),
+      of: find.text(textValue),
       matching: find.byType(FadeTransition),
     ).first
   );
@@ -240,6 +248,89 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderColor(tester), Colors.transparent);
+
+    // alignLabelWithHint: true positions the label at the text baseline,
+    // aligned with the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          alignLabelWithHint: true,
+          hintText: 'hint',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+  });
+
+  testWidgets('InputDecorator alignLabelWithHint for multiline TextField no-strut', (WidgetTester tester) async {
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              maxLines: 8,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+              ),
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // alignLabelWithHint: false centers the label in the TextField
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+
+    // alignLabelWithHint: true aligns the label with the hint.
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+  });
+
+  testWidgets('InputDecorator alignLabelWithHint for multiline TextField', (WidgetTester tester) async {
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              maxLines: 8,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // alignLabelWithHint: false centers the label in the TextField
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+
+    // alignLabelWithHint: true aligns the label with the hint.
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
   // Overall height for this InputDecorator is 40.0dps
@@ -304,7 +395,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -324,10 +415,10 @@ void main() {
     // The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getHintOpacity(tester);
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getHintOpacity(tester);
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
       expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
     }
 
@@ -339,7 +430,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getHintOpacity(tester), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
@@ -358,10 +449,10 @@ void main() {
     // The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getHintOpacity(tester);
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getHintOpacity(tester);
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
       expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
     }
 
@@ -373,7 +464,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -413,7 +504,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -435,7 +526,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
-    expect(getHintOpacity(tester), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -600,6 +691,103 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
+  });
+
+  testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
+    Widget buildFrame({
+      InputCounterWidgetBuilder buildCounter,
+      String counterText,
+      Widget counter,
+      int maxLength,
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  buildCounter: buildCounter,
+                  maxLength: maxLength,
+                  decoration: InputDecoration(
+                    counterText: counterText,
+                    counter: counter,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When counter, counterText, and buildCounter are null, defaults to showing
+    // the built-in counter.
+    int maxLength = 10;
+    await tester.pumpWidget(buildFrame(maxLength: maxLength));
+    Finder counterFinder = find.byType(Text);
+    expect(counterFinder, findsOneWidget);
+    final Text counterWidget = tester.widget(counterFinder);
+    expect(counterWidget.data, '0/${maxLength.toString()}');
+
+    // When counter, counterText, and buildCounter are set, shows the counter
+    // widget.
+    final Key counterKey = UniqueKey();
+    final Key buildCounterKey = UniqueKey();
+    const String counterText = 'I show instead of count';
+    final Widget counter = Text('hello', key: counterKey);
+    final InputCounterWidgetBuilder buildCounter =
+      (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
+        return Text(
+          '${currentLength.toString()} of ${maxLength.toString()}',
+          key: buildCounterKey,
+        );
+      };
+    await tester.pumpWidget(buildFrame(
+      counterText: counterText,
+      counter: counter,
+      buildCounter: buildCounter,
+      maxLength: maxLength,
+    ));
+    counterFinder = find.byKey(counterKey);
+    expect(counterFinder, findsOneWidget);
+    expect(find.text(counterText), findsNothing);
+    expect(find.byKey(buildCounterKey), findsNothing);
+
+    // When counter is null but counterText and buildCounter are set, shows the
+    // counterText.
+    await tester.pumpWidget(buildFrame(
+      counterText: counterText,
+      buildCounter: buildCounter,
+      maxLength: maxLength,
+    ));
+    expect(find.text(counterText), findsOneWidget);
+    counterFinder = find.byKey(counterKey);
+    expect(counterFinder, findsNothing);
+    expect(find.byKey(buildCounterKey), findsNothing);
+
+    // When counter and counterText are null but buildCounter is set, shows the
+    // generated widget.
+    await tester.pumpWidget(buildFrame(
+      buildCounter: buildCounter,
+      maxLength: maxLength,
+    ));
+    expect(find.byKey(buildCounterKey), findsOneWidget);
+    expect(counterFinder, findsNothing);
+    expect(find.text(counterText), findsNothing);
+
+    // When counterText is empty string and counter and buildCounter are null,
+    // shows nothing.
+    await tester.pumpWidget(buildFrame(counterText: '', maxLength: maxLength));
+    expect(find.byType(Text), findsNothing);
+
+    // When no maxLength, can still show a counter
+    maxLength = null;
+    await tester.pumpWidget(buildFrame(
+      buildCounter: buildCounter,
+      maxLength: maxLength,
+    ));
+    expect(find.byKey(buildCounterKey), findsOneWidget);
   });
 
   testWidgets('InputDecoration errorMaxLines', (WidgetTester tester) async {
@@ -1167,7 +1355,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
-    expect(getHintOpacity(tester), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
     // The hint should appear
@@ -1270,6 +1458,58 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
+  });
+
+  testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+      // isFocused: false (default)
+      isEmpty: true,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        hasFloatingPlaceholder: false,
+        labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps. Layout is:
+    //   20 - top padding
+    //   16 - label (ahem font size 16dps)
+    //   20 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 0.0);
+  });
+
+  testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(borderSide: BorderSide.none),
+          hasFloatingPlaceholder: false,
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps. Layout is:
+    //   20 - top padding
+    //   16 - label (ahem font size 16dps)
+    //   20 - bottom padding
+    //    expect(tester.widget<Text>(find.text('prefix')).style.color, prefixStyle.color);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 0.0);
+
+    // The label should not be seen.
+    expect(getOpacity(tester, 'label'), 0.0);
   });
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
@@ -1492,6 +1732,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       )
     );
 
@@ -1507,6 +1748,7 @@ void main() {
     expect(decoration.filled, true);
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
@@ -1522,6 +1764,7 @@ void main() {
       filled: false,
       fillColor: Colors.blue,
       border: OutlineInputBorder(),
+      alignLabelWithHint: false,
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -1537,6 +1780,7 @@ void main() {
         filled: true,
         fillColor: Colors.red,
         border: InputBorder.none,
+        alignLabelWithHint: true,
       ),
     );
 
@@ -1553,6 +1797,7 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+    expect(decoration.alignLabelWithHint, false);
   });
 
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
@@ -1877,5 +2122,131 @@ void main() {
     );
     await tester.pumpAndSettle(); // border changes are animated
     expect(getBorder(tester), disabledBorder);
+  });
+
+  testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/23982
+    const Key key = Key('textField');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              key: key,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.zero,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // TextField has the given border
+    expect(getBorderRadius(tester), BorderRadius.zero);
+
+    // Focusing does not change the border
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+    expect(getBorderRadius(tester), BorderRadius.zero);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(getBorderRadius(tester), BorderRadius.zero);
+    await tester.pumpAndSettle();
+    expect(getBorderRadius(tester), BorderRadius.zero);
+  });
+
+  test('InputBorder equality', () {
+    // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding
+    const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    );
+    expect(outlineInputBorder, const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    ));
+    expect(outlineInputBorder, isNot(const OutlineInputBorder()));
+
+    // UnderlineInputBorder's equality is defined only by the borderSide
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
+    expect(underlineInputBorder, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
+  });
+
+
+  test('InputBorder hashCodes', () {
+    // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding
+    const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    );
+    expect(outlineInputBorder.hashCode, const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    ).hashCode);
+    expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
+
+    // UnderlineInputBorder's hashCode is defined only by the borderSide
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
+    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
+  });
+
+  testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const InputDecorationTheme(
+      labelStyle: TextStyle(),
+      helperStyle: TextStyle(),
+      hintStyle: TextStyle(),
+      errorMaxLines: 5,
+      hasFloatingPlaceholder: false,
+      contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      prefixStyle: TextStyle(),
+      suffixStyle: TextStyle(),
+      counterStyle: TextStyle(),
+      filled: true,
+      fillColor: Colors.red,
+      errorBorder: UnderlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      border: UnderlineInputBorder(),
+      alignLabelWithHint: true,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
+    expect(description, <String>[
+      'labelStyle: TextStyle(<all styles inherited>)',
+      'helperStyle: TextStyle(<all styles inherited>)',
+      'hintStyle: TextStyle(<all styles inherited>)',
+      'errorMaxLines: 5',
+      'hasFloatingPlaceholder: false',
+      'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
+      'prefixStyle: TextStyle(<all styles inherited>)',
+      'suffixStyle: TextStyle(<all styles inherited>)',
+      'counterStyle: TextStyle(<all styles inherited>)',
+      'filled: true',
+      'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'errorBorder: UnderlineInputBorder()',
+      'focusedBorder: UnderlineInputBorder()',
+      'focusedErrorBorder: UnderlineInputBorder()',
+      'disabledBorder: UnderlineInputBorder()',
+      'enabledBorder: UnderlineInputBorder()',
+      'border: UnderlineInputBorder()',
+      'alignLabelWithHint: true',
+    ]);
   });
 }

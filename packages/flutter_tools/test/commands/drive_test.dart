@@ -26,7 +26,7 @@ void main() {
     MemoryFileSystem fs;
     Directory tempDir;
 
-    void withMockDevice([Device mock]) {
+    void withMockDevice([ Device mock ]) {
       mockDevice = mock ?? MockDevice();
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
@@ -123,6 +123,7 @@ void main() {
       final String appFile = fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
+        '--no-wrap',
         'drive',
         '--target=$appFile',
       ];
@@ -143,6 +144,7 @@ void main() {
       final String appFile = fs.path.join(tempDir.path, 'main.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
+        '--no-wrap',
         'drive',
         '--target=$appFile',
       ];

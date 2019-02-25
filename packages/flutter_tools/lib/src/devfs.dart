@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show base64, utf8;
-
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'compile.dart';
+import 'convert.dart' show base64, utf8;
 import 'dart/package_map.dart';
 import 'globals.dart';
 import 'vmservice.dart';
@@ -47,7 +48,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(gzip.encoder);
+    return contentsAsStream().transform<List<int>>(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -83,19 +84,31 @@ class DevFSFileContent extends DevFSContent {
   void _stat() {
     if (_linkTarget != null) {
       // Stat the cached symlink target.
-      _fileStat = _linkTarget.statSync();
-      return;
+      final FileStat fileStat = _linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _linkTarget = null;
+      } else {
+        _fileStat = fileStat;
+        return;
+      }
     }
-    _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.link) {
+    final FileStat fileStat = file.statSync();
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
+    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
-      _fileStat = linkTarget.statSync();
-      if (devFSConfig.cacheSymlinks) {
+      final FileStat fileStat = linkTarget.statSync();
+      if (fileStat.type == FileSystemEntityType.notFound) {
+        _fileStat = null;
+        _linkTarget = null;
+      } else if (devFSConfig.cacheSymlinks) {
         _linkTarget = linkTarget;
       }
+    }
+    if (_fileStat == null) {
+      printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -106,21 +119,29 @@ class DevFSFileContent extends DevFSContent {
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+    if (_oldFileStat == null && _fileStat == null)
+      return false;
+    return time == null
+        || _oldFileStat == null
+        || _fileStat == null
+        || _fileStat.modified.isAfter(time);
   }
 
   @override
   int get size {
     if (_fileStat == null)
       _stat();
-    return _fileStat.size;
+    // Can still be null if the file wasn't found.
+    return _fileStat?.size ?? 0;
   }
 
   @override
@@ -173,7 +194,9 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
+  DevFSStringContent(String string)
+    : _string = string,
+      super(utf8.encode(string));
 
   String _string;
 
@@ -201,9 +224,9 @@ abstract class DevFSOperations {
 /// An implementation of [DevFSOperations] that speaks to the
 /// vm service.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final VMService vmService;
-
   ServiceProtocolDevFSOperations(this.vmService);
+
+  final VMService vmService;
 
   @override
   Future<Uri> create(String fsName) async {
@@ -254,7 +277,7 @@ class DevFSException implements Exception {
 
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-      : httpAddress = serviceProtocol.httpAddress;
+    : httpAddress = serviceProtocol.httpAddress;
 
   final String fsName;
   final Uri httpAddress;
@@ -264,13 +287,13 @@ class _DevFSHttpWriter {
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
-  Completer<Null> _completer;
+  Completer<void> _completer;
   HttpClient _client;
 
-  Future<Null> write(Map<Uri, DevFSContent> entries) async {
+  Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = Completer<Null>();
+    _completer = Completer<void>();
     _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
@@ -290,7 +313,7 @@ class _DevFSHttpWriter {
     }
   }
 
-  Future<Null> _scheduleWrite(
+  Future<void> _scheduleWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -304,7 +327,7 @@ class _DevFSHttpWriter {
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
-      await response.drain<Null>();
+      await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
       if (!_completer.isCompleted)
@@ -314,7 +337,7 @@ class _DevFSHttpWriter {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
         // Synchronization is handled by the _completer below.
-        _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
+        unawaited(_scheduleWrite(deviceUri, content, retry + 1));
         return;
       } else {
         printError('Error writing "$deviceUri" to DevFS: $e');
@@ -322,34 +345,60 @@ class _DevFSHttpWriter {
     }
     _inFlight--;
     if ((_outstanding.isEmpty) && (_inFlight == 0)) {
-      _completer.complete(null);
+      _completer.complete();
     } else {
       _scheduleWrites();
     }
   }
 }
 
+// Basic statistics for DevFS update operation.
+class UpdateFSReport {
+  UpdateFSReport({bool success = false,
+    int invalidatedSourcesCount = 0, int syncedBytes = 0}) {
+    _success = success;
+    _invalidatedSourcesCount = invalidatedSourcesCount;
+    _syncedBytes = syncedBytes;
+  }
+
+  bool get success => _success;
+  int get invalidatedSourcesCount => _invalidatedSourcesCount;
+  int get syncedBytes => _syncedBytes;
+
+  void incorporateResults(UpdateFSReport report) {
+    if (!report._success) {
+      _success = false;
+    }
+    _invalidatedSourcesCount += report._invalidatedSourcesCount;
+    _syncedBytes += report._syncedBytes;
+  }
+
+  bool _success;
+  int _invalidatedSourcesCount;
+  int _syncedBytes;
+}
+
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
-  DevFS(VMService serviceProtocol,
-        this.fsName,
-        this.rootDirectory, {
-        String packagesFilePath
-      })
-    : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
+  DevFS(
+    VMService serviceProtocol,
+    this.fsName,
+    this.rootDirectory, {
+    String packagesFilePath
+  }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
+       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
-  DevFS.operations(this._operations,
-                   this.fsName,
-                   this.rootDirectory, {
-                   String packagesFilePath,
-      })
-    : _httpWriter = null {
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+  DevFS.operations(
+    this._operations,
+    this.fsName,
+    this.rootDirectory, {
+    String packagesFilePath,
+  }) : _httpWriter = null {
+       _packagesFilePath =
+           packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
   final DevFSOperations _operations;
@@ -392,7 +441,7 @@ class DevFS {
     return _baseUri;
   }
 
-  Future<Null> destroy() async {
+  Future<void> destroy() async {
     printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _operations.destroy(fsName);
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -401,7 +450,7 @@ class DevFS {
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
-  Future<int> update({
+  Future<UpdateFSReport> update({
     @required String mainPath,
     String target,
     AssetBundle bundle,
@@ -411,10 +460,13 @@ class DevFS {
     Set<String> fileFilter,
     @required ResidentCompiler generator,
     String dillOutputPath,
+    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
   }) async {
+    assert(trackWidgetCreation != null);
+    assert(generator != null);
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
       content._exists = false;
@@ -445,7 +497,7 @@ class DevFS {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
             _operations.deleteFile(fsName, deviceUri)
-            .then((dynamic v) => v?.cast<String,dynamic>());
+            .then<Map<String, dynamic>>((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -458,12 +510,12 @@ class DevFS {
     if (toRemove.isNotEmpty) {
       printTrace('Removing deleted files');
       toRemove.forEach(_entries.remove);
-      await Future.wait(_pendingOperations);
+      await Future.wait<Map<String, dynamic>>(_pendingOperations);
       _pendingOperations.clear();
     }
 
     // Update modified files
-    int numBytes = 0;
+    int syncedBytes = 0;
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       String archivePath;
@@ -474,7 +526,7 @@ class DevFS {
       // files to incremental compiler next time user does hot reload.
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
-        numBytes += content.size;
+        syncedBytes += content.size;
         if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
@@ -492,7 +544,7 @@ class DevFS {
         if (content is DevFSFileContent) {
           filesUris.add(uri);
           invalidatedFiles.add(content.file.uri.toString());
-          numBytes -= content.size;
+          syncedBytes -= content.size;
         }
       }
     }
@@ -506,7 +558,7 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
     // Don't send full kernel file that would overwrite what VM already
@@ -521,7 +573,7 @@ class DevFS {
         if (!dirtyEntries.containsKey(entryUri)) {
           final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
           dirtyEntries[entryUri] = content;
-          numBytes += content.size;
+          syncedBytes += content.size;
         }
       }
     }
@@ -542,17 +594,18 @@ class DevFS {
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
               _operations.writeFile(fsName, deviceUri, content)
-                  .then((dynamic v) => v?.cast<String, dynamic>());
+                  .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
-        await Future.wait(_pendingOperations, eagerError: true);
+        await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
         _pendingOperations.clear();
       }
     }
 
     printTrace('DevFS: Sync finished');
-    return numBytes;
+    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
+        invalidatedSourcesCount: invalidatedFiles.length);
   }
 
   void _scanFile(Uri deviceUri, FileSystemEntity file) {
@@ -581,11 +634,12 @@ class DevFS {
     return false;
   }
 
-  bool _shouldSkip(FileSystemEntity file,
-                   String relativePath,
-                   Uri directoryUriOnDevice, {
-                   bool ignoreDotFiles = true,
-                   }) {
+  bool _shouldSkip(
+    FileSystemEntity file,
+    String relativePath,
+    Uri directoryUriOnDevice, {
+    bool ignoreDotFiles = true,
+  }) {
     if (file is Directory) {
       // Skip non-files.
       return true;
@@ -600,8 +654,7 @@ class DevFS {
     return false;
   }
 
-  Uri _directoryUriOnDevice(Uri directoryUriOnDevice,
-                            Directory directory) {
+  Uri _directoryUriOnDevice(Uri directoryUriOnDevice, Directory directory) {
     if (directoryUriOnDevice == null) {
       final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
       if (relativeRootPath == '.') {
@@ -615,10 +668,12 @@ class DevFS {
 
   /// Scan all files from the [fileFilter] that are contained in [directory] and
   /// pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
-                                      Directory directory,
-                                      {Uri directoryUriOnDevice,
-                                       bool ignoreDotFiles = true}) async {
+  Future<bool> _scanFilteredDirectory(
+    Set<String> fileFilter,
+    Directory directory, {
+    Uri directoryUriOnDevice,
+    bool ignoreDotFiles = true,
+  }) async {
     directoryUriOnDevice =
         _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
@@ -647,11 +702,13 @@ class DevFS {
   }
 
   /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanDirectory(Directory directory,
-                              {Uri directoryUriOnDevice,
-                               bool recursive = false,
-                               bool ignoreDotFiles = true,
-                               Set<String> fileFilter}) async {
+  Future<bool> _scanDirectory(
+    Directory directory, {
+    Uri directoryUriOnDevice,
+    bool recursive = false,
+    bool ignoreDotFiles = true,
+    Set<String> fileFilter,
+  }) async {
     directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
     if ((fileFilter != null) && fileFilter.isNotEmpty) {
       // When the fileFilter isn't empty, we can skip crawling the directory
@@ -701,7 +758,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<void> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
     final PackageMap packageMap = PackageMap(_packagesFilePath);
 

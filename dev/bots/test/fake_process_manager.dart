@@ -81,7 +81,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   }
 
   void _setupMock() {
-    // Note that not all possible types of invocations are covered here, just the ones
+    // Not all possible types of invocations are covered here, just the ones
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
     when(start(
@@ -151,7 +151,7 @@ class FakeProcess extends Mock implements Process {
 }
 
 /// Callback used to receive stdin input when it occurs.
-typedef void StringReceivedCallback(String received);
+typedef StringReceivedCallback = void Function(String received);
 
 /// A stream consumer class that consumes UTF8 strings as lists of ints.
 class StringStreamConsumer implements StreamConsumer<List<int>> {

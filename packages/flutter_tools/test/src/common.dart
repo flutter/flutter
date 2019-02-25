@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,11 +16,11 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -68,7 +68,7 @@ String getFlutterRoot() {
   return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
-CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
+CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
@@ -76,15 +76,17 @@ CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
 }
 
 /// Updates [path] to have a modification time [seconds] from now.
-void updateFileModificationTime(String path,
-                                DateTime baseTime,
-                                int seconds) {
+void updateFileModificationTime(
+  String path,
+  DateTime baseTime,
+  int seconds,
+) {
   final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit({int exitCode, String message}) {
+Matcher throwsToolExit({ int exitCode, Pattern message }) {
   Matcher matcher = isToolExit;
   if (exitCode != null)
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
@@ -97,7 +99,7 @@ Matcher throwsToolExit({int exitCode, String message}) {
 final Matcher isToolExit = isInstanceOf<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
-Matcher throwsProcessExit([dynamic exitCode]) {
+Matcher throwsProcessExit([ dynamic exitCode ]) {
   return exitCode == null
       ? throwsA(isProcessExit)
       : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
@@ -109,11 +111,11 @@ final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
 /// Returns the path to the flutter project.
-Future<String> createProject(Directory temp, {List<String> arguments}) async {
+Future<String> createProject(Directory temp, { List<String> arguments }) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
-  final CommandRunner<Null> runner = createTestCommandRunner(command);
+  final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
   return projectPath;
 }

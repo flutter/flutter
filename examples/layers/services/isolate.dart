@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef void OnProgressListener(double completed, double total);
-typedef void OnResultListener(String result);
+typedef OnProgressListener = void Function(double completed, double total);
+typedef OnResultListener = void Function(String result);
 
 // An encapsulation of a large amount of synchronous processing.
 //
@@ -136,12 +136,12 @@ class CalculationManager {
     // isolates do not have access to the root bundle. However, the loading
     // process is asynchronous, so the UI will not block while the file is
     // loaded.
-    rootBundle.loadString('services/data.json').then<Null>((String data) {
+    rootBundle.loadString('services/data.json').then<void>((String data) {
       if (isRunning) {
         final CalculationMessage message = CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
-        Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
+        Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((Isolate isolate) {
           if (!isRunning) {
             isolate.kill(priority: Isolate.immediate);
           } else {

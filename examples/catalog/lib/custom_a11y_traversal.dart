@@ -59,18 +59,18 @@ class RowColumnTraversal extends StatelessWidget {
   /// This function expresses the sort keys as a hierarchy, but it could just as
   /// easily have been a flat list:
   ///
-  /// ```
-  ///  Widget build(BuildContext context) {
-  ///    return new Semantics(
-  ///      sortOrder: new SemanticsSortOrder(
-  ///        keys: <SemanticsSortKey>[
-  ///          new OrdinalSortKey(columnOrder.toDouble()),
-  ///          new OrdinalSortKey(rowOrder.toDouble())
-  ///        ],
-  ///      ),
-  ///      child: child,
-  ///    );
-  ///  }
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new Semantics(
+  ///     sortOrder: new SemanticsSortOrder(
+  ///       keys: <SemanticsSortKey>[
+  ///         new OrdinalSortKey(columnOrder.toDouble()),
+  ///         new OrdinalSortKey(rowOrder.toDouble())
+  ///       ],
+  ///     ),
+  ///     child: child,
+  ///   );
+  /// }
   /// ```
   ///
   /// The resulting order is the same.

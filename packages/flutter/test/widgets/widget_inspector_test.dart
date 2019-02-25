@@ -5,14 +5,113 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
-typedef FutureOr<Map<String, Object>> InspectorServiceExtensionCallback(Map<String, String> parameters);
+// Start of block of code where widget creation location line numbers and
+// columns will impact whether tests pass.
+
+class ClockDemo extends StatefulWidget {
+  @override
+  _ClockDemoState createState() => _ClockDemoState();
+}
+
+class _ClockDemoState extends State<ClockDemo> {
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('World Clock'),
+          makeClock('Local', DateTime.now().timeZoneOffset.inHours),
+          makeClock('UTC', 0),
+          makeClock('New York, NY', -4),
+          makeClock('Chicago, IL', -5),
+          makeClock('Denver, CO', -6),
+          makeClock('Los Angeles, CA', -7),
+        ],
+      ),
+    );
+  }
+
+  Widget makeClock(String label, num utcOffset) {
+    return Stack(
+      children: <Widget>[
+        const Icon(Icons.watch),
+        Text(label),
+        ClockText(utcOffset: utcOffset),
+      ],
+    );
+  }
+}
+
+class ClockText extends StatefulWidget {
+  const ClockText({
+    Key key,
+    this.utcOffset = 0,
+  }) : super(key: key);
+
+  final num utcOffset;
+
+  @override
+  _ClockTextState createState() => _ClockTextState();
+}
+
+class _ClockTextState extends State<ClockText> {
+  DateTime currentTime = DateTime.now();
+
+  void updateTime() {
+    setState(() {
+      currentTime = DateTime.now();
+    });
+  }
+
+  void stopClock() {
+    setState(() {
+      currentTime = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (currentTime == null) {
+      return const Text('stopped');
+    }
+    return Text(
+      currentTime
+          .toUtc()
+          .add(Duration(hours: widget.utcOffset))
+          .toIso8601String(),
+    );
+  }
+}
+
+// End of block of code where widget creation location line numbers and
+// columns will impact whether tests pass.
+
+class _CreationLocation {
+  const _CreationLocation({
+    @required this.file,
+    @required this.line,
+    @required this.column,
+    @required this.id,
+  });
+
+  final String file;
+  final int line;
+  final int column;
+  final int id;
+}
+
+typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
 
 class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
   @override
@@ -95,6 +194,8 @@ void main() {
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
 
+  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
+
   @override
   void registerServiceExtension({
     @required String name,
@@ -102,6 +203,20 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;
+  }
+
+  @override
+  void postEvent(String eventKind, Map<Object, Object> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<Object, Object>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
+  }
+
+  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+      .where((Map<Object, Object> event) => event['extension'] == extensionName);
   }
 
   Future<Object> testExtension(String name, Map<String, String> arguments) async {
@@ -121,9 +236,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   int rebuildCount = 0;
 
   @override
-  Future<Null> forceRebuild() async {
+  Future<void> forceRebuild() async {
     rebuildCount++;
-    return null;
+    final WidgetsBinding binding = WidgetsBinding.instance;
+
+    if (binding.renderViewElement != null) {
+      binding.buildOwner.reassemble(binding.renderViewElement);
+    }
   }
 
 
@@ -282,6 +401,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
                 Container(
                   key: childKey,
@@ -678,23 +798,23 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(21));
+      expect(columnA, equals(15));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(26));
+      expect(paramA['column'], equals(20));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(26));
+      expect(paramB1['column'], equals(20));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(31));
+      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
@@ -1204,23 +1324,23 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(21));
+      expect(columnA, equals(15));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(26));
+      expect(paramA['column'], equals(20));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(26));
+      expect(paramB1['column'], equals(20));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(31));
+      expect(paramB2['column'], equals(25));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
@@ -1302,16 +1422,340 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
-    testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
+
+      await tester.pumpWidget(ClockDemo());
+
+      final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
+
+      service.setSelection(clockDemoElement, 'my-group');
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'});
+      final Map<String, Object> creationLocation =
+          jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest =
+          '/' + segments.take(segments.length - 2).join('/');
+      await service.testExtension(
+          'setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+
+      final List<Map<Object, Object>> rebuildEvents =
+          service.getEventsDispatched('Flutter.RebuiltWidgets');
+      expect(rebuildEvents, isEmpty);
+
+      expect(service.rebuildCount, equals(0));
+      expect(
+          await service.testBoolExtension(
+              'trackRebuildDirtyWidgets', <String, String>{'enabled': 'true'}),
+          equals('true'));
+      expect(service.rebuildCount, equals(1));
+      await tester.pump();
+
+      expect(rebuildEvents.length, equals(1));
+      Map<Object, Object> event = rebuildEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      List<int> data = event['events'];
+      expect(data.length, equals(14));
+      final int numDataEntries = data.length ~/ 2;
+      Map<String, List<int>> newLocations = event['newLocations'];
+      expect(newLocations, isNotNull);
+      expect(newLocations.length, equals(1));
+      expect(newLocations.keys.first, equals(file));
+      final List<int> locationsForFile = newLocations[file];
+      expect(locationsForFile.length, equals(21));
+      final int numLocationEntries = locationsForFile.length ~/ 3;
+      expect(numLocationEntries, equals(numDataEntries));
+
+      final Map<int, _CreationLocation> knownLocations =
+          <int, _CreationLocation>{};
+      addToKnownLocationsMap(
+        knownLocations: knownLocations,
+        newLocations: newLocations,
+      );
+      int totalCount = 0;
+      int maxCount = 0;
+      for (int i = 0; i < data.length; i += 2) {
+        final int id = data[i];
+        final int count = data[i + 1];
+        totalCount += count;
+        maxCount = max(maxCount, count);
+        expect(knownLocations.containsKey(id), isTrue);
+      }
+      expect(totalCount, equals(27));
+      // The creation locations that were rebuilt the most were rebuilt 6 times
+      // as there are 6 instances of the ClockText widget.
+      expect(maxCount, equals(6));
+
+      final List<Element> clocks = find.byType(ClockText).evaluate().toList();
+      expect(clocks.length, equals(6));
+      // Update a single clock.
+      StatefulElement clockElement = clocks.first;
+      _ClockTextState state = clockElement.state;
+      state.updateTime(); // Triggers a rebuild.
+      await tester.pump();
+      expect(rebuildEvents.length, equals(1));
+      event = rebuildEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      data = event['events'];
+      // No new locations were rebuilt.
+      expect(event.containsKey('newLocations'), isFalse);
+
+      // There were two rebuilds: one for the ClockText element itself and one
+      // for its child.
+      expect(data.length, equals(4));
+      int id = data[0];
+      int count = data[1];
+      _CreationLocation location = knownLocations[id];
+      expect(location.file, equals(file));
+      // ClockText widget.
+      expect(location.line, equals(50));
+      expect(location.column, equals(9));
+      expect(count, equals(1));
+
+      id = data[2];
+      count = data[3];
+      location = knownLocations[id];
+      expect(location.file, equals(file));
+      // Text widget in _ClockTextState build method.
+      expect(location.line, equals(88));
+      expect(location.column, equals(12));
+      expect(count, equals(1));
+
+      // Update 3 of the clocks;
+      for (int i = 0; i < 3; i++) {
+        clockElement = clocks[i];
+        state = clockElement.state;
+        state.updateTime(); // Triggers a rebuild.
+      }
+
+      await tester.pump();
+      expect(rebuildEvents.length, equals(1));
+      event = rebuildEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      data = event['events'];
+      // No new locations were rebuilt.
+      expect(event.containsKey('newLocations'), isFalse);
+
+      expect(data.length, equals(4));
+      id = data[0];
+      count = data[1];
+      location = knownLocations[id];
+      expect(location.file, equals(file));
+      // ClockText widget.
+      expect(location.line, equals(50));
+      expect(location.column, equals(9));
+      expect(count, equals(3)); // 3 clock widget instances rebuilt.
+
+      id = data[2];
+      count = data[3];
+      location = knownLocations[id];
+      expect(location.file, equals(file));
+      // Text widget in _ClockTextState build method.
+      expect(location.line, equals(88));
+      expect(location.column, equals(12));
+      expect(count, equals(3)); // 3 clock widget instances rebuilt.
+
+      // Update one clock 3 times.
+      clockElement = clocks.first;
+      state = clockElement.state;
+      state.updateTime(); // Triggers a rebuild.
+      state.updateTime(); // Triggers a rebuild.
+      state.updateTime(); // Triggers a rebuild.
+
+      await tester.pump();
+      expect(rebuildEvents.length, equals(1));
+      event = rebuildEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      data = event['events'];
+      // No new locations were rebuilt.
+      expect(event.containsKey('newLocations'), isFalse);
+
+      expect(data.length, equals(4));
+      id = data[0];
+      count = data[1];
+      // Even though a rebuild was triggered 3 times, only one rebuild actually
+      // occurred.
+      expect(count, equals(1));
+
+      // Trigger a widget creation location that wasn't previously triggered.
+      state.stopClock();
+      await tester.pump();
+      expect(rebuildEvents.length, equals(1));
+      event = rebuildEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      data = event['events'];
+      newLocations = event['newLocations'];
+
+      expect(data.length, equals(4));
+      // The second pair in data is the previously unseen rebuild location.
+      id = data[2];
+      count = data[3];
+      expect(count, equals(1));
+      // Verify the rebuild location is new.
+      expect(knownLocations.containsKey(id), isFalse);
+      addToKnownLocationsMap(
+        knownLocations: knownLocations,
+        newLocations: newLocations,
+      );
+      // Verify the rebuild location was included in the newLocations data.
+      expect(knownLocations.containsKey(id), isTrue);
+
+      // Turn off rebuild counts.
+      expect(
+          await service.testBoolExtension(
+              'trackRebuildDirtyWidgets', <String, String>{'enabled': 'false'}),
+          equals('false'));
+
+      state.updateTime(); // Triggers a rebuild.
+      await tester.pump();
+      // Verify that rebuild events are not fired once the extension is disabled.
+      expect(rebuildEvents, isEmpty);
+    },
+        skip: !WidgetInspectorService.instance
+            .isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+
+    testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
+      service.rebuildCount = 0;
+
+      await tester.pumpWidget(ClockDemo());
+
+      final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
+
+      service.setSelection(clockDemoElement, 'my-group');
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'});
+      final Map<String, Object> creationLocation =
+          jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest =
+          '/' + segments.take(segments.length - 2).join('/');
+      await service.testExtension(
+          'setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+
+      final List<Map<Object, Object>> repaintEvents =
+          service.getEventsDispatched('Flutter.RepaintWidgets');
+      expect(repaintEvents, isEmpty);
+
+      expect(service.rebuildCount, equals(0));
+      expect(
+          await service.testBoolExtension(
+              'trackRepaintWidgets', <String, String>{'enabled': 'true'}),
+          equals('true'));
+      // Unlike trackRebuildDirtyWidgets, trackRepaintWidgets doesn't force a full
+      // rebuild.
+      expect(service.rebuildCount, equals(0));
+
+      await tester.pump();
+
+      expect(repaintEvents.length, equals(1));
+      Map<Object, Object> event = repaintEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      List<int> data = event['events'];
+      expect(data.length, equals(18));
+      final int numDataEntries = data.length ~/ 2;
+      final Map<String, List<int>> newLocations = event['newLocations'];
+      expect(newLocations, isNotNull);
+      expect(newLocations.length, equals(1));
+      expect(newLocations.keys.first, equals(file));
+      final List<int> locationsForFile = newLocations[file];
+      expect(locationsForFile.length, equals(27));
+      final int numLocationEntries = locationsForFile.length ~/ 3;
+      expect(numLocationEntries, equals(numDataEntries));
+
+      final Map<int, _CreationLocation> knownLocations =
+          <int, _CreationLocation>{};
+      addToKnownLocationsMap(
+        knownLocations: knownLocations,
+        newLocations: newLocations,
+      );
+      int totalCount = 0;
+      int maxCount = 0;
+      for (int i = 0; i < data.length; i += 2) {
+        final int id = data[i];
+        final int count = data[i + 1];
+        totalCount += count;
+        maxCount = max(maxCount, count);
+        expect(knownLocations.containsKey(id), isTrue);
+      }
+      expect(totalCount, equals(34));
+      // The creation locations that were rebuilt the most were rebuilt 6 times
+      // as there are 6 instances of the ClockText widget.
+      expect(maxCount, equals(6));
+
+      final List<Element> clocks = find.byType(ClockText).evaluate().toList();
+      expect(clocks.length, equals(6));
+      // Update a single clock.
+      final StatefulElement clockElement = clocks.first;
+      final _ClockTextState state = clockElement.state;
+      state.updateTime(); // Triggers a rebuild.
+      await tester.pump();
+      expect(repaintEvents.length, equals(1));
+      event = repaintEvents.removeLast();
+      expect(event['startTime'], isInstanceOf<int>());
+      data = event['events'];
+      // No new locations were rebuilt.
+      expect(event.containsKey('newLocations'), isFalse);
+
+      // Triggering a a rebuild of one widget in this app causes the whole app
+      // to repaint.
+      expect(data.length, equals(18));
+
+      // TODO(jacobr): add an additional repaint test that uses multiple repaint
+      // boundaries to test more complex repaint conditions.
+
+      // Turn off rebuild counts.
+      expect(
+          await service.testBoolExtension(
+              'trackRepaintWidgets', <String, String>{'enabled': 'false'}),
+          equals('false'));
+
+      state.updateTime(); // Triggers a rebuild.
+      await tester.pump();
+      // Verify that rapint events are not fired once the extension is disabled.
+      expect(repaintEvents, isEmpty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+
+    testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
+      final Iterable<Map<Object, Object>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
+      Map<Object, Object> extensionChangedEvent;
+
+      service.rebuildCount = 0;
+      expect(extensionChangedEvents, isEmpty);
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(1));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{}), equals('true'));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(extensionChangedEvents.length, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(2));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'false'}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isFalse);
       expect(await service.testBoolExtension('show', <String, String>{}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
       expect(service.rebuildCount, equals(2));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
@@ -1386,6 +1830,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await expectLater(
         layer.toImage(renderObject.semanticBounds.inflate(50.0)),
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        skip: !Platform.isLinux,
       );
 
       // Regression test for how rendering with a pixel scale other than 1.0
@@ -1396,6 +1841,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           pixelRatio: 0.5,
         ),
         matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1404,6 +1850,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           pixelRatio: 2.0,
         ),
         matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
+        skip: !Platform.isLinux,
       );
 
       final Layer layerParent = layer.parent;
@@ -1419,6 +1866,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
         ),
         matchesGoldenFile('inspector.repaint_boundary.png'),
+        skip: !Platform.isLinux,
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -1436,6 +1884,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           margin: 50.0,
         ),
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        skip: !Platform.isLinux,
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -1456,6 +1905,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
+        skip: !Platform.isLinux,
       );
       // Verify that taking a screenshot with debug paint on did not change
       // the number of children the layer has.
@@ -1466,6 +1916,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await expectLater(
         find.byType(RepaintBoundaryWithDebugPaint),
         matchesGoldenFile('inspector.repaint_boundary.png'),
+        skip: !Platform.isLinux,
       );
 
       expect(renderObject.debugLayer, equals(layer));
@@ -1479,6 +1930,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
         ),
         matchesGoldenFile('inspector.container.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1489,6 +1941,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.container_debugPaint.png'),
+        skip: !Platform.isLinux,
       );
 
       {
@@ -1509,6 +1962,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             debugPaint: true,
           ),
           matchesGoldenFile('inspector.container_debugPaint.png'),
+          skip: !Platform.isLinux,
         );
         expect(container.debugNeedsLayout, isFalse);
       }
@@ -1521,6 +1975,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
         ),
         matchesGoldenFile('inspector.container_small.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1531,6 +1986,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           maxPixelRatio: 3.0,
         ),
         matchesGoldenFile('inspector.container_large.png'),
+        skip: !Platform.isLinux,
       );
 
       // This screenshot will show the clip rect debug paint but no other
@@ -1543,20 +1999,52 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.clipRect_debugPaint.png'),
+        skip: !Platform.isLinux,
       );
 
+      final Element clipRect = find.byType(ClipRRect).evaluate().single;
+
+      final Future<ui.Image> clipRectScreenshot = service.screenshot(
+        clipRect,
+        width: 100.0,
+        height: 100.0,
+        margin: 20.0,
+        debugPaint: true,
+      );
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
-        service.screenshot(
-          find.byType(ClipRRect).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          margin: 20.0,
-          debugPaint: true,
-        ),
+        clipRectScreenshot,
         matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
-        skip: !Platform.isLinux
+        skip: !Platform.isLinux,
+      );
+
+      // Verify we get the same image if we go through the service extension
+      // instead of invoking the screenshot method directly.
+      final Future<Object> base64ScreenshotFuture = service.testExtension(
+        'screenshot',
+        <String, String>{
+          'id': service.toId(clipRect, 'group'),
+          'width': '100.0',
+          'height': '100.0',
+          'margin': '20.0',
+          'debugPaint': 'true',
+        },
+      );
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding
+          .ensureInitialized();
+      final ui.Image screenshotImage = await binding.runAsync<ui.Image>(() async {
+        final String base64Screenshot = await base64ScreenshotFuture;
+        final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
+        final ui.FrameInfo frame = await codec.getNextFrame();
+        return frame.image;
+      }, additionalTime: const Duration(seconds: 11));
+
+      await expectLater(
+        screenshotImage,
+        matchesReferenceImage(await clipRectScreenshot),
+        skip: !Platform.isLinux,
       );
 
       // Test with a very visible debug paint
@@ -1568,6 +2056,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.padding_debugPaint.png'),
+        skip: !Platform.isLinux,
       );
 
       // The bounds for this box crop its rendered content.
@@ -1579,6 +2068,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
+        skip: !Platform.isLinux,
       );
 
       // Verify that setting a margin includes the previously cropped content.
@@ -1591,6 +2081,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
+        skip: !Platform.isLinux,
       );
     });
 
@@ -1662,6 +2153,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await expectLater(
         find.byKey(mainStackKey),
         matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1671,11 +2163,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
         ),
         matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
         matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1685,6 +2179,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
         ),
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
+        skip: !Platform.isLinux,
       );
     });
 
@@ -1757,6 +2252,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await expectLater(
         find.byKey(mainStackKey),
         matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1766,6 +2262,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
         ),
         matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1775,6 +2272,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
         ),
         matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
+        skip: !Platform.isLinux,
       );
 
       await expectLater(
@@ -1784,6 +2282,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
         ),
         matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
+        skip: !Platform.isLinux,
       );
 
       // Make sure taking screenshots hasn't modified the positions of the
@@ -1794,4 +2293,21 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(box2.localToGlobal(Offset.zero), equals(position2));
     });
   }
+}
+
+void addToKnownLocationsMap({
+  @required Map<int, _CreationLocation> knownLocations,
+  @required Map<String, List<int>> newLocations,
+}) {
+  newLocations.forEach((String file, List<int> entries) {
+    assert(entries.length % 3 == 0);
+    for (int i = 0; i < entries.length; i += 3) {
+      final int id = entries[i];
+      final int line = entries[i + 1];
+      final int column = entries[i + 2];
+      assert(!knownLocations.containsKey(id));
+      knownLocations[id] =
+          _CreationLocation(file: file, line: line, column: column, id: id);
+    }
+  });
 }

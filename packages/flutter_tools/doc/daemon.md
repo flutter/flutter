@@ -82,6 +82,7 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
+- `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
 #### app.callServiceExtension
@@ -108,7 +109,7 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 #### app.start
 
-This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, and `deviceId`.
+This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, and `launchMode`.
 
 #### app.debugPort
 
@@ -188,7 +189,7 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
-## 'flutter run --machine' and 'flutter attach --machine' 
+## 'flutter run --machine' and 'flutter attach --machine'
 
 When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 

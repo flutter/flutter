@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show window, PointerDataPacket;
+import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
 
@@ -16,16 +16,53 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispatcher, HitTestTarget {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory GestureBinding._() => null;
-
+///
+/// ## Lifecycle of pointer events and the gesture arena
+///
+/// ### [PointerDownEvent]
+///
+/// When a [PointerDownEvent] is received by the [GestureBinding] (from
+/// [Window.onPointerDataPacket], as interpreted by the
+/// [PointerEventConverter]), a [hitTest] is performed to determine which
+/// [HitTestTarget] nodes are affected. (Other bindings are expected to
+/// implement [hitTest] to defer to [HitTestable] objects. For example, the
+/// rendering layer defers to the [RenderView] and the rest of the render object
+/// hierarchy.)
+///
+/// The affected nodes then are given the event to handle ([dispatchEvent] calls
+/// [HitTestTarget.handleEvent] for each affected node). If any have relevant
+/// [GestureRecognizer]s, they provide the event to them using
+/// [GestureRecognizer.addPointer]. This typically causes the recognizer to
+/// register with the [PointerRouter] to receive notifications regarding the
+/// pointer in question.
+///
+/// Once the hit test and dispatching logic is complete, the event is then
+/// passed to the aforementioned [PointerRouter], which passes it to any objects
+/// that have registered interest in that event.
+///
+/// Finally, the [gestureArena] is closed for the given pointer
+/// ([GestureArenaManager.close]), which begins the process of selecting a
+/// gesture to win that pointer.
+///
+/// ### Other events
+///
+/// A pointer that is [PointerEvent.down] may send further events, such as
+/// [PointerMoveEvent], [PointerUpEvent], or [PointerCancelEvent]. These are
+/// sent to the same [HitTestTarget] nodes as were found when the down event was
+/// received (even if they have since been disposed; it is the responsibility of
+/// those objects to be aware of that possibility).
+///
+/// Then, the events are routed to any still-registered entrants in the
+/// [PointerRouter]'s table for that pointer.
+///
+/// When a [PointerUpEvent] is received, the [GestureArenaManager.sweep] method
+/// is invoked to force the gesture arena logic to terminate if necessary.
+mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onPointerDataPacket = _handlePointerDataPacket;
+    window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   @override
@@ -43,7 +80,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
     if (!locked)
       _flushPointerEventQueue();
   }
@@ -79,26 +116,38 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
 
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
-    HitTestResult result;
+    HitTestResult hitTestResult;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      result = HitTestResult();
-      hitTest(result, event.position);
-      _hitTests[event.pointer] = result;
+      hitTestResult = HitTestResult();
+      hitTest(hitTestResult, event.position);
+      _hitTests[event.pointer] = hitTestResult;
       assert(() {
         if (debugPrintHitTestResults)
-          debugPrint('$event: $result');
+          debugPrint('$event: $hitTestResult');
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      result = _hitTests.remove(event.pointer);
+      hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
-      result = _hitTests[event.pointer];
-    } else {
-      return; // We currently ignore add, remove, and hover move events.
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
     }
-    if (result != null)
-      dispatchEvent(event, result);
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      dispatchEvent(event, hitTestResult);
+    }
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -109,14 +158,36 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
 
   /// Dispatch an event to a hit test result's path.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries
-  /// of the given [HitTestResult], and catches exceptions that any of
-  /// the handlers might throw. The `result` argument must not be null.
+  /// This sends the given event to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult], and catches exceptions that any of the handlers
+  /// might throw. The [hitTestResult] argument may only be null for
+  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
     assert(!locked);
-    assert(result != null);
-    for (HitTestEntry entry in result.path) {
+    // No hit test information implies that this is a hover or pointer
+    // add/remove event.
+    if (hitTestResult == null) {
+      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
+      try {
+        pointerRouter.route(event);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
+          exception: exception,
+          stack: stack,
+          library: 'gesture library',
+          context: 'while dispatching a non-hit-tested pointer event',
+          event: event,
+          hitTestEntry: null,
+          informationCollector: (StringBuffer information) {
+            information.writeln('Event:');
+            information.writeln('  $event');
+          },
+        ));
+      }
+      return;
+    }
+    for (HitTestEntry entry in hitTestResult.path) {
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
@@ -132,7 +203,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
             information.writeln('  $event');
             information.writeln('Target:');
             information.write('  ${entry.target}');
-          }
+          },
         ));
       }
     }
@@ -182,7 +253,8 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   final PointerEvent event;
 
   /// The hit test result entry for the object whose handleEvent method threw
-  /// the exception.
+  /// the exception. May be null if no hit test entry is associated with the
+  /// event (e.g. hover and pointer add/remove events).
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.

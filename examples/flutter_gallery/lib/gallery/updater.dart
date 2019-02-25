@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-typedef Future<String> UpdateUrlFetcher();
+typedef UpdateUrlFetcher = Future<String> Function();
 
 class Updater extends StatefulWidget {
   const Updater({ @required this.updateUrlFetcher, this.child, Key key })
@@ -34,7 +34,7 @@ class UpdaterState extends State<Updater> {
     // Only prompt once a day
     if (_lastUpdateCheck != null &&
         DateTime.now().difference(_lastUpdateCheck) < const Duration(days: 1)) {
-      return null; // We already checked for updates recently
+      return; // We already checked for updates recently
     }
     _lastUpdateCheck = DateTime.now();
 

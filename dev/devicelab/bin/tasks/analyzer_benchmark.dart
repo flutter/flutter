@@ -7,6 +7,6 @@ import 'dart:async';
 import 'package:flutter_devicelab/tasks/analysis.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(analyzerBenchmarkTask);
 }

@@ -23,7 +23,17 @@ import 'sdk.dart';
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
+  PubContext._(this._values) {
+    for (String item in _values) {
+      if (!_validContext.hasMatch(item)) {
+        throw ArgumentError.value(
+            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+      }
+    }
+  }
+
+  static PubContext getVerifyContext(String commandName) =>
+      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
 
   static final PubContext create = PubContext._(<String>['create']);
   static final PubContext createPackage = PubContext._(<String>['create_pkg']);
@@ -38,17 +48,7 @@ class PubContext {
 
   final List<String> _values;
 
-  PubContext._(this._values) {
-    for (String item in _values) {
-      if (!_validContext.hasMatch(item)) {
-        throw ArgumentError.value(
-            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
-      }
-    }
-  }
-
-  static PubContext getVerifyContext(String commandName) =>
-      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';
@@ -69,7 +69,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pubGet({
+Future<void> pubGet({
   @required PubContext context,
   String directory,
   bool skipIfAbsent = false,
@@ -92,7 +92,7 @@ Future<Null> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
-      expectSlowOperation: true,
+      timeout: kSlowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
     if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
@@ -123,7 +123,7 @@ Future<Null> pubGet({
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
-typedef String MessageFilter(String message);
+typedef MessageFilter = String Function(String message);
 
 /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
 /// stdout/stderr streams to the corresponding stream of this process, optionally
@@ -135,7 +135,8 @@ typedef String MessageFilter(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pub(List<String> arguments, {
+Future<void> pub(
+  List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
@@ -161,7 +162,7 @@ Future<Null> pub(List<String> arguments, {
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await Future<Null>.delayed(Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
@@ -173,7 +174,8 @@ Future<Null> pub(List<String> arguments, {
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
 /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
 /// streams of this process.
-Future<Null> pubInteractively(List<String> arguments, {
+Future<void> pubInteractively(
+  List<String> arguments, {
   String directory,
 }) async {
   Cache.releaseLockEarly();

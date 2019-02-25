@@ -248,10 +248,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
 
-    // Do it again. Note that each time the Alert is shown and dismissed
-    // the FormState's didChangeDependencies() method runs. We're making sure
-    // that the didChangeDependencies() method doesn't add an extra willPop
-    // callback.
+    // Do it again.
+    // Each time the Alert is shown and dismissed the FormState's
+    // didChangeDependencies() method runs. We're making sure that the
+    // didChangeDependencies() method doesn't add an extra willPop callback.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
     await tester.pump(); // Call willPop which will show an Alert.
@@ -277,7 +277,7 @@ void main() {
     StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    final TestPageRoute<Null> route = TestPageRoute<Null>(
+    final TestPageRoute<void> route = TestPageRoute<void>(
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {

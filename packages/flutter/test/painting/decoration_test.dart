@@ -62,11 +62,6 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
-    return super.resolve(configuration);
-  }
-
-  @override
   ImageStreamCompleter load(DelayedImageProvider key) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
@@ -76,7 +71,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}}()';
+  String toString() => '${describeIdentity(this)}()';
 }
 
 class TestImage implements ui.Image {
@@ -90,7 +85,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }
@@ -155,7 +150,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () {
-    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = DelayedImageProvider();

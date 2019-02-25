@@ -4,6 +4,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart';
 
 import 'states.dart';
 
@@ -15,6 +17,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           children: kStates.map<Widget>((String state) {
             return GestureDetector(
               onTap: () {
@@ -25,6 +28,7 @@ void main() {
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
+              dragStartBehavior: DragStartBehavior.down,
             );
           }).toList(),
         ),
@@ -53,6 +57,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           children: kStates.take(n).map<Widget>((String state) {
             return Container(
               height: 200.0,
@@ -84,11 +89,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
+          dragStartBehavior: DragStartBehavior.down,
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildListDelegate(
                 kStates.map<Widget>((String state) {
                   return GestureDetector(
+                    dragStartBehavior: DragStartBehavior.down,
                     onTap: () {
                       log.add(state);
                     },
@@ -182,7 +189,7 @@ void main() {
   });
 
   testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
-    final CustomScrollView view = CustomScrollView(scrollDirection: Axis.vertical);
+    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
@@ -200,7 +207,7 @@ void main() {
   });
 
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
-    final CustomScrollView view = CustomScrollView(scrollDirection: Axis.horizontal);
+    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.horizontal);
     expect(view.primary, isFalse);
   });
 
@@ -249,7 +256,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: PrimaryScrollController(
           controller: primaryScrollController,
-          child: CustomScrollView(primary: true),
+          child: const CustomScrollView(primary: true),
         ),
       ),
     );
@@ -409,5 +416,135 @@ void main() {
     );
     await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
     expect(scrolled, isFalse);
+  });
+
+  testWidgets('separatorBuilder must return something', (WidgetTester tester) async {
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+
+    Widget buildFrame(Widget firstSeparator) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              return Text(listOfValues[index]);
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return firstSeparator;
+              } else  {
+                return const Divider();
+              }
+            },
+            itemCount: listOfValues.length,
+          ),
+        ),
+      );
+    }
+
+    // A separatorBuilder that always returns a Divider is fine
+    await tester.pumpWidget(buildFrame(const Divider()));
+    expect(tester.takeException(), isNull);
+
+    // A separatorBuilder that returns null throws a FlutterError
+    await tester.pumpWidget(buildFrame(null));
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(find.byType(ErrorWidget), findsOneWidget);
+  });
+
+  testWidgets('itemBuilder can return null', (WidgetTester tester) async {
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const Key key = Key('list');
+    const int RENDER_NULL_AT = 2; // only render the first 2 values
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Material(
+          child: ListView.builder(
+            key: key,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == RENDER_NULL_AT) {
+                return null;
+              }
+              return Text(listOfValues[index]);
+            },
+            itemCount: listOfValues.length,
+          ),
+        ),
+      );
+    }
+
+    // The length of a list is itemCount or the index of the first itemBuilder
+    // that returns null, whichever is smaller
+    await tester.pumpWidget(buildFrame());
+    expect(tester.takeException(), isNull);
+    expect(find.byType(ErrorWidget), findsNothing);
+    expect(find.byType(Text), findsNWidgets(RENDER_NULL_AT));
+  });
+
+  testWidgets('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+
+    Widget buildFrame(bool throwOnFirstItem) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0 && throwOnFirstItem) {
+                throw Exception('itemBuilder fail');
+              }
+              return Text(listOfValues[index]);
+            },
+            itemCount: listOfValues.length,
+          ),
+        ),
+      );
+    }
+
+    // When itemBuilder doesn't throw, no ErrorWidget
+    await tester.pumpWidget(buildFrame(false));
+    expect(tester.takeException(), isNull);
+    final Finder finder = find.byType(ErrorWidget);
+    expect(find.byType(ErrorWidget), findsNothing);
+
+    // When it does throw, one error widget is rendered in the item's place
+    await tester.pumpWidget(buildFrame(true));
+    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(finder, findsOneWidget);
+  });
+
+  testWidgets('when separatorBuilder throws, creates ErrorWidget', (WidgetTester tester) async {
+    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const Key key = Key('list');
+
+    Widget buildFrame(bool throwOnFirstSeparator) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            key: key,
+            itemBuilder: (BuildContext context, int index) {
+              return Text(listOfValues[index]);
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              if (index == 0 && throwOnFirstSeparator) {
+                throw Exception('separatorBuilder fail');
+              }
+              return const Divider();
+            },
+            itemCount: listOfValues.length,
+          ),
+        ),
+      );
+    }
+
+    // When separatorBuilder doesn't throw, no ErrorWidget
+    await tester.pumpWidget(buildFrame(false));
+    expect(tester.takeException(), isNull);
+    final Finder finder = find.byType(ErrorWidget);
+    expect(find.byType(ErrorWidget), findsNothing);
+
+    // When it does throw, one error widget is rendered in the separator's place
+    await tester.pumpWidget(buildFrame(true));
+    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(finder, findsOneWidget);
   });
 }

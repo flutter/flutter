@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
 import 'states.dart';
@@ -14,6 +15,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
+          dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
           children: const <Widget>[],
         ),
@@ -28,9 +30,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
+          dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
@@ -99,9 +103,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.extent(
+          dragStartBehavior: DragStartBehavior.down,
           maxCrossAxisExtent: 200.0,
-          children: kStates.map((String state) {
+          children: kStates.map<Widget>((String state) {
             return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
               onTap: () {
                 log.add(state);
               },
@@ -529,5 +535,33 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(target)), const Offset(600.0, 0.0));
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 200.0));
+  });
+
+  testWidgets('GridView crossAxisSpacing', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27151.
+    final Key target = UniqueKey();
+
+    Widget build(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: GridView.count(
+          crossAxisCount: 4,
+          crossAxisSpacing: 8.0,
+          children: <Widget>[
+            Container(key: target),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(TextDirection.ltr));
+
+    expect(tester.getTopLeft(find.byKey(target)), Offset.zero);
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(194.0, 194.0));
+
+    await tester.pumpWidget(build(TextDirection.rtl));
+
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(606.0, 0.0));
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 194.0));
   });
 }

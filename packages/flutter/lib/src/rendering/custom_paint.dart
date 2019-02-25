@@ -22,7 +22,7 @@ import 'proxy_box.dart';
 /// The returned list must not be mutated after this function completes. To
 /// change the semantic information, the function must return a new list
 /// instead.
-typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
+typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size size);
 
 /// The interface used by [CustomPaint] (in the widgets library) and
 /// [RenderCustomPaint] (in the rendering library).
@@ -62,7 +62,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 /// class is provided, to check if the new instance contains different
 /// information that affects the semantics tree.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample extends the same code shown for [RadialGradient] to create a
 /// custom painter that paints a sky.
@@ -117,6 +117,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -190,9 +191,9 @@ abstract class CustomPainter extends Listenable {
   ///
   /// See also:
   ///
-  /// * [SemanticsConfiguration.isSemanticBoundary], which causes new
-  ///   [SemanticsNode]s to be added to the semantics tree.
-  /// * [RenderCustomPaint], which uses this getter to build semantics.
+  ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
+  ///    [SemanticsNode]s to be added to the semantics tree.
+  ///  * [RenderCustomPaint], which uses this getter to build semantics.
   SemanticsBuilderCallback get semanticsBuilder => null;
 
   /// Called whenever a new instance of the custom painter delegate class is
@@ -275,8 +276,8 @@ abstract class CustomPainter extends Listenable {
 ///
 /// See also:
 ///
-/// * [SemanticsNode], which is created using the properties of this class.
-/// * [CustomPainter], which creates instances of this class.
+///  * [SemanticsNode], which is created using the properties of this class.
+///  * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
 
@@ -321,8 +322,8 @@ class CustomPainterSemantics {
   ///
   /// See also:
   ///
-  /// * [Semantics], which is a widget that also uses [SemanticsProperties] to
-  ///   annotate.
+  ///  * [Semantics], which is a widget that also uses [SemanticsProperties] to
+  ///    annotate.
   final SemanticsProperties properties;
 
   /// Tags used by the parent [SemanticsNode] to determine the layout of the

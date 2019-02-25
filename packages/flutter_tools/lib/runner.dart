@@ -34,6 +34,7 @@ Future<int> run(
   bool verboseHelp = false,
   bool reportCrashes,
   String flutterVersion,
+  Map<Type, Generator> overrides,
 }) {
   reportCrashes ??= !isRunningOnBot;
 
@@ -63,34 +64,27 @@ Future<int> run(
       return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
     }
     return 0;
-  });
+  }, overrides: overrides);
 }
 
 Future<int> _handleToolError(
-    dynamic error,
-    StackTrace stackTrace,
-    bool verbose,
-    List<String> args,
-    bool reportCrashes,
-    String getFlutterVersion(),
-    ) async {
+  dynamic error,
+  StackTrace stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String getFlutterVersion(),
+) async {
   if (error is UsageException) {
-    stderr.writeln(error.message);
-    stderr.writeln();
-    stderr.writeln(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available "
-            'flutter commands and options.'
-    );
+    printError('${error.message}\n');
+    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      stderr.writeln(error.message);
-    if (verbose) {
-      stderr.writeln();
-      stderr.writeln(stackTrace.toString());
-      stderr.writeln();
-    }
+      printError(error.message);
+    if (verbose)
+      printError('\n$stackTrace\n');
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
@@ -218,7 +212,7 @@ Future<int> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  final Completer<Null> completer = Completer<Null>();
+  final Completer<void> completer = Completer<void>();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

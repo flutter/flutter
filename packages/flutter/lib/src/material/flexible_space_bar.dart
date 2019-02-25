@@ -37,7 +37,7 @@ enum CollapseMode {
 ///
 ///  * [SliverAppBar], which implements the expanding and contracting.
 ///  * [AppBar], which is used by [SliverAppBar].
-///  * <https://material.google.com/patterns/scrolling-techniques.html>
+///  * <https://material.io/design/components/app-bars-top.html#behavior>
 class FlexibleSpaceBar extends StatefulWidget {
   /// Creates a flexible space bar.
   ///
@@ -47,6 +47,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.title,
     this.background,
     this.centerTitle,
+    this.titlePadding,
     this.collapseMode = CollapseMode.parallax
   }) : assert(collapseMode != null),
        super(key: key);
@@ -63,7 +64,8 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Whether the title should be centered.
   ///
-  /// Defaults to being adapted to the current [TargetPlatform].
+  /// By default this property is true if the current target platform
+  /// is [TargetPlatform.iOS], false otherwise.
   final bool centerTitle;
 
   /// Collapse effect while scrolling.
@@ -71,10 +73,35 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
+  /// Defines how far the [title] is inset from either the widget's
+  /// bottom-left or its center.
+  ///
+  /// Typically this property is used to adjust how far the title is
+  /// is inset from the bottom-left and it is specified along with
+  /// [centerTitle] false.
+  ///
+  /// By default the value of this property is
+  /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
+  /// not centered, `EdgeInsetsDirectional.only(start 0, bottom: 16)` otherwise.
+  final EdgeInsetsGeometry titlePadding;
+
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
   ///
   /// Used by [Scaffold] and [SliverAppBar].
+  ///
+  /// `toolbarOpacity` affects how transparent the text within the toolbar
+  /// appears. `minExtent` sets the minimum height of the resulting
+  /// [FlexibleSpaceBar] when fully collapsed. `maxExtent` sets the maximum
+  /// height of the resulting [FlexibleSpaceBar] when fully expanded.
+  /// `currentExtent` sets the scale of the [FlexibleSpaceBar.background] and
+  /// [FlexibleSpaceBar.title] widgets of [FlexibleSpaceBar] upon
+  /// initialization.
+  ///
+  /// See also:
+  ///
+  ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
+  ///    used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
     double toolbarOpacity,
     double minExtent,
@@ -83,7 +110,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     @required Widget child,
   }) {
     assert(currentExtent != null);
-    return _FlexibleSpaceBarSettings(
+    return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
@@ -125,7 +152,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  double _getCollapsePadding(double t, _FlexibleSpaceBarSettings settings) {
+  double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
     switch (widget.collapseMode) {
       case CollapseMode.pin:
         return -(settings.maxExtent - settings.currentExtent);
@@ -133,14 +160,14 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         return 0.0;
       case CollapseMode.parallax:
         final double deltaExtent = settings.maxExtent - settings.minExtent;
-        return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
+        return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
+    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
     assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
 
     final List<Widget> children = <Widget>[];
@@ -193,15 +220,17 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           color: titleStyle.color.withOpacity(opacity)
         );
         final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).lerp(t);
+        final EdgeInsetsGeometry padding = widget.titlePadding ??
+          EdgeInsetsDirectional.only(
+            start: effectiveCenterTitle ? 0.0 : 72.0,
+            bottom: 16.0
+          );
+        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
         final Matrix4 scaleTransform = Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
         children.add(Container(
-          padding: EdgeInsetsDirectional.only(
-            start: effectiveCenterTitle ? 0.0 : 72.0,
-            bottom: 16.0
-          ),
+          padding: padding,
           child: Transform(
             alignment: titleAlignment,
             transform: scaleTransform,
@@ -221,23 +250,42 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 }
 
-class _FlexibleSpaceBarSettings extends InheritedWidget {
-  const _FlexibleSpaceBarSettings({
+/// Provides sizing and opacity information to a [FlexibleSpaceBar].
+///
+/// See also:
+///
+///  * [FlexibleSpaceBar] which creates a flexible space bar.
+class FlexibleSpaceBarSettings extends InheritedWidget {
+  /// Creates a Flexible Space Bar Settings widget.
+  ///
+  /// Used by [Scaffold] and [SliverAppBar]. [child] must have a
+  /// [FlexibleSpaceBar] widget in its tree for the settings to take affect.
+  const FlexibleSpaceBarSettings({
     Key key,
     this.toolbarOpacity,
     this.minExtent,
     this.maxExtent,
-    this.currentExtent,
-    Widget child,
-  }) : super(key: key, child: child);
+    @required this.currentExtent,
+    @required Widget child,
+  }) : assert(currentExtent != null),
+       super(key: key, child: child);
 
+  /// Affects how transparent the text within the toolbar appears.
   final double toolbarOpacity;
+
+  /// Minimum height of the resulting [FlexibleSpaceBar] when fully collapsed.
   final double minExtent;
+
+  /// Maximum height of the resulting [FlexibleSpaceBar] when fully expanded.
   final double maxExtent;
+
+  /// If the [FlexibleSpaceBar.title] or the [FlexibleSpaceBar.background] is
+  /// not null, then this value is used to calculate the relative scale of
+  /// these elements upon initialization.
   final double currentExtent;
 
   @override
-  bool updateShouldNotify(_FlexibleSpaceBarSettings oldWidget) {
+  bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent

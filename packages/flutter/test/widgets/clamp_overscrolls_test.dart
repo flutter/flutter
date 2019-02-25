@@ -11,10 +11,11 @@ import 'package:flutter/widgets.dart';
 // The top of the bottom widget is at 550 (the top of the top widget
 // is at 0). The top of the bottom widget is 500 when it has been
 // scrolled completely into view.
-Widget buildFrame(ScrollPhysics physics) {
+Widget buildFrame(ScrollPhysics physics, { ScrollController scrollController }) {
   return SingleChildScrollView(
     key: UniqueKey(),
     physics: physics,
+    controller: scrollController,
     child: SizedBox(
       height: 650.0,
       child: Column(
@@ -88,5 +89,20 @@ void main() {
     await tester.dragFrom(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
     await tester.pump();
     expect(scrollable.position.pixels, equals(50.0));
+  });
+
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
+    Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
+      final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
+      await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+      expect(scrollable.position.pixels, equals(initialOffset));
+      await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+      expect(scrollable.position.pixels, equals(expectedOffset));
+    }
+
+    await testOutOfBounds(const ClampingScrollPhysics(), -400.0, 0.0);
+    await testOutOfBounds(const ClampingScrollPhysics(), 800.0, 50.0);
   });
 }

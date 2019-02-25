@@ -24,20 +24,20 @@ void main() {
 
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );

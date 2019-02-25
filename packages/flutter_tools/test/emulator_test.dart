@@ -58,7 +58,7 @@ void main() {
       final TestEmulatorManager testEmulatorManager =
           TestEmulatorManager(emulators);
 
-      Future<Null> expectEmulator(String id, List<Emulator> expected) async {
+      Future<void> expectEmulator(String id, List<Emulator> expected) async {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
       }
 
@@ -152,9 +152,9 @@ void main() {
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  final List<Emulator> allEmulators;
-
   TestEmulatorManager(this.allEmulators);
+
+  final List<Emulator> allEmulators;
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() {
@@ -164,7 +164,7 @@ class TestEmulatorManager extends EmulatorManager {
 
 class _MockEmulator extends Emulator {
   _MockEmulator(String id, this.name, this.manufacturer, this.label)
-      : super(id, true);
+    : super(id, true);
 
   @override
   final String name;
@@ -203,8 +203,8 @@ class MockProcessManager extends Mock implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding,
-    Encoding stderrEncoding
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding
   }) {
     final String program = command[0];
     final List<String> args = command.sublist(1);

@@ -44,12 +44,12 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 ///
 /// See also:
 ///
-///   * [Tween] for a discussion on how to use interpolation objects.
-///   * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
-///     [StadiumBorder] for examples of shape borders that can be smoothly
-///     interpolated.
-///   * [BoxBorder] for a border that can only be smoothly interpolated between other
-///     [BoxBorder]s.
+///  * [Tween] for a discussion on how to use interpolation objects.
+///  * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
+///    [StadiumBorder] for examples of shape borders that can be smoothly
+///    interpolated.
+///  * [BoxBorder] for a border that can only be smoothly interpolated between other
+///    [BoxBorder]s.
 class DecorationTween extends Tween<Decoration> {
   /// Creates a decoration tween.
   ///
@@ -243,10 +243,10 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 ///
 /// This is the type of one of the arguments of [TweenVisitor], the signature
 /// used by [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenConstructor<T>(T targetValue);
+typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [AnimatedWidgetBaseState.forEachTween].
-typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
+typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
 ///
@@ -257,7 +257,7 @@ typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor
 /// Subclasses must implement the [forEachTween] method to allow
 /// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
 /// fields and animate them.
-abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
   AnimationController get controller => _controller;
@@ -396,7 +396,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
-/// duration. Properties that are null are not animated.
+/// duration. Properties that are null are not animated. Its child and
+/// descendants are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container] with its internal [AnimationController].
@@ -418,6 +419,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///    position changes.
 ///  * [AnimatedAlign], which automatically transitions its child's
 ///    position over a given duration whenever the given [alignment] changes.
+///  * [AnimatedSwitcher], which switches out a child for a new one with a customizable transition.
+///  * [AnimatedCrossFade], which fades between two children and interpolates their sizes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -766,7 +769,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -917,7 +920,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1018,7 +1021,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {
@@ -1052,6 +1055,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1105,7 +1109,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = _opacity.animate(animation);
+    _opacityAnimation = animation.drive(_opacity);
   }
 
   @override
@@ -1239,7 +1243,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
   /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null.
+  /// [duration] arguments must not be null. Additionally, [elevation] must be
+  /// non-negative.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
   ///
@@ -1261,7 +1266,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shape != null),
        assert(clipBehavior != null),
        assert(borderRadius != null),
-       assert(elevation != null),
+       assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(animateColor != null),
@@ -1284,7 +1289,10 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// The target border radius of the rounded corners for a rectangle shape.
   final BorderRadius borderRadius;
 
-  /// The target z-coordinate at which to place this physical object.
+  /// The target z-coordinate relative to the parent at which to place this
+  /// physical object.
+  ///
+  /// The value will always be non-negative.
   final double elevation;
 
   /// The target background color.

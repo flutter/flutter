@@ -11,6 +11,9 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
+// Examples can assume:
+// AnimationController controller;
+
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
 
@@ -120,11 +123,7 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
 ///
 /// To define a mapping from values in the range 0..1, consider subclassing
 /// [Tween] instead.
-abstract class AnimationWithParentMixin<T> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory AnimationWithParentMixin._() => null;
-
+mixin AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
@@ -248,6 +247,13 @@ class ProxyAnimation extends Animation<double>
 /// Using a [ReverseAnimation] is different from simply using a [Tween] with a
 /// begin of 1.0 and an end of 0.0 because the tween does not change the status
 /// or direction of the animation.
+///
+/// See also:
+///
+///  * [Curve.flipped] and [FlippedCurve], which provide a similar effect but on
+///    [Curve]s.
+///  * [CurvedAnimation], which can take separate curves for when the animation
+///    is going forward than for when it is going in reverse.
 class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
 
@@ -312,15 +318,8 @@ class ReverseAnimation extends Animation<double>
 /// An animation that applies a curve to another animation.
 ///
 /// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
-/// an animation object wrapped in the [CurvedAnimation].
-///
-/// For example, the following code snippet shows how you can apply a curve to a
-/// linear animation produced by an [AnimationController]:
-///
-/// ``` dart
-/// final AnimationController controller = AnimationController(duration: const Duration(milliseconds: 500));
-/// final CurvedAnimation animation = CurvedAnimation(parent: controller, curve: Curves.ease);
-///```
+/// an animation object, especially if you want different curves when the
+/// animation is going forward vs when it is going backward.
 ///
 /// Depending on the given curve, the output of the [CurvedAnimation] could have
 /// a wider range than its input. For example, elastic curves such as
@@ -328,6 +327,45 @@ class ReverseAnimation extends Animation<double>
 /// range of 0.0 to 1.0.
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
+///
+/// {@tool sample}
+///
+/// The following code snippet shows how you can apply a curve to a linear
+/// animation produced by an [AnimationController] `controller`.
+///
+/// ```dart
+/// final Animation<double> animation = CurvedAnimation(
+///   parent: controller,
+///   curve: Curves.ease,
+/// );
+/// ```
+/// {@end-tool}
+/// {@tool sample}
+///
+/// This second code snippet shows how to apply a different curve in the forward
+/// direction than in the reverse direction. This can't be done using a
+/// [CurveTween] (since [Tween]s are not aware of the animation direction when
+/// they are applied).
+///
+/// ```dart
+/// final Animation<double> animation = CurvedAnimation(
+///   parent: controller,
+///   curve: Curves.easeIn,
+///   reverseCurve: Curves.easeOut,
+/// );
+/// ```
+/// {@end-tool}
+///
+/// By default, the [reverseCurve] matches the forward [curve].
+///
+/// See also:
+///
+///  * [CurveTween], for an alternative way of expressing the first sample
+///    above.
+///  * [AnimationController], for examples of creating and disposing of an
+///    [AnimationController].
+///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
+///    [Curve].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
   ///
@@ -428,11 +466,19 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
 enum _TrainHoppingMode { minimize, maximize }
 
-/// This animation starts by proxying one animation, but can be given a
-/// second animation. When their times cross (either because the second is
+/// This animation starts by proxying one animation, but when the value of that
+/// animation crosses the value of the second (either because the second is
 /// going in the opposite direction, or because the one overtakes the other),
-/// the animation hops over to proxying the second animation, and the second
-/// animation becomes the new "first" performance.
+/// the animation hops over to proxying the second animation.
+///
+/// When the [TrainHoppingAnimation] starts proxying the second animation
+/// instead of the first, the [onSwitchedTrain] callback is called.
+///
+/// If the two animations start at the same value, then the
+/// [TrainHoppingAnimation] immediately hops to the second animation, and the
+/// [onSwitchedTrain] callback is not called. If only one animation is provided
+/// (i.e. if the second is null), then the [TrainHoppingAnimation] just proxies
+/// the first animation.
 ///
 /// Since this object must track the two animations even when it has no
 /// listeners of its own, instead of shutting down when all its listeners are
@@ -444,33 +490,41 @@ class TrainHoppingAnimation extends Animation<double>
   /// Creates a train-hopping animation.
   ///
   /// The current train argument must not be null but the next train argument
-  /// can be null.
+  /// can be null. If the next train is null, then this object will just proxy
+  /// the first animation and never hop.
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-    : assert(_currentTrain != null) {
+      : assert(_currentTrain != null) {
     if (_nextTrain != null) {
-      if (_currentTrain.value > _nextTrain.value) {
+      if (_currentTrain.value == _nextTrain.value) {
+        _currentTrain = _nextTrain;
+        _nextTrain = null;
+      } else if (_currentTrain.value > _nextTrain.value) {
         _mode = _TrainHoppingMode.maximize;
       } else {
+        assert(_currentTrain.value < _nextTrain.value);
         _mode = _TrainHoppingMode.minimize;
-        if (_currentTrain.value == _nextTrain.value) {
-          _currentTrain = _nextTrain;
-          _nextTrain = null;
-        }
       }
     }
     _currentTrain.addStatusListener(_statusChangeHandler);
     _currentTrain.addListener(_valueChangeHandler);
     _nextTrain?.addListener(_valueChangeHandler);
-    assert(_mode != null);
+    assert(_mode != null || _nextTrain == null);
   }
 
-  /// The animation that is current driving this animation.
+  /// The animation that is currently driving this animation.
+  ///
+  /// The identity of this object will change from the first animation to the
+  /// second animation when [onSwitchedTrain] is called.
   Animation<double> get currentTrain => _currentTrain;
   Animation<double> _currentTrain;
   Animation<double> _nextTrain;
   _TrainHoppingMode _mode;
 
-  /// Called when this animation switches to be driven by a different animation.
+  /// Called when this animation switches to be driven by the second animation.
+  ///
+  /// This is not called if the two animations provided to the constructor have
+  /// the same value at the time of the call to the constructor. In that case,
+  /// the second animation is used from the start, and the first is ignored.
   VoidCallback onSwitchedTrain;
 
   AnimationStatus _lastStatus;
@@ -491,6 +545,7 @@ class TrainHoppingAnimation extends Animation<double>
     assert(_currentTrain != null);
     bool hop = false;
     if (_nextTrain != null) {
+      assert(_mode != null);
       switch (_mode) {
         case _TrainHoppingMode.minimize:
           hop = _nextTrain.value <= _currentTrain.value;
@@ -646,7 +701,7 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMax] itself
   /// to combine multiple animations.
-  AnimationMax(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.max(first.value, next.value);
@@ -661,7 +716,7 @@ class AnimationMin<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMin] itself
   /// to combine multiple animations.
-  AnimationMin(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.min(first.value, next.value);

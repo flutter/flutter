@@ -92,13 +92,13 @@ flutter:
         - asset: a/bar
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      expect(flutterManifest.fontsDescriptor.toString(), '[{fonts: [{asset: a/bar}], family: foo}]');
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 1);
@@ -124,14 +124,13 @@ flutter:
           weight: 400
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -162,14 +161,14 @@ flutter:
           style: italic
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
 
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -206,16 +205,17 @@ flutter:
           style: italic
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}], family: bar}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final dynamic expectedFontsDescriptor = <dynamic>[
+          {'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}, // ignore: always_specify_types
+          {'fonts': [{'asset': 'a/baz'}, {'style': 'italic', 'weight': 400, 'asset': 'a/baz'}], 'family': 'bar'}, // ignore: always_specify_types
+      ];
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 2);
 
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -229,7 +229,7 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
 
       final Font barFont = fonts[1];
-      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
+      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}'; // ignore: always_specify_types
       expect(barFont.descriptor.toString(), fontDescriptor);
       expect(barFont.familyName, 'bar');
       final List<FontAsset> barAssets = barFont.fontAssets;
@@ -267,15 +267,13 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}]}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -307,15 +305,13 @@ flutter:
     - family: bar
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {family: bar}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -344,8 +340,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      const String expectedFontsDescriptor = '[{fonts: [{weight: 400}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      expect(flutterManifest.fontsDescriptor, <dynamic>[]);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 0);
     });
@@ -393,7 +388,7 @@ flutter:
       String manifest,
       String expectedAppVersion,
       String expectedBuildName,
-      int expectedBuildNumber,
+      String expectedBuildNumber,
     }) async {
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.appVersion, expectedAppVersion);
@@ -401,7 +396,7 @@ flutter:
       expect(flutterManifest.buildNumber, expectedBuildNumber);
     }
 
-    test('parses major.minor.patch+build version clause', () async {
+    test('parses major.minor.patch+build version clause 1', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+2
@@ -414,7 +409,24 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0.0+2',
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: 2,
+        expectedBuildNumber: '2',
+      );
+    });
+
+    test('parses major.minor.patch+build version clause 2', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0-beta+exp.sha.5114f85
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0.0-beta+exp.sha.5114f85',
+        expectedBuildName: '1.0.0-beta',
+        expectedBuildNumber: 'exp.sha.5114f85',
       );
     });
 
@@ -431,41 +443,7 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0+2',
         expectedBuildName: '1.0',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major+build version clause', () async {
-      const String manifest = '''
-name: test
-version: 1+2
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1+2',
-        expectedBuildName: '1',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major version clause', () async {
-      const String manifest = '''
-name: test
-version: 1
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1',
-        expectedBuildName: '1',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '2',
       );
     });
 
@@ -516,8 +494,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void testUsingContextAndFs(String description, FileSystem filesystem,
-        dynamic testMethod()) {
+    void testUsingContextAndFs(
+      String description,
+      FileSystem filesystem,
+      dynamic testMethod(),
+    ) {
       testUsingContext(description,
               () async {
             writeEmptySchemaFile(filesystem);

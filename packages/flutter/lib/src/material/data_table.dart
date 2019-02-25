@@ -21,7 +21,7 @@ import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Signature for [DataColumn.onSort] callback.
-typedef void DataColumnSortCallback(int columnIndex, bool ascending);
+typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 
 /// Column configuration for a [DataTable].
 ///
@@ -229,7 +229,7 @@ class DataCell {
 ///  * [DataCell], which contains the data for a single cell in the data table.
 ///  * [PaginatedDataTable], which shows part of the data in a data table and
 ///    provides controls for paging through the remainder of the data.
-///  * <https://material.google.com/components/data-tables.html>
+///  * <https://material.io/design/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
   ///
@@ -543,7 +543,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged(!row.selected),
+          onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
         );
         rowIndex += 1;
@@ -568,7 +568,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true),
+        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );
@@ -583,7 +583,7 @@ class DataTable extends StatelessWidget {
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
-          onSelectChanged: () => row.onSelectChanged(!row.selected),
+          onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
         );
         rowIndex += 1;
       }
@@ -694,6 +694,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   bool _down;
 
+  static final Animatable<double> _turnTween = Tween<double>(begin: 0.0, end: math.pi)
+    .chain(CurveTween(curve: Curves.easeIn));
+
   @override
   void initState() {
     super.initState();
@@ -706,18 +709,13 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     )
     ..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;
-    _orientationAnimation = Tween<double>(
-      begin: 0.0,
-      end: math.pi,
-    ).animate(CurvedAnimation(
-      parent: _orientationController = AnimationController(
-        duration: widget.duration,
-        vsync: this,
-      ),
-      curve: Curves.easeIn
-    ))
-    ..addListener(_rebuild)
-    ..addStatusListener(_resetOrientationAnimation);
+    _orientationController = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    _orientationAnimation = _orientationController.drive(_turnTween)
+      ..addListener(_rebuild)
+      ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible)
       _orientationOffset = widget.down ? 0.0 : math.pi;
   }

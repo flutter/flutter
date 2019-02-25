@@ -5,13 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
-typedef void ModeUpdater(StockMode mode);
+typedef ModeUpdater = void Function(StockMode mode);
 
 enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }
@@ -110,6 +111,7 @@ class StockHomeState extends State<StockHome> {
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
+        dragStartBehavior: DragStartBehavior.down,
         children: <Widget>[
           const DrawerHeader(child: Center(child: Text('Stocks'))),
           const ListTile(
@@ -260,10 +262,10 @@ class StockHomeState extends State<StockHome> {
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock) {
-        Navigator.pushNamed(context, '/stock:${stock.symbol}');
+        Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
@@ -317,11 +319,13 @@ class StockHomeState extends State<StockHome> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        drawerDragStartBehavior: DragStartBehavior.down,
         key: _scaffoldKey,
         appBar: _isSearching ? buildSearchBar() : buildAppBar(),
         floatingActionButton: buildFloatingActionButton(),
         drawer: _buildDrawer(context),
         body: TabBarView(
+          dragStartBehavior: DragStartBehavior.down,
           children: <Widget>[
             _buildStockTab(context, StockHomeTab.market, widget.stocks.allSymbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
