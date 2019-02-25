@@ -232,7 +232,5 @@ docker_builder:
   markdown_link_check_task:
     container:
       image: node:latest
-    download_tool_script:
-      - npm install -g markdown-link-check@3.7.2
-    script:
-      - find . -name \*.md -exec markdown-link-check {} \;
+    download_tool_script: npm install -g markdown-link-check@3.7.2
+    script: find . -name \*.md -exec markdown-link-check {} \;
