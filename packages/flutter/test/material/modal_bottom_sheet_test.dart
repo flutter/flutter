@@ -28,8 +28,8 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => const SingleChildScrollView(primary: true, child: Text('BottomSheet'))
-    ).then<void>((void result) {
+      builder: (BuildContext context) => const Text('BottomSheet')
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
 
@@ -38,18 +38,18 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the modal barrier area dismisses
-    await tester.tapAt(const Offset(100.0, 100.0));
+    // Tap on the bottom sheet itself to dismiss it.
+    await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
     await tester.pump(const Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
     await tester.pump(const Duration(seconds: 1)); // frame after the animation (sheet has been removed)
-  expect(find.text('BottomSheet'), findsNothing);
+    expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => const SingleChildScrollView(primary: true, child: Text('BottomSheet')),
+      builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
@@ -82,12 +82,9 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      return SingleChildScrollView(
-        primary: true,
-        child: Container(
-          margin: const EdgeInsets.all(40.0),
-          child: const Text('BottomSheet')
-        ),
+      return Container(
+        margin: const EdgeInsets.all(40.0),
+        child: const Text('BottomSheet')
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -106,8 +103,22 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 500.0), 2000.0);
-    await tester.pumpAndSettle(); // drain the microtask queue (Future completion callback)
+    // The fling below must be such that the velocity estimation examines an
+    // offset greater than the kTouchSlop. Too slow or too short a distance, and
+    // it won't trigger. Also, it musn't be so much that it drags the bottom
+    // sheet off the screen, or we won't see it after we pump!
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 50.0), 2000.0);
+    await tester.pump(); // drain the microtask queue (Future completion callback)
+
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+     await tester.pump(); // bottom sheet dismiss animation starts
+
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1)); // animation done
 
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
@@ -125,12 +136,9 @@ void main() {
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      return SingleChildScrollView(
-        primary: true,
-        child: Container(
-          margin: const EdgeInsets.all(40.0),
-          child: const Text('BottomSheet')
-        ),
+      return Container(
+        margin: const EdgeInsets.all(40.0),
+        child: const Text('BottomSheet')
       );
     });
 
@@ -181,7 +189,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return SingleChildScrollView(primary: true, child: Container());
+        return Container();
       },
     );
     await tester.pump();
@@ -210,13 +218,62 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
-      return SingleChildScrollView(
-        primary: true,
-        child: Container(
-          child: const Text('BottomSheet')
-        ),
+      return Container(
+        child: const Text('BottomSheet'),
       );
     });
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'Dialog',
+              textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'BottomSheet',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+
+    showModalBottomSheet<void>(
+      isScrollControlled: true,
+      context: scaffoldKey.currentContext,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(primary: true,
+          child: Container(
+            child: const Text('BottomSheet'),
+          ),
+        );
+      },
+    );
 
     await tester.pump(); // bottom sheet show animation starts
     await tester.pump(const Duration(seconds: 1)); // animation done

@@ -16,6 +16,8 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
+const double _kMinFlingVelocity = 700.0;
+const double _kCloseProgressThreshold = 0.5;
 
 /// A material design bottom sheet.
 ///
@@ -52,18 +54,40 @@ class BottomSheet extends StatefulWidget {
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
     Key key,
-    @required this.scrollController,
+    this.animationController,
+    this.enableDrag = true,
+    this.scrollController,
     this.elevation = 0.0,
     @required this.onClosing,
     @required this.builder
-  }) : assert(onClosing != null),
-       assert(scrollController != null),
+  }) : assert(enableDrag != null),
+       assert(onClosing != null),
+       assert(
+         scrollController == null || animationController == null,
+         'A BottomSheet can either have a scrollController or an '
+         'animationController, but not both. If the scrollController is '
+         'specified, the animation will be controlled by the.',
+       ),
+       assert(
+         (scrollController != null && enableDrag) || scrollController == null,
+         'A BottomSheet with a scrollController must have enableDrag set to true.',
+       ),
        assert(builder != null),
        assert(elevation != null && elevation >= 0.0),
        super(key: key);
 
-  /// The [BottomSheetScrollController] that will act as the [PrimaryScrollController]
-  /// for this [BottomSheet], controlling its height and its child's scroll offset.
+  /// The animation that controls the bottom sheet's position, if
+  /// [scrollController] is not specified.
+  ///
+  /// The BottomSheet widget will manipulate the position of this animation, it
+  /// is not just a passive observer.
+  final AnimationController animationController;
+
+  /// The [BottomSheetScrollController] that will act as the
+  /// [PrimaryScrollController] for this [BottomSheet], controlling its height
+  /// and its child's scroll offset.
+  ///
+  /// If [animationController] is specified, this property must not be.
   final BottomSheetScrollController scrollController;
 
   /// Called when the bottom sheet begins to close.
@@ -79,6 +103,12 @@ class BottomSheet extends StatefulWidget {
   /// [Material] widget.
   final WidgetBuilder builder;
 
+  /// If true, the bottom sheet can be dragged up and down and dismissed by
+  /// swiping downards.
+  ///
+  /// Default is true.  If [scrollController] is specified, this must be true.
+  final bool enableDrag;
+
   /// The z-coordinate at which to place this material relative to its parent.
   ///
   /// This controls the size of the shadow below the material.
@@ -88,6 +118,15 @@ class BottomSheet extends StatefulWidget {
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
+
+  /// Creates an [AnimationController] suitable for controlling a [BottomSheet].
+  static AnimationController createAnimationController(TickerProvider vsync) {
+    return AnimationController(
+      duration: _kBottomSheetDuration,
+      debugLabel: 'BottomSheet',
+      vsync: vsync
+    );
+  }
 
   /// Creates a [BottomSheetScrollController] suitable for animating the
   /// [BottomSheet].
@@ -114,13 +153,55 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
+
+  final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
+
+  double get _childHeight {
+    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    return renderBox.size.height;
+  }
+
+  bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    assert(widget.scrollController == null);
+    assert(widget.enableDrag);
+    if (_dismissUnderway)
+      return;
+    widget.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    assert(widget.scrollController == null);
+    assert(widget.enableDrag);
+    if (_dismissUnderway)
+      return;
+    if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
+      if (widget.animationController.value > 0.0) {
+        widget.animationController.fling(velocity: flingVelocity);
+      }
+      if (flingVelocity < 0.0) {
+        widget.onClosing();
+      }
+    } else if (widget.animationController.value < _kCloseProgressThreshold) {
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: -1.0);
+      widget.onClosing();
+    } else {
+      widget.animationController.forward();
+   }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addTopListener(_maybeCloseBottomSheet);
+    widget.scrollController?.addTopListener(_maybeCloseBottomSheet);
   }
 
+  /// This method is only intended for use in a scroll controlled widget.
   void _maybeCloseBottomSheet() {
+    assert(widget.scrollController != null);
     if (!widget.scrollController.isPersistent &&
         widget.scrollController.top >= widget.scrollController.maxTop) {
       // onClosing is asserted not null
@@ -130,20 +211,33 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryScrollController(
-      controller: widget.scrollController,
-      child: Material(
-        elevation: widget.elevation,
-        child: SizedBox.expand(
-          child: widget.builder(context),
+    if (widget.scrollController != null) {
+      return PrimaryScrollController(
+        controller: widget.scrollController,
+        child: Material(
+          elevation: widget.elevation,
+          child: SizedBox.expand(
+            child: widget.builder(context),
+          ),
         ),
-      ),
+      );
+    }
+    final Widget bottomSheet = Material(
+      key: _childKey,
+      elevation: widget.elevation,
+      child: widget.builder(context),
+    );
+    return !widget.enableDrag ? bottomSheet : GestureDetector(
+      onVerticalDragUpdate: _handleDragUpdate,
+      onVerticalDragEnd: _handleDragEnd,
+      child: bottomSheet,
+      excludeFromSemantics: true,
     );
   }
 
   @override
   void dispose() {
-    widget.scrollController.removeTopListener(_maybeCloseBottomSheet);
+    widget.scrollController?.removeTopListener(_maybeCloseBottomSheet);
     super.dispose();
   }
 }
@@ -155,8 +249,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // MODAL BOTTOM SHEETS
 
-class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetLayout(this.top);
+class _ModalBottomSheetScrollControllerLayout extends SingleChildLayoutDelegate {
+  _ModalBottomSheetScrollControllerLayout(this.top);
 
   final double top;
 
@@ -171,18 +265,45 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
+  bool shouldRelayout(_ModalBottomSheetScrollControllerLayout oldDelegate) {
     return top != oldDelegate.top;
   }
 }
+
+
+class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelegate {
+  _ModalBottomSheetAnimationControllerLayout(this.progress);
+
+  final double progress;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(
+      minWidth: constraints.maxWidth,
+      maxWidth: constraints.maxWidth,
+      minHeight: 0.0,
+      maxHeight: constraints.maxHeight * 9.0 / 16.0
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return Offset(0.0, size.height - childSize.height * progress);
+  }
+
+  @override
+  bool shouldRelayout(_ModalBottomSheetAnimationControllerLayout oldDelegate) {
+    return progress != oldDelegate.progress;
+  }
+}
+
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     Key key,
     this.route,
-    @required this.scrollController,
-  }) : assert(scrollController != null),
-       super(key: key);
+    this.scrollController,
+  }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
   final BottomSheetScrollController scrollController;
@@ -195,7 +316,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addTopListener(_rebuild);
+    widget.scrollController?.addTopListener(_rebuild);
   }
 
   /// Rebuild the sheet when the [BottomSheetScrollController.top] value has changed.
@@ -203,20 +324,19 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     setState(() { /* state is contained in BottomSheetScrollController.top */ });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    String routeLabel;
+  String _getRouteLabel(MaterialLocalizations localizations) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        routeLabel = '';
-        break;
+        return '';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        routeLabel = localizations.dialogLabel;
-        break;
+        return localizations.dialogLabel;
     }
+    return null;
+  }
 
+  Widget _buildScrollControlledWidget(String routeLabel) {
+    assert(widget.scrollController != null);
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -224,7 +344,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       explicitChildNodes: true,
       child: ClipRect(
         child: CustomSingleChildLayout(
-          delegate: _ModalBottomSheetLayout(widget.scrollController.top),
+          delegate: _ModalBottomSheetScrollControllerLayout(widget.scrollController.top),
           child: BottomSheet(
             onClosing: () => Navigator.pop(context),
             builder: widget.route.builder,
@@ -235,9 +355,52 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     );
   }
 
+  Widget _buildAnimationControlledWidget(String routeLabel, BuildContext context) {
+    assert(widget.scrollController == null);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    return GestureDetector(
+      excludeFromSemantics: true,
+      onTap: () => Navigator.pop(context),
+      child: AnimatedBuilder(
+        animation: widget.route.animation,
+        builder: (BuildContext context, Widget child) {
+          // Disable the initial animation when accessible navigation is on so
+          // that the semantics are added to the tree at the correct time.
+          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+          return Semantics(
+            scopesRoute: true,
+            namesRoute: true,
+            label: routeLabel,
+            explicitChildNodes: true,
+            child: ClipRect(
+              child: CustomSingleChildLayout(
+                delegate: _ModalBottomSheetAnimationControllerLayout(animationValue),
+                child: BottomSheet(
+                  animationController: widget.route._animationController,
+                  onClosing: () => Navigator.pop(context),
+                  builder: widget.route.builder,
+                ),
+              ),
+            ),
+          );
+        }
+      )
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String routeLabel = _getRouteLabel(localizations);
+
+    if (widget.scrollController != null) {
+      return _buildScrollControlledWidget(routeLabel);
+    }
+    return _buildAnimationControlledWidget(routeLabel, context);
+  }
+
   @override
   void dispose() {
-    widget.scrollController.removeTopListener(_rebuild);
+    widget.scrollController?.removeTopListener(_rebuild);
     super.dispose();
   }
 }
@@ -247,17 +410,21 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
+    this.isScrollControlled = false,
     this.initialHeightPercentage,
     this.clampTop = false,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : assert(isScrollControlled != null),
+       super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
+  final bool isScrollControlled;
   final double initialHeightPercentage;
   final bool clampTop;
 
   BottomSheetScrollController _scrollController;
+  AnimationController _animationController;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
@@ -272,19 +439,33 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black54;
 
   @override
+  AnimationController createAnimationController() {
+    if (!isScrollControlled) {
+      assert(_animationController == null);
+      _animationController = BottomSheet.createAnimationController(navigator.overlay);
+      return _animationController;
+    }
+    return super.createAnimationController();
+  }
+
+  @override
   void dispose() {
-    _scrollController.dispose();
+    if (isScrollControlled) {
+      _scrollController?.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    _scrollController = BottomSheet.createScrollController(
-      initialHeightPercentage: initialHeightPercentage,
-      minTop: clampTop ? initialHeightPercentage : 0.0,
-      context: context,
-      forFullScreen: true,
-    );
+    if (isScrollControlled) {
+      _scrollController = BottomSheet.createScrollController(
+        initialHeightPercentage: initialHeightPercentage,
+        minTop: clampTop ? initialHeightPercentage : 0.0,
+        context: context,
+        forFullScreen: true,
+      );
+    }
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
@@ -317,7 +498,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// corresponding widget can be safely removed from the tree before the bottom
 /// sheet is closed.
 ///
-/// The `initialTop` argument will limit the
+/// The `isScrollControlled` parameter specifies whether this is a route for
+/// a bottom sheet that will utilize [BottomSheet.scrollController]. If you wish
+/// to have a bottom sheet that has a scrollable child such as a [ListView] or
+/// a [GridView], you should set this parameter to true. In such a case, the
+/// `initialHeightPercentage` specifies how much of the available screen space
+/// the sheet should take at the start.  The `clampTop` parameter specifies
+/// whether to force the bottom sheet to always be at least that height, and
+/// setting it to true will disable swipe down dismissal of the bottom sheet.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
@@ -332,12 +520,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  bool isScrollControlled = false,
   double initialHeightPercentage = 0.5,
   bool clampTop = false,
 }) {
   assert(clampTop != null);
   assert(context != null);
   assert(builder != null);
+  assert(isScrollControlled != null);
   assert(!clampTop || initialHeightPercentage != null,
     'If you wish to clamp the top, you must specify an initial value.');
   assert(initialHeightPercentage != null);
@@ -349,6 +539,7 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    isScrollControlled: isScrollControlled,
     initialHeightPercentage: initialHeightPercentage,
     clampTop: clampTop,
   ));
@@ -359,6 +550,15 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
+///
+/// The `isScrollControlled` parameter specifies whether this is a route for
+/// a bottom sheet that will utilize [BottomSheet.scrollController]. If you wish
+/// to have a bottom sheet that has a scrollable child such as a [ListView] or
+/// a [GridView], you should set this parameter to true. In such a case, the
+/// `initialHeightPercentage` specifies how much of the available screen space
+/// the sheet should take at the start.  The `clampTop` parameter specifies
+/// whether to force the bottom sheet to always be at least that height, and
+/// setting it to true will disable swipe down dismissal of the bottom sheet.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -371,10 +571,6 @@ Future<T> showModalBottomSheet<T>({
 /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
 /// does not add a back button to the enclosing Scaffold's appbar, use the
 /// [Scaffold.bottomSheet] constructor parameter.
-///
-/// A persistent bottom sheet shows information that supplements the primary
-/// content of the app. A persistent bottom sheet remains visible even when
-/// the user interacts with other parts of the app.
 ///
 /// A closely related widget is a modal bottom sheet, which is an alternative
 /// to a menu or a dialog and prevents the user from interacting with the rest
@@ -395,6 +591,7 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  bool isScrollControlled = false,
   double initialHeightPercentage = 0.5,
   bool clampTop = false,
 }) {
@@ -405,6 +602,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
+    isScrollControlled: isScrollControlled,
     initialHeightPercentage: initialHeightPercentage,
     clampTop: clampTop,
   );

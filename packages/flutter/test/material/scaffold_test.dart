@@ -340,18 +340,12 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<void>(
-                    (BuildContext context) {
-                      return SingleChildScrollView(
-                        primary: true,
-                        child: Container(
-                          key: sheetKey,
-                          color: Colors.blue[500],
-                        ),
-                      );
-                    },
-                    initialHeightPercentage: 1.0,
-                  );
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+                    return Container(
+                      key: sheetKey,
+                      color: Colors.blue[500],
+                    );
+                  });
                 },
                 child: const Text('X'),
               );

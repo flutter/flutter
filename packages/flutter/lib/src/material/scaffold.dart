@@ -363,14 +363,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-    this.bottomSheetTop,
+    this.bottomSheetTop = 0.0,
     @required this.extendBody,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null),
-       assert(extendBody != null);
+       assert(extendBody != null),
+       assert(bottomSheetTop != null);
 
   final bool extendBody;
   final EdgeInsets minInsets;
@@ -893,6 +894,7 @@ class Scaffold extends StatefulWidget {
     this.endDrawer,
     this.bottomNavigationBar,
     this.bottomSheet,
+    this.bottomSheetIsScrollControlled = false,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
@@ -1033,6 +1035,14 @@ class Scaffold extends StatefulWidget {
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget bottomSheet;
+
+  /// Whether the [bottomSheet] is a scrollable widget with [ScrollView.primary]
+  /// set to true, which enables the persistent bottom sheet to have a child
+  /// such as a [ListView] or [GridView] that has scrollable content beyond the
+  /// screen's height.
+  ///
+  /// Defaults to false.
+  final bool bottomSheetIsScrollControlled;
 
   /// This flag is deprecated, please use [resizeToAvoidBottomInset]
   /// instead.
@@ -1482,10 +1492,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
+      AnimationController animationController;
+      if (!widget.bottomSheetIsScrollControlled) {
+        animationController = BottomSheet.createAnimationController(this)..value = 1.0;
+      }
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
         true,
         clampTop: true,
+        animationController: animationController,
+        isScrollControlled: widget.bottomSheetIsScrollControlled,
       );
     }
   }
@@ -1507,6 +1523,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bool isPersistent, {
       double initialHeight = 0.5,
       bool clampTop = false,
+      AnimationController animationController,
+      bool isScrollControlled = false,
     }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1520,48 +1538,52 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }());
 
     LocalHistoryEntry persistentSheetHistoryEntry;
-    _bottomSheetScrollController = BottomSheet.createScrollController(
-      initialHeightPercentage: initialHeight,
-      minTop: clampTop ? initialHeight : 0.0,
-      isPersistent: isPersistent,
-      context: context,
-    )..addTopListener(() => setState(() {
-      // If we're very close to the top, just set the scale to 0.
-      // This avoids issues where a fling can send us up so fast we don't acutally
-      // fully dismiss the fab.
-      if (_bottomSheetScrollController.top < 2) {
-        floatingActionButtonVisibilityValue = 0.0;
-      } else {
-        final double screenHeight = MediaQuery.of(context).size.height;
-        floatingActionButtonVisibilityValue = _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
-      }
-      _bodyScrimColor = Colors.black.withOpacity(
-        math.max(
-          _kMinBottomSheetScrimOpacity,
-          _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
-        ),
-      );
-      _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
-
-      // Check if we're a persistent bottom sheet.
-      // We need to add an artificial route here for a11y purposes. If a blind user
-      // were to scroll the bottom sheet up, there would be no clear way to get
-      // back to the state where the rest of the screen is visible.
-      if (isPersistent) {
-        if (_bottomSheetScrollController.top < _bottomSheetScrollController.initialTop) {
-          if (persistentSheetHistoryEntry == null) {
-            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
-              _bottomSheetScrollController.reset();
-              persistentSheetHistoryEntry = null;
-            });
-            ModalRoute.of(context).addLocalHistoryEntry(persistentSheetHistoryEntry);
-          }
-        } else if (persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context).removeLocalHistoryEntry(persistentSheetHistoryEntry);
-          persistentSheetHistoryEntry = null;
+    if (!isScrollControlled) {
+      _bottomSheetScrollController = null;
+    } else {
+      _bottomSheetScrollController = BottomSheet.createScrollController(
+        initialHeightPercentage: initialHeight,
+        minTop: clampTop ? initialHeight : 0.0,
+        isPersistent: isPersistent,
+        context: context,
+      )..addTopListener(() => setState(() {
+        // If we're very close to the top, just set the scale to 0.
+        // This avoids issues where a fling can send us up so fast we don't acutally
+        // fully dismiss the fab.
+        if (_bottomSheetScrollController.top < 2) {
+          floatingActionButtonVisibilityValue = 0.0;
+        } else {
+          final double screenHeight = MediaQuery.of(context).size.height;
+          floatingActionButtonVisibilityValue = _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
         }
-      }
-    }));
+        _bodyScrimColor = Colors.black.withOpacity(
+          math.max(
+            _kMinBottomSheetScrimOpacity,
+            _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
+          ),
+        );
+        _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
+
+        // Check if we're a persistent bottom sheet.
+        // We need to add an artificial route here for a11y purposes. If a blind user
+        // were to scroll the bottom sheet up, there would be no clear way to get
+        // back to the state where the rest of the screen is visible.
+        if (isPersistent) {
+          if (_bottomSheetScrollController.top < _bottomSheetScrollController.initialTop) {
+            if (persistentSheetHistoryEntry == null) {
+              persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+                _bottomSheetScrollController.reset();
+                persistentSheetHistoryEntry = null;
+              });
+              ModalRoute.of(context).addLocalHistoryEntry(persistentSheetHistoryEntry);
+            }
+          } else if (persistentSheetHistoryEntry != null) {
+            ModalRoute.of(context).removeLocalHistoryEntry(persistentSheetHistoryEntry);
+            persistentSheetHistoryEntry = null;
+          }
+        }
+      }));
+    }
 
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
@@ -1583,10 +1605,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         setState(() {
           _currentBottomSheet = null;
         });
-        if (!bottomSheet.isPersistent && _bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
+
+        if (!isScrollControlled && animationController.status !=AnimationStatus.dismissed) {
           _dismissedBottomSheets.add(bottomSheet);
+        } else if (isScrollControlled) {
+          if (!bottomSheet.isPersistent && _bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
+            _dismissedBottomSheets.add(bottomSheet);
+          }
+          _bottomSheetScrollController.dispose();
         }
-        _bottomSheetScrollController.dispose();
         completer.complete();
       }
 
@@ -1602,6 +1629,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
+      animationController: animationController,
+      enableDrag: isScrollControlled == false && !isPersistent,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isPersistent) {
@@ -1638,10 +1667,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
   }
 
-  /// Shows a persistent material design bottom sheet in the nearest [Scaffold].
+  /// Shows a material design bottom sheet in the nearest [Scaffold]. To show
+  /// a persistent bottom sheet, use the [Scaffold.bottomSheet].
   ///
   /// Returns a controller that can be used to close and otherwise manipulate the
   /// bottom sheet.
+  ///
+  /// The `isScrollControlled` parameter specifies whether this is a route for
+  /// a bottom sheet that will utilize [BottomSheet.scrollController]. If you wish
+  /// to have a bottom sheet that has a scrollable child such as a [ListView] or
+  /// a [GridView], you should set this parameter to true. In such a case, the
+  /// `initialHeightPercentage` specifies how much of the available screen space
+  /// the sheet should take at the start.  The `clampTop` parameter specifies
+  /// whether to force the bottom sheet to always be at least that height, and
+  /// setting it to true will disable swipe down dismissal of the bottom sheet.
   ///
   /// To rebuild the bottom sheet (e.g. if it is stateful), call
   /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -1674,15 +1713,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
   PersistentBottomSheetController<T> showBottomSheet<T>(
       WidgetBuilder builder, {
+      bool isScrollControlled = false,
       double initialHeightPercentage = 0.5,
       bool clampTop = false,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
-            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
-                'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
-                'bottomSheet before calling showBottomSheet().'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+          'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
+          'bottomSheet before calling showBottomSheet().'
         );
       }
       return true;
@@ -1690,8 +1730,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
+    AnimationController controller;
+    if (!isScrollControlled) {
+      controller = BottomSheet.createAnimationController(this)..forward();
+    }
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, false, initialHeight: initialHeightPercentage, clampTop: clampTop);
+      _currentBottomSheet = _buildBottomSheet<T>(
+        builder,
+        false,
+        initialHeight: initialHeightPercentage,
+        clampTop: clampTop,
+        animationController: controller,
+        isScrollControlled: isScrollControlled,
+      );
     });
     return _currentBottomSheet;
   }
@@ -1847,9 +1898,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
+    for (_StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
+      bottomSheet.animationController?.dispose();
+      bottomSheet.scrollController?.dispose();
+    }
+    if (_currentBottomSheet != null) {
+      _currentBottomSheet._widget.animationController?.dispose();
+      _currentBottomSheet._widget.scrollController?.dispose();
+    }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
-    _bottomSheetScrollController?.dispose();
     super.dispose();
   }
 
@@ -2152,7 +2210,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
-                bottomSheetTop: _bottomSheetScrollController?.top,
+                bottomSheetTop: _bottomSheetScrollController?.top ?? 0.0,
               ),
             );
           }),
@@ -2183,14 +2241,17 @@ class ScaffoldFeatureController<T extends Widget, U> {
 class _StandardBottomSheet extends StatefulWidget {
   const _StandardBottomSheet({
     Key key,
+    this.animationController,
+    this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
     this.builder,
-    @required this.scrollController,
+    this.scrollController,
     this.isPersistent = false,
-  }) : assert(scrollController != null),
-       super(key: key);
+  }) : super(key: key);
 
+  final AnimationController animationController; // we control it, but it must be disposed by whoever crated it.
+  final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -2202,12 +2263,69 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollController != null) {
+      return;
+    }
+    assert(widget.animationController != null);
+    assert(widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed);
+    widget.animationController.addStatusListener(_handleStatusChange);
+  }
+
+  @override
+  void didUpdateWidget(_StandardBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(widget.scrollController == oldWidget.scrollController
+        || widget.animationController == oldWidget.animationController);
+  }
+
   Future<void> close() {
-    return widget.scrollController.dismiss();
+    if (widget.scrollController != null) {
+      assert(widget.animationController == null);
+      return widget.scrollController.dismiss();
+    }
+    assert(widget.animationController != null);
+    widget.animationController.reverse();
+    return null;
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed && widget.onDismissed != null) {
+      widget.onDismissed();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.animationController != null) {
+      return AnimatedBuilder(
+        animation: widget.animationController,
+        builder: (BuildContext context, Widget child) {
+          return Align(
+            alignment: AlignmentDirectional.topStart,
+            heightFactor: widget.animationController.value,
+            child: child
+          );
+        },
+        child: Semantics(
+          container: true,
+          onDismiss: () {
+            close();
+            widget.onClosing();
+          },
+          child: BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onClosing: widget.onClosing,
+            builder: widget.builder
+          )
+        )
+      );
+    }
+
     return Semantics(
       container: true,
       onDismiss: () {

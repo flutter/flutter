@@ -28,10 +28,9 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
   void showBottomSheet() {
     _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      return const SingleChildScrollView(primary: true, child: Text('bottomSheet'));
+      return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
-      print('got completion');
       setState(() {
         setStateCalled = true;
       });
@@ -288,17 +287,19 @@ void main() {
     // Show the bottom sheet.
     final PersistentBottomSheetTestState sheet = containerKey2.currentState;
     sheet.showBottomSheet();
-    await tester.pumpAndSettle();
+
+    await tester.pump(const Duration(seconds: 1));
 
     // Drag from left edge to invoke the gesture. Nothing should happen.
-    gesture = await tester.startGesture(const Offset(500.0, 100.0));
+    gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
-
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+
     expect(find.text('Home'), findsNothing);
     expect(find.text('Sheet'), isOnstage);
+
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
   });

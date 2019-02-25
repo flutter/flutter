@@ -22,19 +22,15 @@ void main() {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          return SingleChildScrollView(
-            primary: true,
-            child: Container(height: 200.0),
-          );
+          return Container(height: 200.0);
         }
       );
     });
 
     await tester.pump();
     expect(buildCount, equals(1));
-
     bottomSheet.setState(() { });
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(buildCount, equals(2));
   });
 
@@ -51,6 +47,7 @@ void main() {
             Container(height: 100.0, child: const Text('Three')),
           ],
         ),
+        bottomSheetIsScrollControlled: true,
       )
     ));
 
@@ -77,7 +74,7 @@ void main() {
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
-        primary: true,
+        primary: false,
         children: <Widget>[
           Container(height: 100.0, child: const Text('One')),
           Container(height: 100.0, child: const Text('Two')),
@@ -85,6 +82,41 @@ void main() {
         ],
       );
     });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsNothing);
+  });
+
+  testWidgets('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>(
+      (BuildContext context) {
+        return ListView(
+          shrinkWrap: true,
+          primary: true,
+          children: <Widget>[
+            Container(height: 100.0, child: const Text('One')),
+            Container(height: 100.0, child: const Text('Two')),
+            Container(height: 100.0, child: const Text('Three')),
+          ],
+        );
+      },
+      isScrollControlled: true,
+    );
 
     await tester.pumpAndSettle();
 
@@ -107,6 +139,7 @@ void main() {
         itemBuilder: (_, int index) => Text('Item $index'),
         primary: true,
       ),
+      bottomSheetIsScrollControlled: true,
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
         child: Text('fab'),
@@ -155,17 +188,20 @@ void main() {
       )
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
-      return ListView(
-        shrinkWrap: true,
-        primary: true,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
-        ],
-      );
-    });
+    scaffoldKey.currentState.showBottomSheet<void>(
+      (BuildContext context) {
+        return ListView(
+          shrinkWrap: true,
+          primary: true,
+          children: <Widget>[
+            Container(height: 100.0, child: const Text('One')),
+            Container(height: 100.0, child: const Text('Two')),
+            Container(height: 100.0, child: const Text('Three')),
+          ],
+        );
+      },
+      isScrollControlled: true,
+    );
 
     await tester.pumpAndSettle();
 
@@ -195,11 +231,8 @@ void main() {
         return Builder(
           builder: (BuildContext context) {
             buildCount += 1;
-            return SingleChildScrollView(
-              primary: true,
-              child: Container(height: 200.0),
-            );
-          }
+            return Container(height: 200.0);
+          },
         );
       },
     );
@@ -215,7 +248,6 @@ void main() {
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.all(50.0),
-          size: Size(400.0, 600.0),
         ),
         child: Scaffold(
           resizeToAvoidBottomPadding: false,
@@ -235,7 +267,7 @@ void main() {
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
-        return SingleChildScrollView(primary: true, child: Container());
+        return Container();
       },
     );
 
@@ -258,27 +290,22 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: const Placeholder(),
-          bottomSheet: SingleChildScrollView(
+          bottomSheet: Container(
             key: bottomSheetKey,
-            primary: true,
-            child: Container(
-              alignment: Alignment.center,
-              child: Builder(
-                builder: (BuildContext context) {
-                  return RaisedButton(
-                    child: const Text('showModalBottomSheet'),
-                    onPressed: () {
-                      showModalBottomSheet<void>(
-                        context: context,
-                        builder: (BuildContext context) => const SingleChildScrollView(
-                          primary: true,
-                          child: Text('modal bottom sheet'),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+            alignment: Alignment.center,
+            height: 200.0,
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('showModalBottomSheet'),
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) => const Text('modal bottom sheet'),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ),
@@ -286,8 +313,8 @@ void main() {
     );
 
     expect(find.text('showModalBottomSheet'), findsOneWidget);
-    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 300.0));
-    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 300.0));
+    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 400.0));
 
     // Show the modal bottomSheet
     await tester.tap(find.text('showModalBottomSheet'));
@@ -295,7 +322,7 @@ void main() {
     expect(find.text('modal bottom sheet'), findsOneWidget);
 
     // Dismiss the modal bottomSheet
-    await tester.tapAt(const Offset(100.0, 100.0));
+    await tester.tap(find.text('modal bottom sheet'));
     await tester.pumpAndSettle();
     expect(find.text('modal bottom sheet'), findsNothing);
     expect(find.text('showModalBottomSheet'), findsOneWidget);
