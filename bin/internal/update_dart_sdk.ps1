@@ -41,7 +41,7 @@ $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
 }
-$dartSdkHash = "9ca9e66c1b774c4a250f5f91ca55b1a1b9f133f3"
+$dartSdkHash = "0f24b9e7ae03e3ba833faee2f4364890bb6414c3"
 $dartZipName = "dartsdk-windows-x64-release.zip"
 $dartSdkUrl = "https://storage.googleapis.com/dart-archive/channels/be/raw/hash/$dartSdkHash/sdk/$dartZipName"
 
