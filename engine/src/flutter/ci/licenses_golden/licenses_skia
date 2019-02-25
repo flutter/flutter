@@ -1,4 +1,4 @@
-Signature: 1fef5f1f89a091250bec208646570e2e
+Signature: 05da1111732aec79c0ada61abc030278
 
 UNUSED LICENSES:
 
@@ -2900,7 +2900,6 @@ FILE: ../../../third_party/skia/samplecode/SampleEmboss.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFillType.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFilter2.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFontCache.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFuzz.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGradients.cpp
 FILE: ../../../third_party/skia/samplecode/SampleHairCurves.cpp
 FILE: ../../../third_party/skia/samplecode/SampleHairModes.cpp
@@ -3678,7 +3677,6 @@ FILE: ../../../third_party/skia/samplecode/SampleAtlas.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClipDrawMatch.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFilterQuality.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLighting.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathFuzz.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfer.cpp
 FILE: ../../../third_party/skia/src/android/SkBitmapRegionCodec.cpp
