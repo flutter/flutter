@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -245,7 +247,7 @@ void main() {
             int currLength = 0;
             for (int i = 0; i < line.length; i += 1) {
               currLength += line[i] == '\b' ? -1 : 1;
-              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + line);
+              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
             }
           }
 
