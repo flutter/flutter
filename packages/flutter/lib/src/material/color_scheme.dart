@@ -76,7 +76,7 @@ class ColorScheme extends Diagnosticable {
        assert(onError != null),
        assert(brightness != null);
 
-  /// Create dark version of the
+  /// Create dark version of thef
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.dark({
     this.primary = const Color(0xffbb86fc),
