@@ -14,7 +14,9 @@ import 'test_async_utils.dart';
 import 'test_pointer.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
-/// smaller moves. This value must be greater than [kTouchSlop].
+/// smaller moves.
+///
+/// This value must be greater than [kTouchSlop].
 const double kDragSlopDefault = 20.0;
 
 /// Class that programmatically interacts with widgets.
@@ -422,6 +424,15 @@ abstract class WidgetController {
   /// before the drag will be broken into multiple calls. To always send the
   /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
   /// should be set to 0.
+  ///
+  /// Breaking the drag into multiple moves is necessary for accurate execution
+  /// of drag update calls with a [DragStartBehavior] variable set to
+  /// [DragStartBehavior.start]. Without such a change, the dragUpdate callback
+  /// from a drag recognizer will never be invoked.
+  ///
+  /// To force this function to a send a single move event, the 'touchSlopX' and
+  /// 'touchSlopY' variables should be set to 0. However, generally, these values
+  /// should be left to their default values.
   /// {@end template}
   Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
     assert(kDragSlopDefault > kTouchSlop);
