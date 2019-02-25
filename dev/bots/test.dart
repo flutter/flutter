@@ -460,6 +460,9 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     ),
     growable: false,
   );
+  if (request.rows == null || request.rows.isEmpty) {
+    return;
+  }
   final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
   if (response.insertErrors != null && response.insertErrors.isNotEmpty) {
     print('${red}BigQuery insert errors:');
