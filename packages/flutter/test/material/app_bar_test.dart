@@ -1507,12 +1507,11 @@ void main() {
 
     expect(getAppBarWidget().shape, roundedRectangleBorder);
 
-
     final Finder materialFinder = find.byType(Material);
     Material getMaterialWidget() {
       return tester.widget<Material>(materialFinder);
     }
 
     expect(getMaterialWidget().shape, roundedRectangleBorder);
-  });  
+  });
 }
