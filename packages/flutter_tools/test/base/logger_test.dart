@@ -239,6 +239,16 @@ void main() {
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
           expect(ansiStatus.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+
+          // Test that the number of '\b' is correct.
+          for (String line in outputStdout()) {
+            int currLength = 0;
+            for (int i = 0; i < line.length; i += 1) {
+              currLength += line[i] == '\b' ? -1 : 1;
+              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + line);
+            }
+          }
+
           ansiStatus.stop();
           expect(outputStdout().join('\n'), contains('(!)'));
           done = true;
