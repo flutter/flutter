@@ -14,7 +14,7 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 
 // Value extracted via color reader from iOS simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
-  color: CupertinoColors.lightBackgroundGray,
+  color: Color.fromRGBO(204, 204, 204, 1),
   style: BorderStyle.solid,
   width: 0.0,
 );
