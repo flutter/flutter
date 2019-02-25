@@ -616,7 +616,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onForcePressEnd,
     this.onSingleTapUp,
     this.onSingleTapCancel,
-    this.onSingleLongTapDown,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapMoveUpdate,
+    this.onSingleLongTapEnd,
     this.onDoubleTapDown,
     this.behavior,
     @required this.child,
@@ -650,7 +652,13 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
-  final GestureLongPressCallback onSingleLongTapDown;
+  final GestureLongPressStartCallback onSingleLongTapStart;
+
+  /// Called after [onSingleLongTapStart] when the pointer is dragged.
+  final GestureLongPressMoveUpdateCallback onSingleLongTapMoveUpdate;
+
+  /// Called after [onSingleLongTapStart] when the pointer is lifted.
+  final GestureLongPressEndCallback onSingleLongTapEnd;
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
@@ -734,9 +742,21 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       widget.onForcePressEnd(details);
   }
 
-  void _handleLongPress() {
-    if (!_isDoubleTap && widget.onSingleLongTapDown != null) {
-      widget.onSingleLongTapDown();
+  void _handleLongPressStart(LongPressStartDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+      widget.onSingleLongTapStart(details);
+    }
+  }
+
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+      widget.onSingleLongTapMoveUpdate(details);
+    }
+  }
+
+  void _handleLongPressUp(LongPressEndDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+      widget.onSingleLongTapEnd(details);
     }
     _isDoubleTap = false;
   }
@@ -764,7 +784,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
       onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
       onTapCancel: _handleTapCancel,
-      onLongPress: _handleLongPress,
+      onLongPressStart: _handleLongPressStart,
+      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
+      onLongPressEnd: _handleLongPressUp,
       excludeFromSemantics: true,
       behavior: widget.behavior,
       child: widget.child,
