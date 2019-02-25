@@ -28,17 +28,17 @@ class LoggingThumbShape extends SliderComponentShape {
   void paint(
       PaintingContext context,
       Offset thumbCenter, {
-        Animation<double> activationAnimation,
-        Animation<double> enableAnimation,
-        bool isEnabled,
-        bool isDiscrete,
-        bool onActiveTrack,
-        TextPainter labelPainter,
-        RenderBox parentBox,
-        SliderThemeData sliderTheme,
-        TextDirection textDirection,
-        double value,
-      }) {
+      Animation<double> activationAnimation,
+      Animation<double> enableAnimation,
+      bool isEnabled,
+      bool isDiscrete,
+      bool onActiveTrack,
+      TextPainter labelPainter,
+      RenderBox parentBox,
+      SliderThemeData sliderTheme,
+      TextDirection textDirection,
+      double value,
+    }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
@@ -1014,12 +1014,11 @@ void main() {
     // 5 tick marks and a thumb.
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
 
-    // 100 is the min value, 0, subtracted from the max value, 100.
-    // This translates to attempting to put a tick mark for every integer value,
+    // 200 divisions will produce a tick interval off less than 6,
     // which would be too dense to draw.
     await tester.pumpWidget(
       buildSlider(
-        divisions: 100,
+        divisions: 200,
       ),
     );
 
