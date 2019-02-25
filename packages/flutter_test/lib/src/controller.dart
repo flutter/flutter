@@ -472,6 +472,7 @@ abstract class WidgetController {
         if (absoluteOffsetSlope != slopSlope) {
           // The drag goes through one or both of the extents of the edges of the box.
           if (absoluteOffsetSlope < slopSlope) {
+            assert(offsetX.abs() > touchSlopX);
             // The drag goes through the vertical edge of the box.
             // It is guaranteed that the |offsetX| > touchSlopX.
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
@@ -490,6 +491,7 @@ abstract class WidgetController {
               await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
             }
           } else {
+            assert(offsetY.abs() > touchSlopY);
             // The drag goes through the horizontal edge of the box.
             // It is guaranteed that the |offsetY| > touchSlopY.
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
