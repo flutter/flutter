@@ -228,3 +228,12 @@ docker_builder:
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
+
+  markdown_link_check_task:
+    container:
+      image: node:latest
+    use_compute_credits: false
+    download_tool_script:
+      - npm install -g markdown-link-check@3.7.2
+    script:
+      - find . -name \*.md -exec markdown-link-check {} \;
