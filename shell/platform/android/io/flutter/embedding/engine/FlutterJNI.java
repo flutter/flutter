@@ -393,15 +393,6 @@ public class FlutterJNI {
   private native long nativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView);
 
   @UiThread
-  public void detachFromNativeButKeepNativeResources() {
-    ensureAttachedToNative();
-    nativeDetach(nativePlatformViewId);
-    nativePlatformViewId = null;
-  }
-
-  private native void nativeDetach(long nativePlatformViewId);
-
-  @UiThread
   public void detachFromNativeAndReleaseResources() {
     ensureAttachedToNative();
     nativeDestroy(nativePlatformViewId);

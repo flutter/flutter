@@ -109,8 +109,6 @@ public class FlutterEngine {
     pluginRegistry.detach();
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
-    // TODO(mattcarroll): investigate detach vs destroy. document user-cases. update code if needed.
-    flutterJNI.detachFromNativeButKeepNativeResources();
   }
 
   /**
