@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures;
+import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter_test/flutter_test.dart';
@@ -136,20 +136,6 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake semantics enabled', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<bool>(
-      tester: tester,
-      realValue: ui.window.semanticsEnabled,
-      fakeValue: !ui.window.semanticsEnabled,
-      propertyRetriever: () {
-        return WidgetsBinding.instance.window.semanticsEnabled;
-      },
-      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
-        binding.window.semanticsEnabledTestValue = fakeValue;
-      }
-    );
-  });
-
   testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<AccessibilityFeatures>(
       tester: tester,
@@ -160,6 +146,20 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
         binding.window.accessibilityFeaturesTestValue = fakeValue;
+      }
+    );
+  });
+
+  testWidgets('TestWindow can fake platform brightness', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<Brightness>(
+      tester: tester,
+      realValue: Brightness.light,
+      fakeValue: Brightness.dark,
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.platformBrightness;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
+        binding.window.platformBrightnessTestValue = fakeValue;
       }
     );
   });

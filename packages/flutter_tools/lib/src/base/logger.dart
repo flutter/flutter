@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/context.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'terminal.dart';
@@ -388,7 +389,7 @@ class VerboseLogger extends Logger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace stackTrace]) {
+  void _emit(_LogType type, String message, [ StackTrace stackTrace ]) {
     if (message.trim().isEmpty)
       return;
 
@@ -464,7 +465,7 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context[Stopwatch] ?? Stopwatch();
 
   @protected
   @visibleForTesting

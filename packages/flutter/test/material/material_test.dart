@@ -20,8 +20,10 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(
-    {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
+Widget buildMaterial({
+  double elevation = 0.0,
+  Color shadowColor = const Color(0xFF00FF00),
+}) {
   return Center(
     child: SizedBox(
       height: 100.0,

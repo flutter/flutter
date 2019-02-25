@@ -30,6 +30,14 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createHomeScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'test_driver/scroll_perf.dart',
+    'home_scroll_perf',
+  ).run;
+}
+
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -404,7 +412,7 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
-  int get iterationCount => 15;
+  int get iterationCount => 10;
 
   Device get device => _device;
   Device _device;

@@ -297,14 +297,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        HapticFeedback.lightImpact();
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        break;
-    }
   }
 
   TextDirection get textDirection => _textDirection;
@@ -375,8 +367,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   void _handleTap() {
-    if (isInteractive)
+    if (isInteractive) {
       onChanged(!_value);
+      _emitVibration();
+    }
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -390,8 +384,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       _reactionController.forward();
+      _emitVibration();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -417,6 +413,17 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     else
       _positionController.reverse();
     _reactionController.reverse();
+  }
+
+  void _emitVibration(){
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.lightImpact();
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+    }
   }
 
   @override

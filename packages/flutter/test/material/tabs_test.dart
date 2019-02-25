@@ -66,12 +66,12 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
 }
 
 Widget buildFrame({
-    Key tabBarKey,
-    List<String> tabs,
-    String value,
-    bool isScrollable = false,
-    Color indicatorColor,
-  }) {
+  Key tabBarKey,
+  List<String> tabs,
+  String value,
+  bool isScrollable = false,
+  Color indicatorColor,
+}) {
   return boilerplate(
     child: DefaultTabController(
       initialIndex: tabs.indexOf(value),
@@ -2037,5 +2037,66 @@ void main() {
     expect(controller.index, 3);
     expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
+  });
+
+  testWidgets('tabbar does not scroll when viewport dimensions initially change from zero to non-zero', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/10531.
+
+    const List<Widget> tabs = <Widget>[
+      Tab(text: 'NEW MEXICO'),
+      Tab(text: 'GABBA'),
+      Tab(text: 'HEY'),
+    ];
+    final TabController controller = TabController(vsync: const TestVSync(), length: tabs.length);
+
+    Widget buildTestWidget({double width, double height}) {
+      return MaterialApp(
+        home: Center(
+          child: SizedBox(
+            height: height,
+            width: width,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('AppBarBug'),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(30.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Align(
+                      alignment: FractionalOffset.center,
+                      child: TabBar(
+                        controller: controller,
+                        isScrollable: true,
+                        tabs: tabs,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              body: const Center(
+                child: Text('Hello World'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildTestWidget(
+        width: 0.0,
+        height: 0.0,
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildTestWidget(
+        width: 300.0,
+        height: 400.0,
+      ),
+    );
+
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(await tester.pumpAndSettle(), 1); // no more frames are scheduled.
   });
 }

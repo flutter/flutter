@@ -17,10 +17,11 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'flutter_command_test.dart';
+import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
 const String _kEngineRoot = '/flutter/engine';
+const String _kArbitraryEngineRoot = '/arbitrary/engine';
 const String _kProjectRoot = '/project';
 const String _kDotPackages = '.packages';
 
@@ -68,8 +69,26 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
-      testUsingContext('works if --local-engine is specified', () async {
-        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file://$_kFlutterRoot/bin/cache/pkg/sky_engine/lib/');
+      testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by sky_engine', () async {
+        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/').createSync(recursive: true);
+        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
+        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file://$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
+        await runner.run(<String>['dummy', '--local-engine=ios_debug']);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('works if --local-engine is specified and --local-engine-src-path is specified', () async {
+        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
+        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
+        await runner.run(<String>['dummy', '--local-engine-src-path=$_kArbitraryEngineRoot/src', '--local-engine=ios_debug']);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by flutter root', () async {
         fs.directory('$_kEngineRoot/src/out/ios_debug').createSync(recursive: true);
         fs.directory('$_kEngineRoot/src/out/host_debug').createSync(recursive: true);
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);

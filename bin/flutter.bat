@@ -40,7 +40,7 @@ IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
   ECHO        The flutter tool requires Git in order to operate properly;
   ECHO        to set up Flutter, run the following command:
-  ECHO        git clone -b beta https://github.com/flutter/flutter.git
+  ECHO        git clone -b stable https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 

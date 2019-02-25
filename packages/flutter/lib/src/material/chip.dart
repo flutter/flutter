@@ -118,6 +118,11 @@ abstract class ChipAttributes {
   ///
   /// Defaults to 0. The value is always non-negative.
   double get elevation;
+
+  /// Color of the chip's shadow when the elevation is greater than 0.
+  ///
+  /// The default is [Colors.black].
+  Color get shadowColor;
 }
 
 /// An interface for material design chips that can be deleted.
@@ -151,7 +156,8 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget}
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
   ///
@@ -206,7 +212,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return Center(child: CastList());
   /// }
   /// ```
   /// {@end-tool}
@@ -307,6 +313,12 @@ abstract class SelectableChipAttributes {
   ///
   /// The chip is selected when [selected] is true.
   Color get selectedColor;
+
+  /// Color of the chip's shadow when the elevation is greater than 0 and the
+  /// chip is selected.
+  ///
+  /// The default is [Colors.black].
+  Color get selectedShadowColor;
 
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
@@ -485,6 +497,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
   }) : assert(label != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
@@ -518,6 +531,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
+  @override
+  final Color shadowColor;
 
   @override
   Widget build(BuildContext context) {
@@ -538,6 +553,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
+      shadowColor: shadowColor,
       isEnabled: true,
     );
   }
@@ -627,6 +643,8 @@ class InputChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
+    this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(isEnabled != null),
@@ -681,6 +699,10 @@ class InputChip extends StatelessWidget
   @override
   final double elevation;
   @override
+  final Color shadowColor;
+  @override
+  final Color selectedShadowColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -709,6 +731,8 @@ class InputChip extends StatelessWidget
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
+      shadowColor: shadowColor,
+      selectedShadowColor: selectedShadowColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
     );
@@ -797,6 +821,8 @@ class ChoiceChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
+    this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -838,6 +864,10 @@ class ChoiceChip extends StatelessWidget
   @override
   final double elevation;
   @override
+  final Color shadowColor;
+  @override
+  final Color selectedShadowColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -867,6 +897,8 @@ class ChoiceChip extends StatelessWidget
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
+      shadowColor: shadowColor,
+      selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -986,6 +1018,8 @@ class FilterChip extends StatelessWidget
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
+    this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -1027,6 +1061,10 @@ class FilterChip extends StatelessWidget
   @override
   final double elevation;
   @override
+  final Color shadowColor;
+  @override
+  final Color selectedShadowColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -1053,6 +1091,8 @@ class FilterChip extends StatelessWidget
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
+      shadowColor: shadowColor,
+      selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -1126,6 +1166,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
   }) : assert(label != null),
        assert(
          onPressed != null,
@@ -1162,6 +1203,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
+  @override
+  final Color shadowColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1181,6 +1224,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       isEnabled: true,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
+      shadowColor: shadowColor,
     );
   }
 }
@@ -1256,6 +1300,8 @@ class RawChip extends StatefulWidget
     this.backgroundColor,
     this.materialTapTargetSize,
     this.elevation,
+    this.shadowColor,
+    this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
@@ -1309,6 +1355,10 @@ class RawChip extends StatefulWidget
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
+  @override
+  final Color shadowColor;
+  @override
+  final Color selectedShadowColor;
   @override
   final CircleBorder avatarBorder;
 
@@ -1549,6 +1599,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
   static const double _defaultElevation = 0.0;
   static const double _defaultPressElevation = 8.0;
+  static const Color _defaultShadowColor = Colors.black;
 
   @override
   Widget build(BuildContext context) {
@@ -1563,9 +1614,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
     final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
+    final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
+    final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
+    final bool selected = widget.selected ?? false;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
+      shadowColor: selected ? selectedShadowColor : shadowColor,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,
@@ -1681,7 +1736,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     // Only redirects hit detection which occurs above and below the render object.
@@ -2199,7 +2254,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;

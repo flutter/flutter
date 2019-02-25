@@ -3042,120 +3042,6 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
 }
 
-/// The translations for Spanish Castilian, as used in Greenland (`es_GL`).
-class MaterialLocalizationEsGl extends MaterialLocalizationEs {
-  /// Create an instance of the translation bundle for Spanish Castilian, as used in Greenland.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationEsGl({
-    String localeName = 'es_GL',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
-
-  @override
-  String get openAppDrawerTooltip => r'Abrir o menú de navegación';
-
-  @override
-  String get closeButtonTooltip => r'Pechar';
-
-  @override
-  String get nextMonthTooltip => r'Mes seguinte';
-
-  @override
-  String get nextPageTooltip => r'Páxina seguinte';
-
-  @override
-  String get previousPageTooltip => r'Páxina anterior';
-
-  @override
-  String get showMenuTooltip => r'Amosar menú';
-
-  @override
-  String get licensesPageTitle => r'Licenzas';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow‑$lastRow de unhas $rowCount';
-
-  @override
-  String get rowsPerPageTitle => r'Ringleiras por páxina:';
-
-  @override
-  String get tabLabelRaw => r'Pestana $tabIndex de $tabCount';
-
-  @override
-  String get selectedRowCountTitleZero => r'Non se seleccionaron elementos';
-
-  @override
-  String get selectedRowCountTitleOne => r'1 elemento seleccionado';
-
-  @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
-
-  @override
-  String get closeButtonLabel => r'PECHAR';
-
-  @override
-  String get viewLicensesButtonLabel => r'VER LICENZAS';
-
-  @override
-  String get hideAccountsLabel => r'Ocultar contas';
-
-  @override
-  String get showAccountsLabel => r'Amosar contas';
-
-  @override
-  String get modalBarrierDismissLabel => r'Pechar';
-
-  @override
-  String get popupMenuLabel => r'Menú emerxente';
-
-  @override
-  String get dialogLabel => r'Cadro de diálogo';
-
-  @override
-  String get searchFieldLabel => r'Procurar';
-
-  @override
-  String get reorderItemToStart => r'Mover ao comezo';
-
-  @override
-  String get reorderItemToEnd => r'Mover ao fin';
-
-  @override
-  String get reorderItemUp => r'Mover arriba';
-
-  @override
-  String get reorderItemDown => r'Mover abaixo';
-
-  @override
-  String get reorderItemLeft => r'Mover a esquerda';
-
-  @override
-  String get reorderItemRight => r'Mover a dereita';
-
-  @override
-  String get collapsedIconTapHint => r'Amosar';
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter.';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
-}
-
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
 class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Guatemala.
@@ -5178,6 +5064,210 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
 }
 
+/// The translations for Galician (`gl`).
+class MaterialLocalizationGl extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Galician.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationGl({
+    String localeName = 'gl',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Sobre $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'A.M.';
+
+  @override
+  String get backButtonTooltip => r'Atrás';
+
+  @override
+  String get cancelButtonLabel => r'CANCELAR';
+
+  @override
+  String get closeButtonLabel => r'PECHAR';
+
+  @override
+  String get closeButtonTooltip => r'Pechar';
+
+  @override
+  String get collapsedIconTapHint => r'Amosar';
+
+  @override
+  String get continueButtonLabel => r'CONTINUAR';
+
+  @override
+  String get copyButtonLabel => r'COPIAR';
+
+  @override
+  String get cutButtonLabel => r'CORTAR';
+
+  @override
+  String get deleteButtonTooltip => r'Eliminar';
+
+  @override
+  String get dialogLabel => r'Cadro de diálogo';
+
+  @override
+  String get drawerLabel => r'Menú de navegación';
+
+  @override
+  String get expandedIconTapHint => r'Ocultar';
+
+  @override
+  String get hideAccountsLabel => r'Ocultar contas';
+
+  @override
+  String get licensesPageTitle => r'Licenzas';
+
+  @override
+  String get modalBarrierDismissLabel => r'Pechar';
+
+  @override
+  String get nextMonthTooltip => r'Mes seguinte';
+
+  @override
+  String get nextPageTooltip => r'Páxina seguinte';
+
+  @override
+  String get okButtonLabel => r'ACEPTAR';
+
+  @override
+  String get openAppDrawerTooltip => r'Abrir o menú de navegación';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow‑$lastRow de $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow‑$lastRow de unhas $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'PEGAR';
+
+  @override
+  String get popupMenuLabel => r'Menú emerxente';
+
+  @override
+  String get postMeridiemAbbreviation => r'P.M.';
+
+  @override
+  String get previousMonthTooltip => r'Mes anterior';
+
+  @override
+  String get previousPageTooltip => r'Páxina anterior';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Actualizar';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Queda 1 carácter.';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
+  String get reorderItemDown => r'Mover abaixo';
+
+  @override
+  String get reorderItemLeft => r'Mover a esquerda';
+
+  @override
+  String get reorderItemRight => r'Mover a dereita';
+
+  @override
+  String get reorderItemToEnd => r'Mover ao fin';
+
+  @override
+  String get reorderItemToStart => r'Mover ao comezo';
+
+  @override
+  String get reorderItemUp => r'Mover arriba';
+
+  @override
+  String get rowsPerPageTitle => r'Ringleiras por páxina:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Procurar';
+
+  @override
+  String get selectAllButtonLabel => r'SELECCIONAR TODO';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 elemento seleccionado';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Non se seleccionaron elementos';
+
+  @override
+  String get showAccountsLabel => r'Amosar contas';
+
+  @override
+  String get showMenuTooltip => r'Amosar menú';
+
+  @override
+  String get signedInLabel => r'Sesión iniciada';
+
+  @override
+  String get tabLabelRaw => r'Pestana $tabIndex de $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Seleccionar horas';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Seleccionar minutos';
+
+  @override
+  String get viewLicensesButtonLabel => r'VER LICENZAS';
+}
+
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
 class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Swiss German Alemannic Alsatian.
@@ -6196,6 +6286,210 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'LICENCEK MEGTEKINTÉSE';
+}
+
+/// The translations for Armenian (`hy`).
+class MaterialLocalizationHy extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Armenian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationHy({
+    String localeName = 'hy',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName: տեղեկություն';
+
+  @override
+  String get alertDialogLabel => r'Զգուշացում';
+
+  @override
+  String get anteMeridiemAbbreviation => r'АМ';
+
+  @override
+  String get backButtonTooltip => r'Հետ';
+
+  @override
+  String get cancelButtonLabel => r'ՉԵՂԱՐԿԵԼ';
+
+  @override
+  String get closeButtonLabel => r'ՓԱԿԵԼ';
+
+  @override
+  String get closeButtonTooltip => r'Փակել';
+
+  @override
+  String get collapsedIconTapHint => r'Ընդլայնել';
+
+  @override
+  String get continueButtonLabel => r'ՇԱՐՈՒՆԱԿԵԼ';
+
+  @override
+  String get copyButtonLabel => r'ԿՐԿՆՕՐԻՆԱԿԵԼ';
+
+  @override
+  String get cutButtonLabel => r'ԿՏՐԵԼ';
+
+  @override
+  String get deleteButtonTooltip => r'Ջնջել';
+
+  @override
+  String get dialogLabel => r'Դիալոգի պատուհան';
+
+  @override
+  String get drawerLabel => r'Նավիգացյոն մենյու';
+
+  @override
+  String get expandedIconTapHint => r'Պահել';
+
+  @override
+  String get hideAccountsLabel => r'Թաքցնել հաշիվը';
+
+  @override
+  String get licensesPageTitle => r'Լիցենզիա';
+
+  @override
+  String get modalBarrierDismissLabel => r'Փակել';
+
+  @override
+  String get nextMonthTooltip => r'Հաջորդ ամիս';
+
+  @override
+  String get nextPageTooltip => r'Հաջորդ էջ';
+
+  @override
+  String get okButtonLabel => r'ՕԿ';
+
+  @override
+  String get openAppDrawerTooltip => r'Բացել նավիգացյոն մենյուն';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-ից';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow մոտավոր $rowCount-ից';
+
+  @override
+  String get pasteButtonLabel => r'ՏԵՂԱԴՐԵԼ';
+
+  @override
+  String get popupMenuLabel => r'Հայտնվող մենյու';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Նախորդ ամիս';
+
+  @override
+  String get previousPageTooltip => r'Նախորդ էջ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Թարմացում';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountMany => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Մնաց 1 նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Մնաց $remainingCount նիշ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'Նիշի հնարավորություն չկա';
+
+  @override
+  String get reorderItemDown => r'Տանել ներքև';
+
+  @override
+  String get reorderItemLeft => r'Տանել ձախ';
+
+  @override
+  String get reorderItemRight => r'Տանել աջ';
+
+  @override
+  String get reorderItemToEnd => r'Տանել վերջ';
+
+  @override
+  String get reorderItemToStart => r'Տանել սկիզբ';
+
+  @override
+  String get reorderItemUp => r'Տանել վերև';
+
+  @override
+  String get rowsPerPageTitle => r'Էջ տողի վրա:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Փնտրել';
+
+  @override
+  String get selectAllButtonLabel => r'ՆՇԵԼ ԱՄԲՈՂՋԸ';
+
+  @override
+  String get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleMany => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleOne => r'Ընտրված է 1 օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleOther => r'Ընտրված է $selectedRowCount օբյեկտ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Տողերը ընտրված չեն';
+
+  @override
+  String get showAccountsLabel => r'Ցույց տալ հաշիվը';
+
+  @override
+  String get showMenuTooltip => r'Ցույց տալ մենյուն';
+
+  @override
+  String get signedInLabel => r'Մուտքը կատարվեց';
+
+  @override
+  String get tabLabelRaw => r'Ներդիր $tabIndex $tabCount-ից';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Ընտրեք ժամերը';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Ընտրեք րոպեները';
+
+  @override
+  String get viewLicensesButtonLabel => r'ԼԻՑԵՆԶԻԱ';
 }
 
 /// The translations for Indonesian (`id`).
@@ -12867,11 +13161,13 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'he', // Hebrew
   'hi', // Hindi
   'hr', // Croatian
   'hu', // Hungarian
+  'hy', // Armenian
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
@@ -12923,17 +13219,19 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
 ///  * `en` - English (plus 7 country variations)
-///  * `es` - Spanish Castilian (plus 21 country variations)
+///  * `es` - Spanish Castilian (plus 20 country variations)
 ///  * `et` - Estonian
 ///  * `fa` - Persian
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `he` - Hebrew
 ///  * `hi` - Hindi
 ///  * `hr` - Croatian
 ///  * `hu` - Hungarian
+///  * `hy` - Armenian
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
@@ -13036,8 +13334,6 @@ GlobalMaterialLocalizations getTranslation(
           return MaterialLocalizationEsDo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'EC':
           return MaterialLocalizationEsEc(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'GL':
-          return MaterialLocalizationEsGl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'GT':
           return MaterialLocalizationEsGt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'HN':
@@ -13080,6 +13376,8 @@ GlobalMaterialLocalizations getTranslation(
       }
       return MaterialLocalizationFr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
+    case 'gl':
+      return MaterialLocalizationGl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
       return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'he':
@@ -13090,6 +13388,8 @@ GlobalMaterialLocalizations getTranslation(
       return MaterialLocalizationHr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hu':
       return MaterialLocalizationHu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'hy':
+      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
       return MaterialLocalizationId(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':

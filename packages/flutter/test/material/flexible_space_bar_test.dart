@@ -114,6 +114,88 @@ void main() {
 
     expect(clipRect.size.height, minExtent);
   });
+
+  testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
+    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: centerTitle,
+              title: const Text('X'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder title = find.text('X');
+    final Finder flexibleSpaceBar = find.byType(FlexibleSpaceBar);
+    Offset getTitleBottomLeft() {
+      return Offset(
+        tester.getTopLeft(title).dx,
+        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android, null));
+    expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 16.0));
+
+    // Clear the widget tree to avoid animating between Android and iOS.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS, null));
+    expect(getTitleBottomLeft(), const Offset(390.0, 16.0));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
+    expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
+
+  });
+
+  testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
+    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.zero,
+              centerTitle: centerTitle,
+              title: const Text('X'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder title = find.text('X');
+    final Finder flexibleSpaceBar = find.byType(FlexibleSpaceBar);
+    Offset getTitleBottomLeft() {
+      return Offset(
+        tester.getTopLeft(title).dx,
+        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android, null));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.android, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
+
+    // Clear the widget tree to avoid animating between Android and iOS.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS, null));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
+    expect(getTitleBottomLeft(), Offset.zero);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

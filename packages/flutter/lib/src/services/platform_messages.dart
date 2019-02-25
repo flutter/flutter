@@ -37,7 +37,13 @@ class BinaryMessages {
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
-    ServicesBinding.instance.window.sendPlatformMessage(channel, message, (ByteData reply) {
+    // ui.window is accessed directly instead of using ServicesBinding.instance.window
+    // because this method might be invoked before any binding is initialized.
+    // This issue was reported in #27541. It is not ideal to statically access
+    // ui.window because the Window may be dependency injected elsewhere with
+    // a different instance. However, static access at this location seems to be
+    // the least bad option.
+    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -59,7 +65,10 @@ class BinaryMessages {
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   static Future<void> handlePlatformMessage(
-        String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
+    String channel,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) async {
     ByteData response;
     try {
       final _MessageHandler handler = _handlers[channel];
