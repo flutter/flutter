@@ -12,6 +12,7 @@ void main() {
 
   testGesture('toString control tests', (GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);
+    expect(const PointerDownEvent().toStringFull(), hasOneLineDescription);
   });
 
   testGesture('nthMouseButton control tests', (GestureTester tester) {
