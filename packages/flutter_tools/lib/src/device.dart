@@ -36,10 +36,10 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _maybeAddDesktop);
+  ] + _conditionalDesktopDevices);
 
   /// Only add desktop devices if the flag is enabled.
-  static List<DeviceDiscovery> get _maybeAddDesktop {
+  static List<DeviceDiscovery> get _conditionalDesktopDevices {
     return flutterDesktopEnabled ? <DeviceDiscovery>[
       MacOSDevices(),
       LinuxDevices(),
