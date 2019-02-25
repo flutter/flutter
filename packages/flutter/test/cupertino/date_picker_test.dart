@@ -560,6 +560,87 @@ void main() {
       );
     });
 
+    group('Picker handles initial noon/midnight times', () {
+      testWidgets('midnight', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 0, 15),
+              ),
+            ),
+          ),
+        );
+
+        // 0:15 -> 0:16
+        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 0, 16));
+      });
+
+      testWidgets('noon', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 12, 15),
+              ),
+            ),
+          ),
+        );
+
+        // 12:15 -> 12:16
+        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 12, 16));
+      });
+
+      testWidgets('noon in 24 hour time', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                use24hFormat: true,
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 12, 25),
+              ),
+            ),
+          ),
+        );
+
+        // 12:25 -> 12:26
+        await tester.drag(find.text('25'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 12, 26));
+      });
+    });
+
     testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
@@ -730,7 +811,7 @@ void main() {
   });
 }
 
-Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {
+Widget _buildPicker({ FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CupertinoPicker(

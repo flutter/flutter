@@ -180,10 +180,12 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object> json, Dia
 
 void main() {
   test('TreeDiagnosticsMixin control test', () async {
-    void goldenStyleTest(String description,
-        {DiagnosticsTreeStyle style,
-        DiagnosticsTreeStyle lastChildStyle,
-        String golden = ''}) {
+    void goldenStyleTest(
+      String description, {
+      DiagnosticsTreeStyle style,
+      DiagnosticsTreeStyle lastChildStyle,
+      String golden = '',
+    }) {
       final TestTree tree = TestTree(children: <TestTree>[
         TestTree(name: 'node A', style: style),
         TestTree(
@@ -315,7 +317,8 @@ void main() {
   });
 
   test('TreeDiagnosticsMixin tree with properties test', () async {
-    void goldenStyleTest(String description, {
+    void goldenStyleTest(
+      String description, {
       DiagnosticsTreeStyle style,
       DiagnosticsTreeStyle lastChildStyle,
       @required String golden,

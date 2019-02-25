@@ -454,8 +454,10 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header format with up to two pieces.
-  _TimePickerHeaderFormat format(_TimePickerHeaderPiece piece1,
-      [ _TimePickerHeaderPiece piece2 ]) {
+  _TimePickerHeaderFormat format(
+    _TimePickerHeaderPiece piece1, [
+    _TimePickerHeaderPiece piece2,
+  ]) {
     final List<_TimePickerHeaderPiece> pieces = <_TimePickerHeaderPiece>[];
     switch (context.textDirection) {
       case TextDirection.ltr:
@@ -480,8 +482,13 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header piece with up to three fragments.
-  _TimePickerHeaderPiece piece({ int pivotIndex = -1, double bottomMargin = 0.0,
-      _TimePickerHeaderFragment fragment1, _TimePickerHeaderFragment fragment2, _TimePickerHeaderFragment fragment3 }) {
+  _TimePickerHeaderPiece piece({
+    int pivotIndex = -1,
+    double bottomMargin = 0.0,
+    _TimePickerHeaderFragment fragment1,
+    _TimePickerHeaderFragment fragment2,
+    _TimePickerHeaderFragment fragment3,
+  }) {
     final List<_TimePickerHeaderFragment> fragments = <_TimePickerHeaderFragment>[fragment1];
     if (fragment2 != null) {
       fragments.add(fragment2);

@@ -68,7 +68,7 @@ abstract class OperatingSystemUtils {
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all = false});
+  List<File> _which(String execName, { bool all = false });
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -83,7 +83,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -159,7 +159,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
@@ -264,7 +264,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String findProjectRoot([String directory]) {
+String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {

@@ -109,6 +109,99 @@ void main() {
     expect(ended, 1);
   });
 
+  testGesture('Force presses are not recognized on devices with low maxmium pressure', (GestureTester tester) {
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 1.0;
+
+    // Interpolated Flutter pressure values.
+    const double startPressure = 0.4; // = Device pressure of 2.66.
+    const double peakPressure = 0.85; // = Device pressure of 5.66.
+
+    int started = 0;
+    int peaked = 0;
+    int updated = 0;
+    int ended = 0;
+
+    void onStart(ForcePressDetails details) {
+      started += 1;
+    }
+
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+
+    force.onStart = onStart;
+    force.onPeak = (ForcePressDetails details) => peaked += 1;
+    force.onUpdate = (ForcePressDetails details) => updated += 1;
+    force.onEnd = (ForcePressDetails details) => ended += 1;
+
+    const int pointerValue = 1;
+    final TestPointer pointer = TestPointer(pointerValue);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
+    pointer.setDownInfo(down, const Offset(10.0, 10.0));
+    force.addPointer(down);
+    tester.closeArena(pointerValue);
+
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    // Pressure fed into the test environment simulates the values received directly from the device.
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 2.5, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have not hit the start pressure, so no events should be true.
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 2.8, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have just hit the start pressure so just the start event should be triggered and one update call should have occurred.
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.3, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 4.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 5.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have exceeded the start pressure so update should be greater than 0.
+    expect(started, 0);
+    expect(updated, 0);
+    expect(peaked, 0);
+    expect(ended, 0);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 6.0, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have exceeded the peak pressure so peak pressure should be true.
+    expect(started, 0);
+    expect(updated, 0);
+    expect(peaked, 0);
+    expect(ended, 0);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.3, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 4.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 5.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // Update is still called.
+    expect(started, 0);
+    expect(updated, 0);
+    expect(peaked, 0);
+    expect(ended, 0);
+
+    tester.route(pointer.up());
+
+    // We have ended the gesture so ended should be true.
+    expect(started, 0);
+    expect(updated, 0);
+    expect(peaked, 0);
+    expect(ended, 0);
+  });
+
   testGesture('If minimum pressure is not reached, start and end callbacks are not called', (GestureTester tester) {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -447,6 +540,112 @@ void main() {
     expect(started, 1);
     expect(updated, 8);
     expect(peaked, 1);
+    expect(ended, 1);
+  });
+
+  testGesture('A pressure outside of the device reported min and max pressure will not give an error', (GestureTester tester) {
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 6.66;
+
+    // Interpolated Flutter pressure values.
+    const double startPressure = 0.4; // = Device pressure of 2.66.
+    const double peakPressure = 0.85; // = Device pressure of 5.66.
+
+    int started = 0;
+    int peaked = 0;
+    int updated = 0;
+    int ended = 0;
+
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+
+    force.onStart = (_) => started += 1;
+    force.onPeak = (_) => peaked += 1;
+    force.onUpdate = (_) => updated += 1;
+    force.onEnd = (_) => ended += 1;
+
+    const int pointerValue = 1;
+    final TestPointer pointer = TestPointer(pointerValue);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
+    pointer.setDownInfo(down, const Offset(10.0, 10.0));
+    force.addPointer(down);
+    tester.closeArena(1);
+
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    // Pressure fed into the test environment simulates the values received directly from the device.
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 2.5, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have not hit the start pressure, so no events should be true.
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    // If the case where the pressure is greater than the max pressure were not handled correctly, this move event would throw an error.
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 8.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(pointer.up());
+
+    expect(started, 1);
+    expect(peaked, 1);
+    expect(updated, 1);
+    expect(ended, 1);
+  });
+
+  testGesture('A pressure of NAN will not give an error', (GestureTester tester) {
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 6.66;
+
+    // Interpolated Flutter pressure values.
+    const double startPressure = 0.4; // = Device pressure of 2.66.
+    const double peakPressure = 0.85; // = Device pressure of 5.66.
+
+    int started = 0;
+    int peaked = 0;
+    int updated = 0;
+    int ended = 0;
+
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+
+    force.onStart = (_) => started += 1;
+    force.onPeak = (_) => peaked += 1;
+    force.onUpdate = (_) => updated += 1;
+    force.onEnd = (_) => ended += 1;
+
+    const int pointerValue = 1;
+    final TestPointer pointer = TestPointer(pointerValue);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
+    pointer.setDownInfo(down, const Offset(10.0, 10.0));
+    force.addPointer(down);
+    tester.closeArena(1);
+
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    // Pressure fed into the test environment simulates the values received directly from the device.
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 2.5, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // We have not hit the start pressure, so no events should be true.
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 6.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    expect(peaked, 1);
+
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0.0 / 0.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(pointer.up());
+
+    expect(started, 1);
+    expect(peaked, 1);
+    expect(updated, 1);
     expect(ended, 1);
   });
 }

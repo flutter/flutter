@@ -33,12 +33,11 @@ Future<List<int>> fetchUrl(Uri url) async {
 Future<bool> doesRemoteFileExist(Uri url) async =>
   (await _attempt(url, onlyHeaders: true)) != null;
 
-Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
+Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
-    final HttpClientFactory httpClientFactory = context[HttpClientFactory];
-    httpClient = httpClientFactory();
+    httpClient = (context[HttpClientFactory] as HttpClientFactory)(); // ignore: avoid_as
   } else {
     httpClient = HttpClient();
   }
@@ -65,9 +64,9 @@ Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {
-    return (response.statusCode == HttpStatus.ok) ? <int>[] : null;
+    return (response.statusCode == 200) ? <int>[] : null;
   }
-  if (response.statusCode != HttpStatus.ok) {
+  if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(
         'Download failed.\n'

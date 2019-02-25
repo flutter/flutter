@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -82,7 +83,10 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+  );
 
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -139,7 +143,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
-  void usesFilesystemOptions({@required bool hide}) {
+  void usesFilesystemOptions({ @required bool hide }) {
     argParser
       ..addOption('output-dill',
         hide: hide,
@@ -216,7 +220,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesIsolateFilterOption({@required bool hide}) {
+  void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
       hide: hide,
@@ -224,7 +228,7 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -242,7 +246,7 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
-  void addDynamicModeFlags({bool verboseHelp = false}) {
+  void addDynamicModeFlags({ bool verboseHelp = false }) {
     argParser.addOption('compilation-trace-file',
         defaultsTo: 'compilation.txt',
         hide: !verboseHelp,
@@ -260,7 +264,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+  void addDynamicPatchingFlags({ bool verboseHelp = false }) {
     argParser.addOption('patch-number',
         hide: !verboseHelp,
         help: 'An integer used as an internal version number for dynamic patch.\n'
@@ -291,7 +295,7 @@ abstract class FlutterCommand extends Command<void> {
     addDynamicBaselineFlags(verboseHelp: verboseHelp);
   }
 
-  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+  void addDynamicBaselineFlags({ bool verboseHelp = false }) {
     argParser.addOption('baseline-dir',
         defaultsTo: '.baseline',
         hide: !verboseHelp,
@@ -301,7 +305,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesFuchsiaOptions({bool hide = false}) {
+  void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
       help: 'Target model that determines what core libraries are available',
@@ -323,43 +327,30 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    bool debug;
-    bool profile;
-    bool release;
-    if (argParser.options.containsKey('debug')) {
-      debug = argResults['debug'];
-    } else {
-      debug = _defaultBuildMode == BuildMode.debug;
-    }
-    if (argParser.options.containsKey('profile')) {
-      profile = argResults['profile'];
-    } else {
-      profile = _defaultBuildMode == BuildMode.profile;
-    }
-    if (argParser.options.containsKey('release')) {
-      release = argResults['release'];
-    } else {
-      release = _defaultBuildMode == BuildMode.release;
-    }
-    if (debug && profile || debug && release || release && profile) {
+    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
-    }
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
 
-    if (debug) {
-      if (dynamicFlag) {
+    if (argResults['debug']) {
+      if (dynamicFlag)
         throw ToolExit('Error: --dynamic requires --release or --profile.');
-      }
       return BuildMode.debug;
     }
-    if (profile) {
+    if (argResults['profile'])
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    }
-    if (release) {
+    if (argResults['release'])
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-    }
+
+    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
+      throw ToolExit('Error: --dynamic requires --release or --profile.');
+    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
+      return BuildMode.dynamicRelease;
+    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
+      return BuildMode.dynamicProfile;
+
     return _defaultBuildMode;
   }
 
@@ -397,7 +388,7 @@ abstract class FlutterCommand extends Command<void> {
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
     }
 
-    List<String> extraFrontEndOptions =
+    String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
             ? argResults[FlutterOptions.kExtraFrontEndOptions]
             : null;
@@ -406,9 +397,9 @@ abstract class FlutterCommand extends Command<void> {
       for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
-          extraFrontEndOptions.add(flag);
+          extraFrontEndOptions += ',' + flag;
         } else {
-          extraFrontEndOptions = <String>[flag];
+          extraFrontEndOptions = flag;
         }
       }
     }
@@ -434,9 +425,9 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: extraFrontEndOptions?.join(', '),
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]?.join(', ')
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
         ? argResults['build-shared-library']
@@ -526,19 +517,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  /// A hook called to populate the cache with a particular target platform
-  /// or build mode.
-  ///
-  /// If a command requires specific artifacts, it is it's responsibility to
-  /// request them here.
-  Future<void> updateCache() async {
-    // Only download the minimum set of binaries.
-    await cache.updateAll(
-      clobber: false,
-      skipUnknown: true,
-    );
-  }
-
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -549,11 +527,11 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
+
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      await updateCache();
-    }
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
