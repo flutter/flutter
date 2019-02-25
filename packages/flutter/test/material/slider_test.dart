@@ -1241,21 +1241,21 @@ void main() {
     );
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 2,
-              value: '50%',
-              increasedValue: '60%',
-              decreasedValue: '40%',
-              textDirection: TextDirection.ltr,
-              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-            ),
-          ]),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+      semantics,
+      hasSemantics(
+        TestSemantics.root(children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 2,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+          ),
+        ]),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
     semantics.dispose();
   });
 
