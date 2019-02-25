@@ -146,11 +146,15 @@ Future<void> _runSmokeTests() async {
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
   // TODO(dnfield): How will we do this on LUCI?
-  final String credentials = Platform.environment['GCLOUD_SERVICE_ACCOUNT'];
-  if (credentials == null || credentials.isEmpty) {
+  final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
+  if (privateKey == null || privateKey.isEmpty) {
     return null;
   }
-  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials.fromJson(credentials);
+  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
+    'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
+    auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
+    '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
+  );
   final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
   final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
   return bq.BigqueryApi(client);
@@ -442,6 +446,7 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
             'file': result.path,
             'line': result.line,
             'column': result.column,
+            'time': result.totalTime,
           },
           'git': <String, dynamic>{
             'author': authors,
