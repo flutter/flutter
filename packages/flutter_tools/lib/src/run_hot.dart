@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -940,7 +939,7 @@ class ProjectWatcher {
       if (path.contains(pubCachePath)) {
         continue;
       }
-      final String packagePath = Uri.file(path, windows: platform.isWindows).path;
+      final String packagePath = Uri.parse(path).path;
       if (!fs.directory(packagePath).existsSync()) {
         continue;
       }
