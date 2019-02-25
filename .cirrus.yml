@@ -232,7 +232,6 @@ docker_builder:
   markdown_link_check_task:
     container:
       image: node:latest
-    use_compute_credits: false
     download_tool_script:
       - npm install -g markdown-link-check@3.7.2
     script:
