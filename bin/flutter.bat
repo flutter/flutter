@@ -28,6 +28,7 @@ SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
+SET pub_snapshot=%dart_sdk_path%\bin\snapshots\pub.dart.snapshot
 
 REM If available, add location of bundled mingit to PATH
 SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
@@ -108,7 +109,7 @@ GOTO :after_subroutine
       timeout /t 5 /nobreak
       GOTO :do_sdk_update_and_snapshot
     )
-
+    "%dart%" "%pub_snapshot%" version
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
@@ -136,7 +137,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade...
-        CALL "%pub%" upgrade --verbose --verbosity=all
+        "%dart%" "%pub_snapshot%" upgrade --verbose --verbosity=all
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error(%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL
