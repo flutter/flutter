@@ -109,8 +109,7 @@ void main() {
     expect(ended, 1);
   });
 
-  testGesture('Force presses are not recognized on devices with low maxmium pressure', (GestureTester tester) {
-    // Device specific constants that represent those from the iPhone X
+  testGesture('Force presses are not recognized on devices with maxmium pressure of 1', (GestureTester tester) {
     const double pressureMin = 0;
     const double pressureMax = 1.0;
 
@@ -196,6 +195,54 @@ void main() {
     tester.route(pointer.up());
 
     // We have ended the gesture so ended should be true.
+    expect(started, 0);
+    expect(updated, 0);
+    expect(peaked, 0);
+    expect(ended, 0);
+  });
+
+  testGesture('Force presses are not recognized on devices with maxmium pressure of zero', (GestureTester tester) {
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const double pressureMax = 0;
+
+    int started = 0;
+    int peaked = 0;
+    int updated = 0;
+    int ended = 0;
+
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+
+    force.onStart = (ForcePressDetails details) => started += 1;
+    force.onPeak = (ForcePressDetails details) => peaked += 1;
+    force.onUpdate = (ForcePressDetails details) => updated += 1;
+    force.onEnd = (ForcePressDetails details) => ended += 1;
+
+    const int pointerValue = 1;
+    final TestPointer pointer = TestPointer(pointerValue);
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
+    pointer.setDownInfo(down, const Offset(10.0, 10.0));
+    force.addPointer(down);
+    tester.closeArena(pointerValue);
+
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    // Pressure fed into the test environment simulates the values received directly from the device.
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 10, pressureMin: pressureMin, pressureMax: pressureMax));
+
+    // Regardless of current pressure, this recognizer shouldn't participate or
+    // trigger any callbacks.
+    expect(started, 0);
+    expect(peaked, 0);
+    expect(updated, 0);
+    expect(ended, 0);
+
+    tester.route(pointer.up());
+
+    // There should still be no callbacks.
     expect(started, 0);
     expect(updated, 0);
     expect(peaked, 0);

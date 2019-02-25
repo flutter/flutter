@@ -4554,7 +4554,6 @@ void main() {
   );
 
   testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -4588,27 +4587,26 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(FlatButton), findsNothing);
-    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('force press selects word (iOS)', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoTextField(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: TextField(
             controller: controller,
           ),
         ),
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
     const int pointerValue = 1;
     final Offset offset = textfieldStart + const Offset(150.0, 5.0);
@@ -4632,9 +4630,54 @@ void main() {
     );
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(CupertinoButton), findsNWidgets(3));
-    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('tap on non-force-press-supported devices work (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    const int pointerValue = 1;
+    final Offset offset = textfieldStart + const Offset(150.0, 5.0);
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        // iPhone 6 and below report 0 across the board.
+        pressure: 0,
+        pressureMax: 0,
+        pressureMin: 0,
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.up();
+    // The event should fallback to a normal tap and move the cursor.
+    // Single taps selects the edge of the word.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    await tester.pump(const Duration(milliseconds: 500));
+    // Single taps shouldn't trigger the toolbar.
+    expect(find.byType(CupertinoButton), findsNothing);
   });
 
   testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
