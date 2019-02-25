@@ -320,12 +320,16 @@ public class FlutterView extends SurfaceView
     }
 
     private void sendLocalesToDart(Configuration config) {
-        LocaleList localeList = config.getLocales();
-        int localeCount = localeList.size();
         List<Locale> locales = new ArrayList<>();
-        for (int index = 0; index < localeCount; ++index) {
-            Locale locale = localeList.get(index);
-            locales.add(locale);
+        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            LocaleList localeList = config.getLocales();
+            int localeCount = localeList.size();
+            for (int index = 0; index < localeCount; ++index) {
+                Locale locale = localeList.get(index);
+                locales.add(locale);
+            }
+        } else {
+            locales.add(config.locale);
         }
         localizationChannel.sendLocales(locales);
     }
