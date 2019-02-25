@@ -1035,4 +1035,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(getMenuScroll(), 4312.0);
   });
+
+  testWidgets('Dropdown menu respects parent size limits', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/24417
+
+    int selectedIndex;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: const SizedBox(height: 200),
+          body: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return SafeArea(
+                    child: Container(
+                      alignment: Alignment.topLeft,
+                      // From material/dropdown.dart (menus are unaligned by default):
+                      //  _kUnalignedMenuMargin = EdgeInsetsDirectional.only(start: 16.0, end: 24.0)
+                      // This padding ensures that the entire menu will be visible
+                      padding: const EdgeInsetsDirectional.only(start: 16.0, end: 24.0),
+                      child: DropdownButton<int>(
+                        value: 12,
+                        onChanged: (int i) { selectedIndex = i; },
+                        items: List<DropdownMenuItem<int>>.generate(100, (int i) {
+                          return DropdownMenuItem<int>(value: i, child: Text('$i'));
+                        }),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('12'));
+    await tester.pumpAndSettle();
+    expect(selectedIndex, null);
+
+    await tester.tap(find.text('13').last);
+    await tester.pumpAndSettle();
+    expect(selectedIndex, 13);
+  });
 }
