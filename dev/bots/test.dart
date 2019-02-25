@@ -411,7 +411,7 @@ String _getGitHash() {
     case CiProviders.cirrus:
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
-      return 'unknown'; // TODO(dnfield): Set this in the env for LUCI.
+      return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
   }
   return '';
 }
@@ -419,7 +419,7 @@ String _getGitHash() {
 Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceApi tableData) async {
   final FlutterCompactFormatter formatter = FlutterCompactFormatter();
   await testOutput.forEach(formatter.processRawOutput);
-  if (tableData == null) {
+  if (tableData == null || formatter.tests.isEmpty) {
     return;
   }
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
@@ -460,9 +460,6 @@ Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceA
     ),
     growable: false,
   );
-  if (request.rows == null || request.rows.isEmpty) {
-    return;
-  }
   final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'test');
   if (response.insertErrors != null && response.insertErrors.isNotEmpty) {
     print('${red}BigQuery insert errors:');

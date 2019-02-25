@@ -5,11 +5,21 @@ import 'package:meta/meta.dart';
 
 final Stopwatch _stopwatch = Stopwatch();
 
+/// A wrapper around package:test's JSON reporter.
+///
+/// This class behaves similarly to the compact reporter, but supresses all
+/// output except for progress until the end of testing. In other words, errors,
+/// [print] calls, and skipped test messages will not be printed during the run
+/// of the suite.
+///
+/// It also processes the JSON data into a collection of [TestResult]s for any
+/// other post processing needs, e.g. sending data to analytics.
 class FlutterCompactFormatter {
   FlutterCompactFormatter() {
     _stopwatch.start();
   }
 
+  /// Whether to use color escape codes in writing to stdout.
   final bool useColor = stdout.supportsAnsiEscapes;
 
   /// The terminal escape for green text, or the empty string if this is Windows
@@ -42,13 +52,27 @@ class FlutterCompactFormatter {
 
   final Map<int, TestResult> _tests = <int, TestResult>{};
 
+  /// The test results from this run.
   Iterable<TestResult> get tests => _tests.values;
+
+  /// The number of tests that were started.
   int started = 0;
+
+  /// The number of test failures.
   int failures = 0;
+
+  /// The number of skipped tests.
   int skips = 0;
+
+  /// The number of successful tests.
   int successes = 0;
 
+  /// Process a single line of JSON output from the JSON test reporter.
+  ///
+  /// Callers are responsible for splitting multiple lines before calling this
+  /// method.
   TestResult processRawOutput(String raw) {
+    assert(raw != null);
     // We might be getting messages from Flutter Tool about updating/building.
     if (!raw.startsWith('{')) {
       print(raw);
@@ -92,8 +116,7 @@ class FlutterCompactFormatter {
           originalResult.status = TestStatus.skipped;
         } else {
           if (decoded['result'] == 'success') {
-            _tests.remove(originalResult.id);
-            // originalResult.status = TestStatus.succeeded;
+            originalResult.status =TestStatus.succeeded;
             successes += 1;
           } else {
             originalResult.status = TestStatus.failed;
@@ -122,6 +145,7 @@ class FlutterCompactFormatter {
     return originalResult;
   }
 
+  /// Print summary of test results.
   void finish() {
     final List<String> skipped = <String>[];
     final List<String> failed = <String>[];
@@ -152,21 +176,26 @@ class FlutterCompactFormatter {
     skipped.forEach(print);
     failed.forEach(print);
     if (failed.isEmpty) {
-      print(
-          '${_green}Completed, $successes test(s) passing ($skips skipped).$_noColor');
+      print('${_green}Completed, $successes test(s) passing ($skips skipped).$_noColor');
     } else {
       print('$_gray$failures test(s) failed.$_noColor');
     }
   }
 }
 
+/// The state of a test received from the JSON reporter.
 enum TestStatus {
+  /// Test execution has started.
   started,
+  /// Test completed successfully.
   succeeded,
+  /// Test failed.
   failed,
+  /// Test was skipped.
   skipped,
 }
 
+/// The detailed status of a test run.
 class TestResult {
   TestResult({
     @required this.id,
@@ -185,22 +214,46 @@ class TestResult {
         assert(status != null),
         messages = <String>[];
 
+  /// The state of the test.
   TestStatus status;
+
+  /// The internal ID of the test used by the JSON reporter.
   final int id;
+
+  /// The name of the test, specified via the `test` method.
   final String name;
+
+  /// The line number from the original file.
   final int line;
+
+  /// The column from the original file.
   final int column;
+
+  /// The path of the original test file.
   final String path;
+
+  /// A friendly print out of the [path], [line], and [column] of the test.
   String get pathLineColumn => '$path:$line:$column';
+
+  /// The start time of the test, in milliseconds relative to suite startup.
   final int startTime;
+
+  /// The stdout of the test.
   final List<String> messages;
+
+  /// The error message from the test, from an `expect`, an [Exception] or
+  /// [Error].
   String errorMessage;
+
+  /// The stacktrace from a test failure.
   String stackTrace;
 
+  /// The time, in milliseconds relative to suite startup, that the test ended.
   int endTime;
+
+  /// The total time, in milliseconds, that the test took.
   int get totalTime => (endTime ?? _stopwatch.elapsedMilliseconds) - startTime;
 
   @override
-  String toString() =>
-      '{$runtimeType: {$id, $name, ${totalTime}ms, $pathLineColumn}}';
+  String toString() => '{$runtimeType: {$id, $name, ${totalTime}ms, $pathLineColumn}}';
 }
