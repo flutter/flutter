@@ -204,7 +204,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
