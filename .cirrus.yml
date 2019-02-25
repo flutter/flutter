@@ -49,7 +49,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -58,7 +58,7 @@ task:
         memory: 12G
     - name: tool_tests-linux
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tool_tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -121,11 +121,11 @@ task:
   matrix:
     - name: tests-windows
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tests
     - name: tool_tests-windows
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tool_tests
     - name: build_tests-windows
       env:
@@ -202,11 +202,11 @@ task:
   matrix:
     - name: tests-macos
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tests
     - name: tool_tests-macos
       env:
-        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[f502eea8272f422bd97b5b60dbcd54b75199555f4a6957f59969a862619eebae7c29753445b157a66eeb2c401373307c]
+        GCLOUD_SERVICE_ACCOUNT: ENCRYPTED[d2cec6ffe2924b8d2efbbe791fcadf209de35784b50b301f83a10225bf5b96100a0780a3996833a0a947ab2b8eab7390]
         SHARD: tool_tests
     - name: build_tests-macos
       env:
