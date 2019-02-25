@@ -230,6 +230,8 @@ docker_builder:
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
 
 markdown_link_check_task:
+  use_compute_credits: false
+  auto_cancellation: true
   container:
     image: node:latest
   download_tool_script: npm install -g markdown-link-check@3.7.2
