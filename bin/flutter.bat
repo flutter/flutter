@@ -16,6 +16,8 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
+SET
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
@@ -110,6 +112,9 @@ GOTO :after_subroutine
       GOTO :do_sdk_update_and_snapshot
     )
     "%dart%" "%pub_snapshot%" version
+    ECHO Pub Error(%ERRORLEVEL%)
+    "%dart%" --version
+    ECHO Dart Error(%ERRORLEVEL%)
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
