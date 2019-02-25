@@ -939,11 +939,10 @@ class ProjectWatcher {
       if (path.contains(pubCachePath)) {
         continue;
       }
-      final String packagePath = Uri.parse(path).path;
-      if (!fs.directory(packagePath).existsSync()) {
+      if (!fs.directory(path).existsSync()) {
         continue;
       }
-      final Watcher watcher = DirectoryWatcher(packagePath);
+      final Watcher watcher = DirectoryWatcher(path);
       watcher.events.listen(_onWatchEvent);
       _watchersReady.add(watcher.ready);
     }
@@ -962,11 +961,9 @@ class ProjectWatcher {
   final List<String> invalidatedFiles = <String>[];
 
   void _onWatchEvent(WatchEvent watchEvent) {
-    printTrace('WATCH: ${watchEvent.path}|${watchEvent.type}');
     if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.trimRight().endsWith('dart')) {
       return;
     }
-    printTrace('Added: ${watchEvent.path}');
     invalidatedFiles.add(watchEvent.path);
   }
 }
