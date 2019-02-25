@@ -1485,7 +1485,7 @@ void main() {
     await gesture.up();
     await tester.pump();
   });
-  
+
   testWidgets('AppBar with shape', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
     await tester.pumpWidget(
