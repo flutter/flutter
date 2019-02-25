@@ -26,13 +26,17 @@ class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
+          await checkGradleDependencies();
+        }
         return applicationBinary == null
             ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
             : AndroidApk.fromApk(applicationBinary);

@@ -900,6 +900,7 @@ void main() {
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
+          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -1510,6 +1511,7 @@ void main() {
           decoration: InputDecoration.collapsed(
             hintText: 'hint',
           ),
+          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -2050,7 +2052,7 @@ void main() {
       home: Material(
         child: Center(
             child: TextField(
-              buildCounter: (BuildContext context, {int currentLength, int maxLength, bool isFocused}) {
+              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
                 return Text('${currentLength.toString()} of ${maxLength.toString()}');
               },
               maxLength: 10,
@@ -2132,6 +2134,7 @@ void main() {
             child: TextField(
               controller: controller,
               maxLines: 3,
+              strutStyle: StrutStyle.disabled,
             ),
           ) ,
         ),
@@ -2189,7 +2192,6 @@ void main() {
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     });
-
 
     testWidgets('Down and up test 2', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
@@ -2673,6 +2675,59 @@ void main() {
     expect(controller.selection.baseOffset, 0);
   });
 
+  testWidgets('TextField baseline alignment no-strut', (WidgetTester tester) async {
+    final TextEditingController controllerA = TextEditingController(text: 'A');
+    final TextEditingController controllerB = TextEditingController(text: 'B');
+    final Key keyA = UniqueKey();
+    final Key keyB = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                key: keyA,
+                decoration: null,
+                controller: controllerA,
+                style: const TextStyle(fontSize: 10.0),
+                strutStyle: StrutStyle.disabled,
+              )
+            ),
+            const Text(
+              'abc',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            Expanded(
+              child: TextField(
+                key: keyB,
+                decoration: null,
+                controller: controllerB,
+                style: const TextStyle(fontSize: 30.0),
+                strutStyle: StrutStyle.disabled,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
+
+    final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
+  });
+
   testWidgets('TextField baseline alignment', (WidgetTester tester) async {
     final TextEditingController controllerA = TextEditingController(text: 'A');
     final TextEditingController controllerB = TextEditingController(text: 'B');
@@ -2719,6 +2774,7 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
+    // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
     expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
     expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
@@ -4143,7 +4199,7 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap (iOS)',
+    'long press tap is not a double tap (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -4180,161 +4236,6 @@ void main() {
       expect(find.byType(CupertinoButton), findsNothing);
     },
   );
-
-  testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(50.0, 5.0));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Long press on iOS shows collapsed selection cursor.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(50, 0));
-      await tester.pump();
-
-      // The selection position is now moved with the drag.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(50, 0));
-      await tester.pump();
-
-      // The selection position is now moved with the drag.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.up();
-      await tester.pump();
-
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-    },
-  );
-
-  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                maxLines: 1,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final RenderEditable renderEditable = findRenderEditable(tester);
-
-      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
-
-      expect(lastCharEndpoint.length, 1);
-      // Just testing the test and making sure that the last character is off
-      // the right side of the screen.
-      expect(lastCharEndpoint[0].point.dx, 1056);
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(300, 5));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(600, 0));
-      // To the edge of the screen basically.
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
-      );
-      // Keep moving out.
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
-      );
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      ); // We're at the edge now.
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.up();
-      await tester.pump();
-
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
-
-      expect(lastCharEndpoint.length, 1);
-      // The last character is now on screen.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798.6666870117188));
-
-      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // First character's position.
-      );
-      expect(firstCharEndpoint.length, 1);
-      // The first character is now offscreen to the left.
-      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.33331298828125));
-  });
 
   testWidgets(
     'long tap after a double tap select is not affected (iOS)',
@@ -4507,12 +4408,21 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 5.0);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0
+      ),
+    );
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -4541,8 +4451,19 @@ void main() {
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-    await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+    final Offset offset = textfieldStart + const Offset(150.0, 5.0);
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: offset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0
+      ),
+    );
+
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     // We expect the force press to select a word at the given location.
     expect(
@@ -4620,6 +4541,215 @@ void main() {
       'selection disabled'
     ]);
   });
+
+  testWidgets(
+    'strut basic single line',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // This is the height of the decoration (24) plus the metrics from the default
+        // TextStyle of the theme (16).
+        const Size(800, 40),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut TextStyle increases height',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // Strut should inherit the TextStyle.fontSize by default and produce the
+        // same height as if it were disabled.
+        const Size(800, 44),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                style: TextStyle(fontSize: 20),
+                strutStyle: StrutStyle.disabled,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // The height here should match the previous version with strut enabled.
+        const Size(800, 44),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut basic multi line',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // The height should be the input decoration (24) plus 6x the strut height (16).
+        const Size(800, 120),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut no force small strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+                strutStyle: StrutStyle(
+                  // The small strut is overtaken by the larger
+                  // TextStyle fontSize.
+                  fontSize: 5,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // When the strut's height is smaller than TextStyle's and forceStrutHeight
+        // is disabled, then the TextStyle takes precedence. Should be the same height
+        // as 'strut basic multi line'.
+        const Size(800, 120),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut no force large strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                maxLines: 6,
+                strutStyle: StrutStyle(
+                  fontSize: 25,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // When the strut's height is larger than TextStyle's and forceStrutHeight
+        // is disabled, then the StrutStyle takes precedence.
+        const Size(800, 174),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut height override',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                maxLines: 3,
+                strutStyle: StrutStyle(
+                  fontSize: 8,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // The smaller font size of strut make the field shorter than normal.
+        const Size(800, 48),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut forces field taller',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Center(
+              child: TextField(
+                maxLines: 3,
+                style: TextStyle(fontSize: 10),
+                strutStyle: StrutStyle(
+                  fontSize: 18,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextField)),
+        // When the strut fontSize is larger than a provided TextStyle, the
+        // the strut's height takes precedence.
+        const Size(800, 78),
+      );
+    },
+  );
 
   testWidgets('Caret center position', (WidgetTester tester) async {
     await tester.pumpWidget(

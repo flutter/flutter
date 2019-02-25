@@ -49,7 +49,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameDurations()
+  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
@@ -76,7 +76,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractGpuRasterizerDrawEvents()
+  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawEvents()
       .where((TimedEvent event) => event.duration > kBuildBudget)
       .length;
 

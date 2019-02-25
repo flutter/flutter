@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
+import 'package:bsdiff/bsdiff.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
@@ -109,6 +110,21 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
 Future<GradleProject> _gradleProject() async {
   _cachedGradleProject ??= await _readGradleProject();
   return _cachedGradleProject;
+}
+
+/// Runs `gradlew dependencies`, ensuring that dependencies are resolved and
+/// potentially downloaded.
+Future<void> checkGradleDependencies() async {
+  final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: kSlowOperation);
+  final FlutterProject flutterProject = await FlutterProject.current();
+  final String gradle = await _ensureGradle(flutterProject);
+  await runCheckedAsync(
+    <String>[gradle, 'dependencies'],
+    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+    environment: _gradleEnv,
+  );
+  androidSdk.reinitialize();
+  progress.stop();
 }
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
@@ -353,11 +369,12 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
 }
 
 Future<void> _buildGradleProjectV2(
-    FlutterProject flutterProject,
-    String gradle,
-    BuildInfo buildInfo,
-    String target,
-    bool isBuildingBundle) async {
+  FlutterProject flutterProject,
+  String gradle,
+  BuildInfo buildInfo,
+  String target,
+  bool isBuildingBundle,
+) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;
@@ -498,6 +515,7 @@ Future<void> _buildGradleProjectV2(
         throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
 
       printStatus('Found baseline package ${baselineApkFile.path}.');
+      printStatus('Creating dynamic patch...');
       final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
       final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
 
@@ -514,12 +532,20 @@ Future<void> _buildGradleProjectV2(
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
 
-        // Only allow changes under assets/.
-        if (!newFile.name.startsWith('assets/'))
+        // Only allow certain changes.
+        if (!newFile.name.startsWith('assets/') &&
+            !(buildInfo.usesAot && newFile.name.endsWith('.so')))
           throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
-        final String name = fs.path.relative(newFile.name, from: 'assets/');
-        update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        final String name = newFile.name;
+        if (name.contains('_snapshot_') || name.endsWith('.so')) {
+          final List<int> diff = bsdiff(oldFile.content, newFile.content);
+          final int ratio = 100 * diff.length ~/ newFile.content.length;
+          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
+          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
+        } else {
+          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+        }
       }
 
       File updateFile;
@@ -567,7 +593,8 @@ Future<void> _buildGradleProjectV2(
 
       updateFile.parent.createSync(recursive: true);
       updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      printStatus('Created dynamic patch ${updateFile.path}.');
+      final String patchSize = getSizeAsMB(updateFile.lengthSync());
+      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
     }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);

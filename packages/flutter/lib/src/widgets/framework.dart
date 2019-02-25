@@ -2223,7 +2223,7 @@ class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
-  void buildScope(Element context, [VoidCallback callback]) {
+  void buildScope(Element context, [ VoidCallback callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
     assert(context != null);
@@ -3689,7 +3689,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel});
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///

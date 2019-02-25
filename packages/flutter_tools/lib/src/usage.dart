@@ -91,8 +91,11 @@ class Usage {
     _analytics.sendScreenView(command, parameters: parameters);
   }
 
-  void sendEvent(String category, String parameter,
-      { Map<String, String> parameters }) {
+  void sendEvent(
+    String category,
+    String parameter, {
+    Map<String, String> parameters,
+  }) {
     if (suppressAnalytics)
       return;
 
@@ -106,7 +109,7 @@ class Usage {
     String variableName,
     Duration duration, {
     String label,
-    }) {
+  }) {
     if (!suppressAnalytics) {
       _analytics.sendTiming(
         variableName,

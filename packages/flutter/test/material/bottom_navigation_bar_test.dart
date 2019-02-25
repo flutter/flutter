@@ -6,7 +6,9 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -68,6 +70,325 @@ void main() {
     expect(find.text('Alarm'), findsOneWidget);
   });
 
+  testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
+    const Color primaryColor = Colors.black;
+    const Color captionColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    const double selectedFontSize = 14.0;
+    const double unselectedFontSize = 12.0;
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    // Unselected label has a font size of 14 but is scaled down to be font size 12.
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, selectedFontSize);
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(primaryColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(captionColor));
+    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+    expect(_getMaterial(tester).elevation, equals(8.0));
+  });
+
+  testWidgets('Shifting BottomNavigationBar defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    const double selectedFontSize = 14.0;
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(Colors.white));
+    expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+    expect(_getMaterial(tester).elevation, equals(8.0));
+  });
+
+  testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
+    const Color primaryColor = Colors.black;
+    const Color captionColor = Colors.purple;
+    const Color selectedColor = Colors.blue;
+    const Color unselectedColor = Colors.yellow;
+    const double selectedFontSize = 18.0;
+    const double unselectedFontSize = 14.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedFontSize: selectedFontSize,
+            unselectedFontSize: unselectedFontSize,
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    // Unselected label has a font size of 18 but is scaled down to be font size 14.
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, selectedFontSize);
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(unselectedColor));
+    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+  });
+
+
+  testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
+    const Color primaryColor = Colors.black;
+    const Color captionColor = Colors.purple;
+    const Color selectedColor = Colors.blue;
+    const Color unselectedColor = Colors.yellow;
+    const double selectedFontSize = 18.0;
+    const double unselectedFontSize = 14.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            selectedFontSize: selectedFontSize,
+            unselectedFontSize: unselectedFontSize,
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
+    expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+  });
+
+  testWidgets('Fixed BottomNavigationBar can hide unselected labels', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(_getOpacity(tester, 'AC'), equals(1.0));
+    expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+  });
+
+  testWidgets('Fixed BottomNavigationBar can update background color', (WidgetTester tester) async {
+    const Color color = Colors.yellow;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: color,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(_getMaterial(tester).color, equals(color));
+  });
+
+  testWidgets('Shifting BottomNavigationBar background color is overriden by item color', (WidgetTester tester) async {
+    const Color itemColor = Colors.yellow;
+    const Color backgroundColor = Colors.blue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            backgroundColor: backgroundColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+                backgroundColor: itemColor,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(_getMaterial(tester).color, equals(itemColor));
+  });
+
+  testWidgets('Specifying both selectedItemColor and fixedColor asserts', (WidgetTester tester) async {
+    expect(
+      () {
+        return BottomNavigationBar(
+          selectedItemColor: Colors.black,
+          fixedColor: Colors.black,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('AC'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Alarm'),
+            ),
+          ],
+        );
+      },
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided', (WidgetTester tester) async {
+    const Color fixedColor = Colors.black;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            fixedColor: fixedColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(fixedColor));
+  });
+
+  testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
+    const double customElevation = 3.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            elevation: customElevation,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ]
+          )
+        )
+      )
+    );
+
+    expect(_getMaterial(tester).elevation, equals(customElevation));
+  });
+
   testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -91,7 +412,7 @@ void main() {
       )
     );
 
-    const double labelBottomMargin = 8.0; // _kBottomMargin in implementation.
+    const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
     const double additionalPadding = 40.0 - labelBottomMargin;
     const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
@@ -393,7 +714,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(68.0));
+    expect(box.size.height, equals(66.0));
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -827,7 +1148,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
 	      skip: !Platform.isLinux,
       );
     }
@@ -851,6 +1172,191 @@ void main() {
           ])));
     }, throwsA(isInstanceOf<AssertionError>()));
   });
+
+  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+      'for shifting navbar, expect that there is no rendered text', (WidgetTester tester) async {
+        final Widget widget = MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                bottomNavigationBar: BottomNavigationBar(
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
+                  type: BottomNavigationBarType.shifting,
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      title: Text('Red'),
+                      backgroundColor: Colors.red,
+                      icon: Icon(Icons.dashboard),
+                    ),
+                    BottomNavigationBarItem(
+                      title: Text('Green'),
+                      backgroundColor: Colors.green,
+                      icon: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+        await tester.pumpWidget(widget);
+        expect(find.text('Red'), findsOneWidget);
+        expect(find.text('Green'), findsOneWidget);
+        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      });
+
+  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+      'for fixed navbar, expect that there is no rendered text', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Scaffold(
+                  bottomNavigationBar: BottomNavigationBar(
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                    type: BottomNavigationBarType.fixed,
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        title: Text('Red'),
+                        backgroundColor: Colors.red,
+                        icon: Icon(Icons.dashboard),
+                      ),
+                      BottomNavigationBarItem(
+                        title: Text('Green'),
+                        backgroundColor: Colors.green,
+                        icon: Icon(Icons.menu),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        expect(find.text('Red'), findsOneWidget);
+        expect(find.text('Green'), findsOneWidget);
+        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      });
+
+  testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          type: BottomNavigationBarType.shifting,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Red'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.access_alarm),
+              title: Text('Green'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Red\nTab 1 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isHeader,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'Green\nTab 2 of 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
@@ -872,5 +1378,21 @@ Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDir
         ),
       ),
     ),
+  );
+}
+
+double _getOpacity(WidgetTester tester, String textValue) {
+  final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+      find.ancestor(
+        of: find.text(textValue),
+        matching: find.byType(FadeTransition),
+      ).first
+  );
+  return opacityWidget.opacity.value;
+}
+
+Material _getMaterial(WidgetTester tester) {
+  return tester.firstWidget<Material>(
+    find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
   );
 }
