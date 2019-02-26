@@ -458,7 +458,6 @@ void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
     static_cast<FontSkia*>(faked_font.font)
         ->GetSkTypeface()
         ->getFamilyName(&str);
-    FML_DLOG(ERROR) << str.c_str();
     font.setTypeface(static_cast<FontSkia*>(faked_font.font)->GetSkTypeface());
     font.setSize(paragraph_style_.strut_font_size);
     SkFontMetrics strut_metrics;
