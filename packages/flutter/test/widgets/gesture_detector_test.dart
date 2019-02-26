@@ -102,7 +102,7 @@ void main() {
           didStartPan = true;
         },
         onPanUpdate: (DragUpdateDetails details) {
-          panDelta = details.delta;
+          panDelta = panDelta == null ? details.delta : panDelta + details.delta;
         },
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;

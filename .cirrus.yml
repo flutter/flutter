@@ -141,6 +141,7 @@ task:
     - tests-macos
     - tool_tests-macos
     - build_tests-macos
+    - add2app-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -168,11 +169,12 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: high-sierra-xcode-9.4.1
+    image: mojave-xcode-10.1
   depends_on:
     - analyze
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+    COCOAPODS_DISABLE_STATS: true
   install_cocoapods_script:
     - sudo gem install cocoapods
   git_fetch_script:
@@ -208,7 +210,9 @@ task:
       container:
         cpu: 4
         memory: 12G
-
+    - name: add2app-macos
+      env:
+        SHARD: add2app_test
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
@@ -224,4 +228,3 @@ docker_builder:
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
-

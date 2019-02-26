@@ -54,7 +54,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// [dragStartBehavior] must not be null.
   DragGestureRecognizer({
     Object debugOwner,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner);
 

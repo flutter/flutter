@@ -254,4 +254,84 @@ void main() {
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
   });
+
+  test('selects correct place with offsets', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      // This makes the scroll axis vertical.
+      maxLines: 2,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      text: const TextSpan(
+        text: 'test\ntest',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints..paragraph(offset: Offset.zero),
+    );
+
+    editable.selectPositionAt(from: const Offset(0, 2), cause: SelectionChangedCause.tap);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    viewportOffset.correctBy(10);
+
+    pumpFrame();
+
+    expect(
+      editable,
+      paints..paragraph(offset: const Offset(0, -10)),
+    );
+
+    // Tap the same place. But because the offset is scrolled up, the second line
+    // gets tapped instead.
+    editable.selectPositionAt(from: const Offset(0, 2), cause: SelectionChangedCause.tap);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 5);
+
+    // Test the other selection methods.
+    // Move over by one character.
+    editable.handleTapDown(TapDownDetails(globalPosition: const Offset(10, 2)));
+    pumpFrame();
+    editable.selectPosition(cause:SelectionChangedCause.tap);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 6);
+
+    editable.handleTapDown(TapDownDetails(globalPosition: const Offset(20, 2)));
+    pumpFrame();
+    editable.selectWord(cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 5);
+    expect(currentSelection.extentOffset, 9);
+
+    // Select one more character down but since it's still part of the same
+    // word, the same word is selected.
+    editable.selectWordsInRange(from: const Offset(30, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 5);
+    expect(currentSelection.extentOffset, 9);
+  });
 }

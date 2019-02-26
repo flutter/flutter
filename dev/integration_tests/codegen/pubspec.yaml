@@ -22,4 +22,3 @@ builders:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 3b6d

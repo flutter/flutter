@@ -112,6 +112,21 @@ Future<GradleProject> _gradleProject() async {
   return _cachedGradleProject;
 }
 
+/// Runs `gradlew dependencies`, ensuring that dependencies are resolved and
+/// potentially downloaded.
+Future<void> checkGradleDependencies() async {
+  final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: kSlowOperation);
+  final FlutterProject flutterProject = await FlutterProject.current();
+  final String gradle = await _ensureGradle(flutterProject);
+  await runCheckedAsync(
+    <String>[gradle, 'dependencies'],
+    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+    environment: _gradleEnv,
+  );
+  androidSdk.reinitialize();
+  progress.stop();
+}
+
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
@@ -517,12 +532,13 @@ Future<void> _buildGradleProjectV2(
         if (oldFile != null && oldFile.crc32 == newFile.crc32)
           continue;
 
-        // Only allow changes under assets/.
-        if (!newFile.name.startsWith('assets/'))
+        // Only allow certain changes.
+        if (!newFile.name.startsWith('assets/') &&
+            !(buildInfo.usesAot && newFile.name.endsWith('.so')))
           throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
 
-        final String name = fs.path.relative(newFile.name, from: 'assets/');
-        if (name.contains('_snapshot_')) {
+        final String name = newFile.name;
+        if (name.contains('_snapshot_') || name.endsWith('.so')) {
           final List<int> diff = bsdiff(oldFile.content, newFile.content);
           final int ratio = 100 * diff.length ~/ newFile.content.length;
           printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
