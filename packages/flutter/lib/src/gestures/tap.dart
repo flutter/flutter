@@ -174,6 +174,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _finalPosition = event.position;
       _checkUp();
     } else if (event is PointerCancelEvent) {
+      if (_sentTapDown && onTapCancel != null) {
+        invokeCallback<void>('onTapCancel', onTapCancel);
+      }
       _reset();
     }
   }

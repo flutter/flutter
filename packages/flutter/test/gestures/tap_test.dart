@@ -404,4 +404,40 @@ void main() {
       'disposed B',
     ]);
   });
+
+  testGesture('PointerCancelEvent cancels tab', (GestureTester tester) {
+    const PointerDownEvent down = PointerDownEvent(
+        pointer: 5,
+        position: Offset(10.0, 10.0)
+    );
+    const PointerCancelEvent cancel = PointerCancelEvent(
+        pointer: 5,
+        position: Offset(10.0, 10.0)
+    );
+
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+    tap.onTapDown = (_) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (_) {
+      recognized.add('up');
+    };
+    tap.onTap = () {
+      recognized.add('tap');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    tap.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    expect(recognized, <String>['down']);
+    tester.route(cancel);
+    expect(recognized, <String>['down', 'cancel']);
+
+    tap.dispose();
+  });
 }

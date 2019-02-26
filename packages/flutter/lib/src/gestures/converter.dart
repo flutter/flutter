@@ -257,7 +257,15 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.up:
         case ui.PointerChange.cancel:
-          assert(_pointers.containsKey(datum.device));
+          if (!_pointers.containsKey(datum.device)) {
+            // Canceling a pointer that the framework never tracked is a no-op.
+            // This can happen on certain phones (e.g. OnePlus A5000) when the
+            // user activates the three-finger screenshot gesture: We may get
+            // down events for the first two fingers, followed by a cancel event
+            // for all three fingers without ever getting a down for the third
+            // finger.
+            break;
+          }
           final _PointerState state = _pointers[datum.device];
           assert(state.down);
           if (position != state.lastPosition) {
