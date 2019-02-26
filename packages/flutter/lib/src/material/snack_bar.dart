@@ -259,7 +259,7 @@ class SnackBar extends StatelessWidget {
         onDismissed: (DismissDirection direction) {
           Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
-        child: this.floating ? Card(
+        child: floating ? Card(
           elevation: 6.0,
           color: backgroundColor ?? _kSnackBackground,
           child: Theme(
