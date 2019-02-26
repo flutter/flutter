@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'events.dart';
 
 /// The callback to register with a [PointerSignalResolver] to express
@@ -42,10 +44,24 @@ class PointerSignalResolver {
   /// event.
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
+      assert(_currentEvent == null);
       return;
     }
     assert(_currentEvent == event);
+    try {
     _firstRegisteredCallback(event);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'gesture library',
+        context: 'while resolving a PointerSignalEvent',
+        informationCollector: (StringBuffer information) {
+          information.writeln('Event:');
+          information.write('  $event');
+        }
+      ));
+    }
     _firstRegisteredCallback = null;
     _currentEvent = null;
   }

@@ -170,7 +170,8 @@ class TestPointer {
     );
   }
 
-  /// Create a [PointerScrollEvent] with the given delta.
+  /// Create a [PointerScrollEvent] (e.g., scroll wheel scroll; not finger-drag
+  /// scroll) with the given delta.
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
