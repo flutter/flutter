@@ -441,7 +441,6 @@ class PointerEventConverter {
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
             yield PointerScrollEvent(
               timeStamp: timeStamp,
-              pointer: state.pointer,
               kind: kind,
               device: datum.device,
               position: position,

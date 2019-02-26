@@ -790,10 +790,10 @@ class PointerUpEvent extends PointerEvent {
   );
 }
 
-/// A base type for events that correspond to a discrete pointer signal.
+/// An event that corresponds to a discrete pointer signal.
 ///
-/// There are events that originate from the pointer but don't change the state
-/// of the pointer itself, and are discrete rather than needing to be
+/// Pointer signals are events that originate from the pointer but don't change
+/// the state of the pointer itself, and are discrete rather than needing to be
 /// interpreted in the context of a series of events.
 abstract class PointerSignalEvent extends PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -815,21 +815,25 @@ abstract class PointerSignalEvent extends PointerEvent {
 
 /// The pointer issued a scroll event.
 ///
-/// For example, the scroll wheel on a mouse was scrolled.
+/// Scrolling the scroll wheel on a mouse is an example of an event that
+/// would create a [PointerScrollEvent].
 class PointerScrollEvent extends PointerSignalEvent {
   /// Creates a pointer scroll event.
   ///
   /// All of the arguments must be non-null.
   const PointerScrollEvent({
     Duration timeStamp = Duration.zero,
-    int pointer = 0,
-    PointerDeviceKind kind = PointerDeviceKind.touch,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
     int device = 0,
     Offset position = Offset.zero,
     this.scrollDelta = Offset.zero,
-  }) : super(
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       assert(scrollDelta != null),
+       super(
     timeStamp: timeStamp,
-    pointer: pointer,
     kind: kind,
     device: device,
     position: position,
