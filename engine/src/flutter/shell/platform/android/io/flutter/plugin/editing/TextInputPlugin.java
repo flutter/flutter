@@ -6,6 +6,7 @@ package io.flutter.plugin.editing;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
@@ -22,13 +23,20 @@ import io.flutter.view.FlutterView;
  * Android implementation of the text input plugin.
  */
 public class TextInputPlugin {
+    @NonNull
     private final FlutterView mView;
+    @NonNull
     private final InputMethodManager mImm;
+    @NonNull
     private final TextInputChannel textInputChannel;
     private int mClient = 0;
+    @Nullable
     private TextInputChannel.Configuration configuration;
+    @Nullable
     private Editable mEditable;
     private boolean mRestartInputPending;
+    @Nullable
+    private InputConnection lastInputConnection;
 
     public TextInputPlugin(FlutterView view, @NonNull DartExecutor dartExecutor) {
         mView = view;
@@ -62,6 +70,11 @@ public class TextInputPlugin {
                 clearTextInputClient();
             }
         });
+    }
+
+    @NonNull
+    public InputMethodManager getInputMethodManager() {
+        return mImm;
     }
 
     private static int inputTypeFromTextInputType(
@@ -114,7 +127,10 @@ public class TextInputPlugin {
     }
 
     public InputConnection createInputConnection(FlutterView view, EditorInfo outAttrs) {
-        if (mClient == 0) return null;
+        if (mClient == 0) {
+            lastInputConnection = null;
+            return lastInputConnection;
+        }
 
         outAttrs.inputType = inputTypeFromTextInputType(
             configuration.inputType,
@@ -148,7 +164,13 @@ public class TextInputPlugin {
         outAttrs.initialSelStart = Selection.getSelectionStart(mEditable);
         outAttrs.initialSelEnd = Selection.getSelectionEnd(mEditable);
 
-        return connection;
+        lastInputConnection = connection;
+        return lastInputConnection;
+    }
+
+    @Nullable
+    public InputConnection getLastInputConnection() {
+        return lastInputConnection;
     }
 
     private void showTextInput(FlutterView view) {
