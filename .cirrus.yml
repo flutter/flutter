@@ -180,6 +180,7 @@ task:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
   check_date_script:
+    - sudo sntp -sS pool.ntp.org
     - date
   # install_cocoapods_script:
   #   - sudo gem install cocoapods
