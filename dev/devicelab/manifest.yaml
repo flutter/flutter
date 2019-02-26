@@ -126,7 +126,6 @@ tasks:
       flutter_gallery app on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   cull_opacity_perf__timeline_summary:
     description: >
