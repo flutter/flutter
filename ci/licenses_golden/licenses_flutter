@@ -471,7 +471,10 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActi
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterShellArgs.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/AndroidKeyProcessor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterFragment.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterSurfaceView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterTextureView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java
