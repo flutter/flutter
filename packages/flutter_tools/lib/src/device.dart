@@ -11,6 +11,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'desktop.dart';
 import 'fuchsia/fuchsia_device.dart';
 
 import 'globals.dart';
@@ -35,10 +36,16 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-    MacOSDevices(),
-    LinuxDevices(),
-    WindowsDevices(),
-  ]);
+  ] + _conditionalDesktopDevices);
+
+  /// Only add desktop devices if the flag is enabled.
+  static List<DeviceDiscovery> get _conditionalDesktopDevices {
+    return flutterDesktopEnabled ? <DeviceDiscovery>[
+      MacOSDevices(),
+      LinuxDevices(),
+      WindowsDevices(),
+    ] : <DeviceDiscovery>[];
+  }
 
   String _specifiedDeviceId;
 
