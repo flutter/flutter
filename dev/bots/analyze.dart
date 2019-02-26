@@ -473,8 +473,6 @@ Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
 }
 
-final RegExp _licensePattern = RegExp(r'''Copyright \d{4}''');
-
 Future<void> _verifyNoMissingLicense(String workingDirectory) async {
   final List<String> errors = <String>[];
   for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
@@ -484,7 +482,7 @@ Future<void> _verifyNoMissingLicense(String workingDirectory) async {
     bool hasLicense = false;
     final List<String> lines = file.readAsLinesSync();
     if (lines.isNotEmpty)
-      hasLicense = _licensePattern.firstMatch(lines.first) != null;
+      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
     if (!hasLicense)
       errors.add(file.path);
   }
