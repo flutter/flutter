@@ -227,6 +227,9 @@ def to_gn_args(args):
     if args.arm_float_abi:
       gn_args['arm_float_abi'] = args.arm_float_abi
 
+    # Switch flutter to full Dart SDK.
+    gn_args['dart_platform_sdk'] = False
+
     return gn_args
 
 def parse_args(args):

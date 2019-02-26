@@ -11,6 +11,9 @@
 # changing libraries, sources, and patch files.  See
 # https://github.com/dart-lang/sdk/issues/28836.
 
+none:
+  libraries: {}
+
 flutter:
   libraries:
     _builtin:
@@ -147,3 +150,115 @@ flutter:
 
     vmservice_io:
       uri: "../../../third_party/dart/runtime/bin/vmservice/vmservice_io.dart"
+
+dartdevc:
+  libraries:
+    _runtime:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/ddc_runtime/runtime.dart"
+
+    _debugger:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/debugger.dart"
+
+    _foreign_helper:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/foreign_helper.dart"
+
+    _http:
+      uri: "../../../third_party/dart/sdk/lib/_http/http.dart"
+
+    _interceptors:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/interceptors.dart"
+
+    _internal:
+      uri: "../../../third_party/dart/sdk/lib/internal/internal.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/internal_patch.dart"
+
+    _isolate_helper:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/isolate_helper.dart"
+
+    _js_helper:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/js_helper.dart"
+
+    _js_mirrors:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/js_mirrors.dart"
+
+    _js_primitives:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/js_primitives.dart"
+
+    _metadata:
+      uri: "../../../third_party/dart/sdk/lib/html/html_common/metadata.dart"
+
+    _native_typed_data:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/private/native_typed_data.dart"
+
+    async:
+      uri: "../../../third_party/dart/sdk/lib/async/async.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/async_patch.dart"
+
+    collection:
+      uri: "../../../third_party/dart/sdk/lib/collection/collection.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/collection_patch.dart"
+
+    convert:
+      uri: "../../../third_party/dart/sdk/lib/convert/convert.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/convert_patch.dart"
+
+    core:
+      uri: "../../../third_party/dart/sdk/lib/core/core.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/core_patch.dart"
+
+    developer:
+      uri: "../../../third_party/dart/sdk/lib/developer/developer.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/developer_patch.dart"
+
+    io:
+      uri: "../../../third_party/dart/sdk/lib/io/io.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/io_patch.dart"
+      supported: false
+
+    isolate:
+      uri: "../../../third_party/dart/sdk/lib/isolate/isolate.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/isolate_patch.dart"
+      supported: false
+
+    mirrors:
+      uri: "../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/mirrors_patch.dart"
+      supported: false
+
+    math:
+      uri: "../../../third_party/dart/sdk/lib/math/math.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/math_patch.dart"
+
+    typed_data:
+      uri: "../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
+      patches: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/patch/typed_data_patch.dart"
+
+    html:
+      uri: "../../../third_party/dart/sdk/lib/html/dart2js/html_dart2js.dart"
+
+    html_common:
+      uri: "../../../third_party/dart/sdk/lib/html/html_common/html_common_dart2js.dart"
+
+    indexed_db:
+      uri: "../../../third_party/dart/sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart"
+
+    js:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/lib/js/dart2js/js_dart2js.dart"
+
+    js_util:
+      uri: "../../../third_party/dart/pkg/dev_compiler/tool/input_sdk/lib/js_util/dart2js/js_util_dart2js.dart"
+
+    svg:
+      uri: "../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart"
+
+    web_audio:
+      uri: "../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart"
+
+    web_gl:
+      uri: "../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart"
+
+    web_sql:
+      uri: "../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart"
+
+    ui:
+      uri: "flutter/lib/stub_ui/ui.dart"

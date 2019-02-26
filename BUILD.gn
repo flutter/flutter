@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("$flutter_root/common/config.gni")
+import("//third_party/dart/build/dart/dart_action.gni")
 
 # Temporary snapshot copy rules until we can use the full SDK.
 _flutter_sdk_snapshots = [
@@ -36,7 +37,8 @@ group("flutter") {
         "$flutter_root/frontend_server",
         "//third_party/dart:create_sdk",
         "$flutter_root/lib/stub_ui:stub_ui",
-        ":dart2js_platform_files"
+        ":dart2js_platform_files",
+        ":flutter_dartdevc_kernel_sdk",
       ]
       foreach(snapshot, _flutter_sdk_snapshots) {
         public_deps += [ ":copy_flutter_${snapshot[0]}_snapshot" ]
@@ -106,5 +108,39 @@ copy("dart2js_platform_files") {
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/{{source_file_part}}",
+  ]
+}
+
+
+prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
+  deps = [
+     "//third_party/dart:create_sdk",
+  ]
+
+  packages = "//third_party/dart/.packages"
+
+  script = "//third_party/dart/pkg/dev_compiler/tool/kernel_sdk.dart"
+
+  inputs = [
+    "//third_party/dart/pkg/dev_compiler/tool/kernel_sdk.dart",
+  ]
+
+  outputs = [
+    "$target_gen_dir/kernel/amd/dart_sdk.js",
+    "$target_gen_dir/kernel/amd/dart_sdk.js.map",
+    "$target_gen_dir/kernel/common/dart_sdk.js",
+    "$target_gen_dir/kernel/common/dart_sdk.js.map",
+    "$target_gen_dir/kernel/es6/dart_sdk.js",
+    "$target_gen_dir/kernel/es6/dart_sdk.js.map",
+    "$target_gen_dir/kernel/legacy/dart_sdk.js",
+    "$target_gen_dir/kernel/legacy/dart_sdk.js.map",
+  ]
+
+  libraries_path = rebase_path("$flutter_root/lib/snapshot/libraries.json")
+  output_path = rebase_path("$target_gen_dir/kernel/flutter_ddc_sdk.dill")
+
+  args = [
+    "--output=$output_path",
+    "--libraries=$libraries_path",
   ]
 }
