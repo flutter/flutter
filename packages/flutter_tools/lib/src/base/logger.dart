@@ -584,9 +584,6 @@ class SummaryStatus extends Status {
   }
 }
 
-const String _kBackspaceChar = '\b';
-const String _kClearChar = ' ';
-
 /// An [AnsiSpinner] is a simple animation that does nothing but implement a
 /// terminal spinner. When stopped or canceled, the animation erases itself.
 ///
@@ -598,6 +595,9 @@ class AnsiSpinner extends Status {
     VoidCallback onFinish,
     this.slowWarningCallback,
   }) : super(timeout: timeout, onFinish: onFinish);
+
+  final String _backspaceChar = '\b';
+  final String _clearChar = ' ';
 
   int ticks = 0;
   Timer timer;
@@ -614,8 +614,8 @@ class AnsiSpinner extends Status {
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
   int get _currentLength => _currentAnimationFrame.length + _slowWarning.length;
-  String get _backspace => _kBackspaceChar * (spinnerIndent + _currentLength);
-  String get _clear => _kClearChar *  (spinnerIndent + _currentLength);
+  String get _backspace => _backspaceChar * (spinnerIndent + _currentLength);
+  String get _clear => _clearChar *  (spinnerIndent + _currentLength);
 
   @protected
   int get spinnerIndent => 0;
@@ -637,9 +637,9 @@ class AnsiSpinner extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    stdout.write('$_backspace');
+    stdout.write(_backspace);
     ticks += 1;
-    stdout.write('${_kClearChar * spinnerIndent}$_currentAnimationFrame');
+    stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
     if (seemsSlow) {
       if (slowWarningCallback != null) {
         _slowWarning = ' ' + slowWarningCallback();
@@ -751,7 +751,7 @@ class AnsiStatus extends AnsiSpinner {
   }
 
   void _clearStatus() {
-    stdout.write('${_kBackspaceChar * _totalMessageLength}${_kClearChar * _totalMessageLength}${_kBackspaceChar * _totalMessageLength}');
+    stdout.write('${_backspaceChar * _totalMessageLength}${_clearChar * _totalMessageLength}${_backspaceChar * _totalMessageLength}');
   }
 
   @override
