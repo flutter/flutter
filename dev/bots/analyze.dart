@@ -473,7 +473,7 @@ Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
 }
 
-final RegExp _licensePattern = RegExp(r'''LICENSE file''');
+final RegExp _licensePattern = RegExp(r'''Copyright \d{4}''');
 
 Future<void> _verifyNoMissingLicense(String workingDirectory) async {
   final List<String> errors = <String>[];
@@ -482,13 +482,9 @@ Future<void> _verifyNoMissingLicense(String workingDirectory) async {
       .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
     final File file = entity;
     bool hasLicense = false;
-    for (String line in file.readAsLinesSync()) {
-      final Match match = _licensePattern.firstMatch(line);
-      if (match != null) {
-        hasLicense = true;
-        break;
-      }
-    }
+    final List<String> lines = file.readAsLinesSync();
+    if (lines.isNotEmpty)
+      hasLicense = _licensePattern.firstMatch(lines.first) != null;
     if (!hasLicense)
       errors.add(file.path);
   }
@@ -496,7 +492,7 @@ Future<void> _verifyNoMissingLicense(String workingDirectory) async {
   if (errors.isNotEmpty) {
     print('$redLine');
     final String s = errors.length == 1 ? '' : 's';
-    print('${bold}License headers cannot be found the following file$s.$reset\n');
+    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
     print(errors.join('\n'));
     print('$redLine\n');
     exit(1);
