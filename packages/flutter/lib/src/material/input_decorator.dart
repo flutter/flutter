@@ -819,10 +819,9 @@ class _RenderDecoration extends RenderBox {
     return baseline;
   }
 
-  // Returns a value used by performLayout to position all
-  // of the renderers. This method applies layout to all of the renderers
-  // except the container. For convenience, the container is laid out
-  // in performLayout().
+  // Returns a value used by performLayout to position all of the renderers.
+  // This method applies layout to all of the renderers except the container.
+  // For convenience, the container is laid out in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
@@ -856,12 +855,9 @@ class _RenderDecoration extends RenderBox {
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
     const double SUBTEXT_GAP = 8.0;
-    // TODO(justinmc): When to use decoration.floatingLabelHeight vs.
-    // label.size.height? Or always floating?
     final double labelHeight = label == null
       ? 0
       : decoration.floatingLabelHeight;
-    //print('justin label $labelHeight ${labelHeight - boxToBaseline[label]}');
     final double topHeight = decoration.border.isOutline
         ? math.max(labelHeight - boxToBaseline[label], 0)
         : labelHeight;
@@ -891,7 +887,8 @@ class _RenderDecoration extends RenderBox {
       boxToBaseline[hint],
     );
 
-    // The height of the visible input container box. What would be outlined.
+    // Calculate the amount that prefix/suffix affects height above and below
+    // the input.
     final double prefixHeight = prefix == null ? 0 : prefix.size.height;
     final double suffixHeight = suffix == null ? 0 : suffix.size.height;
     final double fixHeight = math.max(
@@ -908,6 +905,7 @@ class _RenderDecoration extends RenderBox {
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
 
+    // Calculate the height of the visible input container box. What would be outlined.
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -920,44 +918,27 @@ class _RenderDecoration extends RenderBox {
       + fixBelowInput
       + contentPadding.bottom,
     );
-    // Is containerHeight affected by bottom stuff? Only when overflowing?
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(contentHeight, maxContainerHeight);
-    //print('justin contentHeight $topHeight + ${contentPadding.top} + $fixAboveInput + $inputHeight + $fixBelowInput + ${contentPadding.bottom} or ${maxContainerHeight}');
 
     // Always position the prefix/suffix in the same place (baseline).
     final double overflow = math.max(0, contentHeight - maxContainerHeight);
     final double baselineAdjustment = fixAboveInput - overflow;
-    //print('justin overflow $overflow, btw $baselineAdjustment $contentHeight $fixAboveInput $inputHeight $fixBelowInput');
 
-    // TODO(justinmc): What exactly is outlineBaseline and how did the original
-    // calculation work? It seems like it's used as the inputBaseline when there
-    // is a border present. It doesn't seem to be the baseline for the text in
-    // the border.
-    //
-    // Inline text within an outline border is centered within the container
-    // less 2.0 dps at the top to account for the vertical space occupied
-    // by the floating label.
-    /*
-    final double outlineBaseline = aboveBaseline +
-      (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
-      */
-    /*
-    final double outlineBaseline = inputInternalBaseline +
-      (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
-      */
     // The baselines that will be used to draw the actual input text content.
     final double inputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment;
-    //print('justin inputBaseline ${contentPadding.top} + $topHeight + inputInternalBaseline + $baselineAdjustment');
-    //final double outlineBaseline = inputBaseline - 5;
+    // The text in the input when an outline border is present is centered
+    // within the container less 2.0 dps at the top to account for the vertical
+    // space occupied by the floating label.
     final double outlineBaseline = inputInternalBaseline +
       (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
 
+    // Find the positions of the text below the input when it exists.
     double subtextCounterBaseline = 0;
     double subtextHelperBaseline = 0;
     double subtextCounterHeight = 0;
@@ -981,16 +962,6 @@ class _RenderDecoration extends RenderBox {
       subtextHelperHeight,
     );
 
-    /*
-    print('''justin return
-      containerHeight: $containerHeight,
-      inputBaseline: $inputBaseline,
-      outlineBaseline: $outlineBaseline,
-      subtextBaseline: $subtextBaseline,
-      subtextHeight: $subtextHeight,
-      btw expnads $expands
-    ''');
-    */
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
@@ -1000,130 +971,6 @@ class _RenderDecoration extends RenderBox {
       subtextHeight: subtextHeight,
     );
   }
-
-  /*
-  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
-    final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
-    BoxConstraints boxConstraints = layoutConstraints.loosen();
-    double aboveBaseline = 0.0;
-    double belowBaseline = 0.0;
-    void layoutLineBox(RenderBox box) {
-      if (box == null)
-        return;
-      box.layout(boxConstraints, parentUsesSize: true);
-      final double baseline = box.getDistanceToBaseline(textBaseline);
-      assert(baseline != null && baseline >= 0.0);
-      boxToBaseline[box] = baseline;
-      aboveBaseline = math.max(baseline, aboveBaseline);
-      belowBaseline = math.max(box.size.height - baseline, belowBaseline);
-    }
-    layoutLineBox(prefix);
-    layoutLineBox(suffix);
-
-    if (icon != null)
-      icon.layout(boxConstraints, parentUsesSize: true);
-    if (prefixIcon != null)
-      prefixIcon.layout(boxConstraints, parentUsesSize: true);
-    if (suffixIcon != null)
-      suffixIcon.layout(boxConstraints, parentUsesSize: true);
-
-    final double inputWidth = math.max(0.0, constraints.maxWidth - (
-      _boxSize(icon).width
-      + contentPadding.left
-      + _boxSize(prefixIcon).width
-      + _boxSize(prefix).width
-      + _boxSize(suffix).width
-      + _boxSize(suffixIcon).width
-      + contentPadding.right));
-
-    boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
-    if (label != null) {
-      if (decoration.alignLabelWithHint) {
-        // The label is aligned with the hint, at the baseline
-        layoutLineBox(label);
-      } else {
-        // The label is centered, not baseline aligned
-        label.layout(boxConstraints, parentUsesSize: true);
-      }
-    }
-
-    boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
-    layoutLineBox(hint);
-    layoutLineBox(input);
-
-    double inputBaseline = contentPadding.top + aboveBaseline;
-    double containerHeight = contentPadding.top
-      + aboveBaseline
-      + belowBaseline
-      + contentPadding.bottom;
-    print('justin old containerHeight = ${contentPadding.top} + $aboveBaseline + $belowBaseline + ${contentPadding.bottom}');
-
-    if (label != null) {
-      // floatingLabelHeight includes the vertical gap between the inline
-      // elements and the floating label.
-      containerHeight += decoration.floatingLabelHeight;
-      inputBaseline += decoration.floatingLabelHeight;
-    }
-    print('justin old inputB: ${contentPadding.top} + $aboveBaseline maybe+ ${decoration.floatingLabelHeight} = $inputBaseline');
-
-    //print('justin old maybe expand containerheight for icon height $containerHeight ${_boxSize(prefixIcon).height} ${_boxSize(suffixIcon).height} ${prefixIcon.size.height}');
-    containerHeight = math.max(
-      containerHeight,
-      math.max(
-        _boxSize(suffixIcon).height,
-        _boxSize(prefixIcon).height));
-
-    // Inline text within an outline border is centered within the container
-    // less 2.0 dps at the top to account for the vertical space occupied
-    // by the floating label.
-    final double outlineBaseline = aboveBaseline +
-      (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
-    //print('justin old outlinebaseline $aboveBaseline + ($containerHeight - (2.0 + $aboveBaseline + $belowBaseline)) / 2.0');
-
-    double subtextBaseline = 0.0;
-    double subtextHeight = 0.0;
-    if (helperError != null || counter != null) {
-      boxConstraints = layoutConstraints.loosen();
-      aboveBaseline = 0.0;
-      belowBaseline = 0.0;
-      layoutLineBox(counter);
-
-      // The helper or error text can occupy the full width less the space
-      // occupied by the icon and counter.
-      boxConstraints = boxConstraints.copyWith(
-        maxWidth: math.max(0.0, boxConstraints.maxWidth
-          - _boxSize(icon).width
-          - _boxSize(counter).width
-          - contentPadding.horizontal,
-        ),
-      );
-      layoutLineBox(helperError);
-
-      if (aboveBaseline + belowBaseline > 0.0) {
-        const double subtextGap = 8.0;
-        subtextBaseline = containerHeight + subtextGap + aboveBaseline;
-        subtextHeight = subtextGap + aboveBaseline + belowBaseline;
-      }
-    }
-
-    print('''justin return old
-      containerHeight: $containerHeight,
-      inputBaseline: $inputBaseline,
-      outlineBaseline: $outlineBaseline,
-      subtextBaseline: $subtextBaseline,
-      subtextHeight: $subtextHeight,
-    ''');
-
-    return _RenderDecorationLayout(
-      boxToBaseline: boxToBaseline,
-      containerHeight: containerHeight,
-      inputBaseline: inputBaseline,
-      outlineBaseline: outlineBaseline,
-      subtextBaseline: subtextBaseline,
-      subtextHeight: subtextHeight,
-    );
-  }
-  */
 
   @override
   double computeMinIntrinsicWidth(double height) {
