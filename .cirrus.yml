@@ -179,26 +179,28 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
-  install_cocoapods_script:
-    - sudo gem install cocoapods
-  git_fetch_script:
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
-  artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
-  setup_script:
-    - bin/flutter config --no-analytics
-    - bin/flutter update-packages
-  test_all_script: |
-    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+  check_date_script:
+    - date
+  # install_cocoapods_script:
+  #   - sudo gem install cocoapods
+  # git_fetch_script:
+  #   - git fetch origin
+  #   - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  # pub_cache:
+  #   folder: $HOME/.pub-cache
+  #   fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  # flutter_pkg_cache:
+  #   folder: bin/cache/pkg
+  #   fingerprint_script: echo $OS; cat bin/internal/engine.version
+  # artifacts_cache:
+  #   folder: bin/cache/artifacts
+  #   fingerprint_script: echo $OS; cat bin/internal/engine.version
+  # setup_script:
+  #   - bin/flutter config --no-analytics
+  #   - bin/flutter update-packages
+  # test_all_script: |
+  #   ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+  #   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
     - name: tests-macos
       env:
