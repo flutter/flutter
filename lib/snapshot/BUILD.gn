@@ -94,6 +94,14 @@ template("bin_to_assembly") {
       "--target_os",
       current_os,
     ]
+    if (defined(invoker.size_symbol)) {
+      args += [
+        "--size_symbol_name",
+        invoker.size_symbol,
+        "--target_arch",
+        current_cpu,
+      ]
+    }
     if (invoker.executable) {
       args += [ "--executable" ]
     }
@@ -201,17 +209,29 @@ bin_to_linkable("isolate_snapshot_instructions_linkable") {
   executable = true
 }
 
+bin_to_linkable("platform_strong_dill_linkable") {
+  deps = [
+    ":strong_platform",
+  ]
+  input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
+  symbol = "kPlatformStrongDill"
+  size_symbol = "kPlatformStrongDillSize"
+  executable = false
+}
+
 source_set("snapshot") {
   deps = [
     ":isolate_snapshot_data_linkable",
     ":isolate_snapshot_instructions_linkable",
     ":vm_snapshot_data_linkable",
     ":vm_snapshot_instructions_linkable",
+    ":platform_strong_dill_linkable",
   ]
   sources = get_target_outputs(":isolate_snapshot_data_linkable") +
     get_target_outputs(":isolate_snapshot_instructions_linkable") +
     get_target_outputs(":vm_snapshot_data_linkable") +
-    get_target_outputs(":vm_snapshot_instructions_linkable")
+    get_target_outputs(":vm_snapshot_instructions_linkable") +
+    get_target_outputs(":platform_strong_dill_linkable")
 }
 
 compile_platform("non_strong_platform") {

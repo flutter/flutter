@@ -71,6 +71,9 @@ shared_library("flutter_shell_native") {
   } else {
     deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
   }
+  if (flutter_runtime_mode == "debug") {
+    deps += [ "$flutter_root/lib/snapshot" ]
+  }
 
   public_configs = [ "$flutter_root:config" ]
 

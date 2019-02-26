@@ -13,6 +13,14 @@
 #define FLUTTER_EXPORT __attribute__((visibility("default")))
 #endif  // OS_WIN
 
+extern "C" {
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+// Used for debugging dart:* sources.
+extern const uint8_t kPlatformStrongDill[];
+extern const intptr_t kPlatformStrongDillSize;
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+}
+
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #include <type_traits>
@@ -286,6 +294,11 @@ void PopulateSnapshotMappingCallbacks(const FlutterProjectArgs* args,
                                 args->isolate_snapshot_instructions_size);
     }
   }
+
+#if !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
+  settings.dart_library_sources_kernel =
+      make_mapping_callback(kPlatformStrongDill, kPlatformStrongDillSize);
+#endif  // !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 }
 
 FlutterEngineResult FlutterEngineRun(size_t version,
