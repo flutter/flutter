@@ -982,6 +982,7 @@ void main() {
       Widget counter,
       String helperText,
       String labelText,
+      Widget prefix,
     }) {
       return boilerplate(
         child: Container(
@@ -993,6 +994,7 @@ void main() {
               counter: counter,
               helperText: helperText,
               labelText: labelText,
+              prefix: prefix,
             ),
           ),
         ),
@@ -1058,6 +1060,26 @@ void main() {
     ));
     expect(findEditableText(), equals(inputBox));
     expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE - LABEL_SPACE);
+
+    // When a prefix or suffix is present in an input that's full of content,
+    // it is ignored and allowed to expand beyond the top of the input. Other
+    // top and bottom decoration is still respected.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: COUNTER_HEIGHT),
+      labelText: 'I am labelText',
+      prefix: Container(
+        width: 10,
+        height: 60,
+      ),
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(
+      inputBox.size.height,
+      HEIGHT
+      - PADDING
+      - LABEL_SPACE
+      - COUNTER_SPACE,
+    );
   });
 
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {

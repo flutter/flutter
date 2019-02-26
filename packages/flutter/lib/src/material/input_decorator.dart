@@ -920,13 +920,15 @@ class _RenderDecoration extends RenderBox {
       + fixBelowInput
       + contentPadding.bottom,
     );
+    // Is containerHeight affected by bottom stuff? Only when overflowing?
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
-      ? boxConstraints.maxHeight - bottomHeight
-      : math.min(contentHeight, boxConstraints.maxHeight);
-    //print('justin contentHeight $topHeight + ${contentPadding.top} + $fixAboveInput + $inputHeight + $fixBelowInput + ${contentPadding.bottom} or ${boxConstraints.maxHeight}');
+      ? maxContainerHeight
+      : math.min(contentHeight, maxContainerHeight);
+    //print('justin contentHeight $topHeight + ${contentPadding.top} + $fixAboveInput + $inputHeight + $fixBelowInput + ${contentPadding.bottom} or ${maxContainerHeight}');
 
     // Always position the prefix/suffix in the same place (baseline).
-    final double overflow = math.max(0, contentHeight - boxConstraints.maxHeight);
+    final double overflow = math.max(0, contentHeight - maxContainerHeight);
     final double baselineAdjustment = fixAboveInput - overflow;
     //print('justin overflow $overflow, btw $baselineAdjustment $contentHeight $fixAboveInput $inputHeight $fixBelowInput');
 
