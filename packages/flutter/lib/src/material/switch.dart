@@ -73,7 +73,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.material,
        assert(dragStartBehavior != null),
        super(key: key);
@@ -97,7 +97,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.adaptive,
        super(key: key);
 

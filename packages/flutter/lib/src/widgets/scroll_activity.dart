@@ -312,7 +312,6 @@ class ScrollDragController implements Drag {
       // May be null for proxied drags like via accessibility.
       return offset;
     }
-
     if (offset == 0.0) {
       if (motionStartDistanceThreshold != null &&
           _offsetSinceLastStop == null &&
