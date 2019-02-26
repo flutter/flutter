@@ -12,6 +12,7 @@ import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterRenderer.RenderSurface;
 import io.flutter.plugin.common.*;
 import java.nio.ByteBuffer;
@@ -166,6 +167,16 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     private final class RenderSurfaceImpl implements RenderSurface {
+        @Override
+        public void attachToRenderer(@NonNull FlutterRenderer renderer) {
+            // Not relevant for v1 embedding.
+        }
+
+        @Override
+        public void detachFromRenderer() {
+            // Not relevant for v1 embedding.
+        }
+
         // Called by native to update the semantics/accessibility tree.
         public void updateSemantics(ByteBuffer buffer, String[] strings) {
             if (mFlutterView == null) {
