@@ -196,9 +196,9 @@ task:
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
-  setup_script:
-    - bin/flutter config --no-analytics
-    - bin/flutter update-packages
+  # setup_script:
+  #   - bin/flutter config --no-analytics
+  #   - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
