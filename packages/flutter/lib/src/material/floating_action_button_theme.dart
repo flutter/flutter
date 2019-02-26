@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -5,73 +7,21 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 /// TODO(clocksmith): dartdoc
-class FloatingActionButtonTheme extends InheritedWidget {
-  /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
-  FloatingActionButtonTheme({
-    Key key,
-    @required this.data,
-    @required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
-
-  /// Specifies the color, shape, and text style values for descendant floating
-  /// action button widgets.
-  final FloatingActionButtonThemeData data;
-
-  /// Returns the data from the closest [FloatingActionButtonTheme] instance
-  /// that encloses the given context.
-  ///
-  /// Defaults to the ambient [ThemeData.floatingActionButtonTheme] if there
-  /// is no [FloatingActionButtonTheme] in the given build context.
-  ///
-  /// {@tool sample}
-  ///
-  /// ```dart
-  /// class Spaceship extends StatelessWidget {
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return FloatingActionButtonTheme(
-  ///       data: FloatingActionButtonTheme.of(context).copyWith(backgroundColor: Colors.red),
-  ///       child: FloatingActionButton(
-  ///         child: const Text('Launch'),
-  ///         onPressed: () { print('We have liftoff!'); },
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [FloatingActionButtonThemeData], which describes the actual
-  ///  configuration of a floating action button theme.
-  static FloatingActionButtonThemeData of(BuildContext context) {
-    final FloatingActionButtonTheme inheritedTheme = context.inheritFromWidgetOfExactType(FloatingActionButtonTheme);
-    return inheritedTheme?.data ?? Theme.of(context).chipTheme;
-  }
-
-  @override
-  bool updateShouldNotify(FloatingActionButtonTheme oldWidget) => data != oldWidget.data;
-}
-
-/// TODO(clocksmith): dartdoc
 class FloatingActionButtonThemeData extends Diagnosticable {
   /// TODO(clocksmith): dartdoc
   const FloatingActionButtonThemeData({
-    @required this.backgroundColor,
-    @required this.foregroundColor,
-  })  : assert(backgroundColor != null),
-        assert(foregroundColor != null);
+    this.backgroundColor,
+    this.elevation,
+    this.foregroundColor,
+    this.highlightElevation,
+    this.shape,
+  });
 
+  /// TODO(clocksmith): dartdoc
   factory FloatingActionButtonThemeData.fromDefaults({
-    Brightness brightness,
+//    Brightness brightness,
     Color primaryColor,
     Color onPrimaryColor,
-    @required TextStyle textStyle,
   }) {
     return FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
@@ -81,25 +31,38 @@ class FloatingActionButtonThemeData extends Diagnosticable {
 
   /// Color to be used for the unselected, enabled floating action buttons's
   /// background.
-  ///
-  /// The default is the primary color.
   final Color backgroundColor;
+
+  /// The z-coordinate to be used for the unselected, enabled floating action \
+  /// buttons's elevation foreground. .
+  final double elevation;
 
   /// Color to be used for the unselected, enabled floating action buttons's
   /// foreground.
-  ///
-  /// The default is the onPrimary color.
   final Color foregroundColor;
+
+  /// The z-coordinate to be used for the selected, enabled floating action
+  /// buttons's elevation foreground. .
+  final double highlightElevation;
+
+  /// The shape to be used for the floating action button's [Material].
+  final ShapeBorder shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
     Color backgroundColor,
+    double elevation,
     Color foregroundColor,
+    double highlightElevation,
+    ShapeBorder shape,
   }) {
     return FloatingActionButtonThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      elevation: elevation ?? this.elevation,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      highlightElevation: highlightElevation ?? this.highlightElevation,
+      shape: shape ?? this.shape,
     );
   }
 
@@ -109,14 +72,20 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       return null;
     return FloatingActionButtonThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
+      highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
   @override
   int get hashCode {
     return hashValues(
       backgroundColor,
+      elevation,
       foregroundColor,
+      highlightElevation,
+      shape,
     );
   }
 
@@ -130,7 +99,10 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     }
     final FloatingActionButtonThemeData otherData = other;
     return otherData.backgroundColor == backgroundColor
-        && otherData.foregroundColor == foregroundColor;
+        && otherData.elevation == elevation
+        && otherData.foregroundColor == foregroundColor
+        && otherData.highlightElevation == highlightElevation
+        && otherData.shape == shape;
   }
 
   @override
@@ -138,12 +110,14 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     final ThemeData defaultTheme = ThemeData.fallback();
     final FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData.fromDefaults(
-      primaryColor: defaultTheme.primaryColor,
+//      brightness: defaultTheme.brightness,
       onPrimaryColor: Colors.white, // This is wrong
-      brightness: defaultTheme.brightness,
-      textStyle: defaultTheme.textTheme.body2,
+      primaryColor: defaultTheme.primaryColor,
     );
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
+    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
   }
 }
