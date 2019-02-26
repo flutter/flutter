@@ -11,6 +11,7 @@ import 'package:platform/platform.dart';
 import 'configuration.dart';
 import 'snippets.dart';
 
+const String _kSerialOption = 'serial';
 const String _kElementOption = 'element';
 const String _kHelpOption = 'help';
 const String _kInputOption = 'input';
@@ -75,6 +76,11 @@ void main(List<String> argList) {
     defaultsTo: environment['ELEMENT_NAME'],
     help: 'The name of the element that this snippet belongs to.',
   );
+  parser.addOption(
+    _kSerialOption,
+    defaultsTo: environment['INVOCATION_INDEX'],
+    help: 'A unique serial number for this snippet tool invocation.',
+  );
   parser.addFlag(
     _kHelpOption,
     defaultsTo: false,
@@ -117,6 +123,7 @@ void main(List<String> argList) {
   final String packageName = args[_kPackageOption] != null && args[_kPackageOption].isNotEmpty ? args[_kPackageOption] : null;
   final String libraryName = args[_kLibraryOption] != null && args[_kLibraryOption].isNotEmpty ? args[_kLibraryOption] : null;
   final String elementName = args[_kElementOption] != null && args[_kElementOption].isNotEmpty ? args[_kElementOption] : null;
+  final String serial = args[_kSerialOption] != null && args[_kSerialOption].isNotEmpty ? args[_kSerialOption] : null;
   final List<String> id = <String>[];
   if (args[_kOutputOption] != null) {
     id.add(path.basename(path.basenameWithoutExtension(args[_kOutputOption])));
@@ -130,10 +137,13 @@ void main(List<String> argList) {
     if (elementName != null) {
       id.add(elementName);
     }
+    if (serial != null) {
+      id.add(serial);
+    }
     if (id.isEmpty) {
       errorExit('Unable to determine ID. At least one of --$_kPackageOption, '
-          '--$_kLibraryOption, --$_kElementOption, or the environment variables '
-          'PACKAGE_NAME, LIBRARY_NAME, or ELEMENT_NAME must be non-empty.');
+          '--$_kLibraryOption, --$_kElementOption, -$_kSerialOption, or the environment variables '
+          'PACKAGE_NAME, LIBRARY_NAME, ELEMENT_NAME, or INVOCATION_INDEX must be non-empty.');
     }
   }
 
@@ -149,6 +159,7 @@ void main(List<String> argList) {
       'sourceLine': environment['SOURCE_LINE'] != null
           ? int.tryParse(environment['SOURCE_LINE'])
           : null,
+      'serial': serial,
       'package': packageName,
       'library': libraryName,
       'element': elementName,

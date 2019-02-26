@@ -59,13 +59,14 @@ class ReorderableListView extends StatefulWidget {
     @required this.onReorder,
     this.scrollDirection = Axis.vertical,
     this.padding,
-  }): assert(scrollDirection != null),
-      assert(onReorder != null),
-      assert(children != null),
-      assert(
-        children.every((Widget w) => w.key != null),
-        'All children of this widget must have a key.',
-      );
+    this.reverse = false,
+  }) : assert(scrollDirection != null),
+       assert(onReorder != null),
+       assert(children != null),
+       assert(
+         children.every((Widget w) => w.key != null),
+         'All children of this widget must have a key.',
+       );
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -82,6 +83,20 @@ class ReorderableListView extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
+
+  /// Whether the scroll view scrolls in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from
+  /// left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
+  /// scrolls from top to bottom when [reverse] is false and from bottom to top
+  /// when [reverse] is true.
+  ///
+  /// Defaults to false.
+  final bool reverse;
 
   /// Called when a list child is dropped into a new position to shuffle the
   /// underlying list.
@@ -122,6 +137,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
           padding: widget.padding,
+          reverse: widget.reverse,
         );
       },
     );
@@ -146,6 +162,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.scrollDirection,
     @required this.padding,
     @required this.onReorder,
+    @required this.reverse,
   });
 
   final Widget header;
@@ -153,6 +170,7 @@ class _ReorderableListContent extends StatefulWidget {
   final Axis scrollDirection;
   final EdgeInsets padding;
   final ReorderCallback onReorder;
+  final bool reverse;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -310,7 +328,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
-  Widget _buildContainerForScrollDirection({List<Widget> children}) {
+  Widget _buildContainerForScrollDirection({ List<Widget> children }) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         return Row(children: children);
@@ -544,16 +562,25 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
             );
             break;
         }
-        wrappedChildren.add(_wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
+        if (widget.reverse) {
+          wrappedChildren.insert(0, _wrap(
+            finalDropArea,
+            widget.children.length,
+            constraints),
+          );
+        } else {
+          wrappedChildren.add(_wrap(
+            finalDropArea,
+            widget.children.length,
+            constraints),
+          );
+        }
         return SingleChildScrollView(
           scrollDirection: widget.scrollDirection,
           child: _buildContainerForScrollDirection(children: wrappedChildren),
           padding: widget.padding,
           controller: _scrollController,
+          reverse: widget.reverse,
         );
     });
   }

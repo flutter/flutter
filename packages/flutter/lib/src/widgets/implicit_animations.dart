@@ -769,7 +769,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -920,7 +920,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///

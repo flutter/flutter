@@ -1,7 +1,7 @@
-# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
-[![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
+# Flutter ![Flutter logo][]
 
+[![Gitter Channel][]][Gitter badge]
+[![Build Status - Cirrus][]][Build status]
 
 # Build beautiful native apps in record time
 
@@ -42,7 +42,7 @@ Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">](https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation)
-[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">](https://github.com/flutter/posse_gallery)
+<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
 
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter/)
@@ -144,4 +144,9 @@ Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our
 
 To join the team working on Flutter, see our [contributor guide](CONTRIBUTING.md).
 
-[flutter.io]: https://flutter.io/
+[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
+[Build status]: https://cirrus-ci.com/github/flutter/flutter/master
+[flutter.io]: https://flutter.io
+[Flutter logo]: https://github.com/dart-lang/site-shared/blob/master/src/_assets/image/flutter/icon/64.png?raw=1
+[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
+[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge

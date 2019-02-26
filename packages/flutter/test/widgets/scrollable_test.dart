@@ -30,8 +30,7 @@ double getScrollOffset(WidgetTester tester) {
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset;
-  // Access for test only.
-  return position.activity.velocity; // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+  return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
@@ -66,7 +65,7 @@ void main() {
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.iOS);
-    await tester.drag(find.byType(Viewport), const Offset(0.0, 200.0));
+    await tester.drag(find.byType(Viewport), const Offset(0.0, 200.0), touchSlopY: 0.0);
     expect(getScrollOffset(tester), -200.0);
     await tester.pump(); // trigger ballistic
     await tester.pump(const Duration(milliseconds: 10));

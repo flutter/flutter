@@ -22,7 +22,8 @@ class UnderlineTabIndicator extends Decoration {
   const UnderlineTabIndicator({
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
-  }) : assert(borderSide != null), assert(insets != null);
+  }) : assert(borderSide != null),
+       assert(insets != null);
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
@@ -57,14 +58,15 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
+  _UnderlinePainter createBoxPainter([ VoidCallback onChanged ]) {
     return _UnderlinePainter(this, onChanged);
   }
 }
 
 class _UnderlinePainter extends BoxPainter {
   _UnderlinePainter(this.decoration, VoidCallback onChanged)
-    : assert(decoration != null), super(onChanged);
+    : assert(decoration != null),
+      super(onChanged);
 
   final UnderlineTabIndicator decoration;
 

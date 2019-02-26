@@ -73,6 +73,10 @@ class MaterialButton extends StatelessWidget {
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
+  ///
+  /// If [onPressed] changes from null to non-null while a gesture is ongoing,
+  /// this can fire during the build phase (in which case calling
+  /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -255,6 +259,7 @@ class MaterialButton extends StatelessWidget {
 
     return RawMaterialButton(
       onPressed: onPressed,
+      onHighlightChanged: onHighlightChanged,
       fillColor: color,
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       highlightColor: highlightColor ?? theme.highlightColor,

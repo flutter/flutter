@@ -14,8 +14,8 @@ import '../src/common.dart';
 /// Creates a temporary directory but resolves any symlinks to return the real
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
-Directory createResolvedTempDirectorySync() {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
+Directory createResolvedTempDirectorySync(String prefix) {
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
   return fs.directory(tempDir.resolveSymbolicLinksSync());
 }
 

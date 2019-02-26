@@ -242,6 +242,12 @@ class InkResponse extends StatefulWidget {
   /// The value passed to the callback is true if this part of the material has
   /// become highlighted and false if this part of the material has stopped
   /// being highlighted.
+  ///
+  /// If all of [onTap], [onDoubleTap], and [onLongPress] become null while a
+  /// gesture is ongoing, then [onTapCancel] will be fired and
+  /// [onHighlightChanged] will be fired with the value false _during the
+  /// build_. This means, for instance, that in that scenario [State.setState]
+  /// cannot be called.
   final ValueChanged<bool> onHighlightChanged;
 
   /// Whether this ink response should be clipped its bounds.

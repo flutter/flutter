@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
 
@@ -30,6 +31,25 @@ enum Orientation {
 /// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
 /// exception, unless the `nullOk` argument is set to true, in which case it
 /// returns null.
+///
+/// MediaQueryData includes two [EdgeInsets] values:
+/// [padding] and [viewInsets]. These
+/// values reflect the configuration of the device and are used by
+/// many top level widgets, like [SafeArea] and the Cupertino and
+/// Material scaffold widgets. The padding value defines areas that
+/// might not be completely visible, like the display "notch" on the
+/// iPhone X. The viewInsets value defines areas that aren't visible at
+/// all, typically because they're obscured by the device's keyboard.
+///
+/// The viewInsets and padding values are independent, they're both
+/// measured from the edges of the MediaQuery widget's bounds. The
+/// bounds of the top level MediaQuery created by [WidgetsApp] are the
+/// same as the window that contains the app.
+///
+/// Widgets whose layouts consume space defined by [viewInsets] or
+/// [padding] shoud enclose their children in secondary MediaQuery
+/// widgets that reduce those properties by the same amount.
+/// The [removePadding] and [removeInsets] methods are useful for this.
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -40,6 +60,7 @@ class MediaQueryData {
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
     this.textScaleFactor = 1.0,
+    this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
@@ -59,6 +80,7 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
+      platformBrightness = window.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
@@ -67,7 +89,7 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
-  /// The size of the media in logical pixel (e.g, the size of the screen).
+  /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
   /// Logical pixels are roughly the same visual size across devices. Physical
   /// pixels are the size of the actual hardware pixels on the device. The
@@ -91,17 +113,34 @@ class MediaQueryData {
   ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
-  /// The number of physical pixels on each side of the display rectangle into
-  /// which the application can render, but over which the operating system
-  /// will likely place system UI, such as the keyboard, that fully obscures
-  /// any content.
+  /// The current brightness mode of the host platform.
+  ///
+  /// For example, starting in Android Pie, battery saver mode asks all apps to
+  /// render in a "dark mode".
+  ///
+  /// Not all platforms necessarily support a concept of brightness mode. Those
+  /// platforms will report [Brightness.light] in this property.
+  final Brightness platformBrightness;
+
+  /// The parts of the display that are completely obscured by system UI,
+  /// typically by the device's keyboard.
+  ///
+  /// When a mobile device's keyboard is visible `viewInsets.bottom`
+  /// corresponds to the top of the keyboard.
+  ///
+  /// This value is independent of the [padding]: both values are
+  /// measured from the edges of the [MediaQuery] widget's bounds. The
+  /// bounds of the top level MediaQuery created by [WidgetsApp] are the
+  /// same as the window (often the mobile device screen) that contains the app.
+  ///
+  /// See also:
+  ///
+  /// * [MediaQueryData], which provides some additional detail about this
+  ///   property and how it differs from [padding].
   final EdgeInsets viewInsets;
 
-  /// The number of physical pixels on each side of the display rectangle into
-  /// which the application can render, but which may be partially obscured by
-  /// system UI (such as the system notification area), or or physical
-  /// intrusions in the display (e.g. overscan regions on television screens or
-  /// phone sensor housings).
+  /// The parts of the display that are partially obscured by system UI,
+  /// typically by the hardware display "notches" or the system status bar.
   ///
   /// If you consumed this padding (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
@@ -111,6 +150,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
+  ///  * [MediaQueryData], which provides some additional detail about this
+  ///    property and how it differs from [viewInsets].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
@@ -175,6 +216,7 @@ class MediaQueryData {
     Size size,
     double devicePixelRatio,
     double textScaleFactor,
+    Brightness platformBrightness,
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
@@ -187,6 +229,7 @@ class MediaQueryData {
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      platformBrightness: platformBrightness ?? this.platformBrightness,
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
@@ -223,6 +266,7 @@ class MediaQueryData {
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
+      platformBrightness: platformBrightness,
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
@@ -262,6 +306,7 @@ class MediaQueryData {
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
+      platformBrightness: platformBrightness,
       padding: padding,
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -285,6 +330,7 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
+        && typedOther.platformBrightness == platformBrightness
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
@@ -300,6 +346,7 @@ class MediaQueryData {
       size,
       devicePixelRatio,
       textScaleFactor,
+      platformBrightness,
       padding,
       viewInsets,
       alwaysUse24HourFormat,
@@ -316,6 +363,7 @@ class MediaQueryData {
              'size: $size, '
              'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
              'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
+             'platformBrightness: $platformBrightness, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
@@ -492,6 +540,15 @@ class MediaQuery extends InheritedWidget {
   /// no such ancestor exists.
   static double textScaleFactorOf(BuildContext context) {
     return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+  }
+
+  /// Returns platformBrightness for the nearest MediaQuery ancestor or
+  /// [Brightness.light], if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// any property of the ancestor [MediaQuery] changes.
+  static Brightness platformBrightnessOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery

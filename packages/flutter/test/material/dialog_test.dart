@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
       theme: theme,
       home: Material(
@@ -475,5 +475,136 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Dismissable.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final List<int> dismissedItems = <int>[];
+
+    // Dismiss is confirmed IFF confirmDismiss() returns true.
+    Future<bool> confirmDismiss (DismissDirection dismissDirection) {
+      return showDialog<bool>(
+        context: _scaffoldKey.currentContext,
+        barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
+        builder: (BuildContext context) {
+          return AlertDialog(
+            actions: <Widget>[
+              FlatButton(
+                child: const Text('TRUE'),
+                onPressed: () {
+                  Navigator.pop(context, true); // showDialog() returns true
+                },
+              ),
+              FlatButton(
+                child: const Text('FALSE'),
+                onPressed: () {
+                  Navigator.pop(context, false); // showDialog() returns false
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    Widget buildDismissibleItem(int item, StateSetter setState) {
+      return Dismissible(
+        key: ValueKey<int>(item),
+        confirmDismiss: confirmDismiss,
+        onDismissed: (DismissDirection direction) {
+          setState(() {
+            expect(dismissedItems.contains(item), isFalse);
+            dismissedItems.add(item);
+          });
+        },
+        child: SizedBox(
+          height: 100.0,
+          child: Text(item.toString()),
+        ),
+      );
+    }
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              key: _scaffoldKey,
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  itemExtent: 100.0,
+                  children: <int>[0, 1, 2, 3, 4]
+                    .where((int i) => !dismissedItems.contains(i))
+                    .map<Widget>((int item) => buildDismissibleItem(item, setState)).toList(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    Future<void> dismissItem(WidgetTester tester, int item) async {
+      await tester.fling(find.text(item.toString()), const Offset(300.0, 0.0), 1000.0); // fling to the right
+      await tester.pump(); // start the slide
+      await tester.pump(const Duration(seconds: 1)); // finish the slide and start shrinking...
+      await tester.pump(); // first frame of shrinking animation
+      await tester.pump(const Duration(seconds: 1)); // finish the shrinking and call the callback...
+      await tester.pump(); // rebuild after the callback removes the entry
+    }
+
+    // Dismiss item 0 is confirmed via the AlertDialog
+    await tester.pumpWidget(buildFrame());
+    expect(dismissedItems, isEmpty);
+    await dismissItem(tester, 0); // Causes the AlertDialog to appear per confirmDismiss
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TRUE')); // AlertDialog action
+    await tester.pumpAndSettle();
+    expect(find.text('TRUE'), findsNothing); // Dialog was dismissed
+    expect(find.text('FALSE'), findsNothing);
+    expect(dismissedItems, <int>[0]);
+    expect(find.text('0'), findsNothing);
+
+    // Dismiss item 1 is not confirmed via the AlertDialog
+    await tester.pumpWidget(buildFrame());
+    expect(dismissedItems, <int>[0]);
+    await dismissItem(tester, 1); // Causes the AlertDialog to appear per confirmDismiss
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('FALSE')); // AlertDialog action
+    await tester.pumpAndSettle();
+    expect(find.text('TRUE'), findsNothing); // Dialog was dismissed
+    expect(find.text('FALSE'), findsNothing);
+    expect(dismissedItems, <int>[0]);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+
+    // Dismiss item 1 is not confirmed via the AlertDialog
+    await tester.pumpWidget(buildFrame());
+    expect(dismissedItems, <int>[0]);
+    await dismissItem(tester, 1); // Causes the AlertDialog to appear per confirmDismiss
+    await tester.pumpAndSettle();
+    expect(find.text('FALSE'), findsOneWidget);
+    expect(find.text('TRUE'), findsOneWidget);
+    await tester.tapAt(Offset.zero); // Tap outside of the AlertDialog
+    await tester.pumpAndSettle();
+    expect(dismissedItems, <int>[0]);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('TRUE'), findsNothing); // Dialog was dismissed
+    expect(find.text('FALSE'), findsNothing);
+
+    // Dismiss item 1 is confirmed via the AlertDialog
+    await tester.pumpWidget(buildFrame());
+    expect(dismissedItems, <int>[0]);
+    await dismissItem(tester, 1); // Causes the AlertDialog to appear per confirmDismiss
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TRUE')); // AlertDialog action
+    await tester.pumpAndSettle();
+    expect(find.text('TRUE'), findsNothing); // Dialog was dismissed
+    expect(find.text('FALSE'), findsNothing);
+    expect(dismissedItems, <int>[0, 1]);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
   });
 }

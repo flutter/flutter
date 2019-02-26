@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -24,8 +23,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -203,7 +204,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     } catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
-      print('Unable to locate flutter root: $error');
+      print(userMessages.runnerNoRoot(error));
     }
     return '.';
   }
@@ -261,12 +262,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column']);
         if (wrapColumn < 0) {
-          throwToolExit('Argument to --wrap-column must be a positive integer. '
-              'You supplied ${topLevelResults['wrap-column']}.');
+          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
         }
       } on FormatException {
-        throwToolExit('Unable to parse argument '
-            '--wrap-column=${topLevelResults['wrap-column']}. Must be a positive integer.');
+        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults['wrap-column']));
       }
     }
 
@@ -310,11 +309,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       addShutdownHook(() async {
         final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
         os.zip(tempDir, zipFile);
-        printStatus(
-          'Bug report written to ${zipFile.basename}.\n'
-          'Warning: this bug report contains local paths, device '
-          'identifiers, and log snippets.'
-        );
+        printStatus(userMessages.runnerBugReportFinished(zipFile.basename));
       }, ShutdownStage.POST_PROCESS_RECORDING);
       addShutdownHook(() => tempDir.delete(recursive: true), ShutdownStage.CLEANUP);
     }
@@ -324,7 +319,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (recordTo != null) {
       recordTo = recordTo.trim();
       if (recordTo.isEmpty)
-        throwToolExit('record-to location not specified');
+        throwToolExit(userMessages.runnerNoRecordTo);
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: getRecordingProcessManager(recordTo),
         FileSystem: getRecordingFileSystem(recordTo),
@@ -336,7 +331,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (replayFrom != null) {
       replayFrom = replayFrom.trim();
       if (replayFrom.isEmpty)
-        throwToolExit('replay-from location not specified');
+        throwToolExit(userMessages.runnerNoReplayFrom);
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: await getReplayProcessManager(replayFrom),
         FileSystem: getReplayFileSystem(replayFrom),
@@ -414,38 +409,49 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
-        if (engineUri != null) {
-          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
-          final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
-          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+        Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        // Skip if sky_engine is the self-contained one.
+        if (fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib') + fs.path.separator == engineUri?.path) {
+          engineUri = null;
+        }
+        // If sky_engine is specified and the engineSourcePath not set, try to determine the engineSourcePath by sky_engine setting.
+        // A typical engineUri looks like: file://flutter-engine-local-path/src/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/
+        if (engineUri?.path != null) {
+          engineSourcePath = fs.directory(engineUri.path)?.parent?.parent?.parent?.parent?.parent?.parent?.path;
+          if (engineSourcePath != null && (engineSourcePath == fs.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
             engineSourcePath = null;
+            throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
+              exitCode: 2);
+          }
         }
       } on FileSystemException {
         engineSourcePath = null;
       } on FormatException {
         engineSourcePath = null;
       }
-
-      engineSourcePath ??= _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
-
-      if (engineSourcePath == null) {
-        throwToolExit('Unable to detect local Flutter engine build directory.\n'
-          'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and '
-          'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or '
-          'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.',
-          exitCode: 2);
-      }
+      // If engineSourcePath is still not set, try to determine it by flutter root.
+      engineSourcePath ??= _tryEnginePath(fs.path.join(fs.directory(Cache.flutterRoot).parent.path, 'engine', 'src'));
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      throwToolExit('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
-        'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
-        'you have compiled the engine in that directory, which should produce an \'out\' directory',
+      throwToolExit(userMessages.runnerNoEngineBuildDirInPath(engineSourcePath),
         exitCode: 2);
     }
 
     return engineSourcePath;
+  }
+
+  String _getHostEngineBasename(String localEngineBasename) {
+    // Determine the host engine directory associated with the local engine:
+    // Strip '_sim_' since there are no host simulator builds.
+    String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
+    tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
+    // Strip suffix for various archs.
+    final List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
+    for (String suffix in suffixes) {
+      tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
+    }
+    return 'host_' + tmpBasename;
   }
 
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
@@ -453,20 +459,20 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (globalResults['local-engine'] != null) {
       localEngine = globalResults['local-engine'];
     } else {
-      throwToolExit('You must specify --local-engine if you are using a locally built engine.', exitCode: 2);
+      throwToolExit(userMessages.runnerLocalEngineRequired, exitCode: 2);
     }
 
     final String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
     if (!fs.isDirectorySync(engineBuildPath)) {
-      throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
+      throwToolExit(userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
     }
 
-    // Determine the host engine directory associated with the local engine:
-    // * strip '_sim_' since there are no host simulator builds.
-    // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    final String hostBasename = _getHostEngineBasename(basename);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
+    if (!fs.isDirectorySync(engineHostBuildPath)) {
+      throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+    }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
@@ -519,13 +525,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
         if (!_compareResolvedPaths(directory, Cache.flutterRoot)) {
-          printError(
-            'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
-            '  running Flutter  : ${Cache.flutterRoot}\n'
-            '  current directory: $directory\n'
-            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
-            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
-          );
+          printError(userMessages.runnerWrongFlutterInstance(Cache.flutterRoot, directory));
         }
 
         break;
@@ -548,28 +548,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
 
         if (!fs.isDirectorySync(flutterPath)) {
-          printError(
-            'Warning! This package referenced a Flutter repository via the .packages file that is '
-            'no longer available. The repository from which the \'flutter\' tool is currently '
-            'executing will be used instead.\n'
-            '  running Flutter tool: ${Cache.flutterRoot}\n'
-            '  previous reference  : $flutterPath\n'
-            'This can happen if you deleted or moved your copy of the Flutter repository, or '
-            'if it was on a volume that is no longer mounted or has been mounted at a '
-            'different location. Please check your system path to verify that you are running '
-            'the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
-          );
+          printError(userMessages.runnerRemovedFlutterRepo(Cache.flutterRoot, flutterPath));
         } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
-          printError(
-            'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
-            'repository than the one last used by this package. The repository from which the '
-            '\'flutter\' tool is currently executing will be used instead.\n'
-            '  running Flutter tool: ${Cache.flutterRoot}\n'
-            '  previous reference  : $flutterPath\n'
-            'This can happen when you have multiple copies of flutter installed. Please check '
-            'your system path to verify that you are running the expected version (run '
-            '\'flutter --version\' to see which flutter is on your path).\n'
-          );
+          printError(userMessages.runnerChangedFlutterRepo(Cache.flutterRoot, flutterPath));
         }
       }
     }

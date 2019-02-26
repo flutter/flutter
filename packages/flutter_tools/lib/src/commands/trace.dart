@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';

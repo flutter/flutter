@@ -58,7 +58,9 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
       ),
       initialRoute: '/login',
       onGenerateRoute: _getRoute,
-      theme: _kShrineTheme,
+      // Copy the platform from the main theme in order to support platform
+      // toggling from the Gallery options menu.
+      theme: _kShrineTheme.copyWith(platform: Theme.of(context).platform),
     );
   }
 }

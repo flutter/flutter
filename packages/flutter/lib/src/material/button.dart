@@ -68,6 +68,10 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
+  ///
+  /// If [onPressed] changes from null to non-null while a gesture is ongoing,
+  /// this can fire during the build phase (in which case calling
+  /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -109,6 +113,8 @@ class RawMaterialButton extends StatefulWidget {
   /// is not [enabled].
   ///
   /// Defaults to 0.0. The value is always non-negative.
+  ///
+  /// See also:
   ///
   ///  * [elevation], the default elevation.
   ///  * [highlightElevation], the elevation when the button is pressed.
@@ -161,11 +167,23 @@ class RawMaterialButton extends StatefulWidget {
 class _RawMaterialButtonState extends State<RawMaterialButton> {
   bool _highlight = false;
   void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
+    if (_highlight != value) {
+      setState(() {
+        _highlight = value;
+        if (widget.onHighlightChanged != null)
+          widget.onHighlightChanged(value);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(RawMaterialButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_highlight && !widget.enabled) {
+      _highlight = false;
       if (widget.onHighlightChanged != null)
-        widget.onHighlightChanged(value);
-    });
+        widget.onHighlightChanged(false);
+    }
   }
 
   @override
@@ -306,7 +324,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return super.hitTest(result, position: position) ||
       child.hitTest(result, position: child.size.center(Offset.zero));
   }

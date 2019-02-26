@@ -761,4 +761,77 @@ class CupertinoIcons {
   ///
   ///  * [tag_solid], similar but with only one tag.
   static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in bus.
+  static const IconData bus = IconData(0xf36d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in car.
+  ///
+  /// See also:
+  ///
+  ///  * [car_detailed], similar, but a more detailed and realistic representation.
+  static const IconData car = IconData(0xf36f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in detailed, realistic car.
+  ///
+  /// See also:
+  ///
+  ///  * [car], similar, but a more simple representation.
+  static const IconData car_detailed = IconData(0xf2c1, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window divided in half and two headlights.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_two], similar, but with a full, undivided window and a single, centered headlight.
+  static const IconData train_style_one = IconData(0xf3af, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window and a single, centered headlight.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_one], similar, but with a with a window divided in half and two headlights.
+  static const IconData train_style_two = IconData(0xf3b4, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw_solid], similar, but filled in.
+  static const IconData paw = IconData(0xf479, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw], similar, but not filled in.
+  static const IconData paw_solid = IconData(0xf47a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller_solid], similar, but filled in.
+  static const IconData game_controller = IconData(0xf43a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller], similar, but not filled in.
+  static const IconData game_controller_solid = IconData(0xf43b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask_solid], similar, but filled in.
+  static const IconData lab_flask = IconData(0xf430, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask], similar, but not filled in.
+  static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

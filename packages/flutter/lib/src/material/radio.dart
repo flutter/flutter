@@ -35,7 +35,7 @@ const double _kInnerRadius = 4.5;
 ///    you can give the radio button a label.
 ///  * [Slider], for selecting a value in a range.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
-///  * <https://material.google.com/components/selection-controls.html#selection-controls-radio-button>
+///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
 class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.
   ///
@@ -200,15 +200,15 @@ class _RenderRadio extends RenderToggleable {
     ValueChanged<bool> onChanged,
     BoxConstraints additionalConstraints,
     @required TickerProvider vsync,
-  }): super(
-    value: value,
-    tristate: false,
-    activeColor: activeColor,
-    inactiveColor: inactiveColor,
-    onChanged: onChanged,
-    additionalConstraints: additionalConstraints,
-    vsync: vsync,
-  );
+  }) : super(
+         value: value,
+         tristate: false,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         onChanged: onChanged,
+         additionalConstraints: additionalConstraints,
+         vsync: vsync,
+       );
 
   @override
   void paint(PaintingContext context, Offset offset) {

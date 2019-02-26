@@ -43,10 +43,15 @@ class _DefaultHeroTag {
 ///
 /// Use at most a single floating action button per screen. Floating action
 /// buttons should be used for positive actions such as "create", "share", or
-/// "navigate".
+/// "navigate". (If more than one floating action button is used within a
+/// [Route], then make sure that each button has a unique [heroTag], otherwise
+/// an exception will be thrown.)
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and
-/// will not react to touch.
+/// will not react to touch. It is highly discouraged to disable a floating
+/// action button as there is no indication to the user that the button is
+/// disabled. Consider changing the [backgroundColor] if disabling the floating
+/// action button.
 ///
 /// See also:
 ///
@@ -54,12 +59,13 @@ class _DefaultHeroTag {
 ///  * [RaisedButton], another kind of button that appears to float above the
 ///    content.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
-class FloatingActionButton extends StatefulWidget {
+class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
   /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
-  /// arguments must not be null. Additionally, [elevation] and
-  /// [highlightElevation] must be non-negative.
+  /// arguments must not be null. Additionally, [elevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
   const FloatingActionButton({
     Key key,
     this.child,
@@ -69,26 +75,30 @@ class FloatingActionButton extends StatefulWidget {
     this.heroTag = const _DefaultHeroTag(),
     this.elevation = 6.0,
     this.highlightElevation = 12.0,
+    double disabledElevation,
     @required this.onPressed,
     this.mini = false,
     this.shape = const CircleBorder(),
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(mini != null),
-        assert(shape != null),
-        assert(isExtended != null),
-        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(mini != null),
+       assert(shape != null),
+       assert(isExtended != null),
+       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       super(key: key);
 
-  /// Creates a wider [StadiumBorder] shaped floating action button with both
-  /// an [icon] and a [label].
+  /// Creates a wider [StadiumBorder]-shaped floating action button with
+  /// an optional [icon] and a [label].
   ///
-  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior]
-  /// and [shape] arguments must not be null. Additionally, [elevation] and
-  //  [highlightElevation] must be non-negative.
+  /// The [label], [elevation], [highlightElevation], [clipBehavior] and
+  /// [shape] arguments must not be null. Additionally, [elevation]
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
@@ -97,33 +107,42 @@ class FloatingActionButton extends StatefulWidget {
     this.heroTag = const _DefaultHeroTag(),
     this.elevation = 6.0,
     this.highlightElevation = 12.0,
+    double disabledElevation,
     @required this.onPressed,
     this.shape = const StadiumBorder(),
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
-    @required Widget icon,
+    Widget icon,
     @required Widget label,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(shape != null),
-        assert(isExtended != null),
-        assert(clipBehavior != null),
-        _sizeConstraints = _kExtendedSizeConstraints,
-        mini = false,
-        child = _ChildOverflowBox(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(width: 16.0),
-              icon,
-              const SizedBox(width: 8.0),
-              label,
-              const SizedBox(width: 20.0),
-            ],
-          ),
-        ),
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(shape != null),
+       assert(isExtended != null),
+       assert(clipBehavior != null),
+       _sizeConstraints = _kExtendedSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       mini = false,
+       child = _ChildOverflowBox(
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: icon == null
+             ? <Widget>[
+                 const SizedBox(width: 20.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ]
+             : <Widget>[
+                 const SizedBox(width: 16.0),
+                 icon,
+                 const SizedBox(width: 8.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ],
+         ),
+       ),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -167,11 +186,15 @@ class FloatingActionButton extends StatefulWidget {
 
   /// The z-coordinate at which to place this button releative to its parent.
   ///
-  ///
   /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to 6, the appropriate elevation for floating action buttons. The
   /// value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  ///  * [disabledElevation], the elevation when the button is disabled.
   final double elevation;
 
   /// The z-coordinate at which to place this button relative to its parent when
@@ -186,6 +209,21 @@ class FloatingActionButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   final double highlightElevation;
+
+  /// The z-coordinate at which to place this button when the button is disabled
+  /// ([onPressed] is null).
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to the same value as [elevation]. Setting this to zero makes the
+  /// floating action button work similar to a [RaisedButton] but the titular
+  /// "floating" effect is lost. The value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  final double disabledElevation;
 
   /// Controls the size of this button.
   ///
@@ -230,61 +268,49 @@ class FloatingActionButton extends StatefulWidget {
   final BoxConstraints _sizeConstraints;
 
   @override
-  _FloatingActionButtonState createState() => _FloatingActionButtonState();
-}
-
-class _FloatingActionButtonState extends State<FloatingActionButton> {
-  bool _highlight = false;
-
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color foregroundColor = widget.foregroundColor ?? theme.accentIconTheme.color;
+    final Color foregroundColor = this.foregroundColor ?? theme.accentIconTheme.color;
     Widget result;
 
-    if (widget.child != null) {
+    if (child != null) {
       result = IconTheme.merge(
         data: IconThemeData(
           color: foregroundColor,
         ),
-        child: widget.child,
+        child: child,
       );
     }
 
     result = RawMaterialButton(
-      onPressed: widget.onPressed,
-      onHighlightChanged: _handleHighlightChanged,
-      elevation: _highlight ? widget.highlightElevation : widget.elevation,
-      constraints: widget._sizeConstraints,
-      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
-      fillColor: widget.backgroundColor ?? theme.accentColor,
+      onPressed: onPressed,
+      elevation: elevation,
+      highlightElevation: highlightElevation,
+      disabledElevation: disabledElevation,
+      constraints: _sizeConstraints,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      fillColor: backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
         letterSpacing: 1.2,
       ),
-      shape: widget.shape,
-      clipBehavior: widget.clipBehavior,
+      shape: shape,
+      clipBehavior: clipBehavior,
       child: result,
     );
 
-    if (widget.tooltip != null) {
+    if (tooltip != null) {
       result = MergeSemantics(
         child: Tooltip(
-          message: widget.tooltip,
+          message: tooltip,
           child: result,
         ),
       );
     }
 
-    if (widget.heroTag != null) {
+    if (heroTag != null) {
       result = Hero(
-        tag: widget.heroTag,
+        tag: heroTag,
         child: result,
       );
     }

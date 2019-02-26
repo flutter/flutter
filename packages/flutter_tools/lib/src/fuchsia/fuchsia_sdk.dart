@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../convert.dart';
+import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
@@ -33,8 +33,8 @@ class FuchsiaSdk {
       final String path = fuchsiaArtifacts.devFinder.absolute.path;
       final RunResult process = await runAsync(<String>[path, 'list', '-full']);
       return process.stdout.trim();
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
+    } catch (exception) {
+      printTrace('$exception');
     }
     return null;
   }
@@ -57,8 +57,8 @@ class FuchsiaSdk {
         controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;
-    } on ArgumentError catch (exception) {
-      throwToolExit('$exception');
+    } catch (exception) {
+      printTrace('$exception');
     }
     return null;
   }

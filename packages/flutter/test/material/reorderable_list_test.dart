@@ -30,7 +30,7 @@ void main() {
       );
     }
 
-    Widget build({Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr}) {
+    Widget build({ Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -900,6 +900,30 @@ void main() {
 
     });
 
+    testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
+      final Widget reorderableListView = ReorderableListView(
+        children: const <Widget>[
+          SizedBox(
+            key: Key('A'),
+            child: Text('A'),
+          ),
+          SizedBox(
+            key: Key('B'),
+            child: Text('B'),
+          ),
+          SizedBox(
+            key: Key('C'),
+            child: Text('C'),
+          )
+        ],
+        reverse: true,
+        onReorder: (int oldIndex, int newIndex) {},
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: reorderableListView,
+      ));
+      expect(tester.getCenter(find.text('A')), greaterThan(tester.getCenter(find.text('B'))));
+    });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
 }

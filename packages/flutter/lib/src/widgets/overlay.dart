@@ -223,10 +223,10 @@ class Overlay extends StatefulWidget {
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// In checked mode, if the [debugRequiredFor] argument is provided then this
+  /// In debug mode, if the `debugRequiredFor` argument is provided then this
   /// function will assert that an overlay was found and will throw an exception
   /// if not. The exception attempts to explain that the calling [Widget] (the
-  /// one given by the [debugRequiredFor] argument) needs an [Overlay] to be
+  /// one given by the `debugRequiredFor` argument) needs an [Overlay] to be
   /// present to function.
   ///
   /// Typical usage is as follows:
@@ -274,7 +274,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   /// Insert the given entry into the overlay.
   ///
-  /// If [above] is non-null, the entry is inserted just above [above].
+  /// If `above` is non-null, the entry is inserted just above `above`.
   /// Otherwise, the entry is inserted on top.
   void insert(OverlayEntry entry, { OverlayEntry above }) {
     assert(entry._overlay == null);
@@ -288,7 +288,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   /// Insert all the entries in the given iterable.
   ///
-  /// If [above] is non-null, the entries are inserted just above [above].
+  /// If `above` is non-null, the entries are inserted just above `above`.
   /// Otherwise, the entries are inserted on top.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
@@ -306,8 +306,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   void _remove(OverlayEntry entry) {
     if (mounted) {
-      _entries.remove(entry);
-      setState(() { /* entry was removed */ });
+      setState(() {
+        _entries.remove(entry);
+      });
     }
   }
 
@@ -316,7 +317,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// This is an O(N) algorithm, and should not be necessary except for debug
   /// asserts. To avoid people depending on it, this function is implemented
-  /// only in checked mode.
+  /// only in debug mode, and always returns false in release mode.
   bool debugIsVisible(OverlayEntry entry) {
     bool result = false;
     assert(_entries.contains(entry));
@@ -382,7 +383,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 /// [offstage] widgets which are kept alive, and are built, but are not laid out
 /// or painted.
 ///
-/// The onstage widget must be a Stack.
+/// The onstage widget must be a [Stack].
 ///
 /// For convenience, it is legal to use [Positioned] widgets around the offstage
 /// widgets.

@@ -19,7 +19,7 @@ class UserMessages {
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-libstdc++5';
+      'On Arch: pacman -S lib32-libstdc++5 (you need to enable multilib: https://wiki.archlinux.org/index.php/Official_repositories#multilib)';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
@@ -45,6 +45,15 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidSdkLicenseOnly(String envKey) =>
+      'Android SDK contains licenses only.\n'
+      'Your first build of an Android application will take longer than usual, '
+      'while gradle downloads the missing components. This functionality will '
+      'only work if the licenses in the licenses folder in $envKey are valid.\n'
+      'If the Android SDK has been installed to another location, set $envKey to that location.\n'
+      'You may also want to add it to your PATH environment variable.\n\n'
+      'Certain features, such as `flutter emulators` and `flutter devices`, will '
+      'not work without the currently missing SDK components.';
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
@@ -53,7 +62,7 @@ class UserMessages {
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-      'If Android SDK has been installed to a custom location, set $envKey to that location.\n'
+      'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
@@ -75,8 +84,12 @@ class UserMessages {
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown => 'Android license status unknown.';
-  String androidSdkOutdated(String managerPath) =>
+  String get androidLicensesUnknown =>
+      'Android license status unknown.\n'
+      'Try re-installing or updating your Android SDK Manager.\n'
+      'See https://developer.android.com/studio/#downloads or visit '
+      'https://flutter.io/setup/#android-setup for detailed instructions.';
+  String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
   String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
@@ -85,6 +98,11 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.io/setup/#android-setup for detailed instructions.';
+  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
+      'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
+      'To update using sdkmanager, run:\n'
+      '  $managerPath "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
+      'or visit https://flutter.io/setup/#android-setup for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -185,4 +203,103 @@ class UserMessages {
   String vsCodeVersion(String version) => 'version $version';
   String vsCodeLocation(String location) => 'VS Code at $location';
   String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
+
+  // Messages used in FlutterCommand
+  String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
+  String get flutterNoDevelopmentDevice =>
+      "Unable to locate a development device; please run 'flutter doctor' "
+      'for information about installing additional components.';
+  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
+      "matching '$deviceId'";
+  String get flutterNoDevicesFound => 'No devices found';
+  String get flutterNoSupportedDevices => 'No supported devices connected.';
+  String flutterFoundSpecifiedDevices(int count, String deviceId) =>
+      'Found $count devices with name or id matching $deviceId:';
+  String get flutterSpecifyDeviceWithAllOption =>
+      'More than one device connected; please specify a device with '
+      "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
+  String get flutterSpecifyDevice =>
+      'More than one device connected; please specify a device with '
+      "the '-d <deviceId>' flag.";
+  String get flutterNoConnectedDevices => 'No connected devices.';
+  String get flutterNoPubspec =>
+      'Error: No pubspec.yaml file found.\n'
+      'This command should be run from the root of your Flutter project.\n'
+      'Do not run this command from the root of your git clone of Flutter.';
+  String get flutterMergeYamlFiles =>
+      'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
+      'We have changed from having separate flutter.yaml and pubspec.yaml\n'
+      'files to having just one pubspec.yaml file. Transitioning is simple:\n'
+      'add a line that just says "flutter:" to your pubspec.yaml file, and\n'
+      'move everything from your current flutter.yaml file into the\n'
+      'pubspec.yaml file, below that line, with everything indented by two\n'
+      'extra spaces compared to how it was in the flutter.yaml file. Then, if\n'
+      'you had a "name:" line, move that to the top of your "pubspec.yaml"\n'
+      'file (you may already have one there), so that there is only one\n'
+      '"name:" line. Finally, delete the flutter.yaml file.\n\n'
+      'For an example of what a new-style pubspec.yaml file might look like,\n'
+      'check out the Flutter Gallery pubspec.yaml:\n'
+      'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
+  String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
+  String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
+  String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
+  String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
+
+  // Messages used in FlutterCommandRunner
+  String runnerNoRoot(String error) => 'Unable to locate flutter root: $error';
+  String runnerWrapColumnInvalid(dynamic value) =>
+      'Argument to --wrap-column must be a positive integer. You supplied $value.';
+  String runnerWrapColumnParseError(dynamic value) =>
+      'Unable to parse argument --wrap-column=$value. Must be a positive integer.';
+  String runnerBugReportFinished(String zipFileName) =>
+      'Bug report written to $zipFileName.\n'
+      'Warning: this bug report contains local paths, device identifiers, and log snippets.';
+  String get runnerNoRecordTo => 'record-to location not specified';
+  String get runnerNoReplayFrom => 'replay-from location not specified';
+  String runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine src directory.\n'
+      'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
+      'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
+      'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
+  String runnerNoEngineBuildDirInPath(String engineSourcePath) =>
+      'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
+      'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
+      'you have compiled the engine in that directory, which should produce an \'out\' directory';
+  String get runnerLocalEngineRequired =>
+      'You must specify --local-engine if you are using a locally built engine.';
+  String runnerNoEngineBuild(String engineBuildPath) =>
+      'No Flutter engine build found at $engineBuildPath.';
+  String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
+      'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
+      '  running Flutter  : $flutterRoot\n'
+      '  current directory: $currentDir\n'
+      'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
+      'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+  String runnerRemovedFlutterRepo(String flutterRoot, String flutterPath) =>
+      'Warning! This package referenced a Flutter repository via the .packages file that is '
+      'no longer available. The repository from which the \'flutter\' tool is currently '
+      'executing will be used instead.\n'
+      '  running Flutter tool: $flutterRoot\n'
+      '  previous reference  : $flutterPath\n'
+      'This can happen if you deleted or moved your copy of the Flutter repository, or '
+      'if it was on a volume that is no longer mounted or has been mounted at a '
+      'different location. Please check your system path to verify that you are running '
+      'the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+  String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
+      'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
+      'repository than the one last used by this package. The repository from which the '
+      '\'flutter\' tool is currently executing will be used instead.\n'
+      '  running Flutter tool: $flutterRoot\n'
+      '  previous reference  : $flutterPath\n'
+      'This can happen when you have multiple copies of flutter installed. Please check '
+      'your system path to verify that you are running the expected version (run '
+      '\'flutter --version\' to see which flutter is on your path).\n';
+  String invalidVersionSettingHintMessage(String invalidVersion) =>
+      'Invalid version $invalidVersion found, default value will be used.\n'
+      'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
+      'In Android, build-name is used as versionName while build-number used as versionCode.\n'
+      'Read more about Android versioning at https://developer.android.com/studio/publish/versioning\n'
+      'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
+      'Read more about iOS versioning at\n'
+      'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 }

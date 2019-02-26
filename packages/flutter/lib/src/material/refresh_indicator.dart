@@ -73,7 +73,7 @@ enum _RefreshIndicatorMode {
 ///
 /// See also:
 ///
-///  * <https://material.google.com/patterns/swipe-to-refresh.html>
+///  * <https://material.io/design/platform-guidance/android-swipe-to-refresh.html>
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
 ///    the inner circular progress spinner during refreshes.

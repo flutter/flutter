@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'app_bar_theme.dart';
 import 'back_button.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -53,7 +54,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 }
 
 // TODO(eseidel): Toolbar needs to change size based on orientation:
-// http://material.google.com/layout/structure.html#structure-app-bar
+// https://material.io/design/components/app-bars-top.html#specs
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
@@ -126,13 +127,18 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
-  /// The arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity]
-  /// and [automaticallyImplyLeading] must not be null. Additionally,
-  /// [elevation] must be non-negative.
+  /// The arguments [primary], [toolbarOpacity], [bottomOpacity]
+  /// and [automaticallyImplyLeading] must not be null. Additionally, if
+  /// [elevation] is specified, it must be non-negative.
+  ///
+  /// If [backgroundColor], [elevation], [brightness], [iconTheme],
+  /// [actionsIconTheme], or [textTheme] are null, then their [AppBarTheme]
+  /// values will be used. If the corresponding [AppBarTheme] property is null,
+  /// then the default specified in the property's documentation will be used.
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
@@ -143,10 +149,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actions,
     this.flexibleSpace,
     this.bottom,
-    this.elevation = 4.0,
+    this.elevation,
+    this.shape,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
+    this.actionsIconTheme,
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -154,7 +162,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
-       assert(elevation != null && elevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
        assert(titleSpacing != null),
        assert(toolbarOpacity != null),
@@ -222,25 +230,28 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// {@tool snippet --template=stateless_widget}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
   ///
   /// ```dart
-  /// Scaffold(
-  ///   appBar: AppBar(
-  ///     title: Text('Hello World'),
-  ///     actions: <Widget>[
-  ///       IconButton(
-  ///         icon: Icon(Icons.shopping_cart),
-  ///         tooltip: 'Open shopping cart',
-  ///         onPressed: () {
-  ///           // ...
-  ///         },
-  ///       ),
-  ///     ],
-  ///   ),
-  /// )
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text('Ready, Set, Shop!'),
+  ///       actions: <Widget>[
+  ///         IconButton(
+  ///           icon: Icon(Icons.shopping_cart),
+  ///           tooltip: 'Open shopping cart',
+  ///           onPressed: () {
+  ///             // Implement navigation to shopping cart page here...
+  ///             print('Shopping cart opened.');
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   final List<Widget> actions;
@@ -269,33 +280,54 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// This controls the size of the shadow below the app bar.
   ///
-  /// Defaults to 4, the appropriate elevation for app bars.
-  ///
   /// The value is non-negative.
+  ///
+  /// If this property is null, then [ThemeData.appBarTheme.elevation] is used,
+  /// if that is also null, the default value is 4, the appropriate elevation
+  /// for app bars.
   final double elevation;
+
+  /// The material's shape as well its shadow.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
+  final ShapeBorder shape;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryColor].
+  /// If this property is null, then [ThemeData.appBarTheme.color] is used,
+  /// if that is also null, then [ThemeData.primaryColor] is used.
   final Color backgroundColor;
 
   /// The brightness of the app bar's material. Typically this is set along
   /// with [backgroundColor], [iconTheme], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryColorBrightness].
+  /// If this property is null, then [ThemeData.appBarTheme.brightness] is used,
+  /// if that is also null, then [ThemeData.primaryColorBrightness] is used.
   final Brightness brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
   /// is set along with [backgroundColor], [brightness], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryIconTheme].
+  /// If this property is null, then [ThemeData.appBarTheme.iconTheme] is used,
+  /// if that is also null, then [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
+
+  /// The color, opacity, and size to use for the icons that appear in the app
+  /// bar's [actions]. This should only be used when the [actions] should be
+  /// themed differently than the icon that appears in the app bar's [leading]
+  /// widget.
+  ///
+  /// If this property is null, then [ThemeData.appBarTheme.actionsIconTheme] is
+  /// used, if that is also null, then this falls back to [iconTheme].
+  final IconThemeData actionsIconTheme;
 
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [brightness] [backgroundColor], [iconTheme].
   ///
-  /// Defaults to [ThemeData.primaryTextTheme].
+  /// If this property is null, then [ThemeData.appBarTheme.textTheme] is used,
+  /// if that is also null, then [ThemeData.primaryTextTheme] is used.
   final TextTheme textTheme;
 
   /// Whether this app bar is being displayed at the top of the screen.
@@ -361,6 +393,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
+  static const double _defaultElevation = 4.0;
+
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
   }
@@ -374,6 +408,7 @@ class _AppBarState extends State<AppBar> {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData themeData = Theme.of(context);
+    final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
 
@@ -382,9 +417,18 @@ class _AppBarState extends State<AppBar> {
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
-    IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
-    TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
-    TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
+    IconThemeData overallIconTheme = widget.iconTheme
+      ?? appBarTheme.iconTheme
+      ?? themeData.primaryIconTheme;
+    IconThemeData actionsIconTheme = widget.actionsIconTheme
+      ?? appBarTheme.actionsIconTheme
+      ?? overallIconTheme;
+    TextStyle centerStyle = widget.textTheme?.title
+      ?? appBarTheme.textTheme?.title
+      ?? themeData.primaryTextTheme.title;
+    TextStyle sideStyle = widget.textTheme?.body1
+      ?? appBarTheme.textTheme?.body1
+      ?? themeData.primaryTextTheme.body1;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -392,8 +436,11 @@ class _AppBarState extends State<AppBar> {
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
         sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
-      appBarIconTheme = appBarIconTheme.copyWith(
-        opacity: opacity * (appBarIconTheme.opacity ?? 1.0)
+      overallIconTheme = overallIconTheme.copyWith(
+        opacity: opacity * (overallIconTheme.opacity ?? 1.0)
+      );
+      actionsIconTheme = actionsIconTheme.copyWith(
+        opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
       );
     }
 
@@ -455,6 +502,14 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
+    // Allow the trailing actions to have their own theme if necessary.
+    if (actions != null) {
+      actions = IconTheme.merge(
+        data: actionsIconTheme,
+        child: actions,
+      );
+    }
+
     final Widget toolbar = NavigationToolbar(
       leading: leading,
       middle: title,
@@ -469,7 +524,7 @@ class _AppBarState extends State<AppBar> {
       child: CustomSingleChildLayout(
         delegate: const _ToolbarContainerLayout(),
         child: IconTheme.merge(
-          data: appBarIconTheme,
+          data: overallIconTheme,
           child: DefaultTextStyle(
             style: sideStyle,
             child: toolbar,
@@ -517,20 +572,29 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    final Brightness brightness = widget.brightness
+      ?? appBarTheme.brightness
+      ?? themeData.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark;
 
     return Semantics(
       container: true,
-      explicitChildNodes: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: widget.backgroundColor ?? themeData.primaryColor,
-          elevation: widget.elevation,
-          child: appBar,
+          color: widget.backgroundColor
+            ?? appBarTheme.color
+            ?? themeData.primaryColor,
+          elevation: widget.elevation
+            ?? appBarTheme.elevation
+            ?? _defaultElevation,
+          shape: widget.shape,
+          child: Semantics(
+            explicitChildNodes: true,
+            child: appBar,
+          ),
         ),
       ),
     );
@@ -602,6 +666,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.backgroundColor,
     @required this.brightness,
     @required this.iconTheme,
+    @required this.actionsIconTheme,
     @required this.textTheme,
     @required this.primary,
     @required this.centerTitle,
@@ -626,6 +691,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Color backgroundColor;
   final Brightness brightness;
   final IconThemeData iconTheme;
+  final IconThemeData actionsIconTheme;
   final TextTheme textTheme;
   final bool primary;
   final bool centerTitle;
@@ -684,6 +750,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
+        actionsIconTheme: actionsIconTheme,
         textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
@@ -708,6 +775,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || backgroundColor != oldDelegate.backgroundColor
         || brightness != oldDelegate.brightness
         || iconTheme != oldDelegate.iconTheme
+        || actionsIconTheme != oldDelegate.actionsIconTheme
         || textTheme != oldDelegate.textTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
@@ -800,7 +868,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
-///  * <https://material.google.com/layout/structure.html#structure-toolbars>
+///  * <https://material.io/design/components/app-bars-top.html>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   ///
@@ -819,6 +887,7 @@ class SliverAppBar extends StatefulWidget {
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
+    this.actionsIconTheme,
     this.textTheme,
     this.primary = true,
     this.centerTitle,
@@ -912,7 +981,9 @@ class SliverAppBar extends StatefulWidget {
   /// The z-coordinate at which to place this app bar when it is above other
   /// content. This controls the size of the shadow below the app bar.
   ///
-  /// Defaults to 4, the appropriate elevation for app bars.
+  /// If this property is null, then [ThemeData.appBarTheme.elevation] is used,
+  /// if that is also null, the default value is 4, the appropriate elevation
+  /// for app bars.
   ///
   /// If [forceElevated] is false, the elevation is ignored when the app bar has
   /// no content underneath it. For example, if the app bar is [pinned] but no
@@ -934,25 +1005,37 @@ class SliverAppBar extends StatefulWidget {
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryColor].
+  /// If this property is null, then [ThemeData.appBarTheme.color] is used,
+  /// if that is also null, then [ThemeData.primaryColor] is used.
   final Color backgroundColor;
 
   /// The brightness of the app bar's material. Typically this is set along
   /// with [backgroundColor], [iconTheme], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryColorBrightness].
+  /// If this property is null, then [ThemeData.appBarTheme.brightness] is used,
+  /// if that is also null, then [ThemeData.primaryColorBrightness] is used.
   final Brightness brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
   /// is set along with [backgroundColor], [brightness], [textTheme].
   ///
-  /// Defaults to [ThemeData.primaryIconTheme].
+  /// If this property is null, then [ThemeData.appBarTheme.iconTheme] is used,
+  /// if that is also null, then [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
+
+  /// The color, opacity, and size to use for trailing app bar icons. This
+  /// should only be used when the trailing icons should be themed differently
+  /// than the leading icons.
+  ///
+  /// If this property is null, then [ThemeData.appBarTheme.actionsIconTheme] is
+  /// used, if that is also null, then this falls back to [iconTheme].
+  final IconThemeData actionsIconTheme;
 
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [brightness] [backgroundColor], [iconTheme].
   ///
-  /// Defaults to [ThemeData.primaryTextTheme].
+  /// If this property is null, then [ThemeData.appBarTheme.textTheme] is used,
+  /// if that is also null, then [ThemeData.primaryTextTheme] is used.
   final TextTheme textTheme;
 
   /// Whether this app bar is being displayed at the top of the screen.
@@ -1116,6 +1199,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           backgroundColor: widget.backgroundColor,
           brightness: widget.brightness,
           iconTheme: widget.iconTheme,
+          actionsIconTheme: widget.actionsIconTheme,
           textTheme: widget.textTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,

@@ -54,7 +54,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 /// While laying out the list, visible children's elements, states and render
 /// objects will be created lazily based on existing widgets (such as in the
 /// case of [SliverChildListDelegate]) or lazily provided ones (such as in the
-/// case of [SliverChildListDelegate]).
+/// case of [SliverChildBuilderDelegate]).
 ///
 /// ### Destruction
 ///
@@ -1081,7 +1081,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,

@@ -7,6 +7,7 @@ import '../base/process.dart';
 
 const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
 const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+const String kCFBundleExecutable = 'CFBundleExecutable';
 
 // Prefer using [iosWorkflow.getPlistValueFromFile] to enable mocking.
 String getValueFromFile(String plistFilePath, String key) {
@@ -25,9 +26,13 @@ String getValueFromFile(String plistFilePath, String key) {
   final String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
 
   try {
-    final String value = runCheckedSync(<String>[
-      executable, 'read', normalizedPlistPath, key
-    ]);
+    final List<String> args = <String>[
+      executable, 'read', normalizedPlistPath
+    ];
+    if (key != null && key.isNotEmpty){
+      args.add(key);
+    }
+    final String value = runCheckedSync(args);
     return value.isEmpty ? null : value;
   } catch (error) {
     return null;

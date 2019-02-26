@@ -23,7 +23,9 @@ export 'dart:ui' show TextAffinity;
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
 class TextInputType {
-  const TextInputType._(this.index) : signed = null, decimal = null;
+  const TextInputType._(this.index)
+    : signed = null,
+      decimal = null;
 
   /// Optimize for numerical information.
   ///

@@ -280,13 +280,28 @@ abstract class ImageProvider<T> {
         }
       );
     }
-    obtainKey(configuration).then<void>((T key) {
+
+    // `obtainKey` can throw both sync and async errors.
+    // `catchError` handles cases where async errors are thrown and the try block is for sync errors.
+    //
+    // `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return stream;
+    }
+
+    key.then<void>((T key) {
       obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+      final ImageStreamCompleter completer = PaintingBinding.instance
+          .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
       if (completer != null) {
         stream.setCompleter(completer);
       }
     }).catchError(handleError);
+
     return stream;
   }
 
@@ -328,7 +343,7 @@ abstract class ImageProvider<T> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  Future<bool> evict({ ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);
@@ -452,8 +467,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// The arguments must not be null.
   const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
-      : assert(url != null),
-        assert(scale != null);
+    : assert(url != null),
+      assert(scale != null);
 
   /// The URL from which the image will be fetched.
   final String url;
@@ -529,8 +544,8 @@ class FileImage extends ImageProvider<FileImage> {
   ///
   /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 })
-      : assert(file != null),
-        assert(scale != null);
+    : assert(file != null),
+      assert(scale != null);
 
   /// The file to decode into an image.
   final File file;
@@ -597,8 +612,8 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ///
   /// The arguments must not be null.
   const MemoryImage(this.bytes, { this.scale = 1.0 })
-      : assert(bytes != null),
-        assert(scale != null);
+    : assert(bytes != null),
+      assert(scale != null);
 
   /// The bytes to decode into an image.
   final Uint8List bytes;

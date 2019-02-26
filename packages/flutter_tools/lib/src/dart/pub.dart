@@ -92,7 +92,7 @@ Future<void> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
-      expectSlowOperation: true,
+      timeout: kSlowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
     if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
@@ -135,7 +135,8 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<void> pub(List<String> arguments, {
+Future<void> pub(
+  List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
@@ -173,7 +174,8 @@ Future<void> pub(List<String> arguments, {
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
 /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
 /// streams of this process.
-Future<void> pubInteractively(List<String> arguments, {
+Future<void> pubInteractively(
+  List<String> arguments, {
   String directory,
 }) async {
   Cache.releaseLockEarly();

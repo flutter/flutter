@@ -22,7 +22,7 @@ void main() {
     Process process;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync();
+      tempDir = createResolvedTempDirectorySync('daemon_mode_test.');
       await _project.setUpIn(tempDir);
     });
 
@@ -90,5 +90,5 @@ void main() {
       expect(result, isList);
       expect(result, isNotEmpty);
     });
-  }, timeout: const Timeout.factor(2));
+  }, timeout: const Timeout.factor(10)); // This test uses the `flutter` tool, which could be blocked behind the startup lock for a long time.
 }

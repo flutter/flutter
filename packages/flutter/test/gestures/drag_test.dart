@@ -58,7 +58,6 @@ void main() {
     tester.route(pointer.move(const Offset(20.0, 30.0))); // moved 10 horizontally and 20 vertically which is 22 total
     expect(didStartPan, isTrue); // 22 > 18
     didStartPan = false;
-    expect(updatedScrollDelta, null);
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
@@ -78,6 +77,58 @@ void main() {
 
     pan.dispose();
     tap.dispose();
+  });
+
+  testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(30.0, 00.0));
+  });
+
+  testGesture('Should report most recent point to onStart with a start configuration', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+    HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+    Offset updateOffset;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updateOffset = details.globalPosition;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(30.0, 0.0));
+    expect(updateOffset, null);
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
@@ -164,57 +215,7 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
-
-    Offset positionAtOnStart;
-    drag.onStart = (DragStartDetails details) {
-      positionAtOnStart = details.globalPosition;
-    };
-
-    final TestPointer pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
-    drag.addPointer(down);
-    competingDrag.addPointer(down);
-    tester.closeArena(5);
-    tester.route(down);
-
-    tester.route(pointer.move(const Offset(30.0, 0.0)));
-    drag.dispose();
-    competingDrag.dispose();
-
-    expect(positionAtOnStart, const Offset(30.0, 00.0));
-  });
-
-  testGesture('Should report most recent point to onStart with a start configuration', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag =
-    HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
-
-    Offset positionAtOnStart;
-    drag.onStart = (DragStartDetails details) {
-      positionAtOnStart = details.globalPosition;
-    };
-    Offset updateOffset;
-    drag.onUpdate = (DragUpdateDetails details) {
-      updateOffset = details.globalPosition;
-    };
-
-    final TestPointer pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
-    drag.addPointer(down);
-    competingDrag.addPointer(down);
-    tester.closeArena(5);
-    tester.route(down);
-
-    tester.route(pointer.move(const Offset(30.0, 0.0)));
-    drag.dispose();
-    competingDrag.dispose();
-
-    expect(positionAtOnStart, const Offset(30.0, 0.0));
-    expect(updateOffset, null);
-  });
+  // TODO(jslavitz): Revert these tests.
 
   testGesture('Should report initial down point to onStart with a down configuration', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =

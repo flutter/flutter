@@ -17,7 +17,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync();
+      tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
@@ -28,13 +28,15 @@ void main() {
     });
 
     test('can step over statements', () async {
-      await _flutter.run(withDebugger: true);
+      await _flutter.run(withDebugger: true, startPaused: true);
+      await _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
+      await _flutter.resume();
+      await _flutter.waitForPause(); // Now we should be on the breakpoint.
 
-      // Stop at the initial breakpoint that the expected steps are based on.
-      await _flutter.breakAt(_project.breakpointUri, _project.breakpointLine, restart: true);
+      expect((await _flutter.getSourceLocation()).line, equals(_project.breakpointLine));
 
       // Issue 5 steps, ensuring that we end up on the annotated lines each time.
-      for (int i = 1; i <= _project.numberOfSteps; i++) {
+      for (int i = 1; i <= _project.numberOfSteps; i += 1) {
         await _flutter.stepOverOrOverAsyncSuspension();
         final SourcePosition location = await _flutter.getSourceLocation();
         final int actualLine = location.line;
@@ -47,5 +49,5 @@ void main() {
           reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
       }
     });
-  }, timeout: const Timeout.factor(3));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

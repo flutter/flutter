@@ -280,7 +280,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<DragStartBehavior>('Start Behavior', dragStartBehavior));
+    properties.add(EnumProperty<DragStartBehavior>('start behavior', dragStartBehavior));
   }
 }
 
@@ -330,8 +330,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) :
-        super(debugOwner: debugOwner);
+  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

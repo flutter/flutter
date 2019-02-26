@@ -581,6 +581,58 @@ void main() {
     expect(capturedImage, isNull); // The image stream listeners should never be called.
   });
 
+  testWidgets('Removing listener FIFO removes exactly one listener and error listener', (WidgetTester tester) async {
+    // To make sure that a single listener removal doesn't only happen
+    // accidentally as described in https://github.com/flutter/flutter/pull/25865#discussion_r244851565.
+    int errorListener1Called = 0;
+    int errorListener2Called = 0;
+    int errorListener3Called = 0;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener1 = (dynamic exception, StackTrace stackTrace) {
+      errorListener1Called++;
+    };
+    final ImageErrorListener errorListener2 = (dynamic exception, StackTrace stackTrace) {
+      errorListener2Called++;
+    };
+    final ImageErrorListener errorListener3 = (dynamic exception, StackTrace stackTrace) {
+      errorListener3Called++;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener1);
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener2);
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener3);
+    // Remove listener. It should remove exactly the first one and the associated
+    // errorListener1.
+    imageProvider._streamCompleter.removeListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(errorListener1Called, 0);
+    expect(errorListener2Called, 1);
+    expect(errorListener3Called, 1);
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+  });
+
   testWidgets('Image.memory control test', (WidgetTester tester) async {
     await tester.pumpWidget(Image.memory(Uint8List.fromList(kTransparentImage), excludeFromSemantics: true,));
   });
@@ -874,7 +926,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 

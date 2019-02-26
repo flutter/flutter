@@ -89,10 +89,7 @@ import 'theme.dart';
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
-  /// The [tabBar], [tabBuilder] and [currentTabIndex] arguments must not be null.
-  ///
-  /// The [currentTabIndex] argument can be used to programmatically change the
-  /// currently selected tab.
+  /// The [tabBar] and [tabBuilder] arguments must not be null.
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
@@ -170,6 +167,16 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_currentPage >= widget.tabBar.items.length) {
+      // Clip down to an acceptable range.
+      _currentPage = widget.tabBar.items.length - 1;
+      // Sanity check, since CupertinoTabBar.items's minimum length is 2.
+      assert(
+        _currentPage >= 0,
+        'CupertinoTabBar is expected to keep at least 2 tabs after updating',
+      );
+    }
+    // The user can still specify an exact desired index.
     if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
       _currentPage = widget.tabBar.currentIndex;
     }
