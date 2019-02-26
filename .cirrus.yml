@@ -101,6 +101,7 @@ task:
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -163,6 +164,7 @@ task:
   osx_instance:
     image: high-sierra-xcode-9.4.1
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD
   setup_script:
@@ -180,12 +182,10 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
-  set_clock_script:
-    - sudo sntp -sS pool.ntp.org
-    - date
   install_cocoapods_script:
     - sudo gem install cocoapods
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
