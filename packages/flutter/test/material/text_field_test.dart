@@ -4587,7 +4587,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
 
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
     expect(find.byType(FlatButton), findsNothing);
   });
 
@@ -4630,7 +4630,7 @@ void main() {
     );
 
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
     expect(find.byType(CupertinoButton), findsNWidgets(3));
   });
 
@@ -4675,7 +4675,7 @@ void main() {
       const TextSelection.collapsed(offset: 8),
     );
 
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
     // Single taps shouldn't trigger the toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
   });
