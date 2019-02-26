@@ -11,6 +11,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
+
 /**
  * Displays a Flutter UI on an Android device.
  * <p>
@@ -35,8 +38,17 @@ import android.widget.FrameLayout;
 public class FlutterView extends FrameLayout {
   private static final String TAG = "FlutterView";
 
+  // Behavior configuration of this FlutterView.
   @NonNull
   private RenderMode renderMode;
+
+  // Internal view hierarchy references.
+  @Nullable
+  private FlutterRenderer.RenderSurface renderSurface;
+
+  // Connections to a Flutter execution context.
+  @Nullable
+  private FlutterEngine flutterEngine;
 
   /**
    * Constructs a {@code FlutterSurfaceView} programmatically, without any XML attributes.
@@ -79,14 +91,76 @@ public class FlutterView extends FrameLayout {
       case surface:
         Log.d(TAG, "Internally creating a FlutterSurfaceView.");
         FlutterSurfaceView flutterSurfaceView = new FlutterSurfaceView(getContext());
+        renderSurface = flutterSurfaceView;
         addView(flutterSurfaceView);
         break;
       case texture:
         Log.d(TAG, "Internally creating a FlutterTextureView.");
         FlutterTextureView flutterTextureView = new FlutterTextureView(getContext());
+        renderSurface = flutterTextureView;
         addView(flutterTextureView);
         break;
     }
+  }
+
+  /**
+   * Connects this {@code FlutterView} to the given {@link FlutterEngine}.
+   *
+   * This {@code FlutterView} will begin rendering the UI painted by the given {@link FlutterEngine}.
+   * This {@code FlutterView} will also begin forwarding interaction events from this
+   * {@code FlutterView} to the given {@link FlutterEngine}, e.g., user touch events, accessibility
+   * events, keyboard events, and others.
+   *
+   * See {@link #detachFromFlutterEngine()} for information on how to detach from a
+   * {@link FlutterEngine}.
+   */
+  public void attachToFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    if (isAttachedToFlutterEngine()) {
+      if (flutterEngine == this.flutterEngine) {
+        // We are already attached to this FlutterEngine
+        return;
+      }
+
+      // Detach from a previous FlutterEngine so we can attach to this new one.
+      detachFromFlutterEngine();
+    }
+
+    this.flutterEngine = flutterEngine;
+
+    // Instruct our FlutterRenderer that we are now its designated RenderSurface.
+    this.flutterEngine.getRenderer().attachToRenderSurface(renderSurface);
+  }
+
+  /**
+   * Disconnects this {@code FlutterView} from a previously attached {@link FlutterEngine}.
+   *
+   * This {@code FlutterView} will clear its UI and stop forwarding all events to the previously-attached
+   * {@link FlutterEngine}. This includes touch events, accessibility events, keyboard events,
+   * and others.
+   *
+   * See {@link #attachToFlutterEngine(FlutterEngine)} for information on how to attach a
+   * {@link FlutterEngine}.
+   */
+  public void detachFromFlutterEngine() {
+    if (!isAttachedToFlutterEngine()) {
+      return;
+    }
+    Log.d(TAG, "Detaching from Flutter Engine");
+
+    // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.
+    flutterEngine.getRenderer().detachFromRenderSurface();
+    flutterEngine = null;
+
+    // TODO(mattcarroll): clear the surface when JNI doesn't blow up
+//    if (isSurfaceAvailableForRendering) {
+//      Canvas canvas = surfaceHolder.lockCanvas();
+//      canvas.drawColor(Color.RED);
+//      surfaceHolder.unlockCanvasAndPost(canvas);
+//    }
+  }
+
+  private boolean isAttachedToFlutterEngine() {
+    return flutterEngine != null;
   }
 
   /**

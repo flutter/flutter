@@ -247,6 +247,22 @@ public class FlutterRenderer implements TextureRegistry {
    * {@link #onFirstFrameRendered()}.
    */
   public interface RenderSurface {
+    /**
+     * Invoked by the owner of this {@code RenderSurface} when it wants to begin rendering
+     * a Flutter UI to this {@code RenderSurface}.
+     *
+     * The details of how rendering is handled is an implementation detail.
+     */
+    void attachToRenderer(@NonNull FlutterRenderer renderer);
+
+    /**
+     * Invoked by the owner of this {@code RenderSurface} when it no longer wants to render
+     * a Flutter UI to this {@code RenderSurface}.
+     *
+     * This method will cease any on-going rendering from Flutter to this {@code RenderSurface}.
+     */
+    void detachFromRenderer();
+
     // TODO(mattcarroll): describe what this callback is intended to do
     void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings);
 
