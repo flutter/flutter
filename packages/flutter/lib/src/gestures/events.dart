@@ -90,7 +90,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent {
+abstract class PointerEvent extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -288,36 +288,37 @@ abstract class PointerEvent {
   final bool synthesized;
 
   @override
-  String toString() => '$runtimeType($position)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('position', position));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+  }
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
-    return '$runtimeType('
-             'timeStamp: $timeStamp, '
-             'pointer: $pointer, '
-             'kind: $kind, '
-             'device: $device, '
-             'position: $position, '
-             'delta: $delta, '
-             'buttons: $buttons, '
-             'down: $down, '
-             'obscured: $obscured, '
-             'pressure: $pressure, '
-             'pressureMin: $pressureMin, '
-             'pressureMax: $pressureMax, '
-             'distance: $distance, '
-             'distanceMin: $distanceMin, '
-             'distanceMax: $distanceMax, '
-             'size: $size, '
-             'radiusMajor: $radiusMajor, '
-             'radiusMinor: $radiusMinor, '
-             'radiusMin: $radiusMin, '
-             'radiusMax: $radiusMax, '
-             'orientation: $orientation, '
-             'tilt: $tilt, '
-             'platformData: $platformData, '
-             'synthesized: $synthesized'
-           ')';
+    return toString(minLevel: DiagnosticLevel.fine);
   }
 }
 
