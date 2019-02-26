@@ -29,7 +29,9 @@ class _ExampleWidgetState extends State<ExampleWidget> {
             RaisedButton(
               child: const Text('Press Button, Get Coffee'),
               onPressed: () async {
-                _message = generated.message;
+                setState(() {
+                 _message = generated.message;
+                });
               },
             ),
             Text(_message),
