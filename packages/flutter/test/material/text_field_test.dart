@@ -4083,6 +4083,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
+      // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
@@ -4272,6 +4273,7 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
       );
+      // Cursor move doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.moveBy(const Offset(50, 0));
@@ -4282,6 +4284,7 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
       );
+      // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.moveBy(const Offset(50, 0));
@@ -4292,6 +4295,7 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
       );
+      // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.up();

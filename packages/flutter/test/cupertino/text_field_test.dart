@@ -1537,6 +1537,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
+      // Shows toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
@@ -1642,6 +1643,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
+    // Shows toolbar.
     expect(find.byType(CupertinoButton), findsNWidgets(3));
   });
 
@@ -1682,6 +1684,7 @@ void main() {
     );
 
     await tester.pump();
+    // Falling back to a single tap doesn't trigger a toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
   });
 
