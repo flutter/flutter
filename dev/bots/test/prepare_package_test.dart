@@ -238,26 +238,30 @@ void main() {
       "channel": "dev",
       "version": "v0.2.3",
       "release_date": "2018-03-20T01:47:02.851729Z",
-      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip"
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
     },
     {
       "hash": "b9bd51cc36b706215915711e580851901faebb40",
       "channel": "beta",
       "version": "v0.2.2",
       "release_date": "2018-03-16T18:48:13.375013Z",
-      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip"
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
     },
     {
       "hash": "$testRef",
       "channel": "stable",
       "version": "v0.0.0",
       "release_date": "2018-03-20T01:47:02.851729Z",
-      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip"
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
     }
   ]
 }
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
+        File(archivePath).writeAsStringSync('archive contents');
         final String gsutilCall = platform.isWindows
             ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
             : 'gsutil.py';
@@ -291,6 +295,7 @@ void main() {
         expect(contents, contains('"hash": "$testRef"'));
         expect(contents, contains('"channel": "stable"'));
         expect(contents, contains('"archive": "stable/$platformName/$archiveName"'));
+        expect(contents, contains('"sha256": "f69f4865f861193a91d1c5544a894167a7137b788d10bac8edbf5d095f45cb4d"'));
         // Make sure existing entries are preserved.
         expect(contents, contains('"hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"'));
         expect(contents, contains('"hash": "b9bd51cc36b706215915711e580851901faebb40"'));

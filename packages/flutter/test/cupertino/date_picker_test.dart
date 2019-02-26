@@ -8,7 +8,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // scrolling by this offset will move the picker to the next item
-const Offset _kRowOffset = Offset(0.0, -32.0);
+const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
   group('Countdown timer picker', () {
@@ -280,7 +280,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -301,7 +301,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -487,7 +487,8 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('March'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('March'), const Offset(0, 32.0), touchSlopY: 0.0);
+
       // Momentarily, the 2018 and the incorrect 30 of February is aligned.
       expect(
         tester.getTopLeft(find.text('2018')).dy,
@@ -525,15 +526,14 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('27'), const Offset(0.0, -32.0));
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0);
       await tester.pump();
       expect(
         date,
         DateTime(2018, 2, 28),
       );
 
-
-      await tester.drag(find.text('28'), const Offset(0.0, -32.0));
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0);
       await tester.pump(); // Once to trigger the post frame animate call.
 
       // Callback doesn't transiently go into invalid dates.
@@ -706,6 +706,8 @@ void main() {
         ),
       );
 
+      const Offset deltaOffset = Offset(0.0, -18.0);
+
       // 11:59 -> 12:59
       await tester.drag(find.text('11'), _kRowOffset);
       await tester.pump();
@@ -721,14 +723,14 @@ void main() {
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
       // 11:59 -> 9:59
-      await tester.drag(find.text('11'), -_kRowOffset * 2);
+      await tester.drag(find.text('11'), -((_kRowOffset - deltaOffset) * 2 + deltaOffset));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
       // 9:59 -> 15:59
-      await tester.drag(find.text('9'), _kRowOffset * 6);
+      await tester.drag(find.text('9'), (_kRowOffset - deltaOffset) * 6 + deltaOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

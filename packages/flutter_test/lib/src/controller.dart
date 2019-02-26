@@ -13,6 +13,12 @@ import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
 
+/// The default drag touch slop used to break up a large drag into multiple
+/// smaller moves.
+///
+/// This value must be greater than [kTouchSlop].
+const double kDragSlopDefault = 20.0;
+
 /// Class that programmatically interacts with widgets.
 ///
 /// For a variant of this class suited specifically for unit tests, see
@@ -410,8 +416,27 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<void> drag(Finder finder, Offset offset, {int pointer}) {
-    return dragFrom(getCenter(finder), offset, pointer: pointer);
+  ///
+  /// {@template flutter.flutter_test.drag}
+  /// By default, if the x or y component of offset is greater than [kTouchSlop], the
+  /// gesture is broken up into two separate moves calls. Changing 'touchSlopX' or
+  /// `touchSlopY` will change the minimum amount of movement in the respective axis
+  /// before the drag will be broken into multiple calls. To always send the
+  /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
+  /// should be set to 0.
+  ///
+  /// Breaking the drag into multiple moves is necessary for accurate execution
+  /// of drag update calls with a [DragStartBehavior] variable set to
+  /// [DragStartBehavior.start]. Without such a change, the dragUpdate callback
+  /// from a drag recognizer will never be invoked.
+  ///
+  /// To force this function to a send a single move event, the 'touchSlopX' and
+  /// 'touchSlopY' variables should be set to 0. However, generally, these values
+  /// should be left to their default values.
+  /// {@end template}
+  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+    assert(kDragSlopDefault > kTouchSlop);
+    return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
@@ -420,11 +445,78 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<void> dragFrom(Offset startLocation, Offset offset, {int pointer}) {
+  ///
+  /// {@macro flutter.flutter_test.drag}
+  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+    assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
-      await gesture.moveBy(offset);
+
+      final double xSign = offset.dx.sign;
+      final double ySign = offset.dy.sign;
+
+      final double offsetX = offset.dx;
+      final double offsetY = offset.dy;
+
+      final bool separateX = offset.dx.abs() > touchSlopX && touchSlopX > 0;
+      final bool separateY = offset.dy.abs() > touchSlopY && touchSlopY > 0;
+
+      if (separateY || separateX) {
+        final double offsetSlope = offsetY / offsetX;
+        final double inverseOffsetSlope = offsetX / offsetY;
+        final double slopSlope = touchSlopY / touchSlopX;
+        final double absoluteOffsetSlope = offsetSlope.abs();
+        final double signedSlopX = touchSlopX * xSign;
+        final double signedSlopY = touchSlopY * ySign;
+        if (absoluteOffsetSlope != slopSlope) {
+          // The drag goes through one or both of the extents of the edges of the box.
+          if (absoluteOffsetSlope < slopSlope) {
+            assert(offsetX.abs() > touchSlopX);
+            // The drag goes through the vertical edge of the box.
+            // It is guaranteed that the |offsetX| > touchSlopX.
+            final double diffY = offsetSlope.abs() * touchSlopX * ySign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(signedSlopX, diffY));
+            if (offsetY.abs() <= touchSlopY) {
+              // The drag ends on or before getting to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+            } else {
+              final double diffY2 = signedSlopY - diffY;
+              final double diffX2 = inverseOffsetSlope * diffY2;
+
+              // The vector from the edge of the box to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+            }
+          } else {
+            assert(offsetY.abs() > touchSlopY);
+            // The drag goes through the horizontal edge of the box.
+            // It is guaranteed that the |offsetY| > touchSlopY.
+            final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(diffX, signedSlopY));
+            if (offsetX.abs() <= touchSlopX) {
+              // The drag ends on or before getting to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+            } else {
+              final double diffX2 = signedSlopX - diffX;
+              final double diffY2 = offsetSlope * diffX2;
+
+              // The vector from the edge of the box to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+            }
+          }
+        } else { // The drag goes through the corner of the box.
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+        }
+      } else { // The drag ends inside the box.
+        await gesture.moveBy(offset);
+      }
       await gesture.up();
     });
   }
