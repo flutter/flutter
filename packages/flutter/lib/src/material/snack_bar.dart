@@ -163,6 +163,7 @@ class SnackBar extends StatelessWidget {
     @required this.content,
     this.backgroundColor,
     this.action,
+    this.floating = false,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
   }) : assert(content != null),
@@ -184,6 +185,10 @@ class SnackBar extends StatelessWidget {
   ///
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction action;
+  
+  /// If this variable is true the SnackBar will be displayed as floating
+  /// default is false so old project don't break.
+  final bool floating;
 
   /// The amount of time the snack bar should be displayed.
   ///
@@ -253,7 +258,19 @@ class SnackBar extends StatelessWidget {
         onDismissed: (DismissDirection direction) {
           Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
-        child: Material(
+        child: this.floating ? Card(
+          elevation: 6.0,
+          color: backgroundColor ?? _kSnackBackground,
+          child: Theme(
+            data: darkTheme,
+            child: mediaQueryData.accessibleNavigation
+                ? snackbar
+                : FadeTransition(
+              opacity: fadeAnimation,
+              child: snackbar,
+            ),
+          ),
+        ) : Material(
           elevation: 6.0,
           color: backgroundColor ?? _kSnackBackground,
           child: Theme(
@@ -302,6 +319,7 @@ class SnackBar extends StatelessWidget {
       content: content,
       backgroundColor: backgroundColor,
       action: action,
+      floating: floating,
       duration: duration,
       animation: newAnimation,
     );
