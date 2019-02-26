@@ -11,6 +11,7 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+import 'card.dart';
 
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
