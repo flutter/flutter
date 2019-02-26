@@ -180,7 +180,6 @@ task:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
   set_clock_script:
-    - sudo rm -rf /tmp/flutter sdk/*
     - sudo sntp -sS pool.ntp.org
     - date
   install_cocoapods_script:
