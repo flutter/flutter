@@ -371,13 +371,14 @@ class RenderFlow extends RenderBox
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
-    for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
-      final int childIndex = _lastPaintOrder[i];
+    final int childrenSize = _lastPaintOrder.isEmpty ? children.length : _lastPaintOrder.length;
+    for (int i = childrenSize - 1; i >= 0; --i) {
+      final int childIndex = _lastPaintOrder.isEmpty ? i : _lastPaintOrder[i];
       if (childIndex >= children.length)
         continue;
       final RenderBox child = children[childIndex];
       final FlowParentData childParentData = child.parentData;
-      final Matrix4 transform = childParentData._transform;
+      final Matrix4 transform = childParentData._transform ?? Matrix4.identity();
       if (transform == null)
         continue;
       final Matrix4 inverse = Matrix4.zero();

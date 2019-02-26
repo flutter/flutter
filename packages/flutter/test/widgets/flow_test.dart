@@ -118,4 +118,30 @@ void main() {
     expect(opacityLayer.alpha, equals(opacity * 255));
     expect(layer.firstChild, isInstanceOf<TransformLayer>());
   });
+
+  testWidgets('Transparent Flow hit test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    final UniqueKey widgetKey = UniqueKey();
+
+    await tester.pumpWidget(
+        Opacity(
+            opacity: 0.0,
+            child: Flow(
+                key: widgetKey,
+                delegate: OpacityFlowDelegate(0.0),
+                children: <Widget>[
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () { log.add('tap'); },
+                  )
+                ]
+            )
+        )
+    );
+    expect(log, equals(<String>[]));
+
+    await tester.tap(find.byKey(widgetKey));
+    expect(log, equals(<String>['tap']));
+    log.clear();
+  });
 }
