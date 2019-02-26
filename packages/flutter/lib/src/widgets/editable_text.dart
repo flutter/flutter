@@ -418,34 +418,28 @@ class EditableText extends StatefulWidget {
   /// The full set of behaviors possible with [minLines] and [maxLines] are as
   /// follows.
   ///
-  /// {@tool sample}
-  /// Single line input
+  /// Input that occupies a single line and scrolls horizontally as needed
   /// ```dart
   /// TextField()
   /// ```
-  /// {@end-tool}
   ///
-  /// {@tool sample}
-  /// Input whose height grows from 1 line indefinitely
+  /// Input whose height grows from one line to as many lines as needed for the
+  /// text that was entered
   /// ```dart
   /// TextField(maxLines: null)
   /// ```
-  /// {@end-tool}
   ///
-  /// {@tool sample}
-  /// Input locked to the given number of lines
+  /// The input's height is large enough for the given number of lines. If
+  /// additional lines are entered the input scrolls vertically.
   /// ```dart
   /// TextField(maxLines: 2)
   /// ```
-  /// {@end-tool}
   ///
-  /// {@tool sample}
   /// Input whose height grows with content between a min and max. An infinite
   /// max is possible with `maxLines: null`.
   /// ```dart
   /// TextField(minLines: 2, maxLines: 4)
   /// ```
-  /// {@end-tool}
   /// {@endtemplate}
   final int maxLines;
 
@@ -464,8 +458,7 @@ class EditableText extends StatefulWidget {
   final int minLines;
 
   /// {@template flutter.widgets.editableText.expands}
-  /// Whether this widget can be sized based on its content or a parent Expanded
-  /// widget.
+  /// Whether this widget can be sized to fill its parent.
   ///
   /// If set to true and wrapped in an [Expanded] or [Flex] widget, the input
   /// will expand its height to fill the parent.
@@ -478,14 +471,12 @@ class EditableText extends StatefulWidget {
   /// See the examples in [maxLines] for the complete picture of how [maxLines],
   /// [minLines], and [expands] interact to produce various behaviors.
   ///
-  /// {@tool sample}
   /// Input that matches the height of its parent
   /// ```dart
   /// Expanded(
   ///   child: TextField(maxLines: null, expands: true),
   /// )
   /// ```
-  /// {@end-tool}
   /// {@endtemplate}
   final bool expands;
 

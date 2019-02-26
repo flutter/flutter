@@ -57,7 +57,6 @@ void main() {
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
         ' │ maxLines: 1\n'
         ' │ minLines: null\n'
-        ' │ expands: false\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'

@@ -701,12 +701,10 @@ class RenderEditable extends RenderBox {
     markNeedsTextLayout();
   }
 
-  // TODO(justinmc): Is it ok to use the editableText docs here? I guess
-  // maxLines did not so that it can add the part about the render object height
   /// {@macro flutter.widgets.editableText.minLines}
   int get minLines => _minLines;
   int _minLines;
-  /// The value must be greater than zero.
+  /// The value may be null. If it is not null, then it must be greater than zero.
   set minLines(int value) {
     assert(value == null || value > 0);
     if (minLines == value)
@@ -1196,8 +1194,7 @@ class RenderEditable extends RenderBox {
     // Clamp height to minLines or maxLines if needed
     final bool minLimited = minLines != null && minLines > 1;
     final bool maxLimited = maxLines != null;
-    final bool limited = (minLines != null && minLines > 1) || maxLines != null;
-    if (limited) {
+    if (minLimited || maxLimited) {
       _layoutText(width);
       if (minLimited && _textPainter.height < preferredLineHeight * minLines) {
         return preferredLineHeight * minLines;
@@ -1670,7 +1667,7 @@ class RenderEditable extends RenderBox {
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
     properties.add(IntProperty('minLines', minLines));
-    properties.add(DiagnosticsProperty<bool>('expands', expands));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));

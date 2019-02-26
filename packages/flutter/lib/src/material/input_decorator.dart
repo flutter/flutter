@@ -713,7 +713,7 @@ class _RenderDecoration extends RenderBox {
   }
 
   bool get expands => _expands;
-  bool _expands;
+  bool _expands = false;
   set expands(bool value) {
     assert(value != null);
     if (_expands == value)
@@ -1566,8 +1566,11 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the input field can expand its height to fill its parent.
   ///
-  /// If wrapped in a widget that lays out its child's height, like Expanded or
-  /// Flex, the input field will only be affected if [expands] is set to true.
+  /// If wrapped in a widget that constrains its child's height, like Expanded
+  /// or Flex, the input field will only be affected if [expands] is set to true.
+  ///
+  /// When [expands] is set to true, [minLines] and [maxLines] must be null to
+  /// avoid ambiguity in determining the height.
   ///
   /// Defaults to false.
   final bool expands;
@@ -1610,7 +1613,7 @@ class InputDecorator extends StatefulWidget {
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isFocused', isFocused));
-    properties.add(DiagnosticsProperty<bool>('expands', expands));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 }

@@ -156,9 +156,6 @@ class TextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
-       // TODO(justinmc): These asserts are repeated in editable and
-       // editable_text. Is that ok or is there a better pattern that avoids
-       // duplication?
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
