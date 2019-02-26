@@ -9,21 +9,20 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a continuous cornered rounded rectangle.
+/// A continuous corner rounded rectangle.
 ///
 /// A shape similar to a rounded rectangle, but with a smoother transition from
 /// the sides to the rounded corners.
 ///
-/// The rendered shape roughly approximates that of a super ellipse. In this
+/// The rendered shape roughly approximates that of a superellipse. In this
 /// shape, the curvature of each corner over the arc is approximately a gaussian
 /// curve instead of a step function as with a traditional quarter circle round.
-/// The rendered rectangle in dynamic radius mode is roughly a super ellipse with
-/// an n value of 5.
+/// The rendered rectangle is roughly a superellipse with an n value of 5.
 ///
 /// In an attempt to keep the shape of the rectangle the same regardless of its
-/// dimension, the radius will automatically be lessened to maximize the
-/// roundness of the resulting rectangle if its width or height is less than
-/// ~3x the radius.
+/// dimension (and to avoid clipping of the shape), the radius will
+/// automatically be lessened. The largest radius at a given aspect ratio where the shape doesn't clip. to maximize the roundness of the resulting
+/// rectangle if its width or height is less than ~3x the radius.
 ///
 /// This shape will always have 4 linear edges and 4 90º curves. However, at
 /// small extent values (ie.  <20 lpx), the rendered shape will appear to have
