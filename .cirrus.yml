@@ -10,6 +10,7 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
