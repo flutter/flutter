@@ -801,7 +801,7 @@ abstract class PointerSignalEvent extends PointerEvent {
   const PointerSignalEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
-    PointerDeviceKind kind = PointerDeviceKind.touch,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
     int device = 0,
     Offset position = Offset.zero,
   }) : super(
