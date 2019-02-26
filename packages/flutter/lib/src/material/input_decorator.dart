@@ -552,7 +552,7 @@ class _RenderDecoration extends RenderBox {
     @required TextDirection textDirection,
     @required TextBaseline textBaseline,
     @required bool isFocused,
-    @required this.expands,
+    @required bool expands,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
@@ -560,7 +560,8 @@ class _RenderDecoration extends RenderBox {
        _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
-       _isFocused = isFocused;
+       _isFocused = isFocused,
+       _expands = expands;
 
   final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
   final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
@@ -711,7 +712,15 @@ class _RenderDecoration extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  bool expands;
+  bool get expands => _expands;
+  bool _expands;
+  set expands(bool value) {
+    assert(value != null);
+    if (_expands == value)
+      return;
+    _expands = value;
+    markNeedsLayout();
+  }
 
   @override
   void attach(PipelineOwner owner) {
