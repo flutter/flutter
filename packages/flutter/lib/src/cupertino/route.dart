@@ -417,9 +417,11 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
     Key key,
     @required Animation<double> animation,
     @required this.child,
-  }) : _positionAnimation = animation
-         .drive(CurveTween(curve: Curves.linearToEaseOut))
-         .drive(_kBottomUpTween),
+  }) : _positionAnimation = CurvedAnimation(
+         parent: animation,
+         curve: Curves.linearToEaseOut,
+         reverseCurve: Curves.linearToEaseOut.flipped,
+       ).drive(_kBottomUpTween),
        super(key: key);
 
   final Animation<Offset> _positionAnimation;
