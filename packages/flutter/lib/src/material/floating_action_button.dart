@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/floating_action_button_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -73,20 +74,19 @@ class FloatingActionButton extends StatelessWidget {
     this.foregroundColor,
     this.backgroundColor,
     this.heroTag = const _DefaultHeroTag(),
-    this.elevation = 6.0,
-    this.highlightElevation = 12.0,
+    this.elevation,
+    this.highlightElevation,
     double disabledElevation,
     @required this.onPressed,
     this.mini = false,
-    this.shape = const CircleBorder(),
+    this.shape,
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) : assert(elevation != null && elevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
-       assert(shape != null),
        assert(isExtended != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
        disabledElevation = disabledElevation ?? elevation,
@@ -109,16 +109,15 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation = 12.0,
     double disabledElevation,
     @required this.onPressed,
-    this.shape = const StadiumBorder(),
+    this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
     Widget icon,
     @required Widget label,
-  }) : assert(elevation != null && elevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(shape != null),
        assert(isExtended != null),
        assert(clipBehavior != null),
        _sizeConstraints = _kExtendedSizeConstraints,
@@ -267,10 +266,18 @@ class FloatingActionButton extends StatelessWidget {
 
   final BoxConstraints _sizeConstraints;
 
+  static const double _defaultElevation = 6;
+  static const double _defaultHighlightElevation = 12;
+  static const ShapeBorder _defaultShape = CircleBorder();
+  static const ShapeBorder _defaultExtendedShape = StadiumBorder();
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color foregroundColor = this.foregroundColor ?? theme.accentIconTheme.color;
+    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+    final Color foregroundColor = this.foregroundColor
+      ?? floatingActionButtonTheme.foregroundColor
+      ?? theme.accentIconTheme.color;
     Widget result;
 
     if (child != null) {
@@ -284,17 +291,17 @@ class FloatingActionButton extends StatelessWidget {
 
     result = RawMaterialButton(
       onPressed: onPressed,
-      elevation: elevation,
-      highlightElevation: highlightElevation,
+      elevation: elevation ?? floatingActionButtonTheme.elevation ?? _defaultElevation,
+      highlightElevation: highlightElevation ?? floatingActionButtonTheme.highlightElevation ?? _defaultHighlightElevation,
       disabledElevation: disabledElevation,
       constraints: _sizeConstraints,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
-      fillColor: backgroundColor ?? theme.accentColor,
+      fillColor: backgroundColor ?? floatingActionButtonTheme.backgroundColor ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
         letterSpacing: 1.2,
       ),
-      shape: shape,
+      shape: shape ?? floatingActionButtonTheme.shape ?? isExtended ? _defaultExtendedShape : _defaultShape,
       clipBehavior: clipBehavior,
       child: result,
     );
