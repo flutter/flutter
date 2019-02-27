@@ -257,6 +257,7 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.up:
         case ui.PointerChange.cancel:
+          assert(_pointers.containsKey(datum.device));
           final _PointerState state = _pointers[datum.device];
           assert(state.down);
           if (position != state.lastPosition) {
