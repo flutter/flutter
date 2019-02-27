@@ -620,7 +620,12 @@ class ServiceEvent extends ServiceObject {
       _extensionKind = map['extensionKind'];
       _extensionData = map['extensionData'];
     }
-    _timelineEvents = map['timelineEvents'];
+    // map['timelineEvents'] is List<dynamic> which can't be assigned to
+    // List<Map<String, dynamic>> directly. Unfortunately, we previously didn't
+    // catch this exception because json_rpc_2 is hiding all these exceptions
+    // on a Stream.
+    final List<dynamic> dynamicList = map['timelineEvents'];
+    _timelineEvents = dynamicList?.cast<Map<String, dynamic>>();
   }
 
   bool get isPauseEvent {
@@ -1293,7 +1298,8 @@ class Isolate extends ServiceObjectOwner {
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
-    return result['enabled'] == 'true';
+    // result might be null when the service extension is not initialized
+    return result != null && result['enabled'] == 'true';
   }
 
   Future<Map<String, dynamic>> uiWindowScheduleFrame() {

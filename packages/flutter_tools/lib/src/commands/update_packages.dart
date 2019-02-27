@@ -22,7 +22,7 @@ import '../runner/flutter_command.dart';
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

@@ -1485,7 +1485,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
+  testWidgets('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -1508,16 +1508,32 @@ void main() {
     await tester.pumpWidget(buildChip(chipTheme));
     Material material = getMaterial(tester);
     expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.black);
 
     inputChip = const InputChip(
       label: Text('Label'),
       elevation: 4.0,
+      shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
     );
 
     await tester.pumpWidget(buildChip(chipTheme));
     await tester.pumpAndSettle();
     material = getMaterial(tester);
     expect(material.elevation, 4.0);
+    expect(material.shadowColor, Colors.green);
+
+    inputChip = const InputChip(
+      label: Text('Label'),
+      selected: true,
+      shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
+    );
+
+    await tester.pumpWidget(buildChip(chipTheme));
+    await tester.pumpAndSettle();
+    material = getMaterial(tester);
+    expect(material.shadowColor, Colors.blue);
   });
 
   testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {

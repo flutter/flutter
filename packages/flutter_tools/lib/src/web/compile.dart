@@ -38,6 +38,7 @@ class WebCompiler {
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
+    /// Compile Dart to JavaScript.
     final List<String> command = <String>[
       engineDartPath,
       dart2jsPath,
