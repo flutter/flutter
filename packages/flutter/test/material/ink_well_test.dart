@@ -54,7 +54,7 @@ void main() {
     await tester.tap(find.byType(InkWell), pointer: 2);
     await tester.tap(find.byType(InkWell), pointer: 3);
 
-    expect(log, equals(<String>['tap-cancel', 'double-tap']));
+    expect(log, equals(<String>['double-tap']));
     log.clear();
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
