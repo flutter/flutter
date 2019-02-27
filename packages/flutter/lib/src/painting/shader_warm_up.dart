@@ -101,11 +101,22 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     path.moveTo(60.0, 20.0);
     path.quadraticBezierTo(60.0, 60.0, 20.0, 60.0);
 
-    final List<ui.Path> paths = <ui.Path>[rrectPath, circlePath, path];
+    final ui.Path convexPath = ui.Path();
+    convexPath.moveTo(20.0, 30.0);
+    convexPath.lineTo(40.0, 20.0);
+    convexPath.lineTo(60.0, 30.0);
+    convexPath.lineTo(60.0, 60.0);
+    convexPath.lineTo(20.0, 60.0);
+    convexPath.close();
+
+    final List<ui.Path> paths = <ui.Path>[rrectPath, circlePath, path, convexPath];
 
     final List<ui.Paint> paints = <ui.Paint>[
       ui.Paint()
         ..isAntiAlias = true
+        ..style = ui.PaintingStyle.fill,
+      ui.Paint()
+        ..isAntiAlias = false
         ..style = ui.PaintingStyle.fill,
       ui.Paint()
         ..isAntiAlias = true
