@@ -120,7 +120,7 @@ abstract class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
-  Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
+  Future<void> connectToVmService({ bool pauseOnExceptions = false }) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
     _vmService.onReceive.listen((String s) => _debugPrint(s, topic: '<=vm='));
@@ -240,11 +240,11 @@ abstract class FlutterTestDriver {
     );
   }
 
-  Future<Isolate> resume({bool waitForNextPause = false}) => _resume(null, waitForNextPause);
-  Future<Isolate> stepOver({bool waitForNextPause = true}) => _resume(StepOption.kOver, waitForNextPause);
+  Future<Isolate> resume({ bool waitForNextPause = false }) => _resume(null, waitForNextPause);
+  Future<Isolate> stepOver({ bool waitForNextPause = true }) => _resume(StepOption.kOver, waitForNextPause);
   Future<Isolate> stepOverAsync({ bool waitForNextPause = true }) => _resume(StepOption.kOverAsyncSuspension, waitForNextPause);
-  Future<Isolate> stepInto({bool waitForNextPause = true}) => _resume(StepOption.kInto, waitForNextPause);
-  Future<Isolate> stepOut({bool waitForNextPause = true}) => _resume(StepOption.kOut, waitForNextPause);
+  Future<Isolate> stepInto({ bool waitForNextPause = true }) => _resume(StepOption.kInto, waitForNextPause);
+  Future<Isolate> stepOut({ bool waitForNextPause = true }) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
     final Isolate isolate = await _getFlutterIsolate();
@@ -354,7 +354,8 @@ abstract class FlutterTestDriver {
     ).whenComplete(subscription.cancel);
   }
 
-  Future<T> _timeoutWithMessages<T>(Future<T> Function() callback, {
+  Future<T> _timeoutWithMessages<T>(
+    Future<T> Function() callback, {
     @required String task,
     Duration timeout = defaultTimeout,
   }) {
@@ -491,10 +492,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _currentRunningAppId = (await started)['params']['appId'];
   }
 
-  Future<void> hotRestart({bool pause = false}) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
   Future<void> hotReload() => _restart(fullRestart: false);
 
-  Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
+  Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
     if (_currentRunningAppId == null)
       throw Exception('App has not started yet');
 

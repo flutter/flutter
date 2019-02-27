@@ -226,7 +226,7 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  ui.ParagraphStyle _createParagraphStyle([TextDirection defaultTextDirection]) {
+  ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
     assert(textAlign != null);

@@ -96,6 +96,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const ShrineDemo(),
     ),
     GalleryDemo(
+      title: 'Fortnightly',
+      subtitle: 'Newspaper typography app',
+      icon: GalleryIcons.custom_typography,
+      category: _kDemos,
+      routeName: FortnightlyDemo.routeName,
+      buildRoute: (BuildContext context) => FortnightlyDemo(),
+    ),
+    GalleryDemo(
       title: 'Contact profile',
       subtitle: 'Address book entry with a flexible appbar',
       icon: GalleryIcons.account_box,

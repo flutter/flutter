@@ -269,7 +269,7 @@ class CommonFinders {
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
-  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false}) {
+  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 }
