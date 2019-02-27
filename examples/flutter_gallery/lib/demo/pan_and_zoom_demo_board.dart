@@ -2,6 +2,7 @@ import 'dart:collection' show IterableMixin;
 import 'dart:math';
 import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart' hide Gradient;
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // An abstraction of the hex board logic
 class Board extends Object with IterableMixin<BoardPoint> {
@@ -43,13 +44,35 @@ class Board extends Object with IterableMixin<BoardPoint> {
   double hexagonMargin; // Margin between hexagons
   List<Offset> positionsForHexagonAtOrigin;
 
+  // Get the distance between two locations
+  int getDistance(BoardPoint a, BoardPoint b) {
+    final Vector3 a3 = a.getCubeCoords();
+    final Vector3 b3 = b.getCubeCoords();
+    return
+      ((a3.x - b3.x).abs() + (a3.y - b3.y).abs() + (a3.z - b3.z).abs()) ~/ 2;
+  }
+
+  // Check if the board point is actually on the board
+  bool _validateBoardPoint(BoardPoint boardPoint) {
+    BoardPoint center = BoardPoint(0, 0);
+    final int distanceFromCenter = getDistance(center, boardPoint);
+    return distanceFromCenter <= boardRadius;
+  }
+
   // Return a q,r BoardPoint for a point in the scene, where the origin is in
-  // the center of the board in both coordinate systems.
+  // the center of the board in both coordinate systems. If no BoardPoint at the
+  // location, return null.
   BoardPoint pointToBoardPoint(Offset point) {
-    return BoardPoint(
+    final BoardPoint boardPoint = BoardPoint(
       ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
       ((2 / 3 * point.dy) / hexagonRadius).round(),
     );
+
+    if (!_validateBoardPoint(boardPoint)) {
+      return null;
+    }
+
+    return boardPoint;
   }
 
   // Return a scene point for a q,r point
@@ -171,5 +194,14 @@ class BoardPoint {
   int get hashCode {
     final String string = q.toString() + r.toString();
     return int.parse(string);
+  }
+
+  // Convert from q,r axial coords to x,y,z cube coords
+  Vector3 getCubeCoords() {
+    return Vector3(
+      q.toDouble(),
+      r.toDouble(),
+      (-q - r).toDouble(),
+    );
   }
 }

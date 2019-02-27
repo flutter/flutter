@@ -61,6 +61,22 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
         onTapUp: _onTapUp,
         size: screenSize,
       ),
+      floatingActionButton: _board.selected == null ? null : FloatingActionButton(
+        onPressed: () => setState(() {
+          if (_board.selected == null) {
+            return;
+          }
+          showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
+            return Container(
+              width: double.infinity,
+              height: 200,
+              child: Text('${_board.selected.q}, ${_board.selected.r}'),
+            );
+          });
+        }),
+        tooltip: 'Edit Tile',
+        child: const Icon(Icons.edit),
+      ),
     );
   }
 
