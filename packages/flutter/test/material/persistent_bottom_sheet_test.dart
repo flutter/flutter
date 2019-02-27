@@ -340,4 +340,29 @@ void main() {
     expect(find.text('showModalBottomSheet'), findsNothing);
     expect(find.byKey(bottomSheetKey), findsNothing);
   });
+
+  testWidgets('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        }
+      );
+    });
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+
+    bottomSheet.close();
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsNothing);
+  });
 }

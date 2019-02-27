@@ -1660,7 +1660,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet,
       completer,
       entry != null
-        ? () {}
+        ? entry.remove
         : _removeCurrentBottomSheet,
       (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
       !isPersistent,
