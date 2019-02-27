@@ -9,7 +9,7 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// A continuous corner rounded rectangle.
+/// A rectangle border with continuous corners.
 ///
 /// A shape similar to a rounded rectangle, but with a smoother transition from
 /// the sides to the rounded corners.
@@ -24,6 +24,13 @@ import 'edge_insets.dart';
 /// automatically be lessened if its width or height is less than ~3x the radius.
 /// The new resulting radius will always be maximal in respect to the dimensions
 /// of the given rectangle.
+///
+/// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
+/// and the actual height and width of pixels that are manipulated to render it.
+/// For example, if a rectangle had dimensions 80px x 100px, and a corner radius
+/// of 25.0, in reality ~38 pixels in each dimension would be used to render a
+/// corner and so ~76px x ~38px would be used to render both corners on a given
+/// side.
 ///
 /// This shape will always have 4 linear edges and 4 90º curves. However, for
 /// rectangles with small values of width or height (ie.  <20 lpx) and a low
@@ -41,14 +48,19 @@ import 'edge_insets.dart';
 ///       color: Colors.blueAccent[400],
 ///       shape: const ContinuousRectangleBorder(borderRadius: 75.0),
 ///       child: const SizedBox(
-///         height: 200,
-///         width: 200,
+///         height: 200.0,
+///         width: 200.0,
 ///       ),
 ///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
+///
+/// The image below depicts a [ContinuousRectangleBorder] with a width
+/// and height of 200.0 and a curve radius of 75.0.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.continuous_rectangle.png)
 ///
 /// See also:
 ///
@@ -61,12 +73,12 @@ import 'edge_insets.dart';
 class ContinuousRectangleBorder extends ShapeBorder {
   /// Creates a continuous cornered rectangle border.
   ///
-  /// The [side] and [borderRadius] arguments must not be null.
+  /// The [side] and [cornerRadius] arguments must not be null.
   const ContinuousRectangleBorder({
     this.side = BorderSide.none,
-    this.borderRadius = 0.0,
+    this.cornerRadius = 0.0,
   }) : assert(side != null),
-       assert(borderRadius != null);
+       assert(cornerRadius != null);
 
   /// The radius for each corner.
   ///
@@ -75,9 +87,9 @@ class ContinuousRectangleBorder extends ShapeBorder {
   ///
   /// By default the radius is 0.0. This value must not be null.
   ///
-  /// Unlike [RoundedRectangleBorder], there is only a single border radius used
+  /// Unlike [RoundedRectangleBorder], there is only a single radius value used
   /// to describe the radius for every corner.
-  final double borderRadius;
+  final double cornerRadius;
 
   /// The style of this border.
   ///
@@ -86,7 +98,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// the exterior shape. If concentric corners are desired for a stroke width
   /// greater than 1/10 the length of the smallest dimension, it is recommended
   /// to use a [Stack] widget, placing a smaller [ContinuousRectangleBorder] with
-  /// the same 'borderRadius' on top of a larger one.
+  /// the same 'cornerRadius' on top of a larger one.
   ///
   /// By default this value is [BorderSide.none]. It must not be null.
   final BorderSide side;
@@ -103,14 +115,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
     final double height = rect.height;
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
-    final double radius = math.max(1, borderRadius);
+    final double radius = math.max(1, cornerRadius);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
     //
     // For example, leftX(k) will give the x value on the left side of the shape
     // that is precisely `k` distance from the left edge of the shape for the
-    // predetermined radius value.
+    // predetermined 'limitedRadius' value.
     double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
     double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
     double topY(double y) { return centerY + y * limitedRadius - height / 2; }
@@ -180,6 +192,12 @@ class ContinuousRectangleBorder extends ShapeBorder {
     //
     // If the shortest side length to radius ratio drops below this value, the
     // radius must be lessened to avoid clipping (ie. concavity) of the shape.
+    //
+    // This value comes from the website where the other equations and curves
+    // were found
+    // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
+    // however it represents the ratio of the total 90º curve width or height to
+    // the width or height of the smallest rectangle dimension.
     const double maxMultiplier = 3.0573;
 
     // The multiplier of the radius in comparison to the smallest edge length
@@ -250,7 +268,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   ShapeBorder scale(double t) {
     return ContinuousRectangleBorder(
       side: side.scale(t),
-      borderRadius: borderRadius * t,
+      cornerRadius: cornerRadius * t,
     );
   }
 
@@ -260,7 +278,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: ui.lerpDouble(a.borderRadius, borderRadius, t),
+        cornerRadius: ui.lerpDouble(a.cornerRadius, cornerRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -272,7 +290,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: ui.lerpDouble(borderRadius, b.borderRadius, t),
+        cornerRadius: ui.lerpDouble(cornerRadius, b.cornerRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -283,14 +301,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousRectangleBorder typedOther = other;
-    return side == typedOther.side && borderRadius == typedOther.borderRadius;
+    return side == typedOther.side && cornerRadius == typedOther.cornerRadius;
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius);
+  int get hashCode => hashValues(side, cornerRadius);
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '$runtimeType($side, $cornerRadius)';
   }
 }

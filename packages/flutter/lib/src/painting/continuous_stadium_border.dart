@@ -8,7 +8,7 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// A continuously cornered stadium shape.
+/// A stadium border with continuous corners.
 ///
 /// A shape similar to a stadium, but with a smoother transition from
 /// each linear edge to its 180º curves.
@@ -31,13 +31,18 @@ import 'edge_insets.dart';
 ///     color: Colors.blueAccent[400],
 ///     shape: const ContinuousStadiumBorder(),
 ///     child: const SizedBox(
-///       height: 100,
-///       width: 200,
+///       height: 100.0,
+///       width: 200.0,
 ///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
+///
+/// The image below depicts a [ContinuousStadiumBorder] with a width of 200.0
+/// and a height of 100.0.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.continuous_stadium.png)
 ///
 /// See also:
 ///
@@ -77,7 +82,10 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // radius must be lessened to avoid clipping (ie. concavity) of the shape.
     //
     // This value comes from the website where the other equations and curves
-    // were found, however it represents the ratio of the total curve height
+    // were found
+    // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
+    // however it represents the ratio of the total 90º curve width or height to
+    // the width or height of the smallest rectangle dimension.
     const double maxMultiplier = 3.0573;
 
     // The multiplier of the radius in comparison to the smallest edge length
@@ -116,9 +124,8 @@ class ContinuousStadiumBorder extends ShapeBorder {
     double leftMidX(double x) { return originX + x * height; }
     double rightMidX(double x) { return originX + width - x * limitedRadius; }
 
-    // The secondary super elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The width is greater than the height. Approximately
-    // renders a super ellipse with an n value of 2.
+    // An elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The width is greater than the height.
     Path roundedRectHorizontal () {
       return Path()
         ..moveTo(leftX(2.00593972), topY(0))
@@ -171,9 +178,8 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    // The secondary super elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The height is greater than the width. Approximately
-    // renders a super ellipse with an n value of 2.
+    // An elliptical shape where there are only 2 straight edges
+    // and two 180º curves. The height is greater than the width.
     Path roundedRectVertical () {
       return Path()
         ..moveTo(centerX, topY(0))
@@ -286,7 +292,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
   }
 
   @override
-  bool operator == (dynamic other) {
+  bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousStadiumBorder typedOther = other;

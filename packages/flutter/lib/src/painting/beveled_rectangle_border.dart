@@ -16,6 +16,11 @@ import 'edge_insets.dart';
 /// but not farther than the side's center. If all the border radii
 /// exceed the sides' half widths/heights the resulting shape is
 /// diamond made by connecting the centers of the sides.
+///
+/// The image depicts a [BeveledRectangleBorder] with a width and height of
+/// 200.0 and circular radius of 75.0 on all corners.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.beveled_rectangle.png)
 class BeveledRectangleBorder extends ShapeBorder {
   /// Creates a border like a [RoundedRectangleBorder] except that the corners
   /// are joined by straight lines instead of arcs.

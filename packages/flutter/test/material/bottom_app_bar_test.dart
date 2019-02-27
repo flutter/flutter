@@ -55,13 +55,14 @@ void main() {
                   onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
-                bottomNavigationBar: const BottomAppBar(
+                bottomNavigationBar: BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    ContinuousRectangleBorder(borderRadius: 30.0),
+                    BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                    ContinuousRectangleBorder(cornerRadius: 30.0),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
-                  child: SizedBox(height: 100.0),
+                  child: const SizedBox(height: 100.0),
                 ),
               ),
             ),
@@ -74,14 +75,12 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
-      skip: !Platform.isLinux,
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
-      skip: !Platform.isLinux,
     );
   });
 

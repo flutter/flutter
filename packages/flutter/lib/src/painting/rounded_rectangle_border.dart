@@ -19,6 +19,17 @@ import 'edge_insets.dart';
 ///
 /// This shape can interpolate to and from [CircleBorder].
 ///
+/// The image below depicts a [RoundedRectangleBorder] with a width of 200.0 and
+/// height of 200.0 and a circular radius of 75.0 on all corners.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.rounded_rectangle.png)
+///
+/// The image below depicts a [RoundedRectangleBorder] with a width of 200.0 and
+/// height of 200.0 and a circular radius of 0.0 on all corners. (ie. a
+/// non-rounded rectangle).
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.rectangle.png)
+///
 /// See also:
 ///
 ///  * [BorderSide], which is used to describe each side of the box.

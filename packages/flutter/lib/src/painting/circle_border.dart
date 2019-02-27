@@ -16,6 +16,10 @@ import 'edge_insets.dart';
 /// When applied to a rectangular space, the border paints in the center of the
 /// rectangle.
 ///
+/// The image below depicts a [CircleBorder] with a width and height of 200.0.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.circle.png)
+///
 /// See also:
 ///
 ///  * [BorderSide], which is used to describe each side of the box.

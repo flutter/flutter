@@ -19,6 +19,11 @@ import 'rounded_rectangle_border.dart';
 /// If the rectangle is taller than it is wide, then the semicircles will be on the
 /// top and bottom, and on the left and right otherwise.
 ///
+/// The image below depicts a [StadiumBorder] with a width of 200.0 and a height
+/// of 150.0.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.stadium.png)
+///
 /// See also:
 ///
 ///  * [BorderSide], which is used to describe the border of the stadium.
