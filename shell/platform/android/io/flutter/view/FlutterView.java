@@ -311,6 +311,7 @@ public class FlutterView extends SurfaceView
             .send();
     }
 
+    @SuppressWarnings("deprecation")
     private void sendLocalesToDart(Configuration config) {
         List<Locale> locales = new ArrayList<>();
         if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
