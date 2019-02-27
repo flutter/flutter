@@ -509,7 +509,7 @@ class ElasticInOutCurve extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
-/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_in_fast_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_center.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear.mp4}
 ///
 /// See also:
@@ -871,8 +871,8 @@ class Curves {
   /// A cubic animation curve that starts quickly, slows down, and then ends
   /// quickly.
   ///
-  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_in_fast_out.mp4}
-  static const Cubic fastInFastOut = Cubic(0.15, 0.85, 0.85, 0.15);
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_center.mp4}
+  static const Cubic slowCenter = Cubic(0.15, 0.85, 0.85, 0.15);
 
   /// An oscillating curve that grows in magnitude.
   ///
