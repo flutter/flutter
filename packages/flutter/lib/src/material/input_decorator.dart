@@ -944,8 +944,9 @@ class _RenderDecoration extends RenderBox {
     // The text in the input when an outline border is present is centered
     // within the container less 2.0 dps at the top to account for the vertical
     // space occupied by the floating label.
-    final double outlineBaseline = inputInternalBaseline +
-      (containerHeight - (2.0 + inputHeight)) / 2.0 + baselineAdjustment;
+    final double outlineBaseline = inputInternalBaseline
+      + baselineAdjustment / 2
+      + (containerHeight - (2.0 + inputHeight)) / 2.0;
 
     // Find the positions of the text below the input when it exists.
     double subtextCounterBaseline = 0;
