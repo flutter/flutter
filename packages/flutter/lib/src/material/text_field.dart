@@ -65,6 +65,22 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// {@tool sample}
+/// This example shows how to create a [TextField] that will obscure input. The
+/// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
+/// and adds a label.
+///
+/// ```dart
+/// TextField(
+///   obscureText: true,
+///   decoration: InputDecoration(
+///     border: OutlineInputBorder(),
+///     labelText: 'Password',
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
