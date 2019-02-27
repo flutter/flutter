@@ -7,7 +7,7 @@
 
 // When running this script, use the output of this script to update the
 // comments that say when the script was last run (that comment appears twice in
-// window.dart), and then replace all the "case" statements with the output from
+// window.dart), and then replace all the map entries with the output from
 // this script (the first set for _canonicalizeLanguageCode and the second set
 // for _canonicalizeRegionCode).
 
@@ -60,7 +60,7 @@ Future<Null> main() async {
       assert(section.containsKey('Deprecated'));
       final String comment = section.containsKey('Comment') ? section['Comment'].single : 'deprecated ${section['Deprecated'].single}';
       final String preferredValue = section['Preferred-Value'].single;
-      outputs[type].add('case \'$subtag\': return \'$preferredValue\'; // ${descriptions.join(", ")}; $comment');
+      outputs[type].add('\'$subtag\': \'$preferredValue\', // ${descriptions.join(", ")}; $comment');
     }
   }
   print('// Mappings generated for language subtag registry as of $fileDate.');
