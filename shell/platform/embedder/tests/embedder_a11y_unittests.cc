@@ -151,17 +151,32 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
 
   // Wait for UpdateSemantics callback on platform (current) thread.
   int node_count = 0;
+  int node_batch_end_count = 0;
   test_data.on_semantics_update =
-      [&node_count](const FlutterSemanticsNode* node) { ++node_count; };
+      [&node_count, &node_batch_end_count](const FlutterSemanticsNode* node) {
+        if (node->id == kFlutterSemanticsNodeIdBatchEnd) {
+          ++node_batch_end_count;
+        } else {
+          ++node_count;
+        }
+      };
   int action_count = 0;
+  int action_batch_end_count = 0;
   test_data.on_custom_action_update =
-      [&action_count](const FlutterSemanticsCustomAction* action) {
-        ++action_count;
+      [&action_count,
+       &action_batch_end_count](const FlutterSemanticsCustomAction* action) {
+        if (action->id == kFlutterSemanticsCustomActionIdBatchEnd) {
+          ++action_batch_end_count;
+        } else {
+          ++action_count;
+        }
       };
   g_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   ASSERT_EQ(4, node_count);
+  ASSERT_EQ(1, node_batch_end_count);
   ASSERT_EQ(1, action_count);
+  ASSERT_EQ(1, action_batch_end_count);
 
   // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   g_test_data_callback = [](Dart_NativeArguments args) {

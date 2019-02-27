@@ -448,6 +448,11 @@ FlutterEngineResult FlutterEngineRun(size_t version,
             };
             ptr(&embedder_node, user_data);
           }
+          const FlutterSemanticsNode batch_end_sentinel = {
+              sizeof(FlutterSemanticsNode),
+              kFlutterSemanticsNodeIdBatchEnd,
+          };
+          ptr(&batch_end_sentinel, user_data);
         };
   }
 
@@ -469,6 +474,11 @@ FlutterEngineResult FlutterEngineRun(size_t version,
             };
             ptr(&embedder_action, user_data);
           }
+          const FlutterSemanticsCustomAction batch_end_sentinel = {
+              sizeof(FlutterSemanticsCustomAction),
+              kFlutterSemanticsCustomActionIdBatchEnd,
+          };
+          ptr(&batch_end_sentinel, user_data);
         };
   }
 
