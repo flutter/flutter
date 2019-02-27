@@ -232,7 +232,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     );
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
       printError('Codegeneration failed, halting build.');
