@@ -324,7 +324,11 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    observatoryUris = <Uri>[result.observatoryUri];
+    if (result.hasObservatory) {
+      observatoryUris = <Uri>[result.observatoryUri];
+    } else {
+      observatoryUris = <Uri>[];
+    }
     return 0;
   }
 
@@ -382,8 +386,11 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    if (result.hasObservatory)
+    if (result.hasObservatory) {
       observatoryUris = <Uri>[result.observatoryUri];
+    } else {
+      observatoryUris = <Uri>[];
+    }
     return 0;
   }
 

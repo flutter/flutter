@@ -228,4 +228,3 @@ docker_builder:
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
-
