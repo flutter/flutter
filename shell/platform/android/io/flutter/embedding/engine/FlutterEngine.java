@@ -6,11 +6,19 @@ package io.flutter.embedding.engine;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
+import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
+import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
+import io.flutter.embedding.engine.systemchannels.NavigationChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
+import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.embedding.engine.systemchannels.SystemChannel;
+import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 
 /**
  * A single Flutter execution environment.
@@ -35,6 +43,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
  * {@link FlutterRenderer} and then attach a {@link FlutterRenderer.RenderSurface}.  Consider using
  * a {@link io.flutter.embedding.android.FlutterView} as a {@link FlutterRenderer.RenderSurface}.
  */
+// TODO(mattcarroll): re-evaluate system channel APIs - some are not well named or differentiated
 public class FlutterEngine {
   private static final String TAG = "FlutterEngine";
 
@@ -44,9 +53,28 @@ public class FlutterEngine {
   private final FlutterRenderer renderer;
   @NonNull
   private final DartExecutor dartExecutor;
-  // TODO(mattcarroll): integrate system channels with FlutterEngine
   @NonNull
   private final FlutterPluginRegistry pluginRegistry;
+
+  // System channels.
+  @NonNull
+  private final AccessibilityChannel accessibilityChannel;
+  @NonNull
+  private final KeyEventChannel keyEventChannel;
+  @NonNull
+  private final LifecycleChannel lifecycleChannel;
+  @NonNull
+  private final LocalizationChannel localizationChannel;
+  @NonNull
+  private final NavigationChannel navigationChannel;
+  @NonNull
+  private final PlatformChannel platformChannel;
+  @NonNull
+  private final SettingsChannel settingsChannel;
+  @NonNull
+  private final SystemChannel systemChannel;
+  @NonNull
+  private final TextInputChannel textInputChannel;
 
   private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
     @SuppressWarnings("unused")
@@ -81,6 +109,16 @@ public class FlutterEngine {
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if possible.
     this.renderer = new FlutterRenderer(flutterJNI);
+
+    accessibilityChannel = new AccessibilityChannel(dartExecutor);
+    keyEventChannel = new KeyEventChannel(dartExecutor);
+    lifecycleChannel = new LifecycleChannel(dartExecutor);
+    localizationChannel = new LocalizationChannel(dartExecutor);
+    navigationChannel = new NavigationChannel(dartExecutor);
+    platformChannel = new PlatformChannel(dartExecutor);
+    settingsChannel = new SettingsChannel(dartExecutor);
+    systemChannel = new SystemChannel(dartExecutor);
+    textInputChannel = new TextInputChannel(dartExecutor);
 
     this.pluginRegistry = new FlutterPluginRegistry(this, context);
   }
@@ -148,6 +186,80 @@ public class FlutterEngine {
   @NonNull
   public FlutterRenderer getRenderer() {
     return renderer;
+  }
+
+  /**
+   * System channel that sends accessibility requests and events from Flutter to Android.
+   */
+  @NonNull
+  public AccessibilityChannel getAccessibilityChannel() {
+    return accessibilityChannel;
+  }
+
+  /**
+   * System channel that sends key events from Android to Flutter.
+   */
+  @NonNull
+  public KeyEventChannel getKeyEventChannel() {
+    return keyEventChannel;
+  }
+
+  /**
+   * System channel that sends Android lifecycle events to Flutter.
+   */
+  @NonNull
+  public LifecycleChannel getLifecycleChannel() {
+    return lifecycleChannel;
+  }
+
+  /**
+   * System channel that sends locale data from Android to Flutter.
+   */
+  @NonNull
+  public LocalizationChannel getLocalizationChannel() {
+    return localizationChannel;
+  }
+
+  /**
+   * System channel that sends Flutter navigation commands from Android to Flutter.
+   */
+  @NonNull
+  public NavigationChannel getNavigationChannel() {
+    return navigationChannel;
+  }
+
+  /**
+   * System channel that sends platform-oriented requests and information to Flutter,
+   * e.g., requests to play sounds, requests for haptics, system chrome settings, etc.
+   */
+  @NonNull
+  public PlatformChannel getPlatformChannel() {
+    return platformChannel;
+  }
+
+  /**
+   * System channel that sends platform/user settings from Android to Flutter, e.g.,
+   * time format, scale factor, etc.
+   */
+  @NonNull
+  public SettingsChannel getSettingsChannel() {
+    return settingsChannel;
+  }
+
+  /**
+   * System channel that sends memory pressure warnings from Android to Flutter.
+   */
+  @NonNull
+  public SystemChannel getSystemChannel() {
+    return systemChannel;
+  }
+
+  /**
+   * System channel that sends and receives text input requests and state.
+   */
+  @NonNull
+  public TextInputChannel getTextInputChannel() {
+    return textInputChannel;
   }
 
   // TODO(mattcarroll): propose a robust story for plugin backward compability and future facing API.
