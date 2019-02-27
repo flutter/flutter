@@ -456,14 +456,16 @@ public class FlutterView extends SurfaceView
         packet.putLong(0); // obscured
 
         packet.putDouble(event.getPressure(pointerIndex)); // pressure
+        double pressureMin = 0.0, pressureMax = 1.0;
         if (event.getDevice() != null) {
             InputDevice.MotionRange pressureRange = event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE);
-            packet.putDouble(pressureRange.getMin()); // pressure_min
-            packet.putDouble(pressureRange.getMax()); // pressure_max
-        } else {
-            packet.putDouble(0.0); // pressure_min
-            packet.putDouble(1.0); // pressure_max
+            if (pressureRange != null) {
+                pressureMin = pressureRange.getMin();
+                pressureMax = pressureRange.getMax();
+            }
         }
+        packet.putDouble(pressureMin); // pressure_min
+        packet.putDouble(pressureMax); // pressure_max
 
         if (pointerKind == kPointerDeviceKindStylus) {
             packet.putDouble(event.getAxisValue(MotionEvent.AXIS_DISTANCE, pointerIndex)); // distance
