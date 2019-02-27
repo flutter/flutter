@@ -439,7 +439,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('loosing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
+  testGesture('losing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
