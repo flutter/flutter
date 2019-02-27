@@ -863,18 +863,20 @@ class _RenderDecoration extends RenderBox {
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
-    const double SUBTEXT_GAP = 8.0;
+    const double subtextGap = 8.0;
     final double labelHeight = label == null
       ? 0
       : decoration.floatingLabelHeight;
     final double topHeight = decoration.border.isOutline
-        ? math.max(labelHeight - boxToBaseline[label], 0)
-        : labelHeight;
+      ? math.max(labelHeight - boxToBaseline[label], 0)
+      : labelHeight;
     final double counterHeight = counter == null
-      ? 0 : boxToBaseline[counter] + SUBTEXT_GAP * 2;
+      ? 0
+      : boxToBaseline[counter] + subtextGap * 2;
     final _HelperError helperErrorWidget = decoration.helperError;
     final double helperErrorHeight = helperErrorWidget.helperText == null
-      ? 0 : helperError.size.height + SUBTEXT_GAP * 2;
+      ? 0
+      : helperError.size.height + subtextGap * 2;
     final double bottomHeight = math.max(
       counterHeight,
       helperErrorHeight,
@@ -889,7 +891,7 @@ class _RenderDecoration extends RenderBox {
 
     // The field can be occupied by a hint or by the input itself
     final double hintHeight = hint == null ? 0 : hint.size.height;
-    final double inputDirectHeight = input?.size?.height == null ? 0 : input.size.height;
+    final double inputDirectHeight = input == null ? 0 : input.size.height;
     final double inputHeight = math.max(hintHeight, inputDirectHeight);
     final double inputInternalBaseline = math.max(
       boxToBaseline[input],
@@ -914,7 +916,7 @@ class _RenderDecoration extends RenderBox {
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
 
-    // Calculate the height of the visible input container box. What would be outlined.
+    // Calculate the height of the input text container.
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -955,13 +957,13 @@ class _RenderDecoration extends RenderBox {
     double subtextHelperHeight = 0;
     if (counter != null) {
       subtextCounterBaseline =
-        containerHeight + SUBTEXT_GAP + boxToBaseline[counter];
-      subtextCounterHeight = counter.size.height + SUBTEXT_GAP;
+        containerHeight + subtextGap + boxToBaseline[counter];
+      subtextCounterHeight = counter.size.height + subtextGap;
     }
     if (helperErrorWidget.helperText != null) {
       subtextHelperBaseline =
-        containerHeight + SUBTEXT_GAP + boxToBaseline[helperError];
-      subtextHelperHeight = helperError.size.height + SUBTEXT_GAP;
+        containerHeight + subtextGap + boxToBaseline[helperError];
+      subtextHelperHeight = helperError.size.height + subtextGap;
     }
     final double subtextBaseline = math.max(
       subtextCounterBaseline,
@@ -1565,13 +1567,15 @@ class InputDecorator extends StatefulWidget {
   /// Defaults to false.
   final bool isFocused;
 
-  /// Whether the input field can expand its height to fill its parent.
+  /// If true, the height of the input field will be as large as possible.
   ///
   /// If wrapped in a widget that constrains its child's height, like Expanded
-  /// or Flex, the input field will only be affected if [expands] is set to true.
+  /// or SizedBox, the input field will only be affected if [expands] is set to
+  /// true.
   ///
-  /// When [expands] is set to true, [minLines] and [maxLines] must be null to
-  /// avoid ambiguity in determining the height.
+  /// See [TextField.minLines] and [TextField.maxLines] for related ways to
+  /// affect the height of an input. When [expands] is true, both must be null
+  /// in order to avoid ambiguity in determining the height.
   ///
   /// Defaults to false.
   final bool expands;

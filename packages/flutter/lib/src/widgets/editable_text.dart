@@ -416,15 +416,17 @@ class EditableText extends StatefulWidget {
   /// the input to grow between the indicated range.
   ///
   /// The full set of behaviors possible with [minLines] and [maxLines] are as
-  /// follows.
+  /// follows. These examples apply equally to `TextField`, `TextFormField`, and
+  /// `EditableText`.
   ///
-  /// Input that occupies a single line and scrolls horizontally as needed
+  /// Input that occupies a single line and scrolls horizontally as needed.
   /// ```dart
   /// TextField()
   /// ```
   ///
-  /// Input whose height grows from one line to as many lines as needed for the
-  /// text that was entered
+  /// Input whose height grows from one line up to as many lines as needed for
+  /// the text that was entered. If a height limit is imposed by its parent, it
+  /// will scroll vertically when its height reaches that limit.
   /// ```dart
   /// TextField(maxLines: null)
   /// ```
@@ -458,15 +460,15 @@ class EditableText extends StatefulWidget {
   final int minLines;
 
   /// {@template flutter.widgets.editableText.expands}
-  /// Whether this widget can be sized to fill its parent.
+  /// Whether this widget's height will be sized to fill its parent.
   ///
-  /// If set to true and wrapped in an [Expanded] or [Flex] widget, the input
-  /// will expand its height to fill the parent.
+  /// If set to true and wrapped in a parent widget like [Expanded] or
+  /// [SizedBox], the input will expand to fill the parent.
   ///
   /// [maxLines] and [minLines] must both be null when this is set to true,
   /// otherwise an error is thrown.
   ///
-  /// Defaults to null.
+  /// Defaults to false.
   ///
   /// See the examples in [maxLines] for the complete picture of how [maxLines],
   /// [minLines], and [expands] interact to produce various behaviors.

@@ -832,6 +832,7 @@ void main() {
     await tester.pumpWidget(textFieldBuilder(maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size.height, greaterThan(emptyInputSize.height));
+    expect(inputBox.size.width, emptyInputSize.width);
 
     final Size threeLineInputSize = inputBox.size;
 
@@ -852,6 +853,7 @@ void main() {
     await tester.pumpWidget(textFieldBuilder(maxLines: 4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
 
     final Size fourLineInputSize = inputBox.size;
 
@@ -866,6 +868,7 @@ void main() {
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pump();
     expect(inputBox.size.height, greaterThan(fourLineInputSize.height));
+    expect(inputBox.size.width, fourLineInputSize.width);
   });
 
   testWidgets('TextField height with minLines and maxLines', (WidgetTester tester) async {
@@ -885,6 +888,7 @@ void main() {
     await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size.height, greaterThan(emptyInputSize.height));
+    expect(inputBox.size.width, emptyInputSize.width);
 
     final Size threeLineInputSize = inputBox.size;
 
@@ -895,6 +899,7 @@ void main() {
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pump();
     expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
 
     // With minLines and maxLines set, input will expand through the range
     await tester.enterText(find.byType(TextField), '');
@@ -904,6 +909,7 @@ void main() {
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pump();
     expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
 
     // minLines can't be greater than maxLines.
     expect(() async {
@@ -964,6 +970,7 @@ void main() {
     // it's wrapped in an Expanded widget.
     await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: null));
     expect(border.size.height, greaterThan(unexpandedInputSize.height));
+    expect(border.size.width, unexpandedInputSize.width);
 
     // min/maxLines that is not null and expands: true contradict each other.
     expect(() async {
@@ -975,8 +982,8 @@ void main() {
   });
 
   testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
-    const double HEIGHT = 200.0;
-    const double PADDING = 24.0;
+    const double height = 200.0;
+    const double padding = 24.0;
 
     Widget containedTextFieldBuilder({
       Widget counter,
@@ -986,7 +993,7 @@ void main() {
     }) {
       return boilerplate(
         child: Container(
-          height: HEIGHT,
+          height: height,
           child: TextField(
             key: textFieldKey,
             maxLines: null,
@@ -1012,18 +1019,18 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a\n' * 11);
     await tester.pump();
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, HEIGHT - PADDING);
+    expect(inputBox.size.height, height - padding);
 
     // Adding a counter causes the EditableText to shrink to fit the counter
     // inside the parent as well.
-    const double COUNTER_HEIGHT = 40.0;
-    const double SUBTEXT_GAP = 8.0 * 2;
-    const double COUNTER_SPACE = COUNTER_HEIGHT + SUBTEXT_GAP;
+    const double counterHeight = 40.0;
+    const double subtextGap = 8.0 * 2;
+    const double counterSpace = counterHeight + subtextGap;
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: COUNTER_HEIGHT),
+      counter: Container(height: counterHeight),
     ));
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE);
+    expect(inputBox.size.height, height - padding - counterSpace);
 
     // Including helperText causes the EditableText to shrink to fit the text
     // inside the parent as well.
@@ -1031,41 +1038,41 @@ void main() {
       helperText: 'I am helperText',
     ));
     expect(findEditableText(), equals(inputBox));
-    const double HELPER_TEXT_SPACE = 28.0;
-    expect(inputBox.size.height, HEIGHT - PADDING - HELPER_TEXT_SPACE);
+    const double helperTextSpace = 28.0;
+    expect(inputBox.size.height, height - padding - helperTextSpace);
 
     // When both helperText and counter are present, EditableText shrinks by the
     // height of the taller of the two in order to fit both within the parent.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: COUNTER_HEIGHT),
+      counter: Container(height: counterHeight),
       helperText: 'I am helperText',
     ));
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE);
+    expect(inputBox.size.height, height - padding - counterSpace);
 
     // When a label is present, EditableText shrinks to fit it at the top so
     // that the bottom of the input still lines up perfectly with the parent.
     await tester.pumpWidget(containedTextFieldBuilder(
       labelText: 'I am labelText',
     ));
-    const double LABEL_SPACE = 16.0;
+    const double labelSpace = 16.0;
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, HEIGHT - PADDING - LABEL_SPACE);
+    expect(inputBox.size.height, height - padding - labelSpace);
 
     // When decoration is present on the top and bottom, EditableText shrinks to
     // fit both inside the parent independently.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: COUNTER_HEIGHT),
+      counter: Container(height: counterHeight),
       labelText: 'I am labelText',
     ));
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, HEIGHT - PADDING - COUNTER_SPACE - LABEL_SPACE);
+    expect(inputBox.size.height, height - padding - counterSpace - labelSpace);
 
     // When a prefix or suffix is present in an input that's full of content,
     // it is ignored and allowed to expand beyond the top of the input. Other
     // top and bottom decoration is still respected.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: COUNTER_HEIGHT),
+      counter: Container(height: counterHeight),
       labelText: 'I am labelText',
       prefix: Container(
         width: 10,
@@ -1075,10 +1082,10 @@ void main() {
     expect(findEditableText(), equals(inputBox));
     expect(
       inputBox.size.height,
-      HEIGHT
-      - PADDING
-      - LABEL_SPACE
-      - COUNTER_SPACE,
+      height
+      - padding
+      - labelSpace
+      - counterSpace,
     );
   });
 
