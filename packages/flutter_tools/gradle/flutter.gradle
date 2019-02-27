@@ -310,11 +310,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         String target = project.flutter.target
+        
+        if (target == null && project.hasProperty('target')) {
+             target = project.property('target')
+        }
+
         if (target == null) {
             target = 'lib/main.dart'
-        }
-        if (project.hasProperty('target')) {
-            target = project.property('target')
         }
 
         Boolean verboseValue = null
