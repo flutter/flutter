@@ -168,7 +168,8 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  // TODO(jonahwilliams): re-enable when engine rolls.
+  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
