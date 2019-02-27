@@ -388,7 +388,6 @@ void main() {
       'tapA onTapDown',
       'tapA onTapUp',
       'tapA onTap',
-      'tapB onTapCancel',
       'swept 1',
       'down 2 to A',
       'down 2 to B',
@@ -398,7 +397,6 @@ void main() {
       'tapA onTapDown',
       'tapA onTapUp',
       'tapA onTap',
-      'tapB onTapCancel',
       'swept 2',
       'disposed A',
       'disposed B',
@@ -439,5 +437,35 @@ void main() {
     expect(recognized, <String>['down', 'cancel']);
 
     tap.dispose();
+  });
+
+  testGesture('loosing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+    tap.onTapDown = (_) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (_) {
+      recognized.add('up');
+    };
+    tap.onTap = () {
+      recognized.add('tap');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    tap.addPointer(down3);
+    drag.addPointer(down3);
+    tester.closeArena(3);
+    tester.route(down3);
+    tester.route(move3);
+    GestureBinding.instance.gestureArena.sweep(3);
+    expect(recognized, isEmpty);
+
+    tap.dispose();
+    drag.dispose();
   });
 }

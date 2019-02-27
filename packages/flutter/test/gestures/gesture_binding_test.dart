@@ -203,19 +203,4 @@ void main() {
     expect(events[3].runtimeType, equals(PointerCancelEvent));
     expect(events[4].runtimeType, equals(PointerRemovedEvent));
   });
-
-  test('Cancelling an untracked pointer is no-op', () {
-    // Regression test for https://github.com/flutter/flutter/issues/20517.
-
-    const ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.cancel, device: 24),
-      ],
-    );
-
-    final List<PointerEvent> events = PointerEventConverter.expand(
-        packet.data, ui.window.devicePixelRatio).toList();
-
-    expect(events.length, 0);
-  });
 }
