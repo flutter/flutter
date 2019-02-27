@@ -16,6 +16,17 @@
 #import "FlutterMacros.h"
 #endif
 
+typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
+  // Hover events will never be sent to Flutter.
+  FlutterMouseTrackingModeNone = 0,
+  // Hover events will be sent to Flutter when the view is in the key window.
+  FlutterMouseTrackingModeInKeyWindow,
+  // Hover events will be sent to Flutter when the view is in the active app.
+  FlutterMouseTrackingModeInActiveApp,
+  // Hover events will be sent to Flutter regardless of window and app focus.
+  FlutterMouseTrackingModeAlways,
+};
+
 /**
  * Controls embedder plugins and communication with the underlying Flutter engine, managing a view
  * intended to handle key inputs and drawing protocols (see |view|).
@@ -32,6 +43,12 @@ FLUTTER_EXPORT
  * be capable of handling text input events, and the OpenGL context handling protocols.
  */
 @property(nullable) NSView<FLEOpenGLContextHandling>* view;
+
+/**
+ * The style of mouse tracking to use for the view. Defaults to
+ * FlutterMouseTrackingModeNone.
+ */
+@property(nonatomic) FlutterMouseTrackingMode mouseTrackingMode;
 
 /**
  * Launches the Flutter engine with the provided configuration.

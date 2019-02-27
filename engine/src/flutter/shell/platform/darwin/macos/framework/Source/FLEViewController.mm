@@ -32,7 +32,18 @@ static const int kAndroidMetaStateMeta = 1 << 16;
 /**
  * A list of additional responders to keyboard events. Keybord events are forwarded to all of them.
  */
-@property NSMutableOrderedSet<NSResponder*>* additionalKeyResponders;
+@property(nonatomic) NSMutableOrderedSet<NSResponder*>* additionalKeyResponders;
+
+/**
+ * The tracking area used to generate hover events, if enabled.
+ */
+@property(nonatomic) NSTrackingArea* trackingArea;
+
+/**
+ * Updates |trackingArea| for the current tracking settings, creating it with
+ * the correct mode if tracking is enabled, or removing it if not.
+ */
+- (void)configureTrackingArea;
 
 /**
  * Creates and registers plugins used by this view controller.
@@ -202,11 +213,27 @@ static void CommonInit(FLEViewController* controller) {
   }
 }
 
+- (void)setView:(NSView*)view {
+  if (_trackingArea) {
+    [self.view removeTrackingArea:_trackingArea];
+  }
+  [super setView:view];
+  [self configureTrackingArea];
+}
+
 - (void)loadView {
   self.view = [[FLEView alloc] init];
 }
 
 #pragma mark - Public methods
+
+- (void)setMouseTrackingMode:(FlutterMouseTrackingMode)mode {
+  if (_mouseTrackingMode == mode) {
+    return;
+  }
+  _mouseTrackingMode = mode;
+  [self configureTrackingArea];
+}
 
 - (BOOL)launchEngineWithAssetsPath:(NSURL*)assets
               commandLineArguments:(NSArray<NSString*>*)arguments {
@@ -240,6 +267,35 @@ static void CommonInit(FLEViewController* controller) {
 }
 
 #pragma mark - Private methods
+
+- (void)configureTrackingArea {
+  if (_mouseTrackingMode != FlutterMouseTrackingModeNone && self.view) {
+    NSTrackingAreaOptions options =
+        NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingInVisibleRect;
+    switch (_mouseTrackingMode) {
+      case FlutterMouseTrackingModeInKeyWindow:
+        options |= NSTrackingActiveInKeyWindow;
+        break;
+      case FlutterMouseTrackingModeInActiveApp:
+        options |= NSTrackingActiveInActiveApp;
+        break;
+      case FlutterMouseTrackingModeAlways:
+        options |= NSTrackingActiveAlways;
+        break;
+      default:
+        NSLog(@"Error: Unrecognized mouse tracking mode: %ld", _mouseTrackingMode);
+        return;
+    }
+    _trackingArea = [[NSTrackingArea alloc] initWithRect:NSZeroRect
+                                                 options:options
+                                                   owner:self
+                                                userInfo:nil];
+    [self.view addTrackingArea:_trackingArea];
+  } else if (_trackingArea) {
+    [self.view removeTrackingArea:_trackingArea];
+    _trackingArea = nil;
+  }
+}
 
 - (void)addInternalPlugins {
   _textInputPlugin = [[FLETextInputPlugin alloc] initWithViewController:self];
@@ -469,6 +525,18 @@ static void CommonInit(FLEViewController* controller) {
 
 - (void)mouseDragged:(NSEvent*)event {
   [self dispatchMouseEvent:event phase:kMove];
+}
+
+- (void)mouseEntered:(NSEvent*)event {
+  [self dispatchMouseEvent:event phase:kAdd];
+}
+
+- (void)mouseExited:(NSEvent*)event {
+  [self dispatchMouseEvent:event phase:kRemove];
+}
+
+- (void)mouseMoved:(NSEvent*)event {
+  [self dispatchMouseEvent:event phase:kHover];
 }
 
 @end
