@@ -128,7 +128,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
       case ModifierKey.scrollLockModifier:
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
-        // Fuschia doesn't have masks for these keys (yet).
+        // Fuchsia doesn't have masks for these keys (yet).
         return false;
     }
     return false;
@@ -171,7 +171,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     return null;
   }
 
-  // Keyboard modifier masks for Fuschia modifiers.
+  // Keyboard modifier masks for Fuchsia modifiers.
 
   /// The [modifiers] field indicates that no modifier keys are pressed if it
   /// equals this value.
