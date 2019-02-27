@@ -937,7 +937,9 @@ class ProjectWatcher {
     final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
     for (String dependency in packageMap.keys) {
       final String scriptPath = packageMap[dependency].toString();
+      printTrace(scriptPath);
       final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+      printTrace(scriptUri);
       if (scriptUri.contains(pubCachePath)) {
         continue;
       }
