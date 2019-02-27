@@ -55,6 +55,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
         TRACE_EVENT_ASYNC_END0("flutter", "PipelineProduce", trace_id_);
         // The continuation is being dropped on the floor. End the flow.
         TRACE_FLOW_END("flutter", "PipelineItem", trace_id_);
+        TRACE_EVENT_ASYNC_END0("flutter", "PipelineItem", trace_id_);
       }
     }
 
@@ -79,6 +80,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     ProducerContinuation(Continuation continuation, size_t trace_id)
         : continuation_(continuation), trace_id_(trace_id) {
       TRACE_FLOW_BEGIN("flutter", "PipelineItem", trace_id_);
+      TRACE_EVENT_ASYNC_BEGIN0("flutter", "PipelineItem", trace_id_);
       TRACE_EVENT_ASYNC_BEGIN0("flutter", "PipelineProduce", trace_id_);
     }
 
@@ -133,6 +135,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     empty_.Signal();
 
     TRACE_FLOW_END("flutter", "PipelineItem", trace_id);
+    TRACE_EVENT_ASYNC_END0("flutter", "PipelineItem", trace_id);
 
     return items_count > 0 ? PipelineConsumeResult::MoreAvailable
                            : PipelineConsumeResult::Done;
