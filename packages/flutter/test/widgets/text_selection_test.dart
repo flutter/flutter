@@ -119,7 +119,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a very quick swipe is just a canceled tap', (WidgetTester tester) async {
+  testWidgets('a very quick swipe is ignored', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 20));
@@ -127,7 +127,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 0);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
 
@@ -135,7 +135,7 @@ void main() {
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
     expect(tapCount, 0);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });

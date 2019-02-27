@@ -299,21 +299,21 @@ void main() {
       await gesture.up();
     }
 
-    await dragOut(kPressTimeout * 0.5); // generates tapCancel
+    await dragOut(kPressTimeout * 0.5); // generates nothing
     expect(tapDown, 0);
-    expect(tapCancel, 1);
+    expect(tapCancel, 0);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kPressTimeout); // generates tapDown, tapCancel
     expect(tapDown, 1);
-    expect(tapCancel, 2);
+    expect(tapCancel, 1);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
     expect(tapDown, 2);
-    expect(tapCancel, 3);
+    expect(tapCancel, 2);
     expect(tap, 0);
     expect(longPress, 1);
   });
