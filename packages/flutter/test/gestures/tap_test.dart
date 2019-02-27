@@ -403,7 +403,7 @@ void main() {
     ]);
   });
 
-  testGesture('PointerCancelEvent cancels tab', (GestureTester tester) {
+  testGesture('PointerCancelEvent cancels tap', (GestureTester tester) {
     const PointerDownEvent down = PointerDownEvent(
         pointer: 5,
         position: Offset(10.0, 10.0)
@@ -431,7 +431,7 @@ void main() {
 
     tap.addPointer(down);
     tester.closeArena(5);
-    tester.route(down);
+    tester.async.elapse(const Duration(milliseconds: 5000));
     expect(recognized, <String>['down']);
     tester.route(cancel);
     expect(recognized, <String>['down', 'cancel']);
@@ -460,7 +460,6 @@ void main() {
     tap.addPointer(down3);
     drag.addPointer(down3);
     tester.closeArena(3);
-    tester.route(down3);
     tester.route(move3);
     GestureBinding.instance.gestureArena.sweep(3);
     expect(recognized, isEmpty);
