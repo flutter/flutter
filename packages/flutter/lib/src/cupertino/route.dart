@@ -418,7 +418,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
     @required Animation<double> animation,
     @required this.child,
   }) : _positionAnimation = animation
-         .drive(CurveTween(curve: Curves.easeInOut))
+         .drive(CurveTween(curve: Curves.linearToEaseOut))
          .drive(_kBottomUpTween),
        super(key: key);
 
@@ -816,8 +816,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-      curve: Curves.ease,
-      reverseCurve: Curves.ease.flipped,
+      curve: Curves.linearToEaseOut,
+      reverseCurve: Curves.linearToEaseOut.flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
@@ -879,8 +879,8 @@ Future<T> showCupertinoModalPopup<T>({
   );
 }
 
-final Animatable<double> _dialogTween = Tween<double>(begin: 1.2, end: 1.0)
-  .chain(CurveTween(curve: Curves.fastOutSlowIn));
+final Animatable<double> _dialogTween = Tween<double>(begin: 1.3, end: 1.0)
+  .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   final CurvedAnimation fadeAnimation = CurvedAnimation(
@@ -941,7 +941,7 @@ Future<T> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: false,
     barrierColor: _kModalBarrierColor,
-    transitionDuration: const Duration(milliseconds: 300),
+    transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
       return builder(context);
     },
