@@ -8,7 +8,7 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Creates a continuous stadium shape.
+/// A continuously cornered stadium shape.
 ///
 /// A shape similar to a stadium, but with a smoother transition from
 /// each linear edge to its 180º curves.
@@ -18,8 +18,11 @@ import 'edge_insets.dart';
 /// traditional half circle round.
 ///
 /// In the event that the height or width of the bounding rectangle is less than
-/// 2x its radius, the curve radius will become smaller to keep the shape from
-/// becoming a lozenge.
+/// ~3x its radius, the curve radius will become smaller to keep the shape from
+/// clipping.
+///
+/// The two 180º arcs will always be positioned on the shorter side of the
+/// rectangle like with the traditional [StadiumBorder] shape.
 ///
 /// {@tool sample}
 /// ```dart
@@ -38,14 +41,16 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] which creates a rectangle whose corners are
+/// * [RoundedRectangleBorder], which is a rectangle whose corners are
 ///   precisely quarter circles.
-/// * [ContinuousRectangleBorder] which creates a rectangle whose 4 edges have
+/// * [ContinuousRectangleBorder], which is a rectangle whose 4 edges have
 ///   a continuous transition into each of its four corners.
+/// * [StadiumBorder], which is a rectangle with semi-circles on two parallel
+///   edges.
 class ContinuousStadiumBorder extends ShapeBorder {
-  /// Creates a Continuous Stadium Border.
+  /// Creates a continuous stadium border.
   ///
-  /// The [side], and [borderRadius] arguments must not be null.
+  /// The [side], argument must not be null.
   const ContinuousStadiumBorder({
     this.side = BorderSide.none,
   }) : assert(side != null);
@@ -56,17 +61,37 @@ class ContinuousStadiumBorder extends ShapeBorder {
   final BorderSide side;
 
   Path _getPath(Rect rect) {
-    // The radius multiplier where the resulting shape will perfectly concave at
-    // with a height and width of any value.
+    // The two 180º arcs will always be positioned on the shorter side of the
+    // rectangle like with the traditional [StadiumBorder] shape.
+
+    // We need to change the dimensions of the rect in the event that the
+    // shape has a side width as the stroke is drawn centered on the border of
+    // the shape instead of inside as with the rounded rect and stadium.
+    if (side.width > 0)
+      rect = rect.deflate(side.width / 2);
+
+    // The radius multiplier where the resulting shape will concave with a
+    // height and width of any value.
+    //
+    // If the shortest side length to radius ratio drops below this value, the
+    // radius must be lessened to avoid clipping (ie. concavity) of the shape.
+    //
+    // This value comes from the website where the other equations and curves
+    // were found, however it represents the ratio of the total curve height
     const double maxMultiplier = 3.0573;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
-    const double dynamicShapeMinMultiplier = 1 / maxMultiplier;
+    //
+    // This is multiplier used in the case of an extreme aspect ratio and a
+    // small extent value. It can be less than 'maxMultiplier' because there
+    // are not enough pixels to render the clipping of the shape at this size so
+    // it appears to still be concave (whereas mathematically it's convex).
+    const double minMultiplier = 1 / maxMultiplier;
 
     // The maximum aspect ratio of the width and height of the given rect before
     // clamping on one dimension will occur.
-    const double maxAspectRatio = 1 - dynamicShapeMinMultiplier;
+    const double maxAspectRatio = 1 - minMultiplier;
 
     final double rectWidth = rect.width;
     final double rectHeight = rect.height;
@@ -78,8 +103,8 @@ class ContinuousStadiumBorder extends ShapeBorder {
     final double originX = centerX - width / 2;
     final double originY = centerY - height / 2;
     final double minDimension = math.min(width, height);
-    final double radius = minDimension * dynamicShapeMinMultiplier;
-    final double limitedRadius = math.min(radius, minDimension * dynamicShapeMinMultiplier);
+    final double radius = minDimension * minMultiplier;
+    final double limitedRadius = math.min(radius, minDimension * minMultiplier);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.

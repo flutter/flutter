@@ -21,22 +21,29 @@ import 'edge_insets.dart';
 ///
 /// In an attempt to keep the shape of the rectangle the same regardless of its
 /// dimension (and to avoid clipping of the shape), the radius will
-/// automatically be lessened. The largest radius at a given aspect ratio where the shape doesn't clip. to maximize the roundness of the resulting
-/// rectangle if its width or height is less than ~3x the radius.
+/// automatically be lessened if its width or height is less than ~3x the radius.
+/// The new resulting radius will always be maximal in respect to the dimensions
+/// of the given rectangle.
 ///
-/// This shape will always have 4 linear edges and 4 90º curves. However, at
-/// small extent values (ie.  <20 lpx), the rendered shape will appear to have
-/// just 2 linear edges and 2 180º curves.
+/// This shape will always have 4 linear edges and 4 90º curves. However, for
+/// rectangles with small values of width or height (ie.  <20 lpx) and a low
+/// aspect ratio (ie. <0.3), the rendered shape will appear to have just 2
+/// linear edges and 2 180º curves.
+///
+/// The example below shows how to render a continuous rectangle on screen.
 ///
 /// {@tool sample}
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Material(
-///     color: Colors.blueAccent[400],
-///     shape: const ContinuousStadiumBorder(),
-///     child: const SizedBox(
-///       height: 100,
-///       width: 200,
+///   return Container(
+///     alignment: Alignment.center,
+///     child: Material(
+///       color: Colors.blueAccent[400],
+///       shape: const ContinuousRectangleBorder(borderRadius: 75.0),
+///       child: const SizedBox(
+///         height: 200,
+///         width: 200,
+///       ),
 ///     ),
 ///   );
 /// }
@@ -45,26 +52,28 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] which creates a rectangle whose corners are
+/// * [RoundedRectangleBorder], which is a rectangle whose corners are
 ///   precisely quarter circles.
-/// * [ContinuousStadiumBorder] which creates a stadium whose two edges have a
-///   continuous transition into it's two 180º curves.
+/// * [ContinuousStadiumBorder], which is a stadium whose two edges have a
+///   continuous transition into its two 180º curves.
+/// * [StadiumBorder], which is a rectangle with semi-circles on two parallel
+///   edges.
 class ContinuousRectangleBorder extends ShapeBorder {
-  /// Creates a Continuous Cornered Rectangle Border.
+  /// Creates a continuous cornered rectangle border.
   ///
-  /// The [side], [mode] and [borderRadius] arguments must not be null.
+  /// The [side] and [borderRadius] arguments must not be null.
   const ContinuousRectangleBorder({
     this.side = BorderSide.none,
-    this.borderRadius = 1.0,
+    this.borderRadius = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
-  /// The radius will be clamped to 1 if a value less than 1 is entered as the
+  /// The radius will be clamped to 0 if a value less than 0 is entered as the
   /// radius.
   ///
-  /// By default the radius is 1.0. This value must not be null.
+  /// By default the radius is 0.0. This value must not be null.
   ///
   /// Unlike [RoundedRectangleBorder], there is only a single border radius used
   /// to describe the radius for every corner.
@@ -72,32 +81,51 @@ class ContinuousRectangleBorder extends ShapeBorder {
 
   /// The style of this border.
   ///
-  /// By default this value is [BorderSide.none]. It also must not be null.
+  /// If the border side width is larger than 1/10 the length of the smallest
+  /// dimension, the interior shape's corners will no longer resemble those of
+  /// the exterior shape. If concentric corners are desired for a stroke width
+  /// greater than 1/10 the length of the smallest dimension, it is recommended
+  /// to use a [Stack] widget, placing a smaller [ContinuousRectangleBorder] with
+  /// the same 'borderRadius' on top of a larger one.
+  ///
+  /// By default this value is [BorderSide.none]. It must not be null.
   final BorderSide side;
 
-  Path _getPath(RRect rrect) {
-    // The radius multiplier where the resulting shape will perfectly concave at
-    // with a height and width of any value.
-    const double maxMultiplier = 3.0573;
+  Path _getPath(Rect rect) {
+    // We need to change the dimensions of the rect in the event that the
+    // shape has a side width as the stroke is drawn centered on the border of
+    // the shape instead of inside as with the rounded rect and stadium.
+    if (side.width > 0)
+      rect = rect.deflate(side.width / 2);
 
     double limitedRadius;
-    final double width = rrect.width;
-    final double height = rrect.height;
-    final double centerX = rrect.center.dx;
-    final double centerY = rrect.center.dy;
+    final double width = rect.width;
+    final double height = rect.height;
+    final double centerX = rect.center.dx;
+    final double centerY = rect.center.dy;
     final double radius = math.max(1, borderRadius);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
+    //
+    // For example, leftX(k) will give the x value on the left side of the shape
+    // that is precisely `k` distance from the left edge of the shape for the
+    // predetermined radius value.
     double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
     double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
     double topY(double y) { return centerY + y * limitedRadius - height / 2; }
     double bottomY(double y) { return centerY - y * limitedRadius + height / 2; }
 
-    // Renders the default super elliptical rounded rect shape where there are
-    // 4 straight edges and 4 90º corners. Approximately renders a super ellipse
+    // Renders the default superelliptical rounded rect shape where there are
+    // 4 straight edges and 4 90º corners. Approximately renders a superellipse
     // with n value of 5.
-    Path roundedRect () {
+    //
+    // Code was inspired from the code listed on this website:
+    // https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles
+    //
+    // Roughly the code draws the shape from the upper right hand corner in a
+    // clockwise fashion around to the upper left hand corner.
+    Path bezierRoundedRect () {
       return Path()
         ..moveTo(leftX(1.52866483), topY(0))
         ..lineTo(rightX(1.52866471), topY(0))
@@ -147,29 +175,46 @@ class ContinuousRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The radius multiplier where the resulting shape will concave with a
+    // height and width of any value.
+    //
+    // If the shortest side length to radius ratio drops below this value, the
+    // radius must be lessened to avoid clipping (ie. concavity) of the shape.
+    const double maxMultiplier = 3.0573;
+
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
-    const double dynamicRadiusMinMultiplier = 2.0;
+    //
+    // This is multiplier used in the case of an extreme aspect ratio and a
+    // small extent value. It can be less than 'maxMultiplier' because there
+    // are not enough pixels to render the clipping of the shape at this size so
+    // it appears to still be concave (whereas mathematically it's convex).
+    const double minMultiplier = 2.2;
 
-    // The edge length at which the corner radius multiplier must be at its
-    // maximum so as to maintain a the appearance of a perfectly concave,
+    // The minimum edge length at which the corner radius multiplier must be at
+    // its maximum so as to maintain the appearance of a perfectly concave,
     // non-lozenge shape.
+    //
+    // If the smallest edge length is less than this value, the dynamic radius
+    // value can be made smaller than the 'maxMultiplier' while the rendered
+    // shape still does not visually clip.
     const double minRadiusEdgeLength = 200.0;
 
-    final double min = math.min(rrect.width, rrect.height);
+    final double minSideLength = math.min(rect.width, rect.height);
 
     // As the minimum side edge length (where the round is occurring)
     // approaches 0, the limitedRadius approaches 2.0 so as to maximize
-    // roundness. As the edge length approaches 200, the limitedRadius
-    // approaches ~3 –- the multiplier of the radius value where the
-    // resulting shape is perfectly concave at any dimension.
+    // roundness (to make the shape with the largest radius that doesn't clip).
+    // As the edge length approaches 200, the limitedRadius approaches ~3 –- the
+    // multiplier of the radius value where the resulting shape is concave (ie.
+    // does not visually clip) at any dimension.
     final double multiplier = ui.lerpDouble(
-        dynamicRadiusMinMultiplier,
+        minMultiplier,
         maxMultiplier,
-        min / minRadiusEdgeLength
+        minSideLength / minRadiusEdgeLength
     );
-    limitedRadius = math.min(radius, min / multiplier);
-    return roundedRect();
+    limitedRadius = math.min(radius, minSideLength / multiplier);
+    return bezierRoundedRect();
   }
 
   @override
@@ -180,21 +225,22 @@ class ContinuousRectangleBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
+        final double width = side.width;
         final Paint paint = side.toPaint();
-        canvas.drawPath(path, paint);
-        break;
+        if (width != 0.0){
+          canvas.drawPath(getOuterPath(rect), paint);
+        }
     }
   }
 
   @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)).deflate(side.width));
+    return _getPath(rect.deflate(side.width));
   }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)));
+    return _getPath(rect);
   }
 
   @override
@@ -233,7 +279,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator == (dynamic other) {
+  bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousRectangleBorder typedOther = other;
