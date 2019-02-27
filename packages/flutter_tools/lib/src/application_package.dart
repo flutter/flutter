@@ -21,18 +21,23 @@ import 'ios/plist_utils.dart' as plist;
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
+          await checkGradleDependencies();
+        }
         return applicationBinary == null
             ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
             : AndroidApk.fromApk(applicationBinary);
@@ -46,6 +51,8 @@ class ApplicationPackageFactory {
         return applicationBinary != null
           ? MacOSApp.fromPrebuiltApp(applicationBinary)
           : null;
+      case TargetPlatform.web:
+        return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
@@ -352,6 +359,7 @@ class ApplicationPackageStore {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         return null;
     }
     return null;

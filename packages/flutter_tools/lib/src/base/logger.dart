@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/context.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'terminal.dart';
@@ -388,7 +389,7 @@ class VerboseLogger extends Logger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace stackTrace]) {
+  void _emit(_LogType type, String message, [ StackTrace stackTrace ]) {
     if (message.trim().isEmpty)
       return;
 
@@ -464,7 +465,7 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context[Stopwatch] ?? Stopwatch();
 
   @protected
   @visibleForTesting
@@ -595,6 +596,9 @@ class AnsiSpinner extends Status {
     this.slowWarningCallback,
   }) : super(timeout: timeout, onFinish: onFinish);
 
+  final String _backspaceChar = '\b';
+  final String _clearChar = ' ';
+
   int ticks = 0;
   Timer timer;
 
@@ -610,8 +614,8 @@ class AnsiSpinner extends Status {
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
   int get _currentLength => _currentAnimationFrame.length + _slowWarning.length;
-  String get _backspace => '\b' * _currentLength;
-  String get _clear => ' ' *  _currentLength;
+  String get _backspace => _backspaceChar * (spinnerIndent + _currentLength);
+  String get _clear => _clearChar *  (spinnerIndent + _currentLength);
 
   @protected
   int get spinnerIndent => 0;
@@ -624,7 +628,7 @@ class AnsiSpinner extends Status {
   }
 
   void _startSpinner() {
-    stdout.write(_clear * (spinnerIndent + 1)); // for _callback to backspace over
+    stdout.write(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
@@ -633,9 +637,9 @@ class AnsiSpinner extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    stdout.write('${_backspace * (spinnerIndent + 1)}');
+    stdout.write(_backspace);
     ticks += 1;
-    stdout.write('${_clear * spinnerIndent}$_currentAnimationFrame');
+    stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
     if (seemsSlow) {
       if (slowWarningCallback != null) {
         _slowWarning = ' ' + slowWarningCallback();
@@ -657,8 +661,7 @@ class AnsiSpinner extends Status {
   }
 
   void _clearSpinner() {
-    final int width = spinnerIndent + 1;
-    stdout.write('${_backspace * width}${_clear * width}${_backspace * width}');
+    stdout.write('$_backspace$_clear$_backspace');
   }
 
   @override
@@ -748,7 +751,7 @@ class AnsiStatus extends AnsiSpinner {
   }
 
   void _clearStatus() {
-    stdout.write('${_backspace * _totalMessageLength}${_clear * _totalMessageLength}${_backspace * _totalMessageLength}');
+    stdout.write('${_backspaceChar * _totalMessageLength}${_clearChar * _totalMessageLength}${_backspaceChar * _totalMessageLength}');
   }
 
   @override

@@ -25,6 +25,9 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Initial display mode of the date picker dialog.
 ///
 /// Date picker UI mode for either showing a list of available years or a
@@ -251,7 +254,7 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
        assert(onChanged != null),
@@ -284,7 +287,6 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
-  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
@@ -296,7 +298,7 @@ class DayPicker extends StatelessWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
@@ -525,7 +527,7 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -788,7 +790,7 @@ class YearPicker extends StatefulWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -1111,6 +1113,28 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
 ///
+/// The [builder] parameter can be used to wrap the dialog widget
+/// to add inherited widgets like [Theme].
+///
+/// {@tool sample}
+/// Show a date picker with the dark theme.
+///
+/// ```dart
+/// Future<DateTime> selectedDate = showDatePicker(
+///   context: context,
+///   initialDate: DateTime.now(),
+///   firstDate: DateTime(2018),
+///   lastDate: DateTime(2030),
+///   builder: (BuildContext context, Widget child) {
+///     return Theme(
+///       data: ThemeData.dark(),
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
+///
 /// The [context], [initialDate], [firstDate], and [lastDate] parameters must
 /// not be null.
 ///
@@ -1133,6 +1157,7 @@ Future<DateTime> showDatePicker({
   DatePickerMode initialDatePickerMode = DatePickerMode.day,
   Locale locale,
   TextDirection textDirection,
+  TransitionBuilder builder,
 }) async {
   assert(initialDate != null);
   assert(firstDate != null);
@@ -1173,6 +1198,8 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    builder: (BuildContext context) => child,
+    builder: (BuildContext context) {
+      return builder == null ? child : builder(context, child);
+    },
   );
 }
