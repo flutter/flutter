@@ -515,32 +515,31 @@ class PointerEnterEvent extends PointerEvent {
     synthesized: synthesized,
   );
 
-  /// Creates an enter event from a [PointerHoverEvent].
+  /// Creates an enter event from a [PointerEvent].
   ///
-  /// This is used by the [MouseTracker] to synthesize enter events, since it
-  /// only actually receives hover events.
-  PointerEnterEvent.fromHoverEvent(PointerHoverEvent hover) : super(
-    timeStamp: hover?.timeStamp,
-    kind: hover?.kind,
-    device: hover?.device,
-    position: hover?.position,
-    delta: hover?.delta,
-    buttons: hover?.buttons,
-    down: hover?.down,
-    obscured: hover?.obscured,
-    pressure: hover?.pressure,
-    pressureMin: hover?.pressureMin,
-    pressureMax: hover?.pressureMax,
-    distance: hover?.distance,
-    distanceMax: hover?.distanceMax,
-    size: hover?.size,
-    radiusMajor: hover?.radiusMajor,
-    radiusMinor: hover?.radiusMinor,
-    radiusMin: hover?.radiusMin,
-    radiusMax: hover?.radiusMax,
-    orientation: hover?.orientation,
-    tilt: hover?.tilt,
-    synthesized: hover?.synthesized,
+  /// This is used by the [MouseTracker] to synthesize enter events.
+  PointerEnterEvent.fromHoverEvent(PointerEvent event) : super(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    down: event?.down,
+    obscured: event?.obscured,
+    pressure: event?.pressure,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
   );
 }
 
@@ -603,32 +602,31 @@ class PointerExitEvent extends PointerEvent {
     synthesized: synthesized,
   );
 
-  /// Creates an exit event from a [PointerHoverEvent].
+  /// Creates an exit event from a [PointerEvent].
   ///
-  /// This is used by the [MouseTracker] to synthesize exit events, since it
-  /// only actually receives hover events.
-  PointerExitEvent.fromHoverEvent(PointerHoverEvent hover) : super(
-    timeStamp: hover?.timeStamp,
-    kind: hover?.kind,
-    device: hover?.device,
-    position: hover?.position,
-    delta: hover?.delta,
-    buttons: hover?.buttons,
-    down: hover?.down,
-    obscured: hover?.obscured,
-    pressure: hover?.pressure,
-    pressureMin: hover?.pressureMin,
-    pressureMax: hover?.pressureMax,
-    distance: hover?.distance,
-    distanceMax: hover?.distanceMax,
-    size: hover?.size,
-    radiusMajor: hover?.radiusMajor,
-    radiusMinor: hover?.radiusMinor,
-    radiusMin: hover?.radiusMin,
-    radiusMax: hover?.radiusMax,
-    orientation: hover?.orientation,
-    tilt: hover?.tilt,
-    synthesized: hover?.synthesized,
+  /// This is used by the [MouseTracker] to synthesize exit events.
+  PointerExitEvent.fromHoverEvent(PointerEvent event) : super(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    down: event?.down,
+    obscured: event?.obscured,
+    pressure: event?.pressure,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
   );
 }
 
