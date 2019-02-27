@@ -77,7 +77,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///     border: OutlineInputBorder(),
 ///     labelText: 'Password',
 ///   ),
-/// );
+/// )
 /// ```
 /// {@end-tool}
 ///
