@@ -51,7 +51,7 @@ enum _ScaffoldSlot {
 /// The geometry of the [Scaffold] after all its contents have been laid out
 /// except the [FloatingActionButton].
 ///
-/// The [Scaffold] passes this prelayout geometry to its
+/// The [Scaffold] passes this pre-layout geometry to its
 /// [FloatingActionButtonLocation], which produces an [Offset] that the
 /// [Scaffold] uses to position the [FloatingActionButton].
 ///

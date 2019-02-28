@@ -114,7 +114,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// A title string for this route.
   ///
-  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// Used to auto-populate [CupertinoNavigationBar] and
   /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
   /// one is not manually supplied.
   final String title;

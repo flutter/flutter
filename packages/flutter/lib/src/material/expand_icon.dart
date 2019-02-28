@@ -13,7 +13,7 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
-/// 180 deg when pressed, then reverts the animation on a second press.
+/// 180 degrees when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
 ///
 /// The expand icon does not include a semantic label for accessibility. In

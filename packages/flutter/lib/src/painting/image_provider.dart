@@ -322,7 +322,7 @@ abstract class ImageProvider<T> {
   /// {@tool sample}
   ///
   /// The following sample code shows how an image loaded using the [Image]
-  /// widget can be evicted using a [NetworkImage] with a matching url.
+  /// widget can be evicted using a [NetworkImage] with a matching URL.
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {

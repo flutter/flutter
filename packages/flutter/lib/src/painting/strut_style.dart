@@ -8,7 +8,7 @@ import 'basic_types.dart';
 import 'text_style.dart';
 
 /// Defines the strut, which sets the minimum height a line can be
-/// relative to the baseline. Strut applies to all lines in the pararaph.
+/// relative to the baseline. Strut applies to all lines in the paragraph.
 ///
 /// Strut is a feature that allows minimum line heights to be set. The effect is as
 /// if a zero width space was included at the beginning of each line in the
@@ -57,16 +57,17 @@ import 'text_style.dart';
 ///
 /// Omitted or null properties will take the default values specified below:
 ///
-///  * [fontFamily]: the name of the font to use when calcualting the strut (e.g., Roboto).
-///    No glyphs from the font will be drawn and the font will be used purely for metrics.
+///  * [fontFamily]: the name of the font to use when calculating the strut
+///    (e.g., Roboto). No glyphs from the font will be drawn and the font will
+///    be used purely for metrics.
 ///
 ///  * [fontFamilyFallback]: an ordered list of font family names that will be searched for when
 ///    the font in [fontFamily] cannot be found. When all specified font families have been
 ///    exhausted an no match was found, the default platform font will be used.
 ///
-///  * [fontSize]: the size of the ascent plus descent in logical pixels. This is also
-///    used as the basis of the custom leading caluclation. This value cannot
-///    be negative.
+///  * [fontSize]: the size of the ascent plus descent in logical pixels. This
+///    is also used as the basis of the custom leading calculation. This value
+///    cannot be negative.
 ///    Default is 14 logical pixels.
 ///
 ///  * [height]: the multiple of [fontSize] to multiply the ascent and descent by.
@@ -121,10 +122,10 @@ import 'text_style.dart';
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [height] was defined as 1.5 (the default font size is 14), which
-/// caused all lines to be laid out taller than without strut. This extra space was
-/// able to accomodate the larger font size of `Second line!` without causing the line
-/// height to change for the second line only. All lines in this example are thus the
-/// same height (`14 * 1.5`).
+/// caused all lines to be laid out taller than without strut. This extra space
+/// was able to accommodate the larger font size of `Second line!` without
+/// causing the line height to change for the second line only. All lines in
+/// this example are thus the same height (`14 * 1.5`).
 ///
 /// ```dart
 /// const Text.rich(
@@ -335,8 +336,8 @@ class StrutStyle extends Diagnosticable {
     leading: 0.0,
   );
 
-  /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
-  /// font is defined in a package, this will be prefixed with
+  /// The name of the font to use when calculating the strut (e.g., Roboto). If
+  /// the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.

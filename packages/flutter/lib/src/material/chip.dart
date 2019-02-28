@@ -254,7 +254,8 @@ abstract class SelectableChipAttributes {
   /// Must not be null. Defaults to false.
   bool get selected;
 
-  /// Called when the chip should change between selected and deselected states.
+  /// Called when the chip should change between selected and de-selected
+  /// states.
   ///
   /// When the chip is tapped, then the [onSelected] callback, if set, will be
   /// applied to `!selected` (see [selected]).

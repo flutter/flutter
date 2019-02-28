@@ -394,7 +394,7 @@ abstract class ScrollView extends StatelessWidget {
 /// A [CustomScrollView] can allow Talkback/VoiceOver to make announcements
 /// to the user when the scroll state changes. For example, on Android an
 /// announcement might be read as "showing items 1 to 10 of 23". To produce
-/// this announcment, the scroll view needs three pieces of information:
+/// this announcement, the scroll view needs three pieces of information:
 ///
 ///   * The first visible child index.
 ///   * The total number of children.
@@ -410,7 +410,7 @@ abstract class ScrollView extends StatelessWidget {
 /// generated semantics of each scrollable item with a semantic index. This can
 /// be done by wrapping the child widgets in an [IndexedSemantics].
 ///
-/// This semantic index is not necesarily the same as the index of the widget in
+/// This semantic index is not necessarily the same as the index of the widget in
 /// the scrollable, because some widgets may not contribute semantic
 /// information. Consider a [new ListView.separated()]: every other widget is a
 /// divider with no semantic information. In this case, only odd numbered

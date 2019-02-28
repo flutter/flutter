@@ -665,7 +665,7 @@ class SliverGeometry extends Diagnosticable {
   /// the rest of the values when constructing the [SliverGeometry] or call
   /// [RenderObject.layout] on its children since [RenderSliver.performLayout]
   /// will be called again on this sliver in the same frame after the
-  /// [SliverConstraints.scrollOffset] correction has ben applied, when the
+  /// [SliverConstraints.scrollOffset] correction has been applied, when the
   /// proper [SliverGeometry] and layout of its children can be computed.
   ///
   /// If the parent is also a [RenderSliver], it must propagate this value
@@ -677,7 +677,7 @@ class SliverGeometry extends Diagnosticable {
   /// [SliverConstraints.remainingCacheExtent].
   ///
   /// This value should be equal to or larger than the [layoutExtent] because
-  /// the sliver allways consumes at least the [layoutExtent] from the
+  /// the sliver always consumes at least the [layoutExtent] from the
   /// [SliverConstraints.remainingCacheExtent] and possibly more if it falls
   /// into the cache area of the viewport.
   ///
