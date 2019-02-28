@@ -267,7 +267,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               border: Border(
                 top: BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
+              ),
             ),
             constraints: BoxConstraints.expand(
                 height: widget.itemExtent * widget.magnification,

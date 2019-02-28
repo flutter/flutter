@@ -20,7 +20,7 @@ void main() {
             additionalConstraints: const BoxConstraints.expand()
           ),
         ),
-      )
+      ),
     );
     layout(root);
     expect(root.size.width, equals(800.0));

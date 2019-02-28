@@ -152,7 +152,7 @@ void main() {
       indicator: BoxDecoration(
         border: Border.all(color: Colors.black),
         shape: BoxShape.rectangle,
-      )
+      ),
     );
 
     await tester.pumpWidget(_withTheme(tabBarTheme));

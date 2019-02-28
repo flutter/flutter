@@ -54,7 +54,7 @@ class _StockSymbolView extends StatelessWidget {
                 TextSpan(text: 'several', style: TextStyle(fontStyle: FontStyle.italic)),
                 TextSpan(text: ' years.'),
               ],
-            )
+            ),
           ),
         ],
         mainAxisSize: MainAxisSize.min,

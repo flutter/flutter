@@ -539,7 +539,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -559,7 +559,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );

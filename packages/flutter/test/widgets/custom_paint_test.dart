@@ -37,7 +37,7 @@ void main() {
         painter: TestCustomPainter(
           log: log,
           name: 'child',
-        )
+        ),
       ),
     ));
 

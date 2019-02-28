@@ -450,7 +450,7 @@ class ItemImageBox extends StatelessWidget {
                             text: 'Chris Godley',
                           ),
                         ],
-                      )
+                      ),
                     ),
                   ),
                 ),
@@ -555,8 +555,8 @@ class BottomBar extends StatelessWidget {
           top: BorderSide(
             color: Theme.of(context).dividerColor,
             width: 1.0,
-          )
-        )
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

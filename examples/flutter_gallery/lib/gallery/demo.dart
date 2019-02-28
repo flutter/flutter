@@ -169,7 +169,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
               children: <TextSpan>[
                 DartSyntaxHighlighter(style).format(_exampleCode),
               ],
-            )
+            ),
           ),
         ),
       );

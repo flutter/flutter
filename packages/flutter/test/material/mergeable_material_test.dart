@@ -1052,7 +1052,7 @@ void main() {
       border: Border(
         top: top ? side : BorderSide.none,
         bottom: bottom ? side : BorderSide.none,
-      )
+      ),
     );
   }
 

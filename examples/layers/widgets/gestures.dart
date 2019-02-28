@@ -160,7 +160,7 @@ class GestureDemoState extends State<GestureDemo> {
               tapEnabled: _tapEnabled,
               doubleTapEnabled: _doubleTapEnabled,
               longPressEnabled: _longPressEnabled,
-            )
+            ),
           ),
         ),
         Positioned(

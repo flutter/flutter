@@ -80,7 +80,7 @@ class StockArrow extends StatelessWidget {
           // TODO(jackson): This should change colors with the theme
           color: _colorForPercentChange(percentChange),
           percentChange: percentChange,
-        )
+        ),
       ),
     );
   }

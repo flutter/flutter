@@ -324,7 +324,7 @@ void main() {
             child: Text('$i', textDirection: TextDirection.ltr),
           );
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(

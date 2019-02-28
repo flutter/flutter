@@ -95,7 +95,7 @@ class ModalBarrier extends StatelessWidget {
               child: color == null ? null : DecoratedBox(
                 decoration: BoxDecoration(
                   color: color,
-                )
+                ),
               ),
             ),
           ),
