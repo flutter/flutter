@@ -412,7 +412,7 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
-  int get iterationCount => 15;
+  int get iterationCount => 10;
 
   Device get device => _device;
   Device _device;

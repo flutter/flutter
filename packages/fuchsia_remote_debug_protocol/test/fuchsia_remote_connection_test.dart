@@ -34,8 +34,11 @@ void main() {
       forwardedPorts = <MockPortForwarder>[];
       int port = 0;
       Future<PortForwarder> mockPortForwardingFunction(
-          String address, int remotePort,
-          [String interface = '', String configFile]) {
+        String address,
+        int remotePort, [
+        String interface = '',
+        String configFile,
+      ]) {
         return Future<PortForwarder>(() {
           final MockPortForwarder pf = MockPortForwarder();
           forwardedPorts.add(pf);

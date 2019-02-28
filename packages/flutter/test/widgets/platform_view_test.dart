@@ -418,8 +418,7 @@ void main() {
       );
     });
 
-    testWidgets('Android view touch events are in virtual display\'s coordinate system', (
-        WidgetTester tester) async {
+    testWidgets('Android view touch events are in virtual display\'s coordinate system', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -755,8 +754,7 @@ void main() {
       );
     });
 
-    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (
-        WidgetTester tester) async {
+    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 

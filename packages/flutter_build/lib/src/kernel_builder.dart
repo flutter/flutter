@@ -155,11 +155,11 @@ class FlutterKernelBuilder implements Builder {
     if (incrementalCompilerByteStorePath != null) {
       arguments.add('--incremental');
     }
-    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName', 'lib');
-    final String normalRoot =  path.join(projectDir.absolute.path, 'lib');
+    final String generatedRoot = path.join(projectDir.absolute.path, '.dart_tool', 'build', 'generated', '$packageName', 'lib${Platform.pathSeparator}');
+    final String normalRoot =  path.join(projectDir.absolute.path, 'lib${Platform.pathSeparator}');
     arguments.addAll(<String>[
       '--packages',
-      packagesFile.path,
+      Uri.file(packagesFile.path).toString(),
       '--output-dill',
       outputFile.path,
       '--filesystem-root',

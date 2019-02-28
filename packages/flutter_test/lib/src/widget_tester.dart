@@ -66,7 +66,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// });
 /// ```
 @isTest
-void testWidgets(String description, WidgetTesterCallback callback, {
+void testWidgets(
+  String description,
+  WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout
 }) {
@@ -158,7 +160,9 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
 /// See also:
 ///
 ///  * [expectLater] for use with asynchronous matchers.
-void expect(dynamic actual, dynamic matcher, {
+void expect(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
   dynamic skip, // true or a String
 }) {
@@ -175,7 +179,9 @@ void expect(dynamic actual, dynamic matcher, {
 ///
 /// Generally, it is better to use [expect], which does include checks to ensure
 /// that asynchronous APIs are not being called.
-void expectSync(dynamic actual, dynamic matcher, {
+void expectSync(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
 }) {
   test_package.expect(actual, matcher, reason: reason);
@@ -189,7 +195,9 @@ void expectSync(dynamic actual, dynamic matcher, {
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
 /// code, the test will fail.
-Future<void> expectLater(dynamic actual, dynamic matcher, {
+Future<void> expectLater(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
   dynamic skip, // true or a String
 }) {
@@ -240,7 +248,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<void> pumpWidget(Widget widget, [
+  Future<void> pumpWidget(
+    Widget widget, [
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
@@ -323,10 +332,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Alternatively, one can check that the return value from this function
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
-      Duration duration = const Duration(milliseconds: 100),
-      EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-      Duration timeout = const Duration(minutes: 10),
-    ]) {
+    Duration duration = const Duration(milliseconds: 100),
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    Duration timeout = const Duration(minutes: 10),
+  ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
     assert(timeout != null);
