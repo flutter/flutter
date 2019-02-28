@@ -633,7 +633,7 @@ class ButtonThemeData extends Diagnosticable {
   /// Returns the button's [MaterialButton.highlightElevation] if it is non-null.
   ///
   /// If button is a [FlatButton] or an [OutlineButton] then the highlight
-  /// elevation is 0.0, otherise the highlight elevation is 8.0.
+  /// elevation is 0.0, otherwise the highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) {
     if (button.highlightElevation != null)
       return button.highlightElevation;
@@ -649,7 +649,7 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.elevation] if it is non-null.
   ///
-  /// Otheriwse the disabled elevation is 0.0.
+  /// Otherwise the disabled elevation is 0.0.
   double getDisabledElevation(MaterialButton button) {
     if (button.disabledElevation != null)
       return button.disabledElevation;

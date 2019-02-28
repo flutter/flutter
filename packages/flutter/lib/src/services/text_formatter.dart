@@ -16,7 +16,7 @@ import 'text_input.dart';
 ///
 /// Concrete implementations [BlacklistingTextInputFormatter], which removes
 /// blacklisted characters upon edit commit, and
-/// [WhitelistingTextInputFormatter], which only allows entries of whitelisted
+/// [WhitelistingTextInputFormatter], which only allows entries of white-listed
 /// characters, are provided.
 ///
 /// To create custom formatters, extend the [TextInputFormatter] class and
@@ -27,7 +27,7 @@ import 'text_input.dart';
 ///  * [EditableText] on which the formatting apply.
 ///  * [BlacklistingTextInputFormatter], a provided formatter for blacklisting
 ///    characters.
-///  * [WhitelistingTextInputFormatter], a provided formatter for whitelisting
+///  * [WhitelistingTextInputFormatter], a provided formatter for white-listing
 ///    characters.
 abstract class TextInputFormatter {
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
@@ -87,7 +87,7 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 ///
 /// See also:
 ///
-///  * [WhitelistingTextInputFormatter], which uses a whitelist instead of a
+///  * [WhitelistingTextInputFormatter], which uses a white list instead of a
 ///    blacklist.
 class BlacklistingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of blacklisted characters patterns.
@@ -200,7 +200,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   }
 }
 
-/// A [TextInputFormatter] that allows only the insertion of whitelisted
+/// A [TextInputFormatter] that allows only the insertion of white-listed
 /// characters patterns.
 ///
 /// Since this formatter only removes characters from the text, it attempts to
@@ -210,9 +210,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 /// See also:
 ///
 ///  * [BlacklistingTextInputFormatter], which uses a blacklist instead of a
-///    whitelist.
+///    white-list.
 class WhitelistingTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that allows only the insertion of whitelisted characters patterns.
+  /// Creates a formatter that allows only the insertion of white-listed characters patterns.
   ///
   /// The [whitelistedPattern] must not be null.
   WhitelistingTextInputFormatter(this.whitelistedPattern)

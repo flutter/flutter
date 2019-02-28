@@ -285,7 +285,7 @@ class AlertDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
-  /// If this label is not provided, a semantic label will be infered from the
+  /// If this label is not provided, a semantic label will be inferred from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.alertDialogLabel].
   ///
@@ -570,7 +570,7 @@ class SimpleDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
-  /// If this label is not provided, a semantic label will be infered from the
+  /// If this label is not provided, a semantic label will be inferred from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.dialogLabel].
   ///

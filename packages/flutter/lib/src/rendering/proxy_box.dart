@@ -3506,7 +3506,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Whether decendants of this [RenderObject] should have their semantic
+  /// Whether descendants of this [RenderObject] should have their semantic
   /// information ignored.
   ///
   /// When this flag is set to true, all child semantics nodes are ignored.
@@ -4167,7 +4167,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///  * [CustomSemanticsAction], for an explaination of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
   set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
@@ -4580,7 +4580,7 @@ class RenderLeaderLayer extends RenderProxyBox {
 ///
 /// Hit testing on descendants of this render object will only work if the
 /// target position is within the box that this render object's parent considers
-/// to be hitable.
+/// to be hittable.
 ///
 /// See also:
 ///

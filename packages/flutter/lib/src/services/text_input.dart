@@ -389,7 +389,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -400,7 +400,7 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
-  /// Specifies how platforms may automatically capitialize text entered by the
+  /// Specifies how platforms may automatically capitalize text entered by the
   /// user.
   ///
   /// Defaults to [TextCapitalization.none].
