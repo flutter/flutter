@@ -15,9 +15,10 @@ import 'edge_insets.dart';
 /// the sides to the rounded corners.
 ///
 /// The rendered shape roughly approximates that of a superellipse. In this
-/// shape, the curvature of each corner over the arc is approximately a gaussian
-/// curve instead of a step function as with a traditional quarter circle round.
-/// The rendered rectangle is roughly a superellipse with an n value of 5.
+/// shape, the curvature of each 90º corner around the length of the arc is
+/// approximately a gaussian curve instead of a step function as with a
+/// traditional quarter circle round. The rendered rectangle is roughly a
+/// superellipse with an n value of 5.
 ///
 /// In an attempt to keep the shape of the rectangle the same regardless of its
 /// dimension (and to avoid clipping of the shape), the radius will
@@ -201,7 +202,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
     // however it represents the ratio of the total 90º curve width or height to
     // the width or height of the smallest rectangle dimension.
-    const double maxMultiplier = 2.0 * totalAffectedCornerPixelRatio;
+    const double minimalUnclippedSideToCornerRadiusRatio = 2.0 * totalAffectedCornerPixelRatio;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
@@ -210,7 +211,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // small extent value. It can be less than 'maxMultiplier' because there
     // are not enough pixels to render the clipping of the shape at this size so
     // it appears to still be concave (whereas mathematically it's convex).
-    const double minMultiplier = 2.0;
+    const double minimalEdgeLengthSideToCornerRadiusRatio = 2.0;
 
     // The minimum edge length at which the corner radius multiplier must be at
     // its maximum so as to maintain the appearance of a perfectly concave,
@@ -230,8 +231,8 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // multiplier of the radius value where the resulting shape is concave (ie.
     // does not visually clip) at any dimension.
     final double multiplier = ui.lerpDouble(
-        minMultiplier,
-        maxMultiplier,
+        minimalEdgeLengthSideToCornerRadiusRatio,
+        minimalUnclippedSideToCornerRadiusRatio,
         minSideLength / minRadiusEdgeLength
     );
     limitedRadius = math.min(radius, minSideLength / multiplier);

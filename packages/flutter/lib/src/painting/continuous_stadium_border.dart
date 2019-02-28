@@ -14,8 +14,8 @@ import 'edge_insets.dart';
 /// each linear edge to its 180º curves. Each 180º curve is approximately half
 /// an ellipse.
 ///
-/// In this shape, the curvature of each 180º curve over the arc is
-/// approximately a gaussian curve instead of a step function as with a
+/// In this shape, the curvature of each 180º curve around the length of the arc
+/// is approximately a gaussian curve instead of a step function as with a
 /// traditional half circle round.
 ///
 /// In an attempt to keep the shape of the rectangle the same regardless of its
@@ -110,7 +110,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
     // however it represents the ratio of the total 90º curve width or height to
     // the width or height of the smallest rectangle dimension.
-    const double maxMultiplier = 2 * totalAffectedCornerPixelRatio;
+    const double minimalUnclippedSideToCornerRadiusRatio = 2 * totalAffectedCornerPixelRatio;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
@@ -119,23 +119,23 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // small extent value. It can be less than 'maxMultiplier' because there
     // are not enough pixels to render the clipping of the shape at this size so
     // it appears to still be concave (whereas mathematically it's convex).
-    const double minMultiplier = 1 / maxMultiplier;
+    const double minimalEdgeLengthSideToCornerRadiusRatio = 1 / minimalUnclippedSideToCornerRadiusRatio;
 
     // The maximum aspect ratio of the width and height of the given rect before
     // clamping on one dimension will occur.
-    const double maxAspectRatio = 1 - minMultiplier;
+    const double maxEdgeLengthAspectRatio = 1 - minimalEdgeLengthSideToCornerRadiusRatio;
 
     final double rectWidth = rect.width;
     final double rectHeight = rect.height;
     final bool widthLessThanHeight = rectWidth < rectHeight;
-    final double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxAspectRatio * rectHeight) : rectWidth;
-    final double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxAspectRatio * rectWidth);
+    final double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxEdgeLengthAspectRatio * rectHeight) : rectWidth;
+    final double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxEdgeLengthAspectRatio * rectWidth);
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
     final double originX = centerX - width / 2;
     final double originY = centerY - height / 2;
     final double minDimension = math.min(width, height);
-    final double radius = minDimension * minMultiplier;
+    final double radius = minDimension * minimalEdgeLengthSideToCornerRadiusRatio;
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
@@ -270,7 +270,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    return width > maxMultiplier * radius ? bezierStadiumHorizontal() : bezierStadiumVertical();
+    return width > minimalUnclippedSideToCornerRadiusRatio * radius ? bezierStadiumHorizontal() : bezierStadiumVertical();
   }
 
   @override
