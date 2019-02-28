@@ -59,7 +59,7 @@ Color _scaleAlpha(Color a, double factor) {
 ///
 /// Consider the light teal of the Flutter logo. It is fully opaque, with a red
 /// channel value of 0x42 (66), a green channel value of 0xA5 (165), and a blue
-/// channel value of 0xF5 (245). In the common "hash syntax" for colour values,
+/// channel value of 0xF5 (245). In the common "hash syntax" for color values,
 /// it would be described as `#42A5F5`.
 ///
 /// Here are some ways it could be constructed:
@@ -803,7 +803,7 @@ enum FilterQuality {
 
   /// Fastest possible filtering, albeit also the lowest quality.
   ///
-  /// Typically this implies nearest-neighbour filtering.
+  /// Typically this implies nearest-neighbor filtering.
   none,
 
   /// Better quality than [none], faster than [medium].
@@ -814,7 +814,7 @@ enum FilterQuality {
   /// Better quality than [low], faster than [high].
   ///
   /// Typically this implies a combination of bilinear interpolation and
-  /// pyramidal parametric prefiltering (mipmaps).
+  /// pyramidal parametric pre-filtering (mipmaps).
   medium,
 
   /// Best possible quality filtering, albeit also the slowest.
@@ -1681,7 +1681,7 @@ Future<Null> _decodeImageFromListAsync(Uint8List list,
 /// [pixels] is the pixel data in the encoding described by [format].
 ///
 /// [rowBytes] is the number of bytes consumed by each row of pixels in the
-/// data buffer.  If unspecified, it defaults to [width] multipled by the
+/// data buffer.  If unspecified, it defaults to [width] multiplied by the
 /// number of bytes per pixel in the provided [format].
 ///
 /// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
@@ -1799,17 +1799,17 @@ class EngineLayer extends NativeFieldWrapperClass2 {
 
 /// A complex, one-dimensional subset of a plane.
 ///
-/// A path consists of a number of subpaths, and a _current point_.
+/// A path consists of a number of sub-paths, and a _current point_.
 ///
-/// Subpaths consist of segments of various types, such as lines,
-/// arcs, or beziers. Subpaths can be open or closed, and can
+/// Sub-paths consist of segments of various types, such as lines,
+/// arcs, or beziers. Sub-paths can be open or closed, and can
 /// self-intersect.
 ///
-/// Closed subpaths enclose a (possibly discontiguous) region of the
+/// Closed sub-paths enclose a (possibly discontiguous) region of the
 /// plane based on the current [fillType].
 ///
 /// The _current point_ is initially at the origin. After each
-/// operation adding a segment to a subpath, the current point is
+/// operation adding a segment to a sub-path, the current point is
 /// updated to the end of that segment.
 ///
 /// Paths can be drawn on canvases using [Canvas.drawPath], and can
@@ -1839,10 +1839,10 @@ class Path extends NativeFieldWrapperClass2 {
   int _getFillType() native 'Path_getFillType';
   void _setFillType(int fillType) native 'Path_setFillType';
 
-  /// Starts a new subpath at the given coordinate.
+  /// Starts a new sub-path at the given coordinate.
   void moveTo(double x, double y) native 'Path_moveTo';
 
-  /// Starts a new subpath at the given offset from the current point.
+  /// Starts a new sub-path at the given offset from the current point.
   void relativeMoveTo(double dx, double dy) native 'Path_relativeMoveTo';
 
   /// Adds a straight line segment from the current point to the given
@@ -1893,7 +1893,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// If the `forceMoveTo` argument is false, adds a straight line
   /// segment and an arc segment.
   ///
-  /// If the `forceMoveTo` argument is true, starts a new subpath
+  /// If the `forceMoveTo` argument is true, starts a new sub-path
   /// consisting of an arc segment.
   ///
   /// In either case, the arc segment consists of the arc that follows
@@ -1971,7 +1971,7 @@ class Path extends NativeFieldWrapperClass2 {
                            bool largeArc, bool clockwise)
                            native 'Path_relativeArcToPoint';
 
-  /// Adds a new subpath that consists of four lines that outline the
+  /// Adds a new sub-path that consists of four lines that outline the
   /// given rectangle.
   void addRect(Rect rect) {
     assert(_rectIsValid(rect));
@@ -1979,7 +1979,7 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _addRect(double left, double top, double right, double bottom) native 'Path_addRect';
 
-  /// Adds a new subpath that consists of a curve that forms the
+  /// Adds a new sub-path that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
   ///
   /// To add a circle, pass an appropriate rectangle as `oval`. [Rect.fromCircle]
@@ -1990,7 +1990,7 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _addOval(double left, double top, double right, double bottom) native 'Path_addOval';
 
-  /// Adds a new subpath with one arc segment that consists of the arc
+  /// Adds a new sub-path with one arc segment that consists of the arc
   /// that follows the edge of the oval bounded by the given
   /// rectangle, from startAngle radians around the oval up to
   /// startAngle + sweepAngle radians around the oval, with zero
@@ -2005,7 +2005,7 @@ class Path extends NativeFieldWrapperClass2 {
   void _addArc(double left, double top, double right, double bottom,
                double startAngle, double sweepAngle) native 'Path_addArc';
 
-  /// Adds a new subpath with a sequence of line segments that connect the given
+  /// Adds a new sub-path with a sequence of line segments that connect the given
   /// points.
   ///
   /// If `close` is true, a final line segment will be added that connects the
@@ -2018,7 +2018,7 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _addPolygon(Float32List points, bool close) native 'Path_addPolygon';
 
-  /// Adds a new subpath that consists of the straight lines and
+  /// Adds a new sub-path that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
   /// argument.
   void addRRect(RRect rrect) {
@@ -2027,7 +2027,7 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _addRRect(Float32List rrect) native 'Path_addRRect';
 
-  /// Adds a new subpath that consists of the given `path` offset by the given
+  /// Adds a new sub-path that consists of the given `path` offset by the given
   /// `offset`.
   ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
@@ -2065,11 +2065,11 @@ class Path extends NativeFieldWrapperClass2 {
   void _extendWithPath(Path path, double dx, double dy) native 'Path_extendWithPath';
   void _extendWithPathAndMatrix(Path path, double dx, double dy, Float64List matrix) native 'Path_extendWithPathAndMatrix';
 
-  /// Closes the last subpath, as if a straight line had been drawn
-  /// from the current point to the first point of the subpath.
+  /// Closes the last sub-path, as if a straight line had been drawn
+  /// from the current point to the first point of the sub-path.
   void close() native 'Path_close';
 
-  /// Clears the [Path] object of all subpaths, returning it to the
+  /// Clears the [Path] object of all sub-paths, returning it to the
   /// same state it had when it was created. The _current point_ is
   /// reset to the origin.
   void reset() native 'Path_reset';
@@ -2088,7 +2088,7 @@ class Path extends NativeFieldWrapperClass2 {
   bool _contains(double x, double y) native 'Path_contains';
 
   /// Returns a copy of the path with all the segments of every
-  /// subpath translated by the given offset.
+  /// sub-path translated by the given offset.
   Path shift(Offset offset) {
     assert(_offsetIsValid(offset));
     return _shift(offset.dx, offset.dy);
@@ -2096,7 +2096,7 @@ class Path extends NativeFieldWrapperClass2 {
   Path _shift(double dx, double dy) native 'Path_shift';
 
   /// Returns a copy of the path with all the segments of every
-  /// subpath transformed by the given matrix.
+  /// sub-path transformed by the given matrix.
   Path transform(Float64List matrix4) {
     assert(_matrix4IsValid(matrix4));
     return _transform(matrix4);
@@ -2243,14 +2243,14 @@ class PathMetricIterator implements Iterator<PathMetric> {
   }
 }
 
-/// Utilities for measuring a [Path] and extracting subpaths.
+/// Utilities for measuring a [Path] and extracting sub-paths.
 ///
 /// Iterate over the object returned by [Path.computeMetrics] to obtain
 /// [PathMetric] objects.
 ///
 /// Once created, the methods on this class will only be valid while the
 /// iterator is at the contour for which they were created. It will also only be
-/// valid for the path as it was specifed when [Path.computeMetrics] was called.
+/// valid for the path as it was specified when [Path.computeMetrics] was called.
 /// If additional contours are added or any contours are updated, the metrics
 /// need to be recomputed.
 class PathMetric {
@@ -2288,7 +2288,7 @@ class PathMetric {
   final _PathMeasure _measure;
 
 
-  /// Computes the position of hte current contour at the given offset, and the
+  /// Computes the position of the current contour at the given offset, and the
   /// angle of the path at that point.
   ///
   /// For example, calling this method with a distance of 1.41 for a line from
@@ -2483,7 +2483,7 @@ class ColorFilter {
         _matrix = matrix,
         _type = _TypeMatrix;
 
-  /// Construct a color filter that applies the srgb gamma curve to the RGB
+  /// Construct a color filter that applies the sRGB gamma curve to the RGB
   /// channels.
   const ColorFilter.linearToSrgbGamma()
       : _color = null,
@@ -2491,7 +2491,7 @@ class ColorFilter {
         _matrix = null,
         _type = _TypeLinearToSrgbGamma;
 
-  /// Creates a color filter that applies the inverse of the srgb gamma curve
+  /// Creates a color filter that applies the inverse of the sRGB gamma curve
   /// to the RGB channels.
   const ColorFilter.srgbToLinearGamma()
       : _color = null,
@@ -3055,8 +3055,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// ## Using saveLayer with clips
   ///
   /// When a rectangular clip operation (from [clipRect]) is not axis-aligned
-  /// with the raster buffer, or when the clip operation is not rectalinear (e.g.
-  /// because it is a rounded rectangle clip created by [clipRRect] or an
+  /// with the raster buffer, or when the clip operation is not rectilinear
+  /// (e.g. because it is a rounded rectangle clip created by [clipRRect] or an
   /// arbitrarily complicated path clip created by [clipPath]), the edge of the
   /// clip needs to be anti-aliased.
   ///
@@ -3408,7 +3408,7 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Draws the given [Path] with the given [Paint]. Whether this shape is
   /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
-  /// filled, then subpaths within it are implicitly closed (see [Path.close]).
+  /// filled, then sub-paths within it are implicitly closed (see [Path.close]).
   void drawPath(Path path, Paint paint) {
     assert(path != null); // path is checked on the engine side
     assert(paint != null);
@@ -3803,7 +3803,7 @@ class Shadow {
   ///
   /// The default shadow is a black shadow with zero offset and zero blur.
   /// Default shadows should be completely covered by the casting element,
-  /// and not be visble.
+  /// and not be visible.
   ///
   /// Transparency should be adjusted through the [color] alpha.
   ///
@@ -3862,9 +3862,10 @@ class Shadow {
   /// To honor this as well, the shape should be translated by [offset] before
   /// being filled using this [Paint].
   ///
-  /// This class does not provide a way to disable shadows to avoid inconsistencies
-  /// in shadow blur rendering, primarily as a method of reducing test flakiness.
-  /// [toPaint] should be overriden in subclasses to provide this functionality.
+  /// This class does not provide a way to disable shadows to avoid
+  /// inconsistencies in shadow blur rendering, primarily as a method of
+  /// reducing test flakiness. [toPaint] should be overridden in subclasses to
+  /// provide this functionality.
   Paint toPaint() {
     return Paint()
       ..color = color

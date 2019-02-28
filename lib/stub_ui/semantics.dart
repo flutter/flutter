@@ -161,7 +161,7 @@ class SemanticsAction {
   /// A [Snackbar], for example, may have a dismiss action to indicate to the
   /// user that it can be removed after it is no longer relevant. On Android,
   /// (with TalkBack) special hint text is spoken when focusing the node and
-  /// a custom action is availible in the local context menu. On iOS,
+  /// a custom action is available in the local context menu. On iOS,
   /// (with VoiceOver) users can perform a standard gesture to dismiss it.
   static const SemanticsAction dismiss = const SemanticsAction._(_kDismissIndex);
 
@@ -642,7 +642,7 @@ class SemanticsUpdateBuilder {
 
   /// Update the custom semantics action associated with the given `id`.
   ///
-  /// The name of the action exposed to the user is the `label`. For overriden
+  /// The name of the action exposed to the user is the `label`. For overridden
   /// standard actions this value is ignored.
   ///
   /// The `hint` should describe what happens when an action occurs, not the
@@ -652,9 +652,9 @@ class SemanticsUpdateBuilder {
   /// The text direction of the `hint` and `label` is the same as the global
   /// window.
   ///
-  /// For overriden standard actions, `overrideId` corresponds with a
-  /// [SemanticsAction.index] value. For custom actions this argument should not be
-  /// provided.
+  /// For overridden standard actions, `overrideId` corresponds with a
+  /// [SemanticsAction.index] value. For custom actions this argument should not
+  /// be provided.
   void updateCustomAction({int id, String label, String hint, int overrideId = -1}) {
     assert(id != null);
     assert(overrideId != null);

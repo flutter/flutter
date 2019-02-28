@@ -264,7 +264,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Android view: When resizing an Android view there is a short period during
   /// which the framework cannot tell if the newest texture frame has the
   /// previous or new size, to workaround this the framework "freezes" the
-  /// texture just before resizing the Android view and unfreezes it when it is
+  /// texture just before resizing the Android view and un-freezes it when it is
   /// certain that a frame with the new size is ready.
   void addTexture(int textureId, { Offset offset: Offset.zero, double width: 0.0, double height: 0.0 , bool freeze: false}) {
     assert(offset != null, 'Offset argument was null');

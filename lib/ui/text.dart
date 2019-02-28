@@ -358,7 +358,7 @@ class TextStyle {
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto). If a `fontFamilyFallback` is
-  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the postion of
+  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the position of
   ///   the preferred font family. When a higher priority font cannot be found or does not contain a glyph, a lower
   ///   priority font will be used.
   /// * `fontFamilyFallback`: An ordered list of the names of the fonts to fallback on when a glyph cannot
@@ -1165,7 +1165,7 @@ class TextPosition {
 /// The only constraint that can be specified is the [width]. See the discussion
 /// at [width] for more details.
 class ParagraphConstraints {
-  /// Creates constraints for laying out a pargraph.
+  /// Creates constraints for laying out a paragraph.
   ///
   /// The [width] argument must not be null.
   const ParagraphConstraints({
@@ -1370,7 +1370,7 @@ class Paragraph extends NativeFieldWrapperClass2 {
 
 /// Builds a [Paragraph] containing text with the given styling information.
 ///
-/// To set the paragraph's alignment, truncation, and ellipsising behavior, pass
+/// To set the paragraph's alignment, truncation, and ellipsizing behavior, pass
 /// an appropriately-configured [ParagraphStyle] object to the [new
 /// ParagraphBuilder] constructor.
 ///

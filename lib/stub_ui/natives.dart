@@ -33,7 +33,7 @@ void _setupHooks() {  // ignore: unused_element
 ///
 /// The buffer contains a list of symbols compiled by the Dart JIT at runtime up to the point
 /// when this function was called. This list can be saved to a text file and passed to tools
-/// such as `flutter build` or Dart `gen_snapshot` in order to precompile this code offline.
+/// such as `flutter build` or Dart `gen_snapshot` in order to pre-compile this code offline.
 ///
 /// The list has one symbol per line of the following format: `<namespace>,<class>,<symbol>\n`.
 /// Here are some examples:
