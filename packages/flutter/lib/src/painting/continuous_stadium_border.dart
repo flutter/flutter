@@ -90,12 +90,12 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // We need to change the dimensions of the rect in the event that the
     // shape has a side width as the stroke is drawn centered on the border of
     // the shape instead of inside as with the rounded rect and stadium.
-    if (side.width > 0)
-      rect = rect.deflate(side.width / 2);
+    if (side.width > 0.0)
+      rect = rect.deflate(side.width / 2.0);
 
     // The ratio of the declared corner radius to the total affected pixels to
-    // render the corner. For example if the declared radius were 25.0px then
-    // totalAffectedCornerPixelRatio * 25.0 (~38) pixels would be affected for
+    // render the corner. For example if the declared radius were 25px then
+    // totalAffectedCornerPixelRatio * 25 (~38) pixels would be affected for
     // each of the the four corners of the shape.
     const double totalAffectedCornerPixelRatio = 1.52865;
 
@@ -110,7 +110,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
     // however it represents the ratio of the total 90º curve width or height to
     // the width or height of the smallest rectangle dimension.
-    const double minimalUnclippedSideToCornerRadiusRatio = 2 * totalAffectedCornerPixelRatio;
+    const double minimalUnclippedSideToCornerRadiusRatio = 2.0 * totalAffectedCornerPixelRatio;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
@@ -119,11 +119,11 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // small extent value. It can be less than 'maxMultiplier' because there
     // are not enough pixels to render the clipping of the shape at this size so
     // it appears to still be concave (whereas mathematically it's convex).
-    const double minimalEdgeLengthSideToCornerRadiusRatio = 1 / minimalUnclippedSideToCornerRadiusRatio;
+    const double minimalEdgeLengthSideToCornerRadiusRatio = 1.0 / minimalUnclippedSideToCornerRadiusRatio;
 
     // The maximum aspect ratio of the width and height of the given rect before
     // clamping on one dimension will occur.
-    const double maxEdgeLengthAspectRatio = 1 - minimalEdgeLengthSideToCornerRadiusRatio;
+    const double maxEdgeLengthAspectRatio = 1.0 - minimalEdgeLengthSideToCornerRadiusRatio;
 
     final double rectWidth = rect.width;
     final double rectHeight = rect.height;
@@ -132,8 +132,8 @@ class ContinuousStadiumBorder extends ShapeBorder {
     final double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxEdgeLengthAspectRatio * rectWidth);
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
-    final double originX = centerX - width / 2;
-    final double originY = centerY - height / 2;
+    final double originX = centerX - width / 2.0;
+    final double originY = centerY - height / 2.0;
     final double minDimension = math.min(width, height);
     final double radius = minDimension * minimalEdgeLengthSideToCornerRadiusRatio;
 
@@ -161,53 +161,53 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // in a clockwise fashion around to the upper left hand corner.
     Path bezierStadiumHorizontal () {
       return Path()
-        ..moveTo(leftX(2.00593972), topY(0))
+        ..moveTo(leftX(2.00593972), topY(0.0))
         ..lineTo(originX + width - 1.52866483 * radius, originY)
-        ..cubicTo(rightX(1.63527834), topY(0),
-            rightX(1.29884040), topY(0),
+        ..cubicTo(rightX(1.63527834), topY(0.0),
+            rightX(1.29884040), topY(0.0),
             rightX(0.99544263), topY(0.10012127))
         ..lineTo(rightX(0.93667978), topY(0.11451437))
         ..cubicTo(rightX(0.37430558), topY(0.31920183),
             rightX(0.00000051), topY(0.85376567),
             rightX(0.00000051), topY(1.45223188))
-        ..cubicTo(rightMidX(0), centerY,
-            rightMidX(0), centerY,
-            rightMidX(0), centerY)
-        ..lineTo(rightMidX(0), centerY)
-        ..cubicTo(rightMidX(0), centerY,
-            rightMidX(0), centerY,
-            rightMidX(0), centerY)
-        ..lineTo(rightX(0), bottomY(1.45223165))
-        ..cubicTo(rightX(0), bottomY(0.85376561),
+        ..cubicTo(rightMidX(0.0), centerY,
+            rightMidX(0.0), centerY,
+            rightMidX(0.0), centerY)
+        ..lineTo(rightMidX(0.0), centerY)
+        ..cubicTo(rightMidX(0.0), centerY,
+            rightMidX(0.0), centerY,
+            rightMidX(0.0), centerY)
+        ..lineTo(rightX(0.0), bottomY(1.45223165))
+        ..cubicTo(rightX(0.0), bottomY(0.85376561),
             rightX(0.37430558), bottomY(0.31920174),
             rightX(0.93667978), bottomY(0.11451438))
-        ..cubicTo(rightX(1.29884040), bottomY(0),
-            rightX(1.63527834), bottomY(0),
-            rightX(2.30815363), bottomY(0))
+        ..cubicTo(rightX(1.29884040), bottomY(0.0),
+            rightX(1.63527834), bottomY(0.0),
+            rightX(2.30815363), bottomY(0.0))
         ..lineTo(originX + 1.52866483 * radius, originY + height)
-        ..cubicTo(leftX(1.63527822), bottomY(0),
-            leftX(1.29884040), bottomY(0),
+        ..cubicTo(leftX(1.63527822), bottomY(0.0),
+            leftX(1.29884040), bottomY(0.0),
             leftX(0.99544257), bottomY(0.10012124))
         ..lineTo(leftX(0.93667972), bottomY(0.11451438))
         ..cubicTo(leftX(0.37430549), bottomY(0.31920174),
             leftX(-0.00000007), bottomY(0.85376561),
             leftX(-0.00000001), bottomY(1.45223176))
-        ..cubicTo(leftMidX(0), centerY,
-            leftMidX(0), centerY,
-            leftMidX(0), centerY)
-        ..lineTo(leftMidX(0), centerY)
-        ..cubicTo(leftMidX(0), centerY,
-            leftMidX(0), centerY,
-            leftMidX(0), centerY)
+        ..cubicTo(leftMidX(0.0), centerY,
+            leftMidX(0.0), centerY,
+            leftMidX(0.0), centerY)
+        ..lineTo(leftMidX(0.0), centerY)
+        ..cubicTo(leftMidX(0.0), centerY,
+            leftMidX(0.0), centerY,
+            leftMidX(0.0), centerY)
         ..lineTo(leftX(-0.00000001), topY(1.45223153))
         ..cubicTo(leftX(0.00000004), topY(0.85376537),
             leftX(0.37430561), topY(0.31920177),
             leftX(0.93667978), topY(0.11451436))
-        ..cubicTo(leftX(1.29884040), topY(0),
-            leftX(1.63527822), topY(0),
-            leftX(2.30815363), topY(0))
+        ..cubicTo(leftX(1.29884040), topY(0.0),
+            leftX(1.63527822), topY(0.0),
+            leftX(2.30815363), topY(0.0))
         ..lineTo(originX + 1.52866483 * radius, originY)
-        ..lineTo(leftX(2.00593972), topY(0))
+        ..lineTo(leftX(2.00593972), topY(0.0))
         ..close();
     }
 
@@ -221,52 +221,52 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // in a clockwise fashion around to the upper left hand corner.
     Path bezierStadiumVertical () {
       return Path()
-        ..moveTo(centerX, topY(0))
-        ..lineTo(centerX, topY(0))
-        ..cubicTo(centerX, topY(0),
-            centerX, topY(0),
-            centerX, topY(0))
-        ..lineTo(rightX(1.45223153), topY(0))
+        ..moveTo(centerX, topY(0.0))
+        ..lineTo(centerX, topY(0.0))
+        ..cubicTo(centerX, topY(0.0),
+            centerX, topY(0.0),
+            centerX, topY(0.0))
+        ..lineTo(rightX(1.45223153), topY(0.0))
         ..cubicTo(rightX(0.85376573), topY(0.00000001),
             rightX(0.31920189), topY(0.37430537),
             rightX(0.11451442), topY(0.93667936))
-        ..cubicTo(rightX(0), topY(1.29884040),
-            rightX(0), topY(1.63527822),
-            rightX(0), topY(2.30815387))
+        ..cubicTo(rightX(0.0), topY(1.29884040),
+            rightX(0.0), topY(1.63527822),
+            rightX(0.0), topY(2.30815387))
         ..lineTo(originX + width, originY + height - 1.52866483 * radius)
-        ..cubicTo(rightX(0), bottomY(1.63527822),
-            rightX(0), bottomY(1.29884028),
+        ..cubicTo(rightX(0.0), bottomY(1.63527822),
+            rightX(0.0), bottomY(1.29884028),
             rightX(0.10012137), bottomY(0.99544269))
         ..lineTo(rightX(0.11451442), bottomY(0.93667972))
         ..cubicTo(rightX(0.31920189), bottomY(0.37430552),
-            rightX(0.85376549), bottomY(0),
-            rightX(1.45223165), bottomY(0))
-        ..cubicTo(centerX, bottomMidY(0),
-            centerX, bottomMidY(0),
-            centerX, bottomMidY(0))
-        ..lineTo(centerX, bottomMidY(0))
-        ..cubicTo(centerX, bottomMidY(0),
-            centerX, bottomMidY(0),
-            centerX, bottomMidY(0))
-        ..lineTo(leftX(1.45223141), bottomY(0))
-        ..cubicTo(leftX(0.85376543), bottomY(0),
+            rightX(0.85376549), bottomY(0.0),
+            rightX(1.45223165), bottomY(0.0))
+        ..cubicTo(centerX, bottomMidY(0.0),
+            centerX, bottomMidY(0.0),
+            centerX, bottomMidY(0.0))
+        ..lineTo(centerX, bottomMidY(0.0))
+        ..cubicTo(centerX, bottomMidY(0.0),
+            centerX, bottomMidY(0.0),
+            centerX, bottomMidY(0.0))
+        ..lineTo(leftX(1.45223141), bottomY(0.0))
+        ..cubicTo(leftX(0.85376543), bottomY(0.0),
             leftX(0.31920192), bottomY(0.37430552),
             leftX(0.11451446), bottomY(0.93667972))
-        ..cubicTo(leftX(0), bottomY(1.29884028),
-            leftX(0), bottomY(1.63527822),
-            leftX(0), bottomY(2.30815387))
+        ..cubicTo(leftX(0.0), bottomY(1.29884028),
+            leftX(0.0), bottomY(1.63527822),
+            leftX(0.0), bottomY(2.30815387))
         ..lineTo(originX, originY + 1.52866483 * radius)
-        ..cubicTo(leftX(0), topY(1.63527822),
-            leftX(0), topY(1.29884040),
+        ..cubicTo(leftX(0.0), topY(1.63527822),
+            leftX(0.0), topY(1.29884040),
             leftX(0.10012126), topY(0.99544257))
         ..lineTo(leftX(0.11451443), topY(0.93667966))
         ..cubicTo(leftX(0.31920189), topY(0.37430552),
-            leftX(0.85376549), topY(0),
-            leftX(1.45223153), topY(0))
-        ..cubicTo(centerX, topY(0),
-            centerX, topY(0),
-            centerX, topY(0))
-        ..lineTo(centerX, topY(0))
+            leftX(0.85376549), topY(0.0),
+            leftX(1.45223153), topY(0.0))
+        ..cubicTo(centerX, topY(0.0),
+            centerX, topY(0.0),
+            centerX, topY(0.0))
+        ..lineTo(centerX, topY(0.0))
         ..close();
     }
 
