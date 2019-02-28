@@ -149,7 +149,7 @@ abstract class MaterialInkController {
 ///
 /// See also:
 ///
-///  * [MergeableMaterial], a piece of material that can split and remerge.
+///  * [MergeableMaterial], a piece of material that can split and re-merge.
 ///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
 ///  * <https://material.io/design/>
 class Material extends StatefulWidget {

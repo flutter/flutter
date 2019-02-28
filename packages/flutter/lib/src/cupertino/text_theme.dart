@@ -148,7 +148,7 @@ class CupertinoTextThemeData extends Diagnosticable {
   }
 
   final TextStyle _navActionTextStyle;
-  /// Typography of interative text content in navigation bars.
+  /// Typography of interactive text content in navigation bars.
   TextStyle get navActionTextStyle {
     return _navActionTextStyle ?? _kDefaultActionTextStyle.copyWith(
       color: _primaryColor,

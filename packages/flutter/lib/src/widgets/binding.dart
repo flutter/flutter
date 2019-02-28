@@ -22,7 +22,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides noop method implementations.
+/// When used as a mixin, provides no-op method implementations.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///

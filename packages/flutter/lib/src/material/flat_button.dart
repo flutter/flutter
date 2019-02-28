@@ -35,7 +35,7 @@ import 'theme_data.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
 /// The [clipBehavior] argument must not be null.

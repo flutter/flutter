@@ -255,7 +255,7 @@ class SystemChrome {
   /// If a particular overlay is unsupported on the platform, enabling or
   /// disabling that overlay will be ignored.
   ///
-  /// The settings here can be overidden by the platform when System UI becomes
+  /// The settings here can be overridden by the platform when System UI becomes
   /// necessary for functionality.
   ///
   /// For example, on Android, when the keyboard becomes visible, it will enable the
