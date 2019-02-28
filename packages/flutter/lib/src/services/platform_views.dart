@@ -354,7 +354,7 @@ class AndroidMotionEvent {
   /// See Android's [MotionEvent#getEdgeFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getEdgeFlags()).
   final int edgeFlags;
 
-  /// The source of this event (e.g a touch pad or stylus).
+  /// The source of this event (e.g a touchpad or stylus).
   ///
   /// See Android's [MotionEvent#getSource](https://developer.android.com/reference/android/view/MotionEvent.html#getSource()).
   final int source;
