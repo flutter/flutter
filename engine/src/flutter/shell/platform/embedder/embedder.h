@@ -622,8 +622,8 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     const uint8_t* data,
     size_t data_length);
 
-// Notify the engine that a vsync event occured. A baton passed to the platform
-// via the vsync callback must be returned.
+// Notify the engine that a vsync event occurred. A baton passed to the
+// platform via the vsync callback must be returned.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
                                          intptr_t baton,
@@ -638,9 +638,9 @@ FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
 FLUTTER_EXPORT
 void FlutterEngineTraceEventDurationBegin(const char* name);
 
-// A profiling utility. Logs a trace duration end event to the timeline. If
-// the timeline is unavailable or disabled, this has no effect. This call must
-// be preceeded by a trace duration begin call (via
+// A profiling utility. Logs a trace duration end event to the timeline. If the
+// timeline is unavailable or disabled, this has no effect. This call must be
+// preceded by a trace duration begin call (via
 // |FlutterEngineTraceEventDurationBegin|) with the same name on the same
 // thread. Can be called on any thread.
 FLUTTER_EXPORT
