@@ -280,9 +280,9 @@ class AboutDialog extends StatelessWidget {
             Text(version, style: Theme.of(context).textTheme.body1),
             Container(height: 18.0),
             Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
-          ]
+          ],
         ),
-      )
+      ),
     ));
     body = <Widget>[
       Row(
@@ -457,7 +457,7 @@ class _LicensePageState extends State<LicensePage> {
       contents.add(const Padding(
         padding: EdgeInsets.symmetric(vertical: 24.0),
         child: Center(
-          child: CircularProgressIndicator()
+          child: CircularProgressIndicator(),
         ),
       ));
     }

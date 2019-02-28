@@ -613,7 +613,7 @@ class SimpleDialog extends StatelessWidget {
         child: SingleChildScrollView(
           padding: contentPadding,
           child: ListBody(children: children),
-        )
+        ),
       ));
     }
 

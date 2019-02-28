@@ -97,7 +97,7 @@ class GridTileBar extends StatelessWidget {
                 child: subtitle,
               ),
             ],
-          )
+          ),
         )
       );
     } else if (title != null || subtitle != null) {
@@ -108,7 +108,7 @@ class GridTileBar extends StatelessWidget {
             softWrap: false,
             overflow: TextOverflow.ellipsis,
             child: title ?? subtitle,
-          )
+          ),
         )
       );
     }

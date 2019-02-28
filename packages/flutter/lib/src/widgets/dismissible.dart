@@ -557,7 +557,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
               moveAnimation: _moveAnimation,
             ),
             child: background,
-          )
+          ),
         ));
       }
 

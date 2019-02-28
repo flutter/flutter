@@ -277,7 +277,7 @@ class TravelDestinationContent extends StatelessWidget {
                 image: AssetImage(destination.assetName, package: destination.assetPackage),
                 fit: BoxFit.cover,
                 child: Container(),
-              )
+              ),
             ),
             Positioned(
               bottom: 16.0,

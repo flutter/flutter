@@ -1135,7 +1135,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         children: <Widget>[
           result,
           Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
-        ]
+        ],
       );
     }
 

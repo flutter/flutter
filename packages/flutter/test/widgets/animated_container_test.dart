@@ -225,7 +225,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: const Text('X', textDirection: TextDirection.ltr),
-        )
+        ),
       )
     );
 
@@ -245,7 +245,7 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: const Text('X', textDirection: TextDirection.ltr),
-        )
+        ),
       )
     );
     await tester.pump();
@@ -269,7 +269,7 @@ void main() {
           width: 200.0,
           height: 100.0,
           child: const Text('X', textDirection: TextDirection.ltr),
-        )
+        ),
       )
     );
     await tester.pump();

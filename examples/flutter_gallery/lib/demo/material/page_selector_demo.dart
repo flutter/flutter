@@ -63,7 +63,7 @@ class _PageSelector extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList()
+                }).toList(),
               ),
             ),
           ),

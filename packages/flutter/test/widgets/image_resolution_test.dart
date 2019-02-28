@@ -143,7 +143,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
             height: imageSize,
             width: imageSize,
             fit: BoxFit.fill,
-          )
+          ),
       ),
     ),
   );

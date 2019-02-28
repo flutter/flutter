@@ -67,20 +67,20 @@ class StockRow extends StatelessWidget {
                     child: Text(
                       lastSale,
                       textAlign: TextAlign.right,
-                    )
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       changeInPrice,
                       textAlign: TextAlign.right,
-                    )
+                    ),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: DefaultTextStyle.of(context).style.textBaseline,
-              )
+              ),
             ),
-          ]
+          ],
         ),
       ),
     );

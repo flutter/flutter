@@ -215,9 +215,9 @@ class _PointDemoState extends State<_PointDemo> {
                 "and red points to change the animation's path.",
                 style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
               ),
-            )
+            ),
           ),
-        )
+        ),
       ),
     );
   }
@@ -388,9 +388,9 @@ class _RectangleDemoState extends State<_RectangleDemo> {
                 "to change the animation's path.",
                 style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
               ),
-            )
+            ),
           ),
-        )
+        ),
       ),
     );
   }
@@ -466,7 +466,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
           },
         ),
         body: TabBarView(
-          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList()
+          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList(),
         ),
       ),
     );

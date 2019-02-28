@@ -96,9 +96,9 @@ void main() {
                   ListTile(title: Text('0')),
                 ],
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       ),
     ));
 

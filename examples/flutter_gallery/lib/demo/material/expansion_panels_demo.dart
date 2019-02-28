@@ -73,7 +73,7 @@ class DualHeaderWithHint extends StatelessWidget {
             ),
           ),
         ),
-      ]
+      ],
     );
   }
 }
@@ -108,7 +108,7 @@ class CollapsibleBody extends StatelessWidget {
             child: DefaultTextStyle(
               style: textTheme.caption.copyWith(fontSize: 15.0),
               child: child,
-            )
+            ),
           ),
         ),
         const Divider(height: 1.0),
@@ -139,7 +139,7 @@ class CollapsibleBody extends StatelessWidget {
             ],
           ),
         ),
-      ]
+      ],
     );
   }
 }
@@ -275,7 +275,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   ),
                 );
               }
-            )
+            ),
           );
         },
       ),
@@ -314,7 +314,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   ),
                 );
               }
-            )
+            ),
           );
         },
       ),

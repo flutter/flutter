@@ -256,7 +256,7 @@ class _RadioItem<T> extends StatelessWidget {
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
     );

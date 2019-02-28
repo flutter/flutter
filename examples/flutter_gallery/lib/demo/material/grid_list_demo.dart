@@ -170,7 +170,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(photo.title)
+            title: Text(photo.title),
           ),
           body: SizedBox.expand(
             child: Hero(

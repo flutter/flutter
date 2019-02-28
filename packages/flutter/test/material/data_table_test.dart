@@ -56,7 +56,7 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable())
+      home: Material(child: buildTable()),
     ));
 
     await tester.tap(find.byType(Checkbox).first);
@@ -75,7 +75,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1))
+      home: Material(child: buildTable(sortColumnIndex: 1)),
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
     await tester.tap(find.text('Calories'));
@@ -84,7 +84,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false))
+      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false)),
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 

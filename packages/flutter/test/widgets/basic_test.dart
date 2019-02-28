@@ -77,7 +77,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         )
       );
       expect(_pointerDown, isFalse);
@@ -107,7 +107,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         )
       );
       expect(_pointerDown, isFalse);
@@ -137,7 +137,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         )
       );
       expect(_pointerDown, isFalse);

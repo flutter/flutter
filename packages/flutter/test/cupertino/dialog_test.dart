@@ -74,7 +74,7 @@ void main() {
           CupertinoDialogAction(child: Text('Cancel')),
           CupertinoDialogAction(child: Text('OK')),
         ],
-      )
+      ),
     )));
 
     expect(

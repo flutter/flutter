@@ -136,11 +136,11 @@ void main() {
                             log.add('a: ${v.value}');
                             return const Text('', textDirection: TextDirection.ltr);
                           }
-                        )
+                        ),
                       ),
-                    )
+                    ),
                   ),
-                )
+                ),
               ),
               right: Container(
                 child: ValueInherited(
@@ -153,14 +153,14 @@ void main() {
                           log.add('b: ${v.value}');
                           return const Text('', textDirection: TextDirection.ltr);
                         }
-                      )
-                    )
+                      ),
+                    ),
                   ),
-                )
+                ),
               ),
-            )
+            ),
           ),
-        )
+        ),
       )
     );
 
@@ -213,9 +213,9 @@ void main() {
                           }
                         ),
                       ),
-                    )
+                    ),
                   ),
-                )
+                ),
               ),
               right: Container(
                 child: ValueInherited(
@@ -230,13 +230,13 @@ void main() {
                           return const Text('', textDirection: TextDirection.ltr);
                         }
                       ),
-                    )
+                    ),
                   ),
-                )
+                ),
               ),
-            )
+            ),
           ),
-        )
+        ),
       )
     );
 
@@ -290,9 +290,9 @@ void main() {
                         key: key,
                         child: child,
                       ),
-                    )
+                    ),
                   ),
-                )
+                ),
               ),
               right: Container(
                 child: ValueInherited(
@@ -301,13 +301,13 @@ void main() {
                     child: Container(
                       key: key,
                       child: child,
-                    )
+                    ),
                   ),
-                )
+                ),
               ),
-            )
+            ),
           ),
-        )
+        ),
       )
     );
 

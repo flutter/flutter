@@ -77,7 +77,7 @@ class StockSymbolPage extends StatelessWidget {
         final Stock stock = stocks[symbol];
         return Scaffold(
           appBar: AppBar(
-            title: Text(stock?.name ?? symbol)
+            title: Text(stock?.name ?? symbol),
           ),
           body: SingleChildScrollView(
             child: Container(
@@ -103,7 +103,7 @@ class StockSymbolPage extends StatelessWidget {
                   crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
               ),
-            )
+            ),
           ),
         );
       },

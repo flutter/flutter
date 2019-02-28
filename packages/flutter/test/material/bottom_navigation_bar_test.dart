@@ -34,8 +34,8 @@ void main() {
             onTap: (int index) {
               mutatedIndex = index;
             },
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -59,8 +59,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ]
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -93,7 +93,7 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
+          ),
         ),
       )
     );
@@ -129,8 +129,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -172,7 +172,7 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
+          ),
         ),
       )
     );
@@ -221,7 +221,7 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
+          ),
         ),
       )
     );
@@ -248,8 +248,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -276,8 +276,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -305,8 +305,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -354,8 +354,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -381,8 +381,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -406,9 +406,9 @@ void main() {
                   title: Text('Alarm'),
                 ),
               ]
-            )
+            ),
           ),
-        )
+        ),
       )
     );
 
@@ -434,8 +434,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -460,8 +460,8 @@ void main() {
                 title: Text('Alarm'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -497,8 +497,8 @@ void main() {
                 title: Text('Add'),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -558,7 +558,7 @@ void main() {
                   title: Text('Add'),
                 ),
               ],
-            )
+            ),
           ),
         ),
       )
@@ -596,7 +596,7 @@ void main() {
                   title: Text('Add'),
                 ),
               ],
-            )
+            ),
           ),
         ),
       )

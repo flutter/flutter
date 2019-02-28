@@ -16,7 +16,7 @@ void main() {
               runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr,)));
             },
             child: const Text('GO'),
-          )
+          ),
         ),
       )
     );

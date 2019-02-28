@@ -433,8 +433,8 @@ void main() {
               height: 100.0,
               color: Colors.green[500],
             ),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -521,8 +521,8 @@ void main() {
               height: 100.0,
               color: Colors.green[500],
             ),
-          )
-        )
+          ),
+        ),
       );
     }
 

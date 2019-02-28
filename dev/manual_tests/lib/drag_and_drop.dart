@@ -238,7 +238,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Drag and Drop Flutter Demo')
+        title: const Text('Drag and Drop Flutter Demo'),
       ),
       body: Column(
         children: <Widget>[
@@ -266,7 +266,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                   child: const Text('above'),
                 ),
               ],
-            )
+            ),
           ),
           Expanded(
             child: Row(
@@ -275,8 +275,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
-              ]
-            )
+              ],
+            ),
           ),
           Expanded(
             child: Row(
@@ -286,9 +286,9 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 MovableBall(2, position, moveBall),
                 MovableBall(3, position, moveBall),
               ],
-            )
+            ),
           ),
-        ]
+        ],
       ),
     );
   }

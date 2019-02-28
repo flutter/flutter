@@ -74,7 +74,7 @@ class DialogDemoState extends State<DialogDemo> {
     .then<void>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text('You selected: $value')
+          content: Text('You selected: $value'),
         ));
       }
     });
@@ -184,7 +184,7 @@ class DialogDemoState extends State<DialogDemo> {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(SnackBar(
-                    content: Text('You selected: ${value.format(context)}')
+                    content: Text('You selected: ${value.format(context)}'),
                   ));
                 }
               });

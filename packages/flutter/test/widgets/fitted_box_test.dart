@@ -23,7 +23,7 @@ void main() {
               height: 50.0,
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -59,7 +59,7 @@ void main() {
               height: 50.0,
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -95,7 +95,7 @@ void main() {
               height: 50.0,
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -465,7 +465,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       )
     );
     expect(_pointerDown, isFalse);

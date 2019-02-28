@@ -1072,7 +1072,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(

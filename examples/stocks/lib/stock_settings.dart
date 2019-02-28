@@ -99,7 +99,7 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('Settings')
+      title: const Text('Settings'),
     );
   }
 

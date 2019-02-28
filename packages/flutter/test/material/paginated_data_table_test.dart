@@ -67,7 +67,7 @@ void main() {
           DataColumn(label: Text('Calories'), numeric: true),
           DataColumn(label: Text('Generation')),
         ],
-      )
+      ),
     ));
 
     await tester.tap(find.byTooltip('Next page'));

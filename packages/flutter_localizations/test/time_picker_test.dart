@@ -33,8 +33,8 @@ class _TimePickerLauncher extends StatelessWidget {
                 },
               );
             }
-          )
-        )
+          ),
+        ),
       ),
     );
   }

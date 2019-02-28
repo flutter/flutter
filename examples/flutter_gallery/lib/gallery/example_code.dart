@@ -133,7 +133,7 @@ IconButton(
 // Floating action button in Scaffold.
 Scaffold(
   appBar: AppBar(
-    title: const Text('Demo')
+    title: const Text('Demo'),
   ),
   floatingActionButton: const FloatingActionButton(
     child: Icon(Icons.add),
@@ -211,7 +211,7 @@ Row(
       groupValue: radioValue,
       onChanged: handleRadioValueChanged,
     ),
-  ]
+  ],
 );
 
 // Creates a disabled radio button.
@@ -266,7 +266,7 @@ GridView.count(
   ].map<Widget>((String url) {
     return GridTile(
       footer: GridTileBar(
-        title: Text(url)
+        title: Text(url),
       ),
       child: Image.network(url, fit: BoxFit.cover),
     );

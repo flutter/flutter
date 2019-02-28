@@ -17,7 +17,7 @@ void main() {
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
               child: SizedBox(height: 100.0),
-            )
+            ),
           ),
         ),
       ),
@@ -209,7 +209,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 0.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -261,7 +261,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 6.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,

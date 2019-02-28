@@ -420,7 +420,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     ));
 
     await tester.tap(find.text('XXX'));
@@ -457,7 +457,7 @@ void main() {
             child: Material(
               child: popupMenuButton,
             ),
-          )
+          ),
         ),
       ),
     );

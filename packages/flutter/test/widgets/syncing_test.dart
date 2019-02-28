@@ -50,8 +50,8 @@ void main() {
           child: TestWidget(
             persistentState: 1,
             child: Container(),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -66,8 +66,8 @@ void main() {
           child: TestWidget(
             persistentState: 2,
             child: Container(),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -84,8 +84,8 @@ void main() {
           child: TestWidget(
             persistentState: 10,
             child: Container(),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -99,7 +99,7 @@ void main() {
         child: TestWidget(
           persistentState: 11,
           child: Container(),
-        )
+        ),
       )
     );
 
@@ -130,7 +130,7 @@ void main() {
             key: keyB,
             child: b,
           ),
-        ]
+        ],
       )
     );
 
@@ -157,7 +157,7 @@ void main() {
             key: keyB,
             child: b,
           ),
-        ]
+        ],
       )
     );
 
@@ -186,7 +186,7 @@ void main() {
             key: keyB,
             child: a,
           ),
-        ]
+        ],
       )
     );
 

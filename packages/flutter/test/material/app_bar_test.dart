@@ -153,7 +153,7 @@ void main() {
           appBar: AppBar(
             centerTitle: true,
             title: const Text('X'),
-          )
+          ),
         ),
       )
     );
@@ -1396,7 +1396,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 
@@ -1412,7 +1412,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: lightTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 

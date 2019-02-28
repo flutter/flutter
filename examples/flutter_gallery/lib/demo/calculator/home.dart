@@ -148,7 +148,7 @@ class CalcDisplay extends StatelessWidget {
       child: Text(
         content,
         style: const TextStyle(fontSize: 24.0),
-      )
+      ),
     );
   }
 }
@@ -197,7 +197,7 @@ class KeyPad extends StatelessWidget {
                     NumberKey(0, calcState),
                     CalcKey('=', calcState.handleEqualsTap),
                   ]),
-                ]
+                ],
               ),
             ),
             Expanded(
@@ -210,12 +210,12 @@ class KeyPad extends StatelessWidget {
                     CalcKey('\u00D7', calcState.handleMultTap),
                     CalcKey('-', calcState.handleMinusTap),
                     CalcKey('+', calcState.handlePlusTap),
-                  ]
+                  ],
                 ),
-              )
+              ),
             ),
-          ]
-        )
+          ],
+        ),
       ),
     );
   }
@@ -232,7 +232,7 @@ class KeyRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: keys,
-      )
+      ),
     );
   }
 }
@@ -255,9 +255,9 @@ class CalcKey extends StatelessWidget {
             style: TextStyle(
               fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             ),
-          )
+          ),
         ),
-      )
+      ),
     );
   }
 }

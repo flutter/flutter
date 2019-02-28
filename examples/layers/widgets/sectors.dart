@@ -107,8 +107,8 @@ class SectorAppState extends State<SectorApp> {
                         child: WidgetToRenderBoxAdapter(renderBox: sectorAddIcon),
                       ),
                       const Text('ADD SECTOR'),
-                    ]
-                  )
+                    ],
+                  ),
                 ),
               ),
               RaisedButton(
@@ -122,8 +122,8 @@ class SectorAppState extends State<SectorApp> {
                         child: WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon),
                       ),
                       const Text('REMOVE SECTOR'),
-                    ]
-                  )
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -141,7 +141,7 @@ class SectorAppState extends State<SectorApp> {
               renderBox: sectors,
               onBuild: doUpdates,
             ),
-          )
+          ),
         ),
       ],
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,7 +155,7 @@ class SectorAppState extends State<SectorApp> {
       title: 'Sector Layout',
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Sector Layout in a Widget Tree')
+          title: const Text('Sector Layout in a Widget Tree'),
         ),
         body: buildBody(),
       ),

@@ -106,7 +106,7 @@ void main() {
       child: TestWidget(
         child: DecoratedBox(
           decoration: kBoxDecorationB
-        )
+        ),
       ),
     ));
 
@@ -133,8 +133,8 @@ void main() {
         child: TestWidget(
           child: DecoratedBox(
             decoration: kBoxDecorationB
-          )
-        )
+          ),
+        ),
       ),
     ));
 

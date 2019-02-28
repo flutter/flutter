@@ -22,7 +22,7 @@ void main() {
           child: Container(
             key: inner
           ),
-        )
+        ),
       ),
     ));
     final RenderBox box = inner.currentContext.findRenderObject();

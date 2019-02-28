@@ -38,7 +38,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-     content: Text(value)
+     content: Text(value),
     ));
   }
 

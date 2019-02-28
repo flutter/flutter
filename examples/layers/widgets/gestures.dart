@@ -178,7 +178,7 @@ class GestureDemoState extends State<GestureDemo> {
                         onChanged: (bool value) { setState(() { _scaleEnabled = value; }); },
                       ),
                       const Text('Scale'),
-                    ]
+                    ],
                   ),
                   Row(
                     children: <Widget>[
@@ -187,7 +187,7 @@ class GestureDemoState extends State<GestureDemo> {
                         onChanged: (bool value) { setState(() { _tapEnabled = value; }); },
                       ),
                       const Text('Tap'),
-                    ]
+                    ],
                   ),
                   Row(
                     children: <Widget>[
@@ -196,7 +196,7 @@ class GestureDemoState extends State<GestureDemo> {
                         onChanged: (bool value) { setState(() { _doubleTapEnabled = value; }); },
                       ),
                       const Text('Double Tap'),
-                    ]
+                    ],
                   ),
                   Row(
                     children: <Widget>[
@@ -205,12 +205,12 @@ class GestureDemoState extends State<GestureDemo> {
                         onChanged: (bool value) { setState(() { _longPressEnabled = value; }); },
                       ),
                       const Text('Long Press'),
-                    ]
+                    ],
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
-            )
+            ),
           ),
         ),
       ],

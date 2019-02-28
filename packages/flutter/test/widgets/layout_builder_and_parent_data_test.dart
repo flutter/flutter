@@ -64,7 +64,7 @@ void main() {
           flex: frame, // this is different after the next pump, so that the parentData has to be applied again
           child: Container(height: 100.0),
         )]);
-      })
+      }),
     ));
     frame += 1;
     tester.state<SizeChangerState>(find.byType(SizeChanger)).trigger();

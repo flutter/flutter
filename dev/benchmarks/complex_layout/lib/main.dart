@@ -115,7 +115,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
                 else
                   return FancyGalleryItem(index, key: PageStorageKey<int>(index));
               },
-            )
+            ),
           ),
           BottomBar(),
         ],
@@ -193,7 +193,7 @@ class MenuItemWithIcon extends StatelessWidget {
           child: Text(title),
         ),
         Text(subtitle, style: Theme.of(context).textTheme.caption),
-      ]
+      ],
     );
   }
 }
@@ -217,7 +217,7 @@ class FancyImageItem extends StatelessWidget {
         ),
         IconBar(),
         FatDivider(),
-      ]
+      ],
     );
   }
 }
@@ -239,7 +239,7 @@ class FancyGalleryItem extends StatelessWidget {
         ),
         IconBar(),
         FatDivider(),
-      ]
+      ],
     );
   }
 }
@@ -374,10 +374,10 @@ class UserHeader extends StatelessWidget {
                   children: <Widget>[
                     Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
                     Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color),
-                  ]
+                  ],
                 ),
               ],
-            )
+            ),
           ),
           TopBarMenu(),
         ],
@@ -454,7 +454,7 @@ class ItemImageBox extends StatelessWidget {
                     ),
                   ),
                 ),
-              ]
+              ],
             )
             ,
             Padding(
@@ -469,7 +469,7 @@ class ItemImageBox extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
       ),
     );
   }
@@ -508,7 +508,7 @@ class ItemGalleryBox extends StatelessWidget {
                                 child: Center(
                                   child: Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
                                 ),
-                              )
+                              ),
                             ),
                             Row(
                               children: <Widget>[
@@ -524,22 +524,22 @@ class ItemGalleryBox extends StatelessWidget {
                                   child: Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text('This is item $tabName'),
-                                  )
+                                  ),
                                 ),
-                              ]
+                              ],
                             ),
-                          ]
-                        )
+                          ],
+                        ),
                       ),
                     ),
                   );
-                }).toList()
-              )
+                }).toList(),
+              ),
             ),
             Container(
-              child: const TabPageSelector()
+              child: const TabPageSelector(),
             ),
-          ]
+          ],
         ),
       ),
     );
@@ -589,7 +589,7 @@ class BottomBarButton extends StatelessWidget {
             onPressed: () { print('Pressed: $title'); },
           ),
           Text(title, style: Theme.of(context).textTheme.caption),
-        ]
+        ],
       ),
     );
   }

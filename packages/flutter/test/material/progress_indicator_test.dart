@@ -180,7 +180,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: CircularProgressIndicator(value: 0.0)
+          child: CircularProgressIndicator(value: 0.0),
         ),
       )
     );
@@ -196,7 +196,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
-        child: CircularProgressIndicator(value: null)
+        child: CircularProgressIndicator(value: null),
       )
     );
 

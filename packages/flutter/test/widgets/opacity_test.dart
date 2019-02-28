@@ -172,9 +172,9 @@ void main() {
                   );
                 }),
               ),
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     await expectLater(

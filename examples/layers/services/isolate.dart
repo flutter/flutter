@@ -256,11 +256,11 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
             child: RaisedButton(
               child: Text(_label),
               onPressed: _handleButtonPressed,
-            )
+            ),
           ),
           Text(_result),
         ],
-      )
+      ),
     );
   }
 

@@ -182,19 +182,19 @@ void main() {
                   SizedBox(
                     height: 150.0,
                     child: Center(
-                      child: Text('top')
+                      child: Text('top'),
                     ),
                   ),
                   SizedBox(
                     height: 200.0,
                     child: Center(
-                      child: Text('middle')
+                      child: Text('middle'),
                     ),
                   ),
                   SizedBox(
                     height: 150.0,
                     child: Center(
-                      child: Text('bottom')
+                      child: Text('bottom'),
                     ),
                   ),
                 ],

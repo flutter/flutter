@@ -141,7 +141,7 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
           children: <Widget>[
             Center(child: Text('LEFT CHILD')),
             Center(child: Text('RIGHT CHILD')),
-          ]
+          ],
         ),
       ),
     ),
@@ -359,9 +359,9 @@ void main() {
           child: TabBarView(
             children: tabs.map<Widget>((String name) {
               return StateMarker(
-                child: Text(name)
+                child: Text(name),
               );
-            }).toList()
+            }).toList(),
           ),
         ),
       );

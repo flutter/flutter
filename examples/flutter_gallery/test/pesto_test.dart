@@ -20,7 +20,7 @@ void main() {
           width: 450.0,
           height: 800.0,
           child: GalleryApp(testMode: true),
-        )
+        ),
       )
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865

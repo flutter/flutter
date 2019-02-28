@@ -1562,8 +1562,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             child: Text(localizations.okButtonLabel),
             onPressed: _handleOk,
           ),
-        ]
-      )
+        ],
+      ),
     );
 
     final Dialog dialog = Dialog(
@@ -1637,7 +1637,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(

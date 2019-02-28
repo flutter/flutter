@@ -31,7 +31,7 @@ class ExpansionTileListDemo extends StatelessWidget {
              ],
           ),
            const ListTile(title: Text('Bottom')),
-        ]
+        ],
       ),
     );
   }

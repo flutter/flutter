@@ -28,8 +28,8 @@ void main() {
               ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -74,8 +74,8 @@ void main() {
               ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -151,8 +151,8 @@ void main() {
               ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -235,8 +235,8 @@ void main() {
               ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -279,8 +279,8 @@ void main() {
               child: const Text('X'),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
@@ -477,7 +477,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     ));
 
     // Pop up the snack bar and then press its action button.
@@ -552,7 +552,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       ));
       await tester.tap(find.text('X'));
       await tester.pump();
@@ -594,7 +594,7 @@ void main() {
                   },
                 ),
             ),
-        )
+        ),
     ));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -620,7 +620,7 @@ void main() {
                   return GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar)
+                            content: Text(helloSnackBar),
                         ));
                       },
                       behavior: HitTestBehavior.opaque,
@@ -631,8 +631,8 @@ void main() {
                       ),
                   );
                 }
-            )
-        )
+            ),
+        ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -677,9 +677,9 @@ void main() {
                             child: const Text('X'),
                         );
                       }
-                  )
+                  ),
               ),
-          )
+          ),
       ));
     }
 

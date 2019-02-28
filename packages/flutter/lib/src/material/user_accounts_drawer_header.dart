@@ -379,7 +379,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
                   ),
-                )
+                ),
               ),
               _AccountDetails(
                 accountName: widget.accountName,

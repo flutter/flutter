@@ -283,7 +283,7 @@ void main() {
               onTap: () { log.add('right'); },
               child: const Text('right'),
             ),
-          ]
+          ],
         );
       },
       '/second': (BuildContext context) => Container(),

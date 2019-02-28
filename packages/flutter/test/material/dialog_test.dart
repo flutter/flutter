@@ -28,10 +28,10 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
                     },
                   );
                 },
-              )
+              ),
             );
           }
-        )
+        ),
       ),
   );
 }

@@ -37,7 +37,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
         ),
       ],
-    )
+    ),
   ),
   '/two': (BuildContext context) => Material(
     child: ListView(
@@ -59,7 +59,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
       ],
-    )
+    ),
   ),
   // This route is the same as /two except that Hero 'a' is shifted to the right by
   // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
@@ -90,7 +90,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
       ],
-    )
+    ),
   ),
 };
 
@@ -103,7 +103,7 @@ class ThreeRoute extends MaterialPageRoute<void> {
           Container(height: 200.0, width: 200.0),
           Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
           Container(height: 200.0, width: 200.0),
-        ]
+        ],
       ),
     );
   });
@@ -253,9 +253,9 @@ void main() {
             Builder(builder: (BuildContext context) {
               return FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             }),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     ));
 
     await tester.tap(find.text('two'));
@@ -324,7 +324,7 @@ void main() {
               child: const Text('foo'),
             ),
           ),
-        )
+        ),
       ),
       routes: <String, WidgetBuilder>{
         '/next': (BuildContext context) {
@@ -630,7 +630,7 @@ void main() {
                 onPressed: () { Navigator.pop(context); },
               ),
             ],
-          )
+          ),
         );
       },
     );
@@ -729,7 +729,7 @@ void main() {
               ),
               const SizedBox(height: 600.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -808,7 +808,7 @@ void main() {
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -880,11 +880,11 @@ void main() {
             children: <Widget>[
               // This container will appear at Y=0
               Container(
-                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0))
+                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0)),
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -898,18 +898,18 @@ void main() {
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
               Container(
-                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0))
+                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0)),
               ),
               FlatButton(
                 child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
-                child: Hero(tag: 'BC', child: Container(height: 150.0))
+                child: Hero(tag: 'BC', child: Container(height: 150.0)),
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -993,7 +993,7 @@ void main() {
                 onPressed: () { Navigator.pop(context); },
               ),
             ],
-          )
+          ),
         );
       },
     );
@@ -1076,7 +1076,7 @@ void main() {
               onPressed: () { Navigator.pushNamed(context, '/two'); },
             ),
           ],
-        )
+        ),
       ),
       '/two': (BuildContext context) => Material(
         child: Column(

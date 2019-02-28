@@ -31,11 +31,11 @@ class ModalBottomSheetDemo extends StatelessWidget {
                       fontSize: 24.0,
                     ),
                   ),
-                )
+                ),
               );
             });
           },
-        )
+        ),
       ),
     );
   }

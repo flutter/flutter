@@ -43,7 +43,7 @@ class TooltipDemo extends StatelessWidget {
                       ),
                     ),
                     Text(' icon.', style: theme.textTheme.subhead),
-                  ]
+                  ],
                 ),
                 Center(
                   child: IconButton(
@@ -53,10 +53,10 @@ class TooltipDemo extends StatelessWidget {
                     tooltip: 'Place a phone call',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(const SnackBar(
-                         content: Text('That was an ordinary tap.')
+                         content: Text('That was an ordinary tap.'),
                       ));
                     },
-                  )
+                  ),
                 ),
               ]
               .map<Widget>((Widget widget) {
@@ -65,7 +65,7 @@ class TooltipDemo extends StatelessWidget {
                   child: widget,
                 );
               })
-              .toList()
+              .toList(),
             ),
           );
         }

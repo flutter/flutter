@@ -605,7 +605,7 @@ void main() {
                   child: Container(),
                 ),
               ),
-            )
+            ),
           ),
         ),
       );

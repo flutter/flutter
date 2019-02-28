@@ -96,7 +96,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         child: RaisedButton(
           onPressed: _showBottomSheetCallback,
           child: const Text('SHOW BOTTOM SHEET'),
-        )
+        ),
       ),
     );
   }

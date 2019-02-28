@@ -53,7 +53,7 @@ Widget buildFrame({
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
             }).toList(),
-          )
+          ),
         ),
       ),
     ),

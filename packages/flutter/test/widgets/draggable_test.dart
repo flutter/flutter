@@ -1158,8 +1158,8 @@ void main() {
                   child: Text('Source'),
                   feedback: Text('Dragging'),
               ),
-            ]
-        )
+            ],
+        ),
     ));
 
     expect(events, isEmpty);
@@ -1634,8 +1634,8 @@ void main() {
             child: Text('Source'),
             feedback: Text('Dragging'),
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     expect(events, isEmpty);

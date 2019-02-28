@@ -317,7 +317,7 @@ class TraversalTester {
                   }).toList(),
                 ),
               ),
-            )
+            ),
         )
     );
 

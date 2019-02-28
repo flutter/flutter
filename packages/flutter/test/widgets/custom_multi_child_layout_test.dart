@@ -52,7 +52,7 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
         LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
       ],
       delegate: delegate,
-    )
+    ),
   );
 }
 
@@ -133,7 +133,7 @@ void main() {
           LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
         ],
         delegate: delegate,
-      )
+      ),
     ));
 
   });
@@ -144,7 +144,7 @@ void main() {
       child: CustomMultiChildLayout(
         key: key,
         delegate: PreferredSizeDelegate(preferredSize: const Size(300.0, 200.0)),
-      )
+      ),
     ));
 
     final RenderBox box = tester.renderObject(find.byKey(key));
@@ -155,7 +155,7 @@ void main() {
       child: CustomMultiChildLayout(
         key: key,
         delegate: PreferredSizeDelegate(preferredSize: const Size(350.0, 250.0)),
-      )
+      ),
     ));
 
     expect(box.size.width, equals(350.0));

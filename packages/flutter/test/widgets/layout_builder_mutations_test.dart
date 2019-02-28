@@ -36,10 +36,10 @@ void main() {
           child: Wrapper(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return Wrapper(
-                child: SizedBox(key: victimKey)
+                child: SizedBox(key: victimKey),
               );
-            })
-          )
+            }),
+          ),
         ),
       ],
     ));
@@ -50,16 +50,16 @@ void main() {
         Wrapper(
           child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return Wrapper(
-              child: SizedBox(key: victimKey)
+              child: SizedBox(key: victimKey),
             );
-          })
+          }),
         ),
         Wrapper(
           child: Wrapper(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return const SizedBox();
-            })
-          )
+            }),
+          ),
         ),
       ],
     ));

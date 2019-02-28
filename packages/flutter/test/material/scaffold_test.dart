@@ -240,7 +240,7 @@ void main() {
               ),
             ],
           ),
-        )
+        ),
       )
     );
 
@@ -272,7 +272,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               const SliverAppBar(
-                title: Text('Title')
+                title: Text('Title'),
               ),
               SliverList(
                 delegate: SliverChildListDelegate(List<Widget>.generate(

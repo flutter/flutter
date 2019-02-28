@@ -26,7 +26,7 @@ void main() {
             child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ],
-      )
+      ),
     );
 
     await tester.pumpWidget(widget);

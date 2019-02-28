@@ -2699,7 +2699,7 @@ void main() {
                 controller: controllerA,
                 style: const TextStyle(fontSize: 10.0),
                 strutStyle: StrutStyle.disabled,
-              )
+              ),
             ),
             const Text(
               'abc',
@@ -2751,7 +2751,7 @@ void main() {
                 decoration: null,
                 controller: controllerA,
                 style: const TextStyle(fontSize: 10.0),
-              )
+              ),
             ),
             const Text(
               'abc',

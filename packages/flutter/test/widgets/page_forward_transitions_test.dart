@@ -99,7 +99,7 @@ void main() {
                           childSecondHalf: const Text('D'),
                           animation: route.secondaryAnimation,
                         ),
-                      ]
+                      ],
                     );
                   },
                 ),

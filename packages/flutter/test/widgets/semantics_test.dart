@@ -36,7 +36,7 @@ void main() {
           label: 'test1',
           textDirection: TextDirection.ltr,
           child: Container(),
-        )
+        ),
       )
     );
 
@@ -79,7 +79,7 @@ void main() {
             label: 'test2a',
             child: Container(),
           ),
-        )
+        ),
       ),
     ));
 
@@ -116,7 +116,7 @@ void main() {
               child: Container(),
             ),
           ),
-        )
+        ),
       ),
     ));
 

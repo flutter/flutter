@@ -521,13 +521,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               _buildLine(!_isFirst(index)),
               _buildIcon(index),
               _buildLine(!_isLast(index)),
-            ]
+            ],
           ),
           Container(
             margin: const EdgeInsetsDirectional.only(start: 12.0),
             child: _buildHeaderText(index),
           ),
-        ]
+        ],
       ),
     );
   }

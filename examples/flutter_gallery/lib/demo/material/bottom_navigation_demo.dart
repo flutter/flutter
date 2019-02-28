@@ -224,7 +224,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         ],
       ),
       body: Center(
-        child: _buildTransitionsStack()
+        child: _buildTransitionsStack(),
       ),
       bottomNavigationBar: botNavBar,
     );

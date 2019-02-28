@@ -100,7 +100,7 @@ class ModalBarrier extends StatelessWidget {
             ),
           ),
         ),
-      )
+      ),
     );
   }
 }

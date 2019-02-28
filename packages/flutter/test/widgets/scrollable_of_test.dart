@@ -92,7 +92,7 @@ void main() {
         return false;
       },
       child: const SingleChildScrollView(
-        child: SizedBox(height: 1200.0)
+        child: SizedBox(height: 1200.0),
       ),
     ));
 

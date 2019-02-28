@@ -20,7 +20,7 @@ class AdaptedListItem extends StatelessWidget {
           color: Colors.lightBlueAccent.shade100,
         ),
         Text(name),
-      ]
+      ],
     );
   }
 }
@@ -38,24 +38,24 @@ class AdaptedGridItem extends StatelessWidget {
           Expanded(
             child: Container(
               color: Colors.lightBlueAccent.shade100,
-            )
+            ),
           ),
           Container(
             margin: const EdgeInsets.only(left: 8.0),
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(name)
+                  child: Text(name),
                 ),
                 const IconButton(
                   icon: Icon(Icons.more_vert),
                   onPressed: null,
                 ),
-              ]
+              ],
             ),
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 }
@@ -99,7 +99,7 @@ void main() {
     title: 'Media Query Example',
     home: Scaffold(
       appBar: AppBar(
-        title: const Text('Media Query Example')
+        title: const Text('Media Query Example'),
       ),
       body: Material(child: AdaptiveContainer(names: _kNames)),
     ),

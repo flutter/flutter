@@ -18,7 +18,7 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
             key: childKey
           ),
         ),
-      )
+      ),
     )
   );
   final RenderBox box = tester.renderObject(find.byKey(childKey));
@@ -44,7 +44,7 @@ void main() {
               key: childKey
             ),
           ),
-        )
+        ),
       ),
     ));
     final RenderBox box = tester.renderObject(find.byKey(childKey));

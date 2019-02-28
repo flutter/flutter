@@ -96,8 +96,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
                   fontSize: 32.0,
                 ),
                 textAlign: TextAlign.center,
-              )
-            )
+              ),
+            ),
           ),
         );
       }

@@ -182,8 +182,8 @@ void main() {
             child: Material(
               elevation: 24.0,
               child: Text('Hello'),
-            )
-        )
+            ),
+        ),
     ));
 
     final SemanticsNode node = tester.getSemantics(find.text('Hello'));
@@ -222,7 +222,7 @@ void main() {
               ),
             ],
           ),
-        )
+        ),
     ));
 
 
@@ -277,7 +277,7 @@ void main() {
                 ),
               ],
             ),
-        )
+        ),
     ));
 
 

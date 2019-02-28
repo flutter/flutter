@@ -343,7 +343,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         children: <Widget> [
           _buildUnderMagnifierScreen(),
           _addBackgroundToChild(result),
-        ]
+        ],
       );
     } else {
       result = _addBackgroundToChild(result);

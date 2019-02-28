@@ -59,13 +59,13 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
-            child: StateMarker(key: left)
+            child: StateMarker(key: left),
           ),
           Container(
             child: StateMarker(
               key: right,
               child: grandchild,
-            )
+            ),
           ),
         ],
       )
@@ -89,10 +89,10 @@ void main() {
             child: StateMarker(
               key: right,
               child: newGrandchild,
-            )
+            ),
           ),
           Container(
-            child: StateMarker(key: left)
+            child: StateMarker(key: left),
           ),
         ],
       )
@@ -114,8 +114,8 @@ void main() {
           child: StateMarker(
             key: left,
             child: Container(),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -181,8 +181,8 @@ void main() {
           child: StateMarker(
             key: left,
             child: Container(),
-          )
-        )
+          ),
+        ),
       )
     );
 

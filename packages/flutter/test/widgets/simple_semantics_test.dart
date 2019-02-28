@@ -17,7 +17,7 @@ void main() {
 
     await tester.pumpWidget(
       const Center(
-          child: Text('Hello!', textDirection: TextDirection.ltr)
+          child: Text('Hello!', textDirection: TextDirection.ltr),
       ),
     );
 

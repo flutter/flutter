@@ -62,7 +62,7 @@ class DateTimeItem extends StatelessWidget {
                   ],
                 ),
               ),
-            )
+            ),
           ),
           Container(
             margin: const EdgeInsets.only(left: 8.0),
@@ -85,11 +85,11 @@ class DateTimeItem extends StatelessWidget {
                 children: <Widget>[
                   Text('${time.format(context)}'),
                   const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                ]
+                ],
               ),
             ),
           ),
-        ]
+        ],
       ),
     );
   }
@@ -247,7 +247,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     },
                   ),
                   const Text('All-day'),
-                ]
+                ],
               ),
             ),
           ]

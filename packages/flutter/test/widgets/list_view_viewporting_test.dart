@@ -484,8 +484,8 @@ void main() {
                                 )).childrenDelegate),
                       ],
                     ),
-                )
-            )
+                ),
+            ),
         )
     );
 

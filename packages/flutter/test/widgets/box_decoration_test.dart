@@ -115,7 +115,7 @@ Future<void> main() async {
             width: 25.0,
             height: 25.0,
           ),
-        )
+        ),
       )
     );
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
@@ -284,7 +284,7 @@ Future<void> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 
@@ -321,7 +321,7 @@ Future<void> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 

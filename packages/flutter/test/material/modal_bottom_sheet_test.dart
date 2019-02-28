@@ -19,7 +19,7 @@ void main() {
           savedContext = context;
           return Container();
         }
-      )
+      ),
     ));
 
     await tester.pump();
@@ -75,7 +75,7 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
     expect(showBottomSheetThenCalled, isFalse);
@@ -132,7 +132,7 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
@@ -212,13 +212,13 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
       return Container(
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     });
 
