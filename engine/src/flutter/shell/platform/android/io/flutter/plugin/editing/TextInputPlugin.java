@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
+import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -24,7 +25,7 @@ import io.flutter.view.FlutterView;
  */
 public class TextInputPlugin {
     @NonNull
-    private final FlutterView mView;
+    private final View mView;
     @NonNull
     private final InputMethodManager mImm;
     @NonNull
@@ -38,7 +39,7 @@ public class TextInputPlugin {
     @Nullable
     private InputConnection lastInputConnection;
 
-    public TextInputPlugin(FlutterView view, @NonNull DartExecutor dartExecutor) {
+    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor) {
         mView = view;
         mImm = (InputMethodManager) view.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -126,7 +127,7 @@ public class TextInputPlugin {
         return textType;
     }
 
-    public InputConnection createInputConnection(FlutterView view, EditorInfo outAttrs) {
+    public InputConnection createInputConnection(View view, EditorInfo outAttrs) {
         if (mClient == 0) {
             lastInputConnection = null;
             return lastInputConnection;
@@ -173,12 +174,12 @@ public class TextInputPlugin {
         return lastInputConnection;
     }
 
-    private void showTextInput(FlutterView view) {
+    private void showTextInput(View view) {
         view.requestFocus();
         mImm.showSoftInput(view, 0);
     }
 
-    private void hideTextInput(FlutterView view) {
+    private void hideTextInput(View view) {
         mImm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
     }
 
@@ -203,7 +204,7 @@ public class TextInputPlugin {
         }
     }
 
-    private void setTextInputEditingState(FlutterView view, TextInputChannel.TextEditState state) {
+    private void setTextInputEditingState(View view, TextInputChannel.TextEditState state) {
         if (!mRestartInputPending && state.text.equals(mEditable.toString())) {
             applyStateToSelection(state);
             mImm.updateSelection(mView, Math.max(Selection.getSelectionStart(mEditable), 0),
