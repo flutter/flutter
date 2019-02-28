@@ -1086,7 +1086,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
 
-  /// An optional controller used to animate the picker back to its
+  /// An optional controller used to set the picker to any value including its
   /// initialization state.
   final CupertinoTimerPickerController controller;
 
