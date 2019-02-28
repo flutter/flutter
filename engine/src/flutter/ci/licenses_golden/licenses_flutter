@@ -473,6 +473,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/Flutte
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterShellArgs.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/AndroidKeyProcessor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/AndroidTouchProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterFragment.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterSurfaceView.java
