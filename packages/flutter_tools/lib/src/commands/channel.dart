@@ -50,6 +50,7 @@ class ChannelCommand extends FlutterCommand {
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
     final Set<String> seenChannels = Set<String>();
+    final List<String> rawOutput = <String>[];
 
     showAll = showAll || currentChannel != currentBranch;
 
@@ -58,6 +59,7 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
+        rawOutput.add(line);
         final List<String> split = line.split('/');
         if (split.length < 2)
           return null;
@@ -74,8 +76,10 @@ class ChannelCommand extends FlutterCommand {
         return null;
       },
     );
-    if (result != 0)
-      throwToolExit('List channels failed: $result', exitCode: result);
+    if (result != 0) {
+      throwToolExit('List channels failed: $result\n${rawOutput.join('\n')}',
+          exitCode: result);
+    }
   }
 
   Future<void> _switchChannel(String branchName) {
