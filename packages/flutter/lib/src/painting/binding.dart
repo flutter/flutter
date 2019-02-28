@@ -38,8 +38,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// shaders that are not covered by [DefaultShaderWarmUp], it may cause jank
   /// in the middle of an animation or interaction. In that case, set
   /// [shaderWarmUp] to a custom [ShaderWarmUp] before calling [initInstances]
-  /// (usually before [runApp] for normal flutter apps, and before
-  /// [enableFlutterDriverExtension] for flutter drive tests). Paint the scene
+  /// (usually before [runApp] for normal Flutter apps, and before
+  /// [enableFlutterDriverExtension] for Flutter drive tests). Paint the scene
   /// in the custom [ShaderWarmUp] so Flutter can pre-compile and cache the
   /// shaders during startup. The warm up is only costly (100ms-200ms,
   /// depending on the shaders to compile) during the first run after the
@@ -49,6 +49,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// Currently the warm-up happens synchronously on the GPU thread which means
   /// the rendering of the first frame on the GPU thread will be postponed until
   /// the warm-up is finished.
+  ///
+  /// See also:
+  ///
+  ///  * [ShaderWarmUp], the interface of how this warm up works.
   static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
