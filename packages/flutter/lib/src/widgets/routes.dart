@@ -81,10 +81,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     RouteSettings settings,
   }) : super(settings: settings);
 
-  // TODO(ianh): once https://github.com/dart-lang/sdk/issues/31543 is fixed,
-  // this should be removed.
-  TransitionRoute._settings(RouteSettings settings) : super(settings: settings);
-
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
   ///
@@ -681,7 +677,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings settings,
-  }) : super._settings(settings);
+  }) : super(settings: settings);
 
   // The API for general users of this class
 
