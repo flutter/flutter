@@ -271,10 +271,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  static Animation _animationControllerForTransitionAnimation(Animation animation) {
-    Animation controller = animation;
+  static Animation<double> _animationControllerForTransitionAnimation(Animation<double> animation) {
+    Animation<double> controller = animation;
     while(controller is ProxyAnimation || controller is TrainHoppingAnimation) {
-      final Animation proxy = controller;
+      final Animation<double> proxy = controller;
       if (proxy is ProxyAnimation)
         controller = proxy.parent;
 
@@ -288,7 +288,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    final Animation controller = _animationControllerForTransitionAnimation(route.animation);
+    final Animation<double> controller = _animationControllerForTransitionAnimation(route.animation);
 
     assert(!_popGestureInProgress.contains(controller));
     assert(_isPopGestureEnabled(route));
