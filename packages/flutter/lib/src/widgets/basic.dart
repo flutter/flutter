@@ -4263,6 +4263,59 @@ class Flexible extends ParentDataWidget<Flex> {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@tool sample}
+/// This example shows how to use an [Expanded] widget in a [Column] so that
+/// it's middle child, a [Container] here, expands to fill the space.
+///
+/// ```dart
+/// Column(
+///   children: <Widget>[
+///     Container(
+///       color: Colors.red,
+///       height: 20,
+///     ),
+///     Expanded(
+///       child: Container(
+///         color: Colors.blue,
+///       ),
+///     ),
+///     Container(
+///       color: Colors.red,
+///       height: 50,
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// This example shows how to use an [Expanded] widget in a [Row] with multiple
+/// children expanded, utilizing the [flex] factor to prioritize available space.
+///
+/// ```dart
+/// Row(
+///   children: <Widget>[
+///     Expanded(
+///       flex: 2,
+///       child: Container(
+///         color: Colors.red,
+///       ),
+///     ),
+///     Container(
+///       color: Colors.blue,
+///       width: 50,
+///     ),
+///     Expanded(
+///       flex: 1,
+///       child: Container(
+///         color: Colors.red,
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
