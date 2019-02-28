@@ -1942,11 +1942,11 @@ abstract class BuildContext {
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
-  /// This should not be used from build methods, because the build context will
-  /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [inheritFromWidgetOfExactType] is more useful. This method is
+  /// In general, [inheritFromWidgetOfExactType] is more useful, since inherited
+  /// widgets will trigger consumers to rebuild when they change. This method is
   /// appropriate when used in interaction event handlers (e.g. gesture
-  /// callbacks), or for performing one-off tasks.
+  /// callbacks) or for performing one-off tasks such as asserting that you have
+  /// or don't have a widget of a specific type as an ancestor.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
