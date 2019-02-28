@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -58,7 +56,7 @@ void main() {
                 bottomNavigationBar: BottomAppBar(
                   shape: AutomaticNotchedShape(
                     BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    ContinuousRectangleBorder(cornerRadius: 30.0),
+                    const ContinuousRectangleBorder(cornerRadius: 30.0),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
