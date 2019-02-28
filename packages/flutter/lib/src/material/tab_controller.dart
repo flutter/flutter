@@ -150,7 +150,12 @@ class TabController extends ChangeNotifier {
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
-  /// True while we're animating from [previousIndex] to [index].
+  /// True while we're animating from [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is true during the [animateTo] animation that's triggered when
+  /// the user taps a [TabBar] tab. It is false when [offset] is changing as a
+  /// consequence of the user dragging (and "flinging") the [TabBarView].
   bool get indexIsChanging => _indexIsChangingCount != 0;
   int _indexIsChangingCount = 0;
 
