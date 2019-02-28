@@ -188,12 +188,21 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// True if a Cupertino pop gesture is currently underway for [route].
   ///
+  /// This returns true for both the top route and the bottom route of a
+  /// pop gesture.
+  ///
   /// See also:
   ///
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
-  static final Set<PageRoute<dynamic>> _popGestureInProgress = <PageRoute<dynamic>>{};
+  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
+    return _popGestureInProgress.contains(_animationControllerForTransitionAnimation(route.animation))
+        || _popGestureInProgress.contains(_animationControllerForTransitionAnimation(route.secondaryAnimation));
+  }
+
+  // A set of Animations that are the primary animations of the route
+  // currently in a pop gesture.
+  static final Set<Animation<double>> _popGestureInProgress = Set<Animation<double>>();
 
   /// True if a Cupertino pop gesture is currently underway for this route.
   ///
@@ -236,7 +245,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     if (route.controller.status != AnimationStatus.completed)
       return false;
     // If we're in a gesture already, we cannot start another.
-    if (_popGestureInProgress.contains(route))
+    if (isPopGestureInProgress(route))
       return false;
 
     // Looks like a back gesture would be welcome!
@@ -262,13 +271,28 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
+  static Animation _animationControllerForTransitionAnimation(Animation animation) {
+    Animation controller = animation;
+    while(controller is ProxyAnimation || controller is TrainHoppingAnimation) {
+      final Animation proxy = controller;
+      if (proxy is ProxyAnimation)
+        controller = proxy.parent;
+
+      if (proxy is TrainHoppingAnimation)
+        controller = proxy.currentTrain;
+    }
+    return controller;
+  }
+
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(!_popGestureInProgress.contains(route));
+    final Animation controller = _animationControllerForTransitionAnimation(route.animation);
+
+    assert(!_popGestureInProgress.contains(controller));
     assert(_isPopGestureEnabled(route));
-    _popGestureInProgress.add(route);
+    _popGestureInProgress.add(controller);
 
     _CupertinoBackGestureController<T> backController;
     backController = _CupertinoBackGestureController<T>(
@@ -277,7 +301,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
       onEnded: () {
         backController?.dispose();
         backController = null;
-        _popGestureInProgress.remove(route);
+        _popGestureInProgress.remove(controller);
       },
     );
     return backController;
@@ -313,9 +337,12 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
       return CupertinoPageTransition(
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
+        // Check if the route has an animation that's currently participating
+        // in a back swipe gesture.
+        //
         // In the middle of a back gesture drag, let the transition be linear to
         // match finger motions.
-        linearTransition: _popGestureInProgress.contains(route),
+        linearTransition: isPopGestureInProgress(route),
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
@@ -354,28 +381,38 @@ class CupertinoPageTransition extends StatelessWidget {
     @required this.child,
     @required bool linearTransition,
   }) : assert(linearTransition != null),
-       _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
-         // The curves below have been rigorously derived from plots of native
-         // iOS animation frames. Specifically, a video was taken of a page
-         // transition animation and the distance in each frame that the page
-         // moved was measured. A best fit bezier curve was the fitted to the
-         // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
-         // reflection over the origin of linearToEaseIn.
-         CurvedAnimation(
-           parent: primaryRouteAnimation,
-           curve: Curves.linearToEaseOut,
-           reverseCurve: Curves.easeInToLinear,
-         )
-       ).drive(_kRightMiddleTween),
-       _secondaryPositionAnimation = CurvedAnimation(
-         parent: secondaryRouteAnimation,
-         curve: Curves.linearToEaseOut,
-         reverseCurve: Curves.easeInToLinear,
-       ).drive(_kMiddleLeftTween),
-       _primaryShadowAnimation = CurvedAnimation(
-         parent: primaryRouteAnimation,
-         curve: Curves.linearToEaseOut,
-       ).drive(_kGradientShadowTween),
+       _primaryPositionAnimation =
+           (linearTransition
+             ? primaryRouteAnimation
+             : CurvedAnimation(
+                 // The curves below have been rigorously derived from plots of native
+                 // iOS animation frames. Specifically, a video was taken of a page
+                 // transition animation and the distance in each frame that the page
+                 // moved was measured. A best fit bezier curve was the fitted to the
+                 // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
+                 // reflection over the origin of linearToEaseIn.
+                 parent: primaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+                 reverseCurve: Curves.easeInToLinear,
+               )
+           ).drive(_kRightMiddleTween),
+       _secondaryPositionAnimation =
+           (linearTransition
+             ? secondaryRouteAnimation
+             : CurvedAnimation(
+                 parent: secondaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+                 reverseCurve: Curves.easeInToLinear,
+               )
+           ).drive(_kMiddleLeftTween),
+       _primaryShadowAnimation =
+           (linearTransition
+             ? primaryRouteAnimation
+             : CurvedAnimation(
+                 parent: primaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+               )
+           ).drive(_kGradientShadowTween),
        super(key: key);
 
   // When this page is coming in to cover another page.
