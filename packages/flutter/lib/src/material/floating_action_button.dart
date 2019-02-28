@@ -291,17 +291,25 @@ class FloatingActionButton extends StatelessWidget {
 
     result = RawMaterialButton(
       onPressed: onPressed,
-      elevation: elevation ?? floatingActionButtonTheme.elevation ?? _defaultElevation,
-      highlightElevation: highlightElevation ?? floatingActionButtonTheme.highlightElevation ?? _defaultHighlightElevation,
-      disabledElevation: disabledElevation,
+      elevation: elevation
+        ?? floatingActionButtonTheme.elevation
+        ?? _defaultElevation,
+      highlightElevation: highlightElevation
+        ?? floatingActionButtonTheme.highlightElevation
+        ?? _defaultHighlightElevation,
+      disabledElevation: disabledElevation ?? 0,
       constraints: _sizeConstraints,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
-      fillColor: backgroundColor ?? floatingActionButtonTheme.backgroundColor ?? theme.accentColor,
+      fillColor: backgroundColor
+        ?? floatingActionButtonTheme.backgroundColor
+        ?? theme.accentColor,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
         letterSpacing: 1.2,
       ),
-      shape: shape ?? floatingActionButtonTheme.shape ?? isExtended ? _defaultExtendedShape : _defaultShape,
+      shape: shape
+        ?? floatingActionButtonTheme.shape
+        ?? isExtended ? _defaultExtendedShape : _defaultShape,
       clipBehavior: clipBehavior,
       child: result,
     );
