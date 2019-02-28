@@ -11,15 +11,25 @@ import 'edge_insets.dart';
 /// A stadium border with continuous corners.
 ///
 /// A shape similar to a stadium, but with a smoother transition from
-/// each linear edge to its 180º curves.
+/// each linear edge to its 180º curves. Each 180º curve is approximately half
+/// an ellipse.
 ///
 /// In this shape, the curvature of each 180º curve over the arc is
 /// approximately a gaussian curve instead of a step function as with a
 /// traditional half circle round.
 ///
-/// In the event that the height or width of the bounding rectangle is less than
-/// ~3x its radius, the curve radius will become smaller to keep the shape from
-/// clipping.
+/// In an attempt to keep the shape of the rectangle the same regardless of its
+/// dimension (and to avoid clipping of the shape), the radius will
+/// automatically be lessened if its width or height is less than ~3x the
+/// declared radius. The new resulting radius will always be maximal in respect
+/// to the dimensions of the given rectangle.
+///
+/// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
+/// and the actual height and width of pixels that are manipulated to render it.
+/// For example, if a rectangle had dimensions 80px x 100px, and a corner radius
+/// of 25.0, in reality ~38 pixels in each dimension would be used to render a
+/// corner and so ~76px x ~38px would be used to render both corners on a given
+/// side.
 ///
 /// The two 180º arcs will always be positioned on the shorter side of the
 /// rectangle like with the traditional [StadiumBorder] shape.
@@ -62,18 +72,32 @@ class ContinuousStadiumBorder extends ShapeBorder {
 
   /// The style of this border.
   ///
+  /// If the border side width is larger than 1/10 the length of the smallest
+  /// dimension, the interior shape's corners will no longer resemble those of
+  /// the exterior shape. If concentric corners are desired for a stroke width
+  /// greater than 1/10 the length of the smallest rectangle dimension, it is
+  /// recommended to use a [Stack] widget, placing a smaller
+  /// [ContinuousStadiumBorder] with the on top of a
+  /// larger one.
+  ///
   /// By default this value is [BorderSide.none]. It also must not be null.
   final BorderSide side;
 
   Path _getPath(Rect rect) {
     // The two 180º arcs will always be positioned on the shorter side of the
-    // rectangle like with the traditional [StadiumBorder] shape.
+    // rectangle like with the traditional stadium border shape.
 
     // We need to change the dimensions of the rect in the event that the
     // shape has a side width as the stroke is drawn centered on the border of
     // the shape instead of inside as with the rounded rect and stadium.
     if (side.width > 0)
       rect = rect.deflate(side.width / 2);
+
+    // The ratio of the declared corner radius to the total affected pixels to
+    // render the corner. For example if the declared radius were 25.0px then
+    // totalAffectedCornerPixelRatio * 25.0 (~38) pixels would be affected for
+    // each of the the four corners of the shape.
+    const double totalAffectedCornerPixelRatio = 1.52865;
 
     // The radius multiplier where the resulting shape will concave with a
     // height and width of any value.
@@ -86,7 +110,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
     // however it represents the ratio of the total 90º curve width or height to
     // the width or height of the smallest rectangle dimension.
-    const double maxMultiplier = 3.0573;
+    const double maxMultiplier = 2 * totalAffectedCornerPixelRatio;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
@@ -112,21 +136,30 @@ class ContinuousStadiumBorder extends ShapeBorder {
     final double originY = centerY - height / 2;
     final double minDimension = math.min(width, height);
     final double radius = minDimension * minMultiplier;
-    final double limitedRadius = math.min(radius, minDimension * minMultiplier);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
-    double leftX(double x) { return centerX + x * limitedRadius - width / 2; }
-    double rightX(double x) { return centerX - x * limitedRadius + width / 2; }
-    double topY(double y) { return centerY + y * limitedRadius - height / 2; }
-    double bottomY(double y) { return centerY - y * limitedRadius + height / 2; }
-    double bottomMidY(double y) { return originY + height - y * limitedRadius; }
+    //
+    // For example, leftX(k) will give the x value on the left side of the shape
+    // that is precisely `k` distance from the left edge of the shape for the
+    // predetermined 'limitedRadius' value.
+    double leftX(double x) { return centerX + x * radius - width / 2; }
+    double rightX(double x) { return centerX - x * radius + width / 2; }
+    double topY(double y) { return centerY + y * radius - height / 2; }
+    double bottomY(double y) { return centerY - y * radius + height / 2; }
+    double bottomMidY(double y) { return originY + height - y * radius; }
     double leftMidX(double x) { return originX + x * height; }
-    double rightMidX(double x) { return originX + width - x * limitedRadius; }
+    double rightMidX(double x) { return originX + width - x * radius; }
 
-    // An elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The width is greater than the height.
-    Path roundedRectHorizontal () {
+    // An elliptical shape with 2 straight edges and two 180º curves. The width
+    // is greater than the height.
+    //
+    // Code was inspired from the code listed on this website:
+    // https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles
+    //
+    // The shape is drawn from the top midpoint to the upper right hand corner
+    // in a clockwise fashion around to the upper left hand corner.
+    Path bezierStadiumHorizontal () {
       return Path()
         ..moveTo(leftX(2.00593972), topY(0))
         ..lineTo(originX + width - 1.52866483 * radius, originY)
@@ -178,9 +211,15 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    // An elliptical shape where there are only 2 straight edges
-    // and two 180º curves. The height is greater than the width.
-    Path roundedRectVertical () {
+    // An elliptical shape which has 2 straight edges and two 180º curves. The
+    // height is greater than the width.
+    //
+    // Code was inspired from the code listed on this website:
+    // https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles
+    //
+    // The shape is drawn from the top midpoint to the upper right hand corner
+    // in a clockwise fashion around to the upper left hand corner.
+    Path bezierStadiumVertical () {
       return Path()
         ..moveTo(centerX, topY(0))
         ..lineTo(centerX, topY(0))
@@ -231,7 +270,7 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..close();
     }
 
-    return width > maxMultiplier * radius ? roundedRectHorizontal() : roundedRectVertical();
+    return width > maxMultiplier * radius ? bezierStadiumHorizontal() : bezierStadiumVertical();
   }
 
   @override

@@ -21,9 +21,9 @@ import 'edge_insets.dart';
 ///
 /// In an attempt to keep the shape of the rectangle the same regardless of its
 /// dimension (and to avoid clipping of the shape), the radius will
-/// automatically be lessened if its width or height is less than ~3x the radius.
-/// The new resulting radius will always be maximal in respect to the dimensions
-/// of the given rectangle.
+/// automatically be lessened if its width or height is less than ~3x the
+/// declared radius. The new resulting radius will always be maximal in respect
+/// to the dimensions of the given rectangle.
 ///
 /// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
 /// and the actual height and width of pixels that are manipulated to render it.
@@ -83,9 +83,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// The radius for each corner.
   ///
   /// The radius will be clamped to 0 if a value less than 0 is entered as the
-  /// radius.
-  ///
-  /// By default the radius is 0.0. This value must not be null.
+  /// radius. By default the radius is 0.0. This value must not be null.
   ///
   /// Unlike [RoundedRectangleBorder], there is only a single radius value used
   /// to describe the radius for every corner.
@@ -107,15 +105,15 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // We need to change the dimensions of the rect in the event that the
     // shape has a side width as the stroke is drawn centered on the border of
     // the shape instead of inside as with the rounded rect and stadium.
-    if (side.width > 0)
-      rect = rect.deflate(side.width / 2);
+    if (side.width > 0.0)
+      rect = rect.deflate(side.width / 2.0);
 
     double limitedRadius;
     final double width = rect.width;
     final double height = rect.height;
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
-    final double radius = math.max(1, cornerRadius);
+    final double radius = math.max(0.0, cornerRadius);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
@@ -135,8 +133,8 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // Code was inspired from the code listed on this website:
     // https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles
     //
-    // Roughly the code draws the shape from the upper right hand corner in a
-    // clockwise fashion around to the upper left hand corner.
+    // The shape is drawn from the top midpoint to the upper right hand corner
+    // in a clockwise fashion around to the upper left hand corner.
     Path bezierRoundedRect () {
       return Path()
         ..moveTo(leftX(1.52866483), topY(0))
@@ -187,6 +185,11 @@ class ContinuousRectangleBorder extends ShapeBorder {
         ..close();
     }
 
+    // The ratio of the declared corner radius to the total affected pixels to
+    // render the corner. For example if the declared radius were 25.0px then
+    // totalAffectedCornerPixelRatio * 25.0 (~38) pixels would be affected.
+    const double totalAffectedCornerPixelRatio = 1.52865;
+
     // The radius multiplier where the resulting shape will concave with a
     // height and width of any value.
     //
@@ -198,7 +201,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
     // however it represents the ratio of the total 90º curve width or height to
     // the width or height of the smallest rectangle dimension.
-    const double maxMultiplier = 3.0573;
+    const double maxMultiplier = 2.0 * totalAffectedCornerPixelRatio;
 
     // The multiplier of the radius in comparison to the smallest edge length
     // used to describe the minimum radius for this shape.
@@ -207,7 +210,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // small extent value. It can be less than 'maxMultiplier' because there
     // are not enough pixels to render the clipping of the shape at this size so
     // it appears to still be concave (whereas mathematically it's convex).
-    const double minMultiplier = 2.2;
+    const double minMultiplier = 2.0;
 
     // The minimum edge length at which the corner radius multiplier must be at
     // its maximum so as to maintain the appearance of a perfectly concave,
@@ -221,7 +224,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     final double minSideLength = math.min(rect.width, rect.height);
 
     // As the minimum side edge length (where the round is occurring)
-    // approaches 0, the limitedRadius approaches 2.0 so as to maximize
+    // approaches 0.0, the limitedRadius approaches 2.0 so as to maximize
     // roundness (to make the shape with the largest radius that doesn't clip).
     // As the edge length approaches 200, the limitedRadius approaches ~3 –- the
     // multiplier of the radius value where the resulting shape is concave (ie.
