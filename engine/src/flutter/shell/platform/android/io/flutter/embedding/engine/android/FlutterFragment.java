@@ -4,12 +4,17 @@
 
 package io.flutter.embedding.engine.android;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.view.FlutterMain;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -144,9 +149,62 @@ public class FlutterFragment extends Fragment {
     return args;
   }
 
+  @Nullable
+  private FlutterEngine flutterEngine;
+
   public FlutterFragment() {
     // Ensure that we at least have an empty Bundle of arguments so that we don't
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
+  }
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+
+    // When "retain instance" is true, the FlutterEngine will survive configuration
+    // changes. Therefore, we create a new one only if one does not already exist.
+    if (flutterEngine == null) {
+      createFlutterEngine();
+    }
+  }
+
+  /**
+   * Creates a new FlutterEngine instance.
+   *
+   * Subclasses can instantiate their own {@link FlutterEngine} by overriding
+   * {@link #onCreateFlutterEngine(Context)}.
+   *
+   * Subclasses can alter the {@link FlutterEngine} after creation by overriding
+   * {@link #onFlutterEngineCreated(FlutterEngine)}.
+   */
+  private void createFlutterEngine() {
+    // Create a FlutterEngine to back our FlutterView.
+    flutterEngine = onCreateFlutterEngine(getActivity());
+
+    // Allow subclasses to customize FlutterEngine as desired.
+    onFlutterEngineCreated(flutterEngine);
+  }
+
+  /**
+   * Hook for subclasses to customize the creation of the {@code FlutterEngine}.
+   *
+   * By default, this method returns a standard {@link FlutterEngine} without any modification.
+   */
+  @NonNull
+  protected FlutterEngine onCreateFlutterEngine(@NonNull Context context) {
+    Log.d(TAG, "onCreateFlutterEngine()");
+    return new FlutterEngine(context);
+  }
+
+  /**
+   * Hook for subclasses to customize the {@link FlutterEngine} owned by this {@link FlutterFragment}
+   * after the {@link FlutterEngine} has been instantiated.
+   *
+   * Consider using this method to connect desired Flutter plugins to this {@code Fragment}'s
+   * {@link FlutterEngine}.
+   */
+  protected void onFlutterEngineCreated(@NonNull FlutterEngine flutterEngine) {
+    // no-op
   }
 }
