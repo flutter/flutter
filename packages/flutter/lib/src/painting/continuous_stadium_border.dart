@@ -27,7 +27,7 @@ import 'edge_insets.dart';
 /// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
 /// and the actual height and width of pixels that are manipulated to render it.
 /// For example, if a rectangle had dimensions 80px x 100px, and a corner radius
-/// of 25.0, in reality ~38 pixels in each dimension would be used to render a
+/// of 25, in reality ~38 pixels in each dimension would be used to render a
 /// corner and so ~76px x ~38px would be used to render both corners on a given
 /// side.
 ///
@@ -49,8 +49,8 @@ import 'edge_insets.dart';
 /// ```
 /// {@end-tool}
 ///
-/// The image below depicts a [ContinuousStadiumBorder] with a width of 200.0
-/// and a height of 100.0.
+/// The image below depicts a [ContinuousStadiumBorder] with a width of 200
+/// and a height of 100.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.continuous_stadium.png)
 ///

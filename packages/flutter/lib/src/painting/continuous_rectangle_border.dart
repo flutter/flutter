@@ -29,7 +29,7 @@ import 'edge_insets.dart';
 /// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
 /// and the actual height and width of pixels that are manipulated to render it.
 /// For example, if a rectangle had dimensions 80px x 100px, and a corner radius
-/// of 25.0, in reality ~38 pixels in each dimension would be used to render a
+/// of 25, in reality ~38 pixels in each dimension would be used to render a
 /// corner and so ~76px x ~38px would be used to render both corners on a given
 /// side.
 ///
@@ -47,7 +47,7 @@ import 'edge_insets.dart';
 ///     alignment: Alignment.center,
 ///     child: Material(
 ///       color: Colors.blueAccent[400],
-///       shape: const ContinuousRectangleBorder(borderRadius: 75.0),
+///       shape: const ContinuousRectangleBorder(cornerRadius: 75.0),
 ///       child: const SizedBox(
 ///         height: 200.0,
 ///         width: 200.0,
@@ -59,7 +59,7 @@ import 'edge_insets.dart';
 /// {@end-tool}
 ///
 /// The image below depicts a [ContinuousRectangleBorder] with a width
-/// and height of 200.0 and a curve radius of 75.0.
+/// and height of 200 and a curve radius of 75.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.continuous_rectangle.png)
 ///
@@ -84,7 +84,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// The radius for each corner.
   ///
   /// The radius will be clamped to 0 if a value less than 0 is entered as the
-  /// radius. By default the radius is 0.0. This value must not be null.
+  /// radius. By default the radius is 0. This value must not be null.
   ///
   /// Unlike [RoundedRectangleBorder], there is only a single radius value used
   /// to describe the radius for every corner.
@@ -138,57 +138,57 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // in a clockwise fashion around to the upper left hand corner.
     Path bezierRoundedRect () {
       return Path()
-        ..moveTo(leftX(1.52866483), topY(0))
-        ..lineTo(rightX(1.52866471), topY(0))
-        ..cubicTo(rightX(1.08849323), topY(0),
-            rightX(0.86840689), topY(0),
+        ..moveTo(leftX(1.52866483), topY(0.0))
+        ..lineTo(rightX(1.52866471), topY(0.0))
+        ..cubicTo(rightX(1.08849323), topY(0.0),
+            rightX(0.86840689), topY(0.0),
             rightX(0.66993427), topY(0.06549600))
         ..lineTo(rightX(0.63149399), topY(0.07491100))
         ..cubicTo(rightX(0.37282392), topY(0.16905899),
             rightX(0.16906013), topY(0.37282401),
             rightX(0.07491176), topY(0.63149399))
         ..cubicTo(rightX(0), topY(0.86840701),
-            rightX(0), topY(1.08849299),
-            rightX(0), topY(1.52866483))
-        ..lineTo(rightX(0), bottomY(1.52866471))
-        ..cubicTo(rightX(0), bottomY(1.08849323),
-            rightX(0), bottomY(0.86840689),
+            rightX(0.0), topY(1.08849299),
+            rightX(0.0), topY(1.52866483))
+        ..lineTo(rightX(0.0), bottomY(1.52866471))
+        ..cubicTo(rightX(0.0), bottomY(1.08849323),
+            rightX(0.0), bottomY(0.86840689),
             rightX(0.06549600), bottomY(0.66993427))
         ..lineTo(rightX(0.07491100), bottomY(0.63149399))
         ..cubicTo(rightX(0.16905899), bottomY(0.37282392),
             rightX(0.37282401), bottomY(0.16906013),
             rightX(0.63149399), bottomY(0.07491176))
         ..cubicTo(rightX(0.86840701), bottomY(0),
-            rightX(1.08849299), bottomY(0),
-            rightX(1.52866483), bottomY(0))
-        ..lineTo(leftX(1.52866483), bottomY(0))
-        ..cubicTo(leftX(1.08849323), bottomY(0),
-            leftX(0.86840689), bottomY(0),
+            rightX(1.08849299), bottomY(0.0),
+            rightX(1.52866483), bottomY(0.0))
+        ..lineTo(leftX(1.52866483), bottomY(0.0))
+        ..cubicTo(leftX(1.08849323), bottomY(0.0),
+            leftX(0.86840689), bottomY(0.0),
             leftX(0.66993427), bottomY(0.06549600))
         ..lineTo(leftX(0.63149399), bottomY(0.07491100))
         ..cubicTo(leftX(0.37282392), bottomY(0.16905899),
             leftX(0.16906013), bottomY(0.37282401),
             leftX(0.07491176), bottomY(0.63149399))
         ..cubicTo(leftX(0), bottomY(0.86840701),
-            leftX(0), bottomY(1.08849299),
-            leftX(0), bottomY(1.52866483))
-        ..lineTo(leftX(0), topY(1.52866471))
-        ..cubicTo(leftX(0), topY(1.08849323),
-            leftX(0), topY(0.86840689),
+            leftX(0.0), bottomY(1.08849299),
+            leftX(0.0), bottomY(1.52866483))
+        ..lineTo(leftX(0.0), topY(1.52866471))
+        ..cubicTo(leftX(0.0), topY(1.08849323),
+            leftX(0.0), topY(0.86840689),
             leftX(0.06549600), topY(0.66993427))
         ..lineTo(leftX(0.07491100), topY(0.63149399))
         ..cubicTo(leftX(0.16905899), topY(0.37282392),
             leftX(0.37282401), topY(0.16906013),
             leftX(0.63149399), topY(0.07491176))
         ..cubicTo(leftX(0.86840701), topY(0),
-            leftX(1.08849299), topY(0),
-            leftX(1.52866483), topY(0))
+            leftX(1.08849299), topY(0.0),
+            leftX(1.52866483), topY(0.0))
         ..close();
     }
 
     // The ratio of the declared corner radius to the total affected pixels to
-    // render the corner. For example if the declared radius were 25.0px then
-    // totalAffectedCornerPixelRatio * 25.0 (~38) pixels would be affected.
+    // render the corner. For example if the declared radius were 25px then
+    // totalAffectedCornerPixelRatio * 25 (~38) pixels would be affected.
     const double totalAffectedCornerPixelRatio = 1.52865;
 
     // The radius multiplier where the resulting shape will concave with a
@@ -225,7 +225,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     final double minSideLength = math.min(rect.width, rect.height);
 
     // As the minimum side edge length (where the round is occurring)
-    // approaches 0.0, the limitedRadius approaches 2.0 so as to maximize
+    // approaches 0, the limitedRadius approaches 2 so as to maximize
     // roundness (to make the shape with the largest radius that doesn't clip).
     // As the edge length approaches 200, the limitedRadius approaches ~3 –- the
     // multiplier of the radius value where the resulting shape is concave (ie.

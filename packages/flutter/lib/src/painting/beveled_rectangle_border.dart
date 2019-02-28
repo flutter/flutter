@@ -18,7 +18,7 @@ import 'edge_insets.dart';
 /// diamond made by connecting the centers of the sides.
 ///
 /// The image depicts a [BeveledRectangleBorder] with a width and height of
-/// 200.0 and circular radius of 75.0 on all corners.
+/// 200 and circular radius of 75 on all corners.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/Shape.beveled_rectangle.png)
 class BeveledRectangleBorder extends ShapeBorder {
