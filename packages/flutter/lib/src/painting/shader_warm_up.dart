@@ -23,17 +23,18 @@ import 'package:flutter/foundation.dart';
 /// done before calling [runApp].
 ///
 /// To determine whether a draw operation is useful for warming up shaders,
-/// check the difference in the `worst_frame_rasterizer_time_millis` benchmarks.
-/// Also, tracing with `flutter run --profile --trace-skia` may reveal whether
-/// there is shader-compilation-related jank. If there is such jank, some long
+/// check whether it improves the slowest GPU frame. Also, tracing with
+/// `flutter run --profile --trace-skia` may reveal whether there is shader-
+/// compilation-related jank. If there is such jank, some long
 /// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
 /// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
-/// `CircularRRectOp`) would suggest Xyz draw operations are causing the shaders
-/// to be compiled. A useful shader warm-up draw operation would eliminate such
-/// long compilation calls in the animation. To double-check the warm-up, trace
-/// with `flutter run --profile --trace-skia --start-paused`. The
-/// `GrGLProgramBuilder` with the associated `XyzOp` should appear during
-/// startup rather than in the middle of a later animation.
+/// `CircularRRectOp`) would suggest Xyz draw operations are causing the
+/// shaders to be compiled. A useful shader warm-up draw operation would
+/// eliminate such long compilation calls in the animation. To double-check
+/// the warm-up, trace with `flutter run --profile --trace-skia --start-
+/// paused`. The `GrGLProgramBuilder` with the associated `XyzOp` should
+/// appear during startup rather than in the middle of a later animation.
+
 ///
 /// This warm-up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
