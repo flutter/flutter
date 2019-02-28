@@ -42,7 +42,7 @@ void main() {
 
     expect(duration, const Duration(hours: 2, minutes: 3, seconds: 4));
 
-    controller.desiredTimerDuration = const Duration();
+    controller.duration = const Duration();
     await tester.pump();
     await tester.pump(animationTime);
 
@@ -54,7 +54,7 @@ void main() {
     const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
     final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
       resetAnimationDuration: animationTime,
-      desiredTimerDuration: initialDuration,
+      targetTimerDuration: initialDuration,
     );
     Duration duration;
     await tester.pumpWidget(
@@ -82,7 +82,7 @@ void main() {
 
     expect(duration, const Duration(hours: 7, minutes: 48, seconds: 27));
 
-    controller.desiredTimerDuration = initialDuration;
+    controller.duration = initialDuration;
     await tester.pump();
     await tester.pump(animationTime);
 
@@ -94,7 +94,7 @@ void main() {
     const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
     final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
       resetAnimationDuration: animationDuration,
-      desiredTimerDuration: initialDuration,
+      targetTimerDuration: initialDuration,
     );
     Duration duration;
     await tester.pumpWidget(
@@ -118,7 +118,7 @@ void main() {
 
     const Duration desiredDuration = Duration(hours: 10, seconds: 34, minutes: 10);
 
-    controller.desiredTimerDuration = desiredDuration;
+    controller.duration = desiredDuration;
     await tester.pump();
     await tester.pump(animationDuration);
 

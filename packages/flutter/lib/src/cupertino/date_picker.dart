@@ -952,17 +952,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 ///  * [CupertinoTimerPicker] which creates a Cupertino themed time picker which
 ///    uses this controller.
 ///  * [CupertinoDatePicker] which creates a Cupertino themed date picker.
-///
 class CupertinoTimerPickerController extends ChangeNotifier {
   /// Creates a CupertinoTimerPickerController.
   ///
-  /// The [resetAnimationDuration] and [desiredTimerDuration] arguments must not be null.
+  /// The [resetAnimationDuration] and [targetTimerDuration] arguments must not be null.
   CupertinoTimerPickerController({
-    Duration desiredTimerDuration = Duration.zero,
-    this.resetAnimationDuration = const Duration(milliseconds: 300),
-  }) : assert(resetAnimationDuration != null),
-       assert(desiredTimerDuration != null) {
-    _desiredTimerDuration = desiredTimerDuration;
+    Duration targetTimerDuration = Duration.zero,
+  }) : assert(targetTimerDuration != null) {
+    _duration = targetTimerDuration;
   }
 
   /// The desired duration of the countdown timer.
@@ -971,17 +968,12 @@ class CupertinoTimerPickerController extends ChangeNotifier {
   /// given duration.
   ///
   /// Defaults to Duration.zero.
-  Duration get desiredTimerDuration => _desiredTimerDuration;
-  Duration _desiredTimerDuration;
-  set desiredTimerDuration(Duration duration) {
-    _desiredTimerDuration = duration;
+  Duration get duration => _duration;
+  Duration _duration;
+  set duration(Duration duration) {
+    _duration = duration;
     notifyListeners();
   }
-
-  /// The time for each picker wheel to swing back to their initial positions.
-  ///
-  /// By default the duration is 300 milliseconds.
-  final Duration resetAnimationDuration;
 }
 
 /// Different modes of [CupertinoTimerPicker].
@@ -1040,6 +1032,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.initialTimerDuration = Duration.zero, // ignore: deprecated_member_use
     this.minuteInterval = 1,
     this.secondInterval = 1,
+    this.resetAnimationDuration = const Duration(milliseconds: 300),
     this.controller,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
@@ -1049,13 +1042,16 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
-       assert(initialTimerDuration.inSeconds % secondInterval == 0);
+       assert(initialTimerDuration.inSeconds % secondInterval == 0),
+       assert(!(controller != null && initialTimerDuration != null)), // ignore: deprecated_member_use
+       assert(resetAnimationDuration != null);
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
 
   /// The initial duration of the countdown timer.
-  @Deprecated('Migration to use controller')
+  @Deprecated('Migration to use a CupertinoTimerPickerControllerController with an'
+              'targetTimerDuration instead of this value.')
   final Duration initialTimerDuration;
 
   /// The granularity of the minute spinner. Must be a positive integer factor
@@ -1068,6 +1064,11 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
+
+  /// The time for each picker wheel to swing back to their initial positions.
+  ///
+  /// By default the duration is 300 milliseconds.
+  final Duration resetAnimationDuration;
 
   /// An optional controller used to set the picker to any value including its
   /// initialization state.
@@ -1107,7 +1108,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     // TODO(jslavitz): Remove this check and fully deprecate widget.initialTimerDuration
     final Duration initialDuration =
       widget.initialTimerDuration != Duration.zero ? // ignore: deprecated_member_use_from_same_package
-      widget.initialTimerDuration : widget.controller.desiredTimerDuration; // ignore: deprecated_member_use_from_same_package
+      widget.initialTimerDuration : widget.controller.duration; // ignore: deprecated_member_use_from_same_package
 
     selectedMinute = initialDuration.inMinutes % 60;
 
@@ -1116,8 +1117,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = initialDuration.inSeconds % 60;
-
-    timerController = widget.controller ?? CupertinoTimerPickerController();
 
     hourController = FixedExtentScrollController(initialItem: selectedHour);
     minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
@@ -1141,8 +1140,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   /// Sets the picker to be the initial time.
   void _desiredDurationChanged() {
-    final Duration desiredTimerDuration = widget.controller.desiredTimerDuration;
-    final Duration animationDuration = widget.controller.resetAnimationDuration;
+    final Duration desiredTimerDuration = widget.controller.duration;
+    final Duration animationDuration = widget.resetAnimationDuration;
 
     assert(desiredTimerDuration >= Duration.zero);
     assert(desiredTimerDuration < const Duration(days: 1));
