@@ -148,8 +148,8 @@ void main() {
         'id': 0,
         'method': 'app.callServiceExtension',
         'params': <String, String> {
-          'methodName': 'ext.flutter.debugPaint'
-        }
+          'methodName': 'ext.flutter.debugPaint',
+        },
       });
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);

@@ -34,7 +34,7 @@ class TextStyleItem extends StatelessWidget {
           ),
           Expanded(
             child: Text(text, style: style.copyWith(height: 1.0))
-          )
+          ),
         ]
       )
     );

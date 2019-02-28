@@ -193,7 +193,7 @@ class _TabControllerScope extends InheritedWidget {
     Key key,
     this.controller,
     this.enabled,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   final TabController controller;

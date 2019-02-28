@@ -150,7 +150,7 @@ class MenuDemoState extends State<MenuDemo> {
                     leading: Icon(Icons.delete),
                     title: Text('Remove')
                   )
-                )
+                ),
               ]
             )
           ),
@@ -177,7 +177,7 @@ class MenuDemoState extends State<MenuDemo> {
               PopupMenuItem<String>(
                 value: _simpleValue3,
                 child: Text(_simpleValue3)
-              )
+              ),
             ]
           ),
           // Pressing the PopupMenuButton on the right of this item shows a menu
@@ -208,10 +208,10 @@ class MenuDemoState extends State<MenuDemo> {
                   value: _checkedValue4,
                   checked: isChecked(_checkedValue4),
                   child: Text(_checkedValue4)
-                )
+                ),
               ]
             )
-          )
+          ),
         ]
       )
     );

@@ -158,7 +158,7 @@ class _LineBetweenPointers{
     this.pointerStartLocation = Offset.zero,
     this.pointerStartId = 0,
     this.pointerEndLocation = Offset.zero,
-    this.pointerEndId = 1
+    this.pointerEndId = 1,
   }) : assert(pointerStartLocation != null && pointerEndLocation != null),
        assert(pointerStartId != null && pointerEndId != null),
        assert(pointerStartId != pointerEndId);

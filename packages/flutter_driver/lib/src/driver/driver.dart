@@ -725,7 +725,7 @@ class FlutterDriver {
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
-          'recordedStreams': _timelineStreamsToString(streams)
+          'recordedStreams': _timelineStreamsToString(streams),
         }),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to start tracing...',
@@ -797,7 +797,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<void> clearTimeline({
-    Duration timeout = _kUnusuallyLongTimeout
+    Duration timeout = _kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {

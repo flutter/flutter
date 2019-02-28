@@ -11,7 +11,7 @@ class TestTransition extends AnimatedWidget {
     Key key,
     this.childFirstHalf,
     this.childSecondHalf,
-    Animation<double> animation
+    Animation<double> animation,
   }) : super(key: key, listenable: animation);
 
   final Widget childFirstHalf;

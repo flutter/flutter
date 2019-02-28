@@ -526,7 +526,7 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           children: <Matcher>[
-            matchesSemantics(hasImplicitScrolling: true)
+            matchesSemantics(hasImplicitScrolling: true),
           ],
         ),
       ],

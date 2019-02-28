@@ -403,7 +403,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true',
     ];
     final Process process = await processManager.start(command);
     unawaited(process.exitCode.then((int exitCode) {

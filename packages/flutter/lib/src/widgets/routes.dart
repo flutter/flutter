@@ -539,7 +539,7 @@ class _ModalScopeStatus extends InheritedWidget {
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
-    @required Widget child
+    @required Widget child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),

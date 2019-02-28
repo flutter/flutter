@@ -57,7 +57,7 @@ class BottomSheet extends StatefulWidget {
     this.enableDrag = true,
     this.elevation = 0.0,
     @required this.onClosing,
-    @required this.builder
+    @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),

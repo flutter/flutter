@@ -332,7 +332,7 @@ class IosProject {
       target,
       <String, dynamic>{
         'projectName': parent.manifest.appName,
-        'iosIdentifier': parent.manifest.iosBundleIdentifier
+        'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,

@@ -449,7 +449,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
-        'CODE_SIGNING_IDENTITY=""'
+        'CODE_SIGNING_IDENTITY=""',
       ]
     );
   }
@@ -720,7 +720,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
-    'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
+    'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
   }).toList();
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);

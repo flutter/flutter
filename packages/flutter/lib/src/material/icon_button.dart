@@ -146,7 +146,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     @required this.onPressed,
-    this.tooltip
+    this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),

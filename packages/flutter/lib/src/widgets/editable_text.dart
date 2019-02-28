@@ -1398,7 +1398,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
     this.paintCursorAboveText,
-    this.devicePixelRatio
+    this.devicePixelRatio,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);

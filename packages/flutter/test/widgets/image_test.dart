@@ -266,7 +266,7 @@ void main() {
               padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0)
-          )
+          ),
         ]
       )
     );
@@ -296,7 +296,7 @@ void main() {
               key: imageKey,
               image: imageProvider
             )
-          )
+          ),
         ]
       )
     );
@@ -838,7 +838,7 @@ void main() {
           rect: Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
-        )
+        ),
       ]
     ), ignoreTransform: true));
     semantics.dispose();

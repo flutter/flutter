@@ -375,7 +375,7 @@ class TableCell extends ParentDataWidget<Table> {
   const TableCell({
     Key key,
     this.verticalAlignment,
-    @required Widget child
+    @required Widget child,
   }) : super(key: key, child: child);
 
   /// How this cell is aligned vertically.

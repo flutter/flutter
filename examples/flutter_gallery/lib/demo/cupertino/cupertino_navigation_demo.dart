@@ -750,7 +750,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
                         Text(
                           'Sign in',
                           style: TextStyle(color: CupertinoTheme.of(context).primaryColor),
-                        )
+                        ),
                       ],
                     ),
                   ),

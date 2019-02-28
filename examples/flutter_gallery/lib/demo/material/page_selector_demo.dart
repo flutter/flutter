@@ -42,7 +42,7 @@ class _PageSelector extends StatelessWidget {
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, 1); },
                   tooltip: 'Page forward'
-                )
+                ),
               ],
               mainAxisAlignment: MainAxisAlignment.spaceBetween
             )

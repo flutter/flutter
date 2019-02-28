@@ -140,7 +140,7 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
         body: const TabBarView(
           children: <Widget>[
             Center(child: Text('LEFT CHILD')),
-            Center(child: Text('RIGHT CHILD'))
+            Center(child: Text('RIGHT CHILD')),
           ]
         )
       )
@@ -619,7 +619,7 @@ void main() {
             controller: controller,
             children: const <Widget>[
               Center(child: Text('LEFT CHILD')),
-              Center(child: Text('RIGHT CHILD'))
+              Center(child: Text('RIGHT CHILD')),
             ]
           ),
         ),
@@ -1545,7 +1545,7 @@ void main() {
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ]
-                )
+                ),
               ],
             ),
           ],
@@ -1809,7 +1809,7 @@ void main() {
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ]
-                )
+                ),
               ],
             ),
           ],

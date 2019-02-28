@@ -165,9 +165,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
                 value: LeaveBehindDemoAction.rightSwipe,
                 checked: _dismissDirection == DismissDirection.startToEnd,
                 child: const Text('Only swipe right')
-              )
+              ),
             ]
-          )
+          ),
         ]
       ),
       body: body,

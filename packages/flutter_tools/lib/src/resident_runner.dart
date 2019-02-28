@@ -144,7 +144,7 @@ class FlutterDevice {
   Future<Uri> setupDevFS(
     String fsName,
     Directory rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
@@ -158,7 +158,7 @@ class FlutterDevice {
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause = false
+    bool pause = false,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');

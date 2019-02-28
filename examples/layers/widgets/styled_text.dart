@@ -46,10 +46,10 @@ Widget toStyledText(String name, String text) {
               style: _kUnderline,
               text: name
             ),
-            const TextSpan(text: ':')
+            const TextSpan(text: ':'),
           ]
         ),
-        TextSpan(text: text)
+        TextSpan(text: text),
       ]
     )
   );

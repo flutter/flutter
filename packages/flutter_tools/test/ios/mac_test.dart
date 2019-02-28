@@ -442,7 +442,7 @@ Could not build the precompiled application for the device.''',
     const List<String> flutterAssetPbxProjLines = <String>[
       '/* flutter_assets */',
       '/* App.framework',
-      'another line'
+      'another line',
     ];
 
     const List<String> appFlxPbxProjLines = <String>[

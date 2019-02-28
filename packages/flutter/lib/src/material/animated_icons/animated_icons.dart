@@ -189,7 +189,7 @@ class _AnimatedIconPainter extends CustomPainter {
 class _PathFrames {
   const _PathFrames({
     @required this.commands,
-    @required this.opacities
+    @required this.opacities,
   });
 
   final List<_PathCommand> commands;

@@ -42,7 +42,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[
       0, 1, 2, 3, 4, 5, // visible
-      6, 7, 8 // in cached area
+      6, 7, 8, // in cached area
     ]));
 
     callbackTracker.clear();
@@ -109,7 +109,7 @@ void main() {
     expect(callbackTracker, equals(<int>[
       0, 1, 2,
       3, 4, 5, //visible
-      6, 7
+      6, 7,
     ]));
     callbackTracker.clear();
 

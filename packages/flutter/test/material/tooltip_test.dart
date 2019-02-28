@@ -630,7 +630,7 @@ void main() {
                 TestSemantics(
                   label: 'Foo\nBar',
                   textDirection: TextDirection.ltr,
-                )
+                ),
               ],
             ),
           ],
@@ -666,7 +666,7 @@ void main() {
                 TestSemantics(
                   label: 'Bar',
                   textDirection: TextDirection.ltr,
-                )
+                ),
               ],
             ),
           ],

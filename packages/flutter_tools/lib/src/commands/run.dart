@@ -424,7 +424,7 @@ class RunCommand extends RunCommandBase {
         devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple',
-        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
       ],
       endTimeOverride: appStartedTime,
     );

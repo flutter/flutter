@@ -53,7 +53,7 @@ Future<void> pumpTestWidget(
                 ),
                 CircleAvatar(
                   child: Text('E'),
-                )
+                ),
               ],
               accountName: withName ? const Text('name') : null,
               accountEmail: withEmail ? const Text('email') : null,

@@ -28,7 +28,7 @@ class GridTileBar extends StatelessWidget {
     this.leading,
     this.title,
     this.subtitle,
-    this.trailing
+    this.trailing,
   }) : super(key: key);
 
   /// The color to paint behind the child widgets.
@@ -95,7 +95,7 @@ class GridTileBar extends StatelessWidget {
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 child: subtitle
-              )
+              ),
             ]
           )
         )

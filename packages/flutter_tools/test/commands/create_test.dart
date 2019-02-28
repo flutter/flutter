@@ -86,7 +86,7 @@ void main() {
 
   testUsingContext('creates a module project correctly', () async {
     await _createAndAnalyzeProject(projectDir, <String>[
-      '--template=module'
+      '--template=module',
     ], <String>[
       '.android/app/',
       '.gitignore',
@@ -341,7 +341,7 @@ void main() {
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
-      '--template=module'
+      '--template=module',
     ], <String>[
       '.android/build.gradle',
       '.android/Flutter/build.gradle',
@@ -1061,7 +1061,7 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
     void onData(List<int> event), {
     Function onError,
     void onDone(),
-    bool cancelOnError
+    bool cancelOnError,
   }) {
     return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

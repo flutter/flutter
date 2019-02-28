@@ -79,7 +79,7 @@ class ExampleDragSource extends StatelessWidget {
     this.color,
     this.heavy = false,
     this.under = true,
-    this.child
+    this.child,
   }) : super(key: key);
 
   final Color color;

@@ -411,7 +411,7 @@ class _BottomNavigationTile extends StatelessWidget {
             ),
             Semantics(
               label: indexLabel,
-            )
+            ),
           ],
         ),
       ),

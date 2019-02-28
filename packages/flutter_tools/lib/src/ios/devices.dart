@@ -166,7 +166,7 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _kIdeviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions,
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();

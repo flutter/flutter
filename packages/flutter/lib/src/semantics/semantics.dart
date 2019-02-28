@@ -3698,7 +3698,7 @@ String _concatStrings({
   @required String thisString,
   @required String otherString,
   @required TextDirection thisTextDirection,
-  @required TextDirection otherTextDirection
+  @required TextDirection otherTextDirection,
 }) {
   if (otherString.isEmpty)
     return thisString;

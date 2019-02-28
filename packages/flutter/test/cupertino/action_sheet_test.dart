@@ -918,7 +918,7 @@ void main() {
                         SemanticsAction.tap,
                       ],
                       label: 'Cancel',
-                    )
+                    ),
                   ],
                 ),
               ],

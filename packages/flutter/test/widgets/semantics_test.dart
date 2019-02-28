@@ -26,7 +26,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     );
 
@@ -91,9 +91,9 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 label: 'test2a',
-              )
+              ),
             ]
-          )
+          ),
         ]
       ),
       ignoreId: true,
@@ -133,9 +133,9 @@ void main() {
                     label: 'test2b',
                   ),
                 ],
-              )
+              ),
             ]
-          )
+          ),
         ]
       ),
       ignoreId: true,
@@ -188,7 +188,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -215,7 +215,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.rtl,
-        )
+        ),
       ]
     );
 
@@ -256,7 +256,7 @@ void main() {
           hint: 'hint',
           value: 'value',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -279,7 +279,7 @@ void main() {
               ),
               Semantics(
                 hint: 'hint two',
-              )
+              ),
 
             ],
           ),
@@ -292,7 +292,7 @@ void main() {
         TestSemantics.rootChild(
           hint: 'hint one\nhint two',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -323,7 +323,7 @@ void main() {
                   height: 10.0,
                   width: 10.0,
                 )
-              )
+              ),
             ],
           ),
         ),
@@ -343,7 +343,7 @@ void main() {
               textDirection: TextDirection.ltr,
             ),
           ]
-        )
+        ),
       ],
     );
 
@@ -379,7 +379,7 @@ void main() {
           hint: 'hint',
           value: 'value',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -667,7 +667,7 @@ void main() {
       container: true,
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
         const CustomSemanticsAction(label: 'foo'): () {},
-        const CustomSemanticsAction(label: 'bar'): () {}
+        const CustomSemanticsAction(label: 'bar'): () {},
       },
     ));
 

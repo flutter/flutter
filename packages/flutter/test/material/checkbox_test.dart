@@ -201,7 +201,7 @@ void main() {
       flags: <SemanticsFlag>[
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
-        SemanticsFlag.isEnabled
+        SemanticsFlag.isEnabled,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));

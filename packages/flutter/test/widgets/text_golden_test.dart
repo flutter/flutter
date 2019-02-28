@@ -376,7 +376,7 @@ void main() {
                   'FakeFont 2',
                   'EvilFont 3',
                   'Nice Font 4',
-                  'ahem'
+                  'ahem',
                 ],
                 fontSize: 14,
               ),

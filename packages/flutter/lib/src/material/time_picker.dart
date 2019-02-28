@@ -999,7 +999,7 @@ class _Dial extends StatefulWidget {
     @required this.selectedTime,
     @required this.mode,
     @required this.use24HourDials,
-    @required this.onChanged
+    @required this.onChanged,
   }) : assert(selectedTime != null);
 
   final TimeOfDay selectedTime;
@@ -1425,7 +1425,7 @@ class _TimePickerDialog extends StatefulWidget {
   /// [initialTime] must not be null.
   const _TimePickerDialog({
     Key key,
-    @required this.initialTime
+    @required this.initialTime,
   }) : assert(initialTime != null),
        super(key: key);
 

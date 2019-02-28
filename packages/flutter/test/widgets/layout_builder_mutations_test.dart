@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 class Wrapper extends StatelessWidget {
   const Wrapper({
     Key key,
-    @required this.child
+    @required this.child,
   }) : assert(child != null),
        super(key: key);
 

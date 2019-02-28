@@ -14,7 +14,7 @@ class SyntaxHighlighterStyle {
     this.stringStyle,
     this.punctuationStyle,
     this.classStyle,
-    this.constantStyle
+    this.constantStyle,
   });
 
   static SyntaxHighlighterStyle lightThemeStyle() {
@@ -72,11 +72,11 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     'finally', 'for', 'get', 'if', 'implements', 'import', 'in', 'is', 'library',
     'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
     'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef', 'var',
-    'void', 'while', 'with', 'yield'
+    'void', 'while', 'with', 'yield',
   ];
 
   static const List<String> _builtInTypes = <String>[
-    'int', 'double', 'num', 'bool'
+    'int', 'double', 'num', 'bool',
   ];
 
   String _src;

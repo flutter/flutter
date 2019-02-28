@@ -122,7 +122,7 @@ class StocksAppState extends State<StocksApp> {
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
          '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater)
+         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );

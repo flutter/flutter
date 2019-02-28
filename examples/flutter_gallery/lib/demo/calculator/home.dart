@@ -130,7 +130,7 @@ class _CalculatorState extends State<Calculator> {
           Expanded(
             flex: 3,
             child: KeyPad(calcState: this)
-          )
+          ),
         ]
       )
     );
@@ -180,23 +180,23 @@ class KeyPad extends StatelessWidget {
                   KeyRow(<Widget>[
                     NumberKey(7, calcState),
                     NumberKey(8, calcState),
-                    NumberKey(9, calcState)
+                    NumberKey(9, calcState),
                   ]),
                   KeyRow(<Widget>[
                     NumberKey(4, calcState),
                     NumberKey(5, calcState),
-                    NumberKey(6, calcState)
+                    NumberKey(6, calcState),
                   ]),
                   KeyRow(<Widget>[
                     NumberKey(1, calcState),
                     NumberKey(2, calcState),
-                    NumberKey(3, calcState)
+                    NumberKey(3, calcState),
                   ]),
                   KeyRow(<Widget>[
                     CalcKey('.', calcState.handlePointTap),
                     NumberKey(0, calcState),
                     CalcKey('=', calcState.handleEqualsTap),
-                  ])
+                  ]),
                 ]
               )
             ),
@@ -209,7 +209,7 @@ class KeyPad extends StatelessWidget {
                     CalcKey('\u00F7', calcState.handleDivTap),
                     CalcKey('\u00D7', calcState.handleMultTap),
                     CalcKey('-', calcState.handleMinusTap),
-                    CalcKey('+', calcState.handlePlusTap)
+                    CalcKey('+', calcState.handlePlusTap),
                   ]
                 )
               )

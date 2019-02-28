@@ -182,7 +182,7 @@ void main() {
           double.minPositive,
           double.maxFinite,
           double.infinity,
-          double.nan
+          double.nan,
         ]),
         <dynamic>['nested', <dynamic>[]],
         <dynamic, dynamic>{ 'a': 'nested', null: <dynamic, dynamic>{} },

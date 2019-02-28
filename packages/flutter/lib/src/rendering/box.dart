@@ -89,7 +89,7 @@ class BoxConstraints extends Constraints {
     this.minWidth = 0.0,
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
-    this.maxHeight = double.infinity
+    this.maxHeight = double.infinity,
   });
 
   /// Creates box constraints that is respected only by the given size.
@@ -108,7 +108,7 @@ class BoxConstraints extends Constraints {
   ///    infinite.
   const BoxConstraints.tightFor({
     double width,
-    double height
+    double height,
   }) : minWidth = width != null ? width : 0.0,
        maxWidth = width != null ? width : double.infinity,
        minHeight = height != null ? height : 0.0,
@@ -123,7 +123,7 @@ class BoxConstraints extends Constraints {
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
-    double height = double.infinity
+    double height = double.infinity,
   }) : minWidth = width != double.infinity ? width : 0.0,
        maxWidth = width != double.infinity ? width : double.infinity,
        minHeight = height != double.infinity ? height : 0.0,
@@ -142,7 +142,7 @@ class BoxConstraints extends Constraints {
   /// given value in the given dimension.
   const BoxConstraints.expand({
     double width,
-    double height
+    double height,
   }) : minWidth = width != null ? width : double.infinity,
        maxWidth = width != null ? width : double.infinity,
        minHeight = height != null ? height : double.infinity,
@@ -169,7 +169,7 @@ class BoxConstraints extends Constraints {
     double minWidth,
     double maxWidth,
     double minHeight,
-    double maxHeight
+    double maxHeight,
   }) {
     return BoxConstraints(
       minWidth: minWidth ?? this.minWidth,

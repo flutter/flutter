@@ -77,7 +77,7 @@ Future<void> main() async {
       log,
       <String>[
         'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr'
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
       ],
     );
   });
@@ -101,7 +101,7 @@ Future<void> main() async {
       log,
       <String>[
         'getInnerPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl'
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
   });

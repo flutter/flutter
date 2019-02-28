@@ -21,7 +21,7 @@ class DualHeaderWithHint extends StatelessWidget {
     this.name,
     this.value,
     this.hint,
-    this.showHint
+    this.showHint,
   });
 
   final String name;
@@ -72,7 +72,7 @@ class DualHeaderWithHint extends StatelessWidget {
               showHint
             )
           )
-        )
+        ),
       ]
     );
   }
@@ -83,7 +83,7 @@ class CollapsibleBody extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
-    this.onCancel
+    this.onCancel,
   });
 
   final EdgeInsets margin;
@@ -135,10 +135,10 @@ class CollapsibleBody extends StatelessWidget {
                   textTheme: ButtonTextTheme.accent,
                   child: const Text('SAVE')
                 )
-              )
+              ),
             ]
           )
-        )
+        ),
       ]
     );
   }
@@ -150,7 +150,7 @@ class DemoItem<T> {
     this.value,
     this.hint,
     this.builder,
-    this.valueToString
+    this.valueToString,
   }) : textController = TextEditingController(text: valueToString(value));
 
   final String name;
@@ -317,7 +317,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             )
           );
         }
-      )
+      ),
     ];
   }
 

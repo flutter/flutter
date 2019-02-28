@@ -453,7 +453,7 @@ class RecipeSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
           child: Table(
             columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(64.0)
+              0: FixedColumnWidth(64.0),
             },
             children: <TableRow>[
               TableRow(
@@ -544,7 +544,7 @@ class Recipe {
     this.ingredientsImagePath,
     this.ingredientsImagePackage,
     this.ingredients,
-    this.steps
+    this.steps,
   });
 
   final String name;
@@ -689,7 +689,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     steps: <RecipeStep>[
       RecipeStep(duration: '10 min', description: 'Prep vegetables'),
       RecipeStep(duration: '5 min', description: 'Stir'),
-      RecipeStep(duration: '1 hr 10 min', description: 'Cook')
+      RecipeStep(duration: '1 hr 10 min', description: 'Cook'),
     ],
   ),
   Recipe(
@@ -712,7 +712,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
       RecipeStep(duration: '5 min', description: 'Sauté vegetables'),
       RecipeStep(duration: '3 min', description: 'Stir vegetables and other filling ingredients'),
       RecipeStep(duration: '10 min', description: 'Fill phyllo squares half-full with filling and fold.'),
-      RecipeStep(duration: '40 min', description: 'Bake')
+      RecipeStep(duration: '40 min', description: 'Bake'),
     ],
   ),
 ];

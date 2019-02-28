@@ -58,7 +58,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         demoWidget: buildSwitch(),
         exampleCodeTag: _switchCode,
         documentationUrl: 'https://docs.flutter.io/flutter/material/Switch-class.html',
-      )
+      ),
     ];
 
     return TabbedComponentDemoScaffold(
@@ -123,7 +123,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Checkbox(value: false, onChanged: null),
               Checkbox(value: null, tristate: true, onChanged: null),
             ]
-          )
+          ),
         ]
       )
     );
@@ -152,7 +152,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 value: 2,
                 groupValue: radioValue,
                 onChanged: handleRadioValueChanged
-              )
+              ),
             ]
           ),
           // Disabled radio buttons
@@ -173,9 +173,9 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 value: 2,
                 groupValue: 0,
                 onChanged: null
-              )
+              ),
             ]
-          )
+          ),
         ]
       )
     );

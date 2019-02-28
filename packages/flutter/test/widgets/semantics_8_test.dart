@@ -27,7 +27,7 @@ void main() {
                 Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
-                )
+                ),
               ]
             )
           )
@@ -44,7 +44,7 @@ void main() {
             label: 'label',
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ]
       )
     ));
@@ -65,7 +65,7 @@ void main() {
                 ),
                 Semantics(
                   checked: true
-                )
+                ),
               ]
             )
           )
@@ -82,7 +82,7 @@ void main() {
             label: 'label',
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ],
       ),
     ));

@@ -150,7 +150,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         title: 'Event',
         color: Colors.pink,
         vsync: this,
-      )
+      ),
     ];
 
     _navigationViews[_currentIndex].controller.value = 1.0;
@@ -218,9 +218,9 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
                 child: Text('Shifting'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
       body: Center(

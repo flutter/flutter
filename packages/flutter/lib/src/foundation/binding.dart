@@ -280,7 +280,7 @@ abstract class BindingBase {
   @protected
   void registerSignalServiceExtension({
     @required String name,
-    @required AsyncCallback callback
+    @required AsyncCallback callback,
   }) {
     assert(name != null);
     assert(callback != null);
@@ -311,7 +311,7 @@ abstract class BindingBase {
   void registerBoolServiceExtension({
     @required String name,
     @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter
+    @required AsyncValueSetter<bool> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -345,7 +345,7 @@ abstract class BindingBase {
   void registerNumericServiceExtension({
     @required String name,
     @required AsyncValueGetter<double> getter,
-    @required AsyncValueSetter<double> setter
+    @required AsyncValueSetter<double> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -407,7 +407,7 @@ abstract class BindingBase {
   void registerStringServiceExtension({
     @required String name,
     @required AsyncValueGetter<String> getter,
-    @required AsyncValueSetter<String> setter
+    @required AsyncValueSetter<String> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -478,7 +478,7 @@ abstract class BindingBase {
   @protected
   void registerServiceExtension({
     @required String name,
-    @required ServiceExtensionCallback callback
+    @required ServiceExtensionCallback callback,
   }) {
     assert(name != null);
     assert(callback != null);

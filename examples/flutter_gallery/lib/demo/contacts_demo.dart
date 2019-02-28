@@ -32,7 +32,7 @@ class _ContactCategory extends StatelessWidget {
                 width: 72.0,
                 child: Icon(icon, color: themeData.primaryColor)
               ),
-              Expanded(child: Column(children: children))
+              Expanded(child: Column(children: children)),
             ],
           ),
         ),
@@ -63,7 +63,7 @@ class _ContactItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: columnChildren
         )
-      )
+      ),
     ];
     if (icon != null) {
       rowChildren.add(SizedBox(

@@ -638,7 +638,7 @@ final Set<String> _packageDependencies = Set<String>.from(<String>[
   'test',
   'utf',
   'watcher',
-  'yaml'
+  'yaml',
 ]);
 
 /// Return null if the project name is legal. Return a validation message if

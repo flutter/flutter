@@ -311,7 +311,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
@@ -1193,7 +1193,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     switch (source) {
       case TestBindingEventSource.test:
@@ -1391,7 +1391,7 @@ const int _kPointerDecay = -2;
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
     this.pointer,
-    this.position
+    this.position,
   ) : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;

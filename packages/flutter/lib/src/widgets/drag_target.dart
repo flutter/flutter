@@ -441,7 +441,7 @@ class DraggableDetails {
   DraggableDetails({
     this.wasAccepted = false,
     @required this.velocity,
-    @required this.offset
+    @required this.offset,
   }) : assert(velocity != null),
        assert(offset != null);
 

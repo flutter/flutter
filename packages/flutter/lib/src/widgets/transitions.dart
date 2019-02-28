@@ -91,7 +91,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// The [listenable] argument is required.
   const AnimatedWidget({
     Key key,
-    @required this.listenable
+    @required this.listenable,
   }) : assert(listenable != null),
        super(key: key);
 

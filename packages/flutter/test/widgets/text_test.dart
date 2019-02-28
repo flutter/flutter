@@ -175,7 +175,7 @@ void main() {
             TestSemantics(
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
-            )
+            ),
           ],
         ),
       ],

@@ -206,7 +206,7 @@ class VMService {
 
       _peer.sendNotification('_registerService', <String, String>{
         'service': 'compileExpression',
-        'alias': 'Flutter Tools'
+        'alias': 'Flutter Tools',
       });
     }
   }
@@ -885,7 +885,7 @@ class VM extends ServiceObjectOwner {
   Future<Map<String, dynamic>> writeDevFSFile(
     String fsName, {
     @required String path,
-    @required List<int> fileContents
+    @required List<int> fileContents,
   }) {
     assert(path != null);
     assert(fileContents != null);
@@ -932,7 +932,7 @@ class VM extends ServiceObjectOwner {
         'viewId': viewId,
         'mainScript': main.toString(),
         'packagesFile': packages.toString(),
-        'assetDirectory': assetsDirectory.toString()
+        'assetDirectory': assetsDirectory.toString(),
     });
   }
 
@@ -1109,7 +1109,7 @@ class Isolate extends ServiceObjectOwner {
     // Inject the 'isolateId' parameter.
     if (params == null) {
       params = <String, dynamic>{
-        'isolateId': id
+        'isolateId': id,
       };
     } else {
       params['isolateId'] = id;
@@ -1154,7 +1154,7 @@ class Isolate extends ServiceObjectOwner {
   }) async {
     try {
       final Map<String, dynamic> arguments = <String, dynamic>{
-        'pause': pause
+        'pause': pause,
       };
       if (rootLibUri != null) {
         arguments['rootLibUri'] = rootLibUri.toString();
@@ -1451,7 +1451,7 @@ class FlutterView extends ServiceObject {
         params: <String, dynamic>{
           'isolateId': _uiIsolate.id,
           'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false)
+          'assetDirectory': assetsDirectory.toFilePath(windows: false),
         });
   }
 

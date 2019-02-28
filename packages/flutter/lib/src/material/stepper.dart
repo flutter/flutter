@@ -526,7 +526,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Container(
             margin: const EdgeInsetsDirectional.only(start: 12.0),
             child: _buildHeaderText(index)
-          )
+          ),
         ]
       )
     );
@@ -599,7 +599,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               } : null,
               child: _buildVerticalHeader(i)
             ),
-            _buildVerticalBody(i)
+            _buildVerticalBody(i),
           ]
         )
       );
@@ -709,7 +709,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 // top vertex the middle of its top.
 class _TrianglePainter extends CustomPainter {
   _TrianglePainter({
-    this.color
+    this.color,
   });
 
   final Color color;

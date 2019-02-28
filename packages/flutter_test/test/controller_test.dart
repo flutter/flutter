@@ -214,7 +214,7 @@ void main() {
 
 class WidgetControllerSpy extends WidgetController {
   WidgetControllerSpy(
-    TestWidgetsFlutterBinding binding
+    TestWidgetsFlutterBinding binding,
   ) : super(binding) {
     _binding = binding;
   }
@@ -260,7 +260,7 @@ class TestGestureSpy extends TestGesture {
     int pointer,
     PointerDeviceKind kind,
     EventDispatcher dispatcher,
-    HitTester hitTester
+    HitTester hitTester,
   }) : super(
         pointer: pointer,
         kind: kind,

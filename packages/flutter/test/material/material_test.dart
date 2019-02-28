@@ -89,7 +89,7 @@ void main() {
       'color: Color(0xffffffff)',
       'textStyle.inherit: true',
       'textStyle.color: Color(0xff00ff00)',
-      'borderRadius: BorderRadiusDirectional.circular(10.0)'
+      'borderRadius: BorderRadiusDirectional.circular(10.0)',
     ]);
   });
 
@@ -606,7 +606,7 @@ void main() {
                       Container(
                         color: Colors.green,
                         height: 150,
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -647,7 +647,7 @@ void main() {
                       Container(
                         color: Colors.green,
                         height: 150,
-                      )
+                      ),
                     ],
                   ),
                 ),

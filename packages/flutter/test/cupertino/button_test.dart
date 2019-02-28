@@ -189,7 +189,7 @@ void main() {
             actions: SemanticsAction.tap.index,
             label: 'ABC',
             flags: SemanticsFlag.isButton.index,
-          )
+          ),
         ],
       ),
       ignoreId: true,

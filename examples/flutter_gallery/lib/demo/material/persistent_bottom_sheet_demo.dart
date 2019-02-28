@@ -67,7 +67,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
                 Navigator.pop(context);
               },
               child: const Text('OK')
-            )
+            ),
           ],
         );
       },

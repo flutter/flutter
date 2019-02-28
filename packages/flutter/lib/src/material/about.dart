@@ -47,7 +47,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-    this.aboutBoxChildren
+    this.aboutBoxChildren,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -185,7 +185,7 @@ void showLicensePage({
   String applicationName,
   String applicationVersion,
   Widget applicationIcon,
-  String applicationLegalese
+  String applicationLegalese,
 }) {
   assert(context != null);
   Navigator.push(context, MaterialPageRoute<void>(
@@ -279,7 +279,7 @@ class AboutDialog extends StatelessWidget {
             Text(name, style: Theme.of(context).textTheme.headline),
             Text(version, style: Theme.of(context).textTheme.body1),
             Container(height: 18.0),
-            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption)
+            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
           ]
         )
       )
@@ -342,7 +342,7 @@ class LicensePage extends StatefulWidget {
     Key key,
     this.applicationName,
     this.applicationVersion,
-    this.applicationLegalese
+    this.applicationLegalese,
   }) : super(key: key);
 
   /// The name of the application.

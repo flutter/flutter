@@ -147,7 +147,7 @@ void main() {
               SvgPathCommand('Z', <Point<double>>[]),
             ]),
             margin: 0.000000001
-        )
+        ),
       ]);
     });
 
@@ -264,7 +264,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(0.0, 0.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0]
           ))
@@ -275,7 +275,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(5.0, 6.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0]
           ))
@@ -290,7 +290,7 @@ void main() {
             SvgPath(
               'path_1',
               <SvgPathCommand>[
-                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)])
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
               ],
               opacity: 0.5,
             ),
@@ -302,7 +302,7 @@ void main() {
             SvgPath(
               'path_1',
               <SvgPathCommand>[
-                SvgPathCommand('M', <Point<double>>[Point<double>(10.0, 10.0)])
+                SvgPathCommand('M', <Point<double>>[Point<double>(10.0, 10.0)]),
               ],
             ),
           ],
@@ -351,7 +351,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(0.0, 0.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0]
           ))
@@ -362,7 +362,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(5.0, 6.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0]
           ))

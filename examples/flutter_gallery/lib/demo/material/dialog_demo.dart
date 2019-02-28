@@ -112,7 +112,7 @@ class DialogDemoState extends State<DialogDemo> {
                     FlatButton(
                       child: const Text('DISCARD'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); }
-                    )
+                    ),
                   ]
                 )
               );
@@ -137,7 +137,7 @@ class DialogDemoState extends State<DialogDemo> {
                     FlatButton(
                       child: const Text('AGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); }
-                    )
+                    ),
                   ]
                 )
               );
@@ -167,7 +167,7 @@ class DialogDemoState extends State<DialogDemo> {
                       icon: Icons.add_circle,
                       text: 'add account',
                       color: theme.disabledColor
-                    )
+                    ),
                   ]
                 )
               );

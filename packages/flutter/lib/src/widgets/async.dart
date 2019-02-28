@@ -380,7 +380,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
     Key key,
     this.initialData,
     Stream<T> stream,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key, stream: stream);
 
@@ -521,7 +521,7 @@ class FutureBuilder<T> extends StatefulWidget {
     Key key,
     this.future,
     this.initialData,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 

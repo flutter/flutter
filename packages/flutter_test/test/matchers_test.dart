@@ -426,7 +426,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         ),
       );
@@ -447,7 +447,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'barz')
+            const CustomSemanticsAction(label: 'barz'),
           ],
         )),
       );
@@ -468,7 +468,7 @@ void main() {
           onLongPressHint: 'fills',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         )),
       );

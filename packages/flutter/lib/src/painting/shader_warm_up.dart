@@ -114,7 +114,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       ui.Paint()
         ..isAntiAlias = true
         ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = 0.1  // hairline
+        ..strokeWidth = 0.1,  // hairline
     ];
 
     // Warm up path stroke and fill shaders.

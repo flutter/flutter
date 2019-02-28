@@ -4745,7 +4745,7 @@ void main() {
       'cursorColor: Color(0xff00ff00)',
       'keyboardAppearance: Brightness.dark',
       'scrollPadding: EdgeInsets.zero',
-      'selection disabled'
+      'selection disabled',
     ]);
   });
 

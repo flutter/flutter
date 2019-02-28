@@ -75,7 +75,7 @@ void main() {
                   ListTile(
                     key: tileKey,
                     title: const Text('0')
-                  )
+                  ),
                 ]
               ),
               ExpansionTile(
@@ -86,7 +86,7 @@ void main() {
                   ListTile(
                     key: tileKey,
                     title: const Text('0')
-                  )
+                  ),
                 ]
               ),
               const ExpansionTile(
@@ -95,7 +95,7 @@ void main() {
                 children: <Widget>[
                   ListTile(title: Text('0')),
                 ]
-              )
+              ),
             ]
           )
         )

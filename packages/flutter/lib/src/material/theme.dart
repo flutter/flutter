@@ -168,7 +168,7 @@ class _InheritedTheme extends InheritedWidget {
   const _InheritedTheme({
     Key key,
     @required this.theme,
-    @required Widget child
+    @required Widget child,
   }) : assert(theme != null),
        super(key: key, child: child);
 

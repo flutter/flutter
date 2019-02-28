@@ -292,15 +292,15 @@ void main() {
         TestSemantics.rootChild(
           rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
-            SemanticsFlag.isButton
+            SemanticsFlag.isButton,
           ],
           label: 'link',
-        )
+        ),
       ]
     ), ignoreId: true, ignoreTransform: true));
 
@@ -325,10 +325,10 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isButton
+              SemanticsFlag.isButton,
             ],
             label: 'link',
-          )
+          ),
         ]
     ), ignoreId: true, ignoreTransform: true));
 

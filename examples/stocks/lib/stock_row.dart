@@ -14,7 +14,7 @@ class StockRow extends StatelessWidget {
     this.stock,
     this.onPressed,
     this.onDoubleTap,
-    this.onLongPressed
+    this.onLongPressed,
   }) : super(key: ObjectKey(stock));
 
   final Stock stock;

@@ -85,7 +85,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);

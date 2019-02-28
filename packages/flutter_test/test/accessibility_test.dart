@@ -163,7 +163,7 @@ void main() {
                   style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                 ),
               ),
-            )
+            ),
           ],
         )
       ));

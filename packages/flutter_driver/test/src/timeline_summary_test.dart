@@ -21,15 +21,15 @@ void main() {
     }
 
     Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
-      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration
+      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration,
     };
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'B', 'ts': timeStamp
+      'name': 'GPURasterizer::Draw', 'ph': 'B', 'ts': timeStamp,
     };
 
     Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp
+      'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp,
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
@@ -211,13 +211,13 @@ void main() {
       const List<List<int>> sequences = <List<int>>[
         <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         <int>[1, 2, 3, 4, 5],
-        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
       ];
 
       const List<int> p90s = <int>[
         9,
         5,
-        18
+        18,
       ];
 
       test('computes 90th frame rasterizer time in milliseconds', () {

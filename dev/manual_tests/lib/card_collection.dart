@@ -234,7 +234,7 @@ class CardCollectionState extends State<CardCollection> {
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
       actions: <Widget>[
-        Text(_dismissDirectionText(_dismissDirection))
+        Text(_dismissDirectionText(_dismissDirection)),
       ],
       flexibleSpace: Container(
         padding: const EdgeInsets.only(left: 72.0),

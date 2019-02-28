@@ -144,7 +144,7 @@ void main() {
             'flutter',
             'dummy',
             const Duration(milliseconds: 1000),
-            'fail'
+            'fail',
           ]
         );
       }

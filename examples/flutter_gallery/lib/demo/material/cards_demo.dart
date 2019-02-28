@@ -66,7 +66,7 @@ const List<TravelDestination> destinations = <TravelDestination>[
     city: 'Thanjavur',
     location: 'Thanjavur, Tamil Nadu',
     type: CardDemoType.selectable,
-  )
+  ),
 ];
 
 class TravelDestinationItem extends StatelessWidget {
@@ -232,7 +232,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
     Key key,
-    this.title
+    this.title,
   }) : super(key: key);
 
   final String title;

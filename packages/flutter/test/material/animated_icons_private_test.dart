@@ -184,7 +184,7 @@ void main () {
       painter.paint(mockCanvas, size);
       verifyInOrder(<void>[
         mockCanvas.rotate(math.pi),
-        mockCanvas.translate(-48.0, -48.0)
+        mockCanvas.translate(-48.0, -48.0),
       ]);
     });
 

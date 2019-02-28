@@ -258,7 +258,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
               onPressed: _handleButtonPressed
             )
           ),
-          Text(_result)
+          Text(_result),
         ]
       )
     );

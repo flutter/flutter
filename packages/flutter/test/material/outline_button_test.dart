@@ -213,7 +213,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ],
       ),
       ignoreId: true,

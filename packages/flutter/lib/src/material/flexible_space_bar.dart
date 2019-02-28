@@ -48,7 +48,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.background,
     this.centerTitle,
     this.titlePadding,
-    this.collapseMode = CollapseMode.parallax
+    this.collapseMode = CollapseMode.parallax,
   }) : assert(collapseMode != null),
        super(key: key);
 

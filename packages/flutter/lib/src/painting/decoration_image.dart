@@ -373,7 +373,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
-  FilterQuality filterQuality = FilterQuality.low
+  FilterQuality filterQuality = FilterQuality.low,
 }) {
   assert(canvas != null);
   assert(image != null);

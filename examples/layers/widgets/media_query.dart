@@ -19,7 +19,7 @@ class AdaptedListItem extends StatelessWidget {
           margin: const EdgeInsets.all(8.0),
           color: Colors.lightBlueAccent.shade100,
         ),
-        Text(name)
+        Text(name),
       ]
     );
   }
@@ -50,10 +50,10 @@ class AdaptedGridItem extends StatelessWidget {
                 const IconButton(
                   icon: Icon(Icons.more_vert),
                   onPressed: null
-                )
+                ),
               ]
             )
-          )
+          ),
         ]
       )
     );

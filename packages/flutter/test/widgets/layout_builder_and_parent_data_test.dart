@@ -35,7 +35,7 @@ class SizeChangerState extends State<SizeChanger> {
           height: _flag ? 50.0 : 100.0,
           width: 100.0,
           child: widget.child
-        )
+        ),
       ],
     );
   }

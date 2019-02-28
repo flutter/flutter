@@ -38,7 +38,7 @@ class RenderImage extends RenderBox {
     bool matchTextDirection = false,
     TextDirection textDirection,
     bool invertColors = false,
-    FilterQuality filterQuality = FilterQuality.low
+    FilterQuality filterQuality = FilterQuality.low,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),

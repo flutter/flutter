@@ -532,7 +532,7 @@ class RadialGradient extends Gradient {
     List<double> stops,
     this.tileMode = TileMode.clamp,
     this.focal,
-    this.focalRadius = 0.0
+    this.focalRadius = 0.0,
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),

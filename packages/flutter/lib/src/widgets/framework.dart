@@ -5005,7 +5005,7 @@ FlutterErrorDetails _debugReportException(
   String context,
   dynamic exception,
   StackTrace stack, {
-  InformationCollector informationCollector
+  InformationCollector informationCollector,
 }) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,

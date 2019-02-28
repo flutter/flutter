@@ -37,7 +37,7 @@ void main() {
       );
     }, overrides: <Type, Generator> {
       Cache: () => Cache(rootOverride: tempDir),
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('getEngineType', () {
@@ -55,7 +55,7 @@ void main() {
       );
     }, overrides: <Type, Generator> {
       Cache: () => Cache(rootOverride: tempDir),
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 
@@ -90,7 +90,7 @@ void main() {
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
       );
     }, overrides: <Type, Generator> {
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('getEngineType', () {
@@ -107,7 +107,7 @@ void main() {
           'android_debug_unopt'
       );
     }, overrides: <Type, Generator> {
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }

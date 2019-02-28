@@ -547,7 +547,7 @@ void main() {
                   ),
                   Container(
                     height: 200.0,
-                  )
+                  ),
                 ],
               ),
             ),

@@ -576,7 +576,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   TextSelectionHandleType _chooseType(
     TextSelectionPoint endpoint,
     TextSelectionHandleType ltrType,
-    TextSelectionHandleType rtlType
+    TextSelectionHandleType rtlType,
   ) {
     if (widget.selection.isCollapsed)
       return TextSelectionHandleType.collapsed;

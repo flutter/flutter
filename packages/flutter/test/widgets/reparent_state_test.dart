@@ -137,7 +137,7 @@ void main() {
           StateMarker(
             key: right,
             child: grandchild
-          )
+          ),
         ]
       )
     );
@@ -160,7 +160,7 @@ void main() {
             key: right,
             child: newGrandchild
           ),
-          StateMarker(key: left)
+          StateMarker(key: left),
         ]
       )
     );
@@ -363,7 +363,7 @@ void main() {
                 child: StateMarker(child: Container(width: 100.0))
               )
             )
-          )
+          ),
         ]
       )
     );

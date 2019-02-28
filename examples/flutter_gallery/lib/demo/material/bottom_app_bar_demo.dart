@@ -333,7 +333,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   const _DemoBottomAppBar({
     this.color,
     this.fabLocation,
-    this.shape
+    this.shape,
   });
 
   final Color color;

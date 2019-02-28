@@ -48,7 +48,7 @@ class _IgnoreDrag extends Drag {
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
     Animation<double> repaint,
-    this.arc
+    this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
@@ -226,7 +226,7 @@ class _PointDemoState extends State<_PointDemo> {
 class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
     Animation<double> repaint,
-    this.arc
+    this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;

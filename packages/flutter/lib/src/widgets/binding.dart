@@ -298,7 +298,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             // This is defined to return a STRING, not a boolean.
             // Devtools, the Intellij plugin, and the flutter tool all depend
             // on it returning a string and not a boolean.
-            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+            'enabled': _needToReportFirstFrame ? 'false' : 'true',
           };
         },
       );
@@ -809,7 +809,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   RenderObjectToWidgetAdapter({
     this.child,
     this.container,
-    this.debugShortDescription
+    this.debugShortDescription,
   }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.

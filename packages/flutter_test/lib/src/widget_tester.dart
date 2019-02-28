@@ -70,7 +70,7 @@ void testWidgets(
   String description,
   WidgetTesterCallback callback, {
   bool skip = false,
-  test_package.Timeout timeout
+  test_package.Timeout timeout,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);

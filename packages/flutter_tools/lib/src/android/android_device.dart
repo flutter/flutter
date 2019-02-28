@@ -63,7 +63,7 @@ class AndroidDevice extends Device {
     String id, {
     this.productID,
     this.modelID,
-    this.deviceCodeName
+    this.deviceCodeName,
   }) : super(id);
 
   final String productID;
@@ -295,7 +295,7 @@ class AndroidDevice extends Device {
     }
 
     await runCheckedAsync(adbCommandForDevice(<String>[
-      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)
+      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
     ]));
     return true;
   }
@@ -505,7 +505,7 @@ class AndroidDevice extends Device {
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     final String output = runCheckedSync(adbCommandForDevice(<String>[
-      'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
+      'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
     ]));
 
     final Match timeMatch = _timeRegExp.firstMatch(output);
@@ -579,7 +579,7 @@ final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 void parseADBDeviceOutput(
   String text, {
   List<AndroidDevice> devices,
-  List<String> diagnostics
+  List<String> diagnostics,
 }) {
   // Check for error messages from adb
   if (!text.contains('List of devices')) {
@@ -707,7 +707,7 @@ class _AdbLogReader extends DeviceLogReader {
     RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
     RegExp(r'^[WEF]\/ActivityManager:\s+.*(\bflutter\b|\bdomokit\b|\bsky\b)'),
     RegExp(r'^[WEF]\/System\.err:\s+'),
-    RegExp(r'^[F]\/[\S^:]+:\s+')
+    RegExp(r'^[F]\/[\S^:]+:\s+'),
   ];
 
   // 'F/libc(pid): Fatal signal 11'

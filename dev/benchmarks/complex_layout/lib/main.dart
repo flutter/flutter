@@ -101,7 +101,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
               print('Pressed search');
             },
           ),
-          TopBarMenu()
+          TopBarMenu(),
         ]
       ),
       body: Column(
@@ -170,7 +170,7 @@ class TopBarMenu extends StatelessWidget {
         const PopupMenuItem<String>(
           value: 'Events',
           child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
-        )
+        ),
       ]
     );
   }
@@ -192,7 +192,7 @@ class MenuItemWithIcon extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
           child: Text(title)
         ),
-        Text(subtitle, style: Theme.of(context).textTheme.caption)
+        Text(subtitle, style: Theme.of(context).textTheme.caption),
       ]
     );
   }
@@ -216,7 +216,7 @@ class FancyImageItem extends StatelessWidget {
           child: Divider()
         ),
         IconBar(),
-        FatDivider()
+        FatDivider(),
       ]
     );
   }
@@ -238,7 +238,7 @@ class FancyGalleryItem extends StatelessWidget {
           child: Divider()
         ),
         IconBar(),
-        FatDivider()
+        FatDivider(),
       ]
     );
   }
@@ -253,7 +253,7 @@ class InfoBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const MiniIconWithText(Icons.thumb_up, '42'),
-          Text('3 Comments', style: Theme.of(context).textTheme.caption)
+          Text('3 Comments', style: Theme.of(context).textTheme.caption),
         ]
       )
     );
@@ -292,7 +292,7 @@ class IconWithText extends StatelessWidget {
           icon: Icon(icon),
           onPressed: () { print('Pressed $title button'); }
         ),
-        Text(title)
+        Text(title),
       ]
     );
   }
@@ -321,7 +321,7 @@ class MiniIconWithText extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 12.0)
           )
         ),
-        Text(title, style: Theme.of(context).textTheme.caption)
+        Text(title, style: Theme.of(context).textTheme.caption),
       ]
     );
   }
@@ -367,19 +367,19 @@ class UserHeader extends StatelessWidget {
                   children: <TextSpan>[
                     TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
-                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold))
+                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold)),
                   ]
                 )),
                 Row(
                   children: <Widget>[
                     Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
-                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color)
+                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color),
                   ]
-                )
+                ),
               ]
             )
           ),
-          TopBarMenu()
+          TopBarMenu(),
         ]
       )
     );
@@ -448,12 +448,12 @@ class ItemImageBox extends StatelessWidget {
                           TextSpan(
                             style: TextStyle(fontWeight: FontWeight.bold),
                             text: 'Chris Godley'
-                          )
+                          ),
                         ]
                       )
                     )
                   )
-                )
+                ),
               ]
             )
             ,
@@ -464,10 +464,10 @@ class ItemImageBox extends StatelessWidget {
                 children: <Widget>[
                   Text('Artisans of Southern India', style: Theme.of(context).textTheme.body2),
                   Text('Silk Spinners', style: Theme.of(context).textTheme.body1),
-                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption)
+                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption),
                 ]
               )
-            )
+            ),
           ]
         )
       )
@@ -483,7 +483,7 @@ class ItemGalleryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> tabNames = <String>[
-      'A', 'B', 'C', 'D'
+      'A', 'B', 'C', 'D',
     ];
 
     return SizedBox(
@@ -525,9 +525,9 @@ class ItemGalleryBox extends StatelessWidget {
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text('This is item $tabName'),
                                   )
-                                )
+                                ),
                               ]
-                            )
+                            ),
                           ]
                         )
                       )
@@ -538,7 +538,7 @@ class ItemGalleryBox extends StatelessWidget {
             ),
             Container(
               child: const TabPageSelector()
-            )
+            ),
           ]
         )
       )
@@ -588,7 +588,7 @@ class BottomBarButton extends StatelessWidget {
             icon: Icon(icon),
             onPressed: () { print('Pressed: $title'); }
           ),
-          Text(title, style: Theme.of(context).textTheme.caption)
+          Text(title, style: Theme.of(context).textTheme.caption),
         ]
       )
     );

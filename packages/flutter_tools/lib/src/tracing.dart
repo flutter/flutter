@@ -35,7 +35,7 @@ class Tracing {
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline({
-    bool awaitFirstFrame = false
+    bool awaitFirstFrame = false,
   }) async {
     if (awaitFirstFrame) {
       final Status status = logger.startProgress(

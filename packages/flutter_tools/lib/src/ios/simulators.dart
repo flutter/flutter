@@ -322,7 +322,7 @@ class IOSSimulator extends Device {
       if (debuggingOptions.buildInfo.isDebug)
         args.addAll(<String>[
           '--enable-checked-mode',
-          '--verify-entry-points'
+          '--verify-entry-points',
         ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');

@@ -62,7 +62,7 @@ class MaterialGap extends MergeableMaterialItem {
   /// Creates a Material gap with a given size.
   const MaterialGap({
     @required LocalKey key,
-    this.size = 16.0
+    this.size = 16.0,
   }) : assert(key != null),
        super(key);
 
@@ -104,7 +104,7 @@ class MergeableMaterial extends StatefulWidget {
     this.mainAxis = Axis.vertical,
     this.elevation = 2,
     this.hasDividers = false,
-    this.children = const <MergeableMaterialItem>[]
+    this.children = const <MergeableMaterialItem>[],
   }) : super(key: key);
 
   /// The children of the [MergeableMaterial].
@@ -140,7 +140,7 @@ class _AnimationTuple {
     this.startAnimation,
     this.endAnimation,
     this.gapAnimation,
-    this.gapStart = 0.0
+    this.gapStart = 0.0,
   });
 
   final AnimationController controller;
@@ -648,7 +648,7 @@ class _MergeableMaterialListBody extends ListBody {
     List<Widget> children,
     Axis mainAxis = Axis.vertical,
     this.items,
-    this.boxShadows
+    this.boxShadows,
   }) : super(children: children, mainAxis: mainAxis);
 
   final List<MergeableMaterialItem> items;
@@ -679,7 +679,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
     List<RenderBox> children,
     AxisDirection axisDirection = AxisDirection.down,
-    this.boxShadows
+    this.boxShadows,
   }) : super(children: children, axisDirection: axisDirection);
 
   List<BoxShadow> boxShadows;

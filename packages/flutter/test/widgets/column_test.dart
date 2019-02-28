@@ -340,7 +340,7 @@ void main() {
         key: flexKey,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 150.0),
         ]
       )
     ));
@@ -355,7 +355,7 @@ void main() {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 150.0),
         ]
       )
     ));
@@ -378,7 +378,7 @@ void main() {
               key: childKey,
               width: 100.0,
               height: 100.0
-            )
+            ),
           ]
         )
       )
@@ -731,7 +731,7 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 150.0),
         ]
       )
     ));
@@ -747,7 +747,7 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
+          Container(width: 100.0, height: 150.0),
         ]
       )
     ));
@@ -771,7 +771,7 @@ void main() {
               key: childKey,
               width: 100.0,
               height: 100.0
-            )
+            ),
           ]
         )
       )

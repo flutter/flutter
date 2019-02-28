@@ -305,7 +305,7 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   ) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;

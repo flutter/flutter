@@ -13,7 +13,7 @@ class _GesturePainter extends CustomPainter {
     this.scaleEnabled,
     this.tapEnabled,
     this.doubleTapEnabled,
-    this.longPressEnabled
+    this.longPressEnabled,
   });
 
   final double zoom;

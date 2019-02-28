@@ -313,7 +313,7 @@ class _ChipDemoState extends State<ChipDemo> {
               });
             },
             icon: const Icon(Icons.vignette, semanticLabel: 'Update border shape'),
-          )
+          ),
         ],
       ),
       body: ChipTheme(

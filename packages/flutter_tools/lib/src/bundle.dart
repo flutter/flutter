@@ -165,7 +165,7 @@ Future<AssetBundle> buildAssets({
   String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false
+  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);

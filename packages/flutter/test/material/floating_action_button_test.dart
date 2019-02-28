@@ -477,7 +477,7 @@ void main() {
             SemanticsFlag.isEnabled,
           ],
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
         ),
       ],
@@ -543,7 +543,7 @@ void main() {
                 TestSemantics(
                   label: 'Add Photo',
                   actions: <SemanticsAction>[
-                    SemanticsAction.tap
+                    SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,

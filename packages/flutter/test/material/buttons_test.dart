@@ -46,7 +46,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -86,7 +86,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ]
       ),
       ignoreId: true,

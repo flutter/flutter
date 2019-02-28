@@ -362,7 +362,7 @@ class DataTable extends StatelessWidget {
     Color color,
     bool checked,
     VoidCallback onRowTap,
-    ValueChanged<bool> onCheckboxChanged
+    ValueChanged<bool> onCheckboxChanged,
   }) {
     Widget contents = Semantics(
       container: true,

@@ -319,7 +319,7 @@ void main() {
       '-e',
       'drag1-update',
       '-f',
-      'drag1-end'
+      'drag1-end',
     ]);
   });
 

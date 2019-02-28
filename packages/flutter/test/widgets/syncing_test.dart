@@ -129,7 +129,7 @@ void main() {
           Container(
             key: keyB,
             child: b
-          )
+          ),
         ]
       )
     );
@@ -156,7 +156,7 @@ void main() {
           Container(
             key: keyB,
             child: b
-          )
+          ),
         ]
       )
     );
@@ -185,7 +185,7 @@ void main() {
           Container(
             key: keyB,
             child: a
-          )
+          ),
         ]
       )
     );

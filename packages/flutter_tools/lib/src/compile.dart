@@ -324,7 +324,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
     this.typeDefinitions,
     this.libraryUri,
     this.klass,
-    this.isStatic
+    this.isStatic,
   ) : super(completer);
 
   String expression;

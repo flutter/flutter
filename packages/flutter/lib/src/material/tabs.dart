@@ -108,7 +108,7 @@ class Tab extends StatelessWidget {
             child: icon,
             margin: const EdgeInsets.only(bottom: 10.0),
           ),
-          _buildLabelText()
+          _buildLabelText(),
         ]
       );
     }

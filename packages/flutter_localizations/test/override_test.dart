@@ -29,7 +29,7 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const FooMaterialLocalizationsDelegate({
     this.supportedLanguage = 'en',
-    this.backButtonTooltip = 'foo'
+    this.backButtonTooltip = 'foo',
   });
 
   final String supportedLanguage;

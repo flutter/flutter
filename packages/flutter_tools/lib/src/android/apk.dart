@@ -16,7 +16,7 @@ import 'gradle.dart';
 Future<void> buildApk({
   @required FlutterProject project,
   @required String target,
-  BuildInfo buildInfo = BuildInfo.debug
+  BuildInfo buildInfo = BuildInfo.debug,
 }) async {
   if (!project.android.isUsingGradle) {
     throwToolExit(

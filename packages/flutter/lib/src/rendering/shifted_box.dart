@@ -1032,7 +1032,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
-    @required SingleChildLayoutDelegate delegate
+    @required SingleChildLayoutDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate,
        super(child);

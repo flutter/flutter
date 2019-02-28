@@ -31,7 +31,7 @@ class UpgradeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     try {
       await runCheckedAsync(<String>[
-        'git', 'rev-parse', '@{u}'
+        'git', 'rev-parse', '@{u}',
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
       throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');

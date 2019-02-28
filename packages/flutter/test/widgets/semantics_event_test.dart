@@ -31,8 +31,8 @@ void main() {
         'type': 'TestEvent',
         'data': <String, dynamic> {
           'text': 'hi',
-          'number': 11
-        }
+          'number': 11,
+        },
       }
     );
     expect(
@@ -42,8 +42,8 @@ void main() {
         'nodeId': 123,
         'data': <String, dynamic> {
           'text': 'hi',
-          'number': 11
-        }
+          'number': 11,
+        },
       }
     );
   });

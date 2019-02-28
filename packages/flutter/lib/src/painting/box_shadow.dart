@@ -33,7 +33,7 @@ class BoxShadow extends ui.Shadow {
     Color color = const Color(0xFF000000),
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
-    this.spreadRadius = 0.0
+    this.spreadRadius = 0.0,
   }) : super(color: color, offset: offset, blurRadius: blurRadius);
 
   /// The amount the box should be inflated prior to applying the blur.

@@ -91,7 +91,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     onPressed: () => _showExampleCode(context),
                   );
                 },
-              )
+              ),
             ],
           ),
           bottom: TabBar(
@@ -112,7 +112,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                       style: Theme.of(context).textTheme.subhead
                     )
                   ),
-                  Expanded(child: demo.demoWidget)
+                  Expanded(child: demo.demoWidget),
                 ],
               ),
             );
@@ -167,7 +167,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
             text: TextSpan(
               style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
               children: <TextSpan>[
-                DartSyntaxHighlighter(style).format(_exampleCode)
+                DartSyntaxHighlighter(style).format(_exampleCode),
               ]
             )
           )

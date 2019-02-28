@@ -148,7 +148,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   /// By default, the [behavior] is [HitTestBehavior.deferToChild].
   RenderProxyBoxWithHitTestBehavior({
     this.behavior = HitTestBehavior.deferToChild,
-    RenderBox child
+    RenderBox child,
   }) : super(child);
 
   /// How to behave during hit testing.
@@ -305,7 +305,7 @@ class RenderLimitedBox extends RenderProxyBox {
   RenderLimitedBox({
     RenderBox child,
     double maxWidth = double.infinity,
-    double maxHeight = double.infinity
+    double maxHeight = double.infinity,
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -548,7 +548,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   RenderIntrinsicWidth({
     double stepWidth,
     double stepHeight,
-    RenderBox child
+    RenderBox child,
   }) : assert(stepWidth == null || stepWidth > 0.0),
        assert(stepHeight == null || stepHeight > 0.0),
        _stepWidth = stepWidth,
@@ -665,7 +665,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 class RenderIntrinsicHeight extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic height.
   RenderIntrinsicHeight({
-    RenderBox child
+    RenderBox child,
   }) : super(child);
 
   @override
@@ -2011,7 +2011,7 @@ class RenderTransform extends RenderProxyBox {
     AlignmentGeometry alignment,
     TextDirection textDirection,
     this.transformHitTests = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
@@ -2393,7 +2393,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   RenderFractionalTranslation({
     @required Offset translation,
     this.transformHitTests = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(translation != null),
        _translation = translation,
        super(child);
@@ -2883,7 +2883,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
-    bool ignoringSemantics
+    bool ignoringSemantics,
   }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics,
        super(child) {
@@ -2958,7 +2958,7 @@ class RenderOffstage extends RenderProxyBox {
   /// Creates an offstage render object.
   RenderOffstage({
     bool offstage = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(offstage != null),
        _offstage = offstage,
        super(child);
@@ -3169,7 +3169,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   RenderMetaData({
     this.metaData,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox child
+    RenderBox child,
   }) : super(behavior: behavior, child: child);
 
   /// Opaque meta data ignored by the render tree
@@ -3194,7 +3194,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureLongPressCallback onLongPress,
     GestureDragUpdateCallback onHorizontalDragUpdate,
     GestureDragUpdateCallback onVerticalDragUpdate,
-    this.scrollFactor = 0.8
+    this.scrollFactor = 0.8,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,

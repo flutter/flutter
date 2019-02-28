@@ -367,7 +367,7 @@ void main() {
                 didPressButton = true;
               },
               child: const Text('X'),
-            )
+            ),
           ],
         ),
       ),
@@ -412,7 +412,7 @@ void main() {
         '/scaffold': (_) => Scaffold(
             appBar: AppBar(),
             body: const Text('Scaffold'),
-        )
+        ),
       };
       await tester.pumpWidget(
         MaterialApp(theme: ThemeData(platform: platform), routes: routes)

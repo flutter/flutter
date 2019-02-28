@@ -165,7 +165,7 @@ void main() {
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
-      canvas.translate(-48.0, -48.0)
+      canvas.translate(-48.0, -48.0),
     ]);
   });
 
@@ -212,7 +212,7 @@ void main() {
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
     verifyInOrder(<void>[
       canvas.rotate(math.pi),
-      canvas.translate(-48.0, -48.0)
+      canvas.translate(-48.0, -48.0),
     ]);
   });
 }

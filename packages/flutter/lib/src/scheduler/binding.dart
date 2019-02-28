@@ -957,7 +957,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     postEvent('Flutter.Frame', <String, dynamic>{
       'number': _profileFrameNumber,
       'startTime': _currentFrameTimeStamp.inMicroseconds,
-      'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+      'elapsed': _profileFrameStopwatch.elapsedMicroseconds,
     });
   }
 

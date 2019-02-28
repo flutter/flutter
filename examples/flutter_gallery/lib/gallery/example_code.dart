@@ -210,7 +210,7 @@ Row(
       value: 2,
       groupValue: radioValue,
       onChanged: handleRadioValueChanged
-    )
+    ),
   ]
 );
 
@@ -262,7 +262,7 @@ GridView.count(
     'https://example.com/image-1.jpg',
     'https://example.com/image-2.jpg',
     '...',
-    'https://example.com/image-n.jpg'
+    'https://example.com/image-n.jpg',
   ].map<Widget>((String url) {
     return GridTile(
       footer: GridTileBar(

@@ -62,7 +62,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.decoration,
     this.position = DecorationPosition.background,
-    Widget child
+    Widget child,
   }) : assert(decoration != null),
        assert(position != null),
        super(key: key, child: child);

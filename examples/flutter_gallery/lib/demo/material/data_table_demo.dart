@@ -226,7 +226,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
               ),
             ],
             source: _dessertsDataSource
-          )
+          ),
         ]
       )
     );

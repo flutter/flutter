@@ -42,7 +42,7 @@ class TooltipDemo extends StatelessWidget {
                         color: theme.iconTheme.color
                       )
                     ),
-                    Text(' icon.', style: theme.textTheme.subhead)
+                    Text(' icon.', style: theme.textTheme.subhead),
                   ]
                 ),
                 Center(
@@ -57,7 +57,7 @@ class TooltipDemo extends StatelessWidget {
                       ));
                     }
                   )
-                )
+                ),
               ]
               .map<Widget>((Widget widget) {
                 return Padding(

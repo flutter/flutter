@@ -368,7 +368,7 @@ class RenderTable extends RenderBox {
     ImageConfiguration configuration = ImageConfiguration.empty,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
-    List<List<RenderBox>> children
+    List<List<RenderBox>> children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),

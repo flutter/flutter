@@ -488,7 +488,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     List<String> typeDefinitions,
     String libraryUri,
     String klass,
-    bool isStatic
+    bool isStatic,
   ) async {
     return null;
   }

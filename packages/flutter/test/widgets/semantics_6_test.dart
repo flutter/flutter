@@ -21,7 +21,7 @@ void main() {
           label: 'hello',
           textDirection: TextDirection.ltr,
           rect: TestSemantics.fullScreen,
-        )
+        ),
       ],
     );
 

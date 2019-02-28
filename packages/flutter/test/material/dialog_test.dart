@@ -61,7 +61,7 @@ void main() {
               didPressOk = true;
             },
             child: const Text('OK')
-        )
+        ),
       ],
     );
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));

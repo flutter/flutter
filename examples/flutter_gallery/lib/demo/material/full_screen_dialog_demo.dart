@@ -88,7 +88,7 @@ class DateTimeItem extends StatelessWidget {
                 ]
               )
             )
-          )
+          ),
         ]
       )
     );
@@ -137,7 +137,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               onPressed: () {
                 Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
               }
-            )
+            ),
           ],
         );
       },
@@ -157,7 +157,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             }
-          )
+          ),
         ]
       ),
       body: Form(
@@ -212,7 +212,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                       _saveNeeded = true;
                     });
                   }
-                )
+                ),
               ]
             ),
             Column(
@@ -249,7 +249,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   const Text('All-day'),
                 ]
               )
-            )
+            ),
           ]
           .map<Widget>((Widget child) {
             return Container(

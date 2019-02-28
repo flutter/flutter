@@ -29,7 +29,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm')
-              )
+              ),
             ],
             onTap: (int index) {
               mutatedIndex = index;
@@ -57,7 +57,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm')
-              )
+              ),
             ]
           )
         )
@@ -404,7 +404,7 @@ void main() {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
                   title: Text('Alarm')
-                )
+                ),
               ]
             )
           )
@@ -432,7 +432,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm')
-              )
+              ),
             ]
           )
         )
@@ -458,7 +458,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm')
-              )
+              ),
             ]
           )
         )
@@ -495,7 +495,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
                 title: Text('Add')
-              )
+              ),
             ]
           )
         )
@@ -556,7 +556,7 @@ void main() {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
                   title: Text('Add')
-                )
+                ),
               ]
             )
           )
@@ -594,7 +594,7 @@ void main() {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
                   title: Text('Add')
-                )
+                ),
               ]
             )
           )
@@ -1168,7 +1168,7 @@ void main() {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-            )
+            ),
           ])));
     }, throwsA(isInstanceOf<AssertionError>()));
   });

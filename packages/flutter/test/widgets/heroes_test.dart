@@ -252,7 +252,7 @@ void main() {
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
               return FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
-            })
+            }),
           ]
         )
       )
@@ -344,7 +344,7 @@ void main() {
               )
             )
           );
-        }
+        },
       }
     ));
 

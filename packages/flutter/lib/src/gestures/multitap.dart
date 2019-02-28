@@ -230,7 +230,7 @@ class _TapGesture extends _TapTracker {
   _TapGesture({
     this.gestureRecognizer,
     PointerEvent event,
-    Duration longTapDelay
+    Duration longTapDelay,
   }) : _lastPosition = event.position,
        super(
     event: event,

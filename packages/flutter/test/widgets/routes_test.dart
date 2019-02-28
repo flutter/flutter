@@ -94,7 +94,7 @@ Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations
+  List<String> expectations,
 ) async {
   expect(host, isNotNull);
   test();

@@ -2008,7 +2008,7 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
-    this.builder
+    this.builder,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it

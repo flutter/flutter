@@ -318,7 +318,7 @@ void main() {
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
-      const SizedBox(width: 100.0)
+      const SizedBox(width: 100.0),
     ];
     await tester.pumpWidget(buildApp());
 
@@ -383,7 +383,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
@@ -438,7 +438,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopRight(title).dx, 620 + 48 + 48);

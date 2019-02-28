@@ -68,7 +68,7 @@ void main() {
           ),
           Container(
             child: const Text('2'),
-          )
+          ),
         ],
       )),
     );
