@@ -515,10 +515,16 @@ class PointerEnterEvent extends PointerEvent {
     synthesized: synthesized,
   );
 
+  /// Creates an enter event from a [PointerHoverEvent].
+  ///
+  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
+  @deprecated
+  PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
+
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
-  PointerEnterEvent.fromHoverEvent(PointerEvent event) : super(
+  PointerEnterEvent.fromMouseEvent(PointerEvent event) : super(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
@@ -602,10 +608,16 @@ class PointerExitEvent extends PointerEvent {
     synthesized: synthesized,
   );
 
+  /// Creates an exit event from a [PointerHoverEvent].
+  ///
+  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
+  @deprecated
+  PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
+
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
-  PointerExitEvent.fromHoverEvent(PointerEvent event) : super(
+  PointerExitEvent.fromMouseEvent(PointerEvent event) : super(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
