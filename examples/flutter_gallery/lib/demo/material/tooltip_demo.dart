@@ -39,8 +39,8 @@ class TooltipDemo extends StatelessWidget {
                       child: Icon(
                         Icons.call,
                         size: 18.0,
-                        color: theme.iconTheme.color
-                      )
+                        color: theme.iconTheme.color,
+                      ),
                     ),
                     Text(' icon.', style: theme.textTheme.subhead),
                   ]
@@ -55,21 +55,21 @@ class TooltipDemo extends StatelessWidget {
                       Scaffold.of(context).showSnackBar(const SnackBar(
                          content: Text('That was an ordinary tap.')
                       ));
-                    }
+                    },
                   )
                 ),
               ]
               .map<Widget>((Widget widget) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-                  child: widget
+                  child: widget,
                 );
               })
               .toList()
             ),
           );
         }
-      )
+      ),
     );
   }
 }

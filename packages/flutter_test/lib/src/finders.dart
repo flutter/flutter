@@ -308,7 +308,7 @@ abstract class Finder {
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
       WidgetsBinding.instance.renderViewElement,
-      skipOffstage: skipOffstage
+      skipOffstage: skipOffstage,
     );
   }
 

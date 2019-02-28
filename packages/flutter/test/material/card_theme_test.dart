@@ -132,7 +132,7 @@ void main() {
             child: Card(
               child: SizedBox.fromSize(size: const Size(200, 300),),
             )
-          )
+          ),
         )
       ),
     ));
@@ -153,7 +153,7 @@ CardTheme _cardTheme() {
     margin: EdgeInsets.all(7.0),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-    )
+    ),
   );
 }
 

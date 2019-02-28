@@ -142,9 +142,9 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
             Center(child: Text('LEFT CHILD')),
             Center(child: Text('RIGHT CHILD')),
           ]
-        )
-      )
-    )
+        ),
+      ),
+    ),
   );
 }
 
@@ -620,7 +620,7 @@ void main() {
             children: const <Widget>[
               Center(child: Text('LEFT CHILD')),
               Center(child: Text('RIGHT CHILD')),
-            ]
+            ],
           ),
         ),
       );
@@ -680,7 +680,7 @@ void main() {
               Center(child: Text('CHILD A')),
               Center(child: Text('CHILD B')),
               Center(child: Text('CHILD C')),
-            ]
+            ],
           ),
         ),
       );
@@ -1544,7 +1544,7 @@ void main() {
                         rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
-                    ]
+                    ],
                 ),
               ],
             ),
@@ -1808,7 +1808,7 @@ void main() {
                         rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
-                    ]
+                    ],
                 ),
               ],
             ),

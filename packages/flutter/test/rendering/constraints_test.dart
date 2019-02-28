@@ -18,8 +18,8 @@ void main() {
           heightFactor: 0.5,
           child: leaf = RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.expand()
-          )
-        )
+          ),
+        ),
       )
     );
     layout(root);

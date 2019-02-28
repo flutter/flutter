@@ -1206,7 +1206,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           information.writeln('This RenderObject has no descendants.');
         }
         information.writeAll(descendants, '\n');
-      }
+      },
     ));
   }
 
@@ -1570,7 +1570,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
             information.writeln(stack[targetFrame]);
           }
         }
-      }
+      },
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);

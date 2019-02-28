@@ -58,7 +58,7 @@ class AdjustableDropdownListTile extends StatelessWidget {
             }).toList(),
           ),
         ),
-      )
+      ),
     );
   }
 

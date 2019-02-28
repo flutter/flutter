@@ -175,7 +175,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
-      maxHeight: maxHeight ?? this.maxHeight
+      maxHeight: maxHeight ?? this.maxHeight,
     );
   }
 
@@ -191,7 +191,7 @@ class BoxConstraints extends Constraints {
       minWidth: deflatedMinWidth,
       maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
       minHeight: deflatedMinHeight,
-      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical)
+      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical),
     );
   }
 
@@ -202,7 +202,7 @@ class BoxConstraints extends Constraints {
       minWidth: 0.0,
       maxWidth: maxWidth,
       minHeight: 0.0,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -213,7 +213,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
       maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
       minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight)
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
     );
   }
 
@@ -233,7 +233,7 @@ class BoxConstraints extends Constraints {
       minWidth: minHeight,
       maxWidth: maxHeight,
       minHeight: minWidth,
-      maxHeight: maxWidth
+      maxHeight: maxWidth,
     );
   }
 
@@ -410,7 +410,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth * factor,
       maxWidth: maxWidth * factor,
       minHeight: minHeight * factor,
-      maxHeight: maxHeight * factor
+      maxHeight: maxHeight * factor,
     );
   }
 
@@ -420,7 +420,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth / factor,
       maxWidth: maxWidth / factor,
       minHeight: minHeight / factor,
-      maxHeight: maxHeight / factor
+      maxHeight: maxHeight / factor,
     );
   }
 
@@ -430,7 +430,7 @@ class BoxConstraints extends Constraints {
       minWidth: (minWidth ~/ factor).toDouble(),
       maxWidth: (maxWidth ~/ factor).toDouble(),
       minHeight: (minHeight ~/ factor).toDouble(),
-      maxHeight: (maxHeight ~/ factor).toDouble()
+      maxHeight: (maxHeight ~/ factor).toDouble(),
     );
   }
 
@@ -440,7 +440,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth % value,
       maxWidth: maxWidth % value,
       minHeight: minHeight % value,
-      maxHeight: maxHeight % value
+      maxHeight: maxHeight % value,
     );
   }
 
@@ -565,7 +565,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth,
       maxWidth: minWidth > maxWidth ? minWidth : maxWidth,
       minHeight: minHeight,
-      maxHeight: minHeight > maxHeight ? minHeight : maxHeight
+      maxHeight: minHeight > maxHeight ? minHeight : maxHeight,
     );
   }
 
@@ -1096,7 +1096,7 @@ abstract class RenderBox extends RenderObject {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
       return _cachedIntrinsicDimensions.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument)
+        () => computer(argument),
       );
     }
     return computer(argument);

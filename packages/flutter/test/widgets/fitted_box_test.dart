@@ -21,8 +21,8 @@ void main() {
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
+            ),
+          ),
         )
       )
     );
@@ -57,8 +57,8 @@ void main() {
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
+            ),
+          ),
         )
       )
     );
@@ -93,8 +93,8 @@ void main() {
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
+            ),
+          ),
         )
       )
     );
@@ -461,10 +461,10 @@ void main() {
                 child: Container(
                   key: key1,
                   color: const Color(0xFF000000),
-                )
-              )
-            )
-          )
+                ),
+              ),
+            ),
+          ),
         )
       )
     );

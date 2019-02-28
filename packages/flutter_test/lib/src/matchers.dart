@@ -1505,7 +1505,7 @@ class _CoversSameAreaAs extends Matcher {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
-          j * (areaToCompare.height / sampleSize)
+          j * (areaToCompare.height / sampleSize),
         );
 
         if (!_samplePoint(matchState, actualPath, offset))

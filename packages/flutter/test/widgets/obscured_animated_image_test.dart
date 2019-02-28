@@ -24,7 +24,7 @@ Future<void> main() async {
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
         routes: <String, WidgetBuilder> {
           '/page': (BuildContext context) => Container(),
-        }
+        },
       )
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));

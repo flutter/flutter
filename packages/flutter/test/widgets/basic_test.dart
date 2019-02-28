@@ -76,7 +76,7 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
+            ),
           )
         )
       );
@@ -106,7 +106,7 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
+            ),
           )
         )
       );
@@ -136,7 +136,7 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
+            ),
           )
         )
       );

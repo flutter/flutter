@@ -178,7 +178,7 @@ void main() {
 
     expect(
         tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 

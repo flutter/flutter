@@ -29,7 +29,7 @@ void main() {
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
-            }
+            },
           ),
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {

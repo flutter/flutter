@@ -126,7 +126,7 @@ void main() {
       ignoreId: true,
       ignoreRect: true,
       ignoreTransform: true,
-    )
+    ),
   );
 
     semantics.dispose();

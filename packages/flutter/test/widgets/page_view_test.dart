@@ -690,7 +690,7 @@ void main() {
               child: Text('Page #$i'),
               container: true,
             );
-          })
+          }),
         ),
     ));
     expect(controller.page, 0);

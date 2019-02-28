@@ -35,7 +35,7 @@ Future<void> buildApk({
     project: project,
     buildInfo: buildInfo,
     target: target,
-    isBuildingBundle: false
+    isBuildingBundle: false,
   );
   androidSdk.reinitialize();
 }

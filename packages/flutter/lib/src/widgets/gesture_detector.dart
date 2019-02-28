@@ -868,7 +868,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     Widget result = Listener(
       onPointerDown: _handlePointerDown,
       behavior: widget.behavior ?? _defaultBehavior,
-      child: widget.child
+      child: widget.child,
     );
     if (!widget.excludeFromSemantics)
       result = _GestureSemantics(owner: this, child: result);

@@ -109,7 +109,7 @@ class Tab extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 10.0),
           ),
           _buildLabelText(),
-        ]
+        ],
       );
     }
 
@@ -1388,7 +1388,7 @@ class TabPageSelector extends StatelessWidget {
             }).toList(),
           ),
         );
-      }
+      },
     );
   }
 }

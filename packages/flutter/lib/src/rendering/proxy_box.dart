@@ -339,7 +339,7 @@ class RenderLimitedBox extends RenderProxyBox {
       minWidth: constraints.minWidth,
       maxWidth: constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
       minHeight: constraints.minHeight,
-      maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight)
+      maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight),
     );
   }
 

@@ -563,7 +563,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
     );
   }
 
@@ -572,7 +572,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
     );
   }
 
@@ -581,7 +581,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
     );
   }
 
@@ -590,7 +590,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
     );
   }
 

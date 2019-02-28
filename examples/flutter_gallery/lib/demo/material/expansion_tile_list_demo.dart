@@ -28,11 +28,11 @@ class ExpansionTileListDemo extends StatelessWidget {
                // https://en.wikipedia.org/wiki/Free_Four
                ListTile(title: Text('Free')),
                ListTile(title: Text('Four')),
-             ]
+             ],
           ),
            const ListTile(title: Text('Bottom')),
         ]
-      )
+      ),
     );
   }
 }

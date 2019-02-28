@@ -2346,7 +2346,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       children.add(Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child: widget.selectButtonBuilder(context, _handleEnableSelect)
+        child: widget.selectButtonBuilder(context, _handleEnableSelect),
       ));
     }
     children.add(_InspectorOverlay(selection: selection));

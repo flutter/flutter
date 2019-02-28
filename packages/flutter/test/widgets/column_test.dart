@@ -25,7 +25,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -71,7 +71,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -115,7 +115,7 @@ void main() {
         children: <Widget>[
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -155,7 +155,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -201,7 +201,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -249,7 +249,7 @@ void main() {
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
           Container(key: child3Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -301,7 +301,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 20.0),
           Container(key: child1Key, width: 100.0, height: 20.0),
           Container(key: child2Key, width: 100.0, height: 20.0),
-        ]
+        ],
       )
     ));
 
@@ -341,7 +341,7 @@ void main() {
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
           Container(width: 100.0, height: 150.0),
-        ]
+        ],
       )
     ));
     RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
@@ -356,7 +356,7 @@ void main() {
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
           Container(width: 100.0, height: 150.0),
-        ]
+        ],
       )
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
@@ -377,10 +377,10 @@ void main() {
             Container(
               key: childKey,
               width: 100.0,
-              height: 100.0
+              height: 100.0,
             ),
-          ]
-        )
+          ],
+        ),
       )
     ));
 
@@ -409,7 +409,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -456,7 +456,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -501,7 +501,7 @@ void main() {
         children: <Widget>[
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -542,7 +542,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -589,7 +589,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -638,7 +638,7 @@ void main() {
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
           Container(key: child3Key, width: 100.0, height: 100.0),
-        ]
+        ],
       )
     ));
 
@@ -691,7 +691,7 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 20.0),
           Container(key: child1Key, width: 100.0, height: 20.0),
           Container(key: child2Key, width: 100.0, height: 20.0),
-        ]
+        ],
       )
     ));
 
@@ -732,7 +732,7 @@ void main() {
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
           Container(width: 100.0, height: 150.0),
-        ]
+        ],
       )
     ));
     RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
@@ -748,7 +748,7 @@ void main() {
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
           Container(width: 100.0, height: 150.0),
-        ]
+        ],
       )
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
@@ -770,10 +770,10 @@ void main() {
             Container(
               key: childKey,
               width: 100.0,
-              height: 100.0
+              height: 100.0,
             ),
-          ]
-        )
+          ],
+        ),
       )
     ));
 

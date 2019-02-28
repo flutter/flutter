@@ -36,7 +36,7 @@ Future<void> main() async {
       paints
         ..drawImageRect(image: rawImage)
         ..rect(color: Colors.black)
-        ..rect(color: Colors.white)
+        ..rect(color: Colors.white),
     );
   });
 
@@ -57,7 +57,7 @@ Future<void> main() async {
       paints
         ..path(color: Color(Colors.blue.value))
         ..rect(color: Colors.black)
-        ..rect(color: Colors.white)
+        ..rect(color: Colors.white),
     );
   });
 

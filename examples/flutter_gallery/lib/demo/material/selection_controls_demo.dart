@@ -63,7 +63,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
     return TabbedComponentDemoScaffold(
       title: 'Selection controls',
-      demos: demos
+      demos: demos,
     );
   }
 
@@ -122,10 +122,10 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Checkbox(value: true, onChanged: null),
               Checkbox(value: false, onChanged: null),
               Checkbox(value: null, tristate: true, onChanged: null),
-            ]
+            ],
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -141,19 +141,19 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Radio<int>(
                 value: 0,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               ),
               Radio<int>(
                 value: 1,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               ),
               Radio<int>(
                 value: 2,
                 groupValue: radioValue,
-                onChanged: handleRadioValueChanged
+                onChanged: handleRadioValueChanged,
               ),
-            ]
+            ],
           ),
           // Disabled radio buttons
           Row(
@@ -162,22 +162,22 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               Radio<int>(
                 value: 0,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               ),
               Radio<int>(
                 value: 1,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               ),
               Radio<int>(
                 value: 2,
                 groupValue: 0,
-                onChanged: null
+                onChanged: null,
               ),
-            ]
+            ],
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -193,7 +193,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
               setState(() {
                 switchValue = value;
               });
-            }
+            },
           ),
           // Disabled switches
           const Switch.adaptive(value: true, onChanged: null),

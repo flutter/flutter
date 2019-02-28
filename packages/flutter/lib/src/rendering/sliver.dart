@@ -724,7 +724,7 @@ class SliverGeometry extends Diagnosticable {
         verify(false,
           'The "maxPaintExtent" is less than the "paintExtent".\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
-          'By definition, a sliver can\'t paint more than the maximum that it can paint!'
+          'By definition, a sliver can\'t paint more than the maximum that it can paint!',
         );
       }
       verify(hitTestExtent != null, 'The "hitTestExtent" is null.');
@@ -1173,7 +1173,7 @@ abstract class RenderSliver extends RenderObject {
         result.add(SliverHitTestEntry(
           this,
           mainAxisPosition: mainAxisPosition,
-          crossAxisPosition: crossAxisPosition
+          crossAxisPosition: crossAxisPosition,
         ));
         return true;
       }
@@ -1369,7 +1369,7 @@ abstract class RenderSliver extends RenderObject {
           ..moveTo(p1.dx - dx1, p1.dy - dy1)
           ..lineTo(p1.dx, p1.dy)
           ..lineTo(p1.dx - dx2, p1.dy - dy2),
-        paint
+        paint,
       );
       return true;
     }());

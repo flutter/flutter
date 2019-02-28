@@ -86,7 +86,7 @@ class TabController extends ChangeNotifier {
       _animationController = length < 2 ? null : AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
-        vsync: vsync
+        vsync: vsync,
       );
 
   /// An animation whose value represents the current position of the [TabBar]'s

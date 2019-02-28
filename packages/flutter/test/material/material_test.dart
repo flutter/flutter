@@ -349,7 +349,7 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.canvas,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
         )
       );
 
@@ -611,7 +611,7 @@ void main() {
                   ),
                 ),
               ),
-            )
+            ),
           )
         ),
       ));
@@ -652,7 +652,7 @@ void main() {
                   ),
                 ),
               ),
-            )
+            ),
           )
         ),
       ));

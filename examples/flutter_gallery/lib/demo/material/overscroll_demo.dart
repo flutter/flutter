@@ -36,8 +36,8 @@ class OverscrollDemoState extends State<OverscrollDemo> {
            label: 'RETRY',
            onPressed: () {
              _refreshIndicatorKey.currentState.show();
-           }
-         )
+           },
+         ),
        ));
     });
   }
@@ -55,9 +55,9 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
-            }
+            },
           ),
-        ]
+        ],
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,

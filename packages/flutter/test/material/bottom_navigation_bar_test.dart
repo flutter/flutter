@@ -24,16 +24,16 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
             ],
             onTap: (int index) {
               mutatedIndex = index;
-            }
+            },
           )
         )
       )
@@ -52,11 +52,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
             ]
           )
@@ -92,9 +92,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
-        )
+        ),
       )
     );
 
@@ -128,7 +128,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -171,9 +171,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
-        )
+        ),
       )
     );
 
@@ -220,9 +220,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
-        )
+        ),
       )
     );
 
@@ -247,7 +247,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -275,7 +275,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -304,7 +304,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -353,7 +353,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -380,7 +380,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -399,15 +399,15 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
+                  title: Text('Alarm'),
                 ),
               ]
             )
-          )
+          ),
         )
       )
     );
@@ -427,13 +427,13 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -453,13 +453,13 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -482,21 +482,21 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_time),
-                title: Text('Time')
+                title: Text('Time'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
-                title: Text('Add')
+                title: Text('Add'),
               ),
-            ]
+            ],
           )
         )
       )
@@ -543,24 +543,24 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
+                  title: Text('Alarm'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time')
+                  title: Text('Time'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add')
+                  title: Text('Add'),
                 ),
-              ]
+              ],
             )
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -581,24 +581,24 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
+                  title: Text('Alarm'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time')
+                  title: Text('Time'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add')
+                  title: Text('Add'),
                 ),
-              ]
+              ],
             )
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -815,7 +815,7 @@ void main() {
           ..restore()
           ..circle(x: 200.0)
           ..translate(x: 400.0)
-          ..circle(x: 200.0)
+          ..circle(x: 200.0),
     );
   });
 

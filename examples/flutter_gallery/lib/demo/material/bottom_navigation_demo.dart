@@ -96,7 +96,7 @@ class CustomInactiveIcon extends StatelessWidget {
       height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
         border: Border.all(color: iconTheme.color, width: 2.0),
-      )
+      ),
     );
   }
 }

@@ -432,7 +432,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
-            )
+            ),
           )
         )
       )
@@ -520,7 +520,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
-            )
+            ),
           )
         )
       );

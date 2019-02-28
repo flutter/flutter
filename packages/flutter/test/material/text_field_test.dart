@@ -207,7 +207,7 @@ void main() {
           ),
           onChanged: (String value) {
             textFieldValue = value;
-          }
+          },
         ),
       )
     );
@@ -1880,7 +1880,7 @@ void main() {
           children: <Widget>[
             TextField(
               key: key1,
-              controller: controller1
+              controller: controller1,
             ),
             TextField(key: key2),
           ],
@@ -4582,7 +4582,7 @@ void main() {
           position: offset,
           pressure: 0.0,
           pressureMax: 6.0,
-          pressureMin: 0.0
+          pressureMin: 0.0,
       ),
     );
     await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
@@ -4622,7 +4622,7 @@ void main() {
         position: offset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
 

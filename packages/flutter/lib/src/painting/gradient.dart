@@ -32,7 +32,7 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
   assert(index != -1);
   return Color.lerp(
       colors[index], colors[index + 1],
-      (t - stops[index]) / (stops[index + 1] - stops[index])
+      (t - stops[index]) / (stops[index + 1] - stops[index]),
   );
 }
 
@@ -624,7 +624,7 @@ class RadialGradient extends Gradient {
       stops: stops,
       tileMode: tileMode,
       focal: focal,
-      focalRadius: focalRadius
+      focalRadius: focalRadius,
     );
   }
 

@@ -582,7 +582,7 @@ class _PageViewState extends State<PageView> {
             slivers: <Widget>[
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate
+                delegate: widget.childrenDelegate,
               ),
             ],
           );

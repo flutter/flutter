@@ -95,7 +95,7 @@ class Daemon {
       onDone: () {
         if (!_onExitCompleter.isCompleted)
           _onExitCompleter.complete(0);
-      }
+      },
     );
   }
 

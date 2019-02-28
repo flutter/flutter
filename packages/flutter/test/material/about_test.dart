@@ -26,7 +26,7 @@ void main() {
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
-                  ]
+                  ],
                 ),
               ],
             ),

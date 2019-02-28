@@ -24,7 +24,7 @@ void main() {
           child: AnimatedIcon(
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-          )
+          ),
         ),
       ),
     );
@@ -46,7 +46,7 @@ void main() {
           child: AnimatedIcon(
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-          )
+          ),
         ),
       ),
     );
@@ -68,7 +68,7 @@ void main() {
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             color: Color(0xFF0000FF),
-          )
+          ),
         ),
       ),
     );
@@ -90,7 +90,7 @@ void main() {
           child: AnimatedIcon(
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-          )
+          ),
         ),
       ),
     );
@@ -114,7 +114,7 @@ void main() {
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             size: 96.0,
-          )
+          ),
         ),
       ),
     );
@@ -156,7 +156,7 @@ void main() {
           child: AnimatedIcon(
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-          )
+          ),
         ),
       ),
     );
@@ -180,7 +180,7 @@ void main() {
           child: AnimatedIcon(
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-          )
+          ),
         ),
       ),
     );
@@ -203,7 +203,7 @@ void main() {
             progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             textDirection: TextDirection.rtl,
-          )
+          ),
         ),
       ),
     );

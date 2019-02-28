@@ -51,7 +51,7 @@ class StocksAppState extends State<StocksApp> {
     debugShowPointers: false,
     debugShowRainbow: false,
     showPerformanceOverlay: false,
-    showSemanticsDebugger: false
+    showSemanticsDebugger: false,
   );
 
   @override
@@ -71,12 +71,12 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.optimistic:
         return ThemeData(
           brightness: Brightness.light,
-          primarySwatch: Colors.purple
+          primarySwatch: Colors.purple,
         );
       case StockMode.pessimistic:
         return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent
+          accentColor: Colors.redAccent,
         );
     }
     assert(_configuration.stockMode != null);

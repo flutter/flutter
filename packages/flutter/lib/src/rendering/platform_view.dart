@@ -610,7 +610,7 @@ class _MotionEventsDispatcher {
         deviceId: 0,
         edgeFlags: 0,
         source: 0,
-        flags: 0
+        flags: 0,
     );
     viewController.sendMotionEvent(androidMotionEvent);
   }
@@ -626,7 +626,7 @@ class _MotionEventsDispatcher {
         touchMajor: event.radiusMajor,
         touchMinor: event.radiusMinor,
         x: position.dx,
-        y: position.dy
+        y: position.dy,
     );
   }
 

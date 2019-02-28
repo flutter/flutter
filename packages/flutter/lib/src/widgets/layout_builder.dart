@@ -232,7 +232,7 @@ FlutterErrorDetails _debugReportException(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

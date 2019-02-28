@@ -379,7 +379,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
               'exception was thrown), this was the stack:'
             );
             FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-          }
+          },
         ));
       }
       return _taskQueue.isNotEmpty;
@@ -488,7 +488,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
               information.writeln('── callback $id ──');
               FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
-          }
+          },
         ));
       }
       return true;
@@ -1001,7 +1001,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
             'exception was thrown), this was the stack:'
           );
           FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-        }
+        },
       ));
     }
     assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());

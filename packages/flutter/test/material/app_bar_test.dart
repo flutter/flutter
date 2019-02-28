@@ -154,7 +154,7 @@ void main() {
             centerTitle: true,
             title: const Text('X'),
           )
-        )
+        ),
       )
     );
 
@@ -878,7 +878,7 @@ void main() {
             data: topPadding100,
             child: Scaffold(
               primary: true,
-              appBar: AppBar(title: const Text('title'))
+              appBar: AppBar(title: const Text('title')),
           ),
         ),
       ),

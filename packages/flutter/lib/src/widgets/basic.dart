@@ -984,7 +984,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
       clipBehavior: clipBehavior,
       elevation: elevation,
       color: color,
-      shadowColor: shadowColor
+      shadowColor: shadowColor,
     );
   }
 
@@ -1182,7 +1182,7 @@ class Transform extends SingleChildRenderObjectWidget {
       origin: origin,
       alignment: alignment,
       textDirection: Directionality.of(context),
-      transformHitTests: transformHitTests
+      transformHitTests: transformHitTests,
     );
   }
 
@@ -2280,7 +2280,7 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   RenderLimitedBox createRenderObject(BuildContext context) {
     return RenderLimitedBox(
       maxWidth: maxWidth,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -5252,7 +5252,7 @@ class Listener extends SingleChildRenderObjectWidget {
       onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
-      behavior: behavior
+      behavior: behavior,
     );
   }
 
@@ -5418,7 +5418,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   RenderIgnorePointer createRenderObject(BuildContext context) {
     return RenderIgnorePointer(
       ignoring: ignoring,
-      ignoringSemantics: ignoringSemantics
+      ignoringSemantics: ignoringSemantics,
     );
   }
 
@@ -5526,7 +5526,7 @@ class MetaData extends SingleChildRenderObjectWidget {
   RenderMetaData createRenderObject(BuildContext context) {
     return RenderMetaData(
       metaData: metaData,
-      behavior: behavior
+      behavior: behavior,
     );
   }
 

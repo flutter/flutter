@@ -361,7 +361,7 @@ class AlertDialog extends StatelessWidget {
       dialogChild = Semantics(
         namesRoute: true,
         label: label,
-        child: dialogChild
+        child: dialogChild,
       );
 
     return Dialog(
@@ -430,7 +430,7 @@ class SimpleDialogOption extends StatelessWidget {
       onTap: onPressed,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
-        child: child
+        child: child,
       ),
     );
   }
@@ -595,7 +595,7 @@ class SimpleDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: Semantics(namesRoute: true, child: title),
-        )
+        ),
       ));
     } else {
       switch (defaultTargetPlatform) {

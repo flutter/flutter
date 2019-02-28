@@ -189,7 +189,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        child: Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -452,9 +452,9 @@ void main() {
                       Container(height: 80.0, child: text),
                       Container(height: 70.0, child: text),
                     ],
-                  )
+                  ),
               ),
-            )
+            ),
         )
     );
 
@@ -483,7 +483,7 @@ void main() {
                                   child: const Text('hey'),
                                 )).childrenDelegate),
                       ],
-                    )
+                    ),
                 )
             )
         )

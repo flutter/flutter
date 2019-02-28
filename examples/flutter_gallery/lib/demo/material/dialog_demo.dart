@@ -102,21 +102,21 @@ class DialogDemoState extends State<DialogDemo> {
                 child: AlertDialog(
                   content: Text(
                     _alertWithoutTitleText,
-                    style: dialogTextStyle
+                    style: dialogTextStyle,
                   ),
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('CANCEL'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
                     FlatButton(
                       child: const Text('DISCARD'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
-                  ]
-                )
+                  ],
+                ),
               );
-            }
+            },
           ),
           RaisedButton(
             child: const Text('ALERT WITH TITLE'),
@@ -127,21 +127,21 @@ class DialogDemoState extends State<DialogDemo> {
                   title: const Text('Use Google\'s location service?'),
                   content: Text(
                     _alertWithTitleText,
-                    style: dialogTextStyle
+                    style: dialogTextStyle,
                   ),
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('DISAGREE'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
                     FlatButton(
                       child: const Text('AGREE'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
-                  ]
-                )
+                  ],
+                ),
               );
-            }
+            },
           ),
           RaisedButton(
             child: const Text('SIMPLE'),
@@ -155,30 +155,30 @@ class DialogDemoState extends State<DialogDemo> {
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'username@gmail.com',
-                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); }
+                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'user02@gmail.com',
-                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); }
+                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.add_circle,
                       text: 'add account',
-                      color: theme.disabledColor
+                      color: theme.disabledColor,
                     ),
-                  ]
-                )
+                  ],
+                ),
               );
-            }
+            },
           ),
           RaisedButton(
             child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
                 context: context,
-                initialTime: _selectedTime
+                initialTime: _selectedTime,
               )
               .then<void>((TimeOfDay value) {
                 if (value != null && value != _selectedTime) {
@@ -188,7 +188,7 @@ class DialogDemoState extends State<DialogDemo> {
                   ));
                 }
               });
-            }
+            },
           ),
           RaisedButton(
             child: const Text('FULLSCREEN'),
@@ -197,18 +197,18 @@ class DialogDemoState extends State<DialogDemo> {
                 builder: (BuildContext context) => FullScreenDialogDemo(),
                 fullscreenDialog: true,
               ));
-            }
+            },
           ),
         ]
         // Add a little space between the buttons
         .map<Widget>((Widget button) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: button
+            child: button,
           );
         })
-        .toList()
-      )
+        .toList(),
+      ),
     );
   }
 }

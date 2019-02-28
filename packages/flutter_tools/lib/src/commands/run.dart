@@ -47,7 +47,7 @@ abstract class RunCommandBase extends FlutterCommand {
               'compiler up to that point. This file can be used in subsequent --dynamic builds '
               'to precompile some code by the offline compiler. '
               'This flag is only allowed when running as --dynamic --profile (recommended) or '
-              '--debug (may include unwanted debug symbols).'
+              '--debug (may include unwanted debug symbols).',
       )
       ..addOption('target-platform',
         defaultsTo: 'default',

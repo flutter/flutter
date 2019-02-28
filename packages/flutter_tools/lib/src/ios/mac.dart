@@ -388,7 +388,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
+      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
@@ -499,7 +499,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
-    allowReentrantFlutter: true
+    allowReentrantFlutter: true,
   );
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');

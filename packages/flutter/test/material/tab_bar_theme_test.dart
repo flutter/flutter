@@ -101,7 +101,7 @@ void main() {
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
           ),
-        )
+        ),
       ),
     );
 
@@ -168,7 +168,7 @@ void main() {
     final TabBarTheme tabBarTheme = TabBarTheme(
       indicator: ShapeDecoration(
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        color: Colors.black
+        color: Colors.black,
       ),
     );
 

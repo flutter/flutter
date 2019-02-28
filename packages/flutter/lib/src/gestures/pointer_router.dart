@@ -83,7 +83,7 @@ class PointerRouter {
         informationCollector: (StringBuffer information) {
           information.writeln('Event:');
           information.write('  $event');
-        }
+        },
       ));
     }
   }

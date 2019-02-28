@@ -109,8 +109,8 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description,
-                      style: Theme.of(context).textTheme.subhead
-                    )
+                      style: Theme.of(context).textTheme.subhead,
+                    ),
                   ),
                   Expanded(child: demo.demoWidget),
                 ],
@@ -168,9 +168,9 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
               style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
               children: <TextSpan>[
                 DartSyntaxHighlighter(style).format(_exampleCode),
-              ]
+              ],
             )
-          )
+          ),
         )
       );
     }
@@ -182,11 +182,11 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
             Icons.clear,
             semanticLabel: 'Close',
           ),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
-        title: const Text('Example code')
+        title: const Text('Example code'),
       ),
-      body: body
+      body: body,
     );
   }
 }
@@ -207,7 +207,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.library_books),
       tooltip: 'API documentation',
-      onPressed: () => launch(documentationUrl, forceWebView: true)
+      onPressed: () => launch(documentationUrl, forceWebView: true),
     );
   }
 }
@@ -231,7 +231,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl, forceWebView: true)
+      onPressed: () => launch(documentationUrl, forceWebView: true),
     );
   }
 }

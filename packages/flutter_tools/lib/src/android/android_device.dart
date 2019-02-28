@@ -634,7 +634,7 @@ void parseADBDeviceOutput(
           deviceID,
           productID: info['product'],
           modelID: info['model'] ?? deviceID,
-          deviceCodeName: info['device']
+          deviceCodeName: info['device'],
         ));
       }
     } else {
@@ -651,7 +651,7 @@ class _AdbLogReader extends DeviceLogReader {
   _AdbLogReader(this.device) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
   }
 

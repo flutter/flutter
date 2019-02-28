@@ -28,7 +28,7 @@ void main() {
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
@@ -218,7 +218,7 @@ void main() {
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
@@ -236,7 +236,7 @@ void main() {
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
@@ -354,7 +354,7 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
-            }
+            },
           ),
         ),
       ),

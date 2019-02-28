@@ -465,7 +465,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
           exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         );
       } else {
         reportExceptionNoticed(details); // mostly this is just a hook for the LiveTestWidgetsFlutterBinding
@@ -487,7 +487,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           exception: exception,
           stack: _unmangle(stack),
           context: 'running a test (but after the test had completed)',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         ), forceReport: true);
         return;
       }
@@ -544,7 +544,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           }
           if (description.isNotEmpty)
             information.writeln('The test description was:\n$description');
-        }
+        },
       ));
       assert(_parentZone != null);
       assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
@@ -1361,7 +1361,7 @@ class TestViewConfiguration extends ViewConfiguration {
     final Matrix4 matrix = Matrix4.compose(
       Vector3(shiftX, shiftY, 0.0), // translation
       Quaternion.identity(), // rotation
-      Vector3(scale, scale, 1.0) // scale
+      Vector3(scale, scale, 1.0), // scale
     );
     return matrix;
   }

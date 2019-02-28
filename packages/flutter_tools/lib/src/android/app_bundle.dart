@@ -44,6 +44,6 @@ Future<void> buildAppBundle({
     project: project,
     buildInfo: buildInfo,
     target: target,
-    isBuildingBundle: true
+    isBuildingBundle: true,
   );
 }

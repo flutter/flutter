@@ -21,7 +21,7 @@ void main() {
             return Center(
               child: Text('storedValue: $storedValue')
             );
-          }
+          },
         )
       )
     );
@@ -51,7 +51,7 @@ void main() {
             return Center(
               child: Text('storedValue: $storedValue')
             );
-          }
+          },
         )
       );
     }

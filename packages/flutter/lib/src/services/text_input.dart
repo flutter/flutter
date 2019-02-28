@@ -543,7 +543,7 @@ class TextEditingValue {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -566,7 +566,7 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
 }
 

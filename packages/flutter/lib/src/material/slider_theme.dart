@@ -1040,7 +1040,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         offset: offset,
         sliderTheme: sliderTheme,
         isEnabled: isEnabled,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx - horizontalAdjustment, trackRect.bottom);
     context.canvas.drawRect(leftTrackSegment, leftTrackPaint);

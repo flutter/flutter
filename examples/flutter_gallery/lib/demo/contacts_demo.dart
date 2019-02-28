@@ -30,7 +30,7 @@ class _ContactCategory extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 width: 72.0,
-                child: Icon(icon, color: themeData.primaryColor)
+                child: Icon(icon, color: themeData.primaryColor),
               ),
               Expanded(child: Column(children: children)),
             ],
@@ -61,7 +61,7 @@ class _ContactItem extends StatelessWidget {
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: columnChildren
+          children: columnChildren,
         )
       ),
     ];
@@ -71,8 +71,8 @@ class _ContactItem extends StatelessWidget {
         child: IconButton(
           icon: Icon(icon),
           color: themeData.primaryColor,
-          onPressed: onPressed
-        )
+          onPressed: onPressed,
+        ),
       ));
     }
     return MergeSemantics(
@@ -80,8 +80,8 @@ class _ContactItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: rowChildren
-        )
+          children: rowChildren,
+        ),
       ),
     );
   }
@@ -138,19 +138,19 @@ class ContactsDemoState extends State<ContactsDemo> {
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
-                      child: Text('App bar scrolls away')
+                      child: Text('App bar scrolls away'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.pinned,
-                      child: Text('App bar stays put')
+                      child: Text('App bar stays put'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
-                      child: Text('App bar floats')
+                      child: Text('App bar floats'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.snapping,
-                      child: Text('App bar snaps')
+                      child: Text('App bar snaps'),
                     ),
                   ],
                 ),

@@ -1311,7 +1311,7 @@ class Isolate extends ServiceObjectOwner {
       'ext.flutter.evict',
       params: <String, dynamic>{
         'value': assetPath,
-      }
+      },
     );
   }
 

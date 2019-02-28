@@ -55,7 +55,7 @@ void main() {
       brightness: Brightness.dark,
       textTheme: CupertinoTextThemeData(
         textStyle: TextStyle(color: CupertinoColors.black),
-      )
+      ),
     ));
 
     // The brightness still cascaded down to the background color.

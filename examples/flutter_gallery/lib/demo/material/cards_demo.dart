@@ -215,7 +215,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                             Icons.check_circle,
                             color: _isSelected ? colorScheme.primary : Colors.transparent,
                           ),
-                        )
+                        ),
                       ),
                     ],
                   ),
@@ -408,8 +408,8 @@ class _CardsDemoState extends State<CardsDemo> {
             margin: const EdgeInsets.only(bottom: 8.0),
             child: child,
           );
-        }).toList()
-      )
+        }).toList(),
+      ),
     );
   }
 }

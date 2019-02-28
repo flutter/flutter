@@ -205,7 +205,7 @@ ThemeData _themeData() {
     primaryColor: Colors.purple,
     brightness: Brightness.dark,
     primaryIconTheme: const IconThemeData(color: Colors.green),
-    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink))
+    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink)),
   );
 }
 

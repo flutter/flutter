@@ -1639,7 +1639,7 @@ void main() {
         of: find.byType(RawChip),
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
-        })
+        }),
       )
     );
     const Color selectScrimColor = Color(0x60191919);

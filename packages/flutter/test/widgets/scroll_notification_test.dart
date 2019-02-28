@@ -18,7 +18,7 @@ void main() {
       },
       child: const SingleChildScrollView(
         child: SizedBox(height: 1200.0)
-      )
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));

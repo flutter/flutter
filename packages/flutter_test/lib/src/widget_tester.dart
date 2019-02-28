@@ -87,7 +87,7 @@ void testWidgets(
       );
     },
     skip: skip,
-    timeout: timeout
+    timeout: timeout,
   );
 }
 

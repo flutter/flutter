@@ -96,10 +96,10 @@ class ModalBarrier extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color,
                 )
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       )
     );
   }

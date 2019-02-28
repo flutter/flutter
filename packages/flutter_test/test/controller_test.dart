@@ -250,7 +250,7 @@ class WidgetControllerSpy extends WidgetController {
       pointer: pointer ?? _getNextPointer(),
       kind: kind,
       dispatcher: sendEventToBinding,
-      hitTester: hitTestOnBinding
+      hitTester: hitTestOnBinding,
     );
   }
 }

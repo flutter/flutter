@@ -30,13 +30,13 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         Container(height: 100.0, width: 100.0),
         FlatButton(
           child: const Text('two'),
-          onPressed: () { Navigator.pushNamed(context, '/two'); }
+          onPressed: () { Navigator.pushNamed(context, '/two'); },
         ),
         FlatButton(
           child: const Text('twoInset'),
-          onPressed: () { Navigator.pushNamed(context, '/twoInset'); }
+          onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
         ),
-      ]
+      ],
     )
   ),
   '/two': (BuildContext context) => Material(
@@ -45,7 +45,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       children: <Widget>[
         FlatButton(
           child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
         Container(height: 150.0, width: 150.0),
         Card(child: Hero(
@@ -58,7 +58,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
-      ]
+      ],
     )
   ),
   // This route is the same as /two except that Hero 'a' is shifted to the right by
@@ -71,7 +71,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       children: <Widget>[
         FlatButton(
           child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
         Container(height: 150.0, width: 150.0),
         Card(
@@ -81,7 +81,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
               tag: 'a',
               transitionOnUserGestures: transitionFromUserGestures,
               child: Container(height: 150.0, width: 150.0, key: secondKey),
-            )
+            ),
           ),
         ),
         Container(height: 150.0, width: 150.0),
@@ -89,7 +89,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
-      ]
+      ],
     )
   ),
 };
@@ -104,7 +104,7 @@ class ThreeRoute extends MaterialPageRoute<void> {
           Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
           Container(height: 200.0, width: 200.0),
         ]
-      )
+      ),
     );
   });
 }
@@ -285,25 +285,25 @@ void main() {
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.25) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.25) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.50) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.50) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.75) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.75) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(1.0) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(1.0) * deltaHeight + initialHeight, epsilon),
     );
   });
 
@@ -321,9 +321,9 @@ void main() {
             child: Container(
               width: 100.0,
               height: 100.0,
-              child: const Text('foo')
-            )
-          )
+              child: const Text('foo'),
+            ),
+          ),
         )
       ),
       routes: <String, WidgetBuilder>{
@@ -339,13 +339,13 @@ void main() {
                 child: Container(
                   width: 100.0,
                   height: 150.0,
-                  child: const Text('bar')
-                )
-              )
-            )
+                  child: const Text('bar'),
+                ),
+              ),
+            ),
           );
         },
-      }
+      },
     ));
 
     expect(log, isEmpty);
@@ -627,7 +627,7 @@ void main() {
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ],
           )
@@ -648,7 +648,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -721,11 +721,11 @@ void main() {
               // This container will appear at Y=100
               Container(
                 key: routeContainerKey,
-                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0))
+                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
               const SizedBox(height: 600.0),
             ],
@@ -749,7 +749,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                   const SizedBox(height: 600.0),
                 ],
@@ -804,7 +804,7 @@ void main() {
               // This container will appear at Y=100
               Container(
                 key: routeContainerKey,
-                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0))
+                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -828,7 +828,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -902,7 +902,7 @@ void main() {
               ),
               FlatButton(
                 child: const Text('PUSH C'),
-                onPressed: () { Navigator.push(context, routeC); }
+                onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
                 child: Hero(tag: 'BC', child: Container(height: 150.0))
@@ -929,7 +929,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH B'),
-                    onPressed: () { Navigator.push(context, routeB); }
+                    onPressed: () { Navigator.push(context, routeB); },
                   ),
                 ],
               );
@@ -990,7 +990,7 @@ void main() {
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ],
           )
@@ -1016,7 +1016,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -1073,9 +1073,9 @@ void main() {
             ),
             FlatButton(
               child: const Text('two'),
-              onPressed: () { Navigator.pushNamed(context, '/two'); }
+              onPressed: () { Navigator.pushNamed(context, '/two'); },
             ),
-          ]
+          ],
         )
       ),
       '/two': (BuildContext context) => Material(
@@ -1086,7 +1086,7 @@ void main() {
               height: 200.0,
               child: FlatButton(
                 child: const Text('pop'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ),
             Hero(

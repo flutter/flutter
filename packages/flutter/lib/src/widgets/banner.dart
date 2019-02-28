@@ -21,7 +21,7 @@ const TextStyle _kTextStyle = TextStyle(
   color: Color(0xFFFFFFFF),
   fontSize: _kHeight * 0.85,
   fontWeight: FontWeight.w900,
-  height: 1.0
+  height: 1.0,
 );
 
 /// Where to show a [Banner].

@@ -56,14 +56,14 @@ class CardCollectionState extends State<CardCollection> {
       (int i) {
         _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
         return _cardModels[i];
-      }
+      },
     );
   }
 
   void _initVariableSizedCardModels() {
     _cardModels = List<CardModel>.generate(
       _cardHeights.length,
-      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i])
+      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i]),
     );
   }
 

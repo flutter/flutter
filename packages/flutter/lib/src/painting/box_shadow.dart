@@ -65,7 +65,7 @@ class BoxShadow extends ui.Shadow {
       color: color,
       offset: offset * factor,
       blurRadius: blurRadius * factor,
-      spreadRadius: spreadRadius * factor
+      spreadRadius: spreadRadius * factor,
     );
   }
 

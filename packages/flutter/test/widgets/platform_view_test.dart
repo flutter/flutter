@@ -66,7 +66,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 
@@ -318,7 +318,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -366,7 +366,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -414,7 +414,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          0
+          0,
       );
     });
 
@@ -984,7 +984,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 

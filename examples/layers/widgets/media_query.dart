@@ -49,10 +49,10 @@ class AdaptedGridItem extends StatelessWidget {
                 ),
                 const IconButton(
                   icon: Icon(Icons.more_vert),
-                  onPressed: null
+                  onPressed: null,
                 ),
               ]
-            )
+            ),
           ),
         ]
       )
@@ -101,7 +101,7 @@ void main() {
       appBar: AppBar(
         title: const Text('Media Query Example')
       ),
-      body: Material(child: AdaptiveContainer(names: _kNames))
-    )
+      body: Material(child: AdaptiveContainer(names: _kNames)),
+    ),
   ));
 }

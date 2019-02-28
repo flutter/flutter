@@ -277,7 +277,7 @@ abstract class ImageProvider<T> {
           if (obtainedKey != null) {
             information.writeln('Image key: $obtainedKey');
           }
-        }
+        },
       );
     }
 
@@ -435,7 +435,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -492,7 +492,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -565,7 +565,7 @@ class FileImage extends ImageProvider<FileImage> {
       scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
-      }
+      },
     );
   }
 
@@ -630,7 +630,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ImageStreamCompleter load(MemoryImage key) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
-      scale: key.scale
+      scale: key.scale,
     );
   }
 
@@ -772,7 +772,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<AssetBundleImageKey>(AssetBundleImageKey(
       bundle: bundle ?? configuration.bundle ?? rootBundle,
       name: keyName,
-      scale: scale
+      scale: scale,
     ));
   }
 

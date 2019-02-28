@@ -33,7 +33,7 @@ void main() {
           'text': 'hi',
           'number': 11,
         },
-      }
+      },
     );
     expect(
       TestSemanticsEvent(text: 'hi', number: 11).toMap(nodeId: 123),
@@ -44,7 +44,7 @@ void main() {
           'text': 'hi',
           'number': 11,
         },
-      }
+      },
     );
   });
 }

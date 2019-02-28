@@ -63,7 +63,7 @@ class StockConfiguration {
       debugShowPointers: debugShowPointers ?? this.debugShowPointers,
       debugShowRainbow: debugShowRainbow ?? this.debugShowRainbow,
       showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
-      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger
+      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger,
     );
   }
 }

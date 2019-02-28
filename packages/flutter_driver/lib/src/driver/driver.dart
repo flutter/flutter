@@ -322,7 +322,7 @@ class FlutterDriver {
         message: 'Flutter Driver extension is taking a long time to become available. '
                  'Ensure your test app (often "lib/main.dart") imports '
                  '"package:flutter_driver/driver_extension.dart" and '
-                 'calls enableFlutterDriverExtension() as the first call in main().'
+                 'calls enableFlutterDriverExtension() as the first call in main().',
       );
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
                isolate.pauseEvent is VMPauseBreakpointEvent ||

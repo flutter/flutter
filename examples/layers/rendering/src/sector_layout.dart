@@ -62,7 +62,7 @@ class SectorDimensions {
   ) {
     return SectorDimensions(
       deltaRadius: constraints.constrainDeltaRadius(deltaRadius),
-      deltaTheta: constraints.constrainDeltaTheta(deltaTheta)
+      deltaTheta: constraints.constrainDeltaTheta(deltaTheta),
     );
   }
 
@@ -263,7 +263,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     while (child != null) {
       final SectorConstraints innerConstraints = SectorConstraints(
         maxDeltaRadius: innerDeltaRadius,
-        maxDeltaTheta: remainingDeltaTheta
+        maxDeltaTheta: remainingDeltaTheta,
       );
       final SectorDimensions childDimensions = child.getIntrinsicDimensions(innerConstraints, childRadius);
       innerTheta += childDimensions.deltaTheta;
@@ -294,7 +294,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     while (child != null) {
       final SectorConstraints innerConstraints = SectorConstraints(
         maxDeltaRadius: innerDeltaRadius,
-        maxDeltaTheta: remainingDeltaTheta
+        maxDeltaTheta: remainingDeltaTheta,
       );
       assert(child.parentData is SectorParentData);
       child.parentData.theta = innerTheta;
@@ -377,7 +377,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     while (child != null) {
       final SectorConstraints innerConstraints = SectorConstraints(
         maxDeltaRadius: remainingDeltaRadius,
-        maxDeltaTheta: innerDeltaTheta
+        maxDeltaTheta: innerDeltaTheta,
       );
       final SectorDimensions childDimensions = child.getIntrinsicDimensions(innerConstraints, childRadius);
       childRadius += childDimensions.deltaRadius;
@@ -406,7 +406,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     while (child != null) {
       final SectorConstraints innerConstraints = SectorConstraints(
         maxDeltaRadius: remainingDeltaRadius,
-        maxDeltaTheta: innerDeltaTheta
+        maxDeltaTheta: innerDeltaTheta,
       );
       child.parentData.theta = innerTheta;
       child.parentData.radius = childRadius;

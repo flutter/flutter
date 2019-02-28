@@ -130,7 +130,7 @@ void main() {
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
-            }
+            },
           ),
           const DataColumn(
             label: Text('Generation'),

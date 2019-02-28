@@ -41,7 +41,7 @@ void main() {
       AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        decoration: decorationA
+        decoration: decorationA,
       )
     );
 
@@ -53,7 +53,7 @@ void main() {
       AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        decoration: decorationB
+        decoration: decorationB,
       )
     );
 
@@ -224,7 +224,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 100.0,
           height: 100.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
+          child: const Text('X', textDirection: TextDirection.ltr),
         )
       )
     );
@@ -244,7 +244,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 200.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
+          child: const Text('X', textDirection: TextDirection.ltr),
         )
       )
     );
@@ -268,7 +268,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 100.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
+          child: const Text('X', textDirection: TextDirection.ltr),
         )
       )
     );

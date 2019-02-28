@@ -630,7 +630,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);

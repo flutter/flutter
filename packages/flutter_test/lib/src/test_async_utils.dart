@@ -111,7 +111,7 @@ class TestAsyncUtils {
         resultValue = value;
         return completionHandler(null, null);
       },
-      onError: completionHandler
+      onError: completionHandler,
     );
   }
 

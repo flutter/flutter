@@ -28,7 +28,7 @@ void main() {
                     onPressed: () { },
                   ),
                 ],
-              )
+              ),
             ),
           ),
         ),
@@ -93,7 +93,7 @@ void main() {
                   Text('First child'),
                   Text('Second child'),
                 ],
-              )
+              ),
             ),
           ),
         ),

@@ -483,7 +483,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         ).drive(
           Tween<double>(
             begin: 1.0,
-            end: 0.0
+            end: 0.0,
           ),
         );
       });
@@ -536,14 +536,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         child: SizedBox(
           width: _sizePriorToCollapse.width,
           height: _sizePriorToCollapse.height,
-          child: background
-        )
+          child: background,
+        ),
       );
     }
 
     Widget content = SlideTransition(
       position: _moveAnimation,
-      child: widget.child
+      child: widget.child,
     );
 
     if (background != null) {
@@ -556,7 +556,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
               axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
               moveAnimation: _moveAnimation,
             ),
-            child: background
+            child: background,
           )
         ));
       }

@@ -44,7 +44,7 @@ class _AccountPictures extends StatelessWidget {
                     height: 48.0,
                     child: picture,
                  ),
-                )
+                ),
               );
             }).toList(),
           ),
@@ -56,7 +56,7 @@ class _AccountPictures extends StatelessWidget {
             child: SizedBox(
               width: 72.0,
               height: 72.0,
-              child: currentAccountPicture
+              child: currentAccountPicture,
             ),
           ),
         ),

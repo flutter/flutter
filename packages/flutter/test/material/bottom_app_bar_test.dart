@@ -34,7 +34,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -196,7 +196,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -248,7 +248,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -300,7 +300,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -415,7 +415,7 @@ class ShapeListenerState extends State<ShapeListener> {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: widget.child,
-      painter: cache
+      painter: cache,
     );
   }
 

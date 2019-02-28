@@ -143,7 +143,7 @@ abstract class BindingBase {
           return <String, dynamic> {
             'value': ui.saveCompilationTrace(),
           };
-        }
+        },
       );
     }
 
@@ -178,7 +178,7 @@ abstract class BindingBase {
                      .toString()
                      .substring('$TargetPlatform.'.length),
           };
-        }
+        },
       );
       return true;
     }());
@@ -289,7 +289,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         await callback();
         return <String, dynamic>{};
-      }
+      },
     );
   }
 
@@ -324,7 +324,7 @@ abstract class BindingBase {
           _postExtensionStateChangedEvent(name, await getter() ? 'true' : 'false');
         }
         return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
-      }
+      },
     );
   }
 
@@ -358,7 +358,7 @@ abstract class BindingBase {
           _postExtensionStateChangedEvent(name, (await getter()).toString());
         }
         return <String, dynamic>{ name: (await getter()).toString() };
-      }
+      },
     );
   }
 
@@ -420,7 +420,7 @@ abstract class BindingBase {
           _postExtensionStateChangedEvent(name, await getter());
         }
         return <String, dynamic>{ 'value': await getter() };
-      }
+      },
     );
   }
 
@@ -522,7 +522,7 @@ abstract class BindingBase {
         FlutterError.reportError(FlutterErrorDetails(
           exception: caughtException,
           stack: caughtStack,
-          context: 'during a service extension callback for "$method"'
+          context: 'during a service extension callback for "$method"',
         ));
         return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
@@ -530,7 +530,7 @@ abstract class BindingBase {
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
             'method': method,
-          })
+          }),
         );
       }
     });

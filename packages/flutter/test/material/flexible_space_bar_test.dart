@@ -16,7 +16,7 @@ void main() {
               title: Text('X')
             )
           )
-        )
+        ),
       )
     );
 
@@ -37,7 +37,7 @@ void main() {
               title: Text('X')
             )
           )
-        )
+        ),
       )
     );
 

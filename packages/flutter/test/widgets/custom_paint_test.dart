@@ -27,18 +27,18 @@ void main() {
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
         log: log,
-        name: 'background'
+        name: 'background',
       ),
       foregroundPainter: TestCustomPainter(
         log: log,
-        name: 'foreground'
+        name: 'foreground',
       ),
       child: CustomPaint(
         painter: TestCustomPainter(
           log: log,
-          name: 'child'
+          name: 'child',
         )
-      )
+      ),
     ));
 
     expect(log, equals(<String>['background', 'child', 'foreground']));

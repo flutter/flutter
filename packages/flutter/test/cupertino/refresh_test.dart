@@ -935,7 +935,7 @@ void main() {
         );
 
         debugDefaultTargetPlatformOverride = null;
-      }
+      },
     );
   };
 
@@ -1312,7 +1312,7 @@ void main() {
         );
 
         debugDefaultTargetPlatformOverride = null;
-      }
+      },
     );
   };
 

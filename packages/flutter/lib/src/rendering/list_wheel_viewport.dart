@@ -763,7 +763,7 @@ class RenderListWheelViewport
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
-            _getUntransformedPaintingCoordinateY(layoutOffset.dy)
+            _getUntransformedPaintingCoordinateY(layoutOffset.dy),
         );
 
     // Get child's center as a fraction of the viewport's height.
@@ -870,7 +870,7 @@ class RenderListWheelViewport
               child,
               cylindricalTransform,
               offsetToCenter);
-          }
+          },
       );
     } else {
       _paintChildCylindrically(

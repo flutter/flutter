@@ -86,7 +86,7 @@ class TextRange {
   @override
   int get hashCode => hashValues(
     start.hashCode,
-    end.hashCode
+    end.hashCode,
   );
 
   @override
@@ -200,7 +200,7 @@ class TextSelection extends TextRange {
     baseOffset.hashCode,
     extentOffset.hashCode,
     affinity.hashCode,
-    isDirectional.hashCode
+    isDirectional.hashCode,
   );
 
   /// Creates a new [TextSelection] based on the current selection, with the

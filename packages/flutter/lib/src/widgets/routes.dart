@@ -241,7 +241,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
               assert(newAnimation.currentTrain == nextRoute._animation);
               _secondaryAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
-            }
+            },
           );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();

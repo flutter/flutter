@@ -136,7 +136,7 @@ void main() {
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
-            highlightElevation: 20.0
+            highlightElevation: 20.0,
           ),
         ),
       ),
@@ -663,13 +663,13 @@ void main() {
             child: FloatingActionButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

@@ -143,7 +143,7 @@ Future<int> runCommandAndStreamOutput(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
-    environment: environment
+    environment: environment,
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
@@ -306,7 +306,7 @@ String runSync(
   return _runWithLoggingSync(
     cmd,
     workingDirectory: workingDirectory,
-    allowReentrantFlutter: allowReentrantFlutter
+    allowReentrantFlutter: allowReentrantFlutter,
   );
 }
 

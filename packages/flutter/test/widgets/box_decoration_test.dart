@@ -98,8 +98,8 @@ Future<void> main() async {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          color: Colors.teal[600]
-        )
+          color: Colors.teal[600],
+        ),
       )
     );
   });
@@ -113,8 +113,8 @@ Future<void> main() async {
           decoration: BoxDecoration(border: Border.all(width: 10.0)),
           child: Container(
             width: 25.0,
-            height: 25.0
-          )
+            height: 25.0,
+          ),
         )
       )
     );
@@ -261,7 +261,7 @@ Future<void> main() async {
           bottomLeft: const Radius.circular(-10.0),
         ),
       )
-      ..circle(x: 400.0, y: 350.0, radius: 45.0)
+      ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );
   });
 

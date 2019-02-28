@@ -336,7 +336,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
               return Future<void>.value();
             WidgetsApp.debugShowWidgetInspectorOverride = value;
             return _forceRebuild();
-          }
+          },
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
@@ -732,7 +732,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: rootWidget
+      child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
 
@@ -937,7 +937,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: 'attaching to the render tree'
+        context: 'attaching to the render tree',
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

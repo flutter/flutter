@@ -76,13 +76,13 @@ class StockSettingsState extends State<StockSettings> {
                   child: const Text('NO THANKS'),
                   onPressed: () {
                     Navigator.pop(context, false);
-                  }
+                  },
                 ),
                 FlatButton(
                   child: const Text('AGREE'),
                   onPressed: () {
                     Navigator.pop(context, true);
-                  }
+                  },
                 ),
               ],
             );
@@ -212,7 +212,7 @@ class StockSettingsState extends State<StockSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      body: buildSettingsPane(context)
+      body: buildSettingsPane(context),
     );
   }
 }

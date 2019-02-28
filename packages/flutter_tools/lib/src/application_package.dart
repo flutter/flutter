@@ -123,7 +123,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -204,7 +204,7 @@ class AndroidApk extends ApplicationPackage {
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 

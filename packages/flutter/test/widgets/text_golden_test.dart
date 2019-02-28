@@ -160,7 +160,7 @@ void main() {
                 style: TextStyle(
                   color: translucentGreen,
                   background: Paint()
-                    ..color = red.withOpacity(0.5)
+                    ..color = red.withOpacity(0.5),
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -168,8 +168,8 @@ void main() {
                     style: TextStyle(
                       color: translucentDarkRed,
                       background: Paint()
-                        ..color = blue.withOpacity(0.5)
-                    )
+                        ..color = blue.withOpacity(0.5),
+                    ),
                   ),
                 ],
               ),
@@ -319,7 +319,7 @@ void main() {
                 text: 'Hello\n',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 30
+                  fontSize: 30,
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -407,7 +407,7 @@ void main() {
                 text: 'Hello\n',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 30
+                  fontSize: 30,
                 ),
                 children: <TextSpan>[
                   TextSpan(

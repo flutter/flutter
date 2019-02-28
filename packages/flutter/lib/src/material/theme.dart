@@ -256,7 +256,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
     return Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
-      data: _data.evaluate(animation)
+      data: _data.evaluate(animation),
     );
   }
 

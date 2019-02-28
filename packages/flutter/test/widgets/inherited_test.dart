@@ -98,8 +98,8 @@ void main() {
               log.add(context.inheritFromWidgetOfExactType(TestInherited));
               return Container();
             }
-          )
-        )
+          ),
+        ),
       );
     }
 
@@ -137,9 +137,9 @@ void main() {
                             return const Text('', textDirection: TextDirection.ltr);
                           }
                         )
-                      )
+                      ),
                     )
-                  )
+                  ),
                 )
               ),
               right: Container(
@@ -155,11 +155,11 @@ void main() {
                         }
                       )
                     )
-                  )
+                  ),
                 )
-              )
+              ),
             )
-          )
+          ),
         )
       )
     );
@@ -211,10 +211,10 @@ void main() {
                             log.add('a: ${v.value}');
                             return const Text('', textDirection: TextDirection.ltr);
                           }
-                        )
-                      )
+                        ),
+                      ),
                     )
-                  )
+                  ),
                 )
               ),
               right: Container(
@@ -229,13 +229,13 @@ void main() {
                           log.add('b: ${v.value}');
                           return const Text('', textDirection: TextDirection.ltr);
                         }
-                      )
+                      ),
                     )
-                  )
+                  ),
                 )
-              )
+              ),
             )
-          )
+          ),
         )
       )
     );
@@ -288,10 +288,10 @@ void main() {
                       value: 3,
                       child: Container(
                         key: key,
-                        child: child
-                      )
+                        child: child,
+                      ),
                     )
-                  )
+                  ),
                 )
               ),
               right: Container(
@@ -300,13 +300,13 @@ void main() {
                   child: Container(
                     child: Container(
                       key: key,
-                      child: child
+                      child: child,
                     )
-                  )
+                  ),
                 )
-              )
+              ),
             )
-          )
+          ),
         )
       )
     );
@@ -342,7 +342,7 @@ void main() {
         final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
         log.add(v.value);
         return const Text('', textDirection: TextDirection.ltr);
-      }
+      },
     );
 
     await tester.pumpWidget(
@@ -351,10 +351,10 @@ void main() {
         child: FlipWidget(
           left: ValueInherited(
             value: 3,
-            child: child
+            child: child,
           ),
-          right: child
-        )
+          right: child,
+        ),
       )
     );
 
@@ -390,7 +390,7 @@ void main() {
           inheritedValue = widget?.value;
           return Container();
         }
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -402,7 +402,7 @@ void main() {
     await tester.pumpWidget(
       ValueInherited(
         value: 3,
-        child: inner
+        child: inner,
       )
     );
     expect(inheritedValue, equals(3));
@@ -418,7 +418,7 @@ void main() {
           buildCount += 1;
           return Container();
         }
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -429,7 +429,7 @@ void main() {
     await tester.pumpWidget(
       ValueInherited(
         value: 3,
-        child: inner
+        child: inner,
       )
     );
     expect(buildCount, equals(1));
@@ -448,8 +448,8 @@ void main() {
             buildCount += 1;
             return Container();
           }
-        )
-      )
+        ),
+      ),
     );
 
     await tester.pumpWidget(
@@ -460,7 +460,7 @@ void main() {
     await tester.pumpWidget(
       ValueInherited(
         value: 3,
-        child: inner
+        child: inner,
       )
     );
     expect(buildCount, equals(2));

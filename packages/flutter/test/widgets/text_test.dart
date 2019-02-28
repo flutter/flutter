@@ -16,7 +16,7 @@ void main() {
       data: MediaQueryData(textScaleFactor: 1.3),
       child: Center(
         child: Text('Hello', textDirection: TextDirection.ltr)
-      )
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));

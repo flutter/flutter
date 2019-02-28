@@ -531,11 +531,11 @@ void main() {
     FlutterProject project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'com.example.helloFlutter'
+        'com.example.helloFlutter',
     );
     expect(
         project.android.applicationId,
-        'com.example.hello_flutter'
+        'com.example.hello_flutter',
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
@@ -543,11 +543,11 @@ void main() {
     project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'abc.1.testAbc'
+        'abc.1.testAbc',
     );
     expect(
         project.android.applicationId,
-        'abc.u1.test_abc'
+        'abc.u1.test_abc',
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
@@ -555,11 +555,11 @@ void main() {
     project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'flutterProject.untitled'
+        'flutterProject.untitled',
     );
     expect(
         project.android.applicationId,
-        'flutter_project.untitled'
+        'flutter_project.untitled',
     );
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,

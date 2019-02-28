@@ -251,7 +251,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
-                    suffixStyle: TextStyle(color: Colors.green)
+                    suffixStyle: TextStyle(color: Colors.green),
                   ),
                   maxLines: 1,
                 ),
@@ -288,7 +288,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 Text(
                   '* indicates required field',
-                  style: Theme.of(context).textTheme.caption
+                  style: Theme.of(context).textTheme.caption,
                 ),
                 const SizedBox(height: 24.0),
               ],

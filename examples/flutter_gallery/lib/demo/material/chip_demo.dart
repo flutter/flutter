@@ -117,7 +117,7 @@ class _ChipsTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: cardChildren,
-      )
+      ),
     );
   }
 }

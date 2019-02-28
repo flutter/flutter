@@ -33,11 +33,11 @@ void main() {
                   return <PopupMenuItem<String>>[
                     const PopupMenuItem<String>(child: Text('menuItem')),
                   ];
-                }
+                },
               ),
             ]
           )
-        )
+        ),
       )
     );
 
@@ -102,12 +102,12 @@ void main() {
                     return <PopupMenuItem<String>>[
                       const PopupMenuItem<String>(child: Text('menuItem')),
                     ];
-                  }
+                  },
                 ),
               ]
             )
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -140,8 +140,8 @@ void main() {
                 ),
               ]
             )
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -174,8 +174,8 @@ void main() {
                 }
               )
             )
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -210,9 +210,9 @@ void main() {
                   );
                 }
               )
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 

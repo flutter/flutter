@@ -28,9 +28,9 @@ void main() {
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 ),
-              ]
-            )
-          )
+              ],
+            ),
+          ),
         )
       )
     );
@@ -66,9 +66,9 @@ void main() {
                 Semantics(
                   checked: true
                 ),
-              ]
-            )
-          )
+              ],
+            ),
+          ),
         )
       )
     );

@@ -500,7 +500,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');
   }

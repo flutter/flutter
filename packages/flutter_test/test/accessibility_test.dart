@@ -349,8 +349,8 @@ void main() {
                 child: GestureDetector(
                   onTap: () {},
                   child: const SizedBox(width: 4.0, height: 4.0),
-                )
-              )
+                ),
+              ),
             ),
           )
         )

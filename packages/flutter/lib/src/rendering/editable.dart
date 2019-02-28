@@ -415,7 +415,7 @@ class RenderEditable extends RenderBox {
         onSelectionChanged(
           TextSelection(
             baseOffset: _baseOffset,
-            extentOffset: newOffset
+            extentOffset: newOffset,
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -424,7 +424,7 @@ class RenderEditable extends RenderBox {
         onSelectionChanged(
           TextSelection(
             baseOffset: newOffset,
-            extentOffset: _baseOffset
+            extentOffset: _baseOffset,
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -511,12 +511,12 @@ class RenderEditable extends RenderBox {
       textSelectionDelegate.textEditingValue = TextEditingValue(
         text: selection.textBefore(text.text)
           + selection.textAfter(text.text).substring(1),
-        selection: TextSelection.collapsed(offset: selection.start)
+        selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
       textSelectionDelegate.textEditingValue = TextEditingValue(
         text: selection.textBefore(text.text),
-        selection: TextSelection.collapsed(offset: selection.start)
+        selection: TextSelection.collapsed(offset: selection.start),
       );
     }
   }
@@ -1478,7 +1478,7 @@ class RenderEditable extends RenderBox {
       _caretPrototype.left - sizeAdjustmentX,
       _caretPrototype.top - sizeAdjustmentY,
       _caretPrototype.right + sizeAdjustmentX,
-      _caretPrototype.bottom + sizeAdjustmentY
+      _caretPrototype.bottom + sizeAdjustmentY,
     );
 
     final Rect caretRect = floatingCaretPrototype.shift(effectiveOffset);

@@ -91,7 +91,7 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -114,7 +114,7 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 200.0
+                    height: 200.0,
                   ),
                 ),
               ],
@@ -139,14 +139,14 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -171,14 +171,14 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -209,7 +209,7 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -241,8 +241,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -251,7 +251,7 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -277,14 +277,14 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -318,14 +318,14 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -350,8 +350,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -360,7 +360,7 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
+                    height: 100.0,
                   ),
                 ),
               ],
@@ -394,15 +394,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -426,8 +426,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -436,8 +436,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -468,15 +468,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -507,8 +507,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -517,8 +517,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -551,15 +551,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -583,22 +583,22 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -623,22 +623,22 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -662,15 +662,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -696,15 +696,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -728,8 +728,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -738,8 +738,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('y')
@@ -748,8 +748,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -784,8 +784,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -794,8 +794,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('y')
@@ -804,8 +804,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -831,15 +831,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -872,8 +872,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -882,8 +882,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -908,8 +908,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('y')
@@ -918,8 +918,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('z')
@@ -928,8 +928,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -964,8 +964,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -974,8 +974,8 @@ void main() {
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('y')
@@ -984,8 +984,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -1011,8 +1011,8 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('z')
@@ -1021,8 +1021,8 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
               ]
             )
@@ -1051,7 +1051,7 @@ void main() {
     return box.decoration == BoxDecoration(
       border: Border(
         top: top ? side : BorderSide.none,
-        bottom: bottom ? side : BorderSide.none
+        bottom: bottom ? side : BorderSide.none,
       )
     );
   }
@@ -1068,31 +1068,31 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('D'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
-              ]
+              ],
             )
           )
         )
@@ -1118,15 +1118,15 @@ void main() {
                   key: ValueKey<String>('A'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialGap(
                   key: ValueKey<String>('x')
@@ -1135,17 +1135,17 @@ void main() {
                   key: ValueKey<String>('C'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('D'),
                   child: SizedBox(
                     width: 100.0,
-                    height: 100.0
-                  )
+                    height: 100.0,
+                  ),
                 ),
-              ]
+              ],
             )
           )
         )

@@ -88,7 +88,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
           title: Text('Action Sheet'),
-          message: Text('An action sheet')
+          message: Text('An action sheet'),
         ),
       ),
     );

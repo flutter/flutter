@@ -166,9 +166,9 @@ void main() {
                       padding: const EdgeInsets.all(5.0),
                       child: Container(
                           color: Colors.blue,
-                          height: 50
+                          height: 50,
                       ),
-                    )
+                    ),
                   );
                 }),
               ),

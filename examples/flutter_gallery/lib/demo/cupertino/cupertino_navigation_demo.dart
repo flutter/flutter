@@ -78,7 +78,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   builder: (BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
-                      colorNameItems: colorNameItems
+                      colorNameItems: colorNameItems,
                     );
                   },
                   defaultTitle: 'Colors',

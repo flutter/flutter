@@ -92,17 +92,17 @@ void main() {
                         TestTransition(
                           childFirstHalf: const Text('A'),
                           childSecondHalf: const Text('B'),
-                          animation: route.animation
+                          animation: route.animation,
                         ),
                         TestTransition(
                           childFirstHalf: const Text('C'),
                           childSecondHalf: const Text('D'),
-                          animation: route.secondaryAnimation
+                          animation: route.secondaryAnimation,
                         ),
                       ]
                     );
-                  }
-                )
+                  },
+                ),
               );
             case '/2': return TestRoute<void>(settings: settings, child: const Text('E'));
             case '/3': return TestRoute<void>(settings: settings, child: const Text('F'));

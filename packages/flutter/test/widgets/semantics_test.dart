@@ -35,7 +35,7 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.ltr,
-          child: Container()
+          child: Container(),
         )
       )
     );
@@ -77,10 +77,10 @@ void main() {
             key: key,
             container: true,
             label: 'test2a',
-            child: Container()
-          )
+            child: Container(),
+          ),
         )
-      )
+      ),
     ));
 
     expect(semantics, hasSemantics(
@@ -92,7 +92,7 @@ void main() {
               TestSemantics(
                 label: 'test2a',
               ),
-            ]
+            ],
           ),
         ]
       ),
@@ -113,11 +113,11 @@ void main() {
               key: key,
               container: true,
               label: 'test2b',
-              child: Container()
-            )
-          )
+              child: Container(),
+            ),
+          ),
         )
-      )
+      ),
     ));
 
     expect(semantics, hasSemantics(
@@ -134,7 +134,7 @@ void main() {
                   ),
                 ],
               ),
-            ]
+            ],
           ),
         ]
       ),
@@ -315,14 +315,14 @@ void main() {
                 child: Container(
                   height: 10.0,
                   width: 10.0,
-                )
+                ),
               ),
               Semantics(
                 value: 'value two',
                 child: Container(
                   height: 10.0,
                   width: 10.0,
-                )
+                ),
               ),
             ],
           ),
@@ -645,7 +645,7 @@ void main() {
 
     expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasTapAction: true,
-      onTapHint: 'test'
+      onTapHint: 'test',
     ));
 
     await tester.pumpWidget(Semantics(
@@ -656,7 +656,7 @@ void main() {
 
     expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasLongPressAction: true,
-      onLongPressHint: 'foo'
+      onLongPressHint: 'foo',
     ));
     semantics.dispose();
   });
@@ -1089,7 +1089,7 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreId: true, ignoreRect: true, ignoreTransform: true)
+      ), ignoreId: true, ignoreRect: true, ignoreTransform: true),
     );
     semantics.dispose();
   });

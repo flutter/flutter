@@ -177,7 +177,7 @@ Future<AssetBundle> buildAssets({
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages
+    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0)
     return null;

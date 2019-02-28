@@ -42,7 +42,7 @@ class TimelineEvent {
         : null,
       json['ts'],
       json['tts'],
-      json['args']
+      json['args'],
     );
   }
 

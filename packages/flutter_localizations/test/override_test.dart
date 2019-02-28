@@ -121,7 +121,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -153,7 +153,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -186,7 +186,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -217,7 +217,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -246,7 +246,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 

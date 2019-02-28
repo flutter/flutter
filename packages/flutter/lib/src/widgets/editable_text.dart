@@ -142,7 +142,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
-      composing: TextRange.empty
+      composing: TextRange.empty,
     );
   }
 
@@ -939,7 +939,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               ),
               textCapitalization: widget.textCapitalization,
               keyboardAppearance: widget.keyboardAppearance,
-          )
+          ),
       )..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -1065,7 +1065,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           newCaretRect.left - widget.scrollPadding.left,
           newCaretRect.top - widget.scrollPadding.top,
           newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + widget.scrollPadding.bottom
+          newCaretRect.bottom + widget.scrollPadding.bottom,
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,

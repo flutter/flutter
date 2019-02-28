@@ -222,7 +222,7 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: directSplashColor)
-        ..circle(color: directHighlightColor)
+        ..circle(color: directHighlightColor),
     );
 
     const Color themeSplashColor1 = Color(0xFF000F00);
@@ -249,7 +249,7 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: themeSplashColor1)
-        ..circle(color: themeHighlightColor1)
+        ..circle(color: themeHighlightColor1),
     );
 
     const Color themeSplashColor2 = Color(0xFF002200);
@@ -269,7 +269,7 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..circle(color: themeHighlightColor2)
+        ..circle(color: themeHighlightColor2),
     );
 
     await gesture.up();

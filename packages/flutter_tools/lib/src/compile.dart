@@ -440,7 +440,7 @@ class ResidentCompiler {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null)
+          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null),
       );
     }
 

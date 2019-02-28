@@ -50,7 +50,7 @@ void main() {
             build(1000, 1000),
             build(3000, 2000),
           ]).countFrames(),
-          2
+          2,
         );
       });
     });
@@ -59,7 +59,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
         );
       });
 
@@ -69,7 +69,7 @@ void main() {
             build(1000, 1000),
             build(3000, 2000),
           ]).computeAverageFrameBuildTimeMillis(),
-          1.5
+          1.5,
         );
       });
     });
@@ -78,7 +78,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
         );
       });
 
@@ -88,14 +88,14 @@ void main() {
             build(1000, 1000),
             build(3000, 2000),
           ]).computeWorstFrameBuildTimeMillis(),
-          2.0
+          2.0,
         );
         expect(
           summarize(<Map<String, dynamic>>[
             build(3000, 2000),
             build(1000, 1000),
           ]).computeWorstFrameBuildTimeMillis(),
-          2.0
+          2.0,
         );
       });
     });
@@ -117,7 +117,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
         );
       });
 
@@ -127,7 +127,7 @@ void main() {
               begin(1000), end(2000),
               begin(3000), end(5000),
             ]).computeAverageFrameRasterizerTimeMillis(),
-            1.5
+            1.5,
         );
       });
 
@@ -137,7 +137,7 @@ void main() {
               end(1000),
               begin(2000), end(4000),
             ]).computeAverageFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
       });
 
@@ -147,7 +147,7 @@ void main() {
               begin(2000), end(4000),
               begin(5000),
             ]).computeAverageFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
       });
     });
@@ -156,7 +156,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
         );
       });
 
@@ -167,14 +167,14 @@ void main() {
               begin(1000), end(2000),
               begin(3000), end(5000),
             ]).computeWorstFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
         expect(
             summarize(<Map<String, dynamic>>[
               begin(3000), end(5000),
               begin(1000), end(2000),
             ]).computeWorstFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
       });
 
@@ -184,7 +184,7 @@ void main() {
               end(1000),
               begin(2000), end(4000),
             ]).computeWorstFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
       });
 
@@ -194,7 +194,7 @@ void main() {
               begin(2000), end(4000),
               begin(5000),
             ]).computeWorstFrameRasterizerTimeMillis(),
-            2.0
+            2.0,
         );
       });
     });
@@ -203,7 +203,7 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!'))
+          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
         );
       });
 
@@ -224,7 +224,7 @@ void main() {
         for(int i = 0; i < sequences.length; ++i) {
           expect(
             summarize(rasterizeTimeSequenceInMillis(sequences[i])).computePercentileFrameRasterizerTimeMillis(90.0),
-            p90s[i]
+            p90s[i],
           );
         }
       });
@@ -236,7 +236,7 @@ void main() {
         }
         expect(
           summarize(rasterizeTimeSequenceInMillis(sequence)).computePercentileFrameRasterizerTimeMillis(99.0),
-          99
+          99,
         );
       });
     });
@@ -278,7 +278,7 @@ void main() {
             'frame_count': 3,
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
-          }
+          },
         );
       });
     });

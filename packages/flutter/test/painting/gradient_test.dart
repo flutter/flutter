@@ -195,7 +195,7 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       throwsAssertionError,
@@ -204,7 +204,7 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
       returnsNormally,
@@ -213,7 +213,7 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
       returnsNormally,
@@ -222,7 +222,7 @@ void main() {
       () {
         return const LinearGradient(
           begin: Alignment.topLeft,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       returnsNormally,
@@ -234,7 +234,7 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       throwsAssertionError,
@@ -244,7 +244,7 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
       returnsNormally,
@@ -253,7 +253,7 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
       returnsNormally,
@@ -262,7 +262,7 @@ void main() {
       () {
         return const RadialGradient(
           center: Alignment.topLeft,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
         ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       returnsNormally,

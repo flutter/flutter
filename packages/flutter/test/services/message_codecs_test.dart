@@ -32,7 +32,7 @@ void main() {
       final ByteData offsetByteData = ByteData.view(
           helloWorldByteData.buffer,
           helloByteData.lengthInBytes,
-          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes,
       );
 
       expect(string.decodeMessage(offsetByteData), ' world');

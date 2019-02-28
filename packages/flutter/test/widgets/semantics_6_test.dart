@@ -71,7 +71,7 @@ Widget buildWidget({ @required String blockedText, bool blocking = true }) {
               container: true,
             ),
           ),
-        ]
+        ],
     ),
   );
 }

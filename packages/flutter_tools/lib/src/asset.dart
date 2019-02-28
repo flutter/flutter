@@ -128,7 +128,7 @@ class _ManifestAssetBundle implements AssetBundle {
       packageMap,
       flutterManifest,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()]
+      excludeDirs: <String>[assetDirPath, getBuildDirectory()],
     );
 
     if (assetVariants == null)
@@ -290,7 +290,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
       result.add(_Asset(
         baseDir: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         relativeUri: Uri(path: entryUri.pathSegments.last),
-        entryUri: entryUri
+        entryUri: entryUri,
       ));
     }
   }

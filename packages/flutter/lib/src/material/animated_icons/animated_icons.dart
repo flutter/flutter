@@ -248,7 +248,7 @@ class _PathCubicTo extends _PathCommand {
     path.cubicTo(
       controlPoint1.dx, controlPoint1.dy,
       controlPoint2.dx, controlPoint2.dy,
-      targetPoint.dx, targetPoint.dy
+      targetPoint.dx, targetPoint.dy,
     );
   }
 }

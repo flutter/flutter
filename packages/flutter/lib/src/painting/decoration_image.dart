@@ -261,7 +261,7 @@ class DecorationImagePainter {
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
-      filterQuality: FilterQuality.low
+      filterQuality: FilterQuality.low,
     );
 
     if (clipPath != null)
@@ -388,7 +388,7 @@ void paintImage({
   if (centerSlice != null) {
     sliceBorder = Offset(
       centerSlice.left + inputSize.width - centerSlice.right,
-      centerSlice.top + inputSize.height - centerSlice.bottom
+      centerSlice.top + inputSize.height - centerSlice.bottom,
     );
     outputSize -= sliceBorder;
     inputSize -= sliceBorder;
@@ -436,7 +436,7 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(
-      sourceSize, Offset.zero & inputSize
+      sourceSize, Offset.zero & inputSize,
     );
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);

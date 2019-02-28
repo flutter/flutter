@@ -89,7 +89,7 @@ void main() {
                       width: 75.0,
                       child: const Text('3'),
                     ),
-                  ]
+                  ],
                 )
               ),
             ],
