@@ -662,7 +662,7 @@ class ResidentCompiler {
   }
 
   Future<dynamic> shutdown() {
-    _server.kill();
-    return _server.exitCode;
+    _server?.kill();
+    return _server?.exitCode;
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/project.dart';
+
 import '../base/common.dart';
 import '../codegen.dart';
 import '../runner/flutter_command.dart';
@@ -24,7 +26,8 @@ class GenerateCommand extends FlutterCommand {
     if (!experimentalBuildEnabled) {
       throwToolExit('FLUTTER_EXPERIMENTAL_BUILD is not enabled, codegen is unsupported.');
     }
-    await codeGenerator.generate(mainPath: argResults['target']);
+    final FlutterProject flutterProject = await FlutterProject.current();
+    await codeGenerator.generate(flutterProject, mainPath: argResults['target']);
     return null;
   }
 }

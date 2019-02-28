@@ -30,6 +30,7 @@ void main() {
     testUsingContext('delegates to build_runner', () async {
       const CodeGeneratingKernelCompiler kernelCompiler = CodeGeneratingKernelCompiler();
       when(mockBuildRunner.build(
+        any,
         aot: anyNamed('aot'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
         linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),

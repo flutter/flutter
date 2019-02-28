@@ -10,6 +10,7 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -27,6 +28,8 @@ import '../project.dart';
 import '../resident_runner.dart';
 import 'build_script_generator.dart';
 
+const String _kMultirootScheme = 'org-dartlang-app';
+
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
 ///
@@ -36,7 +39,7 @@ class BuildRunner extends CodeGenerator {
   const BuildRunner();
 
   @override
-  Future<CodeGenerationResult> build({
+  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
     @required String mainPath,
     @required bool aot,
     @required bool linkPlatformKernelIn,
@@ -45,8 +48,7 @@ class BuildRunner extends CodeGenerator {
     List<String> extraFrontEndOptions = const <String>[],
     bool disableKernelGeneration = false,
   }) async {
-    await generateBuildScript();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    await generateBuildScript(flutterProject);
     final String frontendServerPath = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -115,12 +117,15 @@ class BuildRunner extends CodeGenerator {
       throw Exception('build_runner cannot find generated directory');
     }
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
+    printTrace('relativeMain: $relativeMain');
     final File packagesFile = fs.file(
-      fs.path.join(generatedDirectory.path,  fs.path.setExtension(relativeMain, '.packages'))
+      fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.packages'))
     );
+    printTrace('pacakgesFile: ${packagesFile.path}');
     final File dillFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
+    printTrace('pacakgesFile: ${dillFile.path}');
     if (!packagesFile.existsSync() || !dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
@@ -128,8 +133,7 @@ class BuildRunner extends CodeGenerator {
   }
 
   @override
-  Future<void> invalidateBuildScript() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+  Future<void> invalidateBuildScript(FlutterProject flutterProject) async {
     final File buildScript = flutterProject.dartTool
         .absolute
         .childDirectory('flutter_tool')
@@ -141,8 +145,8 @@ class BuildRunner extends CodeGenerator {
   }
 
   @override
-  Future<void> generateBuildScript() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+  Future<void> generateBuildScript(FlutterProject flutterProject) async {
+    final String appName = flutterProject.manifest.appName;
     final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
     final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
     if (fs.file(resultScriptPath).existsSync()) {
@@ -178,13 +182,22 @@ class BuildRunner extends CodeGenerator {
       final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
       final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
+
+      // Create generated packages file.
+      final String oldPackagesContents = await fs.file(PackageMap.globalPackagesPath).readAsString();
+      // Note: currently we only replace the root package with a multiroot
+      // scheme. To support codegen on arbitrary packages we would need to do
+      // this for each dependency.
+      final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$_kMultirootScheme:/');
+      final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
+      await fs.file(generatedPackagesPath).writeAsString(newPackagesContents);
     } finally {
       status.stop();
     }
   }
 
   @override
-  Future<CodegenDaemon> daemon({
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,
@@ -192,8 +205,7 @@ class BuildRunner extends CodeGenerator {
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
     mainPath ??= findMainDartFile();
-    await generateBuildScript();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    await generateBuildScript(flutterProject);
     final String frontendServerPath = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -241,18 +253,15 @@ class BuildRunner extends CodeGenerator {
       builder.target = flutterProject.manifest.appName;
     }));
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File generatedPackagesFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.packages')));
     final File generatedDillFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.app.dill')));
-    return _BuildRunnerCodegenDaemon(buildDaemonClient, generatedPackagesFile, generatedDillFile);
+    return _BuildRunnerCodegenDaemon(buildDaemonClient, generatedDillFile);
   }
 }
 
 class _BuildRunnerCodegenDaemon implements CodegenDaemon {
-  _BuildRunnerCodegenDaemon(this.buildDaemonClient, this.packagesFile, this.dillFile);
+  _BuildRunnerCodegenDaemon(this.buildDaemonClient, this.dillFile);
 
   final BuildDaemonClient buildDaemonClient;
-  @override
-  final File packagesFile;
   @override
   final File dillFile;
   @override

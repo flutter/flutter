@@ -49,6 +49,7 @@ class FlutterDevice {
          experimentalFlags: experimentalFlags,
        );
 
+  /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(Device device, {
     @required bool trackWidgetCreation,
     String dillOutputPath,
@@ -61,8 +62,9 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) async {
     ResidentCompiler generator;
-    if (experimentalBuildEnabled) {
-      generator = await CodeGeneratingResidentCompiler.create(mainPath: target);
+    final FlutterProject flutterProject = await FlutterProject.current();
+    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(flutterProject: flutterProject, mainPath: target);
     } else {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
