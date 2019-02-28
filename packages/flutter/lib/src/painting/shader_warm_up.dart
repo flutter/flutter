@@ -16,10 +16,24 @@ import 'package:flutter/foundation.dart';
 ///
 /// Therefore, we use this during the [PaintingBinding.initInstances] call to
 /// move common shader compilations from animation time to startup time. By
-/// default, a [DefaultShaderWarmUp] is used. Create a custom [ShaderWarmUp]
-/// subclass to replace [PaintingBinding.shaderWarmUp] before
-/// [PaintingBinding.initInstances] is called. Usually, that can be done before
-/// calling [runApp].
+/// default, a [DefaultShaderWarmUp] is used. If needed, create a custom
+/// [ShaderWarmUp] subclass and give it to [PaintingBinding.shaderWarmUp]
+/// (so it replaces [DefaultShaderWarmUp]) before
+/// [PaintingBinding.initInstances] is called. Usually, that can be done
+/// before calling [runApp].
+///
+/// To determine whether a draw operation is useful for warming up shaders,
+/// check the difference in the worst_frame_rasterizer_time_millis benchmarks.
+/// Also, tracing with `flutter run --profile --trace-skia` could reveal if
+/// there are shader compilation related janks. If there are, some long
+/// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
+/// animation. Their parent calls which look like `XyzOp` would suggest Xyz
+/// draw operations are causing the shaders to be compiled. A useful shader
+/// warm-up draw operation would eliminate such long compilation calls in the
+/// animation. To double check the warm-up, trace with `flutter run --profile
+/// --trace-skia --start-paused`. The `GrGLProgramBuilder` with the associated
+/// `XyzOp` should appear during the startup rather than in the middle of a
+/// later animation.
 ///
 /// This warm up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
@@ -29,6 +43,11 @@ import 'package:flutter/foundation.dart';
 /// If no warm up is desired (e.g., when the startup latency is crucial), set
 /// [PaintingBinding.shaderWarmUp] either to a custom ShaderWarmUp with an empty
 /// [warmUpOnCanvas] or null.
+///
+/// See also
+///
+///  * [PaintingBinding.shaderWarmUp], the actual instance of [ShaderWarmUp]
+///    that's used to warm up the shaders.
 abstract class ShaderWarmUp {
   /// Allow const constructors for subclasses.
   const ShaderWarmUp();
@@ -109,6 +128,10 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     convexPath.lineTo(20.0, 60.0);
     convexPath.close();
 
+    // Skia uses different shaders based on the kinds of paths being drawn and
+    // the associated paint configurations. According to our experience and
+    // tracing, drawing the following paths/paints generates various of
+    // shaders that are commonly used.
     final List<ui.Path> paths = <ui.Path>[rrectPath, circlePath, path, convexPath];
 
     final List<ui.Paint> paints = <ui.Paint>[

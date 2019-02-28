@@ -49,6 +49,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// Currently the warm-up happens synchronously on the GPU thread which means
   /// the rendering of the first frame on the GPU thread will be postponed until
   /// the warm-up is finished.
+  ///
+  /// See also
+  ///
+  ///  * [ShaderWarmUp], the interface of how this warm up works.
   static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
