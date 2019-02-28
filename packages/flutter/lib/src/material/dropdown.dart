@@ -599,8 +599,10 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.icon = Icons.arrow_drop_down,
     this.iconSize = 24.0,
     this.isDense = false,
+    this.iconImage,
     this.isExpanded = false,
   }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
        assert(elevation != null),
@@ -653,10 +655,17 @@ class DropdownButton<T> extends StatefulWidget {
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
 
+  /// The icon used for the dropdown menu. Defaults to Icons.arrow_drop_down.
+  final IconData icon; 
+
   /// The size to use for the drop-down button's down arrow icon button.
   ///
   /// Defaults to 24.0.
   final double iconSize;
+
+  /// Use an image file for the dropdown arrow instead of an icon. If an
+  /// iconImage is specified the icon and iconSize properties are ignored.
+  final Image iconImage;
 
   /// Reduce the button's height.
   ///
@@ -837,7 +846,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
+            (widget.iconImage != null) ? widget.iconImage :
+            Icon(widget.icon,
               size: widget.iconSize,
               color: _downArrowColor,
             ),
