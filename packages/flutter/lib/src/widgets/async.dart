@@ -389,7 +389,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
   /// The data that will be used to create the initial snapshot.
   ///
-  /// Providing this value (presumably obtained sychronously somehow when the
+  /// Providing this value (presumably obtained synchronously somehow when the
   /// [Stream] was created) ensures that the first frame will show useful data.
   /// Otherwise, the first frame will be built with the value null, regardless
   /// of whether a value is available on the stream: since streams are

@@ -369,7 +369,7 @@ class _ScreenshotData {
 /// of the regular rendering pipeline.
 /// This painting context behaves the same as standard [PaintingContext] with
 /// instrumentation added to compute a screenshot of a specified [RenderObject]
-/// added. To correctly mimic the behavor of the regular rendering pipeline, the
+/// added. To correctly mimic the behavior of the regular rendering pipeline, the
 /// full subtree of the first [RepaintBoundary] ancestor of the specified
 /// [RenderObject] will also be rendered rather than just the subtree of the
 /// render object.

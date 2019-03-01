@@ -84,7 +84,7 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can dragged up and down and dismissed by swiping
-  /// downards.
+  /// downwards.
   ///
   /// Default is true.
   final bool enableDrag;
