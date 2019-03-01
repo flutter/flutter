@@ -866,6 +866,7 @@ abstract class ResidentRunner {
       return;
     printStatus('Lost connection to device.');
     _resetTerminal();
+    dispose();
     _finished.complete(0);
   }
 
@@ -874,6 +875,7 @@ abstract class ResidentRunner {
       return;
     printStatus('Application finished.');
     _resetTerminal();
+    dispose();
     _finished.complete(0);
   }
 
@@ -893,6 +895,9 @@ abstract class ResidentRunner {
       terminal.keystrokes.listen(processTerminalInput);
     }
   }
+
+  /// Called to dispose any held resources when the runner is torn down.
+  void dispose();
 
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;

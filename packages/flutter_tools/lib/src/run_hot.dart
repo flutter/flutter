@@ -78,7 +78,7 @@ class HotRunner extends ResidentRunner {
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6)  {
-    watcher = ProjectWatcher(
+    _projectWatcher = ProjectWatcher(
       projectRootPath,
       packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
     );
@@ -89,7 +89,7 @@ class HotRunner extends ResidentRunner {
   final bool hostIsIde;
   bool _didAttach = false;
   final String dillOutputPath;
-  ProjectWatcher watcher;
+  ProjectWatcher _projectWatcher;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -183,7 +183,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     // Wait for filesystem watchers to be ready.
-    await watcher.onReady;
+    await _projectWatcher.onReady;
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -323,8 +323,8 @@ class HotRunner extends ResidentRunner {
         return UpdateFSReport(success: false);
     }
 
-    final List<String> invalidatedFiles = watcher.invalidatedFiles.toList();
-    watcher.invalidatedFiles.clear();
+    final List<String> invalidatedFiles = _projectWatcher.invalidatedFiles.toList();
+    _projectWatcher.invalidatedFiles.clear();
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -921,9 +921,16 @@ class HotRunner extends ResidentRunner {
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }
+
+  @override
+  void dispose() {
+    _projectWatcher.dispose();
+  }
 }
 
-// Watches non pubspec dependencies from the .packages file for changes.
+/// Watches non pubspec dependencies from the .packages file for changes.
+///
+/// To release directory watchers call [dispose].
 class ProjectWatcher {
   ProjectWatcher(String projectDirectory, String packagesPath) {
     final String projectPath = projectDirectory ?? fs.currentDirectory.path;
@@ -931,9 +938,6 @@ class ProjectWatcher {
       return;
     }
     final List<Future<void>> _watchersReady = <Future<void>>[];
-    final Watcher watcher = DirectoryWatcher(projectPath);
-    watcher.events.listen(_onWatchEvent);
-    _watchersReady.add(watcher.ready);
     final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
     for (String dependency in packageMap.keys) {
       final String scriptPath = packageMap[dependency].path;
@@ -942,10 +946,11 @@ class ProjectWatcher {
         continue;
       }
       if (!fs.directory(scriptUri).existsSync()) {
+        printError('$dependency: $scriptUri could not be found.');
         continue;
       }
       final Watcher watcher = DirectoryWatcher(scriptUri);
-      watcher.events.listen(_onWatchEvent);
+      _watchers.add(watcher.events.listen(_onWatchEvent));
       _watchersReady.add(watcher.ready);
     }
     _onReady = Future.wait(_watchersReady);
@@ -960,12 +965,25 @@ class ProjectWatcher {
   // update to .packages
   static const String pubCachePath = '.pub-cache';
 
-  final List<String> invalidatedFiles = <String>[];
+  final Set<String> invalidatedFiles = <String>{};
+  final List<StreamSubscription<WatchEvent>> _watchers = <StreamSubscription<WatchEvent>>[];
 
   void _onWatchEvent(WatchEvent watchEvent) {
-    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.trimRight().endsWith('dart')) {
+    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.endsWith('dart')) {
       return;
     }
-    invalidatedFiles.add(watchEvent.path);
+    // Invalidated files expects a file uri.
+    if (platform.isWindows) {
+      final String fileUri = 'file:///' + watchEvent.path.replaceAll(r'\', r'/');
+      invalidatedFiles.add(fileUri);
+    } else {
+      invalidatedFiles.add(watchEvent.path);
+    }
+  }
+
+  void dispose() {
+    for (StreamSubscription<WatchEvent> subscription in _watchers) {
+      subscription.cancel();
+    }
   }
 }
