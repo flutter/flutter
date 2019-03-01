@@ -31,6 +31,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   // Value that is shown in the date picker in dateAndTime mode.
   DateTime dateTime = DateTime.now();
 
+  // Controller that is used in the time picker.
   CupertinoTimerPickerController timerPickerController;
 
   @override
