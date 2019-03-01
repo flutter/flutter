@@ -11,11 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -32.0);
 
 void main() {
-  testWidgets('time picker scrolls to 00:00:00 after reset', (WidgetTester tester) async {
-    const Duration animationTime = Duration(milliseconds: 200);
-    final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
-    );
-    Duration duration;
+  testWidgets('time picker scrolls to 0h, 0m, 0s after reset', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 200);
+    final CupertinoTimerPickerController controller = CupertinoTimerPickerController();
+
+    Duration currentPickerTime;
     await tester.pumpWidget(
       CupertinoApp(
         home: Padding(
@@ -23,42 +23,54 @@ void main() {
           child: Column(
             children: <Widget>[
               Container(
-                height: 300,
+                height: 300.0,
                 child: CupertinoTimerPicker(
-                  resetAnimationDuration: animationTime,
+                  resetAnimationDuration: animationDuration,
                   controller: controller,
-                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                  onTimerDurationChanged: (Duration newDuration) { currentPickerTime = newDuration; },
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+
+    // Expect that the initial value of the picker is 0h, 0m, 0s.
+    expect(
+      tester.getTopLeft(find.text('0').first).dy,
+      tester.getTopLeft(find.text('0').at(1)).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('0').first).dy,
+      tester.getTopLeft(find.text('0').last).dy,
     );
 
     // Each drag scrolls the first, middle or last picker to the value 2, 3 or 4,
     // respectively.
-    await tester.drag(find.text('0').first, _kRowOffset * 2);
-    await tester.drag(find.text('0').at(1), _kRowOffset * 3);
-    await tester.drag(find.text('0').last, _kRowOffset * 4);
+    await tester.drag(find.text('0').first, _kRowOffset * 2.0);
+    await tester.drag(find.text('0').at(1), _kRowOffset * 3.0);
+    await tester.drag(find.text('0').last, _kRowOffset * 4.0);
 
-    expect(duration, const Duration(hours: 2, minutes: 3, seconds: 4));
+    expect(currentPickerTime, const Duration(hours: 2, minutes: 3, seconds: 4));
 
     // This line resets the controller to the a time of 00:00:00.
-    controller.duration = Duration.zero;
+    controller.targetDuration = Duration.zero;
     await tester.pump();
-    await tester.pump(animationTime);
+    await tester.pump(animationDuration);
 
-    expect(duration, const Duration());
+    expect(currentPickerTime, const Duration());
   });
 
-  testWidgets('time picker scrolls to initial duration after reset', (WidgetTester tester) async {
-    const Duration animationTime = Duration(milliseconds: 200);
+  testWidgets('time picker scrolls to initial duration after being set', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 200);
     const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
     final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
-      targetTimerDuration: initialDuration,
+      initialTimerDuration: initialDuration,
     );
-    Duration duration;
+
+    Duration currentPickerTime;
     await tester.pumpWidget(
       CupertinoApp(
         home: Padding(
@@ -66,11 +78,11 @@ void main() {
           child: Column(
             children: <Widget>[
               Container(
-                height: 300,
+                height: 300.0,
                 child: CupertinoTimerPicker(
                   controller: controller,
-                  resetAnimationDuration: animationTime,
-                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                  resetAnimationDuration: animationDuration,
+                  onTimerDurationChanged: (Duration newDuration) { currentPickerTime = newDuration; },
                 ),
               ),
             ],
@@ -79,26 +91,40 @@ void main() {
       ),
     );
 
-    await tester.drag(find.text('5'), _kRowOffset * 2);
-    await tester.drag(find.text('45'), _kRowOffset * 3);
-    await tester.drag(find.text('23'), _kRowOffset * 4);
+    // Expect that the initial value of the picker is 5h, 45m, 23s.
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('45')).dy,
+    );
 
-    expect(duration, const Duration(hours: 7, minutes: 48, seconds: 27));
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('23')).dy,
+    );
 
-    controller.duration = initialDuration;
+    // Each drag scrolls the first, middle or last picker to the value 7, 48 or 27,
+    // respectively.
+    await tester.drag(find.text('5'), _kRowOffset * 2.0);
+    await tester.drag(find.text('45'), _kRowOffset * 3.0);
+    await tester.drag(find.text('23'), _kRowOffset * 4.0);
+
+    expect(currentPickerTime, const Duration(hours: 7, minutes: 48, seconds: 27));
+
+    // Reset the picker to the initial duration of 5:25:23.
+    controller.targetDuration = initialDuration;
     await tester.pump();
-    await tester.pump(animationTime);
+    await tester.pump(animationDuration);
 
-    expect(duration, initialDuration);
+    expect(currentPickerTime, initialDuration);
   });
 
   testWidgets('time picker scrolls to desired duration after set', (WidgetTester tester) async {
     const Duration animationDuration = Duration(milliseconds: 200);
     const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
     final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
-      targetTimerDuration: initialDuration,
+      initialTimerDuration: initialDuration,
     );
-    Duration duration;
+    Duration currentPickerTime;
     await tester.pumpWidget(
       CupertinoApp(
         home: Padding(
@@ -106,11 +132,11 @@ void main() {
           child: Column(
             children: <Widget>[
               Container(
-                height: 300,
+                height: 300.0,
                 child: CupertinoTimerPicker(
                   resetAnimationDuration: animationDuration,
                   controller: controller,
-                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                  onTimerDurationChanged: (Duration newDuration) { currentPickerTime = newDuration; },
                 ),
               ),
             ],
@@ -119,22 +145,36 @@ void main() {
       ),
     );
 
+    // Expect that the initial value of the picker is 5h, 45m, 23s.
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('45')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('23')).dy,
+    );
+
     const Duration desiredDuration = Duration(hours: 10, seconds: 34, minutes: 10);
 
-    controller.duration = desiredDuration;
+    // Set the picker to the new duration of 10:34:10.
+    controller.targetDuration = desiredDuration;
     await tester.pump();
     await tester.pump(animationDuration);
 
-    expect(duration, desiredDuration);
+    expect(currentPickerTime, desiredDuration);
   });
 
   testWidgets('Listeners fire as expected when setting new controllers to the widget', (WidgetTester tester) async {
     const Duration animationDuration = Duration(milliseconds: 200);
     const Duration initialDuration = Duration(hours: 5, minutes: 45, seconds: 23);
+
     final CupertinoTimerPickerController controller = CupertinoTimerPickerController(
-      targetTimerDuration: initialDuration,
+      initialTimerDuration: initialDuration,
     );
-    Duration duration;
+
+    Duration currentPickerTime;
     await tester.pumpWidget(
       CupertinoApp(
         home: Padding(
@@ -142,30 +182,41 @@ void main() {
           child: Column(
             children: <Widget>[
               Container(
-                height: 300,
+                height: 300.0,
                 child: CupertinoTimerPicker(
                   resetAnimationDuration: animationDuration,
                   controller: controller,
-                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                  onTimerDurationChanged: (Duration newDuration) { currentPickerTime = newDuration; },
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+
+    // Expect that the initial value of the picker is 5h, 45m, 23s.
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('45')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('5')).dy,
+      tester.getTopLeft(find.text('23')).dy,
     );
 
     const Duration desiredDuration = Duration(hours: 10, seconds: 34, minutes: 10);
 
-    controller.duration = desiredDuration;
+    controller.targetDuration = desiredDuration;
     await tester.pump();
     await tester.pump(animationDuration);
 
-    expect(duration, desiredDuration);
+    expect(currentPickerTime, desiredDuration);
 
-    const Duration initialDuration2 = Duration(hours: 1, minutes: 2, seconds: 4);
-    final CupertinoTimerPickerController controller2 = CupertinoTimerPickerController(
-      targetTimerDuration: initialDuration2,
+    const Duration secondDuration = Duration(hours: 15, minutes: 25, seconds: 45);
+    final CupertinoTimerPickerController secondController = CupertinoTimerPickerController(
+      initialTimerDuration: secondDuration,
     );
 
     await tester.pumpWidget(
@@ -175,11 +226,11 @@ void main() {
           child: Column(
             children: <Widget>[
               Container(
-                height: 300,
+                height: 300.0,
                 child: CupertinoTimerPicker(
                   resetAnimationDuration: animationDuration,
-                  controller: controller2,
-                  onTimerDurationChanged: (Duration newDuration) { duration = newDuration; },
+                  controller: secondController,
+                  onTimerDurationChanged: (Duration newDuration) { currentPickerTime = newDuration; },
                 ),
               ),
             ],
@@ -187,13 +238,43 @@ void main() {
         ),
       ),
     );
-    const Duration desiredDuration2 = Duration(hours: 6, seconds: 7, minutes: 8);
 
-    controller.duration = desiredDuration2;
+    // Expect that the initial value of the picker is 15h, 20m, 40s.
+    expect(
+      tester.getTopLeft(find.text('15')).dy,
+      tester.getTopLeft(find.text('25')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('25')).dy,
+      tester.getTopLeft(find.text('45')).dy,
+    );
+
+    const Duration secondDesiredDuration = Duration(hours: 6, seconds: 7, minutes: 8);
+
+    // Set the original controller to the second desired duration.
+    controller.targetDuration = secondDesiredDuration;
     await tester.pump();
     await tester.pump(animationDuration);
 
-    expect(duration, desiredDuration2);
+    // Expect that the picker value doesn't change after setting the old controller.
+    expect(
+      tester.getTopLeft(find.text('15')).dy,
+      tester.getTopLeft(find.text('25')).dy,
+    );
+
+    expect(
+      tester.getTopLeft(find.text('25')).dy,
+      tester.getTopLeft(find.text('45')).dy,
+    );
+
+    secondController.targetDuration = secondDesiredDuration;
+    await tester.pump();
+    await tester.pump(animationDuration);
+
+    // Expect that the picker is now the second desired duration after setting
+    // the second controller's duration to the second desired duration.
+    expect(currentPickerTime, secondDesiredDuration);
   });
 
   group('Countdown timer picker', () {
@@ -207,25 +288,25 @@ void main() {
     });
 
     testWidgets('initialTimerDuration falls within limit', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+      await tester.pumpWidget(
+        CupertinoTimerPicker(
+          onTimerDurationChanged: (_) {},
+          controller: CupertinoTimerPickerController(
             initialTimerDuration: const Duration(days: 1),
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+      expect(tester.takeException(), isAssertionError);
 
-      expect(
-        () {
-          CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+      await tester.pumpWidget(
+        CupertinoTimerPicker(
+          onTimerDurationChanged: (_) {},
+          controller: CupertinoTimerPickerController(
             initialTimerDuration: const Duration(seconds: -1),
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+      expect(tester.takeException(), isAssertionError);
     });
 
     testWidgets('minuteInterval is positive and is a factor of 60', (WidgetTester tester) async {
@@ -293,7 +374,9 @@ void main() {
         CupertinoApp(
           home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
-            initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+            controller: CupertinoTimerPickerController(
+              initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+            ),
           ),
         ),
       );
@@ -322,7 +405,9 @@ void main() {
             textDirection: TextDirection.rtl,
             child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
-              initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              controller: CupertinoTimerPickerController(
+                initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              ),
             ),
           ),
         ),
@@ -353,7 +438,9 @@ void main() {
             width: 400.0,
             child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
-              initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              controller: CupertinoTimerPickerController(
+                initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              ),
             ),
           ),
         ),
@@ -370,7 +457,9 @@ void main() {
             width: 800.0,
             child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
-              initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              controller: CupertinoTimerPickerController(
+                initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+              ),
             ),
           ),
         ),
@@ -394,7 +483,9 @@ void main() {
           child: CupertinoTimerPicker(
             minuteInterval: 10,
             secondInterval: 15,
-            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 45),
+            controller: CupertinoTimerPickerController(
+              initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 45),
+            ),
             mode: CupertinoTimerPickerMode.hms,
             onTimerDurationChanged: (Duration d) {
               duration = d;
