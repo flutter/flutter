@@ -291,8 +291,6 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
   if (state == "AppLifecycleState.resumed" && have_surface_) {
     ScheduleFrame();
   }
-  runtime_controller_->SetLifecycleState(state);
-  // We always want pass the message forwards directly into the framework.
   return false;
 }
 
