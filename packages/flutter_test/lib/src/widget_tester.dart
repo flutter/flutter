@@ -49,8 +49,10 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s). The default timeout is defined at
-/// [TestWidgetsFlutterBinding.defaultTestTimeout]. To increase
-/// timeout, use [WidgetTester.binding.addTime].
+/// [TestWidgetsFlutterBinding.defaultTestTimeout]. To change
+/// timeout, either pass it as an argument after `callback`,
+/// e.g. `{timeout: Duration(seconds: 5)}`
+/// or use [WidgetTester.binding.addTime].
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
