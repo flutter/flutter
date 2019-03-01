@@ -20,6 +20,8 @@ import 'transitions.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
 
+/// A duration that controls how often the drag selection update callback is
+/// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 /// Which type of selection handle to be displayed.
@@ -78,6 +80,10 @@ typedef DragSelectionStartCallback = void Function(DragStartDetails details);
 ///
 /// The second argument [updateDetails] contains the details of the current
 /// pointer movement. It's the same as the one passed to [DragGestureRecognizer.onUpdate].
+///
+/// This signature is different from [GestureDragUpdateCallback] to make it
+/// easier for various text fields to use [TextSelectionGestureDetector] without
+/// having to store the start position.
 typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
 
 /// Signature for when a pointer that has been dragging to select text is no
@@ -721,6 +727,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   @override
   void dispose() {
     _doubleTapTimer?.cancel();
+    _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
 
@@ -765,6 +772,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   DragStartDetails _lastDragStartDetails;
+  DragUpdateDetails _lastDragUpdateDetails;
+  Timer _dragUpdateThrottleTimer;
 
   void _handleDragStart(DragStartDetails details) {
     assert(_lastDragStartDetails == null);
@@ -774,37 +783,40 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  Timer _dragUpdateTimer;
-  DragUpdateDetails _lastDragUpdateDetails;
-
   void _handleDragUpdate(DragUpdateDetails details) {
     _lastDragUpdateDetails = details;
     // Only schedule a new timer if there's no one pending.
-    _dragUpdateTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
+    _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
   }
 
+  /// Drag updates are being throttled to avoid excessive text layouts in text
+  /// fields. The frequency of invocations is controlled by the constant
+  /// [_kDragSelectionUpdateThrottle].
+  ///
+  /// Once the drag gesture ends, any pending drag update will be fired
+  /// immediately. See [_handleDragEnd].
   void _handleDragUpdateThrottled() {
     assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
     if (widget.onDragSelectionUpdate != null) {
       widget.onDragSelectionUpdate(_lastDragStartDetails, _lastDragUpdateDetails);
     }
-    _dragUpdateTimer = null;
+    _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(_lastDragStartDetails != null);
-    if (_dragUpdateTimer != null) {
+    if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
-      _dragUpdateTimer.cancel();
+      _dragUpdateThrottleTimer.cancel();
       _handleDragUpdateThrottled();
     }
     if (widget.onDragSelectionEnd != null) {
       widget.onDragSelectionEnd(details);
     }
-    _dragUpdateTimer = null;
+    _dragUpdateThrottleTimer = null;
     _lastDragStartDetails = null;
     _lastDragUpdateDetails = null;
   }
@@ -887,6 +899,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
       // TODO(mdebbar): Support dragging in any direction (for multiline text).
+      // https://github.com/flutter/flutter/issues/28676
       gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
             () => HorizontalDragGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.mouse),
             (HorizontalDragGestureRecognizer instance) {

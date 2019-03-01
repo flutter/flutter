@@ -58,13 +58,23 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   ///
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
-  GestureRecognizer({ this.debugOwner });
+  ///
+  /// {@template flutter.gestures.gestureRecognizer.kind}
+  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
+  /// by providing the optional [kind] argument. If [kind] is null,
+  /// the recognizer will accept pointer events from all device kinds.
+  /// {@endtemplate}
+  GestureRecognizer({ this.debugOwner, PointerDeviceKind kind }) : _kind = kind;
 
   /// The recognizer's owner.
   ///
   /// This is used in the [toString] serialization to report the object for which
   /// this gesture recognizer was created, to aid in debugging.
   final Object debugOwner;
+
+  /// The kind of device that's allowed to be recognized. If null, events from
+  /// all device kinds will be tracked and recognized.
+  final PointerDeviceKind _kind;
 
   /// Registers a new pointer that might be relevant to this gesture
   /// detector.
@@ -78,7 +88,43 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// subsequent events for this pointer, and to add the pointer to
   /// the global gesture arena manager (see [GestureArenaManager]) to track
   /// that pointer.
-  void addPointer(PointerDownEvent event);
+  ///
+  /// IMPORTANT: This method is called for each and all pointers being added. In
+  /// most cases, you want to override [addAllowedPointer].
+  void addPointer(PointerDownEvent event) {
+    if (isPointerAllowed(event)) {
+      addAllowedPointer(event);
+    } else {
+      handleNonAllowedPointer(event);
+    }
+  }
+
+  /// Registers a new pointer that's been checked to be allowed by this gesture
+  /// recognizer.
+  ///
+  /// Subclasses of [OneSequenceGestureRecognizer] are supposed to override this
+  /// method instead of [addPointer] because [addPointer] will be called for each
+  /// pointer being added while [addAllowedPointer] is only called for pointers
+  /// that are allowed by this recognizer.
+  @protected
+  void addAllowedPointer(PointerDownEvent event) { }
+
+  /// Handles a pointer being added that's not allowed by this recognizer.
+  ///
+  /// Subclasses can override this method and reject the gesture.
+  ///
+  /// See:
+  /// - [OneSequenceGestureRecognizer.handleNonAllowedPointer].
+  @protected
+  void handleNonAllowedPointer(PointerDownEvent event) { }
+
+  /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
+  @protected
+  bool isPointerAllowed(PointerDownEvent event) {
+    // Currently, it only checks for device kind. But in the future we could check
+    // for other things e.g. mouse button.
+    return _kind == null || _kind == event.kind;
+  }
 
   /// Releases any resources used by the object.
   ///
@@ -152,48 +198,18 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
   ///
-  /// {@template flutter.gestures.oneSequenceGestureRecognizer.kind}
-  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
-  /// by providing the optional [kind] argument. If [kind] is null,
-  /// the recognizer will accept pointer events from all device kinds.
-  /// {@endtemplate}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   OneSequenceGestureRecognizer({
     Object debugOwner,
-    @required PointerDeviceKind kind,
-  }) :  _kind = kind,
-        super(debugOwner: debugOwner);
-
-  /// The kind of device that's allowed to be recognized. If null, events from
-  /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind _kind;
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
 
   @override
-  void addPointer(PointerDownEvent event) {
-    if (isPointerAllowed(event)) {
-      addAllowedPointer(event);
-    } else {
-      resolve(GestureDisposition.rejected);
-    }
-  }
-
-  /// Registers a new pointer that's been checked to be allowed by this gesture
-  /// recognizer.
-  ///
-  /// Subclasses of [OneSequenceGestureRecognizer] are supposed to override this
-  /// method instead of [addPointer] because [addPointer] will be called for each
-  /// pointer being added while [addAllowedPointer] is only called for pointers
-  /// that are allowed by this recognizer.
-  @protected
-  void addAllowedPointer(PointerDownEvent event) { }
-
-  /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
-  bool isPointerAllowed(PointerDownEvent event) {
-    // Currently, it only checks for device kind. But in the future we could check
-    // for other things e.g. mouse button.
-    return _kind == null || _kind == event.kind;
+  void handleNonAllowedPointer(PointerDownEvent event) {
+    resolve(GestureDisposition.rejected);
   }
 
   /// Called when a pointer event is routed to this recognizer.
@@ -332,7 +348,7 @@ enum GestureRecognizerState {
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,

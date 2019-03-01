@@ -117,7 +117,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// to 1.0 for values of `pressure` that are between `pressureMin` and
   /// `pressureMax`.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,

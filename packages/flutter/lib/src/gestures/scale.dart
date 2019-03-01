@@ -184,7 +184,7 @@ class _LineBetweenPointers{
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   ScaleGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,

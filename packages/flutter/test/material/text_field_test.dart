@@ -537,11 +537,11 @@ void main() {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
-        overlay(
-          child: TextField(
-            controller: controller,
-          ),
-        )
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
     );
 
     const String testValue = 'abc def ghi';

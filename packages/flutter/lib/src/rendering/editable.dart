@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble;
 
@@ -59,7 +58,6 @@ enum SelectionChangedCause {
 
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
-  /// [QUESTION]: Should we call it `drag` instead of `mouse`?
   drag,
 }
 

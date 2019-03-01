@@ -709,8 +709,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleDragSelectionStart(DragStartDetails details) {
     _renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.drag);
+      from: details.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
     _startSplash(details.globalPosition);
   }
 
@@ -719,9 +720,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       DragUpdateDetails updateDetails,
   ) {
     _renderEditable.selectPositionAt(
-        from: startDetails.globalPosition,
-        to: updateDetails.globalPosition,
-        cause: SelectionChangedCause.drag);
+      from: startDetails.globalPosition,
+      to: updateDetails.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
   }
 
   void _startSplash(Offset globalPosition) {

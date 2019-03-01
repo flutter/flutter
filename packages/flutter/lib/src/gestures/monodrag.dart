@@ -53,7 +53,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// [dragStartBehavior] must not be null.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   DragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
@@ -300,7 +300,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   VerticalDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
@@ -339,7 +339,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
-  /// {@macro flutter.gestures.oneSequenceGestureRecognizer.kind}
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   HorizontalDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
