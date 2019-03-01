@@ -317,6 +317,7 @@ class TextStyle extends Diagnosticable {
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
+    this.decorationThickness,
     this.debugLabel,
     String fontFamily,
     List<String> fontFamilyFallback,
@@ -490,6 +491,10 @@ class TextStyle extends Diagnosticable {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
+  /// The thickness of the decoration as a muliplier of the thickness specified
+  /// by the font.
+  final double decorationThickness;
+
   /// A human-readable description of this text style.
   ///
   /// This property is maintained only in debug builds.
@@ -540,6 +545,7 @@ class TextStyle extends Diagnosticable {
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
+    double decorationThickness,
     String debugLabel,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
@@ -570,6 +576,7 @@ class TextStyle extends Diagnosticable {
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
+      decorationThickness: decorationThickness ?? this.decorationThickness,
       debugLabel: newDebugLabel,
     );
   }
@@ -609,6 +616,8 @@ class TextStyle extends Diagnosticable {
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
+    double decorationThicknessFactor = 1.0,
+    double decorationThicknessDelta = 0.0,
     String fontFamily,
     List<String> fontFamilyFallback,
     double fontSizeFactor = 1.0,
@@ -635,6 +644,9 @@ class TextStyle extends Diagnosticable {
     assert(heightFactor != null);
     assert(heightDelta != null);
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
+    assert(decorationThicknessFactor != null);
+    assert(decorationThicknessDelta != null);
+    assert(decorationThickness != null || (decorationThicknessFactor == 1.0 && decorationThicknessDelta == 0.0));
 
     String modifiedDebugLabel;
     assert(() {
@@ -663,6 +675,7 @@ class TextStyle extends Diagnosticable {
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
+      decorationThickness: decorationThickness == null ? null : decorationThickness * decorationThicknessFactor + decorationThicknessDelta,
       debugLabel: modifiedDebugLabel,
     );
   }
@@ -720,6 +733,7 @@ class TextStyle extends Diagnosticable {
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
+      decorationThickness: other.decorationThickness,
       debugLabel: mergedDebugLabel,
     );
   }
@@ -771,6 +785,7 @@ class TextStyle extends Diagnosticable {
         shadows: t < 0.5 ? null : b.shadows,
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
+        decorationThickness: t < 0.5 ? null : b.decorationThickness,
         debugLabel: lerpDebugLabel,
       );
     }
@@ -796,6 +811,7 @@ class TextStyle extends Diagnosticable {
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
+        decorationThickness: t < 0.5 ? a.decorationThickness : null,
         debugLabel: lerpDebugLabel,
       );
     }
@@ -828,6 +844,7 @@ class TextStyle extends Diagnosticable {
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
+      decorationThickness: ui.lerpDouble(a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
       debugLabel: lerpDebugLabel,
     );
   }
@@ -839,6 +856,7 @@ class TextStyle extends Diagnosticable {
       decoration: decoration,
       decorationColor: decorationColor,
       decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       textBaseline: textBaseline,
@@ -936,7 +954,8 @@ class TextStyle extends Diagnosticable {
         backgroundColor != other.backgroundColor ||
         decoration != other.decoration ||
         decorationColor != other.decorationColor ||
-        decorationStyle != other.decorationStyle)
+        decorationStyle != other.decorationStyle ||
+        decorationThickness != other.decorationThickness)
       return RenderComparison.paint;
     return RenderComparison.identical;
   }
@@ -965,6 +984,7 @@ class TextStyle extends Diagnosticable {
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
+           decorationThickness == typedOther.decorationThickness &&
            listEquals(shadows, typedOther.shadows) &&
            listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
   }
@@ -1030,7 +1050,7 @@ class TextStyle extends Diagnosticable {
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
-    if (decoration != null || decorationColor != null || decorationStyle != null) {
+    if (decoration != null || decorationColor != null || decorationStyle != null || decorationThickness != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
         decorationDescription.add(describeEnum(decorationStyle));
@@ -1050,6 +1070,7 @@ class TextStyle extends Diagnosticable {
         decorationDescription.add('$decoration');
       assert(decorationDescription.isNotEmpty);
       styles.add(MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
+      styles.add(DoubleProperty('${prefix}decorationThickness', decorationThickness, unit: 'x', defaultValue: null));
     }
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
