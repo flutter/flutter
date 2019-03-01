@@ -39,7 +39,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// in the middle of an animation or interaction. In that case, set
   /// [shaderWarmUp] to a custom [ShaderWarmUp] before calling [initInstances]
   /// (usually before [runApp] for normal Flutter apps, and before
-  /// [enableFlutterDriverExtension] for Flutter drive tests). Paint the scene
+  /// [enableFlutterDriverExtension] for Flutter driver tests). Paint the scene
   /// in the custom [ShaderWarmUp] so Flutter can pre-compile and cache the
   /// shaders during startup. The warm up is only costly (100ms-200ms,
   /// depending on the shaders to compile) during the first run after the
