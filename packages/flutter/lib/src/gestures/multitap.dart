@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' show Offset;
+import 'package:meta/meta.dart' show required;
 
 import 'arena.dart';
 import 'binding.dart';
@@ -35,7 +36,8 @@ typedef GestureMultiTapCancelCallback = void Function(int pointer);
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
 class _CountdownZoned {
-  _CountdownZoned({ Duration duration }) {
+   _CountdownZoned({ @required Duration duration }) : 
+      assert(duration != null) {
     _timer = Timer(duration, _onTimeout);
   }
 
@@ -52,8 +54,13 @@ class _CountdownZoned {
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
 class _TapTracker {
-  _TapTracker({ PointerDownEvent event, this.entry, Duration doubleTapMinTime })
-    : pointer = event.pointer,
+  _TapTracker({
+    PointerDownEvent event,
+    this.entry,
+    @required Duration doubleTapMinTime,
+  })
+    : assert(doubleTapMinTime != null),
+      pointer = event.pointer,
       _initialPosition = event.position,
       _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
@@ -270,7 +277,8 @@ class _TapGesture extends _TapTracker {
   }) : _lastPosition = event.position,
        super(
     event: event,
-    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
+    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
+    doubleTapMinTime: kDoubleTapMinTime,
   ) {
     startTrackingPointer(handleEvent);
     if (longTapDelay > Duration.zero) {
