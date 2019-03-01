@@ -4263,56 +4263,80 @@ class Flexible extends ParentDataWidget<Flex> {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
 /// ```dart
-/// Column(
-///   children: <Widget>[
-///     Container(
-///       color: Colors.red,
-///       height: 20,
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Expanded Column Sample'),
 ///     ),
-///     Expanded(
-///       child: Container(
-///         color: Colors.blue,
+///     body: Center(
+///        child: Column(
+///         children: <Widget>[
+///           Container(
+///             color: Colors.red,
+///             height: 100,
+///             width: 100,
+///           ),
+///           Expanded(
+///             child: Container(
+///               color: Colors.blue,
+///               width: 100,
+///             ),
+///           ),
+///           Container(
+///             color: Colors.red,
+///             height: 100,
+///             width: 100,
+///           ),
+///         ],
 ///       ),
 ///     ),
-///     Container(
-///       color: Colors.red,
-///       height: 50,
-///     ),
-///   ],
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
 /// ```dart
-/// Row(
-///   children: <Widget>[
-///     Expanded(
-///       flex: 2,
-///       child: Container(
-///         color: Colors.red,
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Expanded Row Sample'),
+///     ),
+///     body: Center(
+///       child: Row(
+///         children: <Widget>[
+///           Expanded(
+///             flex: 2,
+///             child: Container(
+///               color: Colors.red,
+///               height: 100,
+///             ),
+///           ),
+///           Container(
+///             color: Colors.blue,
+///             height: 100,
+///             width: 50,
+///           ),
+///           Expanded(
+///             flex: 1,
+///             child: Container(
+///               color: Colors.red,
+///               height: 100,
+///             ),
+///           ),
+///         ],
 ///       ),
 ///     ),
-///     Container(
-///       color: Colors.blue,
-///       width: 50,
-///     ),
-///     Expanded(
-///       flex: 1,
-///       child: Container(
-///         color: Colors.red,
-///       ),
-///     ),
-///   ],
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
