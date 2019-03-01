@@ -26,8 +26,8 @@ const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
-class ProcessRunnerException implements Exception {
-  ProcessRunnerException(this.message, [this.result]);
+class PreparePackageException implements Exception {
+  PreparePackageException(this.message, [this.result]);
 
   final String message;
   final ProcessResult result;
@@ -158,17 +158,17 @@ class ProcessRunner {
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw ProcessRunnerException(message);
+      throw PreparePackageException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw ProcessRunnerException(message);
+      throw PreparePackageException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
-      throw ProcessRunnerException(
+      throw PreparePackageException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),
       );
@@ -194,6 +194,7 @@ class ArchiveCreator {
     this.outputDir,
     this.revision,
     this.branch, {
+    this.strict = true,
     ProcessManager processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
@@ -235,6 +236,11 @@ class ArchiveCreator {
 
   /// The directory to write the output file to.
   final Directory outputDir;
+
+  /// True if the creator should be strict about checking requirements or not.
+  ///
+  /// In strict mode, will insist that the [revision] be a tagged revision.
+  final bool strict;
 
   final Uri _minGitUri = Uri.parse(mingitForWindowsUrl);
   final ProcessRunner _processRunner;
@@ -285,10 +291,29 @@ class ArchiveCreator {
     return _outputFile;
   }
 
-  /// Returns the version number of this release, according the to tags in
-  /// the repo.
+  /// Returns the version number of this release, according the to tags in the
+  /// repo.
+  ///
+  /// This looks for the tag attached to [revision] and, if it doesn't find one,
+  /// git will give an error.
+  ///
+  /// If [strict] is true, the exact [revision] must be tagged to return the
+  /// version.  If [strict] is not true, will look backwards in time starting at
+  /// [revision] to find the most recent version tag.
   Future<String> _getVersion() async {
-    return _runGit(<String>['describe', '--tags', '--abbrev=0']);
+    if (strict) {
+      try {
+        return _runGit(<String>['describe', '--tags', '--exact-match', revision]);
+      } on PreparePackageException catch (exception) {
+        throw PreparePackageException(
+          'Git error when checking for a version tag attached to revision $revision.\n'
+          'Perhaps there is no tag at that revision?:\n'
+          '$exception'
+        );
+      }
+    } else {
+      return _runGit(<String>['describe', '--tags', '--abbrev=0', revision]);
+    }
   }
 
   /// Clone the Flutter repo and make sure that the git environment is sane
@@ -525,14 +550,14 @@ class ArchivePublisher {
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
     final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
-      throw ProcessRunnerException('Empty metadata received from server');
+      throw PreparePackageException('Empty metadata received from server');
     }
 
     Map<String, dynamic> jsonData;
     try {
       jsonData = json.decode(currentMetadata);
     } on FormatException catch (e) {
-      throw ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
+      throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
     }
 
     jsonData = await _addRelease(jsonData);
@@ -685,7 +710,7 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final Branch branch = fromBranchName(parsedArguments['branch']);
-  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch);
+  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish']);
   int exitCode = 0;
   String message;
   try {
@@ -701,7 +726,7 @@ Future<void> main(List<String> rawArguments) async {
       );
       await publisher.publishArchive();
     }
-  } on ProcessRunnerException catch (e) {
+  } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
   } catch (e) {
