@@ -18,12 +18,6 @@ import 'edge_insets.dart';
 /// is approximately a gaussian curve instead of a step function as with a
 /// traditional half circle round.
 ///
-/// In an attempt to keep the shape of the rectangle the same regardless of its
-/// dimension (and to avoid clipping of the shape), the radius will
-/// automatically be lessened if its width or height is less than ~3x the
-/// declared radius. The new resulting radius will always be maximal in respect
-/// to the dimensions of the given rectangle.
-///
 /// The ~3 represents twice the ratio (ie. ~3/2) of a corner's declared radius
 /// and the actual height and width of pixels that are manipulated to render it.
 /// For example, if a rectangle had dimensions 80px x 100px, and a corner radius
@@ -93,32 +87,27 @@ class ContinuousStadiumBorder extends ShapeBorder {
     if (side.width > 0.0)
       rect = rect.deflate(side.width / 2.0);
 
-    // The ratio of the declared corner radius to the total affected pixels to
-    // render the corner. For example if the declared radius were 25px then
-    // totalAffectedCornerPixelRatio * 25 (~38) pixels would be affected for
-    // each of the the four corners of the shape.
-    const double totalAffectedCornerPixelRatio = 1.52865;
-
-    // The radius multiplier where the resulting shape will concave with a
-    // height and width of any value.
+    // The ratio of the declared corner radius to the total affected pixels
+    // along each axis to render the corner. For example if the declared radius
+    // were 25px then totalAffectedCornerPixelRatio * 25 (~38) pixels would be
+    // affected along each axis.
+    //
+    // It is also the multiplier where the resulting shape will be convex with
+    // a height and width of any value. Below this value, noticeable clipping
+    // will be seen at large rectangle dimensions.
     //
     // If the shortest side length to radius ratio drops below this value, the
     // radius must be lessened to avoid clipping (ie. concavity) of the shape.
     //
     // This value comes from the website where the other equations and curves
     // were found
-    // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles),
-    // however it represents the ratio of the total 90º curve width or height to
-    // the width or height of the smallest rectangle dimension.
+    // (https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles).
+    const double totalAffectedCornerPixelRatio = 1.52865;
+
+    // The ratio of the radius to the magnitude of pixels on a given side that
+    // are used to construct the two corners.
     const double minimalUnclippedSideToCornerRadiusRatio = 2.0 * totalAffectedCornerPixelRatio;
 
-    // The multiplier of the radius in comparison to the smallest edge length
-    // used to describe the minimum radius for this shape.
-    //
-    // This is multiplier used in the case of an extreme aspect ratio and a
-    // small extent value. It can be less than 'maxMultiplier' because there
-    // are not enough pixels to render the clipping of the shape at this size so
-    // it appears to still be concave (whereas mathematically it's convex).
     const double minimalEdgeLengthSideToCornerRadiusRatio = 1.0 / minimalUnclippedSideToCornerRadiusRatio;
 
     // The maximum aspect ratio of the width and height of the given rect before
@@ -281,10 +270,14 @@ class ContinuousStadiumBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
-        final Paint paint = side.toPaint();
-        canvas.drawPath(path, paint);
-        break;
+        final double width = side.width;
+        if (width != 0.0) {
+          final Path path = getOuterPath(rect, textDirection: textDirection);
+          final Paint paint = side.toPaint();
+          paint.strokeWidth = math.min(width, math.min(rect.width, rect.height) / 2);
+          paint.strokeJoin = StrokeJoin.round;
+          canvas.drawPath(path, paint);
+        }
     }
   }
 
