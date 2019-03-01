@@ -35,7 +35,10 @@ class ChannelCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     switch (argResults.rest.length) {
       case 0:
-        await _listChannels(showAll: argResults['all']);
+        await _listChannels(
+          showAll: argResults['all'],
+          verbose: globalResults['verbose']
+        );
         return null;
       case 1:
         await _switchChannel(argResults.rest[0]);
@@ -45,7 +48,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listChannels({ bool showAll }) async {
+  Future<void> _listChannels({ bool showAll, bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
@@ -59,7 +62,8 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        rawOutput.add(line);
+        if (verbose)
+          rawOutput.add(line);
         final List<String> split = line.split('/');
         if (split.length < 2)
           return null;
@@ -77,8 +81,8 @@ class ChannelCommand extends FlutterCommand {
       },
     );
     if (result != 0) {
-      throwToolExit('List channels failed: $result\n${rawOutput.join('\n')}',
-          exitCode: result);
+      final String details = verbose ? '\n${rawOutput.join('\n')}' : '';
+      throwToolExit('List channels failed: $result$details', exitCode: result);
     }
   }
 
