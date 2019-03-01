@@ -126,7 +126,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   bool get disableShadows => false;
 
   /// Increase the timeout for the current test by the given duration.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [AutomatedTestWidgetsFlutterBinding.addTime]
