@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' show Offset;
-import 'package:meta/meta.dart' show required;
+import 'package:flutter/foundation.dart' show required;
 
 import 'arena.dart';
 import 'binding.dart';
