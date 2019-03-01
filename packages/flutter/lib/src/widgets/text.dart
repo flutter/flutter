@@ -222,6 +222,8 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
+  ///
+  /// The [data] parameter must not be null.
   const Text(this.data, {
     Key key,
     this.style,
@@ -234,11 +236,16 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }) : assert(data != null),
+  }) : assert(
+         data != null,
+         'A non-null String must be provided to a Text widget.',
+       ),
        textSpan = null,
        super(key: key);
 
   /// Creates a text widget with a [TextSpan].
+  ///
+  /// The [textSpan] parameter must not be null.
   const Text.rich(this.textSpan, {
     Key key,
     this.style,
@@ -251,7 +258,10 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }) : assert(textSpan != null),
+  }) : assert(
+         textSpan != null,
+         'A non-null TextSpan must be provided to a Text.rich widget.',
+       ),
        data = null,
        super(key: key);
 
