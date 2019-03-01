@@ -329,7 +329,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       _entries.insertAll(_insertionIndex(below, above), entries);
     });
   }
-  
+
   /// Remove all the entries listed in the given iterable, then reinsert them
   /// into the overlay in the given order.
   ///
