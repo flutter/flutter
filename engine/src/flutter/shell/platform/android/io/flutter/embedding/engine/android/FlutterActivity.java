@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.view.FlutterMain;
 
@@ -130,6 +131,45 @@ public class FlutterActivity extends FragmentActivity {
         getAppBundlePath(),
         FlutterShellArgs.fromIntent(getIntent())
     );
+  }
+
+  @Override
+  public void onPostResume() {
+    super.onPostResume();
+    flutterFragment.onPostResume();
+  }
+
+  @Override
+  protected void onNewIntent(Intent intent) {
+    // Forward Intents to our FlutterFragment in case it cares.
+    flutterFragment.onNewIntent(intent);
+  }
+
+  @Override
+  public void onBackPressed() {
+    flutterFragment.onBackPressed();
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    flutterFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  }
+
+  @Override
+  public void onUserLeaveHint() {
+    flutterFragment.onUserLeaveHint();
+  }
+
+  @Override
+  public void onTrimMemory(int level) {
+    super.onTrimMemory(level);
+    flutterFragment.onTrimMemory(level);
+  }
+
+  @SuppressWarnings("unused")
+  @Nullable
+  protected FlutterEngine getFlutterEngine() {
+    return flutterFragment.getFlutterEngine();
   }
 
   /**

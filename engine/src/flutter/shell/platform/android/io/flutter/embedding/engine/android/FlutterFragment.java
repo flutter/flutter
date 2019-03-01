@@ -6,15 +6,22 @@ package io.flutter.embedding.engine.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.view.FlutterMain;
+
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -25,17 +32,17 @@ import io.flutter.view.FlutterMain;
  * Using a {@code FlutterFragment} requires forwarding a number of calls from an {@code Activity} to
  * ensure that the internal Flutter app behaves as expected:
  * <ol>
- *   <li>{@link Activity#onPostResume()}</li>
- *   <li>{@link Activity#onBackPressed()}</li>
- *   <li>{@link Activity#onRequestPermissionsResult(int, String[], int[])} ()}</li>
- *   <li>{@link Activity#onNewIntent(Intent)} ()}</li>
- *   <li>{@link Activity#onUserLeaveHint()}</li>
- *   <li>{@link Activity#onTrimMemory(int)}</li>
+ *   <li>{@link android.app.Activity#onPostResume()}</li>
+ *   <li>{@link android.app.Activity#onBackPressed()}</li>
+ *   <li>{@link android.app.Activity#onRequestPermissionsResult(int, String[], int[])} ()}</li>
+ *   <li>{@link android.app.Activity#onNewIntent(Intent)} ()}</li>
+ *   <li>{@link android.app.Activity#onUserLeaveHint()}</li>
+ *   <li>{@link android.app.Activity#onTrimMemory(int)}</li>
  * </ol>
  * Additionally, when starting an {@code Activity} for a result from this {@code Fragment}, be sure
  * to invoke {@link Fragment#startActivityForResult(Intent, int)} rather than
- * {@link Activity#startActivityForResult(Intent, int)}. If the {@code Activity} version of the
- * method is invoked then this {@code Fragment} will never receive its
+ * {@link android.app.Activity#startActivityForResult(Intent, int)}. If the {@code Activity} version
+ * of the method is invoked then this {@code Fragment} will never receive its
  * {@link Fragment#onActivityResult(int, int, Intent)} callback.
  * <p>
  * If convenient, consider using a {@link FlutterActivity} instead of a {@code FlutterFragment} to
@@ -151,11 +158,23 @@ public class FlutterFragment extends Fragment {
 
   @Nullable
   private FlutterEngine flutterEngine;
+  @Nullable
+  private FlutterView flutterView;
 
   public FlutterFragment() {
     // Ensure that we at least have an empty Bundle of arguments so that we don't
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
+  }
+
+  /**
+   * The {@link FlutterEngine} that backs the Flutter content presented by this {@code Fragment}.
+   *
+   * @return the {@link FlutterEngine} held by this {@code Fragment}
+   */
+  @Nullable
+  public FlutterEngine getFlutterEngine() {
+    return flutterEngine;
   }
 
   @Override
@@ -206,5 +225,202 @@ public class FlutterFragment extends Fragment {
    */
   protected void onFlutterEngineCreated(@NonNull FlutterEngine flutterEngine) {
     // no-op
+  }
+
+  @Nullable
+  @Override
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    flutterView = new FlutterView(getContext());
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    // TODO(mattcarroll): the following call should exist here, but the plugin system needs to be revamped.
+    //                    The existing attach() method does not know how to handle this kind of FlutterView.
+    //flutterEngine.getPluginRegistry().attach(this, getActivity());
+
+    doInitialFlutterViewRun();
+
+    return flutterView;
+  }
+
+  /**
+   * Starts running Dart within the FlutterView for the first time.
+   *
+   * Reloading/restarting Dart within a given FlutterView is not supported. If this method is
+   * invoked while Dart is already executing then it does nothing.
+   *
+   * {@code flutterEngine} must be non-null when invoking this method.
+   */
+  private void doInitialFlutterViewRun() {
+    if (flutterEngine.getDartExecutor().isExecutingDart()) {
+      // No warning is logged because this situation will happen on every config
+      // change if the developer does not choose to retain the Fragment instance.
+      // So this is expected behavior in many cases.
+      return;
+    }
+
+    // The engine needs to receive the Flutter app's initial route before executing any
+    // Dart code to ensure that the initial route arrives in time to be applied.
+    if (getInitialRoute() != null) {
+      flutterEngine.getNavigationChannel().setInitialRoute(getInitialRoute());
+    }
+
+    // Configure the Dart entrypoint and execute it.
+    DartExecutor.DartEntrypoint entrypoint = new DartExecutor.DartEntrypoint(
+        getResources().getAssets(),
+        getAppBundlePath(),
+        getDartEntrypointFunctionName()
+    );
+    flutterEngine.getDartExecutor().executeDartEntrypoint(entrypoint);
+  }
+
+  /**
+   * Returns the initial route that should be rendered within Flutter, once the Flutter app starts.
+   *
+   * Defaults to {@code null}, which signifies a route of "/" in Flutter.
+   */
+  @Nullable
+  protected String getInitialRoute() {
+    return getArguments().getString(ARG_INITIAL_ROUTE);
+  }
+
+  /**
+   * Returns the file path to the desired Flutter app's bundle of code.
+   *
+   * Defaults to {@link FlutterMain#findAppBundlePath(Context)}.
+   */
+  @NonNull
+  protected String getAppBundlePath() {
+    return getArguments().getString(ARG_APP_BUNDLE_PATH, FlutterMain.findAppBundlePath(getContextCompat()));
+  }
+
+  /**
+   * Returns the name of the Dart method that this {@code FlutterFragment} should execute to
+   * start a Flutter app.
+   *
+   * Defaults to "main".
+   */
+  @NonNull
+  protected String getDartEntrypointFunctionName() {
+    return getArguments().getString(ARG_DART_ENTRYPOINT, "main");
+  }
+
+  // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
+  public void onPostResume() {
+    Log.d(TAG, "onPostResume()");
+    flutterEngine.getLifecycleChannel().appIsResumed();
+  }
+
+  /**
+   * The hardware back button was pressed.
+   *
+   * See {@link android.app.Activity#onBackPressed()}
+   */
+  public void onBackPressed() {
+    Log.d(TAG, "onBackPressed()");
+    if (flutterEngine != null) {
+      flutterEngine.getNavigationChannel().popRoute();
+    } else {
+      Log.w(TAG, "Invoked onBackPressed() before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * The result of a permission request has been received.
+   *
+   * See {@link android.app.Activity#onRequestPermissionsResult(int, String[], int[])}
+   *
+   * @param requestCode identifier passed with the initial permission request
+   * @param permissions permissions that were requested
+   * @param grantResults permission grants or denials
+   */
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (flutterEngine != null) {
+      flutterEngine.getPluginRegistry().onRequestPermissionsResult(requestCode, permissions, grantResults);
+    } else {
+      Log.w(TAG, "onRequestPermissionResult() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * A new Intent was received by the {@link android.app.Activity} that currently owns this
+   * {@link Fragment}.
+   *
+   * See {@link android.app.Activity#onNewIntent(Intent)}
+   *
+   * @param intent new Intent
+   */
+  public void onNewIntent(@NonNull Intent intent) {
+    if (flutterEngine != null) {
+      flutterEngine.getPluginRegistry().onNewIntent(intent);
+    } else {
+      Log.w(TAG, "onNewIntent() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * A result has been returned after an invocation of {@link Fragment#startActivityForResult(Intent, int)}.
+   *
+   * @param requestCode request code sent with {@link Fragment#startActivityForResult(Intent, int)}
+   * @param resultCode code representing the result of the {@code Activity} that was launched
+   * @param data any corresponding return data, held within an {@code Intent}
+   */
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (flutterEngine != null) {
+      flutterEngine.getPluginRegistry().onActivityResult(requestCode, resultCode, data);
+    } else {
+      Log.w(TAG, "onActivityResult() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * The {@link android.app.Activity} that owns this {@link Fragment} is about to go to the background
+   * as the result of a user's choice/action, i.e., not as the result of an OS decision.
+   *
+   * See {@link android.app.Activity#onUserLeaveHint()}
+   */
+  public void onUserLeaveHint() {
+    if (flutterEngine != null) {
+      flutterEngine.getPluginRegistry().onUserLeaveHint();
+    } else {
+      Log.w(TAG, "onUserLeaveHint() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * Callback invoked when memory is low.
+   *
+   * This implementation forwards a memory pressure warning to the running Flutter app.
+   *
+   * @param level level
+   */
+  public void onTrimMemory(int level) {
+    if (flutterEngine != null) {
+      // Use a trim level delivered while the application is running so the
+      // framework has a chance to react to the notification.
+      if (level == TRIM_MEMORY_RUNNING_LOW) {
+        flutterEngine.getSystemChannel().sendMemoryPressureWarning();
+      }
+    } else {
+      Log.w(TAG, "onTrimMemory() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * Callback invoked when memory is low.
+   *
+   * This implementation forwards a memory pressure warning to the running Flutter app.
+   */
+  @Override
+  public void onLowMemory() {
+    super.onLowMemory();
+    flutterEngine.getSystemChannel().sendMemoryPressureWarning();
+  }
+
+  @NonNull
+  private Context getContextCompat() {
+    return Build.VERSION.SDK_INT >= 23
+      ? getContext()
+      : getActivity();
   }
 }
