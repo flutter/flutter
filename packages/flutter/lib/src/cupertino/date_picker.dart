@@ -951,7 +951,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 /// picker to a value other than [Duration.zero], there is no need to construct
 /// a controller when using a [CupertinoTimerPicker].
 ///
-/// Used with [CupertinoTimerPicker].
+/// If desired, a single controller can be used with multiple pickers.
 ///
 /// See also:
 ///
@@ -1051,7 +1051,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// The initial duration of the countdown timer.
   @Deprecated('Migration to use a CupertinoTimerPickerControllerController with an'
-              'targetTimerDuration instead of this value.')
+              'initialTimerDuration instead of this value in the widget itself.')
   final Duration initialTimerDuration;
 
   /// The granularity of the minute spinner. Must be a positive integer factor
@@ -1072,6 +1072,10 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// An optional controller used to set the picker to any value including its
   /// initialization state.
+  ///
+  /// With a controller, this picker's duration can be initialized to a non zero
+  /// duration and then set again to any value after the picker's
+  /// initialization.
   final CupertinoTimerPickerController controller;
 
   @override
