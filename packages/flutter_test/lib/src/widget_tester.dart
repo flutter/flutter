@@ -270,7 +270,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///     tester.binding.addTime(const Duration(seconds: ));
   /// ```
   void addTime(Duration duration) {
-    this.binding.addTime(duration);
+    binding.addTime(duration);
   }
 
   /// Triggers a frame after `duration` amount of time.
