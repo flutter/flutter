@@ -31,6 +31,14 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   // Value that is shown in the date picker in dateAndTime mode.
   DateTime dateTime = DateTime.now();
 
+  CupertinoTimerPickerController timerPickerController;
+
+  @override
+  void initState() {
+    super.initState();
+    timerPickerController = CupertinoTimerPickerController(initialTimerDuration: timer);
+  }
+
   Widget _buildMenu(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
@@ -126,7 +134,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoTimerPicker(
-                controller: CupertinoTimerPickerController(desiredTimerDuration: timer),
+                controller: timerPickerController,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
                 },
