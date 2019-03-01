@@ -1946,7 +1946,11 @@ abstract class BuildContext {
   /// widgets will trigger consumers to rebuild when they change. This method is
   /// appropriate when used in interaction event handlers (e.g. gesture
   /// callbacks) or for performing one-off tasks such as asserting that you have
-  /// or don't have a widget of a specific type as an ancestor.
+  /// or don't have a widget of a specific type as an ancestor. The return value
+  /// of a Widget's build method should not depend on the value returned by this
+  /// method, because the build context will not rebuild if the return value of
+  /// this method changes. This could lead to a situation where data used in the
+  /// build method changes, but the widget is not rebuilt.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
