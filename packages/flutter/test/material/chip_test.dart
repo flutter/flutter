@@ -1649,4 +1649,19 @@ void main() {
       const Offset(4, 4),
     ]));
   });
+
+  testWidgets('Chips should use InkWell instead of InkResponse. #28646', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: (){},
+            label: const Text('action chip'),
+          ),
+        ),
+      ),
+    );
+    final Finder inkFinder = find.byType(InkWell);
+    expect(inkFinder, findsOneWidget);
+  });
 }
