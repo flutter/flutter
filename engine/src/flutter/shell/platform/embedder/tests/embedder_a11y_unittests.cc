@@ -158,6 +158,15 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
           ++node_batch_end_count;
         } else {
           ++node_count;
+          ASSERT_EQ(1.0, node->transform.scaleX);
+          ASSERT_EQ(2.0, node->transform.skewX);
+          ASSERT_EQ(3.0, node->transform.transX);
+          ASSERT_EQ(4.0, node->transform.skewY);
+          ASSERT_EQ(5.0, node->transform.scaleY);
+          ASSERT_EQ(6.0, node->transform.transY);
+          ASSERT_EQ(7.0, node->transform.pers0);
+          ASSERT_EQ(8.0, node->transform.pers1);
+          ASSERT_EQ(9.0, node->transform.pers2);
         }
       };
   int action_count = 0;

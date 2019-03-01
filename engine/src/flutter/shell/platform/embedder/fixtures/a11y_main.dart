@@ -2,12 +2,17 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
-Float64List kIdentityTransform = () {
+Float64List kTestTransform = () {
   final Float64List values = Float64List(16);
-  values[0] = 1.0;
-  values[5] = 1.0;
-  values[10] = 1.0;
-  values[15] = 1.0;
+  values[0] = 1.0;  // scaleX
+  values[4] = 2.0;  // skewX
+  values[12] = 3.0; // transX
+  values[1] = 4.0;  // skewY
+  values[5] = 5.0;  // scaleY
+  values[13] = 6.0; // transY
+  values[3] = 7.0;  // pers0
+  values[7] = 8.0;  // pers1
+  values[15] = 9.0; // pers2
   return values;
 }();
 
@@ -68,7 +73,7 @@ main() async {
       id: 42,
       label: 'A: root',
       rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-      transform: kIdentityTransform,
+      transform: kTestTransform,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
     )
@@ -76,13 +81,13 @@ main() async {
       id: 84,
       label: 'B: leaf',
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-      transform: kIdentityTransform,
+      transform: kTestTransform,
     )
     ..updateNode(
       id: 96,
       label: 'C: branch',
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-      transform: kIdentityTransform,
+      transform: kTestTransform,
       childrenInTraversalOrder: Int32List.fromList(<int>[128]),
       childrenInHitTestOrder: Int32List.fromList(<int>[128]),
     )
@@ -90,7 +95,7 @@ main() async {
       id: 128,
       label: 'D: leaf',
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-      transform: kIdentityTransform,
+      transform: kTestTransform,
       additionalActions: Int32List.fromList(<int>[21]),
     )
     ..updateCustomAction(

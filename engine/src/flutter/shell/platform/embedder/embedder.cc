@@ -412,12 +412,18 @@ FlutterEngineResult FlutterEngineRun(size_t version,
          user_data](blink::SemanticsNodeUpdates update) {
           for (const auto& value : update) {
             const auto& node = value.second;
-            const auto& transform = node.transform;
-            auto flutter_transform = FlutterTransformation{
-                transform.get(0, 0), transform.get(0, 1), transform.get(0, 2),
-                transform.get(1, 0), transform.get(1, 1), transform.get(1, 2),
-                transform.get(2, 0), transform.get(2, 1), transform.get(2, 2)};
-            const FlutterSemanticsNode embedder_node = {
+            SkMatrix transform = static_cast<SkMatrix>(node.transform);
+            FlutterTransformation flutter_transform{
+                transform.get(SkMatrix::kMScaleX),
+                transform.get(SkMatrix::kMSkewX),
+                transform.get(SkMatrix::kMTransX),
+                transform.get(SkMatrix::kMSkewY),
+                transform.get(SkMatrix::kMScaleY),
+                transform.get(SkMatrix::kMTransY),
+                transform.get(SkMatrix::kMPersp0),
+                transform.get(SkMatrix::kMPersp1),
+                transform.get(SkMatrix::kMPersp2)};
+            const FlutterSemanticsNode embedder_node{
                 sizeof(FlutterSemanticsNode),
                 node.id,
                 static_cast<FlutterSemanticsFlag>(node.flags),
