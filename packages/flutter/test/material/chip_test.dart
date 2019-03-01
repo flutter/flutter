@@ -1649,4 +1649,19 @@ void main() {
       const Offset(4, 4),
     ]));
   });
+
+  testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28646
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: (){},
+            label: const Text('action chip'),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(InkWell), findsOneWidget);
+  });
 }
