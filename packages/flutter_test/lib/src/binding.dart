@@ -125,11 +125,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
-  /// Abstract method, implemented in [AutomatedTestWidgetsFlutterBinding] only.
-  /// Call this method on [LiveTestWidgetsFlutterBinding] will result in
-  /// [soSuchMethod]
+  /// Increase the timeout for the current test by the given duration.
   /// 
-  /// See:
+  /// See also:
   ///
   ///  * [AutomatedTestWidgetsFlutterBinding.addTime]
   void addTime(Duration duration);
