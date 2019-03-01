@@ -105,6 +105,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(doubleTapRecognized, isFalse);
 
+    tester.async.elapse(const Duration(milliseconds: 100));
     tap.addPointer(down2);
     tester.closeArena(2);
     expect(doubleTapRecognized, isFalse);
@@ -364,6 +365,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(2);
     expect(doubleTapRecognized, isFalse);
 
+    tester.async.elapse(const Duration(milliseconds: 100));
     tap.addPointer(down1);
     tester.closeArena(1);
     expect(doubleTapRecognized, isFalse);
@@ -525,4 +527,83 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('Should not recognize two over-rapid taps', (GestureTester tester) {
+    final DoubleTapGestureRecognizer tap = DoubleTapGestureRecognizer();
+
+    bool doubleTapRecognized = false;
+    tap.onDoubleTap = () {
+      doubleTapRecognized = true;
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    expect(doubleTapRecognized, isFalse);
+    tester.route(down1);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up1);
+    expect(doubleTapRecognized, isFalse);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.async.elapse(const Duration(milliseconds: 10));
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    expect(doubleTapRecognized, isFalse);
+    tester.route(down2);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up2);
+    expect(doubleTapRecognized, isFalse);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(doubleTapRecognized, isFalse);
+
+    tap.dispose();
+  });
+
+  testGesture('Over-rapid taps resets double tap, allowing third tap to be a double-tap', (GestureTester tester) {
+    final DoubleTapGestureRecognizer tap = DoubleTapGestureRecognizer();
+
+    bool doubleTapRecognized = false;
+    tap.onDoubleTap = () {
+      doubleTapRecognized = true;
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    expect(doubleTapRecognized, isFalse);
+    tester.route(down1);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up1);
+    expect(doubleTapRecognized, isFalse);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.async.elapse(const Duration(milliseconds: 10));
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    expect(doubleTapRecognized, isFalse);
+    tester.route(down2);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up2);
+    expect(doubleTapRecognized, isFalse);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.async.elapse(const Duration(milliseconds: 100));
+    tap.addPointer(down5);
+    tester.closeArena(5);
+    expect(doubleTapRecognized, isFalse);
+    tester.route(down5);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up5);
+    expect(doubleTapRecognized, isTrue);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(doubleTapRecognized, isTrue);
+
+    tap.dispose();
+  });
 }

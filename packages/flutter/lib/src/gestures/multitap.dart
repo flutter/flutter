@@ -32,16 +32,37 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
 
+/// StopwatchWithZone tracks whether the specified duration has elapsed since
+/// creation.
+/// It differs from [Stopwatch] for honoring [Zone].
+class _StopwatchWithZone {
+  _StopwatchWithZone({ Duration duration }) {
+    _timer = Timer(duration, _onTimeout);
+  }
+
+  bool _timeout = false;
+  Timer _timer;
+
+  bool get timeout => _timeout;
+
+  void _onTimeout() {
+    _timeout = true;
+  }
+}
+
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
 class _TapTracker {
   _TapTracker({ PointerDownEvent event, this.entry })
     : pointer = event.pointer,
-      _initialPosition = event.position;
+      _initialPosition = event.position,
+      _elapsedTimeWatch = _StopwatchWithZone(duration: kDoubleTapMinTime) {
+  }
 
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialPosition;
+  final _StopwatchWithZone _elapsedTimeWatch;
 
   bool _isTrackingPointer = false;
 
@@ -62,6 +83,10 @@ class _TapTracker {
   bool isWithinTolerance(PointerEvent event, double tolerance) {
     final Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
+  }
+
+  bool hasElapsedAtLeast(Duration minimum) {
+    return _elapsedTimeWatch.timeout;
   }
 }
 
@@ -101,10 +126,17 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
-    // Ignore out-of-bounds second taps.
-    if (_firstTap != null &&
-        !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
-      return;
+    if (_firstTap != null) {
+      // Ignore out-of-bounds second taps.
+      if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
+        return;
+      }
+      // Restart when the second tap is too close to the first
+      else if (!_firstTap.hasElapsedAtLeast(kDoubleTapMinTime)) {
+        _reset();
+        return addPointer(event);
+      }
+    }
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,

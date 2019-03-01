@@ -52,6 +52,7 @@ void main() {
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byType(InkWell), pointer: 3);
 
     expect(log, equals(<String>['double-tap']));
