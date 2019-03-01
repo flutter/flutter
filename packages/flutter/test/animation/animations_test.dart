@@ -23,7 +23,7 @@ void main() {
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
     CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
-      curve: Curves.ease
+      curve: Curves.ease,
     );
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
@@ -38,7 +38,7 @@ void main() {
     curvedAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.ease,
-      reverseCurve: Curves.elasticOut
+      reverseCurve: Curves.elasticOut,
     );
     expect(curvedAnimation, hasOneLineDescription);
     controller.stop();

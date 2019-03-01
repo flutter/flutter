@@ -978,7 +978,7 @@ class ListView extends BoxScrollView {
          addSemanticIndexes: addSemanticIndexes,
          semanticIndexCallback: (Widget _, int index) {
            return index.isEven ? index ~/ 2 : null;
-         }
+         },
        ),
        super(
          key: key,

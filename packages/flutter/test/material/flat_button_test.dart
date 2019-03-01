@@ -41,13 +41,13 @@ void main() {
             child: Container(),
             onPressed: () { /* to make sure the button is enabled */ },
           ),
-        )
+        ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(FlatButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

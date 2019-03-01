@@ -167,7 +167,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
 
@@ -182,7 +182,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
@@ -196,7 +196,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
@@ -210,7 +210,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
@@ -231,7 +231,7 @@ void main() {
           position: forcePressOffset,
           pressure: 0.0,
           pressureMax: 6.0,
-          pressureMin: 0.0
+          pressureMin: 0.0,
       ),
 
     );
@@ -242,7 +242,7 @@ void main() {
         position: Offset(0.0, 0.0),
         pressure: 0.0,
         pressureMin: 0,
-        pressureMax: 1
+        pressureMax: 1,
       )
     );
     await tester.pump(const Duration(milliseconds: 50));
@@ -256,7 +256,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(
@@ -264,7 +264,7 @@ void main() {
       position: Offset(0.0, 0.0),
       pressure: 0.5,
       pressureMin: 0,
-      pressureMax: 1
+      pressureMax: 1,
     ));
     expect(forcePressStartCount, 1);
 

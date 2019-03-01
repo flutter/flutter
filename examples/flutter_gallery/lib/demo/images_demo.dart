@@ -34,7 +34,7 @@ class ImagesDemo extends StatelessWidget {
             ),
           ),
         ),
-      ]
+      ],
     );
   }
 }

@@ -28,7 +28,7 @@ void main() {
         const StringCodec().encodeMessage('hello'),
         (ByteData replyBinary) {
           reply = string.decodeMessage(replyBinary);
-        }
+        },
       );
       expect(reply, equals('hello world'));
     });

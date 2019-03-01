@@ -34,7 +34,7 @@ class LayoutBuilder extends RenderObjectWidget {
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -232,7 +232,7 @@ FlutterErrorDetails _debugReportException(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

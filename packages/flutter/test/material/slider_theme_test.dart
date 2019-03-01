@@ -153,7 +153,7 @@ void main() {
       sliderBox,
       paints
         ..rect(rect: Rect.fromLTRB(16.0, 299.0, 208.0, 301.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -169,7 +169,7 @@ void main() {
       sliderBox,
       paints
         ..rect(rect: Rect.fromLTRB(16.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: Rect.fromLTRB(214.0, 299.0, 784.0, 301.0), color: sliderTheme.disabledInactiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 299.0, 784.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -192,7 +192,7 @@ void main() {
           x: 208.0,
           y: 300.0,
           radius: 6.0,
-        )
+        ),
     );
 
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -215,7 +215,7 @@ void main() {
           x: 208.0,
           y: 300.0,
           radius: 6.0,
-        )
+        ),
     );
 
     await gesture.up();
@@ -230,7 +230,7 @@ void main() {
           x: 208.0,
           y: 300.0,
           radius: 6.0,
-        )
+        ),
     );
   });
 
@@ -261,7 +261,7 @@ void main() {
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.thumbColor, radius: 6.0)
+        ..circle(color: sliderTheme.thumbColor, radius: 6.0),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3, enabled: false));
@@ -274,7 +274,7 @@ void main() {
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
-        ..circle(color: sliderTheme.disabledThumbColor, radius: 4.0)
+        ..circle(color: sliderTheme.disabledThumbColor, radius: 4.0),
     );
   });
 
@@ -329,7 +329,7 @@ void main() {
             const Offset(-15.9, -40.0),
           ],
           excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
-        )
+        ),
     );
 
     await gesture.up();
@@ -351,7 +351,7 @@ void main() {
             const Offset(-35.9, -40.0),
           ],
           excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
-        )
+        ),
     );
     await gesture.up();
 
@@ -372,7 +372,7 @@ void main() {
             const Offset(-16.0, -40.0),
           ],
           excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
-        )
+        ),
     );
     await gesture.up();
 
@@ -393,7 +393,7 @@ void main() {
             const Offset(-98.0, -40.0),
           ],
           excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
-        )
+        ),
     );
     await gesture.up();
 
@@ -419,7 +419,7 @@ void main() {
             const Offset(90.1, -49.0),
             const Offset(-24.1, -49.0),
           ],
-        )
+        ),
     );
     await gesture.up();
 
@@ -445,7 +445,7 @@ void main() {
             const Offset(98.5, -38.8),
             const Offset(-16.1, -38.8),
           ],
-        )
+        ),
     );
     await gesture.up();
   });
@@ -462,7 +462,7 @@ void main() {
       sliderBox,
       paints
         ..rect(rect: Rect.fromLTRB(16.0, 292.0, 208.0, 308.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: Rect.fromLTRB(208.0, 292.0, 784.0, 308.0), color: sliderTheme.inactiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 292.0, 784.0, 308.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -474,7 +474,7 @@ void main() {
       sliderBox,
       paints
         ..rect(rect: Rect.fromLTRB(16.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: Rect.fromLTRB(214.0, 292.0, 784.0, 308.0), color: sliderTheme.disabledInactiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 292.0, 784.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -491,7 +491,7 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 208, y: 300, radius: 7, color: sliderTheme.thumbColor)
+      paints..circle(x: 208, y: 300, radius: 7, color: sliderTheme.thumbColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -499,7 +499,7 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 208, y: 300, radius: 11, color: sliderTheme.disabledThumbColor)
+      paints..circle(x: 208, y: 300, radius: 11, color: sliderTheme.disabledThumbColor),
     );
   });
 
@@ -515,7 +515,7 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 208, y: 300, radius: 9, color: sliderTheme.thumbColor)
+      paints..circle(x: 208, y: 300, radius: 9, color: sliderTheme.thumbColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -525,7 +525,7 @@ void main() {
     // TODO(clocksmith): This ratio will change once thumb sizes are updated to spec.
     expect(
       sliderBox,
-      paints..circle(x: 208, y: 300, radius: 6, color: sliderTheme.disabledThumbColor)
+      paints..circle(x: 208, y: 300, radius: 6, color: sliderTheme.disabledThumbColor),
     );
   });
 
@@ -550,7 +550,7 @@ void main() {
       paints
         ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
-        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor)
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false));
@@ -561,7 +561,7 @@ void main() {
       paints
         ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
-        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor)
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor),
     );
   });
 
@@ -587,7 +587,7 @@ void main() {
         y: center.dy,
         radius: uniqueOverlayRadius,
         color: sliderTheme.overlayColor,
-      )
+      ),
     );
   });
 
@@ -609,7 +609,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
@@ -627,7 +627,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
@@ -648,7 +648,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
@@ -669,7 +669,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
@@ -690,7 +690,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.never,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
@@ -719,7 +719,7 @@ void main() {
         showValueIndicator: ShowValueIndicator.always,
       ),
       value: 0.5,
-      divisions: 4
+      divisions: 4,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));

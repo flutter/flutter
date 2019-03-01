@@ -19,7 +19,7 @@ RaisedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
-  }
+  },
 );
 
 // Create a disabled button.
@@ -27,7 +27,7 @@ RaisedButton(
 // specified or is null.
 const RaisedButton(
   child: Text('BUTTON TITLE'),
-  onPressed: null
+  onPressed: null,
 );
 
 // Create a button with an icon and a
@@ -47,7 +47,7 @@ OutlineButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
-  }
+  },
 );
 
 // Create a disabled button.
@@ -55,7 +55,7 @@ OutlineButton(
 // specified or is null.
 const OutlineButton(
   child: Text('BUTTON TITLE'),
-  onPressed: null
+  onPressed: null,
 );
 
 // Create a button with an icon and a
@@ -75,7 +75,7 @@ FlatButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
-  }
+  },
 );
 
 // Create a disabled button.
@@ -83,7 +83,7 @@ FlatButton(
 // specified or is null.
 const FlatButton(
   child: Text('BUTTON TITLE'),
-  onPressed: null
+  onPressed: null,
 );
 // END
 
@@ -109,7 +109,7 @@ DropdownButton<String>(
         value: value,
         child: Text(value));
     })
-    .toList()
+    .toList(),
 );
 // END
 
@@ -124,7 +124,7 @@ IconButton(
   onPressed: () {
     setState(() => value = !value);
   },
-  color: value ? Theme.of(context).primaryColor : null
+  color: value ? Theme.of(context).primaryColor : null,
 );
 // END
 
@@ -133,12 +133,12 @@ IconButton(
 // Floating action button in Scaffold.
 Scaffold(
   appBar: AppBar(
-    title: const Text('Demo')
+    title: const Text('Demo'),
   ),
   floatingActionButton: const FloatingActionButton(
     child: Icon(Icons.add),
-    onPressed: null
-  )
+    onPressed: null,
+  ),
 );
 // END
   }
@@ -199,26 +199,26 @@ Row(
     Radio<int>(
       value: 0,
       groupValue: radioValue,
-      onChanged: handleRadioValueChanged
+      onChanged: handleRadioValueChanged,
     ),
     Radio<int>(
       value: 1,
       groupValue: radioValue,
-      onChanged: handleRadioValueChanged
+      onChanged: handleRadioValueChanged,
     ),
     Radio<int>(
       value: 2,
       groupValue: radioValue,
-      onChanged: handleRadioValueChanged
-    )
-  ]
+      onChanged: handleRadioValueChanged,
+    ),
+  ],
 );
 
 // Creates a disabled radio button.
 const Radio<int>(
   value: 0,
   groupValue: 0,
-  onChanged: null
+  onChanged: null,
 );
 // END
 
@@ -262,13 +262,13 @@ GridView.count(
     'https://example.com/image-1.jpg',
     'https://example.com/image-2.jpg',
     '...',
-    'https://example.com/image-n.jpg'
+    'https://example.com/image-n.jpg',
   ].map<Widget>((String url) {
     return GridTile(
       footer: GridTileBar(
-        title: Text(url)
+        title: Text(url),
       ),
-      child: Image.network(url, fit: BoxFit.cover)
+      child: Image.network(url, fit: BoxFit.cover),
     );
   }).toList(),
 );

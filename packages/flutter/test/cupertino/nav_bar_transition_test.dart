@@ -463,7 +463,7 @@ void main() {
                               navigationBar: CupertinoNavigationBar(),
                               child: Placeholder(),
                             );
-                          }
+                          },
                         ));
                       },
                     ),

@@ -31,13 +31,13 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    const PopupMenuItem<String>(child: Text('menuItem'))
+                    const PopupMenuItem<String>(child: Text('menuItem')),
                   ];
-                }
+                },
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -100,14 +100,14 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      const PopupMenuItem<String>(child: Text('menuItem'))
+                      const PopupMenuItem<String>(child: Text('menuItem')),
                     ];
-                  }
+                  },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -137,11 +137,11 @@ void main() {
                       child: Text('menuItem'),
                     ),
                   ],
-                )
-              ]
-            )
-          )
-        )
+                ),
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -172,10 +172,10 @@ void main() {
                     child: const Text('SHOW'),
                   );
                 }
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       )
     );
 
@@ -209,10 +209,10 @@ void main() {
                     child: const Text('SHOW'),
                   );
                 }
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       )
     );
 

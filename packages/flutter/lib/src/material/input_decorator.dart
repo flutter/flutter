@@ -1408,7 +1408,7 @@ class _AffixText extends StatelessWidget {
     this.labelIsFloating,
     this.text,
     this.style,
-    this.child
+    this.child,
   });
 
   final bool labelIsFloating;

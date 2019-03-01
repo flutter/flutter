@@ -100,7 +100,7 @@ void main() {
         final Map<String, dynamic> req = <String, dynamic>{
           'id': requestId,
           'method': method,
-          'params': params
+          'params': params,
         };
         final String jsonEncoded = json.encode(<Map<String, dynamic>>[req]);
         print('run:stdin: $jsonEncoded');

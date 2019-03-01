@@ -17,7 +17,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       )),
     ));
@@ -45,7 +45,7 @@ void main() {
       home: Scaffold(appBar: AppBar(
         title: const Text('App Bar Title'),
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       )),
     ));
@@ -85,7 +85,7 @@ void main() {
         actionsIconTheme: actionsIconThemeData,
         textTheme: textTheme,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       )),
     ));
@@ -118,7 +118,7 @@ void main() {
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () {}),
         ],
       )),
     ));
@@ -135,7 +135,7 @@ void main() {
       theme: themeData,
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       )),
     ));
@@ -162,7 +162,7 @@ void main() {
       theme: themeData,
       home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {})
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       )),
     ));
@@ -205,7 +205,7 @@ ThemeData _themeData() {
     primaryColor: Colors.purple,
     brightness: Brightness.dark,
     primaryIconTheme: const IconThemeData(color: Colors.green),
-    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink))
+    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink)),
   );
 }
 

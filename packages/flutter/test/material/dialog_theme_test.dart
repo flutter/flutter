@@ -24,11 +24,11 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
                             return RepaintBoundary(key: _painterKey, child: dialog);
                           },
                         );
-                      }
-                  )
+                      },
+                  ),
               );
             }
-        )
+        ),
     ),
   );
 }
@@ -51,7 +51,7 @@ void main() {
       elevation: 8.0,
       shape: null,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
-      contentTextStyle: TextStyle(color: Color(0xff000000))
+      contentTextStyle: TextStyle(color: Color(0xff000000)),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))

@@ -110,7 +110,7 @@ class MacOSDevice extends Device {
         }
         final String pid = values[1];
         final ProcessResult killResult = await processManager.run(<String>[
-          'kill', pid
+          'kill', pid,
         ]);
         succeeded &= killResult.exitCode == 0;
       }
@@ -145,7 +145,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDevice()
+      MacOSDevice(),
     ];
   }
 

@@ -375,7 +375,7 @@ class Text extends StatelessWidget {
         label: semanticsLabel,
         child: ExcludeSemantics(
           child: result,
-        )
+        ),
       );
     }
     return result;

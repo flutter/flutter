@@ -83,7 +83,7 @@ class PointerRouter {
         informationCollector: (StringBuffer information) {
           information.writeln('Event:');
           information.write('  $event');
-        }
+        },
       ));
     }
   }
@@ -128,7 +128,7 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     this.route,
     this.event,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,

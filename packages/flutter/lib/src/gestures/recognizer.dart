@@ -128,7 +128,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           information.writeln('Handler: $name');
           information.writeln('Recognizer:');
           information.writeln('  $this');
-        }
+        },
       ));
     }
     return result;

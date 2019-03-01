@@ -44,7 +44,7 @@ class _AccountPictures extends StatelessWidget {
                     height: 48.0,
                     child: picture,
                  ),
-                )
+                ),
               );
             }).toList(),
           ),
@@ -56,7 +56,7 @@ class _AccountPictures extends StatelessWidget {
             child: SizedBox(
               width: 72.0,
               height: 72.0,
-              child: currentAccountPicture
+              child: currentAccountPicture,
             ),
           ),
         ),
@@ -309,7 +309,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.otherAccountsPictures,
     @required this.accountName,
     @required this.accountEmail,
-    this.onDetailsPressed
+    this.onDetailsPressed,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -379,7 +379,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
                   ),
-                )
+                ),
               ),
               _AccountDetails(
                 accountName: widget.accountName,

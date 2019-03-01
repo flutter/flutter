@@ -161,7 +161,7 @@ Future<GradleProject> _readGradleProject() async {
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], flutterProject.android.gradleAppOutV1Directory,
-        flutterProject.android.gradleAppBundleOutV1Directory
+        flutterProject.android.gradleAppBundleOutV1Directory,
     );
   }
   status.stop();
@@ -464,7 +464,7 @@ Future<void> _buildGradleProjectV2(
       }
 
       return line;
-    }
+    },
   );
   status.stop();
 
