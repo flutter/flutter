@@ -446,7 +446,7 @@ class CupertinoIcons {
   ///  * [add_circled], which is similar, but not filled in.
   static const IconData add_circled_solid = IconData(0xf48b, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A gear with eigth cogs. This icon is not filled in.
+  /// A gear with eight cogs. This icon is not filled in.
   ///
   /// See also:
   ///
@@ -455,7 +455,7 @@ class CupertinoIcons {
   ///  * [settings], which is another cogwheel with a different design.
   static const IconData gear = IconData(0xf43c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A gear with eigth cogs. This icon is filled in.
+  /// A gear with eight cogs. This icon is filled in.
   ///
   /// See also:
   ///
@@ -504,14 +504,14 @@ class CupertinoIcons {
   ///  * [play_arrow], which is similar, but not filled in.
   static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// Two verticale rectangles. This icon is not filled in.
+  /// Two vertical rectangles. This icon is not filled in.
   ///
   /// See also:
   ///
   ///  * [pause_solid], which is similar, but filled in.
   static const IconData pause = IconData(0xf477, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// Two verticale rectangles. This icon is filled in.
+  /// Two vertical rectangles. This icon is filled in.
   ///
   /// See also:
   ///
@@ -624,22 +624,22 @@ class CupertinoIcons {
   ///  * [time_solid], which is similar, but without dots on the clock face.
   static const IconData clock_solid = IconData(0xf4bf, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  /// A circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   ///
   /// See also:
   ///
   ///  * [time_solid], which is similar, but filled in.
-  ///  * [clock], which is similar, but with dots on the clockface.
-  ///  * [clock_solid], which is similar, but filled in and with dots on the clockface.
+  ///  * [clock], which is similar, but with dots on the clock face.
+  ///  * [clock_solid], which is similar, but filled in and with dots on the clock face.
   static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A filled in circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  /// A filled in circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   ///
   /// See also:
   ///
   ///  * [time], which is similar, but not filled in.
-  ///  * [clock], which is similar, but not filled in and with dots on the clockface.
-  ///  * [clock_solid], which is similar, but with dots on the clockface.
+  ///  * [clock], which is similar, but not filled in and with dots on the clock face.
+  ///  * [clock_solid], which is similar, but with dots on the clock face.
   static const IconData time_solid = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An unlocked padlock.

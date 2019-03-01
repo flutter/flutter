@@ -81,10 +81,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     RouteSettings settings,
   }) : super(settings: settings);
 
-  // TODO(ianh): once https://github.com/dart-lang/sdk/issues/31543 is fixed,
-  // this should be removed.
-  TransitionRoute._settings(RouteSettings settings) : super(settings: settings);
-
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
   ///
@@ -241,7 +237,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
               assert(newAnimation.currentTrain == nextRoute._animation);
               _secondaryAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
-            }
+            },
           );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
@@ -539,7 +535,7 @@ class _ModalScopeStatus extends InheritedWidget {
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
-    @required Widget child
+    @required Widget child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),
@@ -681,7 +677,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings settings,
-  }) : super._settings(settings);
+  }) : super(settings: settings);
 
   // The API for general users of this class
 

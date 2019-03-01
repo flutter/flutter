@@ -509,7 +509,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });
-          }
+          },
         ),
       ));
     }
@@ -614,7 +614,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                   tooltip: 'Back',
                   onPressed: () {
                     _handleBackButton(appBarMidScrollOffset);
-                  }
+                  },
                 ),
               ),
             ),

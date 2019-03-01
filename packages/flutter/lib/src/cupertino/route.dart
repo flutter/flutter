@@ -61,7 +61,7 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
         Color(0x00000000),
         Color(0x04000000),
         Color(0x12000000),
-        Color(0x38000000)
+        Color(0x38000000),
       ],
       stops: <double>[0.0, 0.3, 0.6, 1.0],
     ),
@@ -114,7 +114,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// A title string for this route.
   ///
-  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// Used to auto-populate [CupertinoNavigationBar] and
   /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
   /// one is not manually supplied.
   final String title;

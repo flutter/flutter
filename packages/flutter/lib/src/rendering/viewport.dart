@@ -576,7 +576,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       if (child.geometry.visible && child.hitTest(
         result,
         mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
-        crossAxisPosition: crossAxisPosition
+        crossAxisPosition: crossAxisPosition,
       )) {
         return true;
       }

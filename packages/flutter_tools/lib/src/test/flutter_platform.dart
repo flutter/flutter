@@ -963,7 +963,7 @@ class _FlutterPlatform extends PlatformPlugin {
     const String observatoryString = 'Observatory listening on ';
     for (Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
-      process.stdout
+      process.stdout,
     ]) {
       stream
           .transform<String>(utf8.decoder)

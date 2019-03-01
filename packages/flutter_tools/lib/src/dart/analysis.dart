@@ -54,7 +54,7 @@ class AnalysisServer {
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
-      'subscriptions': <String>['STATUS']
+      'subscriptions': <String>['STATUS'],
     });
 
     _sendCommand('analysis.setAnalysisRoots',
@@ -70,7 +70,7 @@ class AnalysisServer {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
-      'params': params
+      'params': params,
     });
     _process.stdin.writeln(message);
     printTrace('==> $message');

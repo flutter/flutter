@@ -515,7 +515,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
                     debugPrint(_textSpan.toStringDeep());
                   }
                 });
-              }
+              },
             ),
           ),
         ],
@@ -573,7 +573,7 @@ class _UnderlinesState extends State<Underlines> {
                 ),
                 child: ListBody(
                   children: lines,
-                )
+                ),
               ),
             ),
           ),
@@ -668,7 +668,7 @@ class _FallbackState extends State<Fallback> {
                     child: ListBody(
                       children: lines,
                     ),
-                  )
+                  ),
                 ),
               ),
             ),

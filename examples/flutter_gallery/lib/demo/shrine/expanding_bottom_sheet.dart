@@ -609,7 +609,7 @@ class _ListModel {
   _ListModel({
     @required this.listKey,
     @required this.removedItemBuilder,
-    Iterable<int> initialItems
+    Iterable<int> initialItems,
   }) : assert(listKey != null),
        assert(removedItemBuilder != null),
        _items = List<int>.from(initialItems ?? <int>[]);

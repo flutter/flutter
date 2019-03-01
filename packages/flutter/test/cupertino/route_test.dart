@@ -22,7 +22,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
+        },
       )
     );
 
@@ -55,7 +55,7 @@ void main() {
               ],
             ),
           );
-        }
+        },
       )
     );
 
@@ -117,7 +117,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
+        },
       )
     );
 
@@ -132,7 +132,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
+        },
       )
     );
 
@@ -163,7 +163,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
+        },
       )
     );
 
@@ -178,7 +178,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
+        },
       )
     );
 
@@ -205,7 +205,7 @@ void main() {
           navigationBar: CupertinoNavigationBar(),
           child: Placeholder(),
         );
-      }
+      },
     );
 
     final CupertinoPageRoute<void> route3 = CupertinoPageRoute<void>(
@@ -215,7 +215,7 @@ void main() {
           navigationBar: CupertinoNavigationBar(),
           child: Placeholder(),
         );
-      }
+      },
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
@@ -237,8 +237,8 @@ void main() {
             navigationBar: CupertinoNavigationBar(),
             child: Placeholder(),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.pump();

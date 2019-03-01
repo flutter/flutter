@@ -44,7 +44,7 @@ abstract class AssetBundle {
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false
+    bool reportLicensedPackages = false,
   });
 }
 
@@ -92,7 +92,7 @@ class _ManifestAssetBundle implements AssetBundle {
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false
+    bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -128,7 +128,7 @@ class _ManifestAssetBundle implements AssetBundle {
       packageMap,
       flutterManifest,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()]
+      excludeDirs: <String>[assetDirPath, getBuildDirectory()],
     );
 
     if (assetVariants == null)
@@ -290,7 +290,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
       result.add(_Asset(
         baseDir: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         relativeUri: Uri(path: entryUri.pathSegments.last),
-        entryUri: entryUri
+        entryUri: entryUri,
       ));
     }
   }
@@ -395,7 +395,7 @@ List<Map<String, dynamic>> _parseFonts(
   FlutterManifest manifest,
   bool includeDefaultFonts,
   PackageMap packageMap, {
-  String packageName
+  String packageName,
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (manifest.usesMaterialDesign && includeDefaultFonts) {
@@ -526,7 +526,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   FlutterManifest flutterManifest,
   String assetBase, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -572,7 +572,7 @@ void _parseAssetsFromFolder(
   Map<_Asset, List<_Asset>> result,
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final String directoryPath = fs.path.join(
       assetBase, assetUri.toFilePath(windows: platform.isWindows));
@@ -604,7 +604,7 @@ void _parseAssetFromFile(
   Map<_Asset, List<_Asset>> result,
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final _Asset asset = _resolveAsset(
     packageMap,

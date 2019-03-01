@@ -1630,7 +1630,7 @@ void main() {
       return tester.firstWidget<AnimatedDefaultTextStyle>(
         find.ancestor(
           of: find.text('label'),
-          matching: find.byType(AnimatedDefaultTextStyle)
+          matching: find.byType(AnimatedDefaultTextStyle),
         )
       ).style;
     }

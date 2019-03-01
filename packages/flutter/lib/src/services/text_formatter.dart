@@ -39,13 +39,13 @@ abstract class TextInputFormatter {
   /// [TextEditingValue] at the beginning of the chain.
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   );
 
   /// A shorthand to creating a custom [TextInputFormatter] which formats
   /// incoming text input changes with the given function.
   static TextInputFormatter withFunction(
-    TextInputFormatFunction formatFunction
+    TextInputFormatFunction formatFunction,
   ) {
     return _SimpleTextInputFormatter(formatFunction);
   }
@@ -68,7 +68,7 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   ) {
     return formatFunction(oldValue, newValue);
   }

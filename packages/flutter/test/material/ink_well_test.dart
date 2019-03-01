@@ -38,7 +38,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -84,7 +84,7 @@ void main() {
         child: Center(
           child: InkWell(),
         ),
-      )
+      ),
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -142,7 +142,7 @@ void main() {
               enableFeedback: false,
             ),
           ),
-        )
+        ),
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));

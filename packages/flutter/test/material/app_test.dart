@@ -256,7 +256,7 @@ void main() {
                       child: const Text('X'),
                       onPressed: () async {
                         result = Navigator.of(context).pushNamed('/a');
-                      }
+                      },
                   ),
                 );
               }
@@ -271,7 +271,7 @@ void main() {
                   },
                 ),
               );
-            }
+            },
           },
         )
     );

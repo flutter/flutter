@@ -577,7 +577,7 @@ abstract class Constraints {
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
     assert(isNormalized);
     return isNormalized;
@@ -1206,7 +1206,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           information.writeln('This RenderObject has no descendants.');
         }
         information.writeAll(descendants, '\n');
-      }
+      },
     ));
   }
 
@@ -1570,7 +1570,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
             information.writeln(stack[targetFrame]);
           }
         }
-      }
+      },
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
@@ -1735,7 +1735,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void rotate({
     int oldAngle, // 0..3
     int newAngle, // 0..3
-    Duration time
+    Duration time,
   }) { }
 
   // when the parent has rotated (e.g. when the screen has been turned
@@ -3098,7 +3098,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,
@@ -3180,7 +3180,7 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     @required RenderObject owner,
-    @required bool dropsSemanticsOfPreviousSiblings
+    @required bool dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
        _ancestorChain = <RenderObject>[owner],
        super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);

@@ -72,7 +72,7 @@ String getEmulatorPath([ AndroidSdk existingSdk ]) {
 String getAvdPath() {
 
   final List<String> searchPaths = <String>[
-    platform.environment['ANDROID_AVD_HOME']
+    platform.environment['ANDROID_AVD_HOME'],
   ];
 
   if (platform.environment['HOME'] != null)

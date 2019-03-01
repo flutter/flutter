@@ -142,7 +142,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
-      composing: TextRange.empty
+      composing: TextRange.empty,
     );
   }
 
@@ -347,7 +347,7 @@ class EditableText extends StatefulWidget {
   /// Since fonts may vary depending on user input and due to font
   /// fallback, [StrutStyle.forceStrutHeight] is enabled by default
   /// to lock all lines to the height of the base [TextStyle], provided by
-  /// [style]. This ensures the typed text fits within the alotted space.
+  /// [style]. This ensures the typed text fits within the allotted space.
   ///
   /// If null, the strut used will is inherit values from the [style] and will
   /// have [StrutStyle.forceStrutHeight] set to true. When no [style] is
@@ -453,10 +453,10 @@ class EditableText extends StatefulWidget {
   ///
   /// If this is null, there is no limit to the number of lines, and the text
   /// container will start with enough vertical space for one line and
-  /// automatically grow to accomodate additional lines as they are entered.
+  /// automatically grow to accommodate additional lines as they are entered.
   ///
   /// If it is not null, the value must be greater than zero. If it is greater
-  /// than 1, it will take up enough horizontal space to accomodate that number
+  /// than 1, it will take up enough horizontal space to accommodate that number
   /// of lines.
   /// {@endtemplate}
   final int maxLines;
@@ -939,7 +939,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               ),
               textCapitalization: widget.textCapitalization,
               keyboardAppearance: widget.keyboardAppearance,
-          )
+          ),
       )..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -1065,7 +1065,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           newCaretRect.left - widget.scrollPadding.left,
           newCaretRect.top - widget.scrollPadding.top,
           newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + widget.scrollPadding.bottom
+          newCaretRect.bottom + widget.scrollPadding.bottom,
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
@@ -1398,7 +1398,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
     this.paintCursorAboveText,
-    this.devicePixelRatio
+    this.devicePixelRatio,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);

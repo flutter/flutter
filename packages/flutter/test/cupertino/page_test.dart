@@ -15,7 +15,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -91,7 +91,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -219,7 +219,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -375,7 +375,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -437,7 +437,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -472,7 +472,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),

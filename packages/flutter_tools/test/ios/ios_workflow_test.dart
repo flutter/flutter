@@ -386,7 +386,7 @@ class IOSWorkflowTestTarget extends IOSValidator {
 
 class CocoaPodsTestTarget extends CocoaPodsValidator {
   CocoaPodsTestTarget({
-    this.hasHomebrew = true
+    this.hasHomebrew = true,
   });
 
   @override

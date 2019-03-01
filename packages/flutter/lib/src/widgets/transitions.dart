@@ -91,7 +91,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// The [listenable] argument is required.
   const AnimatedWidget({
     Key key,
-    @required this.listenable
+    @required this.listenable,
   }) : assert(listenable != null),
        super(key: key);
 
@@ -431,7 +431,7 @@ class SizeTransition extends AnimatedWidget {
         heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
         widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
         child: child,
-      )
+      ),
     );
   }
 }

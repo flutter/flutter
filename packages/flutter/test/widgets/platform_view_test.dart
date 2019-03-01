@@ -36,7 +36,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -66,7 +66,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 
@@ -75,7 +75,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams)
+              AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams),
         ]),
       );
     });
@@ -134,7 +134,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
 
@@ -145,7 +145,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -179,7 +179,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -243,7 +243,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -318,7 +318,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -366,7 +366,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -414,7 +414,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          0
+          0,
       );
     });
 
@@ -468,7 +468,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl)
+              AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
 
@@ -486,7 +486,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -512,7 +512,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl)
+              AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
 
@@ -533,7 +533,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -827,7 +827,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview')
+          FakeUiKitView(currentViewId + 1, 'webview'),
         ]),
       );
     });
@@ -860,7 +860,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 2, 'maps')
+          FakeUiKitView(currentViewId + 2, 'maps'),
         ]),
       );
     });
@@ -954,7 +954,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview')
+          FakeUiKitView(currentViewId + 1, 'webview'),
         ]),
       );
     });
@@ -984,7 +984,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 
@@ -992,7 +992,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams)
+          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams),
         ]),
       );
     });
