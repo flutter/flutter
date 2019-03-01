@@ -272,26 +272,53 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     insertAll(widget.initialEntries);
   }
 
+  int _insertionIndex(OverlayEntry below, OverlayEntry above) {
+    assert(above == null || below == null);
+    if (below != null)
+      return _entries.indexOf(below);
+    if (above != null)
+      return _entries.indexOf(above) + 1;
+    return _entries.length;
+  }
+
   /// Insert the given entry into the overlay.
   ///
+  /// If `below` is non-null, the entry is inserted just below `below`.
   /// If `above` is non-null, the entry is inserted just above `above`.
   /// Otherwise, the entry is inserted on top.
-  void insert(OverlayEntry entry, { OverlayEntry above }) {
-    assert(entry._overlay == null);
+  ///
+  /// It is an error to specify both `above` and `below`.
+  void insert(OverlayEntry entry, { OverlayEntry below, OverlayEntry above }) {
+    assert(above == null || below == null);
     assert(above == null || (above._overlay == this && _entries.contains(above)));
+    assert(below == null || (below._overlay == this && _entries.contains(below)));
+    assert(!_entries.contains(entry), 'The specified entry is already present in the Overlay.');
+    assert(entry._overlay == null, 'The specified entry is already present in another Overlay.');
     entry._overlay = this;
     setState(() {
-      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
-      _entries.insert(index, entry);
+      _entries.insert(_insertionIndex(below, above), entry);
     });
   }
 
   /// Insert all the entries in the given iterable.
   ///
+  /// If `below` is non-null, the entries are inserted just below `below`.
   /// If `above` is non-null, the entries are inserted just above `above`.
   /// Otherwise, the entries are inserted on top.
-  void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
+  ///
+  /// It is an error to specify both `above` and `below`.
+  void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry below, OverlayEntry above }) {
+    assert(above == null || below == null);
     assert(above == null || (above._overlay == this && _entries.contains(above)));
+    assert(below == null || (below._overlay == this && _entries.contains(below)));
+    assert(
+      entries.every((OverlayEntry entry) => !_entries.contains(entry)),
+      'One or more of the specified entries are already present in the Overlay.'
+    );
+    assert(
+      entries.every((OverlayEntry entry) => entry._overlay == null),
+      'One or more of the specified entries are already present in another Overlay.'
+    );
     if (entries.isEmpty)
       return;
     for (OverlayEntry entry in entries) {
@@ -299,8 +326,51 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       entry._overlay = this;
     }
     setState(() {
-      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
-      _entries.insertAll(index, entries);
+      _entries.insertAll(_insertionIndex(below, above), entries);
+    });
+  }
+
+
+  /// Remove all the entries listed in the given iterable, then reinsert them
+  /// into the overlay in the given order.
+  ///
+  /// Entries mention in `newEntries` but absent from the overlay are inserted
+  /// as if with [insertAll].
+  ///
+  /// Entries not mentioned in `newEntries` but present in the overlay are
+  /// positioned as a group in the resulting list relative to the entries that
+  /// were moved, as specified by one of `below` or `above`, which, if
+  /// specified, must be one of the entries in `newEntries`:
+  ///
+  /// If `below` is non-null, the group is positioned just below `below`.
+  /// If `above` is non-null, the group is positioned just above `above`.
+  /// Otherwise, the group is left on top, with all the rearranged entries
+  /// below.
+  ///
+  /// It is an error to specify both `above` and `below`.
+  void rearrange(Iterable<OverlayEntry> newEntries, { OverlayEntry below, OverlayEntry above }) {
+    final List<OverlayEntry> newEntriesList = newEntries is List<OverlayEntry> ? newEntries : newEntries.toList(growable: false);
+    assert(above == null || below == null);
+    assert(above == null || (above._overlay == this && _entries.contains(above) && newEntriesList.contains(above)));
+    assert(below == null || (below._overlay == this && _entries.contains(below) && newEntriesList.contains(below)));
+    assert(newEntriesList.every((OverlayEntry entry) => entry._overlay == null || entry._overlay == this));
+    assert(
+      newEntriesList.every((OverlayEntry entry) => _entries.indexOf(entry) == _entries.lastIndexOf(entry)),
+      'One or more of the specified entries are specified multiple times.'
+    );
+    if (newEntriesList.isEmpty)
+      return;
+    if (listEquals(_entries, newEntriesList))
+      return;
+    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
+    for (OverlayEntry entry in newEntriesList) {
+      entry._overlay ??= this;
+    }
+    setState(() {
+      _entries.clear();
+      _entries.addAll(newEntriesList);
+      old.removeAll(newEntriesList);
+      _entries.insertAll(_insertionIndex(below, above), old);
     });
   }
 
