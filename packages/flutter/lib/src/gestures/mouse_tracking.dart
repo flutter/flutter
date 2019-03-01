@@ -229,7 +229,7 @@ class MouseTracker {
           hitAnnotation.annotation.onEnter(PointerEnterEvent.fromMouseEvent(lastEvent));
         }
       }
-      if (hitAnnotation.annotation?.onHover != null) {
+      if (hitAnnotation.annotation?.onHover != null && lastEvent is PointerHoverEvent) {
         hitAnnotation.annotation.onHover(lastEvent);
       }
 
