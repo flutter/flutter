@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -23,17 +25,18 @@ import 'package:flutter/foundation.dart';
 /// done before calling [runApp].
 ///
 /// To determine whether a draw operation is useful for warming up shaders,
-/// check the difference in the `worst_frame_rasterizer_time_millis` benchmarks.
-/// Also, tracing with `flutter run --profile --trace-skia` may reveal whether
-/// there is shader-compilation-related jank. If there is such jank, some long
+/// check whether it improves the slowest GPU frame. Also, tracing with
+/// `flutter run --profile --trace-skia` may reveal whether there is shader-
+/// compilation-related jank. If there is such jank, some long
 /// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
 /// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
-/// `CircularRRectOp`) would suggest Xyz draw operations are causing the shaders
-/// to be compiled. A useful shader warm-up draw operation would eliminate such
-/// long compilation calls in the animation. To double-check the warm-up, trace
-/// with `flutter run --profile --trace-skia --start-paused`. The
-/// `GrGLProgramBuilder` with the associated `XyzOp` should appear during
-/// startup rather than in the middle of a later animation.
+/// `CircularRRectOp`) would suggest Xyz draw operations are causing the
+/// shaders to be compiled. A useful shader warm-up draw operation would
+/// eliminate such long compilation calls in the animation. To double-check
+/// the warm-up, trace with `flutter run --profile --trace-skia --start-
+/// paused`. The `GrGLProgramBuilder` with the associated `XyzOp` should
+/// appear during startup rather than in the middle of a later animation.
+
 ///
 /// This warm-up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
@@ -64,6 +67,8 @@ abstract class ShaderWarmUp {
   /// Trigger draw operations on a given canvas to warm up GPU shader
   /// compilation cache.
   ///
+  /// Parameter [image] is to be used for drawImage related operations.
+  ///
   /// To decide which draw operations to be added to your custom warm up
   /// process, try capture an skp using `flutter screenshot --observatory-
   /// port=<port> --type=skia` and analyze it with https://debugger.skia.org.
@@ -72,20 +77,20 @@ abstract class ShaderWarmUp {
   /// Skia draw operations are commonly used, and which shader compilations
   /// are causing janks.
   @protected
-  void warmUpOnCanvas(ui.Canvas canvas);
+  Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
   /// Construct an offscreen image of [size], and execute [warmUpOnCanvas] on a
   /// canvas associated with that image.
-  void execute() {
+  Future<void> execute() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
 
-    warmUpOnCanvas(canvas);
+    await warmUpOnCanvas(canvas);
 
     final ui.Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
     shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(size.width.ceil(), size.height.ceil()).then((ui.Image image) {
+    picture.toImage(size.width.ceil(), size.height.ceil()).then((ui.Image _) {
       shaderWarmUpTask.finish();
     });
   }
@@ -103,7 +108,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
   @override
-  void warmUpOnCanvas(ui.Canvas canvas) {
+  Future<void> warmUpOnCanvas(ui.Canvas canvas) {
     final ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
 
@@ -178,5 +183,31 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ui.ParagraphConstraints(width: 60.0));
     canvas.drawParagraph(paragraph, const ui.Offset(20.0, 20.0));
+
+
+    // Construct an image for drawImage related operations
+    const int imageWidth = 40;
+    const int imageHeight = 40;
+    final Uint8List pixels = Uint8List.fromList(List<int>.generate(
+      imageWidth * imageHeight * 4,
+          (int i) => i % 4 < 2 ? 0x00 : 0xFF,  // opaque blue
+    ));
+
+    final Completer<void> completer = Completer<void>();
+    ui.decodeImageFromPixels(pixels, imageWidth, imageHeight, ui.PixelFormat.rgba8888, (ui.Image image) {
+      // Warm up image shaders
+      canvas.translate(0.0, 80.0);
+      canvas.save();
+      final ui.Rect srcRect = ui.Rect.fromLTWH(0.0, 0.0, image.width.toDouble(), image.height.toDouble());
+      canvas.drawImage(image, const ui.Offset(20.0, 20.0), ui.Paint());
+      canvas.translate(80.0, 0.0);
+      canvas.drawImageRect(image, srcRect, ui.Rect.fromLTWH(20.0, 20.0, 20.0, 20.0), paints[0]);
+      canvas.translate(80.0, 0.0);
+      canvas.drawImageRect(image, srcRect, ui.Rect.fromLTWH(10.0, 10.0, 60.0, 60.0), paints[0]);
+      canvas.restore();
+      completer.complete();
+    });
+
+    return completer.future;
   }
 }
