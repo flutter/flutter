@@ -136,7 +136,6 @@ Future<void> main(List<String> arguments) async {
     '--inject-html',
     '--header', 'styles.html',
     '--header', 'analytics.html',
-    '--header', 'survey.html',
     '--header', 'snippets.html',
     '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
