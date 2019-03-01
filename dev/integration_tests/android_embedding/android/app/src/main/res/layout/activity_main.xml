@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
+        <Button
+            android:id="@+id/button_fullscreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fullscreen Flutter"
+            />
+        <Button
+            android:id="@+id/button_drawer_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter Under Drawer"
+            />
+        <Button
+            android:id="@+id/button_page_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter In Page Tabs"
+            />
+        <Button
+            android:id="@+id/button_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter In ViewPager"
+            />
+        <Button
+            android:id="@+id/button_standalone_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter In Standalone View"
+            />
+    </LinearLayout>
+</LinearLayout>
