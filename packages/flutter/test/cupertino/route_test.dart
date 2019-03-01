@@ -431,4 +431,101 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(600.0, 0.1));
   });
+
+  testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Text('1'),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Text('2'),
+        );
+      }
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-87, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(537, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // Translation slows down as time goes on.
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-220, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(141, epsilon: 1));
+
+    // Finish the rest of the animation
+    await tester.pump(const Duration(milliseconds: 250));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-179, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(262, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(499, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // Translation slows down as time goes on.
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-47, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(659, epsilon: 1));
+  });
+
+  testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Text('1'),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Text('2'),
+        );
+      }
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    debugDumpApp();
+
+    expect(find.text('1'), findsNothing);
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // Translation slows down as time goes on.
+    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(141, epsilon: 1));
+
+    // Finish the rest of the animation
+    await tester.pump(const Duration(milliseconds: 250));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(262, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(499, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // Translation slows down as time goes on.
+    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(659, epsilon: 1));
+  });
 }
