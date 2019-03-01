@@ -11,35 +11,23 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// TODO(clocksmith): dartdoc
   const FloatingActionButtonThemeData({
     this.backgroundColor,
-    this.elevation,
     this.foregroundColor,
+    this.elevation,
     this.highlightElevation,
     this.shape,
   });
-
-  /// TODO(clocksmith): dartdoc
-  factory FloatingActionButtonThemeData.fromDefaults({
-//    Brightness brightness,
-    Color primaryColor,
-    Color onPrimaryColor,
-  }) {
-    return FloatingActionButtonThemeData(
-      backgroundColor: primaryColor,
-      foregroundColor: onPrimaryColor,
-    );
-}
 
   /// Color to be used for the unselected, enabled floating action buttons's
   /// background.
   final Color backgroundColor;
 
-  /// The z-coordinate to be used for the unselected, enabled floating action \
-  /// buttons's elevation foreground. .
-  final double elevation;
-
   /// Color to be used for the unselected, enabled floating action buttons's
   /// foreground.
   final Color foregroundColor;
+
+  /// The z-coordinate to be used for the unselected, enabled floating action \
+  /// buttons's elevation foreground. .
+  final double elevation;
 
   /// The z-coordinate to be used for the selected, enabled floating action
   /// buttons's elevation foreground. .
@@ -52,15 +40,15 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// new values.
   FloatingActionButtonThemeData copyWith({
     Color backgroundColor,
-    double elevation,
     Color foregroundColor,
+    double elevation,
     double highlightElevation,
     ShapeBorder shape,
   }) {
     return FloatingActionButtonThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      elevation: elevation ?? this.elevation,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      elevation: elevation ?? this.elevation,
       highlightElevation: highlightElevation ?? this.highlightElevation,
       shape: shape ?? this.shape,
     );
@@ -72,8 +60,8 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       return null;
     return FloatingActionButtonThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
@@ -82,8 +70,8 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   int get hashCode {
     return hashValues(
       backgroundColor,
-      elevation,
       foregroundColor,
+      elevation,
       highlightElevation,
       shape,
     );
@@ -99,8 +87,8 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     }
     final FloatingActionButtonThemeData otherData = other;
     return otherData.backgroundColor == backgroundColor
-        && otherData.elevation == elevation
         && otherData.foregroundColor == foregroundColor
+        && otherData.elevation == elevation
         && otherData.highlightElevation == highlightElevation
         && otherData.shape == shape;
   }
@@ -108,15 +96,11 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final ThemeData defaultTheme = ThemeData.fallback();
-    final FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData.fromDefaults(
-//      brightness: defaultTheme.brightness,
-      onPrimaryColor: Colors.white, // This is wrong
-      primaryColor: defaultTheme.primaryColor,
-    );
+    final FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
+
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
     properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
   }

@@ -76,7 +76,7 @@ class FloatingActionButton extends StatelessWidget {
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
     this.highlightElevation,
-    double disabledElevation,
+    this.disabledElevation,
     @required this.onPressed,
     this.mini = false,
     this.shape,
@@ -89,7 +89,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(mini != null),
        assert(isExtended != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
-       disabledElevation = disabledElevation ?? elevation,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
@@ -105,9 +104,9 @@ class FloatingActionButton extends StatelessWidget {
     this.foregroundColor,
     this.backgroundColor,
     this.heroTag = const _DefaultHeroTag(),
-    this.elevation = 6.0,
-    this.highlightElevation = 12.0,
-    double disabledElevation,
+    this.elevation,
+    this.highlightElevation,
+    this.disabledElevation,
     @required this.onPressed,
     this.shape,
     this.isExtended = true,
@@ -121,7 +120,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(isExtended != null),
        assert(clipBehavior != null),
        _sizeConstraints = _kExtendedSizeConstraints,
-       disabledElevation = disabledElevation ?? elevation,
        mini = false,
        child = _ChildOverflowBox(
          child: Row(
@@ -275,9 +273,12 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
-      ?? theme.accentIconTheme.color;
+      ?? theme.accentIconTheme.color
+      ?? theme.colorScheme.onSecondary;
+
     Widget result;
 
     if (child != null) {
@@ -297,19 +298,22 @@ class FloatingActionButton extends StatelessWidget {
       highlightElevation: highlightElevation
         ?? floatingActionButtonTheme.highlightElevation
         ?? _defaultHighlightElevation,
-      disabledElevation: disabledElevation ?? 0,
+      disabledElevation: disabledElevation
+        ?? elevation
+        ?? floatingActionButtonTheme.elevation
+        ?? _defaultElevation,
       constraints: _sizeConstraints,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       fillColor: backgroundColor
         ?? floatingActionButtonTheme.backgroundColor
-        ?? theme.accentColor,
+        ?? theme.colorScheme.secondary,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
         letterSpacing: 1.2,
       ),
       shape: shape
         ?? floatingActionButtonTheme.shape
-        ?? isExtended ? _defaultExtendedShape : _defaultShape,
+        ?? (isExtended ? _defaultExtendedShape : _defaultShape),
       clipBehavior: clipBehavior,
       child: result,
     );
