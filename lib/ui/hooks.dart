@@ -89,13 +89,6 @@ void _updateUserSettingsData(String jsonData) {
   _updatePlatformBrightness(data['platformBrightness']);
 }
 
-@pragma('vm:entry-point')
-// ignore: unused_element
-void _updateLifecycleState(String state) {
-  window._initialLifecycleState ??= state;
-}
-
-
 void _updateTextScaleFactor(double textScaleFactor) {
   window._textScaleFactor = textScaleFactor;
   _invoke(window.onTextScaleFactorChanged, window._onTextScaleFactorChangedZone);

@@ -556,15 +556,6 @@ class Window {
     _onLocaleChangedZone = Zone.current;
   }
 
-  /// The lifecycle state immediately after dart isolate initialization.
-  ///
-  /// This property will not be updated as the lifecycle changes.
-  ///
-  /// It is used to initialize [SchedulerBinding.lifecycleState] at startup
-  /// with any buffered lifecycle state events.
-  String get initialLifecycleState => _initialLifecycleState;
-  String _initialLifecycleState;
-
   /// The system-reported text scale.
   ///
   /// This establishes the text scaling factor to use when rendering text,

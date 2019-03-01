@@ -49,8 +49,6 @@ class RuntimeController final : public WindowClient {
 
   bool SetUserSettingsData(const std::string& data);
 
-  bool SetLifecycleState(const std::string& data);
-
   bool SetSemanticsEnabled(bool enabled);
 
   bool SetAccessibilityFeatures(int32_t flags);
@@ -113,7 +111,6 @@ class RuntimeController final : public WindowClient {
     std::string variant_code;
     std::vector<std::string> locale_data;
     std::string user_settings_data = "{}";
-    std::string lifecycle_state;
     bool semantics_enabled = false;
     bool assistive_technology_enabled = false;
     int32_t accessibility_feature_flags_ = 0;
