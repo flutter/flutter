@@ -26,7 +26,9 @@
 
   FlutterViewController* topFlutterViewController = [[FlutterViewController alloc] init];
   FlutterViewController* bottomFlutterViewController= [[FlutterViewController alloc] init];
-
+  _topEngine = topFlutterViewController.engine;
+  _bottomEngine = bottomFlutterViewController.engine;
+  
   [topFlutterViewController setInitialRoute:@"marquee_green"];
   [self addChildViewController:topFlutterViewController];
   [stackView addArrangedSubview:topFlutterViewController.view];

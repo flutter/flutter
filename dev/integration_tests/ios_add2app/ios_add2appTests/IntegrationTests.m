@@ -8,10 +8,20 @@
 #import "../ios_add2app/AppDelegate.h"
 #import "../ios_add2app/MainViewController.h"
 #import "../ios_add2app/FullScreenViewController.h"
+#import "../ios_add2app/DualFlutterViewController.h"
 
-static void waitForInitialFlutterRender() {
-  // TODO(dnfield,jamesderlin): actually sync with Flutter rendering.
-  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 10, false);
+static void waitForFlutterSemanticsTree(FlutterEngine* engine) {
+  [engine ensureSemanticsEnabled];
+  __block BOOL semanticsAvailable = NO;
+  int tries = 10;
+  while (semanticsAvailable == NO && tries != 0) {
+    [engine registerSemanticsAvailableCallback:^{
+      semanticsAvailable = YES;
+    }];
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, false);
+    tries--;
+  }
+  GREYAssertTrue(semanticsAvailable, @"Semantics Tree did not build!");
 }
 
 @interface FlutterTests : XCTestCase
@@ -38,8 +48,6 @@ static void waitForInitialFlutterRender() {
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Full Screen (Cold)")]
    performAction:grey_tap()];
 
-  waitForInitialFlutterRender();
-
   __weak FlutterViewController* weakViewController;
   @autoreleasepool {
     UINavigationController* navController =
@@ -51,9 +59,9 @@ static void waitForInitialFlutterRender() {
       (FullScreenViewController*)navController.visibleViewController;
     GREYAssertNotNil(weakViewController, @"Expected non-nil FullScreenViewController.");
   }
+  waitForFlutterSemanticsTree(weakViewController.engine);
 
   [[EarlGrey selectElementWithMatcher:grey_accessibilityLabel(@"POP")] performAction:grey_tap()];
-  waitForInitialFlutterRender();
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Native iOS View")]
       assertWithMatcher:grey_sufficientlyVisible()];
   GREYAssertNil(weakViewController, @"Expected FullScreenViewController to be deallocated.");
@@ -66,7 +74,18 @@ static void waitForInitialFlutterRender() {
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Dual Flutter View (Cold)")]
    performAction:grey_tap()];
 
-  waitForInitialFlutterRender();
+  @autoreleasepool {
+    UINavigationController* navController =
+        (UINavigationController*)((AppDelegate*)[
+                                      [UIApplication sharedApplication]
+                                      delegate])
+            .window.rootViewController;
+    DualFlutterViewController* viewController =
+      (DualFlutterViewController*)navController.visibleViewController;
+    GREYAssertNotNil(viewController, @"Expected non-nil DualFlutterViewController.");
+    waitForFlutterSemanticsTree(viewController.topEngine);
+    waitForFlutterSemanticsTree(viewController.bottomEngine);
+  }
 
   // Verify that there are two Flutter views with the expected marquee text.
   [[[EarlGrey selectElementWithMatcher:grey_accessibilityLabel(@"This is Marquee")] atIndex:0]
@@ -86,7 +105,17 @@ static void waitForInitialFlutterRender() {
 
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Hybrid View (Warm)")] performAction:grey_tap()];
 
-  waitForInitialFlutterRender();
+  @autoreleasepool {
+    UINavigationController* navController =
+    (UINavigationController*)((AppDelegate*)[
+                                             [UIApplication sharedApplication]
+                                             delegate])
+    .window.rootViewController;
+    FlutterViewController* viewController =
+    (FlutterViewController*)navController.visibleViewController;
+    GREYAssertNotNil(viewController, @"Expected non-nil FlutterViewController.");
+    waitForFlutterSemanticsTree(viewController.engine);
+  }
 
   [self validateCountsFlutter:@"Platform" count:0];
   [self validateCountsPlatform:@"Flutter" count:_flutterWarmEngineTaps];
