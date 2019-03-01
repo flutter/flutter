@@ -120,6 +120,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
+  /// Abstract method, implemented in [AutomatedTestWidgetsFlutterBinding] only.
+  /// Call this method on [LiveTestWidgetsFlutterBinding] will result in
+  /// [soSuchMethod]
+  /// 
+  /// See:
+  ///
+  ///  * [AutomatedTestWidgetsFlutterBinding.addTime]
+  void addTime(Duration duration);
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -833,7 +842,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeoutCompleter.completeError(
         TimeoutException(
           'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "tester.addTime" to increase the timeout before expensive operations.',
+          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
           _timeout,
         ),
       );
@@ -863,6 +872,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   ///  * [defaultTestTimeout], the maximum that the timeout can reach.
   ///    (That timeout is implemented by the test package.)
+  @override
   void addTime(Duration duration) {
     assert(_timeout != null, 'addTime can only be called during a test.');
     _timeout += duration;
@@ -1033,6 +1043,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
+
+  @override
+  void addTime(Duration duration) {
+    noSuchMethod(i) {
+      throw new Exception("`addTime` is only available for `AutomatedTestWidgetsFlutterBinding`, not this binding (`LiveTestWidgetsFlutterBinding`).");
+    }
+  }
 
   @override
   Clock get clock => const Clock();
