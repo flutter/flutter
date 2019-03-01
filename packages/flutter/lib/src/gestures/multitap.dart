@@ -32,11 +32,10 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
 
-/// StopwatchWithZone tracks whether the specified duration has elapsed since
-/// creation.
-/// It differs from [Stopwatch] for honoring [Zone].
-class _StopwatchWithZone {
-  _StopwatchWithZone({ Duration duration }) {
+/// CountdownZoned tracks whether the specified duration has elapsed since
+/// creation, honoring [Zone].
+class _CountdownZoned {
+  _CountdownZoned({ Duration duration }) {
     _timer = Timer(duration, _onTimeout);
   }
 
@@ -53,16 +52,16 @@ class _StopwatchWithZone {
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
 class _TapTracker {
-  _TapTracker({ PointerDownEvent event, this.entry })
+  _TapTracker({ PointerDownEvent event, this.entry, Duration doubleTapMinTime })
     : pointer = event.pointer,
       _initialPosition = event.position,
-      _elapsedTimeWatch = _StopwatchWithZone(duration: kDoubleTapMinTime) {
+      _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime) {
   }
 
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialPosition;
-  final _StopwatchWithZone _elapsedTimeWatch;
+  final _CountdownZoned _doubleTapMinTimeCountdown;
 
   bool _isTrackingPointer = false;
 
@@ -85,8 +84,8 @@ class _TapTracker {
     return offset.distance <= tolerance;
   }
 
-  bool hasElapsedAtLeast(Duration minimum) {
-    return _elapsedTimeWatch.timeout;
+  bool hasElapsedMinTime() {
+    return _doubleTapMinTimeCountdown.timeout;
   }
 }
 
@@ -132,7 +131,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
         return;
       }
       // Restart when the second tap is too close to the first
-      else if (!_firstTap.hasElapsedAtLeast(kDoubleTapMinTime)) {
+      else if (!_firstTap.hasElapsedMinTime()) {
         _reset();
         return addPointer(event);
       }
@@ -140,7 +139,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
-      entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
+      entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
+      doubleTapMinTime: kDoubleTapMinTime,
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent);
