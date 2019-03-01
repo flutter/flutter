@@ -1110,22 +1110,19 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       widget.initialTimerDuration != Duration.zero ? // ignore: deprecated_member_use_from_same_package
       widget.initialTimerDuration : widget.controller.duration; // ignore: deprecated_member_use_from_same_package
 
-    selectedMinute = initialDuration.inMinutes % 60;
-
-    if (widget.mode != CupertinoTimerPickerMode.ms)
-      selectedHour = initialDuration.inHours;
-
-    if (widget.mode != CupertinoTimerPickerMode.hm)
-      selectedSecond = initialDuration.inSeconds % 60;
-
-    hourController = FixedExtentScrollController(initialItem: selectedHour);
-    minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
-    secondController = FixedExtentScrollController(initialItem: selectedSecond ~/ widget.secondInterval);
+    timerController.duration = initialDuration;
   }
 
   @override
   void didUpdateWidget(CupertinoTimerPicker oldWidget) {
-    timerController ??= widget.controller;
+    if(widget.controller != null && widget.controller != oldWidget.controller)
+      timerController = widget.controller;
+
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_desiredDurationChanged);
+      widget.controller?.addListener(_desiredDurationChanged);
+    }
+
     super.didUpdateWidget(oldWidget);
   }
 
@@ -1155,6 +1152,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = desiredTimerDuration.inSeconds % 60;
+
+    hourController ??= FixedExtentScrollController(initialItem: selectedHour);
+    minuteController ??= FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
+    secondController ??= FixedExtentScrollController(initialItem: selectedSecond ~/ widget.secondInterval);
 
     hourController.animateToItem(selectedHour, duration: animationDuration, curve: Curves.easeOut);
     minuteController.animateToItem(selectedMinute, duration: animationDuration, curve: Curves.easeOut);
