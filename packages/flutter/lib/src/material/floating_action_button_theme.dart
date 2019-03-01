@@ -6,9 +6,28 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// TODO(clocksmith): dartdoc
+/// Defines default property values for descendant [FloatingActionButton]
+/// widgets.
+///
+/// Descendant widgets obtain the current [FloatingActionButtonThemeData] object
+/// using `FloatingActionButtonThemeData.of(context)`. Instances of
+/// [FloatingActionButtonThemeData] can be customized with
+/// [FloatingActionButtonThemeData.copyWith].
+///
+/// Typically an [FloatingActionButtonThemeData] is specified as part of the
+/// overall [Theme] with [ThemeData.floatingActionButtonTheme].
+///
+/// All [FloatingActionButtonThemeData] properties are `null` by default.
+/// When null, the [FloatingActionButton] will use the values from [ThemeData]
+/// if they exist, otherwise it will provide its own defaults.
+///
+/// See also:
+///
+///  * [ThemeData], which describes the overall theme information for the
+///    application.
 class FloatingActionButtonThemeData extends Diagnosticable {
-  /// TODO(clocksmith): dartdoc
+  /// Creates a theme that can be used for
+  /// [ThemeData.floatingActionButtonTheme].
   const FloatingActionButtonThemeData({
     this.backgroundColor,
     this.foregroundColor,
@@ -35,6 +54,11 @@ class FloatingActionButtonThemeData extends Diagnosticable {
 
   /// The shape to be used for the floating action button's [Material].
   final ShapeBorder shape;
+
+  /// The [ThemeData.floatingActionButtonTheme] property of the ambient [Theme].
+  static FloatingActionButtonThemeData of(BuildContext context) {
+    return Theme.of(context).floatingActionButtonTheme;
+  }
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
