@@ -492,7 +492,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           SizeTransition(
             sizeFactor: _entranceController,
             axis: widget.scrollDirection,
-            child: spacing
+            child: spacing,
           ),
           child,
         ]);

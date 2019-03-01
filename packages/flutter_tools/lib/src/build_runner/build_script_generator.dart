@@ -40,7 +40,7 @@ class BuildScriptGenerator {
       literalList(builders, refer('BuilderApplication', 'package:build_runner_core/build_runner_core.dart'))
         .assignFinal('_builders')
         .statement,
-      _createMain()
+      _createMain(),
     ]));
     final DartEmitter emitter = DartEmitter(Allocator.simplePrefixing());
     try {

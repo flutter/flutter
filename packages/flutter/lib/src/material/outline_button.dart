@@ -303,7 +303,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
     _controller = AnimationController(
       duration: _kPressDuration,
-      vsync: this
+      vsync: this,
     );
     _fillAnimation = CurvedAnimation(
       parent: _controller,

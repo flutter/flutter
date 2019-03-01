@@ -344,7 +344,7 @@ class PointerAddedEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
@@ -381,7 +381,7 @@ class PointerRemovedEvent extends PointerEvent {
     double pressureMax = 1.0,
     double distanceMax = 0.0,
     double radiusMin = 0.0,
-    double radiusMax = 0.0
+    double radiusMax = 0.0,
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
@@ -656,7 +656,7 @@ class PointerDownEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
@@ -765,7 +765,7 @@ class PointerUpEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
@@ -814,7 +814,7 @@ class PointerCancelEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,

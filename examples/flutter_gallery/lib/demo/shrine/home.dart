@@ -50,7 +50,7 @@ class HomePage extends StatelessWidget {
     return Stack(
       children: <Widget>[
         backdrop,
-        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight)
+        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight),
       ],
     );
   }

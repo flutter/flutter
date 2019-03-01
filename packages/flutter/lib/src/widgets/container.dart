@@ -62,7 +62,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.decoration,
     this.position = DecorationPosition.background,
-    Widget child
+    Widget child,
   }) : assert(decoration != null),
        assert(position != null),
        super(key: key, child: child);
@@ -355,7 +355,7 @@ class Container extends StatelessWidget {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: ConstrainedBox(constraints: const BoxConstraints.expand())
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
     }
 
@@ -373,7 +373,7 @@ class Container extends StatelessWidget {
       current = DecoratedBox(
         decoration: foregroundDecoration,
         position: DecorationPosition.foreground,
-        child: current
+        child: current,
       );
     }
 

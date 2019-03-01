@@ -309,7 +309,7 @@ Future<void> _runCoverage() async {
 Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool enableFlutterToolAsserts = false
+  bool enableFlutterToolAsserts = false,
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
   if (!hasColor)

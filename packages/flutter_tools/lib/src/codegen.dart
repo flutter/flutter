@@ -194,7 +194,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         trackWidgetCreation: trackWidgetCreation,
         mainPath: mainPath,
         targetProductVm: targetProductVm,
-        extraFrontEndOptions: extraFrontEndOptions
+        extraFrontEndOptions: extraFrontEndOptions,
       );
       final File outputFile = fs.file(outputFilePath);
       if (!await outputFile.exists()) {

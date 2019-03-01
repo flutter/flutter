@@ -282,7 +282,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               child: widget.backLayer,
               visible: _controller.status != AnimationStatus.completed,
               maintainState: true,
-            )
+            ),
           ),
         ],
       ),

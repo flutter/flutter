@@ -248,11 +248,11 @@ class MaterialRectArcTween extends RectTween {
     final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.beginId),
-      end: _cornerFor(end, diagonal.beginId)
+      end: _cornerFor(end, diagonal.beginId),
     );
     _endArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.endId),
-      end: _cornerFor(end, diagonal.endId)
+      end: _cornerFor(end, diagonal.endId),
     );
     _dirty = false;
   }

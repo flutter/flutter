@@ -163,7 +163,7 @@ void main() {
                   style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                 ),
               ),
-            )
+            ),
           ],
         )
       ));
@@ -349,10 +349,10 @@ void main() {
                 child: GestureDetector(
                   onTap: () {},
                   child: const SizedBox(width: 4.0, height: 4.0),
-                )
-              )
+                ),
+              ),
             ),
-          )
+          ),
         )
       ));
 

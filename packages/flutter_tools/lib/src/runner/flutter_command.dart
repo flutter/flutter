@@ -168,7 +168,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
         help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.'
+              'Specifying port 0 (the default) will find a random free port.',
     );
     _usesPortOption = true;
   }
@@ -253,14 +253,14 @@ abstract class FlutterCommand extends Command<void> {
         help: 'Filename of Dart compilation trace file. This file will be produced\n'
               'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
               '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
-              'some code by the offline compiler.'
+              'some code by the offline compiler.',
     );
     argParser.addFlag('patch',
         hide: !verboseHelp,
         negatable: false,
         help: 'Generate dynamic patch for current changes from baseline.\n'
               'Dynamic patch is generated relative to baseline package.\n'
-              'This flag is only allowed when using --dynamic.\n'
+              'This flag is only allowed when using --dynamic.\n',
     );
   }
 
@@ -273,7 +273,7 @@ abstract class FlutterCommand extends Command<void> {
               'This optional setting allows several dynamic patches to coexist\n'
               'for same baseline build, and is useful for canary and A-B testing\n'
               'of dynamic patches.\n'
-              'This flag is only used when --dynamic --patch is specified.\n'
+              'This flag is only used when --dynamic --patch is specified.\n',
     );
     argParser.addOption('patch-dir',
         defaultsTo: 'public',
@@ -281,7 +281,7 @@ abstract class FlutterCommand extends Command<void> {
         help: 'The directory where to store generated dynamic patches.\n'
               'This directory can be deployed to a CDN such as Firebase Hosting.\n'
               'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --patch is specified.\n'
+              'This flag is only used when --dynamic --patch is specified.\n',
     );
     argParser.addFlag('baseline',
         hide: !verboseHelp,
@@ -289,7 +289,7 @@ abstract class FlutterCommand extends Command<void> {
         help: 'Save built package as baseline for future dynamic patching.\n'
             'Built package, such as APK file on Android, is saved and '
             'can be used to generate dynamic patches in later builds.\n'
-            'This flag is only allowed when using --dynamic.\n'
+            'This flag is only allowed when using --dynamic.\n',
     );
 
     addDynamicBaselineFlags(verboseHelp: verboseHelp);
@@ -301,7 +301,7 @@ abstract class FlutterCommand extends Command<void> {
         hide: !verboseHelp,
         help: 'The directory where to store and find generated baseline packages.\n'
               'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --baseline is specified.\n'
+              'This flag is only used when --dynamic --baseline is specified.\n',
     );
   }
 
@@ -359,7 +359,7 @@ abstract class FlutterCommand extends Command<void> {
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
         'Supports the use of product flavors in Android Gradle scripts.\n'
-        'Supports the use of custom Xcode schemes.'
+        'Supports the use of custom Xcode schemes.',
     );
   }
 

@@ -11,6 +11,6 @@ void main() {
     'cull_opacity_perf',
     kCullOpacityRouteName,
     pageDelay: const Duration(seconds: 1),
-    duration: const Duration(seconds: 10)
+    duration: const Duration(seconds: 10),
   );
 }

@@ -326,7 +326,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       contents = AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.body1,
         duration: widget.animationDuration,
-        child: contents
+        child: contents,
       );
     }
     contents = NotificationListener<LayoutChangedNotification>(
@@ -340,7 +340,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         color: backgroundColor,
         child: contents,
         vsync: this,
-      )
+      ),
     );
 
     // PhysicalModel has a temporary workaround for a performance issue that
@@ -713,7 +713,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context)
+        textDirection: Directionality.of(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: _elevation.evaluate(animation),

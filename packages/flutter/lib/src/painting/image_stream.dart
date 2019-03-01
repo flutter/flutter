@@ -505,7 +505,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
        _scale = scale,
