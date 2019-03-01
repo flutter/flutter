@@ -55,8 +55,7 @@ class _TapTracker {
   _TapTracker({ PointerDownEvent event, this.entry, Duration doubleTapMinTime })
     : pointer = event.pointer,
       _initialPosition = event.position,
-      _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime) {
-  }
+      _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
