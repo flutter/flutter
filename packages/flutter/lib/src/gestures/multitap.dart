@@ -36,7 +36,7 @@ typedef GestureMultiTapCancelCallback = void Function(int pointer);
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
 class _CountdownZoned {
-   _CountdownZoned({ @required Duration duration }) : 
+   _CountdownZoned({ @required Duration duration }) :
       assert(duration != null) {
     _timer = Timer(duration, _onTimeout);
   }
