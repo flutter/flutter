@@ -10,7 +10,6 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -22,6 +21,7 @@ import '../base/process_manager.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
