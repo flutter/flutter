@@ -1,4 +1,4 @@
-Signature: f25dc20a23aafd38437994dfd80cdd57
+Signature: 84d0579ee895fb12763c036a74644ea9
 
 UNUSED LICENSES:
 
@@ -2133,8 +2133,11 @@ FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/confetti.json
 FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/drinks.json
 FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/lego_loader.json
 FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/onboarding.json
+FILE: ../../../third_party/skia/experimental/canvaskit/postamble.js
+FILE: ../../../third_party/skia/experimental/canvaskit/preamble.js
 FILE: ../../../third_party/skia/experimental/canvaskit/ready.js
 FILE: ../../../third_party/skia/experimental/canvaskit/release.js
+FILE: ../../../third_party/skia/experimental/canvaskit/skottie.js
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -2144,7 +2147,6 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
-FILE: ../../../third_party/skia/infra/bots/android_bin.isolate
 FILE: ../../../third_party/skia/infra/bots/assets.isolate
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
@@ -4693,14 +4695,12 @@ FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleEmitter.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
 FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
 FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
-FILE: ../../../third_party/skia/modules/particles/src/SkParticleEmitter.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
