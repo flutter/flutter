@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState;
+import 'dart:ui' show AppLifecycleState, window;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -193,6 +193,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     window.onBeginFrame = _handleBeginFrame;
     window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    if (_lifecycleState == null) {
+      _handleLifecycleMessage(window.initialLifecycleState);
+    }
   }
 
   /// The current [SchedulerBinding], if one has been created.
