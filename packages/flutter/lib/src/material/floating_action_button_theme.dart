@@ -14,7 +14,7 @@ import 'theme.dart';
 /// [FloatingActionButtonThemeData] can be customized with
 /// [FloatingActionButtonThemeData.copyWith].
 ///
-/// Typically an [FloatingActionButtonThemeData] is specified as part of the
+/// Typically a [FloatingActionButtonThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.floatingActionButtonTheme].
 ///
 /// All [FloatingActionButtonThemeData] properties are `null` by default.
@@ -44,12 +44,12 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// foreground.
   final Color foregroundColor;
 
-  /// The z-coordinate to be used for the unselected, enabled floating action \
-  /// buttons's elevation foreground. .
+  /// The z-coordinate to be used for the unselected, enabled floating action
+  /// buttons's elevation foreground.
   final double elevation;
 
   /// The z-coordinate to be used for the selected, enabled floating action
-  /// buttons's elevation foreground. .
+  /// buttons's elevation foreground.
   final double highlightElevation;
 
   /// The shape to be used for the floating action button's [Material].
@@ -90,6 +90,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
+
   @override
   int get hashCode {
     return hashValues(

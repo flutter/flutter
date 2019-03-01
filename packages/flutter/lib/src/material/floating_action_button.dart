@@ -63,10 +63,9 @@ class _DefaultHeroTag {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
-  /// arguments must not be null. Additionally, [elevation],
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [mini] and [clipBehavior] arguments must be non-null. Additionally,
+  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
+  /// must be non-negative.
   const FloatingActionButton({
     Key key,
     this.child,
@@ -94,10 +93,9 @@ class FloatingActionButton extends StatelessWidget {
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label], [elevation], [highlightElevation], [clipBehavior] and
-  /// [shape] arguments must not be null. Additionally, [elevation]
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [label] and [clipBehavior] arguments must non-null. Additionally,
+  /// [elevation] [highlightElevation], and [disabledElevation] (if specified)
+  /// must be non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
@@ -274,10 +272,29 @@ class FloatingActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
 
+    final Color backgroundColor = this.backgroundColor
+      ?? floatingActionButtonTheme.backgroundColor
+      ?? theme.colorScheme.secondary;
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
       ?? theme.accentIconTheme.color
       ?? theme.colorScheme.onSecondary;
+    final double elevation = this.elevation
+      ?? floatingActionButtonTheme.elevation
+      ?? _defaultElevation;
+    final double highlighElevation = this.highlightElevation
+      ?? floatingActionButtonTheme.highlightElevation
+      ?? _defaultHighlightElevation;
+    final double disabledElevation = this.disabledElevation ?? elevation;
+    final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
+      ?? theme.materialTapTargetSize;
+    final TextStyle textStyle = theme.accentTextTheme.button.copyWith(
+      color: foregroundColor,
+      letterSpacing: 1.2,
+    );
+    final ShapeBorder shape = this.shape
+      ?? floatingActionButtonTheme.shape
+      ?? (isExtended ? _defaultExtendedShape : _defaultShape);
 
     Widget result;
 
@@ -292,28 +309,14 @@ class FloatingActionButton extends StatelessWidget {
 
     result = RawMaterialButton(
       onPressed: onPressed,
-      elevation: elevation
-        ?? floatingActionButtonTheme.elevation
-        ?? _defaultElevation,
-      highlightElevation: highlightElevation
-        ?? floatingActionButtonTheme.highlightElevation
-        ?? _defaultHighlightElevation,
-      disabledElevation: disabledElevation
-        ?? elevation
-        ?? floatingActionButtonTheme.elevation
-        ?? _defaultElevation,
+      elevation: elevation,
+      highlightElevation: highlighElevation,
+      disabledElevation: disabledElevation,
       constraints: _sizeConstraints,
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
-      fillColor: backgroundColor
-        ?? floatingActionButtonTheme.backgroundColor
-        ?? theme.colorScheme.secondary,
-      textStyle: theme.accentTextTheme.button.copyWith(
-        color: foregroundColor,
-        letterSpacing: 1.2,
-      ),
-      shape: shape
-        ?? floatingActionButtonTheme.shape
-        ?? (isExtended ? _defaultExtendedShape : _defaultShape),
+      materialTapTargetSize: materialTapTargetSize,
+      fillColor: backgroundColor,
+      textStyle: textStyle,
+      shape: shape,
       clipBehavior: clipBehavior,
       child: result,
     );
