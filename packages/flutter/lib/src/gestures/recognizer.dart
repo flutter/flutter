@@ -89,8 +89,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// the global gesture arena manager (see [GestureArenaManager]) to track
   /// that pointer.
   ///
-  /// IMPORTANT: This method is called for each and all pointers being added. In
-  /// most cases, you want to override [addAllowedPointer].
+  /// This method is called for each and all pointers being added. In
+  /// most cases, you want to override [addAllowedPointer] instead.
   void addPointer(PointerDownEvent event) {
     if (isPointerAllowed(event)) {
       addAllowedPointer(event);
@@ -102,8 +102,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Registers a new pointer that's been checked to be allowed by this gesture
   /// recognizer.
   ///
-  /// Subclasses of [OneSequenceGestureRecognizer] are supposed to override this
-  /// method instead of [addPointer] because [addPointer] will be called for each
+  /// Subclasses of [GestureRecognizer] are supposed to override this method
+  /// instead of [addPointer] because [addPointer] will be called for each
   /// pointer being added while [addAllowedPointer] is only called for pointers
   /// that are allowed by this recognizer.
   @protected

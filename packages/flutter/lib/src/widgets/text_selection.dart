@@ -68,11 +68,6 @@ enum _TextSelectionHandlePosition { start, end }
 /// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
 typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
 
-/// Signature for when a pointer has started dragging to select text.
-///
-/// The [details] argument is the same as the one passed to [DragGestureRecognizer.onStart].
-typedef DragSelectionStartCallback = void Function(DragStartDetails details);
-
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
 /// The first argument [startDetails] contains the details of the event that
@@ -85,12 +80,6 @@ typedef DragSelectionStartCallback = void Function(DragStartDetails details);
 /// easier for various text fields to use [TextSelectionGestureDetector] without
 /// having to store the start position.
 typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
-
-/// Signature for when a pointer that has been dragging to select text is no
-/// longer doing so.
-///
-/// The [details] argument is the same as the one passed to [DragGestureRecognizer.onEnd].
-typedef DragSelectionEndCallback = void Function(DragEndDetails details);
 
 /// An interface for building the selection UI, to be provided by the
 /// implementor of the toolbar widget.
@@ -696,13 +685,17 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback onDoubleTapDown;
 
   /// Called when a mouse starts dragging to select text.
-  final DragSelectionStartCallback onDragSelectionStart;
+  final GestureDragStartCallback onDragSelectionStart;
 
   /// Called repeatedly as a mouse moves while dragging.
+  ///
+  /// The frequency of calls is throttled to avoid excessive text layout
+  /// operations in text fields. The throttling is controlled by the constant
+  /// [_kDragSelectionUpdateThrottle].
   final DragSelectionUpdateCallback onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
-  final DragSelectionEndCallback onDragSelectionEnd;
+  final GestureDragEndCallback onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
