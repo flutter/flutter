@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'colors.dart';
 import 'debug.dart';
@@ -29,7 +30,7 @@ enum DrawerAlignment {
 }
 
 // TODO(eseidel): Draw width should vary based on device size:
-// http://material.google.com/layout/structure.html#structure-side-nav
+// https://material.io/design/components/navigation-drawer.html#specs
 
 // Mobile:
 // Width = Screen width − 56 dp
@@ -80,22 +81,27 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
 ///    display and animation of the drawer.
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
+  ///
+  /// The [elevation] must be non-negative.
   const Drawer({
     Key key,
     this.elevation = 16.0,
     this.child,
     this.semanticLabel,
-  }) : super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       super(key: key);
 
-  /// The z-coordinate at which to place this drawer. This controls the size of
-  /// the shadow below the drawer.
+  /// The z-coordinate at which to place this drawer relative to its parent.
   ///
-  /// Defaults to 16, the appropriate elevation for drawers.
+  /// This controls the size of the shadow below the drawer.
+  ///
+  /// Defaults to 16, the appropriate elevation for drawers. The value is
+  /// always non-negative.
   final double elevation;
 
   /// The widget below this widget in the tree.
@@ -174,7 +180,9 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(child != null),
+       assert(dragStartBehavior != null),
        assert(alignment != null),
        super(key: key);
 
@@ -191,6 +199,26 @@ class DrawerController extends StatefulWidget {
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
+
+  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag behavior used for opening
+  /// and closing a drawer will begin upon the detection of a drag gesture. If
+  /// set to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  /// {@endtemplate}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -394,6 +422,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
+          dragStartBehavior: widget.dragStartBehavior,
           child: Container(width: dragAreaWidth),
         ),
       );
@@ -405,6 +434,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
+        dragStartBehavior: widget.dragStartBehavior,
         child: RepaintBoundary(
           child: Stack(
             children: <Widget>[

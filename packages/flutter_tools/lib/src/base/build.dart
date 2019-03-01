@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:archive/archive.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
@@ -44,13 +46,11 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
-    @required String packagesPath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
-      '--packages=$packagesPath',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
@@ -191,7 +191,6 @@ class AOTSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packageMap.packagesPath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -348,7 +347,9 @@ class JITSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required String compilationTraceFilePath,
-    @required bool buildHotUpdate,
+    @required bool createPatch,
+    String buildNumber,
+    String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidJitPlatform(platform)) {
@@ -359,16 +360,90 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 
     final List<String> inputPaths = <String>[
       mainPath, compilationTraceFilePath, engineVmSnapshotData, engineIsolateSnapshotData,
     ];
-    if (buildHotUpdate) {
+
+    if (createPatch) {
       inputPaths.add(isolateSnapshotInstructions);
+
+      if (buildNumber == null) {
+        printError('Error: Dynamic patching requires --build-number specified');
+        return 1;
+      }
+      if (baselineDir == null) {
+        printError('Error: Dynamic patching requires --baseline-dir specified');
+        return 1;
+      }
+
+      final File baselineApk = fs.directory(baselineDir).childFile('$buildNumber.apk');
+      if (!baselineApk.existsSync()) {
+        printError('Error: Could not find baseline package ${baselineApk.path}.');
+        return 1;
+      }
+
+      final Archive baselinePkg = ZipDecoder().decodeBytes(baselineApk.readAsBytesSync());
+
+      {
+        final File f = fs.file(isolateSnapshotInstructions);
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/isolate_snapshot_instr'));
+        if (af == null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+
+        // When building an update, gen_snapshot expects to find the original isolate
+        // snapshot instructions from the previous full build, so we need to extract
+        // it from saves baseline APK.
+        if (!f.existsSync()) {
+          f.writeAsBytesSync(af.content, flush: true);
+        } else {
+          // But if this file is already extracted, we make sure that it's identical.
+          final Function contentEquals = const ListEquality<int>().equals;
+          if (!contentEquals(f.readAsBytesSync(), af.content)) {
+            printError('Error: Detected changes unsupported by dynamic patching.');
+            return 1;
+          }
+        }
+      }
+
+      {
+        final File f = fs.file(engineVmSnapshotData);
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_data'));
+        if (af == null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+
+        // If engine snapshot artifact doesn't exist, gen_snapshot below will fail
+        // with a friendly error, so we don't need to handle this case here too.
+        if (f.existsSync()) {
+          // But if engine snapshot exists, its content must match the engine snapshot
+          // in baseline APK. Otherwise, we're trying to build an update at an engine
+          // version that might be binary incompatible with baseline APK.
+          final Function contentEquals = const ListEquality<int>().equals;
+          if (!contentEquals(f.readAsBytesSync(), af.content)) {
+            printError('Error: Detected engine changes unsupported by dynamic patching.');
+            return 1;
+          }
+        }
+      }
+
+      {
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
+        if (af != null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+      }
     }
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
@@ -385,19 +460,36 @@ class JITSnapshotter {
 
     final Set<String> outputPaths = Set<String>();
     outputPaths.addAll(<String>[isolateSnapshotData]);
-    if (!buildHotUpdate) {
+    if (!createPatch) {
       outputPaths.add(isolateSnapshotInstructions);
     }
 
+    // There are a couple special cases below where we create a snapshot
+    // with only the data section, which only contains interpreted code.
+    bool supportsAppJit = true;
+
+    if (platform == TargetPlatform.android_x64 &&
+        getCurrentHostPlatform() == HostPlatform.windows_x64) {
+      supportsAppJit = false;
+      printStatus('Android x64 dynamic build on Windows x64 will use purely interpreted '
+                  'code for now (see  https://github.com/flutter/flutter/issues/17489).');
+    }
+
+    if (platform == TargetPlatform.android_x86) {
+      supportsAppJit = false;
+      printStatus('Android x86 dynamic build will use purely interpreted code for now. '
+                  'To optimize performance, consider using --target-platform=android-x64.');
+    }
+
     genSnapshotArgs.addAll(<String>[
-      '--snapshot_kind=app-jit',
+      '--snapshot_kind=${supportsAppJit ? 'app-jit' : 'app'}',
       '--load_compilation_trace=$compilationTraceFilePath',
       '--load_vm_snapshot_data=$engineVmSnapshotData',
       '--load_isolate_snapshot_data=$engineIsolateSnapshotData',
       '--isolate_snapshot_data=$isolateSnapshotData',
     ]);
 
-    if (!buildHotUpdate) {
+    if (!createPatch) {
       genSnapshotArgs.add('--isolate_snapshot_instructions=$isolateSnapshotInstructions');
     } else {
       genSnapshotArgs.add('--reused_instructions=$isolateSnapshotInstructions');
@@ -429,7 +521,7 @@ class JITSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'buildHotUpdate': buildHotUpdate.toString(),
+        'createPatch': createPatch.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
       depfilePaths: <String>[],
@@ -442,7 +534,6 @@ class JITSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packagesPath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
@@ -464,6 +555,8 @@ class JITSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_x86,
+      TargetPlatform.android_x64,
     ].contains(platform);
   }
 }

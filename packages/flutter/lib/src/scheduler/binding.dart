@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
@@ -191,8 +190,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onBeginFrame = _handleBeginFrame;
-    ui.window.onDrawFrame = _handleDrawFrame;
+    window.onBeginFrame = _handleBeginFrame;
+    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
   }
 
@@ -204,8 +203,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    if (!kReleaseMode) {
       registerNumericServiceExtension(
         name: 'timeDilation',
         getter: () async => timeDilation,
@@ -298,7 +296,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [Priority.animation] won't run (at least, not with the
   /// [defaultSchedulingStrategy]; this can be configured using
   /// [schedulingStrategy]).
-  Future<T> scheduleTask<T>(TaskCallback<T> task, Priority priority, {
+  Future<T> scheduleTask<T>(
+    TaskCallback<T> task,
+    Priority priority, {
     String debugLabel,
     Flow flow,
   }) {
@@ -408,15 +408,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
-  /// If this is a callback that will be reregistered each time it fires, then
-  /// when you reregister the callback, set the `rescheduling` argument to true.
-  /// This has no effect in release builds, but in debug builds, it ensures that
-  /// the stack trace that is stored for this callback is the original stack
-  /// trace for when the callback was _first_ registered, rather than the stack
-  /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was called. If
-  /// `rescheduling` is true, the call must be in the context of a frame
-  /// callback.
+  /// If this is a callback that will be re-registered each time it fires, then
+  /// when you re-register the callback, set the `rescheduling` argument to
+  /// true. This has no effect in release builds, but in debug builds, it
+  /// ensures that the stack trace that is stored for this callback is the
+  /// original stack trace for when the callback was _first_ registered, rather
+  /// than the stack trace for when the callback is re-registered. This makes it
+  /// easier to track down the original reason that a particular callback was
+  /// called. If `rescheduling` is true, the call must be in the context of a
+  /// frame callback.
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
@@ -513,7 +513,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// To call this function, use the following code:
   ///
   /// ```dart
-  ///   SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
+  /// SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
   /// ```
   static void debugPrintTransientCallbackRegistrationStack() {
     assert(() {
@@ -682,7 +682,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -713,7 +713,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

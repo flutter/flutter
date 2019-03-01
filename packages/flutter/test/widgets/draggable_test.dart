@@ -383,6 +383,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: ListView(
+        dragStartBehavior: DragStartBehavior.down,
         children: <Widget>[
           DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -489,6 +490,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: ListView(
+        dragStartBehavior: DragStartBehavior.down,
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           DragTarget<int>(
@@ -2087,7 +2089,7 @@ void main() {
 
 }
 
-Future<void> _testLongPressDraggableHapticFeedback({WidgetTester tester, bool hapticFeedbackOnStart, int expectedHapticFeedbackCount}) async {
+Future<void> _testLongPressDraggableHapticFeedback({ WidgetTester tester, bool hapticFeedbackOnStart, int expectedHapticFeedbackCount }) async {
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
@@ -2129,7 +2131,7 @@ Future<void> _testLongPressDraggableHapticFeedback({WidgetTester tester, bool ha
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
 }
 
-Future<void> _testChildAnchorFeedbackPosition({WidgetTester tester, double top = 0.0, double left = 0.0}) async {
+Future<void> _testChildAnchorFeedbackPosition({ WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
   final List<int> accepted = <int>[];
   int dragStartedCount = 0;
 

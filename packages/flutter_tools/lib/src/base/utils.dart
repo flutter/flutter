@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' show Random, max;
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
+import '../convert.dart';
 import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
@@ -79,7 +79,7 @@ String camelCase(String str) {
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [String sep = '_']) {
+String snakeCase(String str, [ String sep = '_' ]) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
@@ -203,6 +203,7 @@ class SettingsFile {
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
+    file.parent.createSync(recursive: true);
     file.writeAsStringSync(values.keys.map<String>((String key) {
       return '$key=${values[key]}';
     }).join('\n'));
@@ -342,7 +343,7 @@ const int kMinColumnWidth = 10;
 ///
 /// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
 /// added together.
-String wrapText(String text, {int columnWidth, int hangingIndent, int indent, bool shouldWrap}) {
+String wrapText(String text, { int columnWidth, int hangingIndent, int indent, bool shouldWrap }) {
   if (text == null || text.isEmpty) {
     return '';
   }
@@ -430,7 +431,7 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth, bool shouldWrap}) {
+List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, bool shouldWrap }) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
@@ -490,7 +491,7 @@ List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth, bool
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [int end]) {
+  String joinRun(List<_AnsiRun> list, int start, [ int end ]) {
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 

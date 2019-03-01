@@ -117,6 +117,7 @@ class AndroidView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails d) {},
@@ -125,8 +126,10 @@ class AndroidView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [AndroidView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -198,8 +201,7 @@ class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
   /// {@macro flutter.widgets.platformViews.constructorParams}
-  UiKitView({ // ignore: prefer_const_constructors_in_immutables
-    // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
+  const UiKitView({
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
@@ -209,9 +211,9 @@ class UiKitView extends StatefulWidget {
     this.creationParamsCodec,
     this.gestureRecognizers,
   }) : assert(viewType != null),
-        assert(hitTestBehavior != null),
-        assert(creationParams == null || creationParamsCodec != null),
-        super(key: key);
+       assert(hitTestBehavior != null),
+       assert(creationParams == null || creationParamsCodec != null),
+       super(key: key);
 
   // TODO(amirh): reference the iOS API doc once avaliable.
   /// The unique identifier for iOS view type to be embedded by this widget.
@@ -247,6 +249,7 @@ class UiKitView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the UIKit
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -255,8 +258,10 @@ class UiKitView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [UiKitView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},

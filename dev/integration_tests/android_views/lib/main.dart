@@ -125,15 +125,15 @@ class PlatformViewState extends State<PlatformViewPage> {
           .cast<Map<dynamic, dynamic>>()
           .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
-      await channel.invokeMethod('pipeFlutterViewEvents');
-      await viewChannel.invokeMethod('pipeTouchEvents');
+      await channel.invokeMethod<void>('pipeFlutterViewEvents');
+      await viewChannel.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
       for (Map<String, dynamic> event in recordedEvents.reversed) {
-        await channel.invokeMethod('synthesizeEvent', event);
+        await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
-      await channel.invokeMethod('stopFlutterViewEvents');
-      await viewChannel.invokeMethod('stopTouchEvents');
+      await channel.invokeMethod<void>('stopFlutterViewEvents');
+      await viewChannel.invokeMethod<void>('stopTouchEvents');
 
       if (flutterViewEvents.length != embeddedViewEvents.length)
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
@@ -160,7 +160,7 @@ class PlatformViewState extends State<PlatformViewPage> {
   }
 
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
-    if (!await channel.invokeMethod('getStoragePermission')) {
+    if (!await channel.invokeMethod<bool>('getStoragePermission')) {
       showMessage(
           context, 'External storage permissions are required to save events');
       return;
@@ -190,11 +190,11 @@ class PlatformViewState extends State<PlatformViewPage> {
   }
 
   void listenToFlutterViewEvents() {
-    channel.invokeMethod('pipeFlutterViewEvents');
-    viewChannel.invokeMethod('pipeTouchEvents');
+    channel.invokeMethod<void>('pipeFlutterViewEvents');
+    viewChannel.invokeMethod<void>('pipeTouchEvents');
     Timer(const Duration(seconds: 3), () {
-      channel.invokeMethod('stopFlutterViewEvents');
-      viewChannel.invokeMethod('stopTouchEvents');
+      channel.invokeMethod<void>('stopFlutterViewEvents');
+      viewChannel.invokeMethod<void>('stopTouchEvents');
     });
   }
 

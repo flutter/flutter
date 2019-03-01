@@ -229,9 +229,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('two_level_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(MaterialApp(home: TwoLevelListDemo()));
+      await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -462,9 +462,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('two_level_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(MaterialApp(home: TwoLevelListDemo()));
+      await tester.pumpWidget(MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
@@ -743,10 +743,10 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets('two_level_list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('expansion_tile_list_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(MaterialApp(theme: theme, home: TwoLevelListDemo()));
+        await tester.pumpWidget(MaterialApp(theme: theme, home: ExpansionTileListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });

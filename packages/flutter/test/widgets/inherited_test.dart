@@ -503,7 +503,7 @@ void main() {
     await tester.pump();
     expect(buildCount, equals(1));
 
-    notifier.notifyListeners(); // ignore: invalid_use_of_protected_member
+    notifier.notifyListeners();
     await tester.pump();
     expect(buildCount, equals(2));
 

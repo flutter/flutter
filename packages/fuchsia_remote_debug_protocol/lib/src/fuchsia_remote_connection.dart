@@ -32,8 +32,11 @@ final Logger _log = Logger('FuchsiaRemoteConnection');
 /// `interface` and `configFile`. The config file is used primarily for the
 /// default SSH port forwarding configuration.
 typedef PortForwardingFunction = Future<PortForwarder> Function(
-    String address, int remotePort,
-    [String interface, String configFile]);
+  String address,
+  int remotePort, [
+  String interface,
+  String configFile,
+]);
 
 /// The function for forwarding the local machine's ports to a remote Fuchsia
 /// device.
@@ -101,7 +104,7 @@ class DartVmEvent {
 /// Dart VM at any given time.
 class FuchsiaRemoteConnection {
   FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner)
-      : _pollDartVms = false;
+    : _pollDartVms = false;
 
   bool _pollDartVms;
   final List<PortForwarder> _forwardedVmServicePorts = <PortForwarder>[];
@@ -128,8 +131,7 @@ class FuchsiaRemoteConnection {
 
   /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
   /// [SshCommandRunner] instance.
-  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
-      SshCommandRunner commandRunner) async {
+  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(SshCommandRunner commandRunner) async {
     final FuchsiaRemoteConnection connection = FuchsiaRemoteConnection._(
         isIpV6Address(commandRunner.address), commandRunner);
     await connection._forwardLocalPortsToDeviceServicePorts();
@@ -474,7 +476,7 @@ class FuchsiaRemoteConnection {
   /// Runs a dummy heartbeat command on all Dart VM instances.
   ///
   /// Removes any failing ports from the cache.
-  Future<void> _checkPorts([bool queueEvents = true]) async {
+  Future<void> _checkPorts([ bool queueEvents = true ]) async {
     // Filters out stale ports after connecting. Ignores results.
     await _invokeForAllVms<Map<String, dynamic>>(
       (DartVm vmService) async {
@@ -523,24 +525,22 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    // TODO(awdavies): This is using a temporary workaround rather than a
-    // well-defined service, and will be deprecated in the near future.
-    final List<String> lsOutput =
-        await _sshCommandRunner.run('ls /tmp/dart.services');
+    final List<String> portPaths = await _sshCommandRunner
+        .run('/bin/find /hub -name vmservice-port');
     final List<int> ports = <int>[];
-
-    // The output of lsOutput is a list of available ports as the Fuchsia dart
-    // service advertises. An example lsOutput would look like:
-    //
-    // [ '31782\n', '1234\n', '11967' ]
-    for (String s in lsOutput) {
-      final String trimmed = s.trim();
-      final int lastSpace = trimmed.lastIndexOf(' ');
-      final String lastWord = trimmed.substring(lastSpace + 1);
-      if ((lastWord != '.') && (lastWord != '..')) {
-        final int value = int.tryParse(lastWord);
-        if (value != null) {
-          ports.add(value);
+    for (String path in portPaths) {
+      if (path == '') {
+        continue;
+      }
+      final List<String> lsOutput =
+          await _sshCommandRunner.run('/bin/ls $path');
+      for (String line in lsOutput) {
+        if (line == '') {
+          continue;
+        }
+        final int port = int.tryParse(line);
+        if (port != null) {
+          ports.add(port);
         }
       }
     }
@@ -593,8 +593,12 @@ class _SshPortForwarder implements PortForwarder {
 
   /// Starts SSH forwarding through a subprocess, and returns an instance of
   /// [_SshPortForwarder].
-  static Future<_SshPortForwarder> start(String address, int remotePort,
-      [String interface, String sshConfigPath]) async {
+  static Future<_SshPortForwarder> start(
+    String address,
+    int remotePort, [
+    String interface,
+    String sshConfigPath,
+  ]) async {
     final bool isIpV6 = isIpV6Address(address);
     final ServerSocket localSocket = await _createLocalSocket();
     if (localSocket == null || localSocket.port == 0) {

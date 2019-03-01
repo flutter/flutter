@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
+/// For guidelines on using the Flutter logo, visit https://flutter.io/brand.
 ///
 /// See also:
 ///

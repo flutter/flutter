@@ -3,8 +3,6 @@
         "data": "data/flutter_gallery"
     },
     "sandbox": {
-        "system": [ "data" ],
-        "features": [ "persistent-storage" ],
         "services": [
             "fuchsia.cobalt.LoggerFactory",
             "fuchsia.fonts.Provider",

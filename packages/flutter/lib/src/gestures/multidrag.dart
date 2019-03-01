@@ -439,8 +439,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 
 class _DelayedPointerState extends MultiDragPointerState {
   _DelayedPointerState(Offset initialPosition, Duration delay)
-    : assert(delay != null),
-      super(initialPosition) {
+      : assert(delay != null),
+        super(initialPosition) {
     _timer = Timer(delay, _delayPassed);
   }
 

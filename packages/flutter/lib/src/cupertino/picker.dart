@@ -23,7 +23,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// Can be used with [showModalBottomSheet] to display the picker modally at the
+/// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
 ///
 /// See also:
@@ -41,6 +41,10 @@ class CupertinoPicker extends StatefulWidget {
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent]. Also, if it has transparency, no gradient
   /// effect will be rendered.
+  ///
+  /// The [scrollController] argument can be used to specify a custom
+  /// [FixedExtentScrollController] for programmatically reading or changing
+  /// the current picker index or for selecting an initial index value.
   ///
   /// The [looping] argument decides whether the child list loops and can be
   /// scrolled infinitely.  If set to true, scrolling past the end of the list
@@ -419,7 +423,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
-   @override
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;

@@ -76,6 +76,14 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  codegen_integration_test:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -111,6 +119,26 @@ tasks:
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  home_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of scrolling the material page in the
+      flutter_gallery app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  cull_opacity_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of culling opacity widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  cubic_bezier_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   flavors_test:
     description: >
@@ -326,7 +354,6 @@ tasks:
       Checks that the module project template works and supports add2app on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   external_ui_integration_test_ios:
     description: >

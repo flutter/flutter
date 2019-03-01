@@ -297,6 +297,16 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
+    testUsingContext('Emits partial status when CocoaPods is installed with unknown version', () async {
+      when(cocoaPods.evaluateCocoaPodsInstallation)
+          .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      CocoaPods: () => cocoaPods,
+    });
+
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();

@@ -23,6 +23,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
+  'add2app_test': _runAdd2AppTest,
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
@@ -167,9 +168,22 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
+  // TODO(jonahwilliams): re-enable when engine rolls.
+  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
+
+// Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+//   print('Running Dart2JS build tests...');
+//   await runCommand(flutter,
+//     <String>['build', 'web', '-v'],
+//     workingDirectory: path.join(flutterRoot, relativePathToApplication),
+//     expectNonZeroExit: false,
+//     timeout: _kShortTimeout,
+//   );
+//   print('Done.');
+// }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('Running AOT build tests...');
@@ -184,7 +198,9 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication) async {
   // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
-  if (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) {
+  if (
+        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
+        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
     return;
   }
   print('Running APK build tests...');
@@ -216,6 +232,21 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _runAdd2AppTest() async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running Add2App iOS integration tests...');
+  final String add2AppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
+  await runCommand('./build_and_test.sh',
+    <String>[],
+    workingDirectory: add2AppDir,
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );

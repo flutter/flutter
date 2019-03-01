@@ -170,7 +170,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// recreate all the objects in the chain from the [AnimationController] to the
 /// final [Tween].
 ///
-/// If a [Tween]'s values are never changed, however, a further optimisation can
+/// If a [Tween]'s values are never changed, however, a further optimization can
 /// be applied: the object can be stored in a `static final` variable, so that
 /// the exact same instance is used whenever the [Tween] is needed. This is
 /// preferable to creating an identical [Tween] afresh each time a [State.build]
@@ -267,7 +267,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
 /// A [Tween] that evaluates its [parent] in reverse.
 class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
-  ReverseTween(this.parent) : assert(parent != null), super(begin: parent.end, end: parent.begin);
+  ReverseTween(this.parent)
+    : assert(parent != null),
+      super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///

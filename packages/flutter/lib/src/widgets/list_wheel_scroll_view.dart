@@ -30,6 +30,7 @@ import 'scrollable.dart';
 /// during that stage.
 ///
 /// See also:
+///
 ///  * [ListWheelChildListDelegate], a delegate that supplies children using an
 ///    explicit list.
 ///  * [ListWheelChildLoopingListDelegate], a delegate that supplies infinite
@@ -253,7 +254,8 @@ class FixedExtentScrollController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> animateToItem(int itemIndex, {
+  Future<void> animateToItem(
+    int itemIndex, {
     @required Duration duration,
     @required Curve curve,
   }) async {

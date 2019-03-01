@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
 import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
@@ -18,6 +17,7 @@ import '../base/net.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
 import '../globals.dart';
@@ -90,9 +90,10 @@ class CreateCommand extends FlutterCommand {
       'sample',
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app.',
+        '--template=app. The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.io).',
       defaultsTo: null,
-      valueHelp: 'the sample ID of the desired sample from the API documentation website (http://docs.flutter.io)'
+      valueHelp: 'id',
     );
     argParser.addFlag(
       'overwrite',
@@ -187,7 +188,7 @@ class CreateCommand extends FlutterCommand {
 
     final String host = FlutterVersion.instance.channel == 'stable'
         ? 'docs.flutter.io'
-        : 'master-docs-flutter-io.firebaseapp.com';
+        : 'master-docs.flutter.io';
     return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
   }
 
@@ -395,7 +396,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return null;
   }
 
-  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -414,7 +415,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -431,7 +432,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -463,7 +464,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
@@ -536,7 +537,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, {bool overwrite = false}) {
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
     final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
@@ -559,7 +560,32 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
 }
 
 String _createAndroidIdentifier(String organization, String name) {
-  return '$organization.$name'.replaceAll('_', '');
+  // Android application ID is specified in: https://developer.android.com/studio/build/application-id
+  // All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
+  String tmpIdentifier = '$organization.$name';
+  final RegExp disallowed = RegExp(r'[^\w\.]');
+  tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
+
+  // It must have at least two segments (one or more dots).
+  final List<String> segments = tmpIdentifier
+      .split('.')
+      .where((String segment) => segment.isNotEmpty)
+      .toList();
+  while (segments.length < 2) {
+    segments.add('untitled');
+  }
+
+  // Each segment must start with a letter.
+  final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
+  final List<String> prefixedSegments = segments
+      .map((String segment) {
+        if (!segmentPatternRegex.hasMatch(segment)) {
+          return 'u'+segment;
+        }
+        return segment;
+      })
+      .toList();
+  return prefixedSegments.join('.');
 }
 
 String _createPluginClassName(String name) {
@@ -569,10 +595,21 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
+  name = camelCase(name);
+  String tmpIdentifier = '$organization.$name';
   final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
-  name = camelCase(name).replaceAll(disallowed, '');
-  name = name.isEmpty ? 'untitled' : name;
-  return '$organization.$name';
+  tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
+
+  // It must have at least two segments (one or more dots).
+  final List<String> segments = tmpIdentifier
+      .split('.')
+      .where((String segment) => segment.isNotEmpty)
+      .toList();
+  while (segments.length < 2) {
+    segments.add('untitled');
+  }
+
+  return segments.join('.');
 }
 
 final Set<String> _packageDependencies = Set<String>.from(<String>[

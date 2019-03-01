@@ -49,6 +49,7 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
+  final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
   final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, R>>(
     _spawn,
@@ -61,13 +62,32 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
     ),
     errorsAreFatal: true,
     onExit: resultPort.sendPort,
+    onError: errorPort.sendPort,
   );
-  final R result = await resultPort.first;
+  final Completer<R> result = Completer<R>();
+  errorPort.listen((dynamic errorData) {
+    assert(errorData is List<dynamic>);
+    assert(errorData.length == 2);
+    final Exception exception = Exception(errorData[0]);
+    final StackTrace stack = StackTrace.fromString(errorData[1]);
+    if (result.isCompleted) {
+      Zone.current.handleUncaughtError(exception, stack);
+    } else {
+      result.completeError(exception, stack);
+    }
+  });
+  resultPort.listen((dynamic resultData) {
+    assert(resultData == null || resultData is R);
+    if (!result.isCompleted)
+      result.complete(resultData);
+  });
+  await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
+  errorPort.close();
   isolate.kill();
   Timeline.finishSync();
-  return result;
+  return result.future;
 }
 
 @immutable
@@ -92,9 +112,7 @@ void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
   R result;
   Timeline.timeSync(
     '${configuration.debugLabel}',
-    () {
-      result = configuration.apply();
-    },
+    () { result = configuration.apply(); },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(

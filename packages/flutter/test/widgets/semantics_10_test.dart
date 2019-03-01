@@ -34,7 +34,7 @@ void main() {
   });
 }
 
-Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
+Widget buildTestWidgets({ bool excludeSemantics, String label, bool isSemanticsBoundary }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Semantics(

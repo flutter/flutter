@@ -55,11 +55,12 @@ class ModalBarrier extends StatelessWidget {
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [ModalRoute.semanticsDismissible], which controls this property for
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool barrierSemanticsDismissible;
 
-  /// Semantics label used for the barrier if it is [dismissable].
+  /// Semantics label used for the barrier if it is [dismissible].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
   /// on Android and VoiceOver on iOS) when the barrier is focused.
@@ -146,7 +147,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
-  /// Semantics label used for the barrier if it is [dismissable].
+  /// Semantics label used for the barrier if it is [dismissible].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
   /// on Android and VoiceOver on iOS) when the barrier is focused.
@@ -159,6 +160,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [ModalRoute.semanticsDismissible], which controls this property for
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool barrierSemanticsDismissible;

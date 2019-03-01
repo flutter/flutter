@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -193,8 +194,7 @@ void main() {
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
 
-  final Map<String, List<Map<Object, Object>>> eventsDispatched =
-      <String, List<Map<Object, Object>>>{};
+  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
 
   @override
   void registerServiceExtension({
@@ -212,6 +212,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
   List<Map<Object, Object>> getEventsDispatched(String eventKind) {
     return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
+  }
+
+  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+      .where((Map<Object, Object> event) => event['extension'] == extensionName);
   }
 
   Future<Object> testExtension(String name, Map<String, String> arguments) async {
@@ -396,6 +401,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
                 Container(
                   key: childKey,
@@ -1509,7 +1515,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1518,7 +1524,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1543,7 +1549,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1552,7 +1558,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1723,15 +1729,33 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
+      final Iterable<Map<Object, Object>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
+      Map<Object, Object> extensionChangedEvent;
+
       service.rebuildCount = 0;
+      expect(extensionChangedEvents, isEmpty);
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(1));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{}), equals('true'));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(extensionChangedEvents.length, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(2));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'false'}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isFalse);
       expect(await service.testBoolExtension('show', <String, String>{}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
       expect(service.rebuildCount, equals(2));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });

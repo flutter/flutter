@@ -4,11 +4,15 @@
 
 import 'dart:ui' show Color, hashValues;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'app_bar_theme.dart';
+import 'bottom_app_bar_theme.dart';
 import 'button_theme.dart';
+import 'card_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -102,7 +106,7 @@ class ThemeData extends Diagnosticable {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
-  /// See <https://material.google.com/style/color.html> for
+  /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
@@ -146,13 +150,17 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    AppBarTheme appBarTheme,
+    BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     Typography typography,
+    CupertinoThemeData cupertinoOverrideTheme
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -240,12 +248,16 @@ class ThemeData extends Diagnosticable {
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
     tabBarTheme ??= const TabBarTheme();
+    appBarTheme ??= const AppBarTheme();
+    bottomAppBarTheme ??= const BottomAppBarTheme();
+    cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
     dialogTheme ??= const DialogTheme();
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -287,18 +299,23 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: tabBarTheme,
+      cardTheme: cardTheme,
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
+      appBarTheme: appBarTheme,
+      bottomAppBarTheme: bottomAppBarTheme,
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       typography: typography,
+      cupertinoOverrideTheme: cupertinoOverrideTheme,
     );
   }
 
-  /// Create a [ThemeData] given a set of exact values. All the values
-  /// must be specified.
+  /// Create a [ThemeData] given a set of exact values. All the values must be
+  /// specified. They all must also be non-null except for
+  /// [cupertinoOverrideTheme].
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
@@ -346,13 +363,17 @@ class ThemeData extends Diagnosticable {
     @required this.accentIconTheme,
     @required this.sliderTheme,
     @required this.tabBarTheme,
+    @required this.cardTheme,
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
+    @required this.appBarTheme,
+    @required this.bottomAppBarTheme,
     @required this.colorScheme,
     @required this.dialogTheme,
     @required this.typography,
+    @required this.cupertinoOverrideTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -391,10 +412,13 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(tabBarTheme != null),
+       assert(cardTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
+       assert(appBarTheme != null),
+       assert(bottomAppBarTheme != null),
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(typography != null);
@@ -520,7 +544,7 @@ class ThemeData extends Diagnosticable {
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
   // According to the spec for data tables:
-  // https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+  // https://material.io/archive/guidelines/components/data-tables.html#data-tables-tables-within-cards
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
@@ -586,6 +610,11 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
+  /// The colors and styles used to render [Card].
+  ///
+  /// This is the value returned from [CardTheme.of].
+  final CardTheme cardTheme;
+
   /// The colors and styles used to render [Chip], [
   ///
   /// This is the value returned from [ChipTheme.of].
@@ -613,6 +642,13 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
+  /// A theme for customizing the color, elevation, brightness, iconTheme and
+  /// textTheme of [AppBar]s.
+  final AppBarTheme appBarTheme;
+
+  /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
+  final BottomAppBarTheme bottomAppBarTheme;
+
   /// A set of thirteen colors that can be used to configure the
   /// color properties of most components.
   ///
@@ -629,6 +665,18 @@ class ThemeData extends Diagnosticable {
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
+
+  /// Components of the [CupertinoThemeData] to override from the Material
+  /// [ThemeData] adaptation.
+  ///
+  /// By default, [cupertinoOverrideTheme] is null and Cupertino widgets
+  /// descendant to the Material [Theme] will adhere to a [CupertinoTheme]
+  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorTheme]
+  /// will also inform the [CupertinoThemeData]'s `primaryColor` etc.
+  ///
+  /// This cascading effect for individual attributes of the [CupertinoThemeData]
+  /// can be overridden using attributes of this [cupertinoOverrideTheme].
+  final CupertinoThemeData cupertinoOverrideTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -671,14 +719,19 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    AppBarTheme appBarTheme,
+    BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     Typography typography,
+    CupertinoThemeData cupertinoOverrideTheme,
   }) {
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
@@ -719,13 +772,17 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      cardTheme: cardTheme ?? this.cardTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
+      appBarTheme: appBarTheme ?? this.appBarTheme,
+      bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       typography: typography ?? this.typography,
+      cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
     );
   }
 
@@ -846,13 +903,17 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
+      cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
+      appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
+      bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
+      cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
     );
   }
 
@@ -903,13 +964,17 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.tabBarTheme == tabBarTheme) &&
+           (otherData.cardTheme == cardTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
+           (otherData.appBarTheme == appBarTheme) &&
+           (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
            (otherData.colorScheme == colorScheme) &&
            (otherData.dialogTheme == dialogTheme) &&
-           (otherData.typography == typography);
+           (otherData.typography == typography) &&
+           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
   }
 
   @override
@@ -960,13 +1025,17 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         hashValues(
           tabBarTheme,
+          cardTheme,
           chipTheme,
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
+          appBarTheme,
+          bottomAppBarTheme,
           colorScheme,
           dialogTheme,
           typography,
+          cupertinoOverrideTheme,
         ),
       ),
     );
@@ -1013,12 +1082,118 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
+    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
+    properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
+    properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
+    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
+  }
+}
+
+/// A [CupertinoThemeData] that defers unspecified theme attributes to an
+/// upstream Material [ThemeData].
+///
+/// This type of [CupertinoThemeData] is used by the Material [Theme] to
+/// harmonize the [CupertinoTheme] with the material theme's colors and text
+/// styles.
+///
+/// In the most basic case, [ThemeData]'s `cupertinoOverrideTheme` is null and
+/// and descendant Cupertino widgets' styling is derived from the Material theme.
+///
+/// To override individual parts of the Material-derived Cupertino styling,
+/// `cupertinoOverrideTheme`'s construction parameters can be used.
+///
+/// To completely decouple the Cupertino styling from Material theme derivation,
+/// another [CupertinoTheme] widget can be inserted as a descendant of the
+/// Material [Theme]. On a [MaterialApp], this can be done using the `builder`
+/// parameter on the constructor.
+///
+/// See also:
+///
+///  * [CupertinoThemeData], whose null constructor parameters default to
+///    reasonable iOS styling defaults rather than harmonizing with a Material
+///    theme.
+///  * [Theme], widget which inserts a [CupertinoTheme] with this
+///    [MaterialBasedCupertinoThemeData].
+// This class subclasses CupertinoThemeData rather than composes one because it
+// _is_ a CupertinoThemeData with partially altered behavior. e.g. its textTheme
+// is from the superclass and based on the primaryColor but the primaryColor
+// comes from the Material theme unless overridden.
+class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
+  /// Create a [MaterialBasedCupertinoThemeData] based on a Material [ThemeData]
+  /// and its `cupertinoOverrideTheme`.
+  ///
+  /// The [materialTheme] parameter must not be null.
+  MaterialBasedCupertinoThemeData({
+    @required ThemeData materialTheme,
+  }) : assert(materialTheme != null),
+       _materialTheme = materialTheme,
+       // Pass all values to the superclass so Material-agnostic properties
+       // like barBackgroundColor can still behave like a normal
+       // CupertinoThemeData.
+       super.raw(
+         materialTheme.cupertinoOverrideTheme?.brightness,
+         materialTheme.cupertinoOverrideTheme?.primaryColor,
+         materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
+         materialTheme.cupertinoOverrideTheme?.textTheme,
+         materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
+         materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
+       );
+
+  final ThemeData _materialTheme;
+
+  @override
+  Brightness get brightness => _materialTheme.cupertinoOverrideTheme?.brightness ?? _materialTheme.brightness;
+
+  @override
+  Color get primaryColor => _materialTheme.cupertinoOverrideTheme?.primaryColor ?? _materialTheme.colorScheme.primary;
+
+  @override
+  Color get primaryContrastingColor => _materialTheme.cupertinoOverrideTheme?.primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
+
+  @override
+  Color get scaffoldBackgroundColor => _materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
+
+  /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
+  ///
+  /// Only the specified override attributes of the [ThemeData]'s
+  /// `cupertinoOverrideTheme` and the newly specified parameters are in the
+  /// returned [CupertinoThemeData]. No derived attributes from iOS defaults or
+  /// from cascaded Material theme attributes are copied.
+  ///
+  /// [MaterialBasedCupertinoThemeData.copyWith] cannot change the base
+  /// Material [ThemeData]. To change the base Material [ThemeData], create a
+  /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
+  /// instead.
+  @override
+  CupertinoThemeData copyWith({
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextThemeData textTheme,
+    Color barBackgroundColor,
+    Color scaffoldBackgroundColor,
+  }) {
+    return _materialTheme.cupertinoOverrideTheme?.copyWith(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryContrastingColor: primaryContrastingColor,
+      textTheme: textTheme,
+      barBackgroundColor: barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+    ) ?? CupertinoThemeData(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryContrastingColor: primaryContrastingColor,
+      textTheme: textTheme,
+      barBackgroundColor: barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+    );
   }
 }
 

@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'container.dart';
@@ -228,9 +230,10 @@ class TextSelectionOverlay {
     @required this.renderObject,
     this.selectionControls,
     this.selectionDelegate,
-  }): assert(value != null),
-      assert(context != null),
-      _value = value {
+    this.dragStartBehavior = DragStartBehavior.start,
+  }) : assert(value != null),
+       assert(context != null),
+       _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
     _handleController = AnimationController(duration: _fadeDuration, vsync: overlay);
@@ -261,6 +264,23 @@ class TextSelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   final TextSelectionDelegate selectionDelegate;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], handle drag behavior will
+  /// begin upon the detection of a drag gesture. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
 
   /// Controls the fade-in animations.
   static const Duration _fadeDuration = Duration(milliseconds: 150);
@@ -327,7 +347,7 @@ class TextSelectionOverlay {
     _markNeedsBuild();
   }
 
-  void _markNeedsBuild([Duration duration]) {
+  void _markNeedsBuild([ Duration duration ]) {
     if (_handles != null) {
       _handles[0].markNeedsBuild();
       _handles[1].markNeedsBuild();
@@ -364,9 +384,8 @@ class TextSelectionOverlay {
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-        selectionControls == null)
+         selectionControls == null)
       return Container(); // hide the second handle when collapsed
-
     return FadeTransition(
       opacity: _handleOpacity,
       child: _TextSelectionHandleOverlay(
@@ -377,6 +396,7 @@ class TextSelectionOverlay {
         selection: _selection,
         selectionControls: selectionControls,
         position: position,
+        dragStartBehavior: dragStartBehavior,
       )
     );
   }
@@ -446,7 +466,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.renderObject,
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
-    @required this.selectionControls
+    @required this.selectionControls,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final TextSelection selection;
@@ -456,6 +477,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -527,6 +549,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       link: widget.layerLink,
       showWhenUnlinked: false,
       child: GestureDetector(
+        dragStartBehavior: widget.dragStartBehavior,
         onPanStart: _handleDragStart,
         onPanUpdate: _handleDragUpdate,
         onTap: _handleTap,
@@ -566,5 +589,207 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
         return rtlType;
     }
     return null;
+  }
+}
+
+/// A gesture detector to respond to non-exclusive event chains for a text field.
+///
+/// An ordinary [GestureDetector] configured to handle events like tap and
+/// double tap will only recognize one or the other. This widget detects both:
+/// first the tap and then, if another tap down occurs within a time limit, the
+/// double tap.
+///
+/// See also:
+///
+///  * [TextField], a Material text field which uses this gesture detector.
+///  * [CupertinoTextField], a Cupertino text field which uses this gesture
+///    detector.
+class TextSelectionGestureDetector extends StatefulWidget {
+  /// Create a [TextSelectionGestureDetector].
+  ///
+  /// Multiple callbacks can be called for one sequence of input gesture.
+  /// The [child] parameter must not be null.
+  const TextSelectionGestureDetector({
+    Key key,
+    this.onTapDown,
+    this.onForcePressStart,
+    this.onForcePressEnd,
+    this.onSingleTapUp,
+    this.onSingleTapCancel,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapMoveUpdate,
+    this.onSingleLongTapEnd,
+    this.onDoubleTapDown,
+    this.behavior,
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
+
+  /// Called for every tap down including every tap down that's part of a
+  /// double click or a long press, except touches that include enough movement
+  /// to not qualify as taps (e.g. pans and flings).
+  final GestureTapDownCallback onTapDown;
+
+  /// Called when a pointer has tapped down and the force of the pointer has
+  /// just become greater than [ForcePressGestureDetector.startPressure].
+  final GestureForcePressStartCallback onForcePressStart;
+
+  /// Called when a pointer that had previously triggered [onForcePressStart] is
+  /// lifted off the screen.
+  final GestureForcePressEndCallback onForcePressEnd;
+
+  /// Called for each distinct tap except for every second tap of a double tap.
+  /// For example, if the detector was configured [onSingleTapDown] and
+  /// [onDoubleTapDown], three quick taps would be recognized as a single tap
+  /// down, followed by a double tap down, followed by a single tap down.
+  final GestureTapUpCallback onSingleTapUp;
+
+  /// Called for each touch that becomes recognized as a gesture that is not a
+  /// short tap, such as a long tap or drag. It is called at the moment when
+  /// another gesture from the touch is recognized.
+  final GestureTapCancelCallback onSingleTapCancel;
+
+  /// Called for a single long tap that's sustained for longer than
+  /// [kLongPressTimeout] but not necessarily lifted. Not called for a
+  /// double-tap-hold, which calls [onDoubleTapDown] instead.
+  final GestureLongPressStartCallback onSingleLongTapStart;
+
+  /// Called after [onSingleLongTapStart] when the pointer is dragged.
+  final GestureLongPressMoveUpdateCallback onSingleLongTapMoveUpdate;
+
+  /// Called after [onSingleLongTapStart] when the pointer is lifted.
+  final GestureLongPressEndCallback onSingleLongTapEnd;
+
+  /// Called after a momentary hold or a short tap that is close in space and
+  /// time (within [kDoubleTapTimeout]) to a previous short tap.
+  final GestureTapDownCallback onDoubleTapDown;
+
+  /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior behavior;
+
+  /// Child below this widget.
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _TextSelectionGestureDetectorState();
+}
+
+class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
+  // Counts down for a short duration after a previous tap. Null otherwise.
+  Timer _doubleTapTimer;
+  Offset _lastTapOffset;
+  // True if a second tap down of a double tap is detected. Used to discard
+  // subsequent tap up / tap hold of the same tap.
+  bool _isDoubleTap = false;
+
+  @override
+  void dispose() {
+    _doubleTapTimer?.cancel();
+    super.dispose();
+  }
+
+  // The down handler is force-run on success of a single tap and optimistically
+  // run before a long press success.
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onTapDown != null) {
+      widget.onTapDown(details);
+    }
+    // This isn't detected as a double tap gesture in the gesture recognizer
+    // because it's 2 single taps, each of which may do different things depending
+    // on whether it's a single tap, the first tap of a double tap, the second
+    // tap held down, a clean double tap etc.
+    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
+      // If there was already a previous tap, the second down hold/tap is a
+      // double tap down.
+      if (widget.onDoubleTapDown != null) {
+        widget.onDoubleTapDown(details);
+      }
+
+      _doubleTapTimer.cancel();
+      _doubleTapTimeout();
+      _isDoubleTap = true;
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (!_isDoubleTap) {
+      if (widget.onSingleTapUp != null) {
+        widget.onSingleTapUp(details);
+      }
+      _lastTapOffset = details.globalPosition;
+      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+    }
+    _isDoubleTap = false;
+  }
+
+  void _handleTapCancel() {
+    if (widget.onSingleTapCancel != null) {
+      widget.onSingleTapCancel();
+    }
+  }
+
+  void _forcePressStarted(ForcePressDetails details) {
+    _doubleTapTimer?.cancel();
+    _doubleTapTimer = null;
+    if (widget.onForcePressStart != null)
+      widget.onForcePressStart(details);
+  }
+
+  void _forcePressEnded(ForcePressDetails details) {
+    if (widget.onForcePressEnd != null)
+      widget.onForcePressEnd(details);
+  }
+
+  void _handleLongPressStart(LongPressStartDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+      widget.onSingleLongTapStart(details);
+    }
+  }
+
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+      widget.onSingleLongTapMoveUpdate(details);
+    }
+  }
+
+  void _handleLongPressUp(LongPressEndDetails details) {
+    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+      widget.onSingleLongTapEnd(details);
+    }
+    _isDoubleTap = false;
+  }
+
+  void _doubleTapTimeout() {
+    _doubleTapTimer = null;
+    _lastTapOffset = null;
+  }
+
+  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
+    assert(secondTapOffset != null);
+    if (_lastTapOffset == null) {
+      return false;
+    }
+
+    final Offset difference = secondTapOffset - _lastTapOffset;
+    return difference.distance <= kDoubleTapSlop;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onForcePressStart: widget.onForcePressStart != null ? _forcePressStarted : null,
+      onForcePressEnd: widget.onForcePressEnd != null ? _forcePressEnded : null,
+      onTapCancel: _handleTapCancel,
+      onLongPressStart: _handleLongPressStart,
+      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
+      onLongPressEnd: _handleLongPressUp,
+      excludeFromSemantics: true,
+      behavior: widget.behavior,
+      child: widget.child,
+    );
   }
 }

@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jäänud on 1 tähemärk",
   "remainingTextFieldCharacterCountOther": "Jäänud on $remainingCount tähemärki",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Värskendamine"
 }

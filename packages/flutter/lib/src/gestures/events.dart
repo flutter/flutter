@@ -53,7 +53,7 @@ const int kForwardMouseButton = 0x10;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
-/// The number argument can be at most 62.
+/// The `number` argument can be at most 62.
 ///
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
@@ -62,7 +62,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
-/// The number argument can be at most 62.
+/// The `number` argument can be at most 62.
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
@@ -90,7 +90,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent {
+abstract class PointerEvent extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -122,7 +122,8 @@ abstract class PointerEvent {
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
 
-  /// Unique identifier for the pointer, not reused.
+  /// Unique identifier for the pointer, not reused. Changes for each new
+  /// pointer down event.
   final int pointer;
 
   /// The kind of input device for which the event was generated.
@@ -287,36 +288,37 @@ abstract class PointerEvent {
   final bool synthesized;
 
   @override
-  String toString() => '$runtimeType($position)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('position', position));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+  }
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
-    return '$runtimeType('
-             'timeStamp: $timeStamp, '
-             'pointer: $pointer, '
-             'kind: $kind, '
-             'device: $device, '
-             'position: $position, '
-             'delta: $delta, '
-             'buttons: $buttons, '
-             'down: $down, '
-             'obscured: $obscured, '
-             'pressure: $pressure, '
-             'pressureMin: $pressureMin, '
-             'pressureMax: $pressureMax, '
-             'distance: $distance, '
-             'distanceMin: $distanceMin, '
-             'distanceMax: $distanceMax, '
-             'size: $size, '
-             'radiusMajor: $radiusMajor, '
-             'radiusMinor: $radiusMinor, '
-             'radiusMin: $radiusMin, '
-             'radiusMax: $radiusMax, '
-             'orientation: $orientation, '
-             'tilt: $tilt, '
-             'platformData: $platformData, '
-             'synthesized: $synthesized'
-           ')';
+    return toString(minLevel: DiagnosticLevel.fine);
   }
 }
 
@@ -327,13 +329,14 @@ abstract class PointerEvent {
 class PointerAddedEvent extends PointerEvent {
   /// Creates a pointer added event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerAddedEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
     bool obscured = false,
+    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -348,6 +351,7 @@ class PointerAddedEvent extends PointerEvent {
     device: device,
     position: position,
     obscured: obscured,
+    pressure: pressure,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
     distance: distance,
@@ -366,12 +370,13 @@ class PointerAddedEvent extends PointerEvent {
 class PointerRemovedEvent extends PointerEvent {
   /// Creates a pointer removed event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerRemovedEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     bool obscured = false,
+    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distanceMax = 0.0,
@@ -383,11 +388,12 @@ class PointerRemovedEvent extends PointerEvent {
     device: device,
     position: null,
     obscured: obscured,
+    pressure: pressure,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
     distanceMax: distanceMax,
     radiusMin: radiusMin,
-    radiusMax: radiusMax
+    radiusMax: radiusMax,
   );
 }
 
@@ -396,12 +402,15 @@ class PointerRemovedEvent extends PointerEvent {
 ///
 /// See also:
 ///
+///  * [PointerEnterEvent], which reports when the pointer has entered an
+///    object.
+///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
 class PointerHoverEvent extends PointerEvent {
   /// Creates a pointer hover event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerHoverEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
@@ -410,6 +419,7 @@ class PointerHoverEvent extends PointerEvent {
     Offset delta = Offset.zero,
     int buttons = 0,
     bool obscured = false,
+    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -431,6 +441,7 @@ class PointerHoverEvent extends PointerEvent {
     buttons: buttons,
     down: false,
     obscured: obscured,
+    pressure: pressure,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
     distance: distance,
@@ -446,11 +457,187 @@ class PointerHoverEvent extends PointerEvent {
   );
 }
 
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device, and it has entered a target object.
+///
+/// See also:
+///
+///  * [PointerHoverEvent], which reports when the pointer has moved while
+///    within an object.
+///  * [PointerExitEvent], which reports when the pointer has left an object.
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerEnterEvent extends PointerEvent {
+  /// Creates a pointer enter event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerEnterEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset delta = Offset.zero,
+    int buttons = 0,
+    bool obscured = false,
+    double pressure = 0.0,
+    double pressureMin = 1.0,
+    double pressureMax = 1.0,
+    double distance = 0.0,
+    double distanceMax = 0.0,
+    double size = 0.0,
+    double radiusMajor = 0.0,
+    double radiusMinor = 0.0,
+    double radiusMin = 0.0,
+    double radiusMax = 0.0,
+    double orientation = 0.0,
+    double tilt = 0.0,
+    bool synthesized = false,
+  }) : super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: false,
+    obscured: obscured,
+    pressure: pressure,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: distance,
+    distanceMax: distanceMax,
+    size: size,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt,
+    synthesized: synthesized,
+  );
+
+  /// Creates an enter event from a [PointerHoverEvent].
+  ///
+  /// This is used by the [MouseTracker] to synthesize enter events, since it
+  /// only actually receives hover events.
+  PointerEnterEvent.fromHoverEvent(PointerHoverEvent hover) : super(
+    timeStamp: hover?.timeStamp,
+    kind: hover?.kind,
+    device: hover?.device,
+    position: hover?.position,
+    delta: hover?.delta,
+    buttons: hover?.buttons,
+    down: hover?.down,
+    obscured: hover?.obscured,
+    pressure: hover?.pressure,
+    pressureMin: hover?.pressureMin,
+    pressureMax: hover?.pressureMax,
+    distance: hover?.distance,
+    distanceMax: hover?.distanceMax,
+    size: hover?.size,
+    radiusMajor: hover?.radiusMajor,
+    radiusMinor: hover?.radiusMinor,
+    radiusMin: hover?.radiusMin,
+    radiusMax: hover?.radiusMax,
+    orientation: hover?.orientation,
+    tilt: hover?.tilt,
+    synthesized: hover?.synthesized,
+  );
+}
+
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device, and entered a target object.
+///
+/// See also:
+///
+///  * [PointerHoverEvent], which reports when the pointer has moved while
+///    within an object.
+///  * [PointerEnterEvent], which reports when the pointer has entered an object.
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerExitEvent extends PointerEvent {
+  /// Creates a pointer exit event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerExitEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset delta = Offset.zero,
+    int buttons = 0,
+    bool obscured = false,
+    double pressure = 0.0,
+    double pressureMin = 1.0,
+    double pressureMax = 1.0,
+    double distance = 0.0,
+    double distanceMax = 0.0,
+    double size = 0.0,
+    double radiusMajor = 0.0,
+    double radiusMinor = 0.0,
+    double radiusMin = 0.0,
+    double radiusMax = 0.0,
+    double orientation = 0.0,
+    double tilt = 0.0,
+    bool synthesized = false,
+  }) : super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: false,
+    obscured: obscured,
+    pressure: pressure,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: distance,
+    distanceMax: distanceMax,
+    size: size,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt,
+    synthesized: synthesized,
+  );
+
+  /// Creates an exit event from a [PointerHoverEvent].
+  ///
+  /// This is used by the [MouseTracker] to synthesize exit events, since it
+  /// only actually receives hover events.
+  PointerExitEvent.fromHoverEvent(PointerHoverEvent hover) : super(
+    timeStamp: hover?.timeStamp,
+    kind: hover?.kind,
+    device: hover?.device,
+    position: hover?.position,
+    delta: hover?.delta,
+    buttons: hover?.buttons,
+    down: hover?.down,
+    obscured: hover?.obscured,
+    pressure: hover?.pressure,
+    pressureMin: hover?.pressureMin,
+    pressureMax: hover?.pressureMax,
+    distance: hover?.distance,
+    distanceMax: hover?.distanceMax,
+    size: hover?.size,
+    radiusMajor: hover?.radiusMajor,
+    radiusMinor: hover?.radiusMinor,
+    radiusMin: hover?.radiusMin,
+    radiusMax: hover?.radiusMax,
+    orientation: hover?.orientation,
+    tilt: hover?.tilt,
+    synthesized: hover?.synthesized,
+  );
+}
+
 /// The pointer has made contact with the device.
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerDownEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -504,7 +691,7 @@ class PointerDownEvent extends PointerEvent {
 class PointerMoveEvent extends PointerEvent {
   /// Creates a pointer move event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerMoveEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -558,7 +745,7 @@ class PointerMoveEvent extends PointerEvent {
 class PointerUpEvent extends PointerEvent {
   /// Creates a pointer up event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerUpEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -567,7 +754,7 @@ class PointerUpEvent extends PointerEvent {
     Offset position = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    double pressure = 1.0,
+    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -607,7 +794,7 @@ class PointerUpEvent extends PointerEvent {
 class PointerCancelEvent extends PointerEvent {
   /// Creates a pointer cancel event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments must be non-null.
   const PointerCancelEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
@@ -616,6 +803,7 @@ class PointerCancelEvent extends PointerEvent {
     Offset position = Offset.zero,
     int buttons = 0,
     bool obscured = false,
+    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -636,6 +824,7 @@ class PointerCancelEvent extends PointerEvent {
     buttons: buttons,
     down: false,
     obscured: obscured,
+    pressure: pressure,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
     distance: distance,

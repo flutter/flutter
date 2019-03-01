@@ -153,70 +153,6 @@ void main() {
       OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
-    testUsingContext('Test Google cert also manually selects a provisioning profile', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
-        1, // pid
-        0, // exitCode
-        '''
-1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Google Development (1111AAAA11)"
-    1 valid identities found''',
-        ''
-      ));
-      when(mockProcessManager.runSync(
-        <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
-        1, // pid
-        0, // exitCode
-        'This is a mock certificate',
-        '',
-      ));
-
-      final MockProcess mockProcess = MockProcess();
-      final MockStdIn mockStdIn = MockStdIn();
-      final MockStream mockStdErr = MockStream();
-
-      when(mockProcessManager.start(
-      argThat(contains('openssl')),
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenAnswer((Invocation invocation) => Future<Process>.value(mockProcess));
-
-      when(mockProcess.stdin).thenReturn(mockStdIn);
-      when(mockProcess.stdout)
-          .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
-            Future<List<int>>.value(utf8.encode(
-              'subject= /CN=iPhone Developer: Google Development (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
-            ))
-          ));
-      when(mockProcess.stderr).thenAnswer((Invocation invocation) => mockStdErr);
-      when(mockProcess.exitCode).thenAnswer((_) async => 0);
-
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
-
-      expect(testLogger.statusText, contains('iPhone Developer: Google Development (1111AAAA11)'));
-      expect(testLogger.errorText, isEmpty);
-      verify(mockStdIn.write('This is a mock certificate'));
-      expect(signingConfigs, <String, String> {
-        'DEVELOPMENT_TEAM': '3333CCCC33',
-        'PROVISIONING_PROFILE_SPECIFIER': 'Google Development',
-        'CODE_SIGN_STYLE': 'Manual',
-      });
-    },
-    overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-    });
-
     testUsingContext('Test multiple identity and certificate organization works', () async {
       when(mockProcessManager.runSync(<String>['which', 'security']))
           .thenReturn(exitsHappy);
@@ -534,7 +470,7 @@ class TestTerminal extends AnsiTerminal {
   String bolden(String message) => '<bold>$message</bold>';
 
   @override
-  Stream<String> get onCharInput {
+  Stream<String> get keystrokes {
     return mockTerminalStdInStream;
   }
 }

@@ -71,6 +71,34 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
+  testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
+    const double cursorWidth = 3.14;
+    const Radius cursorRadius = Radius.circular(4);
+    const Color cursorColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              cursorWidth: cursorWidth,
+              cursorRadius: cursorRadius,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorRadius, cursorRadius);
+    expect(textFieldWidget.cursorColor, cursorColor);
+  });
+
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool _called = false;
 
@@ -161,5 +189,28 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
+  });
+
+  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextFormField(
+              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
+                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+              },
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0 of 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 of 10'), findsOneWidget);
   });
 }

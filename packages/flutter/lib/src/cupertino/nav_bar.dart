@@ -11,10 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
+import 'theme.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 ///
@@ -36,7 +36,6 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
-const Color _kDefaultNavBarBackgroundColor = Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = Color(0x4C000000);
 
 const Border _kDefaultNavBarBorder = Border(
@@ -45,22 +44,6 @@ const Border _kDefaultNavBarBorder = Border(
     width: 0.0, // One physical pixel.
     style: BorderStyle.solid,
   ),
-);
-
-const TextStyle _kMiddleTitleTextStyle = TextStyle(
-  fontFamily: '.SF UI Text',
-  fontSize: 17.0,
-  fontWeight: FontWeight.w600,
-  letterSpacing: -0.08,
-  color: CupertinoColors.black,
-);
-
-const TextStyle _kLargeTitleTextStyle = TextStyle(
-  fontFamily: '.SF Pro Display',
-  fontSize: 34.0,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 0.24,
-  color: CupertinoColors.black,
 );
 
 // There's a single tag for all instances of navigation bars because they can
@@ -92,15 +75,6 @@ class _HeroTag {
   int get hashCode {
     return identityHashCode(navigator);
   }
-}
-
-TextStyle _navBarItemStyle(Color color) {
-  return TextStyle(
-    fontFamily: '.SF UI Text',
-    fontSize: 17.0,
-    letterSpacing: -0.24,
-    color: color,
-  );
 }
 
 /// Returns `child` wrapped with background and a bottom border if background color
@@ -142,6 +116,21 @@ Widget _wrapWithBackground({
       filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
+  );
+}
+
+// This exists to support backward compatibility with arguments like
+// `actionsForegroundColor`. CupertinoThemes can be used to support these
+// scenarios now. To support `actionsForegroundColor`, the nav bar rewraps
+// its children with a CupertinoTheme.
+Widget _wrapActiveColor(Color color, BuildContext context, Widget child) {
+  if (color == null) {
+    return child;
+  }
+
+  return CupertinoTheme(
+    data: CupertinoTheme.of(context).copyWith(primaryColor: color),
+    child: child,
   );
 }
 
@@ -206,9 +195,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
-    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.backgroundColor,
     this.padding,
-    this.actionsForegroundColor = CupertinoColors.activeBlue,
+    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -296,6 +285,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
+  ///
+  /// Defaults to [CupertinoTheme]'s `barBackgroundColor` if null.
   /// {@endtemplate}
   final Color backgroundColor;
 
@@ -321,11 +312,16 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Border border;
 
+  /// {@template flutter.cupertino.navBar.actionsForegroundColor}
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the navigation bar.
   ///
+  /// Defaults to the `primaryColor` of the [CupertinoTheme] when null.
+  /// {@endtemplate}
+  ///
   /// The default color for text in the [middle] slot is always black, as per
   /// iOS standard design.
+  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
   final Color actionsForegroundColor;
 
   /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
@@ -366,7 +362,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// True if the navigation bar's background color has no transparency.
   @override
-  bool get fullObstruction => backgroundColor.alpha == 0xFF;
+  bool get fullObstruction => backgroundColor == null ? null : backgroundColor.alpha == 0xFF;
 
   @override
   Size get preferredSize {
@@ -393,6 +389,9 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final Color backgroundColor =
+        widget.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
+
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -403,40 +402,55 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       userMiddle: widget.middle,
       userTrailing: widget.trailing,
       padding: widget.padding,
-      actionsForegroundColor: widget.actionsForegroundColor,
       userLargeTitle: null,
       large: false,
     );
 
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
-      backgroundColor: widget.backgroundColor,
-      child: _PersistentNavigationBar(
-        components: components,
-        padding: widget.padding,
+      backgroundColor: backgroundColor,
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        child: _PersistentNavigationBar(
+          components: components,
+          padding: widget.padding,
+        ),
       ),
     );
 
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
-      return navBar;
+      // Lint ignore to maintain backward compatibility.
+      return _wrapActiveColor(widget.actionsForegroundColor, context, navBar); // ignore: deprecated_member_use_from_same_package
     }
 
-    return Hero(
-      tag: widget.heroTag == _defaultHeroTag
-          ? _HeroTag(Navigator.of(context))
-          : widget.heroTag,
-      createRectTween: _linearTranslateWithLargestRectSizeTween,
-      placeholderBuilder: _navBarHeroLaunchPadBuilder,
-      flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
-      transitionOnUserGestures: true,
-      child: _TransitionableNavigationBar(
-        componentsKeys: keys,
-        backgroundColor: widget.backgroundColor,
-        actionsForegroundColor: widget.actionsForegroundColor,
-        border: widget.border,
-        hasUserMiddle: widget.middle != null,
-        largeExpanded: false,
-        child: navBar,
+    return _wrapActiveColor(
+      // Lint ignore to maintain backward compatibility.
+      widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
+      context,
+      Builder(
+        // Get the context that might have a possibly changed CupertinoTheme.
+        builder: (BuildContext context) {
+          return Hero(
+            tag: widget.heroTag == _defaultHeroTag
+                ? _HeroTag(Navigator.of(context))
+                : widget.heroTag,
+            createRectTween: _linearTranslateWithLargestRectSizeTween,
+            placeholderBuilder: _navBarHeroLaunchPadBuilder,
+            flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+            transitionOnUserGestures: true,
+            child: _TransitionableNavigationBar(
+              componentsKeys: keys,
+              backgroundColor: backgroundColor,
+              backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+              titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+              largeTitleTextStyle: null,
+              border: widget.border,
+              hasUserMiddle: widget.middle != null,
+              largeExpanded: false,
+              child: navBar,
+            ),
+          );
+        },
       ),
     );
   }
@@ -502,9 +516,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
-    this.backgroundColor = _kDefaultNavBarBackgroundColor,
+    this.backgroundColor,
     this.padding,
-    this.actionsForegroundColor = CupertinoColors.activeBlue,
+    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -582,11 +596,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.navBar.border}
   final Border border;
 
-  /// Default color used for text and icons of the [leading] and [trailing]
-  /// widgets in the navigation bar.
+  /// {@macro flutter.cupertino.navBar.actionsForegroundColor}
   ///
   /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
+  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
   final Color actionsForegroundColor;
 
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
@@ -616,6 +630,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
+    // Lint ignore to maintain backward compatibility.
+    final Color actionsForegroundColor = widget.actionsForegroundColor ?? CupertinoTheme.of(context).primaryColor; // ignore: deprecated_member_use_from_same_package
+
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -627,24 +644,28 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       userTrailing: widget.trailing,
       userLargeTitle: widget.largeTitle,
       padding: widget.padding,
-      actionsForegroundColor: widget.actionsForegroundColor,
       large: true,
     );
 
-    return SliverPersistentHeader(
-      pinned: true, // iOS navigation bars are always pinned.
-      delegate: _LargeTitleNavigationBarSliverDelegate(
-        keys: keys,
-        components: components,
-        userMiddle: widget.middle,
-        backgroundColor: widget.backgroundColor,
-        border: widget.border,
-        padding: widget.padding,
-        actionsForegroundColor: widget.actionsForegroundColor,
-        transitionBetweenRoutes: widget.transitionBetweenRoutes,
-        heroTag: widget.heroTag,
-        persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        alwaysShowMiddle: widget.middle != null,
+    return _wrapActiveColor(
+      // Lint ignore to maintain backward compatibility.
+      widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
+      context,
+      SliverPersistentHeader(
+        pinned: true, // iOS navigation bars are always pinned.
+        delegate: _LargeTitleNavigationBarSliverDelegate(
+          keys: keys,
+          components: components,
+          userMiddle: widget.middle,
+          backgroundColor: widget.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
+          border: widget.border,
+          padding: widget.padding,
+          actionsForegroundColor: actionsForegroundColor,
+          transitionBetweenRoutes: widget.transitionBetweenRoutes,
+          heroTag: widget.heroTag,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          alwaysShowMiddle: widget.middle != null,
+        ),
       ),
     );
   }
@@ -702,40 +723,43 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Positioned(
-            top: persistentHeight,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: ClipRect(
-              // The large title starts at the persistent bar.
-              // It's aligned with the bottom of the sliver and expands clipped
-              // and behind the persistent bar.
-              child: OverflowBox(
-                minHeight: 0.0,
-                maxHeight: double.infinity,
-                alignment: AlignmentDirectional.bottomStart,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: 8.0, // Bottom has a different padding.
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: Semantics(
-                        header: true,
-                        child: DefaultTextStyle(
-                          style: _kLargeTitleTextStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          child: components.largeTitle,
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Positioned(
+              top: persistentHeight,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: ClipRect(
+                // The large title starts at the persistent bar.
+                // It's aligned with the bottom of the sliver and expands clipped
+                // and behind the persistent bar.
+                child: OverflowBox(
+                  minHeight: 0.0,
+                  maxHeight: double.infinity,
+                  alignment: AlignmentDirectional.bottomStart,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: _kNavBarEdgePadding,
+                      bottom: 8.0, // Bottom has a different padding.
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      bottom: false,
+                      child: AnimatedOpacity(
+                        opacity: showLargeTitle ? 1.0 : 0.0,
+                        duration: _kNavBarTitleFadeDuration,
+                        child: Semantics(
+                          header: true,
+                          child: DefaultTextStyle(
+                            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            child: components.largeTitle,
+                          ),
                         ),
                       ),
                     ),
@@ -743,14 +767,14 @@ class _LargeTitleNavigationBarSliverDelegate
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: persistentNavigationBar,
-          ),
-        ],
+            Positioned(
+              left: 0.0,
+              right: 0.0,
+              top: 0.0,
+              child: persistentNavigationBar,
+            ),
+          ],
+        ),
       ),
     );
 
@@ -772,7 +796,9 @@ class _LargeTitleNavigationBarSliverDelegate
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: backgroundColor,
-        actionsForegroundColor: actionsForegroundColor,
+        backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+        titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+        largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
         hasUserMiddle: userMiddle != null,
         largeExpanded: showLargeTitle,
@@ -822,7 +848,7 @@ class _PersistentNavigationBar extends StatelessWidget {
 
     if (middle != null) {
       middle = DefaultTextStyle(
-        style: _kMiddleTitleTextStyle,
+        style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         child: Semantics(header: true, child: middle),
       );
       // When the middle's visibility can change on the fly like with large title
@@ -844,7 +870,6 @@ class _PersistentNavigationBar extends StatelessWidget {
       leading = CupertinoNavigationBarBackButton._assemble(
         backChevron,
         backLabel,
-        components.actionsForegroundColor,
       );
     }
 
@@ -885,13 +910,13 @@ class _PersistentNavigationBar extends StatelessWidget {
 @immutable
 class _NavigationBarStaticComponentsKeys {
   _NavigationBarStaticComponentsKeys()
-      : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
-        leadingKey = GlobalKey(debugLabel: 'Leading'),
-        backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
-        backLabelKey = GlobalKey(debugLabel: 'Back label'),
-        middleKey = GlobalKey(debugLabel: 'Middle'),
-        trailingKey = GlobalKey(debugLabel: 'Trailing'),
-        largeTitleKey = GlobalKey(debugLabel: 'Large title');
+    : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
+      leadingKey = GlobalKey(debugLabel: 'Leading'),
+      backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
+      backLabelKey = GlobalKey(debugLabel: 'Back label'),
+      middleKey = GlobalKey(debugLabel: 'Middle'),
+      trailingKey = GlobalKey(debugLabel: 'Trailing'),
+      largeTitleKey = GlobalKey(debugLabel: 'Large title');
 
   final GlobalKey navBarBoxKey;
   final GlobalKey leadingKey;
@@ -919,7 +944,6 @@ class _NavigationBarStaticComponents {
     @required Widget userTrailing,
     @required Widget userLargeTitle,
     @required EdgeInsetsDirectional padding,
-    @required this.actionsForegroundColor,
     @required bool large,
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
@@ -927,7 +951,6 @@ class _NavigationBarStaticComponents {
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
          padding: padding,
-         actionsForegroundColor: actionsForegroundColor,
        ),
        backChevron = createBackChevron(
          backChevronKey: keys.backChevronKey,
@@ -954,7 +977,6 @@ class _NavigationBarStaticComponents {
          trailingKey: keys.trailingKey,
          userTrailing: userTrailing,
          padding: padding,
-         actionsForegroundColor: actionsForegroundColor,
        ),
        largeTitle = createLargeTitle(
          largeTitleKey: keys.largeTitleKey,
@@ -978,8 +1000,6 @@ class _NavigationBarStaticComponents {
     return null;
   }
 
-  final Color actionsForegroundColor;
-
   final KeyedSubtree leading;
   static KeyedSubtree createLeading({
     @required GlobalKey leadingKey,
@@ -987,7 +1007,6 @@ class _NavigationBarStaticComponents {
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
     @required EdgeInsetsDirectional padding,
-    @required Color actionsForegroundColor
   }) {
     Widget leadingContent;
 
@@ -1016,15 +1035,11 @@ class _NavigationBarStaticComponents {
         padding: EdgeInsetsDirectional.only(
           start: padding?.start ?? _kNavBarEdgePadding,
         ),
-        child: DefaultTextStyle(
-          style: _navBarItemStyle(actionsForegroundColor),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: actionsForegroundColor,
-              size: 32.0,
-            ),
-            child: leadingContent,
+        child: IconTheme.merge(
+          data: const IconThemeData(
+            size: 32.0,
           ),
+          child: leadingContent,
         ),
       ),
     );
@@ -1116,7 +1131,6 @@ class _NavigationBarStaticComponents {
     @required GlobalKey trailingKey,
     @required Widget userTrailing,
     @required EdgeInsetsDirectional padding,
-    @required Color actionsForegroundColor,
   }) {
     if (userTrailing == null) {
       return null;
@@ -1128,15 +1142,11 @@ class _NavigationBarStaticComponents {
         padding: EdgeInsetsDirectional.only(
           end: padding?.end ?? _kNavBarEdgePadding,
         ),
-        child: DefaultTextStyle(
-          style: _navBarItemStyle(actionsForegroundColor),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: actionsForegroundColor,
-              size: 32.0,
-            ),
-            child: userTrailing,
+        child: IconTheme.merge(
+          data: const IconThemeData(
+            size: 32.0,
           ),
+          child: userTrailing,
         ),
       ),
     );
@@ -1188,24 +1198,24 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   ///
   /// The [color] parameter must not be null.
   const CupertinoNavigationBarBackButton({
-    @required this.color,
+    this.color,
     this.previousPageTitle,
   }) : _backChevron = null,
-       _backLabel = null,
-       assert(color != null);
+       _backLabel = null;
 
   // Allow the back chevron and label to be separately created (and keyed)
   // because they animate separately during page transitions.
   const CupertinoNavigationBarBackButton._assemble(
     this._backChevron,
     this._backLabel,
-    this.color,
   ) : previousPageTitle = null,
-      assert(color != null);
+      color = null;
 
   /// The [Color] of the back button.
   ///
-  /// Must not be null.
+  /// Can be used to override the color of the back button chevron and label.
+  ///
+  /// Defaults to [CupertinoTheme]'s `primaryColor` if null.
   final Color color;
 
   /// An override for showing the previous route's title. If null, it will be
@@ -1225,16 +1235,21 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
       'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
     );
 
+    TextStyle actionTextStyle = CupertinoTheme.of(context).textTheme.navActionTextStyle;
+    if (color != null) {
+      actionTextStyle = actionTextStyle.copyWith(color: color);
+    }
+
     return CupertinoButton(
       child: Semantics(
         container: true,
         excludeSemantics: true,
         label: 'Back',
         button: true,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
-          child: DefaultTextStyle(
-            style: _navBarItemStyle(color),
+        child: DefaultTextStyle(
+          style: actionTextStyle,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1367,18 +1382,23 @@ class _TransitionableNavigationBar extends StatelessWidget {
   _TransitionableNavigationBar({
     @required this.componentsKeys,
     @required this.backgroundColor,
-    @required this.actionsForegroundColor,
+    @required this.backButtonTextStyle,
+    @required this.titleTextStyle,
+    @required this.largeTitleTextStyle,
     @required this.border,
     @required this.hasUserMiddle,
     @required this.largeExpanded,
     @required this.child,
   }) : assert(componentsKeys != null),
        assert(largeExpanded != null),
+       assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
 
   final _NavigationBarStaticComponentsKeys componentsKeys;
   final Color backgroundColor;
-  final Color actionsForegroundColor;
+  final TextStyle backButtonTextStyle;
+  final TextStyle titleTextStyle;
+  final TextStyle largeTitleTextStyle;
   final Border border;
   final bool hasUserMiddle;
   final bool largeExpanded;
@@ -1558,8 +1578,12 @@ class _NavigationBarComponentsTransition {
        topComponents = topNavBar.componentsKeys,
        bottomNavBarBox = bottomNavBar.renderBox,
        topNavBarBox = topNavBar.renderBox,
-       bottomActionsStyle = _navBarItemStyle(bottomNavBar.actionsForegroundColor),
-       topActionsStyle = _navBarItemStyle(topNavBar.actionsForegroundColor),
+       bottomBackButtonTextStyle = bottomNavBar.backButtonTextStyle,
+       topBackButtonTextStyle = topNavBar.backButtonTextStyle,
+       bottomTitleTextStyle = bottomNavBar.titleTextStyle,
+       topTitleTextStyle = topNavBar.titleTextStyle,
+       bottomLargeTitleTextStyle = bottomNavBar.largeTitleTextStyle,
+       topLargeTitleTextStyle = topNavBar.largeTitleTextStyle,
        bottomHasUserMiddle = bottomNavBar.hasUserMiddle,
        topHasUserMiddle = topNavBar.hasUserMiddle,
        bottomLargeExpanded = bottomNavBar.largeExpanded,
@@ -1588,8 +1612,13 @@ class _NavigationBarComponentsTransition {
   final RenderBox bottomNavBarBox;
   final RenderBox topNavBarBox;
 
-  final TextStyle bottomActionsStyle;
-  final TextStyle topActionsStyle;
+  final TextStyle bottomBackButtonTextStyle;
+  final TextStyle topBackButtonTextStyle;
+  final TextStyle bottomTitleTextStyle;
+  final TextStyle topTitleTextStyle;
+  final TextStyle bottomLargeTitleTextStyle;
+  final TextStyle topLargeTitleTextStyle;
+
   final bool bottomHasUserMiddle;
   final bool topHasUserMiddle;
   final bool bottomLargeExpanded;
@@ -1702,7 +1731,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeOutBy(0.6),
         child: DefaultTextStyle(
-          style: bottomActionsStyle,
+          style: bottomBackButtonTextStyle,
           child: bottomBackChevron.child,
         ),
       ),
@@ -1734,7 +1763,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeOutBy(0.2),
         child: DefaultTextStyle(
-          style: bottomActionsStyle,
+          style: bottomBackButtonTextStyle,
           child: bottomBackLabel.child,
         ),
       ),
@@ -1770,8 +1799,8 @@ class _NavigationBarComponentsTransition {
             alignment: AlignmentDirectional.centerStart,
             child: DefaultTextStyleTransition(
               style: animation.drive(TextStyleTween(
-                begin: _kMiddleTitleTextStyle,
-                end: topActionsStyle,
+                begin: bottomTitleTextStyle,
+                end: topBackButtonTextStyle,
               )),
               child: bottomMiddle.child,
             ),
@@ -1790,7 +1819,7 @@ class _NavigationBarComponentsTransition {
           opacity: fadeOutBy(bottomHasUserMiddle ? 0.4 : 0.7),
           // Keep the font when transitioning into a non-back label leading.
           child: DefaultTextStyle(
-            style: _kMiddleTitleTextStyle,
+            style: bottomTitleTextStyle,
             child: bottomMiddle.child,
           ),
         ),
@@ -1826,8 +1855,8 @@ class _NavigationBarComponentsTransition {
             alignment: AlignmentDirectional.centerStart,
             child: DefaultTextStyleTransition(
               style: animation.drive(TextStyleTween(
-                begin: _kLargeTitleTextStyle,
-                end: topActionsStyle,
+                begin: bottomLargeTitleTextStyle,
+                end: topBackButtonTextStyle,
               )),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1861,7 +1890,7 @@ class _NavigationBarComponentsTransition {
           opacity: fadeOutBy(0.4),
           // Keep the font when transitioning into a non-back-label leading.
           child: DefaultTextStyle(
-            style: _kLargeTitleTextStyle,
+            style: bottomLargeTitleTextStyle,
             child: bottomLargeTitle.child,
           ),
         ),
@@ -1936,7 +1965,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeInFrom(bottomBackChevron == null ? 0.7 : 0.4),
         child: DefaultTextStyle(
-          style: topActionsStyle,
+          style: topBackButtonTextStyle,
           child: topBackChevron.child,
         ),
       ),
@@ -1985,8 +2014,8 @@ class _NavigationBarComponentsTransition {
           opacity: midClickOpacity ?? fadeInFrom(0.4),
           child: DefaultTextStyleTransition(
             style: animation.drive(TextStyleTween(
-              begin: _kLargeTitleTextStyle,
-              end: topActionsStyle,
+              begin: bottomLargeTitleTextStyle,
+              end: topBackButtonTextStyle,
             )),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -2010,8 +2039,8 @@ class _NavigationBarComponentsTransition {
           opacity: midClickOpacity ?? fadeInFrom(0.3),
           child: DefaultTextStyleTransition(
             style: animation.drive(TextStyleTween(
-              begin: _kMiddleTitleTextStyle,
-              end: topActionsStyle,
+              begin: bottomTitleTextStyle,
+              end: topBackButtonTextStyle,
             )),
             child: topBackLabel.child,
           ),
@@ -2053,7 +2082,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
         child: DefaultTextStyle(
-          style: _kMiddleTitleTextStyle,
+          style: topTitleTextStyle,
           child: topMiddle.child,
         ),
       ),
@@ -2101,7 +2130,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeInFrom(0.3),
         child: DefaultTextStyle(
-          style: _kLargeTitleTextStyle,
+          style: topLargeTitleTextStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           child: topLargeTitle.child,

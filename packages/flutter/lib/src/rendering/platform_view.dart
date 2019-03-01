@@ -71,6 +71,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// See also:
+///
 ///  * [AndroidView] which is a widget that is used to show an Android view.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderAndroidView extends RenderBox {
@@ -261,6 +262,7 @@ class RenderAndroidView extends RenderBox {
 /// {@macro flutter.rendering.platformView.gestures}
 ///
 /// See also:
+///
 ///  * [UiKitView] which is a widget that is used to show a UIView.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderUiKitView extends RenderBox {
@@ -410,11 +412,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    // Currently the engine rejects the gesture when the sequence is done.
-    // This doesn't work well with gesture recognizers that recognize after the sequence
-    // has ended.
-    // TODO(amirh): trigger an engine gesture reject here.
-    // https://github.com/flutter/flutter/issues/24076
+    controller.rejectGesture();
   }
 
   void reset() {

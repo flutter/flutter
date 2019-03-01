@@ -46,7 +46,7 @@ import 'framework.dart';
 ///
 /// When the inherited model is rebuilt the [updateShouldNotify] and
 /// [updateShouldNotifyDependent] methods are used to decide what
-/// should be rebuilt.  If [updateShouldNotify] returns true, then the
+/// should be rebuilt. If [updateShouldNotify] returns true, then the
 /// inherited model's [updateShouldNotifyDependent] method is tested for
 /// each dependent and the set of aspect objects it depends on.
 /// The [updateShouldNotifyDependent] method must compare the set of aspect
@@ -153,6 +153,8 @@ abstract class InheritedModel<T> extends InheritedWidget {
   ///
   /// If [aspect] is null this method is the same as
   /// `context.inheritFromWidgetOfExactType(T)`.
+  ///
+  /// If no ancestor of type T exists, null is returned.
   static T inheritFrom<T extends InheritedModel<Object>>(BuildContext context, { Object aspect }) {
     if (aspect == null)
       return context.inheritFromWidgetOfExactType(T);
@@ -160,6 +162,10 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
     final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
+    if (models.isEmpty) {
+      return null;
+    }
+
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
       final T value = context.inheritFromElement(model, aspect: aspect);

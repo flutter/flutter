@@ -108,4 +108,29 @@ void main() {
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
   });
+
+  testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
+    const double safeareaPadding = 27.0;
+
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF')
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.all(safeareaPadding),
+          ),
+          child: LicensePage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
+  });
 }

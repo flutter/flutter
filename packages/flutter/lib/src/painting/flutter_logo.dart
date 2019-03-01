@@ -200,7 +200,7 @@ class FlutterLogoDecoration extends Decoration {
   bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   @override
-  BoxPainter createBoxPainter([VoidCallback onChanged]) {
+  BoxPainter createBoxPainter([ VoidCallback onChanged ]) {
     assert(debugAssertIsValid());
     return _FlutterLogoPainter(this);
   }
@@ -246,9 +246,9 @@ class FlutterLogoDecoration extends Decoration {
 /// An object that paints a [BoxDecoration] into a canvas.
 class _FlutterLogoPainter extends BoxPainter {
   _FlutterLogoPainter(this._config)
-    : assert(_config != null),
-      assert(_config.debugAssertIsValid()),
-      super(null) {
+      : assert(_config != null),
+        assert(_config.debugAssertIsValid()),
+        super(null) {
     _prepareText();
   }
 

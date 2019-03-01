@@ -119,7 +119,7 @@ void main() {
       devFSOperations.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      int bytes = await devFS.update(
+      UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -130,7 +130,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -141,7 +141,8 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -150,7 +151,7 @@ void main() {
       final File file = fs.file(fs.path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -160,13 +161,14 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('modify existing file on local file system', () async {
-      int bytes = await devFS.update(
+      UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -176,12 +178,13 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
       final File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, DateTime.now(), -5);
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -191,10 +194,11 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -204,11 +208,12 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, DateTime.now(), -5);
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -218,10 +223,11 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -231,7 +237,8 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -240,7 +247,7 @@ void main() {
     testUsingContext('delete a file from the local file system', () async {
       final File file = fs.file(fs.path.join(basePath, filePath));
       await file.delete();
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -251,14 +258,15 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add new package', () async {
       await _createPackage(fs, 'newpkg', 'anotherfile.txt');
-      int bytes = await devFS.update(
+      UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -268,9 +276,10 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
-      bytes = await devFS.update(
+      report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -280,7 +289,8 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill.track.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -302,7 +312,7 @@ void main() {
             .map<String>((File file) => canonicalizePath(file.path))
             .toList());
       }
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         fileFilter: fileFilter,
         generator: residentCompiler,
@@ -313,14 +323,15 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add an asset bundle', () async {
       assetBundle.entries['a.txt'] = DevFSStringContent('abc');
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         bundle: assetBundle,
         bundleDirty: true,
@@ -334,14 +345,14 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 25);
+      expect(report.syncedBytes, 25);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add a file to the asset bundle - bundleDirty', () async {
       assetBundle.entries['b.txt'] = DevFSStringContent('abcd');
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         bundle: assetBundle,
         bundleDirty: true,
@@ -358,14 +369,14 @@ void main() {
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 29);
+      expect(report.syncedBytes, 29);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add a file to the asset bundle', () async {
       assetBundle.entries['c.txt'] = DevFSStringContent('12');
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         bundle: assetBundle,
         generator: residentCompiler,
@@ -379,14 +390,14 @@ void main() {
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 24);
+      expect(report.syncedBytes, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('delete a file from the asset bundle', () async {
       assetBundle.entries.remove('c.txt');
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         bundle: assetBundle,
         generator: residentCompiler,
@@ -399,14 +410,15 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('delete all files from the asset bundle', () async {
       assetBundle.entries.clear();
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         bundle: assetBundle,
         bundleDirty: true,
@@ -423,7 +435,8 @@ void main() {
         'a.txt', 'b.txt'
       ]));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -466,7 +479,7 @@ void main() {
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final int bytes = await devFS.update(
+      final UpdateFSReport report = await devFS.update(
         mainPath: 'lib/foo.txt',
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
@@ -476,7 +489,8 @@ void main() {
         'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 22);
+      expect(report.syncedBytes, 22);
+      expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -590,7 +604,8 @@ class MockVM implements VM {
   }
 
   @override
-  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+  Future<Map<String, dynamic>> invokeRpcRaw(
+    String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
     bool timeoutFatal = true,

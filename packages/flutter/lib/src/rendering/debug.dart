@@ -83,10 +83,8 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 ///  * [debugProfilePaintsEnabled], which does something similar for
 ///    painting but using the timeline view.
-///
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugPrintLayouts = false;
 

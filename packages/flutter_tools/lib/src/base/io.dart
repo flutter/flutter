@@ -95,7 +95,7 @@ ExitFunction get exit => _exitFunction;
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ExitFunction exitFunction]) {
+void setExitFunctionForTests([ ExitFunction exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
@@ -162,10 +162,7 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
-io.IOSink get stderr => context[Stdio].stderr;
-
-Stream<List<int>> get stdin => context[Stdio].stdin;
-
-io.IOSink get stdout => context[Stdio].stdout;
-
 Stdio get stdio => context[Stdio];
+io.IOSink get stdout => stdio.stdout;
+Stream<List<int>> get stdin => stdio.stdin;
+io.IOSink get stderr => stdio.stderr;

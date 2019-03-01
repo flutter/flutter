@@ -41,7 +41,7 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
-Widget boilerplate({Widget child}) {
+Widget boilerplate({ Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -142,7 +142,7 @@ void main() {
     }
   });
 
-  testWidgets('Children, onValueChanged, and color arguments can not be null',
+  testWidgets('Children and onValueChanged arguments can not be null',
           (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
@@ -174,21 +174,6 @@ void main() {
       fail('Should not be possible to create segmented control with null onValueChanged');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('onValueChanged'));
-    }
-
-    try {
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: children,
-            onValueChanged: (int newValue) {},
-            unselectedColor: null,
-          ),
-        ),
-      );
-      fail('Should not be possible to create segmented control with null unselectedColor');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('unselectedColor'));
     }
   });
 
@@ -235,6 +220,52 @@ void main() {
     expect(textStyle.style.color, CupertinoColors.activeBlue);
     expect(iconTheme.data.color, CupertinoColors.white);
   });
+
+  testWidgets(
+    'Segmented controls respects themes',
+    (WidgetTester tester) async {
+      final Map<int, Widget> children = <int, Widget>{};
+      children[0] = const Text('Child 1');
+      children[1] = const Icon(IconData(1));
+
+      int sharedValue = 0;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSegmentedControl<int>(
+                children: children,
+                onValueChanged: (int newValue) {
+                  setState(() {
+                    sharedValue = newValue;
+                  });
+                },
+                groupValue: sharedValue,
+              );
+            },
+          ),
+        ),
+      );
+
+      DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
+      IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+      expect(textStyle.style.color, CupertinoColors.black);
+      expect(iconTheme.data.color, CupertinoColors.activeOrange);
+
+      await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
+      iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+
+      expect(textStyle.style.color, CupertinoColors.activeOrange);
+      expect(iconTheme.data.color, CupertinoColors.black);
+    },
+  );
 
   testWidgets('SegmentedControl is correct when user provides custom colors',
           (WidgetTester tester) async {
@@ -1171,13 +1202,13 @@ void main() {
     await tester.tap(find.text('B'));
 
     await tester.pump();
-    expect(getBackgroundColor(tester, 0), const Color(0xff007aff));
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
+    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 3), CupertinoColors.white);
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
-    expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
+    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 3), CupertinoColors.white);
 
     await tester.pump(const Duration(milliseconds: 150));

@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -34,7 +38,7 @@ import 'tween.dart';
 ///     ),
 ///   ],
 /// ).animate(myAnimationController);
-///```
+/// ```
 class TweenSequence<T> extends Animatable<T> {
   /// Construct a TweenSequence.
   ///
@@ -44,7 +48,9 @@ class TweenSequence<T> extends Animatable<T> {
   /// There's a small cost associated with building a `TweenSequence` so
   /// it's best to reuse one, rather than rebuilding it on every frame,
   /// when that's possible.
-  TweenSequence(List<TweenSequenceItem<T>> items) : assert(items != null), assert(items.isNotEmpty) {
+  TweenSequence(List<TweenSequenceItem<T>> items)
+      : assert(items != null),
+        assert(items.isNotEmpty) {
     _items.addAll(items);
 
     double totalWeight = 0.0;
@@ -82,6 +88,9 @@ class TweenSequence<T> extends Animatable<T> {
     assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
     return null;
   }
+
+  @override
+  String toString() => 'TweenSequence(${_items.length} items)';
 }
 
 /// A simple holder for one element of a [TweenSequence].
@@ -92,7 +101,9 @@ class TweenSequenceItem<T> {
   const TweenSequenceItem({
     @required this.tween,
     @required this.weight,
-  }) : assert(tween != null), assert(weight != null), assert(weight > 0.0);
+  }) : assert(tween != null),
+       assert(weight != null),
+       assert(weight > 0.0);
 
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position
@@ -110,7 +121,7 @@ class TweenSequenceItem<T> {
   /// {@end-tool}
   final Animatable<T> tween;
 
-  /// An abitrary value that indicates the relative percentage of a
+  /// An arbitrary value that indicates the relative percentage of a
   /// [TweenSequence] animation's duration when [tween] will be used.
   ///
   /// The percentage for an individual item is the item's weight divided

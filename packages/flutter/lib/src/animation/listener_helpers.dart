@@ -108,8 +108,10 @@ mixin AnimationLocalListenersMixin {
   ///
   /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-    didUnregisterListener();
+    final bool removed = _listeners.remove(listener);
+    if (removed) {
+      didUnregisterListener();
+    }
   }
 
   /// Calls all the listeners.
@@ -172,8 +174,10 @@ mixin AnimationLocalStatusListenersMixin {
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener) {
-    _statusListeners.remove(listener);
-    didUnregisterListener();
+    final bool removed = _statusListeners.remove(listener);
+    if (removed) {
+      didUnregisterListener();
+    }
   }
 
   /// Calls all the status listeners.

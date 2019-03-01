@@ -48,6 +48,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
+  @visibleForTesting
   void markNeedsAddToScene() {
     _needsAddToScene = true;
   }
@@ -90,6 +91,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// A subtree needs [addToScene] if any of its layer needs [addToScene].
   /// The [ContainerLayer] will override this to respect its children.
   @protected
+  @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
     _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
@@ -165,7 +167,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///   * [AnnotatedRegionLayer], for placing values in the layer tree.
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
@@ -173,7 +175,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Return the engine layer for retained rendering. When there's no
   /// corresponding engine layer, null is returned.
   @protected
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]);
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
     // There can't be a loop by adding a retained layer subtree whose
@@ -182,7 +184,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
-    // its descendent layers, say A. That means the child structure of A has
+    // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
     // _subtreeNeedsAddToScene being false.
     if (!_subtreeNeedsAddToScene && _engineLayer != null) {
@@ -274,7 +276,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
     return null; // this does not return an engine layer yet.
   }
@@ -311,10 +313,10 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-/// * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
-///   for how to create and manage backend textures on Android.
-/// * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
-///   for how to create and manage backend textures on iOS.
+///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///    for how to create and manage backend textures on Android.
+///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be
@@ -323,7 +325,8 @@ class TextureLayer extends Layer {
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
-  }): assert(rect != null), assert(textureId != null);
+  }) : assert(rect != null),
+       assert(textureId != null);
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -341,7 +344,7 @@ class TextureLayer extends Layer {
   final bool freeze;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = rect.shift(layerOffset);
     builder.addTexture(
       textureId,
@@ -366,7 +369,8 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
-  }): assert(rect != null), assert(viewId != null);
+  }) : assert(rect != null),
+       assert(viewId != null);
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -377,7 +381,7 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
@@ -452,7 +456,7 @@ class PerformanceOverlayLayer extends Layer {
   final bool checkerboardOffscreenLayers;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
@@ -613,7 +617,7 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
     return null; // ContainerLayer does not have a corresponding engine layer
   }
@@ -625,7 +629,7 @@ class ContainerLayer extends Layer {
   /// to apply effects to the scene using the [SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
-  void addChildrenToScene(ui.SceneBuilder builder, [Offset childOffset = Offset.zero]) {
+  void addChildrenToScene(ui.SceneBuilder builder, [ Offset childOffset = Offset.zero ]) {
     Layer child = firstChild;
     while (child != null) {
       if (childOffset == Offset.zero) {
@@ -746,7 +750,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     // Skia has a fast path for concatenating scale/translation only matrices.
     // Hence pushing a translation-only transform layer should be fast. For
     // retained rendering, we don't want to push the offset down to each leaf
@@ -780,7 +784,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
+  Future<ui.Image> toImage(Rect bounds, { double pixelRatio = 1.0 }) async {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -815,9 +819,13 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ @required Rect clipRect, Clip clipBehavior = Clip.hardEdge }) :
-        _clipRect = clipRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRectLayer({
+    @required Rect clipRect,
+    Clip clipBehavior = Clip.hardEdge,
+  }) : _clipRect = clipRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -856,7 +864,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -887,9 +895,13 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The [clipRRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRRectLayer({ @required RRect clipRRect, Clip clipBehavior = Clip.antiAlias }) :
-        _clipRRect = clipRRect, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipRRectLayer({
+    @required RRect clipRRect,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipRRect = clipRRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -924,7 +936,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -955,9 +967,13 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The [clipPath] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipPathLayer({ @required Path clipPath, Clip clipBehavior = Clip.antiAlias }) :
-        _clipPath = clipPath, _clipBehavior = clipBehavior,
-        assert(clipBehavior != null), assert(clipBehavior != Clip.none);
+  ClipPathLayer({
+    @required Path clipPath,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -992,7 +1008,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1044,7 +1060,7 @@ class TransformLayer extends OffsetLayer {
   bool _inverseDirty = true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
@@ -1094,8 +1110,11 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({ @required int alpha, Offset offset = Offset.zero })
-      : _alpha = alpha, _offset = offset;
+  OpacityLayer({
+    @required int alpha,
+    Offset offset = Offset.zero,
+  }) : _alpha = alpha,
+       _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1124,7 +1143,7 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableOpacityLayers;
@@ -1152,8 +1171,13 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({ @required Shader shader, @required Rect maskRect, @required BlendMode blendMode })
-      : _shader = shader, _maskRect = maskRect, _blendMode = blendMode;
+  ShaderMaskLayer({
+    @required Shader shader,
+    @required Rect maskRect,
+    @required BlendMode blendMode,
+  }) : _shader = shader,
+       _maskRect = maskRect,
+       _blendMode = blendMode;
 
   /// The shader to apply to the children.
   ///
@@ -1195,7 +1219,7 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.pushShaderMask(shader, maskRect.shift(layerOffset), blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -1233,7 +1257,7 @@ class BackdropFilterLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.pushBackdropFilter(filter);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -1345,7 +1369,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     ui.EngineLayer engineLayer;
     bool enabled = true;
     assert(() {
@@ -1460,7 +1484,7 @@ class LeaderLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
@@ -1678,7 +1702,7 @@ class FollowerLayer extends ContainerLayer {
   bool get alwaysNeedsAddToScene => true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked) {
@@ -1729,10 +1753,13 @@ class FollowerLayer extends ContainerLayer {
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new layer annotated with [value] that clips to [size] if provided.
+  /// Creates a new layer annotated with [value] that clips to rectangle defined
+  /// by the [size] and [offset] if provided.
   ///
-  /// The value provided cannot be null.
-  AnnotatedRegionLayer(this.value, {this.size}) : assert(value != null);
+  /// The [value] provided cannot be null.
+  AnnotatedRegionLayer(this.value, {this.size, Offset offset})
+      : offset = offset ?? Offset.zero,
+        assert(value != null);
 
   /// The value returned by [find] if the offset is contained within this layer.
   final T value;
@@ -1741,14 +1768,25 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// If not provided, all offsets are considered to be contained within this
   /// layer, unless an ancestor layer applies a clip.
+  ///
+  /// If [offset] is set, then the offset is applied to the size region before
+  /// hit testing in [find].
   final Size size;
+
+  /// The [offset] is optionally used to translate the clip region for the
+  /// hit-testing of [find] by [offset].
+  ///
+  /// If not provided, offset defaults to [Offset.zero].
+  ///
+  /// Ignored if [size] is not set.
+  final Offset offset;
 
   @override
   S find<S>(Offset regionOffset) {
     final S result = super.find<S>(regionOffset);
     if (result != null)
       return result;
-    if (size != null && !size.contains(regionOffset))
+    if (size != null && !(offset & size).contains(regionOffset))
       return null;
     if (T == S) {
       final Object untypedResult = value;
@@ -1763,5 +1801,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<T>('value', value));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
   }
 }

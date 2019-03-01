@@ -161,8 +161,8 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 ///
 /// See also:
 ///
-/// * [AsyncSnapshot], which augments a connection state with information
-/// received from the asynchronous computation.
+///  * [AsyncSnapshot], which augments a connection state with information
+///    received from the asynchronous computation.
 enum ConnectionState {
   /// Not currently connected to any asynchronous computation.
   ///
@@ -187,17 +187,17 @@ enum ConnectionState {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which builds itself based on a snapshot from interacting
-///   with a [Stream].
-/// * [FutureBuilder], which builds itself based on a snapshot from interacting
-///   with a [Future].
+///  * [StreamBuilder], which builds itself based on a snapshot from interacting
+///    with a [Stream].
+///  * [FutureBuilder], which builds itself based on a snapshot from interacting
+///    with a [Future].
 @immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
-      : assert(connectionState != null),
-        assert(!(data != null && error != null));
+    : assert(connectionState != null),
+      assert(!(data != null && error != null));
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
@@ -285,10 +285,10 @@ class AsyncSnapshot<T> {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
-///   itself based on a snapshot from interacting with a [Stream].
-/// * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
-///   itself based on a snapshot from interacting with a [Future].
+///  * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Stream].
+///  * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Future].
 typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
@@ -389,7 +389,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
   /// The data that will be used to create the initial snapshot.
   ///
-  /// Providing this value (presumably obtained sychronously somehow when the
+  /// Providing this value (presumably obtained synchronously somehow when the
   /// [Stream] was created) ensures that the first frame will show useful data.
   /// Otherwise, the first frame will be built with the value null, regardless
   /// of whether a value is available on the stream: since streams are

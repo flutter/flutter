@@ -11,6 +11,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
@@ -23,6 +24,10 @@ const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
   Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
   For more info, see https://flutter.io/platform-plugins''';
+
+const String unknownCocoaPodsConsequence = '''
+  Flutter is unable to determine the installed CocoaPods's version.
+  Ensure that the output of 'pod --version' contains only digits and . to be recognized by Flutter.''';
 
 const String cocoaPodsInstallInstructions = '''
   brew install cocoapods
@@ -38,6 +43,8 @@ CocoaPods get cocoaPods => context[CocoaPods];
 enum CocoaPodsStatus {
   /// iOS plugins will not work, installation required.
   notInstalled,
+  /// iOS plugins might not work, upgrade recommended.
+  unknownVersion,
   /// iOS plugins will not work, upgrade required.
   belowMinimumVersion,
   /// iOS plugins may not work in certain situations (Swift, static libraries),
@@ -66,6 +73,8 @@ class CocoaPods {
       return CocoaPodsStatus.notInstalled;
     try {
       final Version installedVersion = Version.parse(versionText);
+      if (installedVersion == null)
+        return CocoaPodsStatus.unknownVersion;
       if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
         return CocoaPodsStatus.belowMinimumVersion;
       else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
@@ -77,8 +86,18 @@ class CocoaPods {
     }
   }
 
-  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
+  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
+  /// cloned.
+  ///
+  /// A user can override the default location via the CP_REPOS_DIR environment
+  /// variable.
+  ///
+  /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
+  /// for details of this variable.
+  Future<bool> get isCocoaPodsInitialized {
+    final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
+    return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
+  }
 
   Future<bool> processPods({
     @required IosProject iosProject,
@@ -112,6 +131,15 @@ class CocoaPods {
           emphasis: true,
         );
         return false;
+      case CocoaPodsStatus.unknownVersion:
+        printError(
+          'Warning: Unknown CocoaPods version installed.\n'
+          '$unknownCocoaPodsConsequence\n'
+          'To upgrade:\n'
+          '$cocoaPodsUpgradeInstructions\n',
+          emphasis: true,
+        );
+        break;
       case CocoaPodsStatus.belowMinimumVersion:
         printError(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
@@ -176,6 +204,12 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfile.path);
     }
+    addPodsDependencyToFlutterXcconfig(iosProject);
+  }
+
+  /// Ensures all `Flutter/Xxx.xcconfig` files for the given iOS sub-project of
+  /// a parent Flutter project include pods configuration.
+  void addPodsDependencyToFlutterXcconfig(IosProject iosProject) {
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }
@@ -220,7 +254,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(IosProject iosProject, String engineDirectory) async {
-    final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+    final Status status = logger.startProgress('Running pod install...', timeout: kSlowOperation);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: iosProject.hostAppRoot.path,

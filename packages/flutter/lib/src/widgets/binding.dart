@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -23,7 +22,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides noop method implementations.
+/// When used as a mixin, provides no-op method implementations.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
@@ -141,7 +140,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = ui.window.physicalSize; });
+  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
   ///   }
   ///
   ///   @override
@@ -197,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = ui.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
   ///   }
   ///
   ///   @override
@@ -213,6 +212,9 @@ abstract class WidgetsBindingObserver {
   ///  * [MediaQuery.of], which provides a similar service with less
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
+
+  /// {@macro on_platform_brightness_change}
+  void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
@@ -250,8 +252,8 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     super.initInstances();
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
-    ui.window.onLocaleChanged = handleLocaleChanged;
-    ui.window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    window.onLocaleChanged = handleLocaleChanged;
+    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
@@ -268,8 +270,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
-    if (!isReleaseMode) {
+    profile(() {
       registerSignalServiceExtension(
         name: 'debugDumpApp',
         callback: () {
@@ -289,7 +290,19 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           return _forceRebuild();
         },
       );
-    }
+
+      registerServiceExtension(
+        name: 'didSendFirstFrameEvent',
+        callback: (_) async {
+          return <String, dynamic>{
+            // This is defined to return a STRING, not a boolean.
+            // Devtools, the Intellij plugin, and the flutter tool all depend
+            // on it returning a string and not a boolean.
+            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+          };
+        },
+      );
+    });
 
     assert(() {
       registerBoolServiceExtension(
@@ -399,6 +412,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   }
 
   @override
+  void handlePlatformBrightnessChanged() {
+    super.handlePlatformBrightnessChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangePlatformBrightness();
+  }
+
+  @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
     for (WidgetsBindingObserver observer in _observers)
@@ -413,7 +433,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(ui.window.locales);
+    dispatchLocalesChanged(window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
@@ -531,22 +551,25 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   /// Whether the first frame has finished rendering.
   ///
-  /// Only valid in profile and debug builds, it can't be used in release
-  /// builds.
-  /// It can be deferred using [deferFirstFrameReport] and
-  /// [allowFirstFrameReport].
-  /// The value is set at the end of the call to [drawFrame].
+  /// Only useful in profile and debug builds; in release builds, this always
+  /// return false. This can be deferred using [deferFirstFrameReport] and
+  /// [allowFirstFrameReport]. The value is set at the end of the call to
+  /// [drawFrame].
+  ///
+  /// This value can also be obtained over the VM service protocol as
+  /// `ext.flutter.didSendFirstFrameEvent`.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to report the first frame.
-  //
-  // TODO(ianh): This method should only be available in debug and profile modes.
+  /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
+  /// during startup as the "first frame".
   void deferFirstFrameReport() {
-    assert(_deferFirstFrameReportCount >= 0);
-    _deferFirstFrameReportCount += 1;
+    profile(() {
+      assert(_deferFirstFrameReportCount >= 0);
+      _deferFirstFrameReportCount += 1;
+    });
   }
 
   /// When called after [deferFirstFrameReport]: tell the framework to report
@@ -555,12 +578,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This method may only be called once for each corresponding call
   /// to [deferFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to report the first frame.
-  //
-  // TODO(ianh): This method should only be available in debug and profile modes.
+  /// This is used by [WidgetsApp] to report when the first useful frame is
+  /// painted.
   void allowFirstFrameReport() {
-    assert(_deferFirstFrameReportCount >= 1);
-    _deferFirstFrameReportCount -= 1;
+    profile(() {
+      assert(_deferFirstFrameReportCount >= 1);
+      _deferFirstFrameReportCount -= 1;
+    });
   }
 
   void _handleBuildScheduled() {
@@ -682,13 +706,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         return true;
       }());
     }
-    // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
-    // See https://github.com/dart-lang/sdk/issues/27192
-    if (_needToReportFirstFrame && _reportFirstFrame) {
-      developer.Timeline.instantSync('Widgets completed first useful frame');
-      developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-      _needToReportFirstFrame = false;
-    }
+    profile(() {
+      if (_needToReportFirstFrame && _reportFirstFrame) {
+        developer.Timeline.instantSync('Widgets completed first useful frame');
+        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+        _needToReportFirstFrame = false;
+      }
+    });
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -745,12 +769,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///
 /// See also:
 ///
-/// * [WidgetsBinding.attachRootWidget], which creates the root widget for the
-///   widget hierarchy.
-/// * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
-///   element for the element hierarchy.
-/// * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
-///   ensure the widget, element, and render trees are all built.
+///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///    widget hierarchy.
+///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///    element for the element hierarchy.
+///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
@@ -815,7 +839,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
+  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T> element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();

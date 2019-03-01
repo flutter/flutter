@@ -25,15 +25,7 @@ abstract class OperatingSystemUtils {
   OperatingSystemUtils._private();
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  void makeExecutable(File file);
-
-  /// Updates the specified file system [entity] to have the file mode
-  /// bits set to the value defined by [mode], which can be specified in octal
-  /// (e.g. `644`) or symbolically (e.g. `u+x`).
-  ///
-  /// On operating systems that do not support file mode bits, this will be a
-  /// no-op.
-  void chmod(FileSystemEntity entity, String mode);
+  ProcessResult makeExecutable(File file);
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
@@ -76,7 +68,7 @@ abstract class OperatingSystemUtils {
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all = false});
+  List<File> _which(String execName, { bool all = false });
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -86,17 +78,12 @@ class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  void makeExecutable(File file) {
-    chmod(file, 'a+x');
+  ProcessResult makeExecutable(File file) {
+    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
   }
 
   @override
-  void chmod(FileSystemEntity entity, String mode) {
-    processManager.runSync(<String>['chmod', mode, entity.path]);
-  }
-
-  @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -165,14 +152,14 @@ class _PosixUtils extends OperatingSystemUtils {
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
+  // This is a no-op.
   @override
-  void makeExecutable(File file) {}
+  ProcessResult makeExecutable(File file) {
+    return ProcessResult(0, 0, null, null);
+  }
 
   @override
-  void chmod(FileSystemEntity entity, String mode) {}
-
-  @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
@@ -277,7 +264,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String findProjectRoot([String directory]) {
+String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {

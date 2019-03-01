@@ -253,13 +253,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  ///  * The method [correctBy], which is a method of [ViewportOffset] used
+  ///  * [correctBy], which is a method of [ViewportOffset] used
   ///    by viewport render objects to correct the offset during layout
   ///    without notifying its listeners.
-  ///  * The method [jumpTo], for making changes to position while not in the
+  ///  * [jumpTo], for making changes to position while not in the
   ///    middle of layout and applying the new position immediately.
-  ///  * The method [animateTo], which is like [jumpTo] but animating to the
-  ///    distination offset.
+  ///  * [animateTo], which is like [jumpTo] but animating to the
+  ///    destination offset.
   void correctPixels(double value) {
     _pixels = value;
   }
@@ -473,11 +473,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  /// * [applyViewportDimension], which is called when new
-  ///   viewport dimensions are established.
-  /// * [applyContentDimensions], which is called after new
-  ///   viewport dimensions are established, and also if new content dimensions
-  ///   are established, and which calls [ScrollPosition.applyNewDimensions].
+  ///  * [applyViewportDimension], which is called when new
+  ///    viewport dimensions are established.
+  ///  * [applyContentDimensions], which is called after new
+  ///    viewport dimensions are established, and also if new content dimensions
+  ///    are established, and which calls [ScrollPosition.applyNewDimensions].
   @protected
   @mustCallSuper
   void applyNewDimensions() {
@@ -488,7 +488,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
-  Future<void> ensureVisible(RenderObject object, {
+  Future<void> ensureVisible(
+    RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
@@ -545,7 +546,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// The animation is typically handled by an [DrivenScrollActivity].
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   });
@@ -570,7 +572,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// If [animateTo] is called then [curve] defaults to [Curves.ease].
   @override
-  Future<void> moveTo(double to, {
+  Future<void> moveTo(
+    double to, {
     Duration duration,
     Curve curve,
     bool clamp = true,
@@ -609,6 +612,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Call [beginActivity] to change the current activity.
   @protected
+  @visibleForTesting
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 

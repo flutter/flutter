@@ -1422,4 +1422,96 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ));
   });
+
+  testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17598
+
+    const double appBarHeight = 256.0;
+    bool snap = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    expandedHeight: appBarHeight,
+                    pinned: false,
+                    floating: true,
+                    snap: snap,
+                    actions: <Widget>[
+                      FlatButton(
+                        child: const Text('snap=false'),
+                        onPressed: () {
+                          setState(() {
+                            snap = false;
+                          });
+                        },
+                      ),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        height: appBarHeight,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      <Widget>[
+                        Container(height: 1200.0, color: Colors.teal),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+    await gesture.up();
+
+    await tester.tap(find.text('snap=false'));
+    await tester.pumpAndSettle();
+
+    gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('AppBar with shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBar(
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          shape: roundedRectangleBorder,
+          actions: const <Widget>[Text('A1'), Text('A2')],
+        ),
+      ),
+    );
+
+    final Finder appBarFinder = find.byType(AppBar);
+
+    AppBar getAppBarWidget() {
+      return tester.widget<AppBar>(appBarFinder);
+    }
+
+    expect(getAppBarWidget().shape, roundedRectangleBorder);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget() {
+      return tester.widget<Material>(materialFinder);
+    }
+
+    expect(getMaterialWidget().shape, roundedRectangleBorder);
+  });
 }

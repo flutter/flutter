@@ -8,10 +8,12 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:crypto/crypto.dart';
+import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:process/process.dart';
 
 const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
@@ -196,14 +198,14 @@ class ArchiveCreator {
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
     HttpReader httpReader,
-  }) : assert(revision.length == 40),
-       flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
-       httpReader = httpReader ?? http.readBytes,
-       _processRunner = ProcessRunner(
-         processManager: processManager,
-         subprocessOutput: subprocessOutput,
-         platform: platform,
-       ) {
+  })  : assert(revision.length == 40),
+        flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
+        httpReader = httpReader ?? http.readBytes,
+        _processRunner = ProcessRunner(
+          processManager: processManager,
+          subprocessOutput: subprocessOutput,
+          platform: platform,
+        ) {
     _flutter = path.join(
       flutterRoot.absolute.path,
       'bin',
@@ -311,8 +313,7 @@ class ArchiveCreator {
     final File gitFile = File(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
-    final Directory minGitPath =
-        Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
+    final Directory minGitPath = Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
     await minGitPath.create(recursive: true);
     await _unzipArchive(gitFile, workingDirectory: minGitPath);
   }
@@ -332,6 +333,9 @@ class ArchiveCreator {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
+        // Run it outside the cloned Flutter repo to not nest git repos, since
+        // they'll be git repos themselves too.
+        workingDirectory: tempDir,
       );
     }
 
@@ -432,13 +436,13 @@ class ArchivePublisher {
     ProcessManager processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
-  }) : assert(revision.length == 40),
-       platformName = platform.operatingSystem.toLowerCase(),
-       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
-       _processRunner = ProcessRunner(
-         processManager: processManager,
-         subprocessOutput: subprocessOutput,
-       );
+  })  : assert(revision.length == 40),
+        platformName = platform.operatingSystem.toLowerCase(),
+        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
+        _processRunner = ProcessRunner(
+          processManager: processManager,
+          subprocessOutput: subprocessOutput,
+        );
 
   final Platform platform;
   final String platformName;
@@ -453,6 +457,18 @@ class ArchivePublisher {
   String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
+  Future<String> _getChecksum(File archiveFile) async {
+    final DigestSink digestSink = DigestSink();
+    final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
+
+    final Stream<List<int>> stream = archiveFile.openRead();
+    await stream.forEach((List<int> chunk) {
+      sink.add(chunk);
+    });
+    sink.close();
+    return digestSink.value.toString();
+  }
+
   /// Publish the archive to Google Storage.
   Future<void> publishArchive() async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
@@ -461,7 +477,7 @@ class ArchivePublisher {
     await _updateMetadata();
   }
 
-  Map<String, dynamic> _addRelease(Map<String, dynamic> jsonData) {
+  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
@@ -477,6 +493,7 @@ class ArchivePublisher {
     newEntry['version'] = version;
     newEntry['release_date'] = DateTime.now().toUtc().toIso8601String();
     newEntry['archive'] = destinationArchivePath;
+    newEntry['sha256'] = await _getChecksum(outputFile);
 
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'];
@@ -518,7 +535,7 @@ class ArchivePublisher {
       throw ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
     }
 
-    jsonData = _addRelease(jsonData);
+    jsonData = await _addRelease(jsonData);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
@@ -530,8 +547,16 @@ class ArchivePublisher {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
+    if (platform.isWindows) {
+      return _processRunner.runProcess(
+        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--']..addAll(args),
+        workingDirectory: workingDirectory,
+        failOk: failOk,
+      );
+    }
+
     return _processRunner.runProcess(
-      <String>['gsutil']..addAll(args),
+      <String>['gsutil.py', '--']..addAll(args),
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
@@ -558,7 +583,7 @@ class ArchivePublisher {
       args.addAll(<String>['-h', 'Content-Type:$mimeType']);
     }
     args.addAll(<String>['cp', src, dest]);
-    return _runGsUtil(args);
+    return await _runGsUtil(args);
   }
 }
 

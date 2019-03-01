@@ -20,6 +20,9 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
+/// The [child] is not clipped. To clip a child to the shape of a particular
+/// [ShapeDecoration], consider using a [ClipPath] widget.
+///
 /// {@tool sample}
 ///
 /// This sample shows a radial gradient that draws a moon on a night sky:
@@ -142,9 +145,9 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Since [Container] combines a number of other widgets each with their own
 /// layout behavior, [Container]'s layout behavior is somewhat complicated.
 ///
-/// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
-/// the [child], to honor the `width`, `height`, and [constraints], to expand to
-/// fit the parent, to be as small as possible.
+/// Summary: [Container] tries, in order: to honor [alignment], to size itself
+/// to the [child], to honor the `width`, `height`, and [constraints], to expand
+/// to fit the parent, to be as small as possible.
 ///
 /// More specifically:
 ///
@@ -313,6 +316,9 @@ class Container extends StatelessWidget {
   /// A shorthand for specifying just a solid color is available in the
   /// constructor: set the `color` argument instead of the `decoration`
   /// argument.
+  ///
+  /// The [child] is not clipped to the decoration. To clip a child to the shape
+  /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
   final Decoration decoration;
 
   /// The decoration to paint in front of the [child].

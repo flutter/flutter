@@ -28,6 +28,10 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    # Ignore analyzer hints for updating pubspecs when using Future or
+    # Stream and not importing dart:async
+    # Please see https://github.com/flutter/flutter/pull/24528 for details.
+    sdk_version_async_exported_from_core: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively
@@ -66,9 +70,11 @@ linter:
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # there are plenty of valid reasons to return null
+    # - avoid_returning_null_for_future # not yet tested
     - avoid_returning_null_for_void
     # - avoid_returning_this # there are plenty of valid reasons to return this
     # - avoid_setters_without_getters # not yet tested
+    # - avoid_shadowing_type_parameters # not yet tested
     # - avoid_single_cascade_in_expression_statements # not yet tested
     - avoid_slow_async_io
     - avoid_types_as_parameter_names
@@ -114,7 +120,7 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_collection_literals
+    # - prefer_collection_literals # temporary until all platforms support set literals
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
@@ -145,12 +151,13 @@ linter:
     - sort_constructors_first
     - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    - super_goes_last
+    # - super_goes_last # no longer needed w/ Dart 2
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives
+    # - unnecessary_await_in_return # not yet tested
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     - unnecessary_getters_setters
@@ -163,6 +170,7 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    # - use_function_type_syntax_for_parameters # not yet tested
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182

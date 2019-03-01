@@ -9,13 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
 
-// TODO(sigurdm): This should not be stored here.
-const String beeUri =
-    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
-
 class VideoCard extends StatelessWidget {
-  const VideoCard({Key key, this.controller, this.title, this.subtitle})
-      : super(key: key);
+  const VideoCard({ Key key, this.controller, this.title, this.subtitle }) : super(key: key);
 
   final VideoPlayerController controller;
   final String title;
@@ -214,8 +209,7 @@ class FadeAnimation extends StatefulWidget {
   _FadeAnimationState createState() => _FadeAnimationState();
 }
 
-class _FadeAnimationState extends State<FadeAnimation>
-    with SingleTickerProviderStateMixin {
+class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
   AnimationController animationController;
 
   @override
@@ -336,7 +330,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({Key key}) : super(key: key);
+  const VideoDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/video';
 
@@ -350,37 +344,40 @@ Future<bool> isIOSSimulator() async {
   return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
-class _VideoDemoState extends State<VideoDemo>
-    with SingleTickerProviderStateMixin {
-  final VideoPlayerController butterflyController =
-      VideoPlayerController.asset(
-        'videos/butterfly.mp4',
-        package: 'flutter_gallery_assets',
-      );
-  final VideoPlayerController beeController = VideoPlayerController.network(
-    beeUri,
+class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {
+  final VideoPlayerController butterflyController = VideoPlayerController.asset(
+    'videos/butterfly.mp4',
+    package: 'flutter_gallery_assets',
   );
+
+  // TODO(sigurdm): This should not be stored here.
+  static const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+  final VideoPlayerController beeController = VideoPlayerController.network(beeUri);
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;
+  bool isDisposed = false;
 
   @override
   void initState() {
     super.initState();
 
-    Future<void> initController(VideoPlayerController controller) async {
+    Future<void> initController(VideoPlayerController controller, String name) async {
+      print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""}');
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
-      if (mounted)
+      if (mounted) {
+        print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
         setState(() {});
+      }
     }
 
-    initController(butterflyController);
-    initController(beeController);
+    initController(butterflyController, 'butterfly');
+    initController(beeController, 'bee');
     isIOSSimulator().then<void>((bool result) {
       isSupported = !result;
     });
@@ -388,8 +385,11 @@ class _VideoDemoState extends State<VideoDemo>
 
   @override
   void dispose() {
+    print('> VideoDemo dispose');
+    isDisposed  = true;
     butterflyController.dispose();
     beeController.dispose();
+    print('< VideoDemo dispose');
     super.dispose();
   }
 
@@ -401,29 +401,29 @@ class _VideoDemoState extends State<VideoDemo>
         title: const Text('Videos'),
       ),
       body: isSupported
-          ? ConnectivityOverlay(
-              child: ListView(
-                children: <Widget>[
-                  VideoCard(
-                    title: 'Butterfly',
-                    subtitle: '… flutters by',
-                    controller: butterflyController,
-                  ),
-                  VideoCard(
-                    title: 'Bee',
-                    subtitle: '… gently buzzing',
-                    controller: beeController,
-                  ),
-                ],
-              ),
-              connectedCompleter: connectedCompleter,
-              scaffoldKey: scaffoldKey,
-            )
-          : const Center(
-              child: Text(
-                'Video playback not supported on the iOS Simulator.',
-              ),
+        ? ConnectivityOverlay(
+            child: ListView(
+              children: <Widget>[
+                VideoCard(
+                  title: 'Butterfly',
+                  subtitle: '… flutters by',
+                  controller: butterflyController,
+                ),
+                VideoCard(
+                  title: 'Bee',
+                  subtitle: '… gently buzzing',
+                  controller: beeController,
+                ),
+              ],
             ),
+            connectedCompleter: connectedCompleter,
+            scaffoldKey: scaffoldKey,
+          )
+        : const Center(
+            child: Text(
+              'Video playback not supported on the iOS Simulator.',
+            ),
+          ),
     );
   }
 }

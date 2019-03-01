@@ -52,11 +52,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
       // Prevent swipe popping of this page. Use explicit exit buttons only.
       onWillPop: () => Future<bool>.value(true),
       child: DefaultTextStyle(
-        style: const TextStyle(
-          fontFamily: '.SF UI Text',
-          fontSize: 17.0,
-          color: CupertinoColors.black,
-        ),
+        style: CupertinoTheme.of(context).textTheme.textStyle,
         child: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
@@ -241,7 +237,6 @@ class Tab1RowItem extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.plus_circled,
-                  color: CupertinoColors.activeBlue,
                   semanticLabel: 'Add',
                 ),
                 onPressed: () { },
@@ -249,7 +244,6 @@ class Tab1RowItem extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.share,
-                  color: CupertinoColors.activeBlue,
                   semanticLabel: 'Share',
                 ),
                 onPressed: () { },
@@ -352,8 +346,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            CupertinoButton(
-                              color: CupertinoColors.activeBlue,
+                            CupertinoButton.filled(
                               minSize: 30.0,
                               padding: const EdgeInsets.symmetric(horizontal: 24.0),
                               borderRadius: BorderRadius.circular(32.0),
@@ -367,12 +360,11 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                               ),
                               onPressed: () { },
                             ),
-                            CupertinoButton(
-                              color: CupertinoColors.activeBlue,
+                            CupertinoButton.filled(
                               minSize: 30.0,
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(32.0),
-                              child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
+                              child: const Icon(CupertinoIcons.ellipsis),
                               onPressed: () { },
                             ),
                           ],
@@ -722,7 +714,11 @@ class CupertinoDemoTab3 extends StatelessWidget {
         trailing: trailingButtons,
       ),
       child: DecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+        decoration: BoxDecoration(
+          color: CupertinoTheme.of(context).brightness == Brightness.light
+              ? CupertinoColors.extraLightBackgroundGray
+              : CupertinoColors.darkBackgroundGray,
+        ),
         child: ListView(
           children: <Widget>[
             const Padding(padding: EdgeInsets.only(top: 32.0)),
@@ -736,9 +732,9 @@ class CupertinoDemoTab3 extends StatelessWidget {
                 );
               },
               child: Container(
-                decoration: const BoxDecoration(
-                  color: CupertinoColors.white,
-                  border: Border(
+                decoration: BoxDecoration(
+                  color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                  border: const Border(
                     top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
                     bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
                   ),
@@ -750,10 +746,10 @@ class CupertinoDemoTab3 extends StatelessWidget {
                     top: false,
                     bottom: false,
                     child: Row(
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text(
                           'Sign in',
-                          style: TextStyle(color: CupertinoColors.activeBlue),
+                          style: TextStyle(color: CupertinoTheme.of(context).primaryColor),
                         )
                       ],
                     ),
@@ -791,8 +787,7 @@ class Tab3Dialog extends StatelessWidget {
               color: Color(0xFF646464),
             ),
             const Padding(padding: EdgeInsets.only(top: 18.0)),
-            CupertinoButton(
-              color: CupertinoColors.activeBlue,
+            CupertinoButton.filled(
               child: const Text('Sign in'),
               onPressed: () {
                 Navigator.pop(context);

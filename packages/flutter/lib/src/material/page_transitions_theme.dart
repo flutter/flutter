@@ -214,6 +214,7 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// used on Android P.
 ///
 /// See also:
+///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.

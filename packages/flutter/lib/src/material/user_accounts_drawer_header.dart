@@ -295,8 +295,8 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///
 /// See also:
 ///
-///  * [DrawerHeader], for a drawer header that doesn't show user accounts
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
+///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///

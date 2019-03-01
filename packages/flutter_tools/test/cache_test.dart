@@ -51,6 +51,36 @@ void main() {
   });
 
   group('Cache', () {
+    final MockCache mockCache = MockCache();
+    final MemoryFileSystem fs = MemoryFileSystem();
+
+    testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
+      final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
+      final Directory directory = fs.directory('/Applications/flutter/bin/cache');
+      directory.createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
+      when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
+      expect(gradleWrapper.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: ()=> mockCache,
+      FileSystem: () => fs
+    });
+
+    testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
+      final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
+      final Directory directory = fs.directory('/Applications/flutter/bin/cache');
+      directory.createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew')).createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew.bat')).createSync(recursive: true);
+
+      when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
+      expect(gradleWrapper.isUpToDateInner(), true);
+    }, overrides: <Type, Generator>{
+      Cache: ()=> mockCache,
+      FileSystem: () => fs
+    });
+
     test('should not be up to date, if some cached artifact is not', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
@@ -98,7 +128,7 @@ void main() {
         verifyNever(artifact2.update());
         expect(
           testLogger.errorText,
-          contains('https://github.com/flutter/flutter/wiki/Using-Flutter-in-China'),
+          contains('https://flutter.io/community/china'),
         );
       }
     });
@@ -124,7 +154,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile extends Mock implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
+  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
     return MockRandomAccessFile();
   }
 }
@@ -132,3 +162,4 @@ class MockFile extends Mock implements File {
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockInternetAddress extends Mock implements InternetAddress {}
+class MockCache extends Mock implements Cache {}

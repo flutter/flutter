@@ -436,6 +436,11 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(
+      _ticker != null,
+      'AnimationController.forward() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
@@ -464,6 +469,11 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    assert(
+      _ticker != null,
+      'AnimationController.reverse() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
@@ -483,7 +493,34 @@ class AnimationController extends Animation<double>
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
   TickerFuture animateTo(double target, { Duration duration, Curve curve = Curves.linear }) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateTo() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _direction = _AnimationDirection.forward;
+    return _animateToInternal(target, duration: duration, curve: curve);
+  }
+
+  /// Drives the animation from its current value to target.
+  ///
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// During the animation, [status] is reported as [AnimationStatus.reverse]
+  /// regardless of whether `target` < [value] or not. At the end of the
+  /// animation, when `target` is reached, [status] is reported as
+  /// [AnimationStatus.dismissed].
+  TickerFuture animateBack(double target, { Duration duration, Curve curve = Curves.linear }) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateBack() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
+    _direction = _AnimationDirection.reverse;
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
@@ -542,7 +579,11 @@ class AnimationController extends Animation<double>
   /// Starts running this animation in the forward direction, and
   /// restarts the animation when it completes.
   ///
-  /// Defaults to repeating between the lower and upper bounds.
+  /// Defaults to repeating between the [lowerBound] and [upperBound] of the
+  /// [AnimationController] when no explicit value is set for [min] and [max].
+  ///
+  /// With [reverse] set to true, instead of always starting over at [min]
+  /// the value will alternate between [min] and [max] values on each repeat.
   ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
@@ -550,7 +591,7 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture repeat({ double min, double max, Duration period }) {
+  TickerFuture repeat({ double min, double max, bool reverse = false, Duration period }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -565,7 +606,10 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
-    return animateWith(_RepeatingSimulation(min, max, period));
+    assert(max >= min);
+    assert(max <= upperBound && min >= lowerBound);
+    assert(reverse != null);
+    return animateWith(_RepeatingSimulation(_value, min, max, reverse, period));
   }
 
   /// Drives the animation with a critically damped spring (within [lowerBound]
@@ -609,6 +653,11 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   TickerFuture animateWith(Simulation simulation) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateWith() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     stop();
     return _startSimulation(simulation);
   }
@@ -645,6 +694,11 @@ class AnimationController extends Animation<double>
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which restart the animation controller.
   void stop({ bool canceled = true }) {
+    assert(
+      _ticker != null,
+      'AnimationController.stop() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.'
+    );
     _simulation = null;
     _lastElapsedDuration = null;
     _ticker.stop(canceled: canceled);
@@ -742,21 +796,33 @@ class _InterpolationSimulation extends Simulation {
 }
 
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(this.min, this.max, Duration period)
-    : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond {
+  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period)
+      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
+        _initialT = (max == min) ? 0.0 : (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
+    assert(_initialT >= 0.0);
   }
 
   final double min;
   final double max;
+  final bool reverse;
 
   final double _periodInSeconds;
+  final double _initialT;
 
   @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
-    final double t = (timeInSeconds / _periodInSeconds) % 1.0;
-    return ui.lerpDouble(min, max, t);
+
+    final double totalTimeInSeconds = timeInSeconds + _initialT;
+    final double t = (totalTimeInSeconds / _periodInSeconds) % 1.0;
+    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds) % 2 == 1;
+
+    if (reverse && _isPlayingReverse) {
+      return ui.lerpDouble(max, min, t);
+    } else {
+      return ui.lerpDouble(min, max, t);
+    }
   }
 
   @override

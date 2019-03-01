@@ -41,15 +41,12 @@ import 'observer_list.dart';
 ///    commonly used with [Animation] subclasses, wherein its name. It is a
 ///    subclass of [AnimatedWidget], which can be used to create widgets that
 ///    are driven from a [Listenable].
-///
 ///  * [ValueListenableBuilder], a widget that uses a builder callback to
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
-///
 ///  * [InheritedNotifier], an abstract superclass for widgets that use a
 ///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
 ///    that declare a dependency on them, using the [InheritedWidget] mechanism.
-///
 ///  * [new Listenable.merge], which creates a [Listenable] that triggers
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
@@ -198,6 +195,7 @@ class ChangeNotifier implements Listenable {
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
   @protected
+  @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
@@ -223,19 +221,23 @@ class ChangeNotifier implements Listenable {
   }
 }
 
-class _MergingListenable extends ChangeNotifier {
-  _MergingListenable(this._children) {
-    for (Listenable child in _children)
-      child?.addListener(notifyListeners);
-  }
+class _MergingListenable extends Listenable {
+  _MergingListenable(this._children);
 
   final List<Listenable> _children;
 
   @override
-  void dispose() {
-    for (Listenable child in _children)
-      child?.removeListener(notifyListeners);
-    super.dispose();
+  void addListener(VoidCallback listener) {
+    for (final Listenable child  in _children) {
+      child?.addListener(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    for (final Listenable child in _children) {
+      child?.removeListener(listener);
+    }
   }
 
   @override

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,5 +47,23 @@ void main() {
       expect(textTheme.subtitle, isTextFont);
       expect(textTheme.overline, isTextFont);
     }
+  });
+
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    Typography(
+      platform: TargetPlatform.android,
+      black: Typography.blackCupertino,
+      white: Typography.whiteCupertino,
+      englishLike: Typography.englishLike2018,
+      dense: Typography.dense2018,
+      tall: Typography.tall2018,
+    ).debugFillProperties(builder);
+
+    final List<String> nonDefaultPropertyNames = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.name).toList();
+
+    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 }

@@ -22,6 +22,8 @@ final ArgParser parser = ArgParser()
   ..addOption('build-dir', help: 'The fuchsia build directory')
   ..addOption('dart-sdk', help: 'The prebuilt dart SDK')
   ..addOption('target', help: 'The GN target to attach to')
+  ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
+  ..addOption('device', help: 'The device id to attach to')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -39,6 +41,7 @@ Future<void> main(List<String> args) async {
   final String buildDirectory = argResults['build-dir'];
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
+  final File devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
   final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
@@ -50,10 +53,11 @@ Future<void> main(List<String> args) async {
   fs.currentDirectory = path;
 
   // Check for a package with a lib directory.
-  String targetFile = 'lib/main.dart';
+  final String entrypoint = argResults['entrypoint'];
+  String targetFile = 'lib/$entrypoint';
   if (!fs.file(targetFile).existsSync()) {
     // Otherwise assume the package is flat.
-    targetFile = 'main.dart';
+    targetFile = entrypoint;
   }
   final List<String> command = <String>[
     'attach',
@@ -70,6 +74,10 @@ Future<void> main(List<String> args) async {
     '--packages',
     packages,
   ];
+  final String deviceName = argResults['device'];
+  if (deviceName != null && deviceName.isNotEmpty) {
+    command.addAll(<String>['-d', deviceName]);
+  }
   if (verbose) {
     command.add('--verbose');
   }
@@ -84,7 +92,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
         frontendServer: frontendServer,

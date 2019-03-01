@@ -20,12 +20,9 @@ class BuildFlxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
-
     printError("'build flx' is no longer supported. Instead, use 'build "
                "bundle' to build and assemble the application code and resources "
                'for your app.');
-
     return null;
   }
 }

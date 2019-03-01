@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../gallery/demo.dart';
@@ -34,9 +33,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   Widget _buildMenu(List<Widget> children) {
     return Container(
-      decoration: const BoxDecoration(
-        color: CupertinoColors.white,
-        border: Border(
+      decoration: BoxDecoration(
+        color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        border: const Border(
           top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
           bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
         ),
@@ -47,16 +46,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         child: SafeArea(
           top: false,
           bottom: false,
-          child: DefaultTextStyle(
-            style: const TextStyle(
-              letterSpacing: -0.24,
-              fontSize: 17.0,
-              color: CupertinoColors.black,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: children,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: children,
           ),
         ),
       ),
@@ -249,19 +241,23 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cupertino Picker'),
-        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoPickerDemo.routeName)],
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Picker'),
+        // We're specifying a back label here because the previous page is a
+        // Material page. CupertinoPageRoutes could auto-populate these back
+        // labels.
+        previousPageTitle: 'Cupertino',
+        trailing: CupertinoDemoDocumentationButton(CupertinoPickerDemo.routeName),
       ),
-      body: DefaultTextStyle(
-        style: const TextStyle(
-          fontFamily: '.SF UI Text',
-          fontSize: 17.0,
-          color: CupertinoColors.black,
-        ),
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: BoxDecoration(
+            color: CupertinoTheme.of(context).brightness == Brightness.light
+                ? CupertinoColors.extraLightBackgroundGray
+                : CupertinoColors.darkBackgroundGray,
+          ),
           child: ListView(
             children: <Widget>[
               const Padding(padding: EdgeInsets.only(top: 32.0)),

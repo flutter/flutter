@@ -474,7 +474,7 @@ final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
 ///   <name>: <description>:
 ///     <properties>
 ///     <children>
-///```
+/// ```
 ///
 /// See also:
 ///
@@ -502,7 +502,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///   * [DiagnosticsTreeStyle.singleLine]
+///  * [DiagnosticsTreeStyle.singleLine]
 final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
@@ -703,7 +703,7 @@ abstract class DiagnosticsNode {
   /// than `minLevel`.
   ///
   /// If `minLevel` is [DiagnosticLevel.hidden] no diagnostics will be filtered.
-  /// If `minLevel` is [DiagnosticsLevel.off] all diagnostics will be filtered.
+  /// If `minLevel` is [DiagnosticLevel.off] all diagnostics will be filtered.
   bool isFiltered(DiagnosticLevel minLevel) => level.index < minLevel.index;
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -854,8 +854,7 @@ abstract class DiagnosticsNode {
   ///
   /// See also:
   ///
-  ///  * [toString], for a brief description of the [value] but not its children.
-  ///  * [toStringShallow], for a detailed description of the [value] but not its
+  ///  * [toString], for a brief description of the [value] but not its
   ///    children.
   String toStringDeep({
     String prefixLineOne = '',
@@ -1527,7 +1526,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 /// See also:
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
-///    [DiagnosticsProperty]
+///    [DiagnosticsProperty].
 class EnumProperty<T> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
@@ -1558,7 +1557,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 /// The [ifPresent] and [ifNull] strings describe the property [value] when it
 /// is non-null and null respectively. If one of [ifPresent] or [ifNull] is
 /// omitted, that is taken to mean that [level] should be
-/// [DiagnosticsLevel.hidden] when [value] is non-null or null respectively.
+/// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
 ///
 /// This kind of diagnostics property is typically used for values mostly opaque
 /// values, like closures, where presenting the actual object is of dubious
@@ -1615,7 +1614,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   /// Description to use if the property [value] is not null.
   ///
   /// If the property [value] is not null and [ifPresent] is null, the
-  /// [level] for the property is [DiagnosticsLevel.hidden] and the description
+  /// [level] for the property is [DiagnosticLevel.hidden] and the description
   /// from superclass is used.
   final String ifPresent;
 
@@ -1754,7 +1753,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
        _valueComputed = false,
        _value = null,
        _computeValue = computeValue,
-        _defaultLevel = level,
+       _defaultLevel = level,
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
        super(
          name: name,
@@ -2102,17 +2101,17 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticableTree], which extends this class to also describe the
 ///    children of a tree structured object.
 ///  * [Diagnosticable.debugFillProperties], which lists best practices
-///    for specifying the properties of a [DiagnosticNode]. The most common use
+///    for specifying the properties of a [DiagnosticsNode]. The most common use
 ///    case is to override [debugFillProperties] defining custom properties for
-///    a subclass of [TreeDiagnosticsMixin] using the existing
+///    a subclass of [DiagnosticableTreeMixin] using the existing
 ///    [DiagnosticsProperty] subclasses.
 ///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
-///    for describing the children of a [DiagnosticNode]. Typically the base
+///    for describing the children of a [DiagnosticsNode]. Typically the base
 ///    class already describes the children of a node properly or a node has
 ///    no children.
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
-///    nodes without properties or children. There are many [DiagnosticProperty]
-///    subclasses to handle common use cases.
+///    nodes without properties or children. There are many
+///    [DiagnosticsProperty] subclasses to handle common use cases.
 abstract class Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -2132,7 +2131,7 @@ abstract class Diagnosticable {
   }
 
   /// Returns a debug representation of the object that is used by debugging
-  /// tools and by [toStringDeep].
+  /// tools and by [DiagnosticsNode.toStringDeep].
   ///
   /// Leave [name] as null if there is not a meaningful description of the
   /// relationship between the this node and its parent.
@@ -2381,7 +2380,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///
   /// `joiner` specifies the string which is place between each part obtained
   /// from [debugFillProperties]. Passing a string such as `'\n '` will result
-  /// in a multiline string that indents the properties of the object below its
+  /// in a multi-line string that indents the properties of the object below its
   /// name (as per [toString]).
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
@@ -2455,12 +2454,12 @@ abstract class DiagnosticableTree extends Diagnosticable {
   /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
   /// provide.
   ///
+  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
+  ///
   /// See also:
   ///
   ///  * [RenderTable.debugDescribeChildren], which provides high quality custom
   ///    descriptions for its child nodes.
-  ///
-  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
   @protected
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 }

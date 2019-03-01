@@ -11,6 +11,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
+import 'test_data/tests_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
@@ -21,7 +22,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync();
+      tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
@@ -31,16 +32,18 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<Isolate> breakInBuildMethod(FlutterTestDriver flutter) async {
-      return _flutter.breakAt(
-          _project.buildMethodBreakpointUri,
-          _project.buildMethodBreakpointLine);
+    Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
+      await _flutter.breakAt(
+        _project.buildMethodBreakpointUri,
+        _project.buildMethodBreakpointLine,
+      );
     }
 
-    Future<Isolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-      return _flutter.breakAt(
-          _project.topLevelFunctionBreakpointUri,
-          _project.topLevelFunctionBreakpointLine);
+    Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+      await _flutter.breakAt(
+        _project.topLevelFunctionBreakpointUri,
+        _project.topLevelFunctionBreakpointLine,
+      );
     }
 
     test('can evaluate trivial expressions in top level function', () async {
@@ -78,7 +81,52 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+
+  group('flutter test expression evaluation', () {
+    Directory tempDir;
+    final TestsProject _project = TestsProject();
+    FlutterTestTestDriver _flutter;
+
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
+      await _project.setUpIn(tempDir);
+      _flutter = FlutterTestTestDriver(tempDir);
+    });
+
+    tearDown(() async {
+      await _flutter.quit();
+      tryToDelete(tempDir);
+    });
+
+    test('can evaluate trivial expressions in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
+      await _flutter.waitForPause();
+      await evaluateTrivialExpressions(_flutter);
+    });
+
+    test('can evaluate complex expressions in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
+      await _flutter.waitForPause();
+      await evaluateComplexExpressions(_flutter);
+    });
+
+    test('can evaluate expressions returning complex objects in a test', () async {
+      await _flutter.test(
+        withDebugger: true,
+        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+      );
+      await _flutter.waitForPause();
+      await evaluateComplexReturningExpressions(_flutter);
+    });
+    // Skipped due to https://github.com/flutter/flutter/issues/26518
+  }, timeout: const Timeout.factor(10), skip: true); // The DevFS sync takes a really long time, so these tests can be slow.
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -178,27 +179,6 @@ void main() {
       await commands.close();
     });
 
-    testUsingContext('daemon should send showMessage on startup if no Android devices are available', () async {
-      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
-      daemon = Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger,
-      );
-
-      final Map<String, dynamic> response =
-        await responses.stream.skipWhile(_isConnectedEvent).first;
-      expect(response['event'], 'daemon.showMessage');
-      expect(response['params'], isMap);
-      expect(response['params'], containsPair('level', 'warning'));
-      expect(response['params'], containsPair('title', 'Unable to list devices'));
-      expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
-    }, overrides: <Type, Generator>{
-      AndroidWorkflow: () => MockAndroidWorkflow(canListDevices: false),
-      IOSWorkflow: () => MockIOSWorkflow(),
-    });
-
     testUsingContext('device.getDevices should respond with list', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
@@ -211,6 +191,27 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isList);
+      await responses.close();
+      await commands.close();
+    });
+
+    testUsingContext('device.getDevices reports avaiable devices', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(MockAndroidDevice());
+      commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      final dynamic result = response['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
       await responses.close();
       await commands.close();
     });
@@ -241,6 +242,7 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => MockAndroidWorkflow(),
       IOSWorkflow: () => MockIOSWorkflow(),
+      FuchsiaWorkflow: () => MockFuchsiaWorkflow(),
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
@@ -302,6 +304,13 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+
+class MockFuchsiaWorkflow extends FuchsiaWorkflow {
+  MockFuchsiaWorkflow({ this.canListDevices = true });
+
+  @override
+  final bool canListDevices;
+}
 
 class MockAndroidWorkflow extends AndroidWorkflow {
   MockAndroidWorkflow({ this.canListDevices = true });
