@@ -114,6 +114,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   AnimationController get controller => _controller;
   AnimationController _controller;
 
+  /// The animation for the route being pushed on top of this route. This
+  /// animation lets this route coordinate with the entrance and exit transition
+  /// of routes pushed on top of this route.
+  Animation<double> get secondaryAnimation => _secondaryAnimation;
+  final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
+
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
@@ -163,12 +169,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
     changedInternalState();
   }
-
-  /// The animation for the route being pushed on top of this route. This
-  /// animation lets this route coordinate with the entrance and exit transition
-  /// of routes pushed on top of this route.
-  Animation<double> get secondaryAnimation => _secondaryAnimation;
-  final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
   @override
   void install(OverlayEntry insertionPoint) {

@@ -499,33 +499,28 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.pump();
-    debugDumpApp();
+    await tester.pumpAndSettle();
 
     expect(find.text('1'), findsNothing);
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0, epsilon: 1));
 
-    await tester.pump(const Duration(milliseconds: 50));
+    final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
 
-    await tester.pump(const Duration(milliseconds: 50));
-    // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(141, epsilon: 1));
-
-    // Finish the rest of the animation
-    await tester.pump(const Duration(milliseconds: 250));
-
-    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await swipeGesture.moveBy(const Offset(100, 0));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(262, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-233, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100, epsilon: 1));
 
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(499, epsilon: 1));
+    await swipeGesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-200, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(200, epsilon: 1));
 
-    await tester.pump(const Duration(milliseconds: 50));
-    // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('x')).dx, moreOrLessEquals(659, epsilon: 1));
+    // Moving by the same distance each time produces linear movements on both
+    // routes.
+    await swipeGesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300, epsilon: 1));
   });
 }
