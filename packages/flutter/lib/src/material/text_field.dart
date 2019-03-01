@@ -495,7 +495,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
         enabled: widget.enabled,
-        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
+        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
       );
 
     // No need to build anything if counter or counterText were given directly.

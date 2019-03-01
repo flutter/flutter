@@ -365,7 +365,7 @@ void _defineTests() {
               rect: TestSemantics.fullScreen,
               actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
             ),
-          ]
+          ],
         ),
       ],
     );
@@ -440,7 +440,7 @@ void _defineTests() {
                 rect: TestSemantics.fullScreen,
                 flags: flags,
               ),
-            ]
+            ],
         ),
       ],
     );
@@ -487,7 +487,7 @@ void _defineTests() {
                 rect: TestSemantics.fullScreen,
                 flags: flags,
               ),
-            ]
+            ],
         ),
       ],
     );
@@ -753,7 +753,7 @@ class _DiffTester {
         if (node.key != null && idAssignments[node.key] != null) {
           expect(idAssignments[node.key], node.id, reason:
             'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
-            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.'
+            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
           );
         }
         return true;

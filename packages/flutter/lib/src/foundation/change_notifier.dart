@@ -213,7 +213,7 @@ class ChangeNotifier implements Listenable {
             informationCollector: (StringBuffer information) {
               information.writeln('The $runtimeType sending notification was:');
               information.write('  $this');
-            }
+            },
           ));
         }
       }

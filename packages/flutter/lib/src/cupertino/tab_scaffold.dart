@@ -255,7 +255,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
             // Chain the user's original callback.
             if (widget.tabBar.onTap != null)
               widget.tabBar.onTap(newIndex);
-          }
+          },
         ),
       ));
     }

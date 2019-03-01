@@ -195,7 +195,7 @@ void main() {
         when(mockXcode.minorVersion).thenReturn(1);
         expect(deviceUnderTest.supportsScreenshot, false);
       },
-      overrides: <Type, Generator>{Xcode: () => mockXcode}
+      overrides: <Type, Generator>{Xcode: () => mockXcode},
     );
 
     testUsingContext(
@@ -217,7 +217,7 @@ void main() {
               fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
-          workingDirectory: null
+          workingDirectory: null,
         ));
       },
       overrides: <Type, Generator>{
@@ -225,7 +225,7 @@ void main() {
         // Test a real one. Screenshot doesn't require instance states.
         SimControl: () => SimControl(),
         Xcode: () => mockXcode,
-      }
+      },
     );
   });
 

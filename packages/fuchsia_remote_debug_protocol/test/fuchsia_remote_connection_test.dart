@@ -70,7 +70,7 @@ void main() {
                 'name': 'file://flutterBinary1',
                 'number': '1',
               },
-            }
+            },
           ],
         },
         <String, dynamic>{
@@ -85,7 +85,7 @@ void main() {
                 'name': 'file://flutterBinary2',
                 'number': '2',
               },
-            }
+            },
           ],
         },
       ];

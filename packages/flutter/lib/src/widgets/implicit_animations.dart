@@ -218,7 +218,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   const ImplicitlyAnimatedWidget({
     Key key,
     this.curve = Curves.linear,
-    @required this.duration
+    @required this.duration,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -779,7 +779,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.child,
     Rect rect,
     Curve curve = Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -1116,7 +1116,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child
+      child: widget.child,
     );
   }
 }

@@ -160,7 +160,7 @@ Future<void> checkFlingItemBeforeMovementEnd(
   WidgetTester tester,
   int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism = rollbackElement
+  DismissMethod mechanism = rollbackElement,
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
@@ -176,7 +176,7 @@ Future<void> checkFlingItemAfterMovement(
   WidgetTester tester,
   int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism = rollbackElement
+  DismissMethod mechanism = rollbackElement,
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());

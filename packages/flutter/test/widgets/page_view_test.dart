@@ -172,7 +172,7 @@ void main() {
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
-        )
+        ),
       ),
     ));
 
@@ -690,7 +690,7 @@ void main() {
               child: Text('Page #$i'),
               container: true,
             );
-          })
+          }),
         ),
     ));
     expect(controller.page, 0);

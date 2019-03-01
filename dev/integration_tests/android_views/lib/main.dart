@@ -109,9 +109,9 @@ class PlatformViewState extends State<PlatformViewPage> {
               key: const ValueKey<String>('play'),
               child: const Text('PLAY FILE'),
               onPressed: () { playEventsFile(); },
-            )
+            ),
           ],
-        )
+        ),
       ],
     );
   }

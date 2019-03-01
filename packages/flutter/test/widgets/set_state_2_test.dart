@@ -32,7 +32,7 @@ void main() {
                   log.add('middle $value');
                   return inner;
                 }
-              )
+              ),
             );
           }
         );

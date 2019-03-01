@@ -108,7 +108,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
-      entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
+      entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent);
@@ -230,7 +230,7 @@ class _TapGesture extends _TapTracker {
   _TapGesture({
     this.gestureRecognizer,
     PointerEvent event,
-    Duration longTapDelay
+    Duration longTapDelay,
   }) : _lastPosition = event.position,
        super(
     event: event,
@@ -350,7 +350,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     _gestureMap[event.pointer] = _TapGesture(
       gestureRecognizer: this,
       event: event,
-      longTapDelay: longTapDelay
+      longTapDelay: longTapDelay,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () => onTapDown(event.pointer, TapDownDetails(globalPosition: event.position)));

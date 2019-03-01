@@ -116,7 +116,7 @@ class FruitPage extends StatelessWidget {
                         Text(
                           ' ¬ ',
                           // TODO(larche): Replace textTheme.display3.color with a ColorScheme value when known.
-                          style: textTheme.overline.apply(color: textTheme.display3.color)
+                          style: textTheme.overline.apply(color: textTheme.display3.color),
                         ),
                         Text(
                           'CULTURE',
@@ -160,7 +160,7 @@ class FruitPage extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -170,7 +170,7 @@ class FruitPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -109,7 +109,7 @@ void main() {
           label: 'child1',
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.isSelected.index,
-        )
+        ),
       ],
     )));
 

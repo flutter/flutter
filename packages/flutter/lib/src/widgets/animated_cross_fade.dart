@@ -219,7 +219,7 @@ class AnimatedCrossFade extends StatefulWidget {
         Positioned(
           key: topChildKey,
           child: topChild,
-        )
+        ),
       ],
     );
   }

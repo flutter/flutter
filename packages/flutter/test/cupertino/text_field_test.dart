@@ -186,7 +186,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
@@ -217,7 +217,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
         findsNothing,
       );
@@ -1008,7 +1008,7 @@ void main() {
 
     await tester.enterText(
       find.widgetWithText(CupertinoTextField, 'field 1'),
-      "j'aime la poutine"
+      "j'aime la poutine",
     );
     await tester.pump();
 
@@ -1632,7 +1632,7 @@ void main() {
         position: textfieldStart + const Offset(150.0, 5.0),
         pressure: 3.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     // We expect the force press to select a word at the given location.
@@ -1705,7 +1705,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 

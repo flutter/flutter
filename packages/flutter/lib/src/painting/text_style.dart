@@ -990,7 +990,7 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
-      shadows
+      shadows,
     );
   }
 

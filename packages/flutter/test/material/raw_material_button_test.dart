@@ -200,7 +200,7 @@ void main() {
               key: key,
               onPressed: () {},
               child: const SizedBox(),
-            )
+            ),
           ],
         ),
       ),

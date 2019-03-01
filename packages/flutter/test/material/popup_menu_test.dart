@@ -32,7 +32,7 @@ void main() {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,
-                        child: Text('One')
+                        child: Text('One'),
                       ),
                     ];
                   },
@@ -138,7 +138,7 @@ void main() {
                   return <PopupMenuItem<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: Text('One')
+                      child: Text('One'),
                     ),
                   ];
                 },
@@ -420,7 +420,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     ));
 
     await tester.tap(find.text('XXX'));
@@ -457,7 +457,7 @@ void main() {
             child: Material(
               child: popupMenuButton,
             ),
-          )
+          ),
         ),
       ),
     );

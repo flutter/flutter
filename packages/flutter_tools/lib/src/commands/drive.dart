@@ -295,7 +295,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
         '--packages=${PackageMap.globalPackagesPath}',
         '-rexpanded',
       ]),
-    environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
+    environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri },
   );
   if (result != 0)
     throwToolExit('Driver tests failed: $result', exitCode: result);

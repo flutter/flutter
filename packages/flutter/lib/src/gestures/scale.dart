@@ -158,7 +158,7 @@ class _LineBetweenPointers{
     this.pointerStartLocation = Offset.zero,
     this.pointerStartId = 0,
     this.pointerEndLocation = Offset.zero,
-    this.pointerEndId = 1
+    this.pointerEndId = 1,
   }) : assert(pointerStartLocation != null && pointerEndLocation != null),
        assert(pointerStartId != null && pointerEndId != null),
        assert(pointerStartId != pointerEndId);
@@ -327,7 +327,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
-        pointerEndLocation: _pointerLocations[_pointerQueue[1]]
+        pointerEndLocation: _pointerLocations[_pointerQueue[1]],
       );
     } else {
       /// A new rotation process is on the way, set the [_initialLine]
@@ -335,7 +335,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
-        pointerEndLocation: _pointerLocations[_pointerQueue[1]]
+        pointerEndLocation: _pointerLocations[_pointerQueue[1]],
       );
       _currentLine = null;
     }

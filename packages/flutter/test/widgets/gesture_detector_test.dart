@@ -378,7 +378,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
 
@@ -452,7 +452,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: maxPressure,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
 
@@ -504,7 +504,7 @@ void main() {
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
 
