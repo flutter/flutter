@@ -128,7 +128,8 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
          SetLocales(window_data_.locale_data) &&
          SetSemanticsEnabled(window_data_.semantics_enabled) &&
          SetAccessibilityFeatures(window_data_.accessibility_feature_flags_) &&
-         SetUserSettingsData(window_data_.user_settings_data);
+         SetUserSettingsData(window_data_.user_settings_data) &&
+         SetLifecycleState(window_data_.lifecycle_state);
 }
 
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
@@ -158,6 +159,17 @@ bool RuntimeController::SetUserSettingsData(const std::string& data) {
 
   if (auto* window = GetWindowIfAvailable()) {
     window->UpdateUserSettingsData(window_data_.user_settings_data);
+    return true;
+  }
+
+  return false;
+}
+
+bool RuntimeController::SetLifecycleState(const std::string& data) {
+  window_data_.lifecycle_state = data;
+
+  if (auto* window = GetWindowIfAvailable()) {
+    window->UpdateLifecycleState(window_data_.lifecycle_state);
     return true;
   }
 
