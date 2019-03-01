@@ -351,7 +351,7 @@ class RenderUiKitView extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (!(event is PointerDownEvent)) {
+    if (event is! PointerDownEvent) {
       return;
     }
     _gestureRecognizer.addPointer(event);
@@ -360,7 +360,7 @@ class RenderUiKitView extends RenderBox {
 
   // This is registered as a global PointerRoute while the render object is attached.
   void _handleGlobalPointerEvent(PointerEvent event) {
-    if (!(event is PointerDownEvent)) {
+    if (event is! PointerDownEvent) {
       return;
     }
     final Offset localOffset = globalToLocal(event.position);
