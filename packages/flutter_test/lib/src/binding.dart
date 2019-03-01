@@ -1058,8 +1058,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool _inTest = false;
 
   @override
-  void noSuchMethod(Invocation invocation) {
-    throw 'LiveTestWidgetsFlutterBinding - $invocation';
+  void addTime(Duration duration) {
+    // noop
+    // addTime is only implmented in [AutomatedTestWidgetsFlutterBinding]
   }
 
   @override

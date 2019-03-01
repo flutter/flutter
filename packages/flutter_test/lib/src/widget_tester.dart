@@ -62,7 +62,6 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   tester.binding.addTime(const Duration(seconds: 3));
 ///   await tester.pumpWidget(new MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
@@ -261,16 +260,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
-  }
-
-  /// See [AutomatedTestWidgetsFlutterBinding.addTime]
-  ///
-  /// This is the shorthand for
-  /// ```dart
-  ///     tester.binding.addTime(const Duration(seconds: ));
-  /// ```
-  void addTime(Duration duration) {
-    binding.addTime(duration);
   }
 
   /// Triggers a frame after `duration` amount of time.
