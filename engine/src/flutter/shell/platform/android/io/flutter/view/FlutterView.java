@@ -570,7 +570,11 @@ public class FlutterView extends SurfaceView
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if (!event.isFromSource(InputDevice.SOURCE_CLASS_POINTER) ||
+        // Method isFromSource is only available in API 18+ (Jelly Bean MR2)
+        // Mouse hover support is not implemented for API < 18.
+        boolean isPointerEvent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+            && event.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
+        if (!isPointerEvent ||
             event.getActionMasked() != MotionEvent.ACTION_HOVER_MOVE ||
             !isAttached()) {
             return super.onGenericMotionEvent(event);
