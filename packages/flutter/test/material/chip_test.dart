@@ -1650,7 +1650,8 @@ void main() {
     ]));
   });
 
-  testWidgets('Chips should use InkWell instead of InkResponse. #28646', (WidgetTester tester) async {
+  testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28646
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1661,7 +1662,6 @@ void main() {
         ),
       ),
     );
-    final Finder inkFinder = find.byType(InkWell);
-    expect(inkFinder, findsOneWidget);
+    expect(find.byType(InkWell), findsOneWidget);
   });
 }
