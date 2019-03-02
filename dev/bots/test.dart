@@ -145,6 +145,7 @@ Future<void> _runToolTests() async {
 
   await _buildRunnerTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
+    flutterRoot,
     enableFlutterToolAsserts: true,
   );
 
@@ -307,8 +308,9 @@ Future<void> _runCoverage() async {
 }
 
 Future<void> _buildRunnerTest(
-  String workingDirectory, {
-    String testPath,
+  String workingDirectory,
+  String flutterRoot, {
+   String testPath,
    bool enableFlutterToolAsserts = false,
   }
 ) {
@@ -319,7 +321,9 @@ Future<void> _buildRunnerTest(
   if (testPath != null) {
     args.add(testPath);
   }
-  final Map<String, String> pubEnvironment = <String, String>{};
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
