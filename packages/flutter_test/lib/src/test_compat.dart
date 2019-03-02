@@ -231,7 +231,7 @@ void test(
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
-@isTest
+@isTestGroup
 void group(Object description, Function body) {
   _declarer.group(description.toString(), body);
 }
