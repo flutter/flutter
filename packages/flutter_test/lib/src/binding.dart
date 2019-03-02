@@ -126,11 +126,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   bool get disableShadows => false;
 
   /// Increase the timeout for the current test by the given duration.
-  ///
-  /// See also:
-  ///
-  ///  * [AutomatedTestWidgetsFlutterBinding.addTime]
-  void addTime(Duration duration);
+  void addTime(Duration duration)
+    // noop
+    // [addTime] is only implmented in [AutomatedTestWidgetsFlutterBinding]
+    // other class inherited from [TestWidgetsFlutterBinding] is unlikely
+    // to overrride this method
+  }
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -1054,12 +1055,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
-
-  @override
-  void addTime(Duration duration) {
-    // noop
-    // addTime is only implmented in [AutomatedTestWidgetsFlutterBinding]
-  }
 
   @override
   Clock get clock => const Clock();
