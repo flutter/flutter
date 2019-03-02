@@ -24,15 +24,6 @@ if [[ -n "${GEM_HOME}" ]]
     PATH="${GEM_HOME}/bin:$PATH"
 fi
 
-# Jazzy 0.8.x, used on chrome infra, expects --no-download-badge
-# Jazzy 0.9.x, used on LUCI, doesn't support that flag.
-noDownloadBadge=""
-if [[ -z "$LUCI_CONTEXT" ]]
-  then
-    noDownloadBadge="--no-download-badge"
-fi
-
-
 # Use iPhoneSimulator SDK
 # See: https://github.com/realm/jazzy/issues/791
 jazzy \
@@ -47,5 +38,4 @@ jazzy \
   --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,"$(xcrun --show-sdk-path --sdk iphonesimulator)",-I,"$(pwd)"\
   --module Flutter\
   --root-url https://docs.flutter.io/objc/\
-  --output "$1"\
-  $noDownloadBadge
+  --output "$1"
