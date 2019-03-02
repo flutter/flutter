@@ -80,12 +80,20 @@ class ContinuousStadiumBorder extends ShapeBorder {
   Path _getPath(Rect rect) {
     // The two 180º arcs will always be positioned on the shorter side of the
     // rectangle like with the traditional stadium border shape.
+    final double sideWidth = side.width;
 
     // We need to change the dimensions of the rect in the event that the
     // shape has a side width as the stroke is drawn centered on the border of
     // the shape instead of inside as with the rounded rect and stadium.
-    if (side.width > 0.0)
-      rect = rect.deflate(side.width / 2.0);
+    if (sideWidth > 0.0) {
+      final double halfWidth = side.width / 2.0;
+      if (sideWidth * 2.0 < math.min(rect.width, rect.height))
+        rect = rect.deflate(halfWidth);
+      else if (rect.width > rect.height)
+        rect = Rect.fromLTRB(rect.left, rect.top + halfWidth, rect.right, rect.bottom - halfWidth);
+      else
+        rect = Rect.fromLTRB(rect.left + halfWidth, rect.top, rect.right - halfWidth, rect.bottom);
+    }
 
     // The ratio of the declared corner radius to the total affected pixels
     // along each axis to render the corner. For example if the declared radius
@@ -117,8 +125,10 @@ class ContinuousStadiumBorder extends ShapeBorder {
     final double rectWidth = rect.width;
     final double rectHeight = rect.height;
     final bool widthLessThanHeight = rectWidth < rectHeight;
-    final double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxEdgeLengthAspectRatio * rectHeight) : rectWidth;
-    final double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxEdgeLengthAspectRatio * rectWidth);
+    double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxEdgeLengthAspectRatio * rectHeight) : rectWidth;
+    double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxEdgeLengthAspectRatio * rectWidth);
+
+
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
     final double originX = centerX - width / 2.0;
@@ -195,7 +205,6 @@ class ContinuousStadiumBorder extends ShapeBorder {
         ..cubicTo(leftX(1.29884040), topY(0.0),
             leftX(1.63527822), topY(0.0),
             leftX(2.30815363), topY(0.0))
-        ..lineTo(originX + 1.52866483 * radius, originY)
         ..lineTo(leftX(2.00593972), topY(0.0))
         ..close();
     }

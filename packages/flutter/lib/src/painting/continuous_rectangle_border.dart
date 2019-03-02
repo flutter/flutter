@@ -75,12 +75,10 @@ import 'edge_insets.dart';
 class ContinuousRectangleBorder extends ShapeBorder {
   /// Creates a continuous cornered rectangle border.
   ///
-  /// The [side] and [cornerRadius] arguments must not be null.
+  /// The [cornerRadius] argument must not be null.
   const ContinuousRectangleBorder({
-    this.side = BorderSide.none,
     this.cornerRadius = 0.0,
-  }) : assert(side != null),
-       assert(cornerRadius != null);
+  }) : assert(cornerRadius != null);
 
   /// The radius for each corner.
   ///
@@ -91,31 +89,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// to describe the radius for every corner.
   final double cornerRadius;
 
-  /// The style of this border.
-  ///
-  /// If the border side width is larger than 1/10 the length of the smallest
-  /// dimension, the interior shape's corners will no longer resemble those of
-  /// the exterior shape. If concentric corners are desired for a stroke width
-  /// greater than 1/10 the length of the smallest dimension, it is recommended
-  /// to use a [Stack] widget, placing a smaller [ContinuousRectangleBorder] with
-  /// the same 'cornerRadius' on top of a larger one.
-  ///
-  /// By default this value is [BorderSide.none]. It must not be null.
-  final BorderSide side;
-
   Path _getPath(Rect rect) {
-    // We need to change the dimensions of the rect in the event that the
-    // shape has a side width as the stroke is drawn centered on the border of
-    // the shape instead of inside as with the rounded rect and stadium.
-    if (side.width > 0.0)
-      rect = rect.deflate(side.width / 2.0);
-
     double limitedRadius;
     final double width = rect.width;
     final double height = rect.height;
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
     final double radius = math.max(0.0, cornerRadius);
+    final double minSideLength = math.min(rect.width, rect.height);
 
     // These equations give the x and y values for each of the 8 mid and corner
     // points on a rectangle.
@@ -232,8 +213,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // This value was determined by an eyeball approximation.
     const double minRadiusEdgeLength = 200.0;
 
-    final double minSideLength = math.min(rect.width, rect.height);
-
     // As the minimum side edge length (where the round is occurring)
     // approaches 0, the limitedRadius approaches 2 so as to maximize
     // roundness (to make the shape with the largest radius that doesn't clip).
@@ -241,34 +220,17 @@ class ContinuousRectangleBorder extends ShapeBorder {
     // multiplier of the radius value where the resulting shape is concave (ie.
     // does not visually clip) at any dimension.
     final double multiplier = ui.lerpDouble(
-        minimalEdgeLengthSideToCornerRadiusRatio,
-        minimalUnclippedSideToCornerRadiusRatio,
-        minSideLength / minRadiusEdgeLength
+      minimalEdgeLengthSideToCornerRadiusRatio,
+      minimalUnclippedSideToCornerRadiusRatio,
+      minSideLength / minRadiusEdgeLength,
     );
     limitedRadius = math.min(radius, minSideLength / multiplier);
     return bezierRoundedRect();
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
-    if (rect.isEmpty)
-      return;
-    switch (side.style) {
-      case BorderStyle.none:
-        break;
-      case BorderStyle.solid:
-        final double width = side.width;
-        if (width != 0.0){
-          final Paint paint = side.toPaint();
-          paint.strokeJoin = StrokeJoin.round;
-          canvas.drawPath(getOuterPath(rect), paint);
-        }
-    }
-  }
-
-  @override
   Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return _getPath(rect.deflate(side.width));
+    return _getPath(rect);
   }
 
   @override
@@ -277,12 +239,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
+  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {}
+
+  @override
+  EdgeInsetsGeometry get dimensions => const EdgeInsets.all(0.0);
 
   @override
   ShapeBorder scale(double t) {
     return ContinuousRectangleBorder(
-      side: side.scale(t),
       cornerRadius: cornerRadius * t,
     );
   }
@@ -292,7 +256,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
     assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
-        side: BorderSide.lerp(a.side, side, t),
         cornerRadius: ui.lerpDouble(a.cornerRadius, cornerRadius, t),
       );
     }
@@ -304,7 +267,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
     assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
-        side: BorderSide.lerp(side, b.side, t),
         cornerRadius: ui.lerpDouble(cornerRadius, b.cornerRadius, t),
       );
     }
@@ -316,14 +278,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final ContinuousRectangleBorder typedOther = other;
-    return side == typedOther.side && cornerRadius == typedOther.cornerRadius;
+    return cornerRadius == typedOther.cornerRadius;
   }
 
   @override
-  int get hashCode => hashValues(side, cornerRadius);
+  int get hashCode => cornerRadius.hashCode;
 
   @override
   String toString() {
-    return '$runtimeType($side, $cornerRadius)';
+    return '$runtimeType($cornerRadius)';
   }
 }
