@@ -55,11 +55,12 @@ class _CountdownZoned {
 /// larger gesture.
 class _TapTracker {
   _TapTracker({
-    PointerDownEvent event,
+    @required PointerDownEvent event,
     this.entry,
     @required Duration doubleTapMinTime,
   })
     : assert(doubleTapMinTime != null),
+      assert(event != null),
       pointer = event.pointer,
       _initialPosition = event.position,
       _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
@@ -137,12 +138,11 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerEvent event) {
     if (_firstTap != null) {
-      // Ignore out-of-bounds second taps.
       if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
+        // Ignore out-of-bounds second taps.
         return;
-      }
-      // Restart when the second tap is too close to the first
-      else if (!_firstTap.hasElapsedMinTime()) {
+      } else if (!_firstTap.hasElapsedMinTime()) {
+        // Restart when the second tap is too close to the first
         _reset();
         return addAllowedPointer(event);
       }
