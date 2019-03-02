@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -252,5 +253,66 @@ void main() {
     // fit in the back button).
     expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Back')).dx, 8.0 + 34.0 + 6.0);
+  });
+
+  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          key: scaffoldKey,
+          body: Center(
+            child: RaisedButton(
+              onPressed: () {
+                Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const Scaffold(
+                      body: Center(child: Text('route')),
+                    );
+                  },
+                ));
+              },
+              child: const Text('push'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Check the basic iOS back-swipe dismiss transition. Dragging the pushed
+    // route halfway across the screen will trigger the iOS dismiss animation
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('route'), findsNothing);
+
+
+    // Run the dismiss animation 75%, which exposes the route "push" button,
+    // and then press the button. MaterialPageTransition duration is 300ms,
+    // 275 = 300 * 0.75.
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 275)); // partially dismiss "route"
+    expect(find.text('route'), findsOneWidget);
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
   });
 }

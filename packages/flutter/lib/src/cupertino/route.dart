@@ -274,6 +274,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     backController = _CupertinoBackGestureController<T>(
       navigator: route.navigator,
       controller: route.controller,
+      route: route,
       onEnded: () {
         backController?.dispose();
         backController = null;
@@ -579,6 +580,7 @@ class _CupertinoBackGestureController<T> {
     @required this.navigator,
     @required this.controller,
     @required this.onEnded,
+    @required this.route,
   }) : assert(navigator != null),
        assert(controller != null),
        assert(onEnded != null) {
@@ -593,6 +595,8 @@ class _CupertinoBackGestureController<T> {
   final AnimationController controller;
 
   final VoidCallback onEnded;
+
+  final PageRoute<dynamic> route;
 
   bool _animating = false;
 
@@ -652,7 +656,7 @@ class _CupertinoBackGestureController<T> {
     }
     _animating = false;
     if (status == AnimationStatus.dismissed)
-      navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
+      navigator.removeRoute(route); // this will cause the route to get disposed, which will dispose us
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 
