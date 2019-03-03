@@ -18,7 +18,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      driver?.close();
+      await driver?.close();
     });
 
     test('Ensure keyboard dismissal resizes the view to original size', () async {
