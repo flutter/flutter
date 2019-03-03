@@ -1327,18 +1327,18 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      final RoundedRectangleBorder border = shapeClipper.shape;
-      if (border.borderRadius != borderRadius)
-        return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
-      return true;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
+    if (border.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
+    return true;
   }
 
   bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != CircleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      return true;
+    if (shapeClipper.shape.runtimeType != CircleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    return true;
   }
 
   @override

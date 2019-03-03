@@ -1984,7 +1984,8 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
     return _cachedBuilder;
   }
 
-  @override DiagnosticsTreeStyle get style {
+  @override
+  DiagnosticsTreeStyle get style {
     return super.style ?? _builder.defaultDiagnosticsTreeStyle;
   }
 

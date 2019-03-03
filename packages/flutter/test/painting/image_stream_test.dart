@@ -103,7 +103,7 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
-   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
+  testWidgets('getNextFrame future fails', (WidgetTester tester) async {
      final MockCodec mockCodec = MockCodec();
      mockCodec.frameCount = 1;
      final Completer<Codec> codecCompleter = Completer<Codec>();

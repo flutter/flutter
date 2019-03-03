@@ -362,7 +362,7 @@ void main() {
     });
   });
 
-   group('Labeled tappable node guideline', () {
+  group('Labeled tappable node guideline', () {
     testWidgets('Passes when node is labeled', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
