@@ -66,10 +66,21 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
+  ///
+  /// There are two different semantic label for the class.
+  /// [placeholderSemanticLabel] is used for defining a semantics label for
+  /// [placeholder]. [imageSemanticLabel] is used for defining a semantics label
+  /// for [image]
+  ///
+  /// If [excludeFromSemantics] is true, then [placeholderSemanticLabel] and
+  /// [imageSemanticLabel] will be ignored.
   const FadeInImage({
     Key key,
     @required this.placeholder,
     @required this.image,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -118,6 +129,9 @@ class FadeInImage extends StatefulWidget {
     @required String image,
     double placeholderScale = 1.0,
     double imageScale = 1.0,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -174,6 +188,9 @@ class FadeInImage extends StatefulWidget {
     AssetBundle bundle,
     double placeholderScale,
     double imageScale = 1.0,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -283,6 +300,24 @@ class FadeInImage extends StatefulWidget {
   /// If this is true, there must be an ambient [Directionality] widget in
   /// scope.
   final bool matchTextDirection;
+
+  /// Whether to exclude this image from semantics.
+  ///
+  /// Useful for images which do not contribute meaningful information to an
+  /// application.
+  final bool excludeFromSemantics;
+
+  /// A Semantic description of the [placeholder].
+  ///
+  /// Used to provide a description of the [placeholder] to TalkBack on Android, and
+  /// VoiceOver on iOS.
+  final String placeholderSemanticLabel;
+
+  /// A Semantic description of the [image].
+  ///
+  /// Used to provide a description of the [image] to TalkBack on Android, and
+  /// VoiceOver on iOS.
+  final String imageSemanticLabel;
 
   @override
   State<StatefulWidget> createState() => _FadeInImageState();
@@ -456,7 +491,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           }
           break;
         case FadeInImagePhase.completed:
-          // Nothing to do.
+        // Nothing to do.
           break;
       }
     });
@@ -487,15 +522,21 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   ImageInfo get _imageInfo {
     return _isShowingPlaceholder
-      ? _placeholderResolver._imageInfo
-      : _imageResolver._imageInfo;
+        ? _placeholderResolver._imageInfo
+        : _imageResolver._imageInfo;
+  }
+
+  String get _semanticLabel {
+    return _isShowingPlaceholder
+        ? widget.placeholderSemanticLabel
+        : widget.imageSemanticLabel;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(_phase != FadeInImagePhase.start);
     final ImageInfo imageInfo = _imageInfo;
-    return RawImage(
+    final RawImage image = RawImage(
       image: imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -506,6 +547,15 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
+    );
+
+    if (widget.excludeFromSemantics)
+      return image;
+    return Semantics(
+      container: _semanticLabel != null,
+      image: true,
+      label: _semanticLabel == null ? '' : _semanticLabel,
+      child: image,
     );
   }
 
