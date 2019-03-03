@@ -553,8 +553,12 @@ abstract class WidgetController {
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
   /// down gesture.
-  Future<TestGesture> startGesture(Offset downLocation, {int pointer}) async {
-    final TestGesture result = await createGesture(pointer: pointer);
+  Future<TestGesture> startGesture(
+    Offset downLocation, {
+    int pointer,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) async {
+    final TestGesture result = await createGesture(pointer: pointer, kind: kind);
     await result.down(downLocation);
     return result;
   }
