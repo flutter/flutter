@@ -143,8 +143,9 @@ Future<void> _runSmokeTests() async {
 Future<void> _runToolTests() async {
   await _runSmokeTests();
 
-  await _pubRunTest(
+  await _buildRunnerTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
+    flutterRoot,
     enableFlutterToolAsserts: true,
   );
 
@@ -168,21 +169,22 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  // TODO(jonahwilliams): re-enable when engine rolls.
+  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
-  print('Running Dart2JS build tests...');
-  await runCommand(flutter,
-    <String>['build', 'web', '-v'],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: false,
-    timeout: _kShortTimeout,
-  );
-  print('Done.');
-}
+// Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+//   print('Running Dart2JS build tests...');
+//   await runCommand(flutter,
+//     <String>['build', 'web', '-v'],
+//     workingDirectory: path.join(flutterRoot, relativePathToApplication),
+//     expectNonZeroExit: false,
+//     timeout: _kShortTimeout,
+//   );
+//   print('Done.');
+// }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('Running AOT build tests...');
@@ -305,10 +307,45 @@ Future<void> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
+Future<void> _buildRunnerTest(
+  String workingDirectory,
+  String flutterRoot, {
+   String testPath,
+   bool enableFlutterToolAsserts = false,
+  }
+) {
+  final List<String> args = <String>['run', 'build_runner', 'test', '--', '-rcompact', '-j1'];
+  if (!hasColor) {
+    args.add('--no-color');
+  }
+  if (testPath != null) {
+    args.add(testPath);
+  }
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
+  if (Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  if (enableFlutterToolAsserts) {
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts'))
+        toolsArgs += ' --enable-asserts';
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+  }
+  return runCommand(
+    pub, args,
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
+}
+
 Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool enableFlutterToolAsserts = false
+  bool enableFlutterToolAsserts = false,
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
   if (!hasColor)

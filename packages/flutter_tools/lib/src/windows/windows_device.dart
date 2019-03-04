@@ -93,7 +93,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      WindowsDevice()
+      WindowsDevice(),
     ];
   }
 

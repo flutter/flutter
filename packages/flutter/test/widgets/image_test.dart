@@ -24,7 +24,7 @@ void main() {
         child: Image(
           image: imageProvider1,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
       EnginePhase.layout,
@@ -46,10 +46,10 @@ void main() {
         child: Image(
           image: imageProvider2,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -66,10 +66,10 @@ void main() {
           gaplessPlayback: true,
           image: imageProvider1,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -89,10 +89,10 @@ void main() {
           gaplessPlayback: true,
           image: imageProvider2,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -109,7 +109,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -129,7 +129,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -147,7 +147,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -165,10 +165,10 @@ void main() {
         key: key,
         gaplessPlayback: true,
         excludeFromSemantics: true,
-        image: imageProvider2
+        image: imageProvider2,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -199,9 +199,9 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider
+            image: imageProvider,
           ),
-        )
+        ),
       )
     );
 
@@ -226,9 +226,9 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider
+            image: imageProvider,
           ),
-        )
+        ),
       )
     );
 
@@ -256,8 +256,8 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider
-            )
+              image: imageProvider,
+            ),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -265,9 +265,9 @@ void main() {
               devicePixelRatio: 10.0,
               padding: EdgeInsets.zero,
             ),
-            child: Container(width: 100.0)
-          )
-        ]
+            child: Container(width: 100.0),
+          ),
+        ],
       )
     );
 
@@ -283,7 +283,7 @@ void main() {
               devicePixelRatio: 5.0,
               padding: EdgeInsets.zero,
             ),
-            child: Container(width: 100.0)
+            child: Container(width: 100.0),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -294,10 +294,10 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider
-            )
-          )
-        ]
+              image: imageProvider,
+            ),
+          ),
+        ],
       )
     );
 
@@ -643,7 +643,7 @@ void main() {
         excludeFromSemantics: true,
         image: TestImageProvider(),
         color: const Color(0xFF00FF00),
-        colorBlendMode: BlendMode.clear
+        colorBlendMode: BlendMode.clear,
       )
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
@@ -758,11 +758,11 @@ void main() {
             key: key,
             child: Image(
                 excludeFromSemantics: true,
-                image: imageProvider1
-            )
+                image: imageProvider1,
+            ),
         ),
         null,
-        EnginePhase.layout
+        EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -782,11 +782,11 @@ void main() {
             key: key,
             child: Image(
               excludeFromSemantics: true,
-              image: imageProvider2
-            )
+              image: imageProvider2,
+            ),
         ),
         null,
-        EnginePhase.layout
+        EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -838,7 +838,7 @@ void main() {
           rect: Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
-        )
+        ),
       ]
     ), ignoreTransform: true));
     semantics.dispose();

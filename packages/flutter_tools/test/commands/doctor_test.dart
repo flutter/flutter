@@ -24,7 +24,7 @@ import '../src/context.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorOutputPlatform
+  Platform: _kNoColorOutputPlatform,
 };
 
 void main() {
@@ -144,7 +144,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost,127.0.0.1'
+          'NO_PROXY': 'localhost,127.0.0.1',
         },
     });
 
@@ -159,7 +159,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'http_proxy': 'fakeproxy.local',
-          'no_proxy': 'localhost,127.0.0.1'
+          'no_proxy': 'localhost,127.0.0.1',
         },
     });
 
@@ -174,7 +174,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': '127.0.0.1'
+          'NO_PROXY': '127.0.0.1',
         },
     });
 
@@ -189,7 +189,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost'
+          'NO_PROXY': 'localhost',
         },
     });
   });
@@ -635,7 +635,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
     return <DoctorValidator>[
       PassingValidator('Passing Validator'),
       PassingValidator('Another Passing Validator'),
-      PassingValidator('Providing validators is fun')
+      PassingValidator('Providing validators is fun'),
     ];
   }
 
@@ -699,11 +699,11 @@ class FakeGroupedDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 1'),
-        PassingGroupedValidator('Category 1')
+        PassingGroupedValidator('Category 1'),
       ]));
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 2'),
-        MissingGroupedValidator('Category 2')
+        MissingGroupedValidator('Category 2'),
       ]));
     }
     return _validators;

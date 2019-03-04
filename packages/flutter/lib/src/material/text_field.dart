@@ -65,6 +65,22 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// {@tool sample}
+/// This example shows how to create a [TextField] that will obscure input. The
+/// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
+/// and adds a label.
+///
+/// ```dart
+/// TextField(
+///   obscureText: true,
+///   decoration: InputDecoration(
+///     border: OutlineInputBorder(),
+///     labelText: 'Password',
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
@@ -280,7 +296,7 @@ class TextField extends StatefulWidget {
   ///
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number
-  /// greather than 0, it will also display the maximum number allowed. If set
+  /// greater than 0, it will also display the maximum number allowed. If set
   /// to [TextField.noMaxLength] then only the current character count is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
@@ -499,7 +515,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
         enabled: widget.enabled,
-        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines
+        hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
       );
 
     // No need to build anything if counter or counterText were given directly.
@@ -603,12 +619,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  InteractiveInkFeature _createInkFeature(TapDownDetails details) {
+  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
     final BuildContext editableContext = _editableTextKey.currentContext;
     final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
-    final Offset position = referenceBox.globalToLocal(details.globalPosition);
+    final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color = themeData.splashColor;
 
     InteractiveInkFeature splash;
@@ -641,7 +657,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
-    _startSplash(details);
+    _startSplash(details.globalPosition);
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
@@ -727,10 +743,29 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  void _startSplash(TapDownDetails details) {
+  void _handleDragSelectionStart(DragStartDetails details) {
+    _renderEditable.selectPositionAt(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
+    _startSplash(details.globalPosition);
+  }
+
+  void _handleDragSelectionUpdate(
+      DragStartDetails startDetails,
+      DragUpdateDetails updateDetails,
+  ) {
+    _renderEditable.selectPositionAt(
+      from: startDetails.globalPosition,
+      to: updateDetails.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
+  }
+
+  void _startSplash(Offset globalPosition) {
     if (_effectiveFocusNode.hasFocus)
       return;
-    final InteractiveInkFeature splash = _createInkFeature(details);
+    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
@@ -895,6 +930,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
           onSingleLongTapEnd: _handleSingleLongTapEnd,
           onDoubleTapDown: _handleDoubleTapDown,
+          onDragSelectionStart: _handleDragSelectionStart,
+          onDragSelectionUpdate: _handleDragSelectionUpdate,
           behavior: HitTestBehavior.translucent,
           child: child,
         ),

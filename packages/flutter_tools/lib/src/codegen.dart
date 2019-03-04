@@ -134,6 +134,8 @@ abstract class CodegenDaemon {
   /// Whether the previously enqueued build was successful.
   Stream<CodegenStatus> get buildResults;
 
+  CodegenStatus get lastStatus;
+
   /// Starts a new build.
   void startBuild();
 
@@ -192,7 +194,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         trackWidgetCreation: trackWidgetCreation,
         mainPath: mainPath,
         targetProductVm: targetProductVm,
-        extraFrontEndOptions: extraFrontEndOptions
+        extraFrontEndOptions: extraFrontEndOptions,
       );
       final File outputFile = fs.file(outputFilePath);
       if (!await outputFile.exists()) {
@@ -265,11 +267,12 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
 
   @override
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
-    _codegenDaemon.startBuild();
-    final CodegenStatus status = await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
-    });
-    if (status == CodegenStatus.Failed) {
+    if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
+      await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+        return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+      });
+    }
+    if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
       printError('Codegeneration failed, halting build.');
     }
     // Delete this file so that the frontend_server can handle multi-root.

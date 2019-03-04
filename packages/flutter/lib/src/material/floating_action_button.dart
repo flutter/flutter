@@ -184,7 +184,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button releative to its parent.
+  /// The z-coordinate at which to place this button relative to its parent.
   ///
   /// This controls the size of the shadow below the floating action button.
   ///

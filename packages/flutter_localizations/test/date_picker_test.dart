@@ -229,7 +229,7 @@ Future<void> _pumpBoilerplate(
   WidgetTester tester,
   Widget child, {
   Locale locale = const Locale('en', 'US'),
-  TextDirection textDirection = TextDirection.ltr
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,

@@ -379,7 +379,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
               'exception was thrown), this was the stack:'
             );
             FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-          }
+          },
         ));
       }
       return _taskQueue.isNotEmpty;
@@ -408,15 +408,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
-  /// If this is a callback that will be reregistered each time it fires, then
-  /// when you reregister the callback, set the `rescheduling` argument to true.
-  /// This has no effect in release builds, but in debug builds, it ensures that
-  /// the stack trace that is stored for this callback is the original stack
-  /// trace for when the callback was _first_ registered, rather than the stack
-  /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was called. If
-  /// `rescheduling` is true, the call must be in the context of a frame
-  /// callback.
+  /// If this is a callback that will be re-registered each time it fires, then
+  /// when you re-register the callback, set the `rescheduling` argument to
+  /// true. This has no effect in release builds, but in debug builds, it
+  /// ensures that the stack trace that is stored for this callback is the
+  /// original stack trace for when the callback was _first_ registered, rather
+  /// than the stack trace for when the callback is re-registered. This makes it
+  /// easier to track down the original reason that a particular callback was
+  /// called. If `rescheduling` is true, the call must be in the context of a
+  /// frame callback.
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
@@ -488,7 +488,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
               information.writeln('── callback $id ──');
               FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
-          }
+          },
         ));
       }
       return true;
@@ -957,7 +957,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     postEvent('Flutter.Frame', <String, dynamic>{
       'number': _profileFrameNumber,
       'startTime': _currentFrameTimeStamp.inMicroseconds,
-      'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+      'elapsed': _profileFrameStopwatch.elapsedMicroseconds,
     });
   }
 
@@ -1001,7 +1001,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
             'exception was thrown), this was the stack:'
           );
           FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-        }
+        },
       ));
     }
     assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());

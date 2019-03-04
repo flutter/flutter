@@ -265,7 +265,7 @@ class _HeroState extends State<Hero> {
       if (widget.placeholderBuilder == null) {
         return SizedBox(
           width: _placeholderSize.width,
-          height: _placeholderSize.height
+          height: _placeholderSize.height,
         );
       } else {
         return widget.placeholderBuilder(context, widget.child);

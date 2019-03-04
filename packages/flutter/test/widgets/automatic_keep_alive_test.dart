@@ -612,7 +612,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager childManager
+    RenderSliverBoxChildManager childManager,
   }) : _childManager = childManager;
 
   @protected

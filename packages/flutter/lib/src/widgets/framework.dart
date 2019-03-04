@@ -2277,7 +2277,7 @@ class BuildOwner {
             informationCollector: (StringBuffer information) {
               information.writeln('The element being rebuilt at the time was index $index of $dirtyCount:');
               information.write('  ${_dirtyElements[index]}');
-            }
+            },
           );
         }
         index += 1;
@@ -4056,7 +4056,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
           description: '$this',
           ownershipChain: parent.debugGetCreatorChain(10),
           foundValidAncestor: ancestor != null,
-          badAncestors: badAncestors
+          badAncestors: badAncestors,
         )
       );
     }());
@@ -5005,7 +5005,7 @@ FlutterErrorDetails _debugReportException(
   String context,
   dynamic exception,
   StackTrace stack, {
-  InformationCollector informationCollector
+  InformationCollector informationCollector,
 }) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,

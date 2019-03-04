@@ -17,7 +17,7 @@ void main() {
 
     await tester.pumpWidget(
       const Center(
-          child: Text('Hello!', textDirection: TextDirection.ltr)
+          child: Text('Hello!', textDirection: TextDirection.ltr),
       ),
     );
 
@@ -29,7 +29,7 @@ void main() {
           textDirection: TextDirection.ltr,
           rect: Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
           transform: Matrix4.translationValues(358.0, 293.0, 0.0),
-        )
+        ),
       ],
     )));
 
@@ -69,7 +69,7 @@ void main() {
                   textDirection: TextDirection.ltr,
                   rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
                   transform: Matrix4.translationValues(395.0, 295.0, 0.0),
-                )
+                ),
               ],
             ),
           ],

@@ -78,7 +78,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   builder: (BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
-                      colorNameItems: colorNameItems
+                      colorNameItems: colorNameItems,
                     );
                   },
                   defaultTitle: 'Colors',
@@ -750,7 +750,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
                         Text(
                           'Sign in',
                           style: TextStyle(color: CupertinoTheme.of(context).primaryColor),
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -212,7 +212,7 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
-  /// The elevation of this node reative to the parent node.
+  /// The elevation of this node relative to the parent node.
   ///
   /// See also:
   ///
@@ -493,8 +493,8 @@ class SemanticsTester {
   ///
   /// Use this method to generate code for unit tests. It works similar to
   /// screenshot testing. The very first time you add semantics to a widget you
-  /// verify manually that the widget behaves correctly. You then use ths method
-  /// to generate test code for this widget.
+  /// verify manually that the widget behaves correctly. You then use this
+  /// method to generate test code for this widget.
   ///
   /// Example:
   ///

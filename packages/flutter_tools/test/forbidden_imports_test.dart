@@ -83,7 +83,7 @@ void main() {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'test', 'src', 'build_runner'),
       fs.path.join(flutterTools, 'lib', 'src', 'build_runner'),
-      fs.path.join(flutterTools, 'lib', 'executable.dart')
+      fs.path.join(flutterTools, 'lib', 'executable.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => !entity.path.contains(path));
 

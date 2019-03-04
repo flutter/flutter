@@ -102,7 +102,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// 3. The **transformed cylindrical space viewport painting coordinates**.
 ///    Children from system 2 get their positions transformed into a cylindrical
-///    projection matrix instead of its cartesian offset with respect to the
+///    projection matrix instead of its Cartesian offset with respect to the
 ///    scroll offset.
 ///
 ///    Children in this coordinate system are painted.
@@ -763,7 +763,7 @@ class RenderListWheelViewport
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
-            _getUntransformedPaintingCoordinateY(layoutOffset.dy)
+            _getUntransformedPaintingCoordinateY(layoutOffset.dy),
         );
 
     // Get child's center as a fraction of the viewport's height.
@@ -870,7 +870,7 @@ class RenderListWheelViewport
               child,
               cylindricalTransform,
               offsetToCenter);
-          }
+          },
       );
     } else {
       _paintChildCylindrically(

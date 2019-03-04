@@ -196,7 +196,7 @@ class _TestWidget extends StatelessWidget {
                 height: 100.0,
               );
             })),
-          )
+          ),
         ],
       ),
     );

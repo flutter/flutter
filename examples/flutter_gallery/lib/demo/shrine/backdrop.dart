@@ -103,7 +103,7 @@ class _BackdropTitle extends AnimatedWidget {
                   end: const Offset(1.0, 0.0),
                 ).evaluate(animation),
                 child: const ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
-              )
+              ),
             ]),
           ),
         ),
@@ -138,7 +138,7 @@ class _BackdropTitle extends AnimatedWidget {
               ),
             ),
           ],
-        )
+        ),
       ]),
     );
   }

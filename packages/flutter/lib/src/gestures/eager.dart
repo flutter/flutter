@@ -12,8 +12,13 @@ import 'recognizer.dart';
 /// all touch events inside the view bounds to the embedded Android view.
 /// See [AndroidView.gestureRecognizers] for more details.
 class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
+  /// Create an eager gesture recognizer.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  EagerGestureRecognizer({ PointerDeviceKind kind }): super(kind: kind);
+
   @override
-  void addPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     // We call startTrackingPointer as this is where OneSequenceGestureRecognizer joins the arena.
     startTrackingPointer(event.pointer);
     resolve(GestureDisposition.accepted);

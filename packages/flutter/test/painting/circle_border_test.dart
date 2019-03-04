@@ -24,7 +24,7 @@ void main() {
     expect(
       (Canvas canvas) => c10.paint(canvas, Rect.fromLTWH(10.0, 20.0, 30.0, 40.0)),
       paints
-        ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0)
+        ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
   });
 }
