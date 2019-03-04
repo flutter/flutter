@@ -123,10 +123,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// can be moved without limit once the long press is accepted.
   LongPressGestureRecognizer({
     double postAcceptSlopTolerance,
+    PointerDeviceKind kind,
     Object debugOwner,
   }) : super(
     deadline: kLongPressTimeout,
     postAcceptSlopTolerance: postAcceptSlopTolerance,
+    kind: kind,
     debugOwner: debugOwner,
   );
 
