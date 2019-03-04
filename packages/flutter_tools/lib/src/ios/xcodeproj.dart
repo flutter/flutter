@@ -167,18 +167,23 @@ class XcodeProjectInterpreter {
     // See: https://github.com/flutter/flutter/issues/28415
     String out;
     for (int i = 0; i < 5; i++) {
-      final RunResult result = await runCheckedAsync(
-        <String>[_executable, '-list'],
-        workingDirectory: projectPath,
-      ).timeout(const Duration(seconds: 10));
-      if (result.exitCode == 0) {
-        out = result.stdout;
-        break;
+      try {
+        final RunResult result = await runCheckedAsync(
+          <String>[_executable, '-list'],
+          workingDirectory: projectPath,
+        ).timeout(const Duration(seconds: 10));
+        if (result.exitCode == 0) {
+          out = result.stdout;
+          break;
+        }
+      } on TimeoutException {
+        continue;
       }
     }
-    // assume we timed out or failed.
+    // Assume we timed out or failed.
     if (out == null) {
-      throwToolExit('xcodebuild -list timed out');
+      throwToolExit(
+        'xcodebuild -list timed out. Please see flutter/issues/28415 for more context.');
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
