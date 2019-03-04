@@ -101,7 +101,7 @@ Future<void> main(List<String> args) async {
         flutterPatchedSdk: flutterPatchedSdk,
       ),
       HotRunnerConfig: () => HotRunnerConfig()..computeDartDependencies = false,
-    }
+    },
   );
 }
 

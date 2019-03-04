@@ -236,7 +236,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options = const <String>[]
+  List<String> options = const <String>[],
 }) {
   return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
     workingDirectory: workingDirectory,

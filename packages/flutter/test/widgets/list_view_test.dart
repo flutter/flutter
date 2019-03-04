@@ -324,7 +324,7 @@ void main() {
             child: Text('$i', textDirection: TextDirection.ltr),
           );
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -526,7 +526,7 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           children: <Matcher>[
-            matchesSemantics(hasImplicitScrolling: true)
+            matchesSemantics(hasImplicitScrolling: true),
           ],
         ),
       ],

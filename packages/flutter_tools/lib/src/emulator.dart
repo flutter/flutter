@@ -115,7 +115,7 @@ class EmulatorManager {
       'avd',
       '-n', name,
       '-k', sdkId,
-      '-d', device
+      '-d', device,
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
@@ -136,7 +136,7 @@ class EmulatorManager {
       getAvdManagerPath(androidSdk),
       'list',
       'device',
-      '-c'
+      '-c',
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);

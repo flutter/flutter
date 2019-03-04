@@ -487,7 +487,7 @@ class TextEditingValue {
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty
+    this.composing = TextRange.empty,
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
@@ -538,12 +538,12 @@ class TextEditingValue {
   TextEditingValue copyWith({
     String text,
     TextSelection selection,
-    TextRange composing
+    TextRange composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -566,7 +566,7 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
 }
 

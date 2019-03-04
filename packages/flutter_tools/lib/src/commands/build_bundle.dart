@@ -28,7 +28,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios'],
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,

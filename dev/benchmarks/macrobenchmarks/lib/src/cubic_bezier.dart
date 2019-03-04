@@ -263,7 +263,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
       PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708),
       PathDetail(bezier3Path,
           translate: <double>[53.0, 200.48], rotation: -3.14159),
-      PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239)
+      PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239),
     ];
   }
 

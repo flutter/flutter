@@ -1676,7 +1676,7 @@ class _NavigationBarComponentsTransition {
           ancestor: toNavBarBox,
         ).translate(
           0.0,
-          - fromBox.size.height / 2 + toBox.size.height / 2
+          - fromBox.size.height / 2 + toBox.size.height / 2,
         ) & fromBox.size; // Keep the from render object's size.
 
     if (forwardDirection < 0) {

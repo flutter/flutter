@@ -225,7 +225,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           Path(),
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
@@ -237,7 +237,7 @@ void main() {
         Path(),
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -250,7 +250,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0),
         ),
       );
     });
@@ -268,7 +268,7 @@ void main() {
         linePath,
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
@@ -286,7 +286,7 @@ void main() {
         linePath,
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -426,7 +426,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         ),
       );
@@ -447,7 +447,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'barz')
+            const CustomSemanticsAction(label: 'barz'),
           ],
         )),
       );
@@ -468,7 +468,7 @@ void main() {
           onLongPressHint: 'fills',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         )),
       );

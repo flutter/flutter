@@ -30,7 +30,7 @@ class ExpandIcon extends StatefulWidget {
     this.isExpanded = false,
     this.size = 24.0,
     @required this.onPressed,
-    this.padding = const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0),
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -120,7 +120,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more)
+          child: const Icon(Icons.expand_more),
         ),
       ),
     );

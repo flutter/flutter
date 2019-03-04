@@ -109,7 +109,7 @@ void main() {
                 },
                 onChangeStart: (double value) {
                   numberOfTimesOnChangeStartIsCalled++;
-                }
+                },
               ),
             ),
           );
@@ -148,7 +148,7 @@ void main() {
                 },
                 onChangeEnd: (double value) {
                   numberOfTimesOnChangeEndIsCalled++;
-                }
+                },
               ),
             ),
           );
@@ -191,7 +191,7 @@ void main() {
                 },
                 onChangeEnd: (double value) {
                   endValue = value;
-                }
+                },
               ),
             ),
           );
@@ -247,7 +247,7 @@ void main() {
                   setState(() {
                     endValue = value;
                   });
-                }
+                },
               ),
             ),
           );

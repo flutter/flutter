@@ -42,7 +42,7 @@ typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, Voi
 
 typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
-  @required ServiceExtensionCallback callback
+  @required ServiceExtensionCallback callback,
 });
 
 /// A layer that mimics the behavior of another layer.
@@ -864,7 +864,7 @@ mixin WidgetInspectorService {
   void _registerBoolServiceExtension({
     @required String name,
     @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter
+    @required AsyncValueSetter<bool> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -2346,7 +2346,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       children.add(Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child: widget.selectButtonBuilder(context, _handleEnableSelect)
+        child: widget.selectButtonBuilder(context, _handleEnableSelect),
       ));
     }
     children.add(_InspectorOverlay(selection: selection));
@@ -2756,7 +2756,7 @@ class _Location {
     this.line,
     this.column,
     this.name,
-    this.parameterLocations
+    this.parameterLocations,
   });
 
   /// File path of the location.

@@ -70,12 +70,12 @@ void main() {
           value: (dynamic value) {
             final List<String> pair = value;
             return pair[1];
-          }
+          },
         );
 
         return Response(
             'test-report-id',
-            200
+            200,
         );
       }));
 

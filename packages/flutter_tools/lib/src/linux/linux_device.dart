@@ -93,7 +93,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      LinuxDevice()
+      LinuxDevice(),
     ];
   }
 

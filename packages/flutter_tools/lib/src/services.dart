@@ -64,7 +64,7 @@ Future<void> parseServiceConfigs(
         'root': serviceRoot,
         'name': service['name'],
         'android-class': service['android-class'],
-        'ios-framework': service['ios-framework']
+        'ios-framework': service['ios-framework'],
       });
     }
 
@@ -102,7 +102,7 @@ File generateServiceDefinitions(
   final List<Map<String, String>> services =
       servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
         'name': service['name'],
-        'class': service['android-class']
+        'class': service['android-class'],
       }).toList();
 
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
