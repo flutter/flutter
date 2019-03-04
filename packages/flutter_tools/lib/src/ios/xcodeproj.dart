@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -161,10 +162,24 @@ class XcodeProjectInterpreter {
     return parseXcodeBuildSettings(out);
   }
 
-  XcodeProjectInfo getInfo(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      _executable, '-list',
-    ], workingDirectory: projectPath);
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    // xcodebuild -list occassionally hangs and we're not sure why.
+    // See: https://github.com/flutter/flutter/issues/28415
+    String out;
+    for (int i = 0; i < 5; i++) {
+      final RunResult result = await runCheckedAsync(
+        <String>[_executable, '-list'],
+        workingDirectory: projectPath,
+      ).timeout(const Duration(seconds: 10));
+      if (result.exitCode == 0) {
+        out = result.stdout;
+        break;
+      }
+    }
+    // assume we timed out or failed.
+    if (out == null) {
+      throwToolExit('xcodebuild -list timed out');
+    }
     return XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
 }
