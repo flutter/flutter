@@ -28,8 +28,10 @@ const Duration _kDuration = Duration(milliseconds: 300);
 
 // Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
-  _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
-  _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
+  _ActiveItem.incoming(this.controller, this.itemIndex)
+      : removedItemBuilder = null;
+  _ActiveItem.outgoing(
+      this.controller, this.itemIndex, this.removedItemBuilder);
   _ActiveItem.index(this.itemIndex)
       : controller = null,
         removedItemBuilder = null;
@@ -170,8 +172,7 @@ class AnimatedList extends StatefulWidget {
     assert(nullOk != null);
     final AnimatedListState result =
         context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
-    if (nullOk || result != null)
-      return result;
+    if (nullOk || result != null) return result;
     throw FlutterError(
         'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
         'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
@@ -187,8 +188,8 @@ class AnimatedList extends StatefulWidget {
   AnimatedListState createState() => AnimatedListState();
 }
 
-abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T> with TickerProviderStateMixin<T> {
-
+abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
+    with TickerProviderStateMixin<T> {
   AnimatedListItemBuilder get itemBuilder;
   int get initialItemCount;
 
@@ -198,8 +199,8 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
 
   @protected
   SliverChildBuilderDelegate get delegate => SliverChildBuilderDelegate(
-    _itemBuilder,
-  );
+        _itemBuilder,
+      );
 
   @override
   void initState() {
@@ -209,10 +210,8 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
 
   @override
   void dispose() {
-    for (_ActiveItem item in _incomingItems)
-      item.controller.dispose();
-    for (_ActiveItem item in _outgoingItems)
-      item.controller.dispose();
+    for (_ActiveItem item in _incomingItems) item.controller.dispose();
+    for (_ActiveItem item in _outgoingItems) item.controller.dispose();
     super.dispose();
   }
 
@@ -261,7 +260,7 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
   /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration duration = _kDuration }) {
+  void insertItem(int index, {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -271,16 +270,16 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
     for (_ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex)
-        item.itemIndex += 1;
+      if (item.itemIndex >= itemIndex) item.itemIndex += 1;
     }
     for (_ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex)
-        item.itemIndex += 1;
+      if (item.itemIndex >= itemIndex) item.itemIndex += 1;
     }
 
-    final AnimationController controller = AnimationController(duration: duration, vsync: this);
-    final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
+    final AnimationController controller =
+        AnimationController(duration: duration, vsync: this);
+    final _ActiveItem incomingItem =
+        _ActiveItem.incoming(controller, itemIndex);
     setState(() {
       _incomingItems
         ..add(incomingItem)
@@ -289,7 +288,9 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
     });
 
     controller.forward().then<void>((_) {
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
+      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)
+          .controller
+          .dispose();
     });
   }
 
@@ -304,7 +305,8 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder,
+      {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
@@ -313,10 +315,12 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
     assert(itemIndex >= 0 && itemIndex < _itemsCount);
     assert(_activeItemAt(_outgoingItems, itemIndex) == null);
 
-    final _ActiveItem incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller = incomingItem?.controller
-        ?? AnimationController(duration: duration, value: 1.0, vsync: this);
-    final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
+    final _ActiveItem incomingItem =
+        _removeActiveItemAt(_incomingItems, itemIndex);
+    final AnimationController controller = incomingItem?.controller ??
+        AnimationController(duration: duration, value: 1.0, vsync: this);
+    final _ActiveItem outgoingItem =
+        _ActiveItem.outgoing(controller, itemIndex, builder);
     setState(() {
       _outgoingItems
         ..add(outgoingItem)
@@ -324,17 +328,17 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
     });
 
     controller.reverse().then<void>((void value) {
-      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
+      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)
+          .controller
+          .dispose();
 
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
       for (_ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
-          item.itemIndex -= 1;
+        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
       }
       for (_ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
-          item.itemIndex -= 1;
+        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
       }
 
       setState(() {
@@ -344,19 +348,18 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
   }
 
   Widget _itemBuilder(BuildContext context, int itemIndex) {
-    if (itemIndex >= _itemsCount)
-      return null;
+    if (itemIndex >= _itemsCount) return null;
 
     final _ActiveItem outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
     if (outgoingItem != null)
-      return outgoingItem.removedItemBuilder(context, outgoingItem.controller.view);
+      return outgoingItem.removedItemBuilder(
+          context, outgoingItem.controller.view);
 
     final _ActiveItem incomingItem = _activeItemAt(_incomingItems, itemIndex);
-    final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
+    final Animation<double> animation =
+        incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
     return itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
   }
-
-
 }
 
 /// The state for a scrolling container that animates items when they are
@@ -384,7 +387,6 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
 /// with the static [AnimatedList.of] method.
 class AnimatedListState extends _AnimatedListBaseState<AnimatedList> {
-
   @override
   AnimatedListItemBuilder get itemBuilder => widget.itemBuilder;
 
@@ -415,9 +417,14 @@ class AnimatedListState extends _AnimatedListBaseState<AnimatedList> {
 /// This sliver is similar to one created by [SliverList] with
 /// [SliverChildBuilderDelegate].
 class SliverAnimatedList extends StatefulWidget {
-
   /// Creates a sliver that animates items when they are inserted or removed.
-  const SliverAnimatedList({Key key, this.itemBuilder, this.initialItemCount}) : super(key: key);
+  const SliverAnimatedList({
+    Key key,
+    @required this.itemBuilder,
+    this.initialItemCount = 0,
+  })  : assert(itemBuilder != null),
+        assert(initialItemCount != null),
+        super(key: key);
 
   /// Called, as needed, to build list item widgets.
   ///
@@ -451,13 +458,13 @@ class SliverAnimatedList extends StatefulWidget {
   /// ```dart
   /// AnimatedListModel animatedList = SliverAnimatedList.of(context);
   /// ```
-  static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
+  static SliverAnimatedListState of(BuildContext context,
+      {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final SliverAnimatedListState result =
-    context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
-    if (nullOk || result != null)
-      return result;
+    final SliverAnimatedListState result = context
+        .ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
+    if (nullOk || result != null) return result;
     throw FlutterError(
         'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
         'No SliverAnimatedListState ancestor could be found starting from the'
@@ -495,8 +502,8 @@ class SliverAnimatedList extends StatefulWidget {
 ///
 /// [SliverAnimatedList] item input handlers can also refer to their
 /// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
-class SliverAnimatedListState extends _AnimatedListBaseState<SliverAnimatedList> {
-
+class SliverAnimatedListState
+    extends _AnimatedListBaseState<SliverAnimatedList> {
   @override
   AnimatedListItemBuilder get itemBuilder => widget.itemBuilder;
 
