@@ -211,9 +211,13 @@ bin_to_linkable("isolate_snapshot_instructions_linkable") {
 
 bin_to_linkable("platform_strong_dill_linkable") {
   deps = [
-    ":strong_platform",
+    ":kernel_platform_files",
   ]
-  input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
+  if (is_fuchsia || is_fuchsia_host) {
+    input = "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
+  } else {
+    input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
+  }
   symbol = "kPlatformStrongDill"
   size_symbol = "kPlatformStrongDillSize"
   executable = false
