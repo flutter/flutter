@@ -64,7 +64,7 @@ class _DefaultHeroTag {
 ///       title: Text('Floating Action Button Sample'),
 ///     ),
 ///     body: Center(
-///         child: Text('Press the button below!')
+///       child: Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
