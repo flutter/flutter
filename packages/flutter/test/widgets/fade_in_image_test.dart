@@ -123,7 +123,7 @@ Future<void> main() async {
       const String imageSemanticText = 'Test image semantic label';
       const Duration animationDuration = const Duration(milliseconds: 50);
 
-      testWidgets('assigned correctly according to placeholder or image semanticsLabel', (WidgetTester tester) async {
+      testWidgets('assigned correctly according to placeholder or image', (WidgetTester tester) async {
         // The semantics widget that is created
         Semantics displayedWidget() => tester.widget(find.byType(Semantics));
         // The placeholder is expected to be already loaded
@@ -178,7 +178,7 @@ Future<void> main() async {
         expect(displayedWidget().properties.label, same(''));
       });
 
-      testWidgets('assigned correctly without semantics text', (WidgetTester tester) async {
+      testWidgets('assigned correctly without any semantics text', (WidgetTester tester) async {
         // The semantics widget that is created
         Semantics displayedWidget() => tester.widget(find.byType(Semantics));
         // The placeholder is expected to be already loaded
