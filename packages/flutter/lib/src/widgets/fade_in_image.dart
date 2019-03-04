@@ -491,7 +491,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           }
           break;
         case FadeInImagePhase.completed:
-        // Nothing to do.
+          // Nothing to do.
           break;
       }
     });
@@ -522,14 +522,14 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   ImageInfo get _imageInfo {
     return _isShowingPlaceholder
-        ? _placeholderResolver._imageInfo
-        : _imageResolver._imageInfo;
+      ? _placeholderResolver._imageInfo
+      : _imageResolver._imageInfo;
   }
 
   String get _semanticLabel {
     return _isShowingPlaceholder
-        ? widget.placeholderSemanticLabel
-        : widget.imageSemanticLabel;
+      ? widget.placeholderSemanticLabel
+      : widget.imageSemanticLabel;
   }
 
   @override
@@ -549,8 +549,10 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       matchTextDirection: widget.matchTextDirection,
     );
 
-    if (widget.excludeFromSemantics)
+    if (widget.excludeFromSemantics) {
       return image;
+    }
+
     return Semantics(
       container: _semanticLabel != null,
       image: true,
