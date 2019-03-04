@@ -15,6 +15,56 @@ import 'will_pop_scope.dart';
 /// descendant of this [Form]. To obtain the [FormState], you may use [Form.of]
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
+/// [GlobalKey] is required to identify the [Form], and it is used here to
+/// validate input.
+///
+/// ```dart
+/// final _formKey = GlobalKey<FormState>();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   // Build a Form widget using the _formKey we created above
+///   return Form(
+///     key: _formKey,
+///     child: Column(
+///       crossAxisAlignment: CrossAxisAlignment.start,
+///       children: <Widget>[
+///         TextFormField(
+///         validator: (value) {
+///         if (value.isEmpty) {
+///           return 'Please enter some text';
+///             }
+///           },
+///         ),
+///         Padding(
+///           padding: const EdgeInsets.symmetric(vertical: 16.0),
+///           child: RaisedButton(
+///             onPressed: () {
+///               // Validate will return true if the form is valid, or false if
+///               // the form is invalid.
+///               if (_formKey.currentState.validate()) {
+///                 // Process data.
+///               }
+///             },
+///             child: Text('Submit'),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///  * [GlobalKey], a key that is unique across the entire app.
+///  * [FormField], a single form field widget that maintains the current state.
+///  * [TextFormField], a convenience widget that wraps a [TextField] widget in
+///  a [FormField].
+///
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
