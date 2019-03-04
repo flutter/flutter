@@ -152,13 +152,6 @@ class TestWindow implements Window {
   }
 
   @override
-  String get initialLifecycleState => _initialLifecycleStateTestValue;
-  String _initialLifecycleStateTestValue;
-  set initialLifecycleStateTestValue(String state) {
-    _initialLifecycleStateTestValue = state;
-  }
-
-  @override
   double get textScaleFactor => _textScaleFactorTestValue ?? _window.textScaleFactor;
   double _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given [textScaleFactorTestValue] instead.
