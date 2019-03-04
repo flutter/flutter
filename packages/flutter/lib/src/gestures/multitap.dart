@@ -58,12 +58,11 @@ class _TapTracker {
     @required PointerDownEvent event,
     this.entry,
     @required Duration doubleTapMinTime,
-  })
-    : assert(doubleTapMinTime != null),
-      assert(event != null),
-      pointer = event.pointer,
-      _initialPosition = event.position,
-      _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
+  }) : assert(doubleTapMinTime != null),
+       assert(event != null),
+       pointer = event.pointer,
+       _initialPosition = event.position,
+       _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
@@ -142,7 +141,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
         // Ignore out-of-bounds second taps.
         return;
       } else if (!_firstTap.hasElapsedMinTime()) {
-        // Restart when the second tap is too close to the first
+        // Restart when the second tap is too close to the first.
         _reset();
         return addAllowedPointer(event);
       }
