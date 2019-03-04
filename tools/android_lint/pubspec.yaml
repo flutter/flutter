@@ -1,0 +1,5 @@
+name: android_lint
+dependencies:
+  args: 1.5.0
+  path: ^1.6.2
+  process: ^3.0.9
