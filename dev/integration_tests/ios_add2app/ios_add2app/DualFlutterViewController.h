@@ -8,8 +8,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DualFlutterViewController : UIViewController
 
-@property (readonly, weak, nonatomic) FlutterEngine* topEngine;
-@property (readonly, weak, nonatomic) FlutterEngine* bottomEngine;
+@property (readonly, strong, nonatomic) FlutterViewController* topFlutterViewController;
+@property (readonly, strong, nonatomic) FlutterViewController* bottomFlutterViewController;
 
 @end
 
