@@ -8,10 +8,12 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({ this.name, this.icon });
-  @required
+  const GalleryDemoCategory._({
+    @required this.name,
+    @required this.icon,
+  });
+
   final String name;
-  @required
   final IconData icon;
 
   @override
