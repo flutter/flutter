@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
@@ -244,6 +245,41 @@ void main() {
 
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+
+  testWidgets('Radio ink ripple is displayed correctly', (WidgetTester tester) async {
+    final Key painterKey = UniqueKey();
+    const Key radioKey = Key('radio');
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: RepaintBoundary(
+          key: painterKey,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.white,
+              child: Radio<int>(
+                key: radioKey,
+                value: 1,
+                groupValue: 1,
+                onChanged: (int value) {},
+              ),
+            )
+          ),
+        ),
+      ),
+    ));
+
+    await tester.press(find.byKey(radioKey));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(painterKey),
+      matchesGoldenFile('radio.ink_ripple.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }
 
