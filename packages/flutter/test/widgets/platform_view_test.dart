@@ -1364,6 +1364,36 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
+    testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Stack(
+          alignment: Alignment.topLeft,
+          children: <Widget>[
+            const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            Container(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              width: 100,
+              height: 100,
+            ),
+          ],
+        )
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+    });
+
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
