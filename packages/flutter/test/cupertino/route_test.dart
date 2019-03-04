@@ -257,6 +257,7 @@ void main() {
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
@@ -289,10 +290,23 @@ void main() {
     expect(find.text('push'), findsNothing);
 
     TestGesture gesture = await tester.startGesture(const Offset(5, 300));
-    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.moveBy(const Offset(400, 0));
     await gesture.up();
+    await tester.pump();
+    expect( // The 'route' route has been dragged to the right, halfway across the screen
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+      const Offset(400, 0),
+    );
+    expect( // The 'push' route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))).dx,
+      lessThan(0),
+    );
     await tester.pumpAndSettle();
     expect(find.text('push'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))),
+      Offset.zero,
+    );
     expect(find.text('route'), findsNothing);
 
 

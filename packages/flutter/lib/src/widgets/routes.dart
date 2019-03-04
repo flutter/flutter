@@ -154,7 +154,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // We might still be an active route if a subclass is controlling the
         // the transition and hits the dismissed status. For example, the iOS
         // back gesture drives this animation to the dismissed status before
-        // removing the route.
+        // removing the route and disposing it.
         if (!isActive) {
           navigator.finalizeRoute(this);
           assert(overlayEntries.isEmpty);
