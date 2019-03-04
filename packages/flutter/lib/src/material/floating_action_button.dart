@@ -55,7 +55,7 @@ class _DefaultHeroTag {
 ///
 /// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to make a simple [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon].
+/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
