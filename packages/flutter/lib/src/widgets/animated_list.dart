@@ -26,6 +26,22 @@ typedef AnimatedListRemovedItemBuilder = Widget Function(
 // The default insert/remove animation duration.
 const Duration _kDuration = Duration(milliseconds: 300);
 
+// Incoming and outgoing AnimatedList items.
+class _ActiveItem implements Comparable<_ActiveItem> {
+  _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
+  _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
+  _ActiveItem.index(this.itemIndex)
+      : controller = null,
+        removedItemBuilder = null;
+
+  final AnimationController controller;
+  final AnimatedListRemovedItemBuilder removedItemBuilder;
+  int itemIndex;
+
+  @override
+  int compareTo(_ActiveItem other) => itemIndex - other.itemIndex;
+}
+
 /// A scrolling container that animates items when they are inserted or removed.
 ///
 /// This widget's [AnimatedListState] can be used to dynamically insert or remove
@@ -171,47 +187,175 @@ class AnimatedList extends StatefulWidget {
   AnimatedListState createState() => AnimatedListState();
 }
 
-abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T> with TickerProviderStateMixin<T> implements AnimatedListModel {
-
-  @protected
-  _AnimatedListController controller;
+abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T> with TickerProviderStateMixin<T> {
 
   AnimatedListItemBuilder get itemBuilder;
   int get initialItemCount;
 
+  final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
+  final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
+  int _itemsCount = 0;
+
+  @protected
+  SliverChildBuilderDelegate get delegate => SliverChildBuilderDelegate(
+    _itemBuilder,
+  );
+
   @override
   void initState() {
     super.initState();
-    controller = _AnimatedListController(
-      onDelegateChanged: (_) {
-        setState(() {
-          // the state change happened inside the animated list controller, which
-          // now provides a different delegate that needs to be passed to the
-          // custom ListView or the sliver.
-        });
-      },
-      vsync: this,
-      itemBuilder: itemBuilder,
-      initialItemsCount: initialItemCount,
-    );
+    _itemsCount = initialItemCount;
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    for (_ActiveItem item in _incomingItems)
+      item.controller.dispose();
+    for (_ActiveItem item in _outgoingItems)
+      item.controller.dispose();
     super.dispose();
   }
 
-  @override
-  void insertItem(int index, {Duration duration = _kDuration}) {
-    controller.insertItem(index, duration: duration);
+  _ActiveItem _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
+    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items.removeAt(i);
   }
 
-  @override
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder,
-      {Duration duration = _kDuration}) {
-    controller.removeItem(index, builder, duration: duration);
+  _ActiveItem _activeItemAt(List<_ActiveItem> items, int itemIndex) {
+    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items[i];
   }
+
+  // The insertItem() and removeItem() index parameters are defined as if the
+  // removeItem() operation removed the corresponding list entry immediately.
+  // The entry is only actually removed from the ListView when the remove animation
+  // finishes. The entry is added to _outgoingItems when removeItem is called
+  // and removed from _outgoingItems when the remove animation finishes.
+
+  int _indexToItemIndex(int index) {
+    int itemIndex = index;
+    for (_ActiveItem item in _outgoingItems) {
+      if (item.itemIndex <= itemIndex)
+        itemIndex += 1;
+      else
+        break;
+    }
+    return itemIndex;
+  }
+
+  int _itemIndexToIndex(int itemIndex) {
+    int index = itemIndex;
+    for (_ActiveItem item in _outgoingItems) {
+      assert(item.itemIndex != itemIndex);
+      if (item.itemIndex < itemIndex)
+        index -= 1;
+      else
+        break;
+    }
+    return index;
+  }
+
+  /// Insert an item at [index] and start an animation that will be passed
+  /// to [AnimatedList.itemBuilder] when the item is visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insert] method:
+  /// it increases the length of the list by one and shifts all items at or
+  /// after [index] towards the end of the list.
+  void insertItem(int index, { Duration duration = _kDuration }) {
+    assert(index != null && index >= 0);
+    assert(duration != null);
+
+    final int itemIndex = _indexToItemIndex(index);
+    assert(itemIndex >= 0 && itemIndex <= _itemsCount);
+
+    // Increment the incoming and outgoing item indices to account
+    // for the insertion.
+    for (_ActiveItem item in _incomingItems) {
+      if (item.itemIndex >= itemIndex)
+        item.itemIndex += 1;
+    }
+    for (_ActiveItem item in _outgoingItems) {
+      if (item.itemIndex >= itemIndex)
+        item.itemIndex += 1;
+    }
+
+    final AnimationController controller = AnimationController(duration: duration, vsync: this);
+    final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
+    setState(() {
+      _incomingItems
+        ..add(incomingItem)
+        ..sort();
+      _itemsCount += 1;
+    });
+
+    controller.forward().then<void>((_) {
+      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
+    });
+  }
+
+  /// Remove the item at [index] and start an animation that will be passed
+  /// to [builder] when the item is visible.
+  ///
+  /// Items are removed immediately. After an item has been removed, its index
+  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
+  /// item will still appear in the list for [duration] and during that time
+  /// [builder] must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.remove] method:
+  /// it decreases the length of the list by one and shifts all items at or
+  /// before [index] towards the beginning of the list.
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    assert(index != null && index >= 0);
+    assert(builder != null);
+    assert(duration != null);
+
+    final int itemIndex = _indexToItemIndex(index);
+    assert(itemIndex >= 0 && itemIndex < _itemsCount);
+    assert(_activeItemAt(_outgoingItems, itemIndex) == null);
+
+    final _ActiveItem incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
+    final AnimationController controller = incomingItem?.controller
+        ?? AnimationController(duration: duration, value: 1.0, vsync: this);
+    final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
+    setState(() {
+      _outgoingItems
+        ..add(outgoingItem)
+        ..sort();
+    });
+
+    controller.reverse().then<void>((void value) {
+      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
+
+      // Decrement the incoming and outgoing item indices to account
+      // for the removal.
+      for (_ActiveItem item in _incomingItems) {
+        if (item.itemIndex > outgoingItem.itemIndex)
+          item.itemIndex -= 1;
+      }
+      for (_ActiveItem item in _outgoingItems) {
+        if (item.itemIndex > outgoingItem.itemIndex)
+          item.itemIndex -= 1;
+      }
+
+      setState(() {
+        _itemsCount -= 1;
+      });
+    });
+  }
+
+  Widget _itemBuilder(BuildContext context, int itemIndex) {
+    if (itemIndex >= _itemsCount)
+      return null;
+
+    final _ActiveItem outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
+    if (outgoingItem != null)
+      return outgoingItem.removedItemBuilder(context, outgoingItem.controller.view);
+
+    final _ActiveItem incomingItem = _activeItemAt(_incomingItems, itemIndex);
+    final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
+    return itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
+  }
+
 
 }
 
@@ -250,7 +394,7 @@ class AnimatedListState extends _AnimatedListBaseState<AnimatedList> {
   @override
   Widget build(BuildContext context) {
     return ListView.custom(
-      childrenDelegate: controller.delegate,
+      childrenDelegate: delegate,
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
       controller: widget.controller,
@@ -362,260 +506,7 @@ class SliverAnimatedListState extends _AnimatedListBaseState<SliverAnimatedList>
   @override
   Widget build(BuildContext context) {
     return SliverList(
-      delegate: controller.delegate,
+      delegate: delegate,
     );
   }
-}
-
-/// Interface that provides methods to add and remove items from a list. The
-/// operations performed on this model will be reflected by animating the items
-/// in a list.
-abstract class AnimatedListModel {
-
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
-  void insertItem(int index, {Duration duration = _kDuration});
-
-  /// Remove the item at [index] and start an animation that will be passed
-  /// to [builder] when the item is visible.
-  ///
-  /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
-  /// item will still appear in the list for [duration] and during that time
-  /// [builder] must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.remove] method:
-  /// it decreases the length of the list by one and shifts all items at or
-  /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder,
-      {Duration duration = _kDuration});
-}
-
-class _AnimatedListController implements AnimatedListModel {
-
-  _AnimatedListController(
-      {@required this.onDelegateChanged,
-        @required this.itemBuilder,
-        @required this.vsync,
-        int initialItemsCount}) {
-    _itemsCount = initialItemsCount ?? 0;
-
-    _currentDelegate = _SliverAnimatedBuilderDelegate(
-        incomingItems: <_ActiveItem>[],
-        outgoingItems: <_ActiveItem>[],
-        itemBuilder: itemBuilder,
-        itemsCount: _itemsCount);
-  }
-
-  final ValueChanged<SliverChildDelegate> onDelegateChanged;
-  SliverChildDelegate _currentDelegate;
-
-  /// A delegate for a [SliverList] that will build the current list items and
-  /// animate them accordingly.
-  SliverChildDelegate get delegate => _currentDelegate;
-
-  final TickerProvider vsync;
-  final AnimatedListItemBuilder itemBuilder;
-
-  final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
-  final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
-  int _itemsCount;
-
-  void _notifyDelegateChanged() {
-    _currentDelegate = _SliverAnimatedBuilderDelegate(
-      incomingItems: _incomingItems,
-      outgoingItems: _outgoingItems,
-      itemsCount: _itemsCount,
-      itemBuilder: itemBuilder,
-    );
-    onDelegateChanged(delegate);
-  }
-
-  /// Release the resources used by this object. The object is no longer usable
-  /// after this method is called.
-  ///
-  /// This will dispose all ongoing item animations.
-  void dispose() {
-    for (_ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
-      item.controller.dispose();
-    }
-  }
-
-  @override
-  void insertItem(int index, {Duration duration = _kDuration}) {
-    assert(index != null && index >= 0);
-    assert(duration != null);
-
-    final int itemIndex = _indexToItemIndex(index, _outgoingItems);
-    assert(itemIndex >= 0 && itemIndex <= _itemsCount);
-
-    // Increment the incoming and outgoing item indices to account
-    // for the insertion.
-    for (_ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex)
-        item.itemIndex += 1;
-    }
-    for (_ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex)
-        item.itemIndex += 1;
-    }
-
-    final AnimationController controller =
-    AnimationController(duration: duration, vsync: vsync);
-    final _ActiveItem incomingItem =
-    _ActiveItem.incoming(controller, itemIndex);
-
-    _incomingItems
-      ..add(incomingItem)
-      ..sort();
-    _itemsCount += 1;
-    _notifyDelegateChanged();
-
-    controller.forward().then<void>((_) {
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)
-          .controller
-          .dispose();
-    });
-  }
-
-  @override
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder,
-      {Duration duration = _kDuration}) {
-    assert(index != null && index >= 0);
-    assert(builder != null);
-    assert(duration != null);
-
-    final int itemIndex = _indexToItemIndex(index, _outgoingItems);
-    assert(itemIndex >= 0 && itemIndex < _itemsCount);
-    assert(_activeItemAt(_outgoingItems, itemIndex) == null);
-
-    final _ActiveItem incomingItem =
-    _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller = incomingItem?.controller ??
-        AnimationController(duration: duration, value: 1.0, vsync: vsync);
-    final _ActiveItem outgoingItem =
-    _ActiveItem.outgoing(controller, itemIndex, builder);
-
-    _outgoingItems
-      ..add(outgoingItem)
-      ..sort();
-    _notifyDelegateChanged();
-
-    controller.reverse().then<void>((void value) {
-      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)
-          .controller
-          .dispose();
-
-      // Decrement the incoming and outgoing item indices to account
-      // for the removal.
-      for (_ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
-      }
-      for (_ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
-      }
-
-      _itemsCount -= 1;
-      _notifyDelegateChanged();
-    });
-  }
-
-  _ActiveItem _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
-    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
-    return i == -1 ? null : items.removeAt(i);
-  }
-}
-
-// Delegate for a sliver list that animates incoming and leaving items as
-// instructed by an _AnimatedListController
-class _SliverAnimatedBuilderDelegate extends SliverChildDelegate {
-  _SliverAnimatedBuilderDelegate(
-      {this.incomingItems,
-        this.outgoingItems,
-        this.itemBuilder,
-        this.itemsCount});
-
-  final List<_ActiveItem> incomingItems;
-  final List<_ActiveItem> outgoingItems;
-  final AnimatedListItemBuilder itemBuilder;
-  final int itemsCount;
-
-  @override
-  int get estimatedChildCount => itemsCount;
-
-  @override
-  Widget build(BuildContext context, int index) {
-    if (index >= itemsCount)
-      return null;
-
-    final _ActiveItem outgoingItem = _activeItemAt(outgoingItems, index);
-    if (outgoingItem != null)
-      return outgoingItem.removedItemBuilder(
-          context, outgoingItem.controller.view);
-
-    final _ActiveItem incomingItem = _activeItemAt(incomingItems, index);
-    final Animation<double> animation =
-        incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return itemBuilder(
-        context, _itemIndexToIndex(index, outgoingItems), animation);
-  }
-
-  @override
-  bool shouldRebuild(SliverChildDelegate oldDelegate) => true;
-}
-
-// Incoming and outgoing AnimatedList items.
-class _ActiveItem implements Comparable<_ActiveItem> {
-  _ActiveItem.incoming(this.controller, this.itemIndex)
-      : removedItemBuilder = null;
-  _ActiveItem.outgoing(
-      this.controller, this.itemIndex, this.removedItemBuilder);
-  _ActiveItem.index(this.itemIndex)
-      : controller = null,
-        removedItemBuilder = null;
-
-  final AnimationController controller;
-  final AnimatedListRemovedItemBuilder removedItemBuilder;
-  int itemIndex;
-
-  @override
-  int compareTo(_ActiveItem other) => itemIndex - other.itemIndex;
-}
-
-// The insertItem() and removeItem() index parameters are defined as if the
-// removeItem() operation removed the corresponding list entry immediately.
-// The entry is only actually removed from the ListView when the remove animation
-// finishes. The entry is added to _outgoingItems when removeItem is called
-// and removed from _outgoingItems when the remove animation finishes.
-
-_ActiveItem _activeItemAt(List<_ActiveItem> items, int itemIndex) {
-  final int i = binarySearch(items, _ActiveItem.index(itemIndex));
-  return i == -1 ? null : items[i];
-}
-
-int _indexToItemIndex(int index, List<_ActiveItem> outgoingItems) {
-  int itemIndex = index;
-  for (_ActiveItem item in outgoingItems) {
-    if (item.itemIndex <= itemIndex)
-      itemIndex += 1;
-    else
-      break;
-  }
-  return itemIndex;
-}
-
-int _itemIndexToIndex(int itemIndex, List<_ActiveItem> outgoingItems) {
-  int index = itemIndex;
-  for (_ActiveItem item in outgoingItems) {
-    assert(item.itemIndex != itemIndex);
-    if (item.itemIndex < itemIndex)
-      index -= 1;
-    else
-      break;
-  }
-  return index;
 }
