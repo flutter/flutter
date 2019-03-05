@@ -12,13 +12,14 @@ import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
+import 'package:quiver/core.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
-import '../cache.dart';
 import '../codegen.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
@@ -53,24 +54,23 @@ class BuildRunner extends CodeGenerator {
     final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final String buildScript = flutterProject
+    final String buildSnapshot = flutterProject
         .dartTool
         .childDirectory('build')
         .childDirectory('entrypoint')
-        .childFile('build.dart')
+        .childFile('build.dart.snapshot')
         .path;
     final String scriptPackagesPath = flutterProject
         .dartTool
         .childDirectory('flutter_tool')
         .childFile('.packages')
         .path;
-    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
     final Status status = logger.startProgress('running builders...', timeout: null);
     try {
       final Process buildProcess = await processManager.start(<String>[
-        dartPath,
+        engineDartBinaryPath,
         '--packages=$scriptPackagesPath',
-        buildScript,
+        buildSnapshot,
         'build',
         '--skip-build-script-check',
         '--define', 'flutter_build|kernel=disabled=$disableKernelGeneration',
@@ -95,7 +95,6 @@ class BuildRunner extends CodeGenerator {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(printError);
-      await buildProcess.exitCode;
     } finally {
       status.stop();
     }
@@ -128,31 +127,34 @@ class BuildRunner extends CodeGenerator {
   }
 
   @override
-  Future<void> invalidateBuildScript() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final File buildScript = flutterProject.dartTool
-        .absolute
-        .childDirectory('flutter_tool')
-        .childFile('build.dart');
-    if (!buildScript.existsSync()) {
-      return;
-    }
-    await buildScript.delete();
-  }
-
-  @override
   Future<void> generateBuildScript() async {
     final FlutterProject flutterProject = await FlutterProject.current();
-    final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
-    final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
-    if (fs.file(resultScriptPath).existsSync()) {
-      return;
+    final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
+    final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
+    final File buildScript = entrypointDirectory.childFile('build.dart');
+    final File buildSnapshot = entrypointDirectory.childFile('build.dart.snapshot');
+    final File scriptIdFile = entrypointDirectory.childFile('id');
+    final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
+
+    // Check if contents of builders changed. If so, invalidate build script
+    // and regnerate.
+    final YamlMap builders = await flutterProject.builders;
+    final String newContents = _produceScriptId(builders);
+    if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
+      final String contents = scriptIdFile.readAsStringSync().trim();
+      if (newContents == contents) {
+        return;
+      }
+    }
+    // Clean-up all existing artifacts.
+    if (flutterProject.dartTool.existsSync()) {
+      flutterProject.dartTool.deleteSync(recursive: true);
     }
     final Status status = logger.startProgress('generating build script...', timeout: null);
     try {
-      fs.directory(generatedDirectory).createSync(recursive: true);
-
-      final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
+      generatedDirectory.createSync(recursive: true);
+      entrypointDirectory.createSync(recursive: true);
+      flutterProject.dartTool.childDirectory('build').childDirectory('generated').createSync(recursive: true);
       final StringBuffer stringBuffer = StringBuffer();
 
       stringBuffer.writeln('name: flutter_tool');
@@ -160,24 +162,38 @@ class BuildRunner extends CodeGenerator {
       final YamlMap builders = await flutterProject.builders;
       if (builders != null) {
         for (String name in builders.keys) {
-          final YamlNode node = builders[name];
+          final Object node = builders[name];
           stringBuffer.writeln('  $name: $node');
         }
       }
       stringBuffer.writeln('  build_runner: any');
       stringBuffer.writeln('  flutter_build:');
       stringBuffer.writeln('    sdk: flutter');
-      await syntheticPubspec.writeAsString(stringBuffer.toString());
+      syntheticPubspec.writeAsStringSync(stringBuffer.toString());
 
       await pubGet(
         context: PubContext.pubGet,
-        directory: generatedDirectory,
+        directory: generatedDirectory.path,
         upgrade: false,
         checkLastModified: false,
       );
+      if (!scriptIdFile.existsSync()) {
+        scriptIdFile.createSync(recursive: true);
+      }
+      scriptIdFile.writeAsStringSync(newContents);
       final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
       final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
+      final ProcessResult result = await processManager.run(<String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--snapshot=${buildSnapshot.path}',
+        '--snapshot-kind=app-jit',
+        '--packages=${fs.path.join(generatedDirectory.path, '.packages')}',
+        buildScript.path,
+      ]);
+      if (result.exitCode != 0) {
+        throwToolExit('Error generating build_script snapshot: ${result.stderr}');
+      }
     } finally {
       status.stop();
     }
@@ -200,25 +216,23 @@ class BuildRunner extends CodeGenerator {
     final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final String buildScript = flutterProject
+    final File buildSnapshot = flutterProject
         .dartTool
         .childDirectory('build')
         .childDirectory('entrypoint')
-        .childFile('build.dart')
-        .path;
+        .childFile('build.dart.snapshot');
     final String scriptPackagesPath = flutterProject
         .dartTool
         .childDirectory('flutter_tool')
         .childFile('.packages')
         .path;
-    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
     try {
       final List<String> command = <String>[
-        dartPath,
+        engineDartBinaryPath,
         '--packages=$scriptPackagesPath',
-        buildScript,
+        buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
         '--define', 'flutter_build|kernel=disabled=false',
@@ -278,4 +292,15 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
   void startBuild() {
     buildDaemonClient.startBuild();
   }
+}
+
+// Sorts the builders by name and produces a hashcode of the resulting iterable.
+String _produceScriptId(YamlMap builders) {
+  if (builders == null || builders.isEmpty) {
+    return '0';
+  }
+  final List<String> orderedBuilders = builders.keys
+    .cast<String>()
+    .toList()..sort();
+  return hashObjects(orderedBuilders).toString();
 }
