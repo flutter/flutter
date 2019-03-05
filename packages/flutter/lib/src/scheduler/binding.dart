@@ -193,7 +193,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     window.onBeginFrame = _handleBeginFrame;
     window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    if (_lifecycleState == null) {
+    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
       _handleLifecycleMessage(window.initialLifecycleState);
     }
   }
