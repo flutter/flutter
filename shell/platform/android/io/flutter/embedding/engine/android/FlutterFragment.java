@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
@@ -160,6 +161,8 @@ public class FlutterFragment extends Fragment {
   private FlutterEngine flutterEngine;
   @Nullable
   private FlutterView flutterView;
+  @Nullable
+  private PlatformPlugin platformPlugin;
 
   public FlutterFragment() {
     // Ensure that we at least have an empty Bundle of arguments so that we don't
@@ -181,11 +184,30 @@ public class FlutterFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
+    initializeFlutter(getContextCompat());
+
     // When "retain instance" is true, the FlutterEngine will survive configuration
     // changes. Therefore, we create a new one only if one does not already exist.
     if (flutterEngine == null) {
       createFlutterEngine();
     }
+
+    // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin
+    // is bound to a specific Activity. Therefore, it needs to be created and configured
+    // every time this Fragment attaches to a new Activity.
+    // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
+    //                    control of the entire window. This is unacceptable for non-fullscreen
+    //                    use-cases.
+    platformPlugin = new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel());
+  }
+
+  private void initializeFlutter(@NonNull Context context) {
+    String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
+    FlutterShellArgs flutterShellArgs = new FlutterShellArgs(
+        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {}
+    );
+
+    FlutterMain.ensureInitializationComplete(context.getApplicationContext(), flutterShellArgs.toArray());
   }
 
   /**
@@ -307,7 +329,72 @@ public class FlutterFragment extends Fragment {
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
   public void onPostResume() {
     Log.d(TAG, "onPostResume()");
-    flutterEngine.getLifecycleChannel().appIsResumed();
+    if (flutterEngine != null) {
+      flutterEngine.getLifecycleChannel().appIsResumed();
+
+      // TODO(mattcarroll): find a better way to handle the update of UI overlays than calling through
+      //                    to platformPlugin. We're implicitly entangling the Window, Activity, Fragment,
+      //                    and engine all with this one call.
+      platformPlugin.onPostResume();
+
+      // TODO(mattcarroll): consider a more abstract way to invoke this behavior. It is very strange for
+      //                    a Fragment to have a seemingly random View responsibility, but this is what
+      //                    existed in the original embedding and I don't have a good alternative yet.
+      flutterView.updateAccessibilityFeatures();
+    } else {
+      Log.w(TAG, "onPostResume() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    Log.d(TAG, "onPause()");
+    flutterEngine.getLifecycleChannel().appIsInactive();
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    Log.d(TAG, "onStop()");
+    flutterEngine.getLifecycleChannel().appIsPaused();
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    Log.d(TAG, "onDestroyView()");
+    flutterView.detachFromFlutterEngine();
+  }
+
+  @Override
+  public void onDetach() {
+    super.onDetach();
+    Log.d(TAG, "onDetach()");
+
+    // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this Fragment,
+    // and this Fragment's Activity.
+    platformPlugin = null;
+
+    // Destroy our FlutterEngine if we're not set to retain it.
+    if (!retainFlutterIsolateAfterFragmentDestruction()) {
+      flutterEngine.destroy();
+      flutterEngine = null;
+    }
+  }
+
+  /**
+   * Returns true if the {@link FlutterEngine} within this {@code FlutterFragment} should outlive
+   * the {@code FlutterFragment}, itself.
+   *
+   * Defaults to false. This method can be overridden in subclasses to retain the
+   * {@link FlutterEngine}.
+   */
+  // TODO(mattcarroll): consider a dynamic determination of this preference based on whether the
+  //                    engine was created automatically, or if the engine was provided manually.
+  //                    Manually provided engines should probably not be destroyed.
+  protected boolean retainFlutterIsolateAfterFragmentDestruction() {
+    return false;
   }
 
   /**
