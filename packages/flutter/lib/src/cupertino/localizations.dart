@@ -208,16 +208,26 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
   const _CupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'en';
+  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
 
   @override
-  Future<CupertinoLocalizations> load(Locale locale) => DefaultCupertinoLocalizations.load(locale);
+  Future<CupertinoLocalizations> load(Locale locale) {
+    switch (locale.languageCode) {
+      case 'fr':
+        return CupertinoLocalizationsFr.load(locale);
+        return SynchronousFuture<CupertinoLocalizations>(const CupertinoLocalizationsFr());
+      case 'en':
+      default:
+        return DefaultCupertinoLocalizations.load(locale);
+        return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
+    }
+  }
 
   @override
   bool shouldReload(_CupertinoLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
+  String toString() => 'DefaultCupertinoLocalizations.delegate()';
 }
 
 /// US English strings for the cupertino widgets.
@@ -354,11 +364,155 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
-  static Future<CupertinoLocalizations> load(Locale locale) {
-    return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
-  }
+  static Future<CupertinoLocalizations> load(Locale locale) => SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
 
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]
   /// to create an instance of this class.
   static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
 }
+
+/// French strings for the cupertino widgets.
+class CupertinoLocalizationsFr implements CupertinoLocalizations {
+  /// Constructs an object that defines the cupertino widgets' localized strings
+  /// for French.
+  ///
+  /// [LocalizationsDelegate] implementations typically call the static [load]
+  /// function, rather than constructing this class directly.
+  const CupertinoLocalizationsFr();
+
+  static const List<String> _shortWeekdays = <String>[
+    'Lun',
+    'Mar',
+    'Mer',
+    'Jeu',
+    'Ven',
+    'Sam',
+    'Dim',
+  ];
+
+  static const List<String> _shortMonths = <String>[
+    'Jan',
+    'Févr.',
+    'Mars',
+    'Avr.',
+    'Mai',
+    'Juin',
+    'Juil.',
+    'Août',
+    'Sept.',
+    'Oct.',
+    'Nov.',
+    'Déc.',
+  ];
+
+  static const List<String> _months = <String>[
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septemebre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ];
+
+
+
+  @override
+  String datePickerYear(int yearIndex) => yearIndex.toString();
+
+  @override
+  String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
+
+  @override
+  String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
+
+  @override
+  String datePickerHour(int hour) => hour.toString();
+
+  @override
+  String datePickerHourSemanticsLabel(int hour)  {
+    if (hour == 1)
+      return '1 heure';
+    return hour.toString() + ' heures';
+  }
+
+  @override
+  String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
+
+  @override
+  String datePickerMinuteSemanticsLabel(int minute) {
+    if (minute == 1)
+      return '1 minute';
+    return minute.toString() + ' minutes';
+  }
+
+  @override
+  String datePickerMediumDate(DateTime date) {
+    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
+        '${_shortMonths[date.month - DateTime.january]} '
+        '${date.day.toString().padRight(2)}';
+  }
+
+  @override
+  DatePickerDateOrder get datePickerDateOrder => DatePickerDateOrder.mdy;
+
+  @override
+  DatePickerDateTimeOrder get datePickerDateTimeOrder => DatePickerDateTimeOrder.date_time_dayPeriod;
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get alertDialogLabel => 'Alerte';
+
+  @override
+  String timerPickerHour(int hour) => hour.toString();
+
+  @override
+  String timerPickerMinute(int minute) => minute.toString();
+
+  @override
+  String timerPickerSecond(int second) => second.toString();
+
+  @override
+  String timerPickerHourLabel(int hour) => hour == 1 ? 'heure' : 'heures';
+
+  @override
+  String timerPickerMinuteLabel(int minute) => 'min';
+
+  @override
+  String timerPickerSecondLabel(int second) => 'sec';
+
+  @override
+  String get cutButtonLabel => 'Couper';
+
+  @override
+  String get copyButtonLabel => 'Copier';
+
+  @override
+  String get pasteButtonLabel => 'Coller';
+
+  @override
+  String get selectAllButtonLabel => 'Sélectionner tout';
+
+  /// Creates an object that provides French resource values for the
+  /// cupertino library widgets.
+  ///
+  /// The [locale] parameter is ignored.
+  ///
+  /// This method is typically used to create a [LocalizationsDelegate].
+  static Future<CupertinoLocalizations> load(Locale locale) => SynchronousFuture<CupertinoLocalizations>(const CupertinoLocalizationsFr());
+
+  /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]
+  /// to create an instance of this class.
+  static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
+}
+
