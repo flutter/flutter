@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="4" by="lint 26.1.1">
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="            assert object.id > ROOT_NODE_ID;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="263"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="            assert object.id == ROOT_NODE_ID;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="266"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert !(hasCheckedState &amp;&amp; hasToggledState);"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="365"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert objects.containsKey(0);"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="611"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="                    assert(object.scrollIndex + visibleChildren &lt;= object.scrollChildren);"
+        errorLine2="                    ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="791"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="                    assert(!object.childrenInHitTestOrder.get(object.scrollIndex).hasFlag(Flag.IS_HIDDEN));"
+        errorLine2="                    ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="792"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert virtualViewId != ROOT_NODE_ID;"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="886"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert objects.containsKey(object.id);"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="920"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert objects.get(object.id) == object;"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="921"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="            assert hadPreviousConfig;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="1065"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="                        assert action.overrideId == -1;"
+        errorLine2="                        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="1194"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="            assert !globalGeometryDirty;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="1216"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert packet.position() % (POINTER_DATA_FIELD_COUNT * BYTE_PER_FIELD) == 0;"
+        errorLine2="    ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/AndroidTouchProcessor.java"
+            line="80"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="        assert 0 &lt;= value;"
+        errorLine2="        ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java"
+            line="112"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_SET_SELECTION`"
+        errorLine1="            result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="237"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_COPY`"
+        errorLine1="            result.addAction(AccessibilityNodeInfo.ACTION_COPY);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="240"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_CUT`"
+        errorLine1="            result.addAction(AccessibilityNodeInfo.ACTION_CUT);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="243"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_PASTE`"
+        errorLine1="            result.addAction(AccessibilityNodeInfo.ACTION_PASTE);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="246"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_START_INT`"
+        errorLine1="                                   AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT)"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="508"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_END_INT`"
+        errorLine1="                                   AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT);"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="510"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_START_INT`"
+        errorLine1="                                    AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT));"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="514"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_END_INT`"
+        errorLine1="                                    AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT));"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="517"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN`"
+        errorLine1="                AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="561"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 17 (current min is 16): `android.provider.Settings.Global#TRANSITION_ANIMATION_SCALE`"
+        errorLine1="                    Settings.Global.TRANSITION_ANIMATION_SCALE);"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="956"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER_PORTRAIT`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="221"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER_LANDSCAPE`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="225"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_FULL_USER`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_FULL_USER;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="229"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 21 (current min is 16): `android.view.HapticFeedbackConstants#CLOCK_TICK`"
+        errorLine1="                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
+            line="121"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 19 (current min is 16): `android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY`"
+        errorLine1="            enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
+            line="151"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_LTR`"
+        errorLine1="        return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="336"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_RTL`"
+        errorLine1="        return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="336"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.accessibility.AccessibilityNodeInfo#setCollectionInfo"
+        errorLine1="                        result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain("
+        errorLine2="                               ~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="320"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#obtain"
+        errorLine1="                        result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain("
+        errorLine2="                                                                                      ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="320"
+            column="87"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.accessibility.AccessibilityNodeInfo#setCollectionInfo"
+        errorLine1="                        result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain("
+        errorLine2="                               ~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="329"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#obtain"
+        errorLine1="                        result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain("
+        errorLine2="                                                                                      ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="329"
+            column="87"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.View#isAttachedToWindow"
+        errorLine1="      if (isAttachedToWindow()) {"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterSurfaceView.java"
+            line="137"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 19 (current min is 16): android.view.View#isAttachedToWindow"
+        errorLine1="      if (isAttachedToWindow()) {"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterTextureView.java"
+            line="148"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetTop"
+        errorLine1="    viewportMetrics.paddingTop = insets.getSystemWindowInsetTop();"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            line="186"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetRight"
+        errorLine1="    viewportMetrics.paddingRight = insets.getSystemWindowInsetRight();"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            line="187"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetLeft"
+        errorLine1="    viewportMetrics.paddingLeft = insets.getSystemWindowInsetLeft();"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            line="189"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetBottom"
+        errorLine1="    viewportMetrics.viewInsetBottom = insets.getSystemWindowInsetBottom();"
+        errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            line="194"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetBottom"
+        errorLine1="        if (insets.getSystemWindowInsetBottom() &lt; screenHeight * keyboardHeightRatioHeuristic) {"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="651"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetBottom"
+        errorLine1="            return insets.getSystemWindowInsetBottom();"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="657"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetTop"
+        errorLine1="        mMetrics.physicalPaddingTop = statusBarHidden ? 0 : insets.getSystemWindowInsetTop();"
+        errorLine2="                                                                   ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="678"
+            column="68"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetRight"
+        errorLine1="            zeroSides == ZeroSides.RIGHT || zeroSides == ZeroSides.BOTH ? 0 : insets.getSystemWindowInsetRight();"
+        errorLine2="                                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="680"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetLeft"
+        errorLine1="            zeroSides == ZeroSides.LEFT || zeroSides == ZeroSides.BOTH ? 0 : insets.getSystemWindowInsetLeft();"
+        errorLine2="                                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="683"
+            column="85"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 20 (current min is 16): android.view.WindowInsets#getSystemWindowInsetBottom"
+        errorLine1="            navigationBarHidden ? calculateBottomKeyboardInset(insets) : insets.getSystemWindowInsetBottom();"
+        errorLine2="                                                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="691"
+            column="81"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 17 (current min is 16): android.provider.Settings.Global#getString"
+        errorLine1="            String value = Settings.Global.getString(getContext().getContentResolver(),"
+        errorLine2="                                           ~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="955"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 19 (current min is 16): android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener"
+        errorLine1="    class TouchExplorationListener implements AccessibilityManager.TouchExplorationStateChangeListener {"
+        errorLine2="                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="966"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 28 (current min is 16): new android.app.ActivityManager.TaskDescription"
+        errorLine1="            ? new TaskDescription(description.label, 0, description.color)"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
+            line="137"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 28 (current min is 16): android.content.pm.PackageInfo#getLongVersionCode"
+        errorLine1="            return packageInfo.getLongVersionCode();"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="37"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                try (InputStream is = manager.open(asset);"
+        errorLine2="                     ^">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="191"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 21 (current min is 16): `android.os.Build#SUPPORTED_ABIS`"
+        errorLine1="                for (String abi : Build.SUPPORTED_ABIS) {"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="247"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                    try (InputStream is = zipFile.getInputStream(entry)) {"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="284"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                        try (InputStream is = apkFile.getInputStream(origEntry)) {"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="300"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                        try (InputStream is = manager.open(asset)) {"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="305"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                    try (OutputStream os = new FileOutputStream(output)) {"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="312"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                    try (InputStream is = zipFile.getInputStream(entry);"
+        errorLine2="                         ^">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="317"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                try (InputStream input = connection.getInputStream()) {"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="132"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="                    try (OutputStream output = new FileOutputStream(localFile)) {"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="134"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Try-with-resources requires API level 19 (current min is 16)"
+        errorLine1="            try (InputStream is = manager.open(fn)) {"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="329"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;21&quot; />"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/AndroidManifest.xml"
+            line="8"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="HardcodedDebugMode"
+        message="Avoid hardcoding the debug mode; leaving it out allows debug and release builds to automatically assign one"
+        errorLine1="    &lt;application android:label=&quot;Flutter Shell&quot; android:name=&quot;FlutterApplication&quot; android:debuggable=&quot;true&quot;>"
+        errorLine2="                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/AndroidManifest.xml"
+            line="13"
+            column="82"/>
+    </issue>
+
+    <issue
+        id="UnsafeDynamicallyLoadedCode"
+        message="Dynamically loading code using `load` is risky, please use `loadLibrary` instead when possible"
+        errorLine1="                System.load(lib.getAbsolutePath());"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java"
+            line="164"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `ResourceUpdater` which has field `context` pointing to `Context`); this is a memory leak (and also breaks Instant Run)"
+        errorLine1="    private static ResourceUpdater sResourceUpdater;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `ResourceExtractor` which has field `mContext` pointing to `Context`); this is a memory leak (and also breaks Instant Run)"
+        errorLine1="    private static ResourceExtractor sResourceExtractor;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="This AsyncTask class should be static or leaks might occur (io.flutter.view.ResourceCleaner.CleanTask)"
+        errorLine1="    private class CleanTask extends AsyncTask&lt;Void, Void, Void> {"
+        errorLine2="                  ~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java"
+            line="22"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="This AsyncTask class should be static or leaks might occur (io.flutter.view.ResourceExtractor.ExtractTask)"
+        errorLine1="    private class ExtractTask extends AsyncTask&lt;Void, Void, Void> {"
+        errorLine2="                  ~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="43"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="This AsyncTask class should be static or leaks might occur (io.flutter.view.ResourceUpdater.DownloadTask)"
+        errorLine1="    private class DownloadTask extends AsyncTask&lt;String, String, Void> {"
+        errorLine2="                  ~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="92"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="            Log.i(TAG,"
+        errorLine2="            ^">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="1082"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.println(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="        Log.println(level, tag, errorMessage + details);"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/common/ErrorLogResult.java"
+            line="33"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="            Log.i(TAG, &quot;Cleaning &quot; + mFilesToDelete.length + &quot; resources.&quot;);"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                Log.i(TAG, &quot;Extracted baseline resource &quot; + resource);"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="196"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                Log.i(TAG, &quot;Extracted override resource &quot; + entry.getName());"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
+            line="323"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                Log.i(TAG, &quot;Checking for updates at &quot; + unresolvedURL);"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="102"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                Log.i(TAG, &quot;Resolved update URL &quot; + resolvedURL);"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="117"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                Log.i(TAG, &quot;HTTP response code &quot; + responseCode);"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="120"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                    Log.i(TAG, &quot;Downloading update &quot; + unresolvedURL);"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="133"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="LogConditional"
+        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
+        errorLine1="                        Log.i(TAG, &quot;Update downloaded in &quot; + totalMillis / 100 / 10. + &quot;s&quot;);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceUpdater.java"
+            line="142"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseSparseArrays"
+        message="Use `new SparseArray&lt;SemanticsObject>(...)` instead for better performance"
+        errorLine1="        objects = new HashMap&lt;>();"
+        errorLine2="                  ~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="137"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UseSparseArrays"
+        message="Use `new SparseArray&lt;CustomAccessibilityAction>(...)` instead for better performance"
+        errorLine1="        customAccessibilityActions = new HashMap&lt;>();"
+        errorLine2="                                     ~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
+            line="138"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UseSparseArrays"
+        message="Use `new SparseArray&lt;BinaryReply>(...)` instead for better performance"
+        errorLine1="    this.pendingReplies = new HashMap&lt;>();"
+        errorLine2="                          ~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java"
+            line="43"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseSparseArrays"
+        message="Use `new SparseArray&lt;VirtualDisplayController>(...)` instead for better performance"
+        errorLine1="        vdControllers = new HashMap&lt;>();"
+        errorLine2="                        ~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="57"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
+        errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
+        errorLine2="                 ~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            line="307"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
+        errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
+        errorLine2="                   ~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="498"
+            column="20"/>
+    </issue>
+
+</issues>

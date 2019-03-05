@@ -57,7 +57,15 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     return -1;
   }
 
-  final IOSink projectXml = File('./project.xml').openWrite();
+  if (argResults['rebaseline']) {
+    print('Removing previous baseline.xml...');
+    final File baselineXml = File(baselineXmlPath);
+    if (baselineXml.existsSync()) {
+      await baselineXml.delete();
+    }
+  }
+  print('Preparing projext.xml...');
+  final IOSink projectXml = File(projectXmlPath).openWrite();
   projectXml.write(
       '''<!-- THIS FILE IS GENERATED. PLEASE USE THE INCLUDED DART PROGRAM  WHICH -->
 <!-- WILL AUTOMATICALLY FIND ALL .java FILES AND INCLUDE THEM HERE       -->
@@ -79,57 +87,67 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   await projectXml.close();
 
   print('Wrote project.xml, starting lint...');
-  final ProcessResult result = await processManager.run(
+  final Process lintProcess = await processManager.start(
     <String>[
       path.join(androidSdkDir.path, 'tools', 'bin', 'lint'),
       '--project',
-      './project.xml',
+      projectXmlPath,
       '--html',
       argResults['out'],
       '--showall',
       '--exitcode', // Set non-zero exit code on errors
       '-Wall',
       '-Werror',
+      '--baseline',
+      baselineXmlPath,
     ],
   );
-  if (result.stderr != null) {
-    print('Lint tool had internal errors:');
-    print(result.stderr);
-  }
-  print(result.stdout);
-  return result.exitCode;
+  lintProcess.stdout.pipe(stdout);
+  lintProcess.stderr.pipe(stderr);
+  return await lintProcess.exitCode;
 }
 
+/// Prepares an [ArgParser] for this script.
 ArgParser setupOptions() {
   final ArgParser argParser = ArgParser();
-  argParser.addOption(
-    'in',
-    help: 'The path to `engine/src`.',
-    defaultsTo: path.relative(
-      path.join(
-        path.dirname(
-          path.dirname(path.dirname(path.fromUri(Platform.script))),
+  argParser
+    ..addOption(
+      'in',
+      help: 'The path to `engine/src`.',
+      defaultsTo: path.relative(
+        path.join(
+          projectDir,
+          '..',
+          '..',
+          '..',
         ),
-        '..',
-        '..',
       ),
-    ),
-  );
-  argParser.addOption(
-    'out',
-    help: 'The path to write the generated the HTML report to.',
-    defaultsTo: 'lint_report',
-  );
-  argParser.addFlag(
-    'help',
-    help: 'Print usage of the command.',
-    negatable: false,
-    defaultsTo: false,
-  );
+    )
+    ..addOption(
+      'out',
+      help: 'The path to write the generated the HTML report to.',
+      defaultsTo: path.join(projectDir, 'lint_report'),
+    )
+    ..addFlag(
+      'help',
+      help: 'Print usage of the command.',
+      negatable: false,
+      defaultsTo: false,
+    )
+    ..addFlag(
+      'rebaseline',
+      help: 'Recalculates the baseline for errors and warnings '
+          'in this project.',
+      negatable: false,
+      defaultsTo: false,
+    );
 
   return argParser;
 }
 
+/// Checks that `java` points to Java 1.8.
+///
+/// The SDK lint tool may not work with Java > 1.8.
 Future<void> checkJava1_8() async {
   print('Checking Java version...');
   final ProcessResult javaResult = await processManager.run(
@@ -146,3 +164,18 @@ Future<void> checkJava1_8() async {
         'If this process fails, please retry using Java 1.8.');
   }
 }
+
+/// The root directory of this project.
+String get projectDir => path.dirname(
+      path.dirname(
+        path.fromUri(Platform.script),
+      ),
+    );
+
+/// The path to use for project.xml, which tells the linter where to find source
+/// files.
+String get projectXmlPath => path.join(projectDir, 'project.xml');
+
+/// The path to use for baseline.xml, which tells the linter what errors or
+/// warnings to ignore.
+String get baselineXmlPath => path.join(projectDir, 'baseline.xml');
