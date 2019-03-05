@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
-import 'android/android_workflow.dart' show kAndroidSdkBuildToolsMinVersion, kAndroidSdkMinVersion;
 import 'android/gradle.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
