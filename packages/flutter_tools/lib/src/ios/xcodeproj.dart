@@ -172,7 +172,7 @@ class XcodeProjectInterpreter {
           <String>[_executable, '-list'],
           workingDirectory: projectPath,
         ).timeout(const Duration(seconds: 10));
-        // Its okay for this call to fail - it will if the project is
+        // It's okay for this call to fail - it will if the project is
         // misconfigured. We just don't want it to timeout or hang.
         out = result.toString();
         break;
