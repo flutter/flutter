@@ -10,8 +10,17 @@ cd flutter/ci/licenses_golden
 patch -p2 < my/patch/file
 ```
 
-## Regenerate License Files (Only works on Linux)
-To update the golden license files, make sure you've rebased your branch to the latest upstream master and then run the following in this directory:
+## Check for license changes (Only works on Linux)
+
+This script has two sets of output files: "goldens", which describe
+the current license state of the repository, and the actual real
+LICENSE file, which is what matters.
+
+We look at changes to the goldens to determine if there are any actual
+changes to the licenses.
+
+To update the goldens, make sure you've rebased your branch to the
+latest upstream master and then run the following in this directory:
 
 ```
 pub get
@@ -20,9 +29,29 @@ rm -rf ../../../out/licenses
 dart lib/main.dart --src ../../.. --out ../../../out/licenses --golden ../../ci/licenses_golden
 ```
 
-Then copy any affected files from `../../../out/licenses` to `../../ci/licenses_golden` and add them to your change.
+In order for the license script to work correctly, you need to remove
+any untracked files inside `engine/src` (the buildroot), not just
+`engine/src/flutter`.
 
-The `sky/packages/sky_engine/LICENSE` file is included in product releases and should be updated any time the golden file changes in a way that involves changes to anything other than the FILE lines.  To update this file, run:
+Once the script has finished, copy any affected files from
+`../../../out/licenses` to `../../ci/licenses_golden` and add them to
+your change, and examine the diffs to see what changed.
+
+```
+cp ../../../out/licenses/* ../../ci/licenses_golden
+git diff
+```
+
+If the only changes are to what files are included, then you're good
+to go. However, if any of the _licenses_ changed, whether new licenses
+are added, old ones removed, or any have their content changed in
+_any_ way (including, e.g., whitespace changes), or if the affected
+libraries change, **you must update the actual license file**.
+
+The `sky/packages/sky_engine/LICENSE` file is the one actually
+included in product releases and the one that should be updated any
+time the golden file changes in a way that involves changes to
+anything other than the `FILE` lines. To update this file, run:
 
 ```
 pub get
@@ -30,4 +59,7 @@ gclient sync
 dart lib/main.dart --release --src ../../.. --out ../../../out/licenses > ../../sky/packages/sky_engine/LICENSE
 ```
 
-**In order for the license script to work, please remove all untracked files inside `engine/src` (not just `engine/src/flutter`)**
+The bots do not verify that you did this step, it's important that you
+do it! When reviewing patches, if you see a change to the golden
+files, check to see if there's a corresponding change to the LICENSE
+file!

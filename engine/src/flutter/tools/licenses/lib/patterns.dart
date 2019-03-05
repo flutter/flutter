@@ -980,14 +980,14 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
-    licenseIndices: const <int>[3],
-    versionIndicies: const <int, int>{ 3:4 },
+    licenseIndices: const <int>[3], // 5 is lgpl, which we're actively not selecting
+    versionIndicies: const <int, int>{ 3:4 }, // 5:6 for lgpl
     pattern: RegExp(
       kIndent +
       r'(?:Version: [GMPL/012. ]+ *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
-      r'^\1\2)?The contents of this file are subject to the Mozilla Public License Version *\n'
-      r'^\1\2(?:1\.1) \(the "License"\); you may not use this file except in compliance with *\n'
+      r'^\1\2)?The contents of this file are subject to the (Mozilla Public License) Version *\n'
+      r'^\1\2(1\.1) \(the "License"\); you may not use this file except in compliance with *\n'
       r'^\1\2the License\. +You may obtain a copy of the License at *\n'
       r'^\1\2http://www\.mozilla\.org/MPL/ *\n'
       r'^(?:(?:\1\2? *)? *\n)*'

@@ -1184,7 +1184,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
           result.addAll(licenses);
           progress.advance(success: true);
         } catch (e, stack) {
-          system.stderr.writeln('error searching for copyright in: ${file.io}\n$e');
+          system.stderr.writeln('\nerror searching for copyright in: ${file.io}\n$e');
           if (e is! String)
             system.stderr.writeln(stack);
           system.stderr.writeln('\n');
@@ -2256,6 +2256,9 @@ Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
 
   final List<License> licenses = Set<License>.from(componentRoot.getLicenses(progress).toList()).toList();
 
+  if (progress.hadErrors)
+    throw 'Had failures while collecting licenses.';
+
   sink.writeln('UNUSED LICENSES:\n');
   final List<String> unusedLicenses = licenses
     .where((License license) => !license.isUsed)
@@ -2268,6 +2271,38 @@ Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
   sink.writeln('USED LICENSES:\n');
   final List<License> usedLicenses = licenses.where((License license) => license.isUsed).toList();
   final List<String> output = usedLicenses.map((License license) => license.toString()).toList();
+  for (int index = 0; index < output.length; index += 1) {
+    // The strings we look for here are strings which we do not expect to see in
+    // any of the licenses we use. They either represent examples of misparsing
+    // licenses (issues we've previously run into and fixed), or licenses we
+    // know we are trying to avoid (e.g. the GPL, or licenses that only apply to
+    // test content which shouldn't get built at all).
+    // If you find that one of these tests is getting hit, and it's not obvious
+    // to you why the relevant license is a problem, please ask around (e.g. try
+    // asking Hixie). Do not merely remove one of these checks, sometimes the
+    // issues involved are relatively subtle.
+    if (output[index].contains('Version: MPL 1.1/GPL 2.0/LGPL 2.1'))
+      throw 'Unexpected trilicense block found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('The contents of this file are subject to the Mozilla Public License Version'))
+      throw 'Unexpected MPL block found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('You should have received a copy of the GNU'))
+      throw 'Unexpected GPL block found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('BoringSSL is a fork of OpenSSL'))
+      throw 'Unexpected legacy BoringSSL block found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('Contents of this folder are ported from'))
+      throw 'Unexpected block found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('https://github.com/w3c/web-platform-tests/tree/master/selectors-api'))
+      throw 'Unexpected W3C content found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('http://www.w3.org/Consortium/Legal/2008/04-testsuite-copyright.html'))
+      throw 'Unexpected W3C copyright found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('It is based on commit'))
+      throw 'Unexpected content found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('The original code is covered by the dual-licensing approach described in:'))
+      throw 'Unexpected old license reference found in: ${usedLicenses[index].origin}';
+    if (output[index].contains('must choose'))
+      throw 'Unexpected indecisiveness found in: ${usedLicenses[index].origin}';
+  }
+
   output.sort();
   sink.writeln(output.join('\n\n'));
   sink.writeln('Total license count: ${licenses.length}');
@@ -2396,17 +2431,3 @@ Future<void> main(List<String> arguments) async {
     system.exit(1);
   }
 }
-
-// Sanity checks:
-//
-// The following substrings shouldn't be in the output:
-//   Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//   The contents of this file are subject to the Mozilla Public License Version
-//   You should have received a copy of the GNU
-//   BoringSSL is a fork of OpenSSL
-//   Contents of this folder are ported from
-//   https://github.com/w3c/web-platform-tests/tree/master/selectors-api
-//   It is based on commit
-//   The original code is covered by the dual-licensing approach described in:
-//   http://www.w3.org/Consortium/Legal/2008/04-testsuite-copyright.html
-//   must choose
