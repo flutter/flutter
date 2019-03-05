@@ -378,10 +378,16 @@ public class FlutterView extends SurfaceView
     private static final int kPointerDeviceKindMouse = 1;
     private static final int kPointerDeviceKindStylus = 2;
     private static final int kPointerDeviceKindInvertedStylus = 3;
-    private static final int kPointerDeviceKindUnknown = 4;
+    private static final int kPointerDeviceKindSignal = 4;
+    private static final int kPointerDeviceKindUnknown = 5;
+
+    // Must match the PointerSignalKind enum in pointer.dart.
+    private static final int kPointerSignalKindNone = 0;
+    private static final int kPointerSignalKindScroll = 1;
+    private static final int kPointerSignalKindUnknown = 2;
 
     // These values must match the unpacking code in hooks.dart.
-    private static final int kPointerDataFieldCount = 21;
+    private static final int kPointerDataFieldCount = 24;
     private static final int kPointerBytesPerField = 8;
 
     private int getPointerChangeForAction(int maskedAction) {
@@ -436,11 +442,14 @@ public class FlutterView extends SurfaceView
 
         int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
 
+        int signalKind = kPointerSignalKindNone;
+
         long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
         packet.putLong(timeStamp); // time_stamp
         packet.putLong(pointerChange); // change
         packet.putLong(pointerKind); // kind
+        packet.putLong(signalKind); // signal_kind
         packet.putLong(event.getPointerId(pointerIndex)); // device
         packet.putDouble(event.getX(pointerIndex)); // physical_x
         packet.putDouble(event.getY(pointerIndex)); // physical_y
@@ -492,6 +501,9 @@ public class FlutterView extends SurfaceView
         }
 
         packet.putLong(pointerData); // platformData
+
+        packet.putDouble(0.0); // scroll_delta_x
+        packet.putDouble(0.0); // scroll_delta_y
     }
 
     @Override

@@ -277,6 +277,7 @@ typedef struct {
   double pixel_ratio;
 } FlutterWindowMetricsEvent;
 
+// The phase of the pointer event.
 typedef enum {
   kCancel,
   kUp,
@@ -286,6 +287,12 @@ typedef enum {
   kRemove,
   kHover,
 } FlutterPointerPhase;
+
+// The type of a pointer signal.
+typedef enum {
+  kFlutterPointerSignalKindNone,
+  kFlutterPointerSignalKindScroll,
+} FlutterPointerSignalKind;
 
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterPointerEvent).
@@ -297,6 +304,9 @@ typedef struct {
   // An optional device identifier. If this is not specified, it is assumed that
   // the embedder has no multitouch capability.
   int32_t device;
+  FlutterPointerSignalKind signal_kind;
+  double scroll_delta_x;
+  double scroll_delta_y;
 } FlutterPointerEvent;
 
 struct _FlutterPlatformMessageResponseHandle;
