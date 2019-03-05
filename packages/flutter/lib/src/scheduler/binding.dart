@@ -229,6 +229,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// Initializes the [lifecycleState] with the data from the window.
   ///
   /// An optional [testWindow] may be provided to supply test values.
+  ///
+  /// Once the lifecycleState is initialized, it cannot be initialized again.
+  @protected
   void initLifecycleState([Window testWindow]) {
     if (_lifecycleState == null && _parseAppLifecycleMessage((testWindow ?? window).initialLifecycleState) != null) {
       _handleLifecycleMessage((testWindow ?? window).initialLifecycleState);

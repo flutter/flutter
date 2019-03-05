@@ -168,6 +168,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // doesn't get generated for tests.
   }
 
+  // Force-initialize the lifecycle state in window. This may be used by testing
+  // frameworks to initialize the state with custom values.
   void forceInitLifecycleState() {
     initLifecycleState(_window);
   }
