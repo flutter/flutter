@@ -491,8 +491,12 @@ class TextStyle extends Diagnosticable {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
-  /// The thickness of the decoration as a muliplier of the thickness specified
-  /// by the font.
+  /// The thickness of the decoration stroke as a muliplier of the thickness
+  /// defined by the font.
+  ///
+  /// The font provides a base stroke width for decorations which scales off
+  /// of the [fontSize]. This property may be used to achieve a thinner or
+  /// thicker decoration stroke, without changing the [fontSize].
   final double decorationThickness;
 
   /// A human-readable description of this text style.
