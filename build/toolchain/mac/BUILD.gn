@@ -14,6 +14,7 @@ assert(host_os == "mac")
 
 import("//build/config/sysroot.gni")
 import("//build/toolchain/clang.gni")
+import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/goma.gni")
 
 if (use_goma) {
@@ -48,6 +49,14 @@ template("mac_toolchain") {
     cxx = invoker.cxx
     ld = invoker.ld
     ar = invoker.ar
+
+    if (use_clang_static_analyzer) {
+      analyzer_wrapper =
+          rebase_path("//build/toolchain/clang_static_analyzer_wrapper.py",
+                      root_build_dir) + "  --mode=clang"
+      cc = analyzer_wrapper + " ${cc}"
+      cxx = analyzer_wrapper + " ${cxx}"
+    }
 
     # Make these apply to all tools below.
     lib_switch = "-l"

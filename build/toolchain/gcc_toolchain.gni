@@ -6,6 +6,12 @@
 concurrent_links = exec_script("get_concurrent_links.py", [], "value")
 
 import("//build/toolchain/clang.gni")
+import("//build/toolchain/clang_static_analyzer.gni")
+
+# Path to the Clang static analysis wrapper script.
+analyzer_wrapper =
+    rebase_path("//build/toolchain/clang_static_analyzer_wrapper.py",
+                root_build_dir) + " --mode=clang"
 
 # This template defines a toolchain for something that works like gcc
 # (including clang).
@@ -56,11 +62,22 @@ template("gcc_toolchain") {
     assert(defined(invoker.toolchain_os),
            "gcc_toolchain() must specify a \"toolchain_os\"")
 
+    # Use the static analysis script if static analysis is turned on
+    # AND the tool has not opted out by setting
+    # 'is_clang_static_analysis_supported' to false.
+    if (is_clang && use_clang_static_analyzer &&
+        (!defined(invoker.is_clang_analysis_supported) ||
+         invoker.is_clang_analysis_supported)) {
+      compiler_prefix = "${analyzer_wrapper} "
+    } else {
+      compiler_prefix = ""
+    }
+
     # We can't do string interpolation ($ in strings) on things with dots in
     # them. To allow us to use $cc below, for example, we create copies of
     # these values in our scope.
-    cc = invoker.cc
-    cxx = invoker.cxx
+    cc = compiler_prefix + invoker.cc
+    cxx = compiler_prefix + invoker.cxx
     ar = invoker.ar
     ld = invoker.ld
     readelf = invoker.readelf
