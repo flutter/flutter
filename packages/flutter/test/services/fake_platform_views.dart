@@ -223,7 +223,7 @@ class FakeIosPlatformViewsController {
     final int id = args['id'];
     gesturesRejected[id] += 1;
     return Future<int>.sync(() => null);
-    }
+  }
 
   Future<dynamic> _dispose(MethodCall call) {
     final int id = call.arguments;

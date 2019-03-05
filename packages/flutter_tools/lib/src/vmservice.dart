@@ -1428,14 +1428,14 @@ class FlutterView extends ServiceObject {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<ServiceEvent> subscription =
       (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
-      // TODO(johnmccutchan): Listen to the debug stream and catch initial
-      // launch errors.
-      if (event.kind == ServiceEvent.kIsolateRunnable) {
-        printTrace('Isolate is runnable.');
-        if (!completer.isCompleted)
-          completer.complete();
-      }
-    });
+        // TODO(johnmccutchan): Listen to the debug stream and catch initial
+        // launch errors.
+        if (event.kind == ServiceEvent.kIsolateRunnable) {
+          printTrace('Isolate is runnable.');
+          if (!completer.isCompleted)
+            completer.complete();
+        }
+      });
     await owner.vm.runInView(viewId,
                              entryUri,
                              packagesUri,

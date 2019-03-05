@@ -2246,7 +2246,7 @@ class BuildOwner {
           context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
           debugPreviousBuildTarget = _debugCurrentBuildTarget;
           _debugCurrentBuildTarget = context;
-         return true;
+          return true;
         }());
         _dirtyElementsNeedsResorting = false;
         try {

@@ -37,7 +37,7 @@ class ChannelCommand extends FlutterCommand {
       case 0:
         await _listChannels(
           showAll: argResults['all'],
-          verbose: globalResults['verbose']
+          verbose: globalResults['verbose'],
         );
         return null;
       case 1:

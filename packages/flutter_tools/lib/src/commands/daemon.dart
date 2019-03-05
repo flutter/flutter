@@ -982,9 +982,8 @@ class _AppRunLogger extends Logger {
           'id': id.toString(),
           'progressId': progressId,
           'finished': true,
-        },
-      );
-    })..start();
+        });
+      })..start();
     return _status;
   }
 
