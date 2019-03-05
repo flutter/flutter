@@ -309,9 +309,9 @@ void main() {
     expect(find.text('route'), findsNothing);
 
 
-    // Run the dismiss animation 75%, which exposes the route "push" button,
-    // and then press the button. MaterialPageTransition duration is 300ms,
-    // 275 = 300 * 0.75.
+    // Run the dismiss animation 60%, which exposes the route "push" button,
+    // and then press the button. A drag dropped animation is 400ms when dropped
+    // exactly halfway. It follows a curve that is very steep initially.
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
@@ -319,10 +319,19 @@ void main() {
     expect(find.text('push'), findsNothing);
 
     gesture = await tester.startGesture(const Offset(5, 300));
-    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.moveBy(const Offset(400, 0)); // Drag halfway.
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 275)); // partially dismiss "route"
-    expect(find.text('route'), findsOneWidget);
+    await tester.pump(); // Trigger the dropped snapping animation.
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(400, 0),
+    );
+    // Let the dismissing snapping animation go 60%.
+    await tester.pump(const Duration(milliseconds: 240));
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
+      moreOrLessEquals(798, epsilon: 1),
+    );
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
@@ -522,5 +531,88 @@ void main() {
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300, epsilon: 1));
+  });
+
+  testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Text('1'),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Text('2'),
+        );
+      }
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
+
+    await tester.pumpAndSettle();
+
+    final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
+
+    await swipeGesture.moveBy(const Offset(500, 0));
+    await swipeGesture.up();
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(744, epsilon: 1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // Rate of change is slowing down.
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+  });
+
+  testWidgets('Snapped drags forwards and backwards should signal didStopUserGesture', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: const Text('1'),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Text('2'),
+        );
+      }
+    );
+
+    navigatorKey.currentState.push(route2);
+    await tester.pumpAndSettle();
+
+    await tester.dragFrom(const Offset(5, 100), const Offset(100, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100, epsilon: 1));
+    expect(navigatorKey.currentState.userGestureInProgress, true);
+
+    // Didn't drag far enough to snap into dismissing this route.
+    // Each 100px distance takes 100ms to snap back.
+    await tester.pump(const Duration(milliseconds: 101));
+    // Back to the page covering the whole screen.
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0, epsilon: 1));
+    expect(navigatorKey.currentState.userGestureInProgress, false);
+
+    await tester.dragFrom(const Offset(5, 100), const Offset(500, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500, epsilon: 1));
+    expect(navigatorKey.currentState.userGestureInProgress, true);
+
+    // Did go far enough to snap out of this route.
+    await tester.pump(const Duration(milliseconds: 301));
+    // Back to the page covering the whole screen.
+    expect(find.text('2'), findsNothing);
+    // First route covers the whole screen.
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(0, epsilon: 1));
+    expect(navigatorKey.currentState.userGestureInProgress, false);
   });
 }

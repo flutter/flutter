@@ -180,12 +180,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog;
   }
 
-  @override
-  void dispose() {
-    _popGestureInProgress.remove(this);
-    super.dispose();
-  }
-
   /// True if a Cupertino pop gesture is currently underway for [route].
   ///
   /// This returns true for both the top route and the bottom route of a
@@ -196,13 +190,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
   static bool isPopGestureInProgress(PageRoute<dynamic> route) {
-    return _popGestureInProgress.contains(_animationControllerForTransitionAnimation(route.animation))
-        || _popGestureInProgress.contains(_animationControllerForTransitionAnimation(route.secondaryAnimation));
+    return route.navigator.userGestureInProgress;
   }
-
-  // A set of Animations that are the primary animations of the route
-  // currently in a pop gesture.
-  static final Set<Animation<double>> _popGestureInProgress = Set<Animation<double>>();
 
   /// True if a Cupertino pop gesture is currently underway for this route.
   ///
@@ -242,7 +231,12 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     if (route.fullscreenDialog)
       return false;
     // If we're in an animation already, we cannot be manually swiped.
-    if (route.controller.status != AnimationStatus.completed)
+    if (route.animation.status != AnimationStatus.completed)
+      return false;
+    // If we're being popped into, we also cannot be swiped until the pop above
+    // it completes. This translates to our secondary animation being
+    // dismissed.
+    if (route.secondaryAnimation.status != AnimationStatus.dismissed)
       return false;
     // If we're in a gesture already, we cannot start another.
     if (isPopGestureInProgress(route))
@@ -271,28 +265,11 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  static Animation<double> _animationControllerForTransitionAnimation(Animation<double> animation) {
-    Animation<double> controller = animation;
-    while(controller is ProxyAnimation || controller is TrainHoppingAnimation) {
-      final Animation<double> proxy = controller;
-      if (proxy is ProxyAnimation)
-        controller = proxy.parent;
-
-      if (proxy is TrainHoppingAnimation)
-        controller = proxy.currentTrain;
-    }
-    return controller;
-  }
-
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    final Animation<double> controller = _animationControllerForTransitionAnimation(route.animation);
-
-    assert(!_popGestureInProgress.contains(controller));
     assert(_isPopGestureEnabled(route));
-    _popGestureInProgress.add(controller);
 
     _CupertinoBackGestureController<T> backController;
     backController = _CupertinoBackGestureController<T>(
@@ -301,7 +278,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
       onEnded: () {
         backController?.dispose();
         backController = null;
-        _popGestureInProgress.remove(controller);
       },
     );
     return backController;
@@ -655,7 +631,6 @@ class _CupertinoBackGestureController<T> {
       animateForward = velocity > 0 ? false : true;
     else
       animateForward = controller.value > 0.5 ? true : false;
-
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
@@ -687,9 +662,9 @@ class _CupertinoBackGestureController<T> {
       controller.removeStatusListener(_handleStatusChanged);
     }
     _animating = false;
+    onEnded();
     if (status == AnimationStatus.dismissed)
-      route.navigator.removeRoute(route); // this will cause the route to get disposed, which will dispose us
-    onEnded(); // this will call dispose if popping the route failed to do so
+      route.navigator.removeRoute(route); // This also disposes the route.
   }
 
   void dispose() {
