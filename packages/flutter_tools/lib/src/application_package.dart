@@ -9,11 +9,13 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
+import 'android/android_workflow.dart' show kAndroidSdkBuildToolsMinVersion, kAndroidSdkMinVersion;
 import 'android/gradle.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
+import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -92,9 +94,9 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = androidSdk.latestVersion.aaptPath;
     if (aaptPath == null) {
-      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      printError(userMessages.aaptNotFound);
       return null;
     }
 
