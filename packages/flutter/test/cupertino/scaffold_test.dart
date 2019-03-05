@@ -11,8 +11,8 @@ import '../painting/mocks_for_image_cache.dart';
 void main() {
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           // Default nav bar is translucent.
           navigationBar: CupertinoNavigationBar(
             middle: Text('Title'),
@@ -42,6 +42,7 @@ void main() {
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
 
+    BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -50,12 +51,20 @@ void main() {
           navigationBar: const CupertinoNavigationBar(
             middle: Text('Transparent'),
           ),
-          child: Container(),
+          child: Builder(
+            builder: (BuildContext context) {
+              childContext = context;
+              return Container();
+            },
+          ),
         ),
       ),
     ));
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 100.0);
+    // The shouldn't see a media query view inset because it was consumed by
+    // the scaffold.
+    expect(MediaQuery.of(childContext).viewInsets.bottom, 0);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -146,7 +155,7 @@ void main() {
                     ),
                   )
                   : Stack();
-            }
+            },
           ),
         ),
       ),
@@ -276,8 +285,8 @@ void main() {
 
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           child: Center(),
         ),
       ),
@@ -292,8 +301,8 @@ void main() {
 
   testWidgets('Overrides background color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: const CupertinoPageScaffold(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
           child: Center(),
           backgroundColor: Color(0xFF010203),
         ),

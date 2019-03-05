@@ -10,6 +10,9 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// bool _first;
+
 /// Specifies which of two children to show. See [AnimatedCrossFade].
 ///
 /// The child that is shown will fade in, while the other will fade out.
@@ -35,7 +38,7 @@ enum CrossFadeState {
 /// top child and the bottom child should be keyed using the provided
 /// `topChildKey` and `bottomChildKey` keys respectively.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
@@ -57,6 +60,7 @@ enum CrossFadeState {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
 
 /// A widget that cross-fades between two given children and animates itself
@@ -78,7 +82,7 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 /// [AnimatedCrossFade] is rebuilt with a different value for the
 /// [crossFadeState] property.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This code fades between two representations of the Flutter logo. It depends
 /// on a boolean field `_first`; when `_first` is true, the first logo is shown,
@@ -94,6 +98,7 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 ///   crossFadeState: _first ? CrossFadeState.showFirst : CrossFadeState.showSecond,
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -214,7 +219,7 @@ class AnimatedCrossFade extends StatefulWidget {
         Positioned(
           key: topChildKey,
           child: topChild,
-        )
+        ),
       ],
     );
   }
@@ -243,29 +248,19 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       _controller.value = 1.0;
     _firstAnimation = _initAnimation(widget.firstCurve, true);
     _secondAnimation = _initAnimation(widget.secondCurve, false);
-  }
-
-  Animation<double> _initAnimation(Curve curve, bool inverted) {
-    Animation<double> animation = CurvedAnimation(
-      parent: _controller,
-      curve: curve,
-    );
-
-    if (inverted) {
-      animation = Tween<double>(
-        begin: 1.0,
-        end: 0.0,
-      ).animate(animation);
-    }
-
-    animation.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       setState(() {
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
       });
     });
+  }
 
-    return animation;
+  Animation<double> _initAnimation(Curve curve, bool inverted) {
+    Animation<double> result = _controller.drive(CurveTween(curve: curve));
+    if (inverted)
+      result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
+    return result;
   }
 
   @override
@@ -302,8 +297,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   Widget build(BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
-
+    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
+                                       _controller.status == AnimationStatus.forward;
     Key topKey;
     Widget topChild;
     Animation<double> topAnimation;

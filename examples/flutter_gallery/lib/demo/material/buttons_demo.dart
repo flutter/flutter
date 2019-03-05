@@ -70,6 +70,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildRaisedButton(),
         ),
         exampleCodeTag: _raisedCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/RaisedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'FLAT',
@@ -79,6 +80,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildFlatButton(),
         ),
         exampleCodeTag: _flatCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/FlatButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'OUTLINE',
@@ -88,24 +90,28 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildOutlineButton(),
         ),
         exampleCodeTag: _outlineCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlineButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         demoWidget: buildDropdownButton(),
         exampleCodeTag: _dropdownCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/DropdownButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         demoWidget: buildIconButton(),
         exampleCodeTag: _iconCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/IconButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         demoWidget: buildActionButton(),
         exampleCodeTag: _actionCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/FloatingActionButton-class.html',
       ),
     ];
 
@@ -114,7 +120,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       demos: demos,
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.sentiment_very_satisfied),
+          icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
           onPressed: () {
             setState(() {
               _buttonShape = _buttonShape == null ? const StadiumBorder() : null;
@@ -135,13 +141,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               RaisedButton(
-                child: const Text('RAISED BUTTON'),
+                child: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               const RaisedButton(
-                child: Text('DISABLED'),
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
                 onPressed: null,
               ),
             ],
@@ -151,14 +157,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               RaisedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('RAISED BUTTON'),
+                label: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               RaisedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('DISABLED'),
+                label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 2'),
                 onPressed: null,
               ),
             ],
@@ -178,13 +184,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               FlatButton(
-                child: const Text('FLAT BUTTON'),
+                child: const Text('FLAT BUTTON', semanticsLabel: 'FLAT BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               const FlatButton(
-                child: Text('DISABLED'),
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
                 onPressed: null,
               ),
             ],
@@ -194,14 +200,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               FlatButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 18.0),
-                label: const Text('FLAT BUTTON'),
+                label: const Text('FLAT BUTTON', semanticsLabel: 'FLAT BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               FlatButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 18.0),
-                label: const Text('DISABLED'),
+                label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 4'),
                 onPressed: null,
               ),
             ],
@@ -221,13 +227,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               OutlineButton(
-                child: const Text('OUTLINE BUTTON'),
+                child: const Text('OUTLINE BUTTON', semanticsLabel: 'OUTLINE BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               const OutlineButton(
-                child: Text('DISABLED'),
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
                 onPressed: null,
               ),
             ],
@@ -237,14 +243,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               OutlineButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('OUTLINE BUTTON'),
+                label: const Text('OUTLINE BUTTON', semanticsLabel: 'OUTLINE BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
               OutlineButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('DISABLED'),
+                label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 6'),
                 onPressed: null,
               ),
             ],
@@ -274,7 +280,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown1Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -295,7 +301,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown2Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -317,9 +323,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               },
               items: <String>[
                   'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
-                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
+                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
                  ]
-                .map((String value) {
+                .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -354,12 +360,12 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           const IconButton(
             icon: Icon(
               Icons.thumb_up,
-              semanticLabel: 'Thumbs up',
+              semanticLabel: 'Thumbs not up',
             ),
             onPressed: null,
-          )
+          ),
         ]
-        .map((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
+        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
         .toList(),
       ),
     );
@@ -373,6 +379,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         onPressed: () {
           // Perform some action
         },
+        tooltip: 'floating action button',
       ),
     );
   }

@@ -4,13 +4,18 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class ModalBottomSheetDemo extends StatelessWidget {
   static const String routeName = '/material/modal-bottom-sheet';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Modal bottom sheet')),
+      appBar: AppBar(
+        title: const Text('Modal bottom sheet'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
+      ),
       body: Center(
         child: RaisedButton(
           child: const Text('SHOW BOTTOM SHEET'),
@@ -23,15 +28,15 @@ class ModalBottomSheetDemo extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
-                      fontSize: 24.0
-                    )
-                  )
-                )
+                      fontSize: 24.0,
+                    ),
+                  ),
+                ),
               );
             });
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
   }
 }

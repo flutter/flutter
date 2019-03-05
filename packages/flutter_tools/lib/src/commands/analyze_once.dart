@@ -33,7 +33,7 @@ class AnalyzeOnce extends AnalyzeBase {
   final Directory workingDirectory;
 
   @override
-  Future<Null> analyze() async {
+  Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fs.currentDirectory).path;
 
@@ -68,7 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
 
     // analyze all
-    final Completer<Null> analysisCompleter = Completer<Null>();
+    final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
@@ -87,16 +87,17 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      errors.addAll(fileErrors.errors);
+      // Record the issues found (but filter out to do comments).
+      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
     });
 
     await server.start();
     // Completing the future in the callback can't fail.
-    server.onExit.then((int exitCode) { // ignore: unawaited_futures
+    unawaited(server.onExit.then<void>((int exitCode) {
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
-    });
+    }));
 
     Cache.releaseLockEarly();
 
@@ -106,7 +107,7 @@ class AnalyzeOnce extends AnalyzeBase {
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
     final Status progress = argResults['preamble']
-        ? logger.startProgress('Analyzing $message...')
+        ? logger.startProgress('Analyzing $message...', timeout: kSlowOperation)
         : null;
 
     await analysisCompleter.future;
@@ -132,7 +133,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
-      printStatus(error.toString());
+      printStatus(error.toString(), hangingIndent: 7);
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 

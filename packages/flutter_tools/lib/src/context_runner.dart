@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:quiver/time.dart';
-
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
@@ -19,21 +18,31 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/time.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'fuchsia/fuchsia_sdk.dart';
+import 'fuchsia/fuchsia_workflow.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'linux/linux_workflow.dart';
+import 'macos/macos_workflow.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
+import 'web/compile.dart';
+import 'web/web_device.dart';
+import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
@@ -48,34 +57,45 @@ Future<T> runInContext<T>(
       AndroidStudio: AndroidStudio.latestValid,
       AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
       Cache: () => Cache(),
-      Clock: () => const Clock(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(),
+      ChromeLauncher: () => const ChromeLauncher(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       GenSnapshot: () => const GenSnapshot(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompiler: () => const KernelCompiler(),
+      KernelCompiler: () => experimentalBuildEnabled ? const CodeGeneratingKernelCompiler() : const KernelCompiler(),
+      LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      MacOSWorkflow: () => const MacOSWorkflow(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
+      SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
       Usage: () => Usage(),
+      UserMessages: () => UserMessages(),
+      WindowsWorkflow: () => const WindowsWorkflow(),
+      WebCompiler: () => const WebCompiler(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

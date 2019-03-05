@@ -12,6 +12,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // dynamic _lot;
+// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
@@ -35,14 +36,14 @@ import 'framework.dart';
 /// termination by overriding [afterDone]. Finally, the summary may be updated
 /// on change of stream by overriding [afterDisconnected] and [afterConnected].
 ///
-/// [T] is the type of stream events.
+/// `T` is the type of stream events.
 ///
-/// [S] is the type of interaction summary.
+/// `S` is the type of interaction summary.
 ///
 /// See also:
 ///
-///  * [StreamBuilder], which is specialized to the case where only the most
-///  recent interaction is needed for widget building.
+///  * [StreamBuilder], which is specialized for the case where only the most
+///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
   const StreamBuilderBase({ Key key, this.stream }) : super(key: key);
@@ -160,8 +161,8 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 ///
 /// See also:
 ///
-/// * [AsyncSnapshot], which augments a connection state with information
-/// received from the asynchronous computation.
+///  * [AsyncSnapshot], which augments a connection state with information
+///    received from the asynchronous computation.
 enum ConnectionState {
   /// Not currently connected to any asynchronous computation.
   ///
@@ -186,17 +187,17 @@ enum ConnectionState {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which builds itself based on a snapshot from interacting
-///   with a [Stream].
-/// * [FutureBuilder], which builds itself based on a snapshot from interacting
-///   with a [Future].
+///  * [StreamBuilder], which builds itself based on a snapshot from interacting
+///    with a [Stream].
+///  * [FutureBuilder], which builds itself based on a snapshot from interacting
+///    with a [Future].
 @immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
-      : assert(connectionState != null),
-        assert(!(data != null && error != null));
+    : assert(connectionState != null),
+      assert(!(data != null && error != null));
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
@@ -284,10 +285,10 @@ class AsyncSnapshot<T> {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
-/// itself based on a snapshot from interacting with a [Stream].
-/// * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
-/// itself based on a snapshot from interacting with a [Future].
+///  * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Stream].
+///  * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Future].
 typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
@@ -332,16 +333,11 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// state is `ConnectionState.active`.
 ///
 /// The initial snapshot data can be controlled by specifying [initialData].
-/// You would use this facility to ensure that if the [builder] is invoked
-/// before the first event arrives on the stream, the snapshot carries data of
-/// your choice rather than the default null value.
+/// This should be used to ensure that the first frame has the expected value,
+/// as the builder will always be called before the stream listener has a chance
+/// to be processed.
 ///
-/// See also:
-///
-/// * [StreamBuilderBase], which supports widget building based on a computation
-/// that spans all interactions made with the stream.
-///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [StreamBuilder] configuring a text label to show the
 /// latest bid received for a lot in an auction. Assume the `_lot` field is
@@ -363,25 +359,42 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///   },
 /// )
 /// ```
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], which wraps a [ValueListenable] instead of a
+///    [Stream].
+///  * [StreamBuilderBase], which supports widget building based on a computation
+///    that spans all interactions made with the stream.
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1139 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
-  /// strategy is given by [builder]. The [initialData] is used to create the
-  /// initial snapshot. It is null by default.
+  /// strategy is given by [builder].
+  ///
+  /// The [initialData] is used to create the initial snapshot.
+  ///
+  /// The [builder] must not be null.
   const StreamBuilder({
     Key key,
     this.initialData,
     Stream<T> stream,
-    @required this.builder
-  })
-      : assert(builder != null),
-        super(key: key, stream: stream);
+    @required this.builder,
+  }) : assert(builder != null),
+       super(key: key, stream: stream);
 
-  /// The build strategy currently used by this builder. Cannot be null.
+  /// The build strategy currently used by this builder.
   final AsyncWidgetBuilder<T> builder;
 
-  /// The data that will be used to create the initial snapshot. Null by default.
+  /// The data that will be used to create the initial snapshot.
+  ///
+  /// Providing this value (presumably obtained synchronously somehow when the
+  /// [Stream] was created) ensures that the first frame will show useful data.
+  /// Otherwise, the first frame will be built with the value null, regardless
+  /// of whether a value is available on the stream: since streams are
+  /// asynchronous, no events from the stream can be obtained before the initial
+  /// build.
   final T initialData;
 
   @override
@@ -472,7 +485,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [FutureBuilder] configuring a text label to show the
 /// state of an asynchronous calculation returning a string. Assume the
@@ -497,6 +510,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///   },
 /// )
 /// ```
+/// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
@@ -507,7 +521,7 @@ class FutureBuilder<T> extends StatefulWidget {
     Key key,
     this.future,
     this.initialData,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 

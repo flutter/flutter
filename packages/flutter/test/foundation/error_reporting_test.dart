@@ -38,7 +38,7 @@ Future<StackTrace> getSampleStack() async {
   return await Future<StackTrace>.sync(() => StackTrace.current);
 }
 
-Future<Null> main() async {
+Future<void> main() async {
   final List<String> console = <String>[];
 
   final StackTrace sampleStack = await getSampleStack();
@@ -71,7 +71,7 @@ Future<Null> main() async {
       'Either the assertion indicates an error in the framework itself, or we should provide substantially '
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
@@ -112,7 +112,7 @@ Future<Null> main() async {
       'Either the assertion indicates an error in the framework itself, or we should provide substantially '
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
     ));
     console.clear();
@@ -126,7 +126,7 @@ Future<Null> main() async {
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word'
+      'word word word word word word word word word word word word word word word word word word word word',
     );
     console.clear();
     FlutterError.resetErrorCount();
@@ -152,7 +152,7 @@ Future<Null> main() async {
       'Either the assertion indicates an error in the framework itself, or we should provide substantially '
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'

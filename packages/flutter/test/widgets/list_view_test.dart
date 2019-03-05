@@ -27,7 +27,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({DiagnosticLevel minLevel}) => '$index $alive';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
@@ -176,7 +176,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
-    Future<Null> checkAndScroll([String zero = '0:false']) async {
+    Future<void> checkAndScroll([ String zero = '0:false' ]) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
       expect(find.text('2:false'), findsOneWidget);
@@ -324,7 +324,7 @@ void main() {
             child: Text('$i', textDirection: TextDirection.ltr),
           );
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -499,5 +499,38 @@ void main() {
     );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
+  });
+
+  testWidgets('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              itemExtent: 100.0,
+              children: <Widget>[
+                Container(
+                  height: 100.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          children: <Matcher>[
+            matchesSemantics(hasImplicitScrolling: true),
+          ],
+        ),
+      ],
+    ));
+    handle.dispose();
   });
 }

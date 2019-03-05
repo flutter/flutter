@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'debug.dart';
@@ -21,6 +23,12 @@ const double _kDismissThreshold = 0.4;
 ///
 /// Used by [Dismissible.onDismissed].
 typedef DismissDirectionCallback = void Function(DismissDirection direction);
+
+/// Signature used by [Dismissible] to give the application an opportunity to
+/// confirm or veto a dismiss gesture.
+///
+/// Used by [Dismissible.confirmDismiss].
+typedef ConfirmDismissCallback = Future<bool> Function(DismissDirection direction);
 
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
@@ -75,6 +83,7 @@ class Dismissible extends StatefulWidget {
     @required this.child,
     this.background,
     this.secondaryBackground,
+    this.confirmDismiss,
     this.onResize,
     this.onDismissed,
     this.direction = DismissDirection.horizontal,
@@ -82,8 +91,10 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
+       assert(dragStartBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -100,6 +111,15 @@ class Dismissible extends StatefulWidget {
   /// has been dragged up or to the left. It may only be specified when background
   /// has also been specified.
   final Widget secondaryBackground;
+
+  /// Gives the app an opportunity to confirm or veto a pending dismissal.
+  ///
+  /// If the returned Future<bool> completes true, then this widget will be
+  /// dismissed, otherwise it will be moved back to its original location.
+  ///
+  /// If the returned Future<bool> completes to false or null the [onResize]
+  /// and [onDismissed] callbacks will not run.
+  final ConfirmDismissCallback confirmDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback onResize;
@@ -142,6 +162,23 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
+  /// dismissible will begin upon the detection of a drag gesture. If set to
+  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
+
   @override
   _DismissibleState createState() => _DismissibleState();
 }
@@ -149,7 +186,7 @@ class Dismissible extends StatefulWidget {
 class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     @required this.axis,
-    @required this.moveAnimation
+    @required this.moveAnimation,
   }) : assert(axis != null),
        assert(moveAnimation != null),
        super(reclip: moveAnimation);
@@ -187,7 +224,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
 
 enum _FlingGestureKind { none, forward, reverse }
 
-class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin { // ignore: MIXIN_INFERENCE_INCONSISTENT_MATCHING_CLASSES
+class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -323,12 +360,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _updateMoveAnimation() {
     final double end = _dragExtent.sign;
-    _moveAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: _directionIsXAxis
-          ? Offset(end, widget.crossAxisEndOffset)
-          : Offset(widget.crossAxisEndOffset, end),
-    ).animate(_moveController);
+    _moveAnimation = _moveController.drive(
+      Tween<Offset>(
+        begin: Offset.zero,
+        end: _directionIsXAxis
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
+      ),
+    );
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
@@ -362,11 +401,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     return _FlingGestureKind.reverse;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  Future<void> _handleDragEnd(DragEndDetails details) async {
     if (!_isActive || _moveController.isAnimating)
       return;
     _dragUnderway = false;
-    if (_moveController.isCompleted) {
+    if (_moveController.isCompleted && await _confirmStartResizeAnimation() == true) {
       _startResizeAnimation();
       return;
     }
@@ -400,10 +439,23 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
   }
 
-  void _handleDismissStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed && !_dragUnderway)
-      _startResizeAnimation();
+  Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
+    if (status == AnimationStatus.completed && !_dragUnderway) {
+      if (await _confirmStartResizeAnimation() == true)
+        _startResizeAnimation();
+      else
+        _moveController.reverse();
+    }
     updateKeepAlive();
+  }
+
+  Future<bool> _confirmStartResizeAnimation() async {
+    if (widget.confirmDismiss != null) {
+      final DismissDirection direction = _dismissDirection;
+      assert(direction != null);
+      return widget.confirmDismiss(direction);
+    }
+    return true;
   }
 
   void _startResizeAnimation() {
@@ -424,13 +476,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _resizeController.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
-        _resizeAnimation = Tween<double>(
-          begin: 1.0,
-          end: 0.0
-        ).animate(CurvedAnimation(
-          parent: _resizeController,
-          curve: _kResizeTimeCurve
-        ));
+        _resizeAnimation = _resizeController.drive(
+          CurveTween(
+            curve: _kResizeTimeCurve
+          ),
+        ).drive(
+          Tween<double>(
+            begin: 1.0,
+            end: 0.0,
+          ),
+        );
       });
     }
   }
@@ -481,14 +536,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         child: SizedBox(
           width: _sizePriorToCollapse.width,
           height: _sizePriorToCollapse.height,
-          child: background
-        )
+          child: background,
+        ),
       );
     }
 
     Widget content = SlideTransition(
       position: _moveAnimation,
-      child: widget.child
+      child: widget.child,
     );
 
     if (background != null) {
@@ -501,15 +556,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
               axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
               moveAnimation: _moveAnimation,
             ),
-            child: background
-          )
+            child: background,
+          ),
         ));
       }
 
       children.add(content);
       content = Stack(children: children);
     }
-
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
@@ -519,8 +573,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: content
+      child: content,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 }
-

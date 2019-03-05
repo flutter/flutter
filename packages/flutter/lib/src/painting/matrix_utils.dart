@@ -144,7 +144,7 @@ class MatrixUtils {
         _min4(point1.dx, point2.dx, point3.dx, point4.dx),
         _min4(point1.dy, point2.dy, point3.dy, point4.dy),
         _max4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _max4(point1.dy, point2.dy, point3.dy, point4.dy)
+        _max4(point1.dy, point2.dy, point3.dy, point4.dy),
     );
   }
 

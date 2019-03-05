@@ -163,7 +163,7 @@ void main() {
                   style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                 ),
               ),
-            )
+            ),
           ],
         )
       ));
@@ -349,10 +349,10 @@ void main() {
                 child: GestureDetector(
                   onTap: () {},
                   child: const SizedBox(width: 4.0, height: 4.0),
-                )
-              )
+                ),
+              ),
             ),
-          )
+          ),
         )
       ));
 
@@ -361,6 +361,63 @@ void main() {
       handle.dispose();
     });
   });
+
+   group('Labeled tappable node guideline', () {
+    testWidgets('Passes when node is labeled', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onTap: () {},
+        label: 'test',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+    testWidgets('Fails if long-press has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onLongPress: () {},
+        label: '',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Fails if tap has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onTap: () {},
+        label: '',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Passes if tap is merged into labeled node', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        onLongPress: () {},
+        label: '',
+        child: Semantics(
+          label: 'test',
+          child: const SizedBox(width: 10.0, height: 10.0),
+        ),
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+  });
+
 }
 
 Widget _boilerplate(Widget child) {

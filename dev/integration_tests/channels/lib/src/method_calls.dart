@@ -67,7 +67,7 @@ Future<TestStepResult> _methodCallSuccessHandshake(
   dynamic result = nothing;
   dynamic error = nothing;
   try {
-    result = await channel.invokeMethod('success', arguments);
+    result = await channel.invokeMethod<dynamic>('success', arguments);
   } catch (e) {
     error = e;
   }
@@ -95,7 +95,7 @@ Future<TestStepResult> _methodCallErrorHandshake(
   dynamic errorDetails = nothing;
   dynamic error = nothing;
   try {
-    error = await channel.invokeMethod('error', arguments);
+    error = await channel.invokeMethod<dynamic>('error', arguments);
   } on PlatformException catch (e) {
     errorDetails = e.details;
   } catch (e) {
@@ -123,7 +123,7 @@ Future<TestStepResult> _methodCallNotImplementedHandshake(
   dynamic result = nothing;
   dynamic error = nothing;
   try {
-    error = await channel.invokeMethod('notImplemented');
+    error = await channel.invokeMethod<dynamic>('notImplemented');
   } on MissingPluginException {
     result = null;
   } catch (e) {

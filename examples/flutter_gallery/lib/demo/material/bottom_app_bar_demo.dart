@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class BottomAppBarDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_app_bar';
 
@@ -31,7 +33,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'circular floating action button',
     value: FloatingActionButton(
       onPressed: _showSnackbar,
-      child: Icon(Icons.add),
+      child: Icon(Icons.add, semanticLabel: 'Action'),
       backgroundColor: Colors.orange,
     ),
   );
@@ -41,7 +43,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'diamond shape floating action button',
     value: _DiamondFab(
       onPressed: _showSnackbar,
-      child: Icon(Icons.add),
+      child: Icon(Icons.add, semanticLabel: 'Action'),
     ),
   );
 
@@ -143,8 +145,9 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         title: const Text('Bottom app bar'),
         elevation: 0.0,
         actions: <Widget>[
+          MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
             onPressed: () {
               setState(() {
                 _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
@@ -253,7 +256,7 @@ class _RadioItem<T> extends StatelessWidget {
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
     );
@@ -278,7 +281,7 @@ class _ColorsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: colors.map((_NamedColor namedColor) {
+      children: colors.map<Widget>((_NamedColor namedColor) {
         return RawMaterialButton(
           onPressed: () {
             onChanged(namedColor.color);
@@ -330,7 +333,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   const _DemoBottomAppBar({
     this.color,
     this.fabLocation,
-    this.shape
+    this.shape,
   });
 
   final Color color;
@@ -346,9 +349,9 @@ class _DemoBottomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> rowContents = <Widget> [
       IconButton(
-        icon: const Icon(Icons.menu),
+        icon: const Icon(Icons.menu, semanticLabel: 'Show bottom sheet'),
         onPressed: () {
-          showModalBottomSheet<Null>(
+          showModalBottomSheet<void>(
             context: context,
             builder: (BuildContext context) => const _DemoDrawer(),
           );
@@ -364,7 +367,7 @@ class _DemoBottomAppBar extends StatelessWidget {
 
     rowContents.addAll(<Widget> [
       IconButton(
-        icon: const Icon(Icons.search),
+        icon: const Icon(Icons.search, semanticLabel: 'show search action',),
         onPressed: () {
           Scaffold.of(context).showSnackBar(
             const SnackBar(content: Text('This is a dummy search action.')),
@@ -376,6 +379,7 @@ class _DemoBottomAppBar extends StatelessWidget {
           Theme.of(context).platform == TargetPlatform.iOS
               ? Icons.more_horiz
               : Icons.more_vert,
+          semanticLabel: 'Show menu actions',
         ),
         onPressed: () {
           Scaffold.of(context).showSnackBar(

@@ -5,11 +5,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
+import 'mocks_for_image_cache.dart';
 
 void main() {
   TestRenderingFlutterBinding(); // initializes the imageCache
@@ -53,5 +55,35 @@ void main() {
       expect(otherCache.currentSize, 0);
       expect(imageCache.currentSize, 1);
     });
+
+    test('ImageProvider errors can always be caught', () async {
+      final ErrorImageProvider imageProvider = ErrorImageProvider();
+      final Completer<bool> caughtError = Completer<bool>();
+      FlutterError.onError = (FlutterErrorDetails details) {
+        caughtError.complete(false);
+      };
+      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+      stream.addListener((ImageInfo info, bool syncCall) {
+        caughtError.complete(false);
+      }, onError: (dynamic error, StackTrace stackTrace) {
+        caughtError.complete(true);
+      });
+      expect(await caughtError.future, true);
+    });
+  });
+
+  test('ImageProvide.obtainKey errors will be caught', () async {
+    final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(false);
+    };
+    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+    stream.addListener((ImageInfo info, bool syncCall) {
+      caughtError.complete(false);
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      caughtError.complete(true);
+    });
+    expect(await caughtError.future, true);
   });
 }

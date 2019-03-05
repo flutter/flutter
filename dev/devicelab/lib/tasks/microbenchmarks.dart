@@ -78,8 +78,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         stderr.writeln('[STDERR] $line');
       });
@@ -87,8 +87,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   bool processWasKilledIntentionally = false;
   bool resultsHaveBeenParsed = false;
   final StreamSubscription<String> stdoutSub = process.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) async {
     print(line);
 
@@ -124,7 +124,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       process.stdin.write('q');
       await process.stdin.flush();
       // Also send a kill signal in case the `q` above didn't work.
-      process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
+      process.kill(ProcessSignal.sigint);
       try {
         completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {

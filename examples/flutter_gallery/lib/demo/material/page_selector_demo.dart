@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class _PageSelector extends StatelessWidget {
   const _PageSelector({ this.icons });
 
@@ -32,18 +34,18 @@ class _PageSelector extends StatelessWidget {
                   icon: const Icon(Icons.chevron_left),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, -1); },
-                  tooltip: 'Page back'
+                  tooltip: 'Page back',
                 ),
                 TabPageSelector(controller: controller),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, 1); },
-                  tooltip: 'Page forward'
-                )
+                  tooltip: 'Page forward',
+                ),
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween
-            )
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
           ),
           Expanded(
             child: IconTheme(
@@ -52,7 +54,7 @@ class _PageSelector extends StatelessWidget {
                 color: color,
               ),
               child: TabBarView(
-                children: icons.map((Icon icon) {
+                children: icons.map<Widget>((Icon icon) {
                   return Container(
                     padding: const EdgeInsets.all(12.0),
                     child: Card(
@@ -61,7 +63,7 @@ class _PageSelector extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList()
+                }).toList(),
               ),
             ),
           ),
@@ -85,7 +87,10 @@ class PageSelectorDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Page selector')),
+      appBar: AppBar(
+        title: const Text('Page selector'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
+      ),
       body: DefaultTabController(
         length: icons.length,
         child: _PageSelector(icons: icons),

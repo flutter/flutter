@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -91,8 +92,6 @@ typedef FinderConstructor = Finder Function(SerializableFinder finder);
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
-  final TestTextInput _testTextInput = TestTextInput();
-
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler, this._silenceErrors) {
     _testTextInput.register();
@@ -138,8 +137,11 @@ class FlutterDriverExtension {
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
+      'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
     });
   }
+
+  final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler _requestDataHandler;
   final bool _silenceErrors;
@@ -175,7 +177,10 @@ class FlutterDriverExtension {
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       final Command command = commandDeserializer(params);
-      final Result response = await commandHandler(command).timeout(command.timeout);
+      Future<Result> responseFuture = commandHandler(command);
+      if (command.timeout != null)
+        responseFuture = responseFuture.timeout(command.timeout);
+      final Result response = await responseFuture;
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
@@ -189,7 +194,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, { bool isError = false }) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,
@@ -203,8 +208,8 @@ class FlutterDriverExtension {
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
-  Future<Null> _waitUntilFrame(bool condition(), [Completer<Null> completer]) {
-    completer ??= Completer<Null>();
+  Future<void> _waitUntilFrame(bool condition(), [ Completer<void> completer ]) {
+    completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         _waitUntilFrame(condition, completer);
@@ -274,6 +279,17 @@ class FlutterDriverExtension {
     }, description: 'widget with runtimeType "${arguments.type}"');
   }
 
+  Finder _createPageBackFinder() {
+    return find.byElementPredicate((Element element) {
+      final Widget widget = element.widget;
+      if (widget is Tooltip)
+        return widget.message == 'Back';
+      if (widget is CupertinoNavigationBarBackButton)
+        return true;
+      return false;
+    }, description: 'Material or Cupertino back button');
+  }
+
   Finder _createFinder(SerializableFinder finder) {
     final FinderConstructor constructor = _finders[finder.finderType];
 
@@ -304,9 +320,10 @@ class FlutterDriverExtension {
     return WaitForAbsentResult();
   }
 
-  Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
+  Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    return null;
   }
 
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
@@ -337,11 +354,11 @@ class FlutterDriverExtension {
 
     _prober.binding.hitTest(hitTest, startLocation);
     _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
-    await Future<Null>.value(); // so that down and move don't happen in the same microtask
+    await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
       _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
-      await Future<Null>.delayed(pause);
+      await Future<void>.delayed(pause);
     }
     _prober.binding.dispatchEvent(pointer.up(), hitTest);
 
@@ -404,7 +421,7 @@ class FlutterDriverExtension {
       _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       if (!semanticsWasEnabled) {
         // wait for the first frame where semantics is enabled.
-        final Completer<Null> completer = Completer<Null>();
+        final Completer<void> completer = Completer<void>();
         SchedulerBinding.instance.addPostFrameCallback((Duration d) {
           completer.complete();
         });

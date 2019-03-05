@@ -8,6 +8,8 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 const List<Color> coolColors = <Color>[
@@ -28,12 +30,14 @@ const List<String> coolColorNames = <String>[
   'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
+const int _kChildCount = 50;
+
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = List<Color>.generate(50, (int index) {
+      : colorItems = List<Color>.generate(_kChildCount, (int index) {
           return coolColors[math.Random().nextInt(coolColors.length)];
         }) ,
-        colorNameItems = List<String>.generate(50, (int index) {
+        colorNameItems = List<String>.generate(_kChildCount, (int index) {
           return coolColorNames[math.Random().nextInt(coolColorNames.length)];
         });
 
@@ -48,11 +52,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
       // Prevent swipe popping of this page. Use explicit exit buttons only.
       onWillPop: () => Future<bool>.value(true),
       child: DefaultTextStyle(
-        style: const TextStyle(
-          fontFamily: '.SF UI Text',
-          fontSize: 17.0,
-          color: CupertinoColors.black,
-        ),
+        style: CupertinoTheme.of(context).textTheme.textStyle,
         child: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
@@ -78,7 +78,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   builder: (BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
-                      colorNameItems: colorNameItems
+                      colorNameItems: colorNameItems,
                     );
                   },
                   defaultTitle: 'Colors',
@@ -125,6 +125,15 @@ class ExitButton extends StatelessWidget {
   }
 }
 
+final Widget trailingButtons = Row(
+  mainAxisSize: MainAxisSize.min,
+  children: <Widget>[
+    CupertinoDemoDocumentationButton(CupertinoNavigationDemo.routeName),
+    const Padding(padding: EdgeInsets.only(left: 8.0)),
+    const ExitButton(),
+  ],
+);
+
 class CupertinoDemoTab1 extends StatelessWidget {
   const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
 
@@ -135,9 +144,10 @@ class CupertinoDemoTab1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
+        semanticChildCount: _kChildCount,
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
-            trailing: ExitButton(),
+          CupertinoSliverNavigationBar(
+            trailing: trailingButtons,
           ),
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
@@ -152,12 +162,12 @@ class CupertinoDemoTab1 extends StatelessWidget {
                 (BuildContext context, int index) {
                   return Tab1RowItem(
                     index: index,
-                    lastItem: index == 49,
+                    lastItem: index == _kChildCount - 1,
                     color: colorItems[index],
                     colorName: colorNameItems[index],
                   );
                 },
-                childCount: 50,
+                childCount: _kChildCount,
               ),
             ),
           ),
@@ -227,7 +237,6 @@ class Tab1RowItem extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.plus_circled,
-                  color: CupertinoColors.activeBlue,
                   semanticLabel: 'Add',
                 ),
                 onPressed: () { },
@@ -235,7 +244,6 @@ class Tab1RowItem extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.share,
-                  color: CupertinoColors.activeBlue,
                   semanticLabel: 'Share',
                 ),
                 onPressed: () { },
@@ -338,8 +346,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            CupertinoButton(
-                              color: CupertinoColors.activeBlue,
+                            CupertinoButton.filled(
                               minSize: 30.0,
                               padding: const EdgeInsets.symmetric(horizontal: 24.0),
                               borderRadius: BorderRadius.circular(32.0),
@@ -353,12 +360,11 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                               ),
                               onPressed: () { },
                             ),
-                            CupertinoButton(
-                              color: CupertinoColors.activeBlue,
+                            CupertinoButton.filled(
                               minSize: 30.0,
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(32.0),
-                              child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
+                              child: const Icon(CupertinoIcons.ellipsis),
                               onPressed: () { },
                             ),
                           ],
@@ -421,8 +427,8 @@ class CupertinoDemoTab2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        trailing: ExitButton(),
+      navigationBar: CupertinoNavigationBar(
+        trailing: trailingButtons,
       ),
       child: ListView(
         children: <Widget>[
@@ -704,11 +710,15 @@ class CupertinoDemoTab3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        trailing: ExitButton(),
+      navigationBar: CupertinoNavigationBar(
+        trailing: trailingButtons,
       ),
       child: DecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+        decoration: BoxDecoration(
+          color: CupertinoTheme.of(context).brightness == Brightness.light
+              ? CupertinoColors.extraLightBackgroundGray
+              : CupertinoColors.darkBackgroundGray,
+        ),
         child: ListView(
           children: <Widget>[
             const Padding(padding: EdgeInsets.only(top: 32.0)),
@@ -722,9 +732,9 @@ class CupertinoDemoTab3 extends StatelessWidget {
                 );
               },
               child: Container(
-                decoration: const BoxDecoration(
-                  color: CupertinoColors.white,
-                  border: Border(
+                decoration: BoxDecoration(
+                  color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                  border: const Border(
                     top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
                     bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
                   ),
@@ -736,11 +746,11 @@ class CupertinoDemoTab3 extends StatelessWidget {
                     top: false,
                     bottom: false,
                     child: Row(
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text(
                           'Sign in',
-                          style: TextStyle(color: CupertinoColors.activeBlue),
-                        )
+                          style: TextStyle(color: CupertinoTheme.of(context).primaryColor),
+                        ),
                       ],
                     ),
                   ),
@@ -777,8 +787,7 @@ class Tab3Dialog extends StatelessWidget {
               color: Color(0xFF646464),
             ),
             const Padding(padding: EdgeInsets.only(top: 18.0)),
-            CupertinoButton(
-              color: CupertinoColors.activeBlue,
+            CupertinoButton.filled(
               child: const Text('Sign in'),
               onPressed: () {
                 Navigator.pop(context);

@@ -13,7 +13,7 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
-/// 180 deg when pressed, then reverts the animation on a second press.
+/// 180 degrees when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
 ///
 /// The expand icon does not include a semantic label for accessibility. In
@@ -30,7 +30,7 @@ class ExpandIcon extends StatefulWidget {
     this.isExpanded = false,
     this.size = 24.0,
     @required this.onPressed,
-    this.padding = const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0),
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -67,16 +67,14 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   AnimationController _controller;
   Animation<double> _iconTurns;
 
+  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
+    .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
-    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn
-      )
-    );
+    _iconTurns = _controller.drive(_iconTurnTween);
     // If the widget is initially expanded, rotate the icon without animating it.
     if (widget.isExpanded) {
       _controller.value = math.pi;
@@ -122,7 +120,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more)
+          child: const Icon(Icons.expand_more),
         ),
       ),
     );

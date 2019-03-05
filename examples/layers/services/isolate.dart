@@ -136,12 +136,12 @@ class CalculationManager {
     // isolates do not have access to the root bundle. However, the loading
     // process is asynchronous, so the UI will not block while the file is
     // loaded.
-    rootBundle.loadString('services/data.json').then<Null>((String data) {
+    rootBundle.loadString('services/data.json').then<void>((String data) {
       if (isRunning) {
         final CalculationMessage message = CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
-        Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
+        Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((Isolate isolate) {
           if (!isRunning) {
             isolate.kill(priority: Isolate.immediate);
           } else {
@@ -183,7 +183,7 @@ class CalculationManager {
         sender.send(<double>[ completed, total ]);
       },
       onResultListener: sender.send,
-      data: message.data
+      data: message.data,
     );
     calculator.run();
   }
@@ -221,7 +221,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
     )..repeat();
     _calculationManager = CalculationManager(
       onProgressListener: _handleProgressUpdate,
-      onResultListener: _handleResult
+      onResultListener: _handleResult,
     );
   }
 
@@ -243,24 +243,24 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
               width: 120.0,
               height: 120.0,
               color: const Color(0xFF882222),
-            )
+            ),
           ),
           Opacity(
             opacity: _calculationManager.isRunning ? 1.0 : 0.0,
             child: CircularProgressIndicator(
               value: _progress
-            )
+            ),
           ),
           Text(_status),
           Center(
             child: RaisedButton(
               child: Text(_label),
-              onPressed: _handleButtonPressed
-            )
+              onPressed: _handleButtonPressed,
+            ),
           ),
-          Text(_result)
-        ]
-      )
+          Text(_result),
+        ],
+      ),
     );
   }
 

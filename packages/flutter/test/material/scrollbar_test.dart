@@ -94,7 +94,7 @@ void main() {
       maxScrollExtent: 0.0,
       pixels: 0.0,
       viewportDimension: 100.0,
-      axisDirection: AxisDirection.down
+      axisDirection: AxisDirection.down,
     );
     scrollPainter.update(metrics, AxisDirection.down);
 
@@ -113,9 +113,9 @@ void main() {
           data: ThemeData(
             platform: platform
           ),
-          child: Scrollbar(
+          child: const Scrollbar(
             child: SingleChildScrollView(
-              child: const SizedBox(width: 4000.0, height: 4000.0),
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),

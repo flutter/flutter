@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import '../flutter_test_alternative.dart';
@@ -10,11 +9,11 @@ import '../flutter_test_alternative.dart';
 import 'fake_platform_views.dart';
 
 void main() {
-  FakePlatformViewsController viewsController;
 
   group('Android', () {
+    FakeAndroidPlatformViewsController viewsController;
     setUp(() {
-      viewsController = FakePlatformViewsController(TargetPlatform.android);
+      viewsController = FakeAndroidPlatformViewsController();
     });
 
     test('create Android view of unregistered type', () async {
@@ -38,9 +37,9 @@ void main() {
           .setSize(const Size(200.0, 300.0));
       expect(
           viewsController.views,
-          unorderedEquals(<FakePlatformView>[
-            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            FakePlatformView(1, 'webview', const Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+          unorderedEquals(<FakeAndroidPlatformView>[
+            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakeAndroidPlatformView(1, 'webview', const Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
     });
 
@@ -65,11 +64,11 @@ void main() {
           PlatformViewsService.initAndroidView(id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await viewController.setSize(const Size(200.0, 300.0));
 
-      viewController.dispose();
+      await viewController.dispose();
       expect(
           viewsController.views,
-          unorderedEquals(<FakePlatformView>[
-            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+          unorderedEquals(<FakeAndroidPlatformView>[
+            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -94,9 +93,9 @@ void main() {
       await viewController.setSize(const Size(500.0, 500.0));
       expect(
           viewsController.views,
-          unorderedEquals(<FakePlatformView>[
-            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            FakePlatformView(1, 'webview', const Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+          unorderedEquals(<FakeAndroidPlatformView>[
+            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            FakeAndroidPlatformView(1, 'webview', const Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -129,8 +128,8 @@ void main() {
       await viewController.setSize(const Size(100.0, 100.0));
       expect(
           viewsController.views,
-          unorderedEquals(<FakePlatformView>[
-            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+          unorderedEquals(<FakeAndroidPlatformView>[
+            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -142,9 +141,88 @@ void main() {
       await viewController.setLayoutDirection(TextDirection.rtl);
       expect(
           viewsController.views,
-          unorderedEquals(<FakePlatformView>[
-            FakePlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+          unorderedEquals(<FakeAndroidPlatformView>[
+            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
+    });
+  });
+
+  group('iOS', ()
+  {
+    FakeIosPlatformViewsController viewsController;
+    setUp(() {
+      viewsController = FakeIosPlatformViewsController();
+    });
+
+    test('create iOS view of unregistered type', () async {
+      expect(
+            () {
+          return PlatformViewsService.initUiKitView(
+            id: 0,
+            viewType: 'web',
+            layoutDirection: TextDirection.ltr,
+          );
+        },
+        throwsA(isInstanceOf<PlatformException>()),
+      );
+    });
+
+    test('create iOS views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initUiKitView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await PlatformViewsService.initUiKitView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(0, 'webview'),
+          FakeUiKitView(1, 'webview'),
+        ]),
+      );
+    });
+
+    test('reuse iOS view id', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initUiKitView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      expect(
+            () => PlatformViewsService.initUiKitView(
+            id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
+        throwsA(isInstanceOf<PlatformException>()),
+      );
+    });
+
+    test('dispose iOS view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initUiKitView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+
+      viewController.dispose();
+      expect(
+          viewsController.views,
+          unorderedEquals(<FakeUiKitView>[
+            FakeUiKitView(0, 'webview'),
+          ]));
+    });
+
+    test('dispose inexisting iOS view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.dispose();
+      expect(
+          () async {
+            await viewController.dispose();
+          },
+          throwsA(isInstanceOf<PlatformException>()),
+      );
     });
   });
 }

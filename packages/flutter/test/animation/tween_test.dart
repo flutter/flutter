@@ -21,12 +21,24 @@ void main() {
     expect(chain, hasOneLineDescription);
   });
 
-  test('Can animated tweens', () {
+  test('Can animate tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
     final Animation<double> animation = tween.animate(controller);
+    controller.value = 0.50;
+    expect(animation.value, 0.40);
+    expect(animation, hasOneLineDescription);
+    expect(animation.toStringDetails(), hasOneLineDescription);
+  });
+
+  test('Can drive tweens', () {
+    final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+    final Animation<double> animation = controller.drive(tween);
     controller.value = 0.50;
     expect(animation.value, 0.40);
     expect(animation, hasOneLineDescription);
@@ -61,7 +73,7 @@ void main() {
     expect(tween.lerp(1.0), equals(b));
     expect(
       tween.lerp(0.5),
-      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0))
+      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0)),
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = Matrix4Tween(begin: a, end: c);
@@ -71,7 +83,7 @@ void main() {
       rotationTween.lerp(0.5).absoluteError(
         a.clone()..rotateZ(0.5)
       ),
-      moreOrLessEquals(0.0)
+      moreOrLessEquals(0.0),
     );
   }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
 

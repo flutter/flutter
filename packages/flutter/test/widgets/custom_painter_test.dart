@@ -363,9 +363,9 @@ void _defineTests() {
             TestSemantics.rootChild(
               id: expectedId,
               rect: TestSemantics.fullScreen,
-              actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
+              actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
             ),
-          ]
+          ],
         ),
       ],
     );
@@ -440,7 +440,7 @@ void _defineTests() {
                 rect: TestSemantics.fullScreen,
                 flags: flags,
               ),
-            ]
+            ],
         ),
       ],
     );
@@ -487,7 +487,7 @@ void _defineTests() {
                 rect: TestSemantics.fullScreen,
                 flags: flags,
               ),
-            ]
+            ],
         ),
       ],
     );
@@ -682,7 +682,7 @@ void _defineTests() {
   });
 }
 
-void testDiff(String description, Future<Null> Function(_DiffTester tester) testFunction) {
+void testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
   testWidgets(description, (WidgetTester tester) async {
     await testFunction(_DiffTester(tester));
   });
@@ -700,7 +700,7 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<Null> diff({List<String> from, List<String> to}) async {
+  Future<void> diff({ List<String> from, List<String> to }) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
@@ -753,7 +753,7 @@ class _DiffTester {
         if (node.key != null && idAssignments[node.key] != null) {
           expect(idAssignments[node.key], node.id, reason:
             'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
-            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.'
+            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
           );
         }
         return true;

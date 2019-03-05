@@ -62,11 +62,6 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
-    return super.resolve(configuration);
-  }
-
-  @override
   ImageStreamCompleter load(DelayedImageProvider key) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
@@ -76,7 +71,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}}()';
+  String toString() => '${describeIdentity(this)}()';
 }
 
 class TestImage implements ui.Image {
@@ -90,7 +85,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }
@@ -155,7 +150,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () {
-    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = DelayedImageProvider();
@@ -245,7 +240,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         -1.0,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle)
+      const BoxDecoration(shape: BoxShape.rectangle),
     );
     expect(
       BoxDecoration.lerp(
@@ -253,7 +248,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         0.0,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle)
+      const BoxDecoration(shape: BoxShape.rectangle),
     );
     expect(
       BoxDecoration.lerp(
@@ -261,7 +256,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         0.25,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle)
+      const BoxDecoration(shape: BoxShape.rectangle),
     );
     expect(
       BoxDecoration.lerp(
@@ -269,7 +264,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         0.75,
       ),
-      const BoxDecoration(shape: BoxShape.circle)
+      const BoxDecoration(shape: BoxShape.circle),
     );
     expect(
       BoxDecoration.lerp(
@@ -277,7 +272,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         1.0,
       ),
-      const BoxDecoration(shape: BoxShape.circle)
+      const BoxDecoration(shape: BoxShape.circle),
     );
     expect(
       BoxDecoration.lerp(
@@ -285,7 +280,7 @@ void main() {
         const BoxDecoration(shape: BoxShape.circle),
         2.0,
       ),
-      const BoxDecoration(shape: BoxShape.circle)
+      const BoxDecoration(shape: BoxShape.circle),
     );
   });
 
@@ -297,7 +292,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         -1.0,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x00FFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x00FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -305,7 +300,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         0.0,
       ),
-      const BoxDecoration()
+      const BoxDecoration(),
     );
     expect(
       BoxDecoration.lerp(
@@ -313,7 +308,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         0.25,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -321,7 +316,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         0.75,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -329,7 +324,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         1.0,
       ),
-      const BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient),
     );
     expect(
       BoxDecoration.lerp(
@@ -337,7 +332,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         2.0,
       ),
-      const BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient),
     );
   });
 

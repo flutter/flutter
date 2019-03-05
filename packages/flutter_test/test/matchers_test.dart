@@ -225,7 +225,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           Path(),
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
@@ -237,7 +237,7 @@ void main() {
         Path(),
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -250,7 +250,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0),
         ),
       );
     });
@@ -268,7 +268,7 @@ void main() {
         linePath,
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
@@ -286,7 +286,7 @@ void main() {
         linePath,
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -409,8 +409,8 @@ void main() {
         },
       ));
 
-      expect(tester.getSemanticsData(find.byKey(key)),
-        matchesSemanticsData(
+      expect(tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -426,14 +426,14 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         ),
       );
 
       // Doesn't match custom actions
-      expect(tester.getSemanticsData(find.byKey(key)),
-        isNot(matchesSemanticsData(
+      expect(tester.getSemantics(find.byKey(key)),
+        isNot(matchesSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -447,14 +447,14 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'barz')
+            const CustomSemanticsAction(label: 'barz'),
           ],
         )),
       );
 
       // Doesn't match wrong hints
-      expect(tester.getSemanticsData(find.byKey(key)),
-        isNot(matchesSemanticsData(
+      expect(tester.getSemantics(find.byKey(key)),
+        isNot(matchesSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -468,7 +468,7 @@ void main() {
           onLongPressHint: 'fills',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         )),
       );
@@ -494,16 +494,24 @@ void main() {
         hint: 'e',
         textDirection: TextDirection.ltr,
         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
         textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
         scrollPosition: null,
         scrollExtentMax: null,
         scrollExtentMin: null,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
       );
+      final _FakeSemanticsNode node = _FakeSemanticsNode();
+      node.data = data;
 
-      expect(data, matchesSemanticsData(
+      expect(node, matchesSemantics(
          rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
          size: const Size(10.0, 10.0),
+         elevation: 3.0,
+         thickness: 4.0,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
@@ -548,6 +556,35 @@ void main() {
          customActions: <CustomSemanticsAction>[action],
       ));
     });
+
+    testWidgets('Can match child semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        label: 'Foo',
+        container: true,
+        explicitChildNodes: true,
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          label: 'Bar',
+          textDirection: TextDirection.ltr,
+        ),
+      ));
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(node, matchesSemantics(
+        label: 'Foo',
+        textDirection: TextDirection.ltr,
+        children: <Matcher>[
+          matchesSemantics(
+            label: 'Bar',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ));
+      handle.dispose();
+    });
   });
 }
 
@@ -591,4 +628,10 @@ class _FakeComparator implements GoldenFileComparator {
     this.imageBytes = imageBytes;
     return Future<void>.value();
   }
+}
+
+class _FakeSemanticsNode extends SemanticsNode {
+  SemanticsData data;
+  @override
+  SemanticsData getSemanticsData() => data;
 }

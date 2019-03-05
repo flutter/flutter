@@ -22,7 +22,7 @@ class TestInkSplash extends InkSplash {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-    TextDirection textDirection
+    TextDirection textDirection,
   }) : super(
     controller: controller,
     referenceBox: referenceBox,

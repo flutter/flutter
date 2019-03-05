@@ -28,7 +28,7 @@ class GalleryTransitionTest {
     final String deviceId = device.deviceId;
     final Directory galleryDirectory =
         dir('${flutterDirectory.path}/examples/flutter_gallery');
-    await inDirectory(galleryDirectory, () async {
+    await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)

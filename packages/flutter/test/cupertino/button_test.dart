@@ -12,6 +12,7 @@ import '../widgets/semantics_tester.dart';
 const TextStyle testStyle = TextStyle(
   fontFamily: 'Ahem',
   fontSize: 10.0,
+  letterSpacing: 0.0,
 );
 
 void main() {
@@ -175,7 +176,7 @@ void main() {
           child: Center(
             child: CupertinoButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
       ),
@@ -188,7 +189,7 @@ void main() {
             actions: SemanticsAction.tap.index,
             label: 'ABC',
             flags: SemanticsFlag.isButton.index,
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -225,6 +226,80 @@ void main() {
       ).decoration;
 
     expect(boxDecoration.color, const Color(0x00FF00));
+  });
+
+  testWidgets('Botton respects themes', (WidgetTester tester) async {
+    TextStyle textStyle;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton(
+          onPressed: () {},
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+
+    expect(textStyle.color, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.filled(
+          onPressed: () {},
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+
+    expect(textStyle.color, CupertinoColors.white);
+    BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      )
+    ).decoration;
+    expect(decoration.color, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoButton(
+          onPressed: () {},
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+    expect(textStyle.color, CupertinoColors.activeOrange);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoButton.filled(
+          onPressed: () {},
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+    expect(textStyle.color, CupertinoColors.black);
+    decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      )
+    ).decoration;
+    expect(decoration.color, CupertinoColors.activeOrange);
   });
 }
 

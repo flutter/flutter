@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/material/persistent-bottom-sheet';
 
@@ -26,7 +28,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Container(
         decoration: BoxDecoration(
@@ -38,10 +40,10 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: themeData.accentColor,
-              fontSize: 24.0
-            )
-          )
-        )
+              fontSize: 24.0,
+            ),
+          ),
+        ),
       );
     })
     .closed.whenComplete(() {
@@ -64,8 +66,8 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('OK')
-            )
+              child: const Text('OK'),
+            ),
           ],
         );
       },
@@ -76,7 +78,12 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: const Text('Persistent bottom sheet')),
+      appBar: AppBar(
+        title: const Text('Persistent bottom sheet'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(PersistentBottomSheetDemo.routeName),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,
@@ -88,9 +95,9 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       body: Center(
         child: RaisedButton(
           onPressed: _showBottomSheetCallback,
-          child: const Text('SHOW BOTTOM SHEET')
-        )
-      )
+          child: const Text('SHOW BOTTOM SHEET'),
+        ),
+      ),
     );
   }
 }

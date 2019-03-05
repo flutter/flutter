@@ -89,24 +89,8 @@ class BoxConstraints extends Constraints {
     this.minWidth = 0.0,
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
-    this.maxHeight = double.infinity
+    this.maxHeight = double.infinity,
   });
-
-  /// The minimum width that satisfies the constraints.
-  final double minWidth;
-
-  /// The maximum width that satisfies the constraints.
-  ///
-  /// Might be [double.infinity].
-  final double maxWidth;
-
-  /// The minimum height that satisfies the constraints.
-  final double minHeight;
-
-  /// The maximum height that satisfies the constraints.
-  ///
-  /// Might be [double.infinity].
-  final double maxHeight;
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -124,11 +108,11 @@ class BoxConstraints extends Constraints {
   ///    infinite.
   const BoxConstraints.tightFor({
     double width,
-    double height
-  }): minWidth = width != null ? width : 0.0,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : 0.0,
-      maxHeight = height != null ? height : double.infinity;
+    double height,
+  }) : minWidth = width != null ? width : 0.0,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : 0.0,
+       maxHeight = height != null ? height : double.infinity;
 
   /// Creates box constraints that require the given width or height, except if
   /// they are infinite.
@@ -139,11 +123,11 @@ class BoxConstraints extends Constraints {
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
-    double height = double.infinity
-  }): minWidth = width != double.infinity ? width : 0.0,
-      maxWidth = width != double.infinity ? width : double.infinity,
-      minHeight = height != double.infinity ? height : 0.0,
-      maxHeight = height != double.infinity ? height : double.infinity;
+    double height = double.infinity,
+  }) : minWidth = width != double.infinity ? width : 0.0,
+       maxWidth = width != double.infinity ? width : double.infinity,
+       minHeight = height != double.infinity ? height : 0.0,
+       maxHeight = height != double.infinity ? height : double.infinity;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -158,24 +142,40 @@ class BoxConstraints extends Constraints {
   /// given value in the given dimension.
   const BoxConstraints.expand({
     double width,
-    double height
-  }): minWidth = width != null ? width : double.infinity,
-      maxWidth = width != null ? width : double.infinity,
-      minHeight = height != null ? height : double.infinity,
-      maxHeight = height != null ? height : double.infinity;
+    double height,
+  }) : minWidth = width != null ? width : double.infinity,
+       maxWidth = width != null ? width : double.infinity,
+       minHeight = height != null ? height : double.infinity,
+       maxHeight = height != null ? height : double.infinity;
+
+  /// The minimum width that satisfies the constraints.
+  final double minWidth;
+
+  /// The maximum width that satisfies the constraints.
+  ///
+  /// Might be [double.infinity].
+  final double maxWidth;
+
+  /// The minimum height that satisfies the constraints.
+  final double minHeight;
+
+  /// The maximum height that satisfies the constraints.
+  ///
+  /// Might be [double.infinity].
+  final double maxHeight;
 
   /// Creates a copy of this box constraints but with the given fields replaced with the new values.
   BoxConstraints copyWith({
     double minWidth,
     double maxWidth,
     double minHeight,
-    double maxHeight
+    double maxHeight,
   }) {
     return BoxConstraints(
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
-      maxHeight: maxHeight ?? this.maxHeight
+      maxHeight: maxHeight ?? this.maxHeight,
     );
   }
 
@@ -191,7 +191,7 @@ class BoxConstraints extends Constraints {
       minWidth: deflatedMinWidth,
       maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
       minHeight: deflatedMinHeight,
-      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical)
+      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical),
     );
   }
 
@@ -202,7 +202,7 @@ class BoxConstraints extends Constraints {
       minWidth: 0.0,
       maxWidth: maxWidth,
       minHeight: 0.0,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -213,7 +213,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
       maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
       minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight)
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
     );
   }
 
@@ -233,7 +233,7 @@ class BoxConstraints extends Constraints {
       minWidth: minHeight,
       maxWidth: maxHeight,
       minHeight: minWidth,
-      maxHeight: maxWidth
+      maxHeight: maxWidth,
     );
   }
 
@@ -247,14 +247,14 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
-  double constrainWidth([double width = double.infinity]) {
+  double constrainWidth([ double width = double.infinity ]) {
     assert(debugAssertIsValid());
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
-  double constrainHeight([double height = double.infinity]) {
+  double constrainHeight([ double height = double.infinity ]) {
     assert(debugAssertIsValid());
     return height.clamp(minHeight, maxHeight);
   }
@@ -410,7 +410,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth * factor,
       maxWidth: maxWidth * factor,
       minHeight: minHeight * factor,
-      maxHeight: maxHeight * factor
+      maxHeight: maxHeight * factor,
     );
   }
 
@@ -420,7 +420,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth / factor,
       maxWidth: maxWidth / factor,
       minHeight: minHeight / factor,
-      maxHeight: maxHeight / factor
+      maxHeight: maxHeight / factor,
     );
   }
 
@@ -430,7 +430,7 @@ class BoxConstraints extends Constraints {
       minWidth: (minWidth ~/ factor).toDouble(),
       maxWidth: (maxWidth ~/ factor).toDouble(),
       minHeight: (minHeight ~/ factor).toDouble(),
-      maxHeight: (maxHeight ~/ factor).toDouble()
+      maxHeight: (maxHeight ~/ factor).toDouble(),
     );
   }
 
@@ -440,7 +440,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth % value,
       maxWidth: maxWidth % value,
       minHeight: minHeight % value,
-      maxHeight: maxHeight % value
+      maxHeight: maxHeight % value,
     );
   }
 
@@ -449,17 +449,7 @@ class BoxConstraints extends Constraints {
   /// If either is null, this function interpolates from a [BoxConstraints]
   /// object whose fields are all set to 0.0.
   ///
-  /// The `t` argument represents position on the timeline, with 0.0 meaning
-  /// that the interpolation has not started, returning `a` (or something
-  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-  /// returning `b` (or something equivalent to `b`), and values in between
-  /// meaning that the interpolation is at the relevant point on the timeline
-  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-  /// 1.0, so negative values and values greater than 1.0 are valid (and can
-  /// easily be generated by curves such as [Curves.elasticInOut]).
-  ///
-  /// Values for `t` are usually obtained from an [Animation<double>], such as
-  /// an [AnimationController].
+  /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -575,7 +565,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth,
       maxWidth: minWidth > maxWidth ? minWidth : maxWidth,
       minHeight: minHeight,
-      maxHeight: minHeight > maxHeight ? minHeight : maxHeight
+      maxHeight: minHeight > maxHeight ? minHeight : maxHeight,
     );
   }
 
@@ -584,7 +574,7 @@ class BoxConstraints extends Constraints {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (other is! BoxConstraints)
+    if (runtimeType != other.runtimeType)
       return false;
     final BoxConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());
@@ -625,8 +615,8 @@ class BoxHitTestEntry extends HitTestEntry {
   ///
   /// The [localPosition] argument must not be null.
   const BoxHitTestEntry(RenderBox target, this.localPosition)
-      : assert(localPosition != null),
-        super(target);
+    : assert(localPosition != null),
+      super(target);
 
   @override
   RenderBox get target => super.target;
@@ -855,7 +845,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// The declaration of the `RenderFoo` class itself would thus look like this:
 ///
 /// ```dart
-/// class RenderFlex extends RenderBox with
+/// class RenderFoo extends RenderBox with
 ///   ContainerRenderObjectMixin<RenderBox, FooParentData>,
 ///   RenderBoxContainerDefaultsMixin<RenderBox, FooParentData> {
 ///   // ...
@@ -1106,7 +1096,7 @@ abstract class RenderBox extends RenderObject {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
       return _cachedIntrinsicDimensions.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument)
+        () => computer(argument),
       );
     }
     return computer(argument);
@@ -1746,7 +1736,7 @@ abstract class RenderBox extends RenderObject {
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
           information.write('  ');
           information.writeln(node.toStringShallow(joiner: '\n  '));
-         }
+        }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
@@ -1776,7 +1766,7 @@ abstract class RenderBox extends RenderObject {
           'Constraints: $constraints\n'
           'Size: $_size\n'
           'If you are not writing your own RenderBox subclass, then this is not '
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
         );
       }
       if (debugCheckIntrinsicSizes) {
@@ -1825,7 +1815,7 @@ abstract class RenderBox extends RenderObject {
             'The following ${failureCount > 1 ? "failures" : "failure"} was detected:\n'
             '$failures'
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }
       }
@@ -1844,7 +1834,7 @@ abstract class RenderBox extends RenderObject {
       // notify them again.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
-       if (parent is RenderObject) {
+      if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
       }
@@ -1999,6 +1989,9 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
+  /// This method will un-project the point from the screen onto the widget,
+  /// which makes it different from [MatrixUtils.transformPoint].
+  ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns [Offset.zero].
   ///
@@ -2008,11 +2001,28 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, { RenderObject ancestor }) {
+    // We want to find point (p) that corresponds to a given point on the
+    // screen (s), but that also physically resides on the local render plane,
+    // so that it is useful for visually accurate gesture processing in the
+    // local space. For that, we can't simply transform 2D screen point to
+    // the 3D local space since the screen space lacks the depth component |z|,
+    // and so there are many 3D points that correspond to the screen point.
+    // We must first unproject the screen point onto the render plane to find
+    // the true 3D point that corresponds to the screen point.
+    // We do orthogonal unprojection after undoing perspective, in local space.
+    // The render plane is specified by renderBox offset (o) and Z axis (n).
+    // Unprojection is done by finding the intersection of the view vector (d)
+    // with the local X-Y plane: (o-s).dot(n) == (p-s).dot(n), (p-s) == |z|*d.
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
     if (det == 0.0)
       return Offset.zero;
-    return MatrixUtils.transformPoint(transform, point);
+    final Vector3 n = Vector3(0.0, 0.0, 1.0);
+    final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
+    final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
+    final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
+    final Vector3 p = s - d * (n.dot(s) / n.dot(d));
+    return Offset(p.x, p.y);
   }
 
   /// Convert the given point from the local coordinate system for this box to
@@ -2188,11 +2198,7 @@ abstract class RenderBox extends RenderObject {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderBoxContainerDefaultsMixin._() => null;
-
+mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
   /// Returns the baseline of the first child with a baseline.
   ///
   /// Useful when the children are displayed vertically in the same order they

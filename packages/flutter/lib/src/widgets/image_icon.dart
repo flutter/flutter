@@ -17,7 +17,7 @@ import 'image.dart';
 ///
 ///  * [IconButton], for interactive icons.
 ///  * [IconTheme], which provides ambient configuration for icons.
-///  * [Icon], for icons based on glyphs from fonts instead of images
+///  * [Icon], for icons based on glyphs from fonts instead of images.
 ///  * [Icons], a predefined font based set of icons from the material design library.
 class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
@@ -73,7 +73,7 @@ class ImageIcon extends StatelessWidget {
     if (image == null)
       return Semantics(
         label: semanticLabel,
-        child: SizedBox(width: iconSize, height: iconSize)
+        child: SizedBox(width: iconSize, height: iconSize),
       );
 
     final double iconOpacity = iconTheme.opacity;

@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import 'debug.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -50,8 +51,8 @@ class _TextSelectionToolbar extends StatelessWidget {
       elevation: 1.0,
       child: Container(
         height: 44.0,
-        child: Row(mainAxisSize: MainAxisSize.min, children: items)
-      )
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
     );
   }
 }
@@ -103,8 +104,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   }
 }
 
-/// Draws a single text selection handle. The [type] determines where the handle
-/// points (e.g. the [left] handle points up and to the right).
+/// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
   _TextSelectionHandlePainter({ this.color });
 
@@ -132,6 +132,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
@@ -146,7 +147,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
-      )
+      ),
     );
   }
 
@@ -173,14 +174,14 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.left: // points up-right
         return Transform(
           transform: Matrix4.rotationZ(math.pi / 2.0),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.right: // points up-left
         return handle;
       case TextSelectionHandleType.collapsed: // points up
         return Transform(
           transform: Matrix4.rotationZ(math.pi / 4.0),
-          child: handle
+          child: handle,
         );
     }
     assert(type != null);

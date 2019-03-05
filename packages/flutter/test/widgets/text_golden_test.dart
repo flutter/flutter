@@ -135,6 +135,56 @@ void main() {
     );
   }, skip: !Platform.isLinux);
 
+  // TODO(garyq): This test requires an update when the background
+  // drawing from the beginning of the line bug is fixed. The current
+  // tested version is not completely correct.
+  testWidgets('Text Background', (WidgetTester tester) async {
+    const Color red = Colors.red;
+    const Color blue = Colors.blue;
+    const Color translucentGreen = Color(0x5000F000);
+    const Color translucentDarkRed = Color(0x500F0000);
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Colors.green,
+            ),
+            child: RichText(
+              textDirection: TextDirection.ltr,
+              text: TextSpan(
+                text: 'text1 ',
+                style: TextStyle(
+                  color: translucentGreen,
+                  background: Paint()
+                    ..color = red.withOpacity(0.5),
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'text2',
+                    style: TextStyle(
+                      color: translucentDarkRed,
+                      background: Paint()
+                        ..color = blue.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('text_golden.Background.png'),
+    );
+  }, skip: !Platform.isLinux);
+
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
@@ -161,7 +211,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         )
     );
 
@@ -170,4 +220,227 @@ void main() {
       matchesGoldenFile('text_golden.Fade.1.png'),
     );
   }, skip: !Platform.isLinux);
+
+  testWidgets('Default Strut text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.StrutDefault.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Strut text 1', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine2\nLine3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                height: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.1.1.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Strut text 2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                height: 1.5,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.2.1.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Strut text rich', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 150.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text.rich(
+              TextSpan(
+                text: 'Hello\n',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 30,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'Second line!\n',
+                    style: TextStyle(
+                      fontSize: 5,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Third line!\n',
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(
+                fontSize: 14,
+                height: 1.1,
+                leading: 0.1,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.3.1.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Strut text font fallback', (WidgetTester tester) async {
+    // Font Fallback
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text('Hello\nLine 2\nLine 3',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(),
+              strutStyle: StrutStyle(
+                fontFamily: 'FakeFont 1',
+                fontFamilyFallback: <String>[
+                  'FakeFont 2',
+                  'EvilFont 3',
+                  'Nice Font 4',
+                  'ahem',
+                ],
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Strut.4.1.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text.rich(
+              TextSpan(
+                text: 'Hello\n',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 30,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'Second line!\n',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Third line!\n',
+                    style: TextStyle(
+                      fontSize: 27,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(
+                fontSize: 14,
+                height: 1.1,
+                forceStrutHeight: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
+    );
+  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 }

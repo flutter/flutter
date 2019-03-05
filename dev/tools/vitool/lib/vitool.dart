@@ -222,7 +222,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
 
       final _Transform subtreeTransform = _Transform(
         transformMatrix: transformMatrix,
-        opacity: opacity
+        opacity: opacity,
       );
       paths.addAll(_interpretSvgGroup(element.children, subtreeTransform));
     }
@@ -252,7 +252,7 @@ List<Point<double>> parsePoints(String points) {
     final Match m = _pointMatcher.firstMatch(unParsed);
     result.add(Point<double>(
         double.parse(m.group(1)),
-        double.parse(m.group(2))
+        double.parse(m.group(2)),
     ));
     unParsed = m.group(3);
   }
@@ -314,7 +314,7 @@ class SvgPath {
 
   SvgPath applyTransform(_Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map((SvgPathCommand c) => c.applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((SvgPathCommand c) => c.applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
@@ -386,7 +386,7 @@ class SvgPathCommand {
 }
 
 class SvgPathCommandBuilder {
-  static const Map<String, Null> kRelativeCommands = <String, Null> {
+  static const Map<String, void> kRelativeCommands = <String, void> {
     'c': null,
     'l': null,
     'm': null,
@@ -400,7 +400,7 @@ class SvgPathCommandBuilder {
   SvgPathCommand build(String type, List<Point<double>> points) {
     List<Point<double>> absPoints = points;
     if (_isRelativeCommand(type)) {
-      absPoints = points.map((Point<double> p) => p + lastPoint).toList();
+      absPoints = points.map<Point<double>>((Point<double> p) => p + lastPoint).toList();
     }
 
     if (type == 'M' || type == 'm')
@@ -446,7 +446,7 @@ class _Transform {
 
   /// Constructs a new _Transform, default arguments create a no-op transform.
   _Transform({Matrix3 transformMatrix, this.opacity = 1.0}) :
-      this.transformMatrix = transformMatrix ?? Matrix3.identity();
+      transformMatrix = transformMatrix ?? Matrix3.identity();
 
   final Matrix3 transformMatrix;
   final double opacity;

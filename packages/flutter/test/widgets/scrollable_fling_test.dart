@@ -4,13 +4,14 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 const TextStyle testFont = TextStyle(
   color: Color(0xFF00FF00),
   fontFamily: 'Ahem',
 );
 
-Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   await tester.pumpWidget(Container());
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -19,13 +20,13 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     home: Container(
       color: const Color(0xFF111111),
       child: ListView.builder(
+        dragStartBehavior: DragStartBehavior.down,
         itemBuilder: (BuildContext context, int index) {
           return Text('$index', style: testFont);
         },
       ),
     ),
   ));
-  return null;
 }
 
 const double dragOffset = 213.82;
@@ -65,7 +66,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets)
+        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
       ),
     );
 
@@ -93,7 +94,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets)
+        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
       ),
     );
 

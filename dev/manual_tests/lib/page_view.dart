@@ -119,7 +119,7 @@ class PageViewAppState extends State<PageViewApp> {
 
   Widget _buildBody(BuildContext context) {
     return PageView(
-      children: cardModels.map(buildCard).toList(),
+      children: cardModels.map<Widget>(buildCard).toList(),
       // TODO(abarth): itemsWrap: itemsWrap,
       scrollDirection: scrollDirection,
     );

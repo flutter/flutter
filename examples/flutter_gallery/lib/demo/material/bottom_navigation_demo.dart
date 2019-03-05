@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
@@ -24,10 +26,9 @@ class NavigationIconView {
          duration: kThemeAnimationDuration,
          vsync: vsync,
        ) {
-    _animation = CurvedAnimation(
-      parent: controller,
+    _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    );
+    ));
   }
 
   final Widget _icon;
@@ -35,7 +36,7 @@ class NavigationIconView {
   final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
-  CurvedAnimation _animation;
+  Animation<double> _animation;
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
     Color iconColor;
@@ -51,10 +52,12 @@ class NavigationIconView {
     return FadeTransition(
       opacity: _animation,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0.0, 0.02), // Slightly down.
-          end: Offset.zero,
-        ).animate(_animation),
+        position: _animation.drive(
+          Tween<Offset>(
+            begin: const Offset(0.0, 0.02), // Slightly down.
+            end: Offset.zero,
+          ),
+        ),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor,
@@ -93,7 +96,7 @@ class CustomInactiveIcon extends StatelessWidget {
       height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
         border: Border.all(color: iconTheme.color, width: 2.0),
-      )
+      ),
     );
   }
 }
@@ -147,11 +150,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         title: 'Event',
         color: Colors.pink,
         vsync: this,
-      )
+      ),
     ];
-
-    for (NavigationIconView view in _navigationViews)
-      view.controller.addListener(_rebuild);
 
     _navigationViews[_currentIndex].controller.value = 1.0;
   }
@@ -161,12 +161,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     for (NavigationIconView view in _navigationViews)
       view.controller.dispose();
     super.dispose();
-  }
-
-  void _rebuild() {
-    setState(() {
-      // Rebuild in order to animate views.
-    });
   }
 
   Widget _buildTransitionsStack() {
@@ -191,10 +185,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
+      //iconSize: 4.0,
       onTap: (int index) {
         setState(() {
           _navigationViews[_currentIndex].controller.reverse();
@@ -208,6 +203,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       appBar: AppBar(
         title: const Text('Bottom navigation'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(BottomNavigationDemo.routeName),
           PopupMenuButton<BottomNavigationBarType>(
             onSelected: (BottomNavigationBarType value) {
               setState(() {
@@ -222,13 +218,13 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
                 child: Text('Shifting'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
       body: Center(
-        child: _buildTransitionsStack()
+        child: _buildTransitionsStack(),
       ),
       bottomNavigationBar: botNavBar,
     );

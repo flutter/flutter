@@ -48,7 +48,7 @@ class _OverflowRegionData {
 /// overflows. It will print on the first occurrence, and once after each time that
 /// [reassemble] is called.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
@@ -81,16 +81,12 @@ class _OverflowRegionData {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///   * The code for [RenderUnconstrainedBox] and [RenderFlex] for examples of
-///     classes that use this indicator mixin.
-abstract class DebugOverflowIndicatorMixin extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory DebugOverflowIndicatorMixin._() => null;
-
+///  * [RenderUnconstrainedBox] and [RenderFlex] for examples of classes that use this indicator mixin.
+mixin DebugOverflowIndicatorMixin on RenderObject {
   static const Color _black = Color(0xBF000000);
   static const Color _yellow = Color(0xBFFFFF00);
   // The fraction of the container that the indicator covers.

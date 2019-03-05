@@ -30,13 +30,13 @@ class TextStyleItem extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: 72.0,
-            child: Text(name, style: nameStyle)
+            child: Text(name, style: nameStyle),
           ),
           Expanded(
-            child: Text(text, style: style.copyWith(height: 1.0))
-          )
-        ]
-      )
+            child: Text(text, style: style.copyWith(height: 1.0)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -57,14 +57,14 @@ class TypographyDemo extends StatelessWidget {
       TextStyleItem(name: 'Body 2', style: textTheme.body2, text: 'Medium 14sp'),
       TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Regular 14sp'),
       TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
-      TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp')
+      TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp'),
     ];
 
     if (MediaQuery.of(context).size.width > 500.0) {
       styleItems.insert(0, TextStyleItem(
         name: 'Display 4',
         style: textTheme.display4,
-        text: 'Light 112sp'
+        text: 'Light 112sp',
       ));
     }
 

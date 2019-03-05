@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
@@ -50,6 +52,7 @@ class _SearchDemoState extends State<SearchDemo> {
               }
             },
           ),
+          MaterialDemoDocumentationButton(SearchDemo.routeName),
           IconButton(
             tooltip: 'More (not implemented)',
             icon: Icon(
@@ -88,7 +91,7 @@ class _SearchDemoState extends State<SearchDemo> {
               ),
             ),
             const SizedBox(height: 64.0),
-            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
+            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.'),
           ],
         ),
       ),
@@ -157,7 +160,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
     return _SuggestionList(
       query: query,
-      suggestions: suggestions.map((int i) => '$i').toList(),
+      suggestions: suggestions.map<String>((int i) => '$i').toList(),
       onSelected: (String suggestion) {
         query = suggestion;
         showResults(context);
@@ -216,7 +219,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
                 query = '';
                 showSuggestions(context);
               },
-            )
+            ),
     ];
   }
 }

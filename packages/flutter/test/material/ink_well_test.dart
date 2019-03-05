@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -37,7 +38,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -53,7 +54,7 @@ void main() {
     await tester.tap(find.byType(InkWell), pointer: 2);
     await tester.tap(find.byType(InkWell), pointer: 3);
 
-    expect(log, equals(<String>['tap-cancel', 'double-tap']));
+    expect(log, equals(<String>['double-tap']));
     log.clear();
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
@@ -82,7 +83,7 @@ void main() {
         child: Center(
           child: InkWell(),
         ),
-      )
+      ),
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -140,7 +141,7 @@ void main() {
               enableFeedback: false,
             ),
           ),
-        )
+        ),
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));
@@ -155,7 +156,7 @@ void main() {
   });
 
   testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
-    Future<Null> runTest(bool keepAlive) async {
+    Future<void> runTest(bool keepAlive) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -164,6 +165,7 @@ void main() {
               link: LayerLink(),
               child: ListView(
                 addAutomaticKeepAlives: keepAlive,
+                dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
                   Container(height: 500.0, child: InkWell(onTap: () { }, child: const Placeholder())),
                   Container(height: 500.0),

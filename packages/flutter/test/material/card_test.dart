@@ -26,9 +26,9 @@ void main() {
                   MaterialButton(
                     child: const Text('Button'),
                     onPressed: () { },
-                  )
+                  ),
                 ],
-              )
+              ),
             ),
           ),
         ),
@@ -40,25 +40,32 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            label: 'I am text!',
-            textDirection: TextDirection.ltr,
-          ),
-          TestSemantics(
-            id: 2,
-            label: 'Moar text!!1',
-             textDirection: TextDirection.ltr,
-          ),
-          TestSemantics(
-            id: 3,
-            label: 'Button',
-            textDirection: TextDirection.ltr,
-            actions: <SemanticsAction>[
-              SemanticsAction.tap,
-            ],
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
+            elevation: 1.0,
+            thickness: 0.0,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                label: 'I am text!',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                id: 3,
+                label: 'Moar text!!1',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                id: 4,
+                label: 'Button',
+                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                ],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
+              ),
             ],
           ),
         ],
@@ -84,9 +91,9 @@ void main() {
               child: Column(
                 children: const <Widget>[
                   Text('First child'),
-                  Text('Second child')
+                  Text('Second child'),
                 ],
-              )
+              ),
             ),
           ),
         ),

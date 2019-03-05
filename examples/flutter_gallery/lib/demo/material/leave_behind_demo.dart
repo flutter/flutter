@@ -7,6 +7,8 @@ import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import '../../gallery/demo.dart';
+
 enum LeaveBehindDemoAction {
   reset,
   horizontalSwipe,
@@ -49,7 +51,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         index: index,
         name: 'Item $index Sender',
         subject: 'Subject: $index',
-        body: "[$index] first line of the message's body..."
+        body: "[$index] first line of the message's body...",
       );
     });
   }
@@ -94,8 +96,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
+        onPressed: () { handleUndo(item); },
+      ),
     ));
   }
 
@@ -107,8 +109,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
+        onPressed: () { handleUndo(item); },
+      ),
     ));
   }
 
@@ -124,14 +126,14 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       );
     } else {
       body = ListView(
-        children: leaveBehindItems.map((LeaveBehindItem item) {
+        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
           return _LeaveBehindListItem(
             item: item,
             onArchive: _handleArchive,
             onDelete: _handleDelete,
             dismissDirection: _dismissDirection,
           );
-        }).toList()
+        }).toList(),
       );
     }
 
@@ -140,32 +142,33 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       appBar: AppBar(
         title: const Text('Swipe to dismiss'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
           PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: Text('Reset the list')
+                child: Text('Reset the list'),
               ),
               const PopupMenuDivider(),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
-                child: const Text('Horizontal swipe')
+                child: const Text('Horizontal swipe'),
               ),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
                 checked: _dismissDirection == DismissDirection.endToStart,
-                child: const Text('Only swipe left')
+                child: const Text('Only swipe left'),
               ),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
                 checked: _dismissDirection == DismissDirection.startToEnd,
-                child: const Text('Only swipe right')
-              )
-            ]
-          )
-        ]
+                child: const Text('Only swipe right'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: body,
     );
@@ -214,24 +217,24 @@ class _LeaveBehindListItem extends StatelessWidget {
         background: Container(
           color: theme.primaryColor,
           child: const ListTile(
-            leading: Icon(Icons.delete, color: Colors.white, size: 36.0)
-          )
+            leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+          ),
         ),
         secondaryBackground: Container(
           color: theme.primaryColor,
           child: const ListTile(
-            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0)
-          )
+            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+          ),
         ),
         child: Container(
           decoration: BoxDecoration(
             color: theme.canvasColor,
-            border: Border(bottom: BorderSide(color: theme.dividerColor))
+            border: Border(bottom: BorderSide(color: theme.dividerColor)),
           ),
           child: ListTile(
             title: Text(item.name),
             subtitle: Text('${item.subject}\n${item.body}'),
-            isThreeLine: true
+            isThreeLine: true,
           ),
         ),
       ),

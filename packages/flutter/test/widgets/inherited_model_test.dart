@@ -190,6 +190,22 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
+  testWidgets('Looking up an non existent InherintedModel ancestor returns null', (WidgetTester tester) async {
+    ABCModel inheritedModel;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          inheritedModel = InheritedModel.inheritFrom(context);
+          return Container();
+        },
+      ),
+    );
+    // Shouldn't crash first of all.
+
+    expect(inheritedModel, null);
+  });
+
   testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
     int _a = 0;
     int _b = 1;

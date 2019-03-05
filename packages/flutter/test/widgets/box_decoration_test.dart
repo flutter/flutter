@@ -18,7 +18,7 @@ import '../rendering/mock_canvas.dart';
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.future);
 
-  final Future<Null> future;
+  final Future<void> future;
 
   static ui.Image image;
 
@@ -30,17 +30,18 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((Null value) => ImageInfo(image: image))
+      future.then<ImageInfo>((void value) => ImageInfo(image: image))
     );
   }
 }
 
-Future<Null> main() async {
+Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
       KeyedSubtree(
         key: key,
@@ -62,7 +63,7 @@ Future<Null> main() async {
   });
 
   testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
       child: RepaintBoundary(
@@ -97,8 +98,8 @@ Future<Null> main() async {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          color: Colors.teal[600]
-        )
+          color: Colors.teal[600],
+        ),
       )
     );
   });
@@ -112,9 +113,9 @@ Future<Null> main() async {
           decoration: BoxDecoration(border: Border.all(width: 10.0)),
           child: Container(
             width: 25.0,
-            height: 25.0
-          )
-        )
+            height: 25.0,
+          ),
+        ),
       )
     );
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
@@ -260,7 +261,7 @@ Future<Null> main() async {
           bottomLeft: const Radius.circular(-10.0),
         ),
       )
-      ..circle(x: 400.0, y: 350.0, radius: 45.0)
+      ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );
   });
 
@@ -283,7 +284,7 @@ Future<Null> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 
@@ -320,7 +321,7 @@ Future<Null> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 

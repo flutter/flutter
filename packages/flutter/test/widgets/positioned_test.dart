@@ -65,7 +65,7 @@ void main() {
       end: RelativeRect.fromRect(
         Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
         Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
-      )
+      ),
     );
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 10),
@@ -104,7 +104,7 @@ void main() {
       ),
     ); // t=0
     recordMetrics();
-    final Completer<Null> completer = Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again

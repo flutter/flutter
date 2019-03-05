@@ -36,7 +36,7 @@ import 'localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
-Future<Null> main(List<String> rawArgs) async {
+Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
@@ -81,9 +81,11 @@ Future<Null> main(List<String> rawArgs) async {
 // To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
-// ignore_for_file: public_member_api_docs
 '''
 );
+  buffer.writeln('''
+/// The subset of date symbols supported by the intl package which are also
+/// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale))
@@ -93,6 +95,9 @@ Future<Null> main(List<String> rawArgs) async {
 
   // Code that uses datePatterns expects it to contain values of type
   // Map<String, String> not Map<String, dynamic>.
+  buffer.writeln('''
+/// The subset of date patterns supported by the intl package which are also
+/// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale)) {
@@ -135,7 +140,7 @@ String _jsonToMap(dynamic json) {
   }
 
   if (json is Iterable)
-    return '<dynamic>[${json.map(_jsonToMap).join(',')}]';
+    return '<dynamic>[${json.map<String>(_jsonToMap).join(',')}]';
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, dynamic>{');

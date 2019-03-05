@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -52,11 +52,11 @@ void main() {
       count = 0;
       flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = DoctorCommand();
-      final CommandRunner<Null>runner = createTestCommandRunner(doctorCommand);
+      final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
     });
 
@@ -67,7 +67,7 @@ void main() {
 
       flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 
@@ -75,14 +75,14 @@ void main() {
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
     });
   });
 
   group('analytics with mocks', () {
     Usage mockUsage;
-    Clock mockClock;
+    SystemClock mockClock;
     Doctor mockDoctor;
     List<int> mockTimes;
 
@@ -100,17 +100,17 @@ void main() {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
       verify(mockClock.now()).called(2);
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
       );
     }, overrides: <Type, Generator>{
-      Clock: () => mockClock,
+      SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
@@ -119,17 +119,17 @@ void main() {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
       verify(mockClock.now()).called(2);
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
       );
     }, overrides: <Type, Generator>{
-      Clock: () => mockClock,
+      SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });

@@ -34,6 +34,56 @@ void main() {
     expect(step.transform(1.0), 1.0);
   });
 
+  void assertMaximumSlope(Curve curve, double maximumSlope) {
+    const double delta = 0.005;
+    for (double x = 0.0; x < 1.0 - delta; x += delta) {
+      final double deltaY = curve.transform(x) - curve.transform(x + delta);
+      assert(deltaY.abs() < delta * maximumSlope, '${curve.toString()} discontinuous at $x');
+    }
+  }
+
+  test('Curve is continuous', () {
+    assertMaximumSlope(Curves.linear, 20.0);
+    assertMaximumSlope(Curves.decelerate, 20.0);
+    assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
+    assertMaximumSlope(Curves.slowMiddle, 20.0);
+    assertMaximumSlope(Curves.bounceIn, 20.0);
+    assertMaximumSlope(Curves.bounceOut, 20.0);
+    assertMaximumSlope(Curves.bounceInOut, 20.0);
+    assertMaximumSlope(Curves.elasticOut, 20.0);
+    assertMaximumSlope(Curves.elasticInOut, 20.0);
+    assertMaximumSlope(Curves.ease, 20.0);
+
+    assertMaximumSlope(Curves.easeIn, 20.0);
+    assertMaximumSlope(Curves.easeInSine, 20.0);
+    assertMaximumSlope(Curves.easeInQuad, 20.0);
+    assertMaximumSlope(Curves.easeInCubic, 20.0);
+    assertMaximumSlope(Curves.easeInQuart, 20.0);
+    assertMaximumSlope(Curves.easeInQuint, 20.0);
+    assertMaximumSlope(Curves.easeInExpo, 20.0);
+    assertMaximumSlope(Curves.easeInCirc, 20.0);
+
+    assertMaximumSlope(Curves.easeOut, 20.0);
+    assertMaximumSlope(Curves.easeOutSine, 20.0);
+    assertMaximumSlope(Curves.easeOutQuad, 20.0);
+    assertMaximumSlope(Curves.easeOutCubic, 20.0);
+    assertMaximumSlope(Curves.easeOutQuart, 20.0);
+    assertMaximumSlope(Curves.easeOutQuint, 20.0);
+    assertMaximumSlope(Curves.easeOutExpo, 20.0);
+    assertMaximumSlope(Curves.easeOutCirc, 20.0);
+
+    // Curves.easeInOutExpo is discontinuous at its midpoint, so not included
+    // here
+
+    assertMaximumSlope(Curves.easeInOut, 20.0);
+    assertMaximumSlope(Curves.easeInOutSine, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuad, 20.0);
+    assertMaximumSlope(Curves.easeInOutCubic, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuart, 20.0);
+    assertMaximumSlope(Curves.easeInOutQuint, 20.0);
+    assertMaximumSlope(Curves.easeInOutCirc, 20.0);
+  });
+
   void expectStaysInBounds(Curve curve) {
     expect(curve.transform(0.0), inInclusiveRange(0.0, 1.0));
     expect(curve.transform(0.1), inInclusiveRange(0.0, 1.0));
@@ -92,6 +142,23 @@ void main() {
     expect(bounds[1], greaterThan(1.0));
   });
 
+  test('Back overshoots its bounds', () {
+    expect(Curves.easeInBack, hasOneLineDescription);
+    expect(Curves.easeOutBack, hasOneLineDescription);
+    expect(Curves.easeInOutBack, hasOneLineDescription);
+
+    List<double> bounds;
+    bounds = estimateBounds(Curves.easeInBack);
+    expect(bounds[0], lessThan(0.0));
+    expect(bounds[1], lessThanOrEqualTo(1.0));
+    bounds = estimateBounds(Curves.easeOutBack);
+    expect(bounds[0], greaterThanOrEqualTo(0.0));
+    expect(bounds[1], greaterThan(1.0));
+    bounds = estimateBounds(Curves.easeInOutBack);
+    expect(bounds[0], lessThan(0.0));
+    expect(bounds[1], greaterThan(1.0));
+  });
+
   test('Decelerate does so', () {
     expect(Curves.decelerate, hasOneLineDescription);
 
@@ -134,6 +201,47 @@ void main() {
 
     expect(() => Curves.bounceInOut.transform(-0.0001), throwsAssertionError);
     expect(() => Curves.bounceInOut.transform(1.0001), throwsAssertionError);
+  });
+
+  test('Curve transform method should return 0.0 for t=0.0 and 1.0 for t=1.0', () {
+    expect(const SawTooth(2).transform(0), 0);
+    expect(const SawTooth(2).transform(1), 1);
+
+    expect(const Interval(0, 1).transform(0), 0);
+    expect(const Interval(0, 1).transform(1), 1);
+
+    expect(const Threshold(0.5).transform(0), 0);
+    expect(const Threshold(0.5).transform(1), 1);
+
+    expect(const ElasticInCurve().transform(0), 0);
+    expect(const ElasticInCurve().transform(1), 1);
+
+    expect(const ElasticOutCurve().transform(0), 0);
+    expect(const ElasticOutCurve().transform(1), 1);
+
+    expect(const ElasticInOutCurve().transform(0), 0);
+    expect(const ElasticInOutCurve().transform(1), 1);
+
+    expect(Curves.linear.transform(0), 0);
+    expect(Curves.linear.transform(1), 1);
+
+    expect(Curves.easeInOutExpo.transform(0), 0);
+    expect(Curves.easeInOutExpo.transform(1), 1);
+
+    expect(const FlippedCurve(Curves.easeInOutExpo).transform(0), 0);
+    expect(const FlippedCurve(Curves.easeInOutExpo).transform(1), 1);
+
+    expect(Curves.decelerate.transform(0), 0);
+    expect(Curves.decelerate.transform(1), 1);
+
+    expect(Curves.bounceIn.transform(0), 0);
+    expect(Curves.bounceIn.transform(1), 1);
+
+    expect(Curves.bounceOut.transform(0), 0);
+    expect(Curves.bounceOut.transform(1), 1);
+
+    expect(Curves.bounceInOut.transform(0), 0);
+    expect(Curves.bounceInOut.transform(1), 1);
   });
 
 }

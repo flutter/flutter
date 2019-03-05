@@ -1,4 +1,3 @@
-
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -223,11 +222,12 @@ void main() {
 }
 
 class MockPortForwarder extends DevicePortForwarder {
-  final int availablePort;
   MockPortForwarder([this.availablePort]);
 
+  final int availablePort;
+
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
       return availablePort;
@@ -239,7 +239,7 @@ class MockPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => throw 'not implemented';
 
   @override
-  Future<Null> unforward(ForwardedPort forwardedPort) {
+  Future<void> unforward(ForwardedPort forwardedPort) {
     throw 'not implemented';
   }
 }

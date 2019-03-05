@@ -25,18 +25,18 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('build-shared-library',
         negatable: false,
         defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).'
+        help: 'Compile to a *.so file (requires NDK when building for Android).',
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map(getNameForIOSArch),
-        allowed: IOSArch.values.map(getNameForIOSArch),
+        defaultsTo: defaultIOSArchs.map<String>(getNameForIOSArch),
+        allowed: IOSArch.values.map<String>(getNameForIOSArch),
         help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
@@ -56,9 +56,7 @@ class BuildAotCommand extends BuildSubCommand {
   final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
-  Future<Null> runCommand() async {
-    await super.runCommand();
-
+  Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -70,8 +68,8 @@ class BuildAotCommand extends BuildSubCommand {
     if (!argResults['quiet']) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
-        'Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-        expectSlowOperation: true,
+        'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
+        timeout: kSlowOperation,
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
@@ -84,12 +82,14 @@ class BuildAotCommand extends BuildSubCommand {
         platform: platform,
         buildMode: buildMode,
         mainPath: mainPath,
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: false,
         outputPath: outputPath,
         extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       );
       if (mainPath == null) {
         throwToolExit('Compiler terminated unexpectedly.');
-        return;
+        return null;
       }
 
       // Build AOT snapshot.
@@ -112,14 +112,14 @@ class BuildAotCommand extends BuildSubCommand {
             outputPath: outputPath,
             buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-          ).then((int buildExitCode) {
+          ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
         });
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
-        if ((await Future.wait(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+        if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
+          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
           await runCheckedAsync(<String>['lipo']
             ..addAll(dylibs)
@@ -152,7 +152,7 @@ class BuildAotCommand extends BuildSubCommand {
       // Catch the String exceptions thrown from the `runCheckedSync` methods below.
       status?.cancel();
       printError(error);
-      return;
+      return null;
     }
     status?.stop();
 
@@ -165,5 +165,6 @@ class BuildAotCommand extends BuildSubCommand {
     } else {
       printStatus(builtMessage);
     }
+    return null;
   }
 }

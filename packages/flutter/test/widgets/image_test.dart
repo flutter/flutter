@@ -24,7 +24,7 @@ void main() {
         child: Image(
           image: imageProvider1,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
       EnginePhase.layout,
@@ -46,10 +46,10 @@ void main() {
         child: Image(
           image: imageProvider2,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -66,10 +66,10 @@ void main() {
           gaplessPlayback: true,
           image: imageProvider1,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -89,10 +89,10 @@ void main() {
           gaplessPlayback: true,
           image: imageProvider2,
           excludeFromSemantics: true,
-        )
+        ),
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -109,7 +109,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -129,7 +129,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -147,7 +147,7 @@ void main() {
         excludeFromSemantics: true,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -165,10 +165,10 @@ void main() {
         key: key,
         gaplessPlayback: true,
         excludeFromSemantics: true,
-        image: imageProvider2
+        image: imageProvider2,
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -199,9 +199,9 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider
+            image: imageProvider,
           ),
-        )
+        ),
       )
     );
 
@@ -226,9 +226,9 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider
+            image: imageProvider,
           ),
-        )
+        ),
       )
     );
 
@@ -256,8 +256,8 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider
-            )
+              image: imageProvider,
+            ),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -265,9 +265,9 @@ void main() {
               devicePixelRatio: 10.0,
               padding: EdgeInsets.zero,
             ),
-            child: Container(width: 100.0)
-          )
-        ]
+            child: Container(width: 100.0),
+          ),
+        ],
       )
     );
 
@@ -283,7 +283,7 @@ void main() {
               devicePixelRatio: 5.0,
               padding: EdgeInsets.zero,
             ),
-            child: Container(width: 100.0)
+            child: Container(width: 100.0),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -294,10 +294,10 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider
-            )
-          )
-        ]
+              image: imageProvider,
+            ),
+          ),
+        ],
       )
     );
 
@@ -581,6 +581,58 @@ void main() {
     expect(capturedImage, isNull); // The image stream listeners should never be called.
   });
 
+  testWidgets('Removing listener FIFO removes exactly one listener and error listener', (WidgetTester tester) async {
+    // To make sure that a single listener removal doesn't only happen
+    // accidentally as described in https://github.com/flutter/flutter/pull/25865#discussion_r244851565.
+    int errorListener1Called = 0;
+    int errorListener2Called = 0;
+    int errorListener3Called = 0;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener1 = (dynamic exception, StackTrace stackTrace) {
+      errorListener1Called++;
+    };
+    final ImageErrorListener errorListener2 = (dynamic exception, StackTrace stackTrace) {
+      errorListener2Called++;
+    };
+    final ImageErrorListener errorListener3 = (dynamic exception, StackTrace stackTrace) {
+      errorListener3Called++;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener1);
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener2);
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener3);
+    // Remove listener. It should remove exactly the first one and the associated
+    // errorListener1.
+    imageProvider._streamCompleter.removeListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(errorListener1Called, 0);
+    expect(errorListener2Called, 1);
+    expect(errorListener3Called, 1);
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+  });
+
   testWidgets('Image.memory control test', (WidgetTester tester) async {
     await tester.pumpWidget(Image.memory(Uint8List.fromList(kTransparentImage), excludeFromSemantics: true,));
   });
@@ -591,7 +643,7 @@ void main() {
         excludeFromSemantics: true,
         image: TestImageProvider(),
         color: const Color(0xFF00FF00),
-        colorBlendMode: BlendMode.clear
+        colorBlendMode: BlendMode.clear,
       )
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
@@ -601,7 +653,7 @@ void main() {
 
   testWidgets('Precache', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -621,6 +673,28 @@ void main() {
     expect(isSync, isTrue);
   });
 
+  testWidgets('Precache remove listeners immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
+    final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
+    final TestImageProvider provider = TestImageProvider(streamCompleter: imageStreamCompleter);
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          precacheImage(provider, context);
+          return Container();
+        }
+      )
+    );
+
+    expect(imageStreamCompleter.listeners.length, 2);
+    imageStreamCompleter.listeners.keys.toList()[1](null, null);
+
+    expect(imageStreamCompleter.listeners.length, 1);
+    imageStreamCompleter.listeners.keys.toList()[0](null, null);
+
+    expect(imageStreamCompleter.listeners.length, 0);
+  });
+
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
     dynamic capturedException;
     StackTrace capturedStackTrace;
@@ -632,7 +706,7 @@ void main() {
     final Exception testException = Exception('cannot resolve host');
     final StackTrace testStack = StackTrace.current;
     final TestImageProvider imageProvider = TestImageProvider();
-    Future<Null> precache;
+    Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -684,11 +758,11 @@ void main() {
             key: key,
             child: Image(
                 excludeFromSemantics: true,
-                image: imageProvider1
-            )
+                image: imageProvider1,
+            ),
         ),
         null,
-        EnginePhase.layout
+        EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -708,11 +782,11 @@ void main() {
             key: key,
             child: Image(
               excludeFromSemantics: true,
-              image: imageProvider2
-            )
+              image: imageProvider2,
+            ),
         ),
         null,
-        EnginePhase.layout
+        EnginePhase.layout,
     );
 
     renderImage = key.currentContext.findRenderObject();
@@ -764,7 +838,7 @@ void main() {
           rect: Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
-        )
+        ),
       ]
     ), ignoreTransform: true));
     semantics.dispose();
@@ -792,14 +866,14 @@ void main() {
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  ImageStreamCompleter _streamCompleter;
-  ImageConfiguration _lastResolvedConfiguration;
-
   TestImageProvider({ImageStreamCompleter streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
   }
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  ImageStreamCompleter _streamCompleter;
+  ImageConfiguration _lastResolvedConfiguration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -852,7 +926,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 

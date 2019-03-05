@@ -96,13 +96,13 @@ void main() {
       // The first item is at the center of the viewport.
       expect(
       tester.getTopLeft(find.widgetWithText(Container, '0')),
-      const Offset(0.0, 250.0)
+      const Offset(0.0, 250.0),
       );
 
       // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '9')),
-        const Offset(0.0, 150.0)
+        const Offset(0.0, 150.0),
       );
 
       controller.jumpTo(1000.0);
@@ -111,7 +111,7 @@ void main() {
       // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
     });
 
@@ -144,7 +144,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '-1000')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
 
       // Can be scrolled infinitely for positive indexes.
@@ -152,7 +152,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '1000')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
     });
 
@@ -331,7 +331,7 @@ void main() {
         )
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
       // value of childCount should be 4.
@@ -515,7 +515,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -573,7 +573,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -694,7 +694,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
       expect(viewport, paints
         ..transform(
           matrix4: equals(<dynamic>[

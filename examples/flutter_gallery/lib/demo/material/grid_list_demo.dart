@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum GridDemoTileStyle {
   imageOnly,
   oneLine,
@@ -117,10 +119,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size).shortestSide;
-    _flingAnimation = Tween<Offset>(
+    _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
-      end: _clampOffset(_offset + direction * distance)
-    ).animate(_controller);
+      end: _clampOffset(_offset + direction * distance),
+    ));
     _controller
       ..value = 0.0
       ..fling(velocity: magnitude / 1000.0);
@@ -153,7 +155,7 @@ class GridDemoPhotoItem extends StatelessWidget {
     Key key,
     @required this.photo,
     @required this.tileStyle,
-    @required this.onBannerTap
+    @required this.onBannerTap,
   }) : assert(photo != null && photo.isValid),
        assert(tileStyle != null),
        assert(onBannerTap != null),
@@ -168,7 +170,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(photo.title)
+            title: Text(photo.title),
           ),
           body: SizedBox.expand(
             child: Hero(
@@ -192,8 +194,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           photo.assetName,
           package: photo.assetPackage,
           fit: BoxFit.cover,
-        )
-      )
+        ),
+      ),
     );
 
     final IconData icon = photo.isFavorite ? Icons.star : Icons.star_border;
@@ -340,6 +342,7 @@ class GridListDemoState extends State<GridListDemo> {
       appBar: AppBar(
         title: const Text('Grid list'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
@@ -371,7 +374,7 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children: photos.map((Photo photo) {
+                children: photos.map<Widget>((Photo photo) {
                   return GridDemoPhotoItem(
                     photo: photo,
                     tileStyle: _tileStyle,
@@ -379,7 +382,7 @@ class GridListDemoState extends State<GridListDemo> {
                       setState(() {
                         photo.isFavorite = !photo.isFavorite;
                       });
-                    }
+                    },
                   );
                 }).toList(),
               ),

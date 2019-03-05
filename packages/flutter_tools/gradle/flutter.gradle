@@ -18,13 +18,18 @@ import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     repositories {
+        google()
         jcenter()
-        maven {
-            url 'https://dl.google.com/dl/android/maven2'
-        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
+    }
+}
+
+android {
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 }
 
@@ -191,6 +196,13 @@ class FlutterPlugin implements Plugin<Project> {
                         compile pluginProject
                     }
                 }
+		pluginProject.afterEvaluate {
+                    pluginProject.android.buildTypes {
+                        profile {
+                            initWith debug
+                        }
+                    }
+		}
                 pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
@@ -212,9 +224,11 @@ class FlutterPlugin implements Plugin<Project> {
             } else {
                 if (project.getConfigurations().findByName("debugCompileOnly")) {
                     debugCompileOnly project.files(debugFlutterJar)
+                    profileCompileOnly project.files(profileFlutterJar)
                     releaseCompileOnly project.files(releaseFlutterJar)
                 } else {
                     debugProvided project.files(debugFlutterJar)
+                    profileProvided project.files(profileFlutterJar)
                     releaseProvided project.files(releaseFlutterJar)
                 }
             }
@@ -271,6 +285,22 @@ class FlutterPlugin implements Plugin<Project> {
         return "release"
     }
 
+    /**
+     * Returns a Flutter Jar file path suitable for the specified Android buildMode.
+     */
+    private File flutterJarFor(buildMode) {
+        if (buildMode == "profile") {
+            return profileFlutterJar
+        } else if (buildMode == "dynamicProfile") {
+            return dynamicProfileFlutterJar
+        } else if (buildMode == "dynamicRelease") {
+            return dynamicReleaseFlutterJar
+        } else if (buildMode == "debug") {
+            return debugFlutterJar
+        }
+        return releaseFlutterJar
+    }
+
     private void addFlutterTask(Project project) {
         if (project.state.failure) {
             return
@@ -304,8 +334,20 @@ class FlutterPlugin implements Plugin<Project> {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
         String compilationTraceFilePathValue = null
-        if (project.hasProperty('precompile')) {
-            compilationTraceFilePathValue = project.property('precompile')
+        if (project.hasProperty('compilation-trace-file')) {
+            compilationTraceFilePathValue = project.property('compilation-trace-file')
+        }
+        Boolean createPatchValue = false
+        if (project.hasProperty('patch')) {
+            createPatchValue = project.property('patch').toBoolean()
+        }
+        Integer buildNumberValue = null
+        if (project.hasProperty('build-number')) {
+            buildNumberValue = project.property('build-number').toInteger()
+        }
+        String baselineDirValue = null
+        if (project.hasProperty('baseline-dir')) {
+            baselineDirValue = project.property('baseline-dir')
         }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
@@ -349,6 +391,9 @@ class FlutterPlugin implements Plugin<Project> {
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 compilationTraceFilePath compilationTraceFilePathValue
+                createPatch createPatchValue
+                buildNumber buildNumberValue
+                baselineDir baselineDirValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -357,14 +402,49 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
 
+            // We know that the flutter app is a subproject in another Android app when these tasks exist.
+            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
+            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
-                dependsOn variant.mergeAssets
-                dependsOn "clean${variant.mergeAssets.name.capitalize()}"
-                into variant.mergeAssets.outputDir
+                if (packageAssets && cleanPackageAssets) {
+                    dependsOn packageAssets
+                    dependsOn cleanPackageAssets
+                    into packageAssets.outputDir
+
+                    File chosenFlutterJar = flutterJarFor(flutterBuildMode)
+                    Task copySharedFlutterAssetsTask = project.tasks.create(name: "copySharedFlutterAssets${variant.name.capitalize()}", type: Copy) {
+                        from(project.zipTree(chosenFlutterJar))
+                        include 'assets/flutter_shared/*'
+                        into "src/${variant.name}"
+                    }
+                    dependsOn copySharedFlutterAssetsTask
+                } else {
+                    dependsOn variant.mergeAssets
+                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
+                    into variant.mergeAssets.outputDir
+                }
                 with flutterTask.assets
             }
-            variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
+
+            if (packageAssets) {
+                String mainModuleName = "app"
+                try {
+                    String tmpModuleName = project.rootProject.ext.mainModuleName
+                    if (tmpModuleName != null && !tmpModuleName.empty) {
+                        mainModuleName = tmpModuleName
+                    }
+                } catch (Exception e) {
+                }
+                // Only include configurations that exist in parent project.
+                Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${variant.name.capitalize()}Assets")
+                if (mergeAssets) {
+                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+                }
+            } else {
+                variant.outputs[0].processResources.dependsOn(copyFlutterAssetsTask)
+            }
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
@@ -393,10 +473,16 @@ abstract class BaseFlutterTask extends DefaultTask {
     String[] fileSystemRoots
     @Optional @Input
     String fileSystemScheme
-    @Optional @Input
+    @Input
     Boolean trackWidgetCreation
     @Optional @Input
     String compilationTraceFilePath
+    @Optional @Input
+    Boolean createPatch
+    @Optional @Input
+    Integer buildNumber
+    @Optional @Input
+    String baselineDir
     @Optional @Input
     Boolean buildSharedLibrary
     @Optional @Input
@@ -489,7 +575,17 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--track-widget-creation"
             }
             if (compilationTraceFilePath != null) {
-                args "--precompile", compilationTraceFilePath
+                args "--compilation-trace-file", compilationTraceFilePath
+            }
+            if (createPatch) {
+                args "--patch"
+                args "--build-number", project.android.defaultConfig.versionCode
+                if (buildNumber != null) {
+                    assert buildNumber == project.android.defaultConfig.versionCode
+                }
+            }
+            if (baselineDir != null) {
+                args "--baseline-dir", baselineDir
             }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"
@@ -534,7 +630,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug' || compilationTraceFilePath) {
+            if (buildMode == 'release' || buildMode == 'profile') {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {
@@ -551,9 +647,13 @@ class FlutterTask extends BaseFlutterTask {
         if (dependenciesFile.exists()) {
             try {
                 // Dependencies file has Makefile syntax:
-                //   <target> <files>: <source> <files> <separated> <by> <space>
+                //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
                 String depText = dependenciesFile.text
-                return project.files(depText.split(': ')[1].split())
+                // So we split list of files by non-escaped(by backslash) space,
+                def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+                // then we replace all escaped spaces with regular spaces
+                def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
+                return project.files(depList)
             } catch (Exception e) {
                 logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
             }

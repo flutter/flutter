@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
-final List<GlobalKey> globalKeys = defaultPages.map((_) => GlobalKey()).toList();
+final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
 int currentPage;
 
 Widget buildPage(int page) {
@@ -17,7 +17,7 @@ Widget buildPage(int page) {
     key: globalKeys[page],
     width: pageSize.width,
     height: pageSize.height,
-    child: Text(page.toString())
+    child: Text(page.toString()),
   );
 }
 
@@ -30,7 +30,7 @@ Widget buildFrame({
     scrollDirection: Axis.horizontal,
     reverse: reverse,
     onPageChanged: (int page) { currentPage = page; },
-    children: pages.map(buildPage).toList(),
+    children: pages.map<Widget>(buildPage).toList(),
   );
 
   // The test framework forces the frame to be 800x600, so we need to create
@@ -45,7 +45,7 @@ Widget buildFrame({
   );
 }
 
-Future<Null> page(WidgetTester tester, Offset offset) {
+Future<void> page(WidgetTester tester, Offset offset) {
   return TestAsyncUtils.guard(() async {
     final String itemText = currentPage != null ? currentPage.toString() : '0';
     await tester.drag(find.text(itemText), offset);
@@ -53,11 +53,11 @@ Future<Null> page(WidgetTester tester, Offset offset) {
   });
 }
 
-Future<Null> pageLeft(WidgetTester tester) {
+Future<void> pageLeft(WidgetTester tester) {
   return page(tester, Offset(-pageSize.width, 0.0));
 }
 
-Future<Null> pageRight(WidgetTester tester) {
+Future<void> pageRight(WidgetTester tester) {
   return page(tester, Offset(pageSize.width, 0.0));
 }
 

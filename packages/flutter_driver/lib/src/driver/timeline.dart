@@ -42,7 +42,7 @@ class TimelineEvent {
         : null,
       json['ts'],
       json['tts'],
-      json['args']
+      json['args'],
     );
   }
 
@@ -57,7 +57,7 @@ class TimelineEvent {
     this.threadDuration,
     this.timestampMicros,
     this.threadTimestampMicros,
-    this.arguments
+    this.arguments,
   );
 
   /// The original event JSON.
@@ -129,6 +129,6 @@ List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
 
   // TODO(vegorov): use instance method version of castFrom when it is available.
   return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-    .map((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+    .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
     .toList();
 }

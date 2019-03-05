@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'button_theme.dart';
-import 'colors.dart';
-import 'constants.dart';
+import 'material_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -29,8 +28,50 @@ import 'theme_data.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
+/// and lastly a RaisedButton with gradient background.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           RaisedButton(
+///             onPressed: null,
+///             child: const Text('Disabled Button'),
+///           ),
+///           RaisedButton(
+///             onPressed: () {},
+///             child: const Text('Enabled Button'),
+///           ),
+///           RaisedButton(
+///             onPressed: () {},
+///             textColor: Colors.white,
+///             padding: const EdgeInsets.all(0.0),
+///             child: Container(
+///               decoration: const BoxDecoration(
+///                 gradient: LinearGradient(
+///                   colors: <Color>[Colors.red, Colors.green, Colors.blue],
+///                 ),
+///               ),
+///               padding: const EdgeInsets.all(10.0),
+///               child: Text('Gradient Button'),
+///             ),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -40,39 +81,59 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
-///  * <https://material.google.com/components/buttons.html>
-class RaisedButton extends StatelessWidget {
+///  * <https://material.io/design/components/buttons.html>
+class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], and
-  /// [clipBehavior] arguments must not be null.
+  /// [clipBehavior] arguments must not be null. Additionally,  [elevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const RaisedButton({
     Key key,
-    @required this.onPressed,
-    this.onHighlightChanged,
-    this.textTheme,
-    this.textColor,
-    this.disabledTextColor,
-    this.color,
-    this.disabledColor,
-    this.highlightColor,
-    this.splashColor,
-    this.colorBrightness,
-    this.elevation = 2.0,
-    this.highlightElevation = 8.0,
-    this.disabledElevation = 0.0,
-    this.padding,
-    this.shape,
-    this.clipBehavior = Clip.none,
-    this.materialTapTargetSize,
-    this.animationDuration = kThemeChangeDuration,
-    this.child,
-  }) : assert(elevation != null),
-       assert(highlightElevation != null),
-       assert(disabledElevation != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       super(key: key);
+    @required VoidCallback onPressed,
+    ValueChanged<bool> onHighlightChanged,
+    ButtonTextTheme textTheme,
+    Color textColor,
+    Color disabledTextColor,
+    Color color,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
+    Brightness colorBrightness,
+    double elevation,
+    double highlightElevation,
+    double disabledElevation,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    Clip clipBehavior = Clip.none,
+    MaterialTapTargetSize materialTapTargetSize,
+    Duration animationDuration,
+    Widget child,
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onHighlightChanged: onHighlightChanged,
+         textTheme: textTheme,
+         textColor: textColor,
+         disabledTextColor: disabledTextColor,
+         color: color,
+         disabledColor: disabledColor,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
+         colorBrightness: colorBrightness,
+         elevation: elevation,
+         highlightElevation: highlightElevation,
+         disabledElevation: disabledElevation,
+         padding: padding,
+         shape: shape,
+         clipBehavior: clipBehavior,
+         materialTapTargetSize: materialTapTargetSize,
+         animationDuration: animationDuration,
+         child: child,
+       );
 
   /// Create a filled button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -82,325 +143,50 @@ class RaisedButton extends StatelessWidget {
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], [icon],
   /// [label], and [clipBehavior] arguments must not be null.
-  RaisedButton.icon({
+  factory RaisedButton.icon({
     Key key,
-    @required this.onPressed,
-    this.onHighlightChanged,
-    this.textTheme,
-    this.textColor,
-    this.disabledTextColor,
-    this.color,
-    this.disabledColor,
-    this.highlightColor,
-    this.splashColor,
-    this.colorBrightness,
-    this.elevation = 2.0,
-    this.highlightElevation = 8.0,
-    this.disabledElevation = 0.0,
-    this.shape,
-    this.clipBehavior = Clip.none,
-    this.materialTapTargetSize,
-    this.animationDuration = kThemeChangeDuration,
+    @required VoidCallback onPressed,
+    ValueChanged<bool> onHighlightChanged,
+    ButtonTextTheme textTheme,
+    Color textColor,
+    Color disabledTextColor,
+    Color color,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
+    Brightness colorBrightness,
+    double elevation,
+    double highlightElevation,
+    double disabledElevation,
+    ShapeBorder shape,
+    Clip clipBehavior,
+    MaterialTapTargetSize materialTapTargetSize,
+    Duration animationDuration,
     @required Widget icon,
     @required Widget label,
-  }) : assert(elevation != null),
-       assert(highlightElevation != null),
-       assert(disabledElevation != null),
-       assert(icon != null),
-       assert(label != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-       child = Row(
-         mainAxisSize: MainAxisSize.min,
-         children: <Widget>[
-           icon,
-           const SizedBox(width: 8.0),
-           label,
-         ],
-       ),
-       super(key: key);
-
-  /// Called when the button is tapped or otherwise activated.
-  ///
-  /// If this is set to null, the button will be disabled, see [enabled].
-  final VoidCallback onPressed;
-
-  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
-  /// callback.
-  final ValueChanged<bool> onHighlightChanged;
-
-  /// Defines the button's base colors, and the defaults for the button's minimum
-  /// size, internal padding, and shape.
-  ///
-  /// Defaults to `ButtonTheme.of(context).textTheme`.
-  final ButtonTextTheme textTheme;
-
-  /// The color to use for this button's text.
-  ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
-  ///
-  /// The default text color depends on the button theme's text theme,
-  /// [ButtonThemeData.textTheme].
-  ///
-  /// See also:
-  ///   * [disabledTextColor], the text color to use when the button has been
-  ///     disabled.
-  final Color textColor;
-
-  /// The color to use for this button's text when the button is disabled.
-  ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
-  ///
-  /// The default value is the theme's disabled color,
-  /// [ThemeData.disabledColor].
-  ///
-  /// See also:
-  ///  * [textColor] - The color to use for this button's text when the button is [enabled].
-  final Color disabledTextColor;
-
-  /// The button's fill color, displayed by its [Material], while it
-  /// is in its default (unpressed, [enabled]) state.
-  ///
-  /// The default fill color is the theme's button color, [ThemeData.buttonColor].
-  ///
-  /// Typically the default color will be overidden with a Material color,
-  /// for example:
-  ///
-  /// ```dart
-  ///  RaisedButton(
-  ///    color: Colors.blue,
-  ///    onPressed: _handleTap,
-  ///    child: Text('DEMO'),
-  ///  ),
-  /// ```
-  ///
-  /// See also:
-  ///   * [disabledColor] - the fill color of the button when the button is disabled.
-  final Color color;
-
-  /// The fill color of the button when the button is disabled.
-  ///
-  /// The default value of this color is the theme's disabled color,
-  /// [ThemeData.disabledColor].
-  ///
-  /// See also:
-  ///   * [color] - the fill color of the button when the button is [enabled].
-  final Color disabledColor;
-
-  /// The splash color of the button's [InkWell].
-  ///
-  /// The ink splash indicates that the button has been touched. It
-  /// appears on top of the button's child and spreads in an expanding
-  /// circle beginning where the touch occurred.
-  ///
-  /// The default splash color is the current theme's splash color,
-  /// [ThemeData.splashColor].
-  ///
-  /// The appearance of the splash can be configured with the theme's splash
-  /// factory, [ThemeData.splashFactory].
-  final Color splashColor;
-
-  /// The highlight color of the button's [InkWell].
-  ///
-  /// The highlight indicates that the button is actively being pressed. It
-  /// appears on top of the button's child and quickly spreads to fill
-  /// the button, and then fades out.
-  ///
-  /// If [textTheme] is [ButtonTextTheme.primary], the default highlight color is
-  /// transparent (in other words the highlight doesn't appear). Otherwise it's
-  /// the current theme's highlight color, [ThemeData.highlightColor].
-  final Color highlightColor;
-
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the raised button.
-  ///
-  /// Defaults to 2, the appropriate elevation for raised buttons.
-  ///
-  /// See also:
-  ///
-  ///  * [FlatButton], a button with no elevation or fill color.
-  ///  * [disabledElevation], the elevation when the button is disabled.
-  ///  * [highlightElevation], the elevation when the button is pressed.
-  final double elevation;
-
-  /// The elevation for the button's [Material] when the button
-  /// is [enabled] but not pressed.
-  ///
-  /// Defaults to 2.0.
-  ///
-  /// See also:
-  ///
-  ///  * [highlightElevation], the default elevation.
-  ///  * [disabledElevation], the elevation when the button is disabled.
-
-  /// The elevation for the button's [Material] when the button
-  /// is [enabled] and pressed.
-  ///
-  /// This controls the size of the shadow below the button. When a tap
-  /// down gesture occurs within the button, its [InkWell] displays a
-  /// [highlightColor] "highlight".
-  ///
-  /// Defaults to 8.0.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  ///  * [disabledElevation], the elevation when the button is disabled.
-  final double highlightElevation;
-
-  /// The elevation for the button's [Material] when the button
-  /// is not [enabled].
-  ///
-  /// Defaults to 0.0.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  ///  * [highlightElevation], the elevation when the button is pressed.
-  final double disabledElevation;
-
-  /// The theme brightness to use for this button.
-  ///
-  /// Defaults to the theme's brightness, [ThemeData.brightness].
-  final Brightness colorBrightness;
-
-  /// The button's label.
-  ///
-  /// Often a [Text] widget in all caps.
-  final Widget child;
-
-  /// Whether the button is enabled or disabled.
-  ///
-  /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
-
-  /// The internal padding for the button's [child].
-  ///
-  /// Defaults to the value from the current [ButtonTheme],
-  /// [ButtonThemeData.padding].
-  final EdgeInsetsGeometry padding;
-
-  /// The shape of the button's [Material].
-  ///
-  /// The button's highlight and splash are clipped to this shape. If the
-  /// button has an elevation, then its drop shadow is defined by this
-  /// shape as well.
-  final ShapeBorder shape;
-
-  /// {@macro flutter.widgets.Clip}
-  final Clip clipBehavior;
-
-  /// Defines the duration of animated changes for [shape] and [elevation].
-  ///
-  /// The default value is [kThemeChangeDuration].
-  final Duration animationDuration;
-
-  /// Configures the minimum size of the tap target.
-  ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
-  ///
-  /// See also:
-  ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  final MaterialTapTargetSize materialTapTargetSize;
-
-  Brightness _getBrightness(ThemeData theme) {
-    return colorBrightness ?? theme.brightness;
-  }
-
-  ButtonTextTheme _getTextTheme(ButtonThemeData buttonTheme) {
-    return textTheme ?? buttonTheme.textTheme;
-  }
-
-  Color _getFillColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    final Color fillColor = enabled ? color : disabledColor;
-    if (fillColor != null)
-      return fillColor;
-
-    final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
-    switch (_getTextTheme(buttonTheme)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return enabled
-          ? theme.buttonColor
-          : theme.disabledColor;
-      case ButtonTextTheme.primary:
-        return enabled
-          ? theme.buttonColor
-          : (themeIsDark ? Colors.white12 : Colors.black12);
-    }
-    return null;
-  }
-
-  Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme, Color fillColor) {
-    final Color color = enabled ? textColor : disabledTextColor;
-    if (color != null)
-      return color;
-
-    final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
-    final bool fillIsDark = fillColor != null
-      ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
-      : themeIsDark;
-
-    switch (_getTextTheme(buttonTheme)) {
-      case ButtonTextTheme.normal:
-        return enabled
-          ? (themeIsDark ? Colors.white : Colors.black87)
-          : theme.disabledColor;
-      case ButtonTextTheme.accent:
-        return enabled
-          ? theme.accentColor
-          : theme.disabledColor;
-      case ButtonTextTheme.primary:
-        return enabled
-          ? (fillIsDark ? Colors.white : Colors.black)
-          : (themeIsDark ? Colors.white30 : Colors.black38);
-    }
-    return null;
-  }
-
-  Color _getHighlightColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    if (highlightColor != null)
-      return highlightColor;
-
-    switch (_getTextTheme(buttonTheme)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return theme.highlightColor;
-      case ButtonTextTheme.primary:
-        return Colors.transparent;
-    }
-    return Colors.transparent;
-  }
+  }) = _RaisedButtonWithIcon;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-    final Color fillColor = _getFillColor(theme, buttonTheme);
-    final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
-
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
-      fillColor: fillColor,
-      textStyle: theme.textTheme.button.copyWith(color: textColor),
-      highlightColor: _getHighlightColor(theme, buttonTheme),
-      splashColor: splashColor ?? theme.splashColor,
-      elevation: elevation,
-      highlightElevation: highlightElevation,
-      disabledElevation: disabledElevation,
-      padding: padding ?? buttonTheme.padding,
-      constraints: buttonTheme.constraints,
-      shape: shape ?? buttonTheme.shape,
-      clipBehavior: clipBehavior,
-      animationDuration: animationDuration,
+      clipBehavior: clipBehavior ?? Clip.none,
+      fillColor: buttonTheme.getFillColor(this),
+      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      highlightColor: buttonTheme.getHighlightColor(this),
+      splashColor: buttonTheme.getSplashColor(this),
+      elevation: buttonTheme.getElevation(this),
+      highlightElevation: buttonTheme.getHighlightElevation(this),
+      disabledElevation: buttonTheme.getDisabledElevation(this),
+      padding: buttonTheme.getPadding(this),
+      constraints: buttonTheme.getConstraints(this),
+      shape: buttonTheme.getShape(this),
+      animationDuration: buttonTheme.getAnimationDuration(this),
+      materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       child: child,
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 
@@ -421,4 +207,65 @@ class RaisedButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
+}
+
+/// The type of of RaisedButtons created with [RaisedButton.icon].
+///
+/// This class only exists to give RaisedButtons created with [RaisedButton.icon]
+/// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixin {
+  _RaisedButtonWithIcon({
+    Key key,
+    @required VoidCallback onPressed,
+    ValueChanged<bool> onHighlightChanged,
+    ButtonTextTheme textTheme,
+    Color textColor,
+    Color disabledTextColor,
+    Color color,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
+    Brightness colorBrightness,
+    double elevation,
+    double highlightElevation,
+    double disabledElevation,
+    ShapeBorder shape,
+    Clip clipBehavior = Clip.none,
+    MaterialTapTargetSize materialTapTargetSize,
+    Duration animationDuration,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onHighlightChanged: onHighlightChanged,
+         textTheme: textTheme,
+         textColor: textColor,
+         disabledTextColor: disabledTextColor,
+         color: color,
+         disabledColor: disabledColor,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
+         colorBrightness: colorBrightness,
+         elevation: elevation,
+         highlightElevation: highlightElevation,
+         disabledElevation: disabledElevation,
+         shape: shape,
+         clipBehavior: clipBehavior,
+         materialTapTargetSize: materialTapTargetSize,
+         animationDuration: animationDuration,
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: <Widget>[
+             icon,
+             const SizedBox(width: 8.0),
+             label,
+           ],
+         ),
+       );
 }

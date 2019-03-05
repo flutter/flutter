@@ -7,14 +7,17 @@ import 'dart:async';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
-    addBuildModeFlags();
+    usesBuildNumberOption();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -22,25 +25,14 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios'],
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
-      ..addOption('precompile',
-        hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only\n'
-              'allowed when using --dynamic. It takes a Dart compilation trace\n'
-              'file produced by the training run of the application. With this\n'
-              'flag, instead of using default Dart VM snapshot provided by the\n'
-              'engine, the application will use its own snapshot that includes\n'
-              'additional functions.'
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -70,9 +62,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Null> runCommand() async {
-    await super.runCommand();
-
+  Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -80,24 +70,28 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
+    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
+
     await build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      snapshotPath: argResults['snapshot'],
-      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['precompile'],
+      compilationTraceFilePath: argResults['compilation-trace-file'],
+      createPatch: argResults['patch'],
+      buildNumber: buildNumber,
+      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );
+    return null;
   }
 }

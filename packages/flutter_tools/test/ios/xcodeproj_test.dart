@@ -110,7 +110,7 @@ void main() {
       fs.file(xcodebuild).deleteSync();
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     }, overrides: <Type, Generator>{
-      Platform: () => fakePlatform('notMacOS')
+      Platform: () => fakePlatform('notMacOS'),
     });
 
     testUsingOsxContext('isInstalled is false when xcodebuild does not exist', () {
@@ -197,7 +197,7 @@ Information about project "Runner":
     });
     test('expected build configuration for non-flavored build is derived from BuildMode', () {
       expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'), 'Release');
+      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
       expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
     });
     test('expected scheme for flavored build is the title-cased flavor', () {
@@ -207,7 +207,7 @@ Information about project "Runner":
     });
     test('expected build configuration for flavored build is Mode-Flavor', () {
       expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello'), 'Hello'), 'Debug-Hello');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO'), 'Hello'), 'Release-Hello');
+      expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO'), 'Hello'), 'Profile-Hello');
       expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello'), 'Hello'), 'Release-Hello');
     });
     test('scheme for default project is Runner', () {
@@ -218,9 +218,9 @@ Information about project "Runner":
       expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
     });
     test('build configuration for default project is matched against BuildMode', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
+      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner']);
       expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
-      expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Release');
+      expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
       expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
     });
     test('scheme for project with custom schemes is matched against flavor', () {
@@ -238,12 +238,12 @@ Information about project "Runner":
     test('build configuration for project with custom schemes is matched against BuildMode and flavor', () {
       final XcodeProjectInfo info = XcodeProjectInfo(
         <String>['Runner'],
-        <String>['debug (free)', 'Debug paid', 'release - Free', 'Release-Paid'],
+        <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
         <String>['Free', 'Paid'],
       );
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free'), 'Free'), 'debug (free)');
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid'), 'Paid'), 'Debug paid');
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE'), 'Free'), 'release - Free');
+      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE'), 'Free'), 'profile - Free');
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid'), 'Paid'), 'Release-Paid');
     });
     test('build configuration for project with inconsistent naming is null', () {
@@ -450,7 +450,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -468,7 +468,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -486,7 +486,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -503,7 +503,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,

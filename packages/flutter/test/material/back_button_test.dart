@@ -16,10 +16,10 @@ void main() {
             return const Material(
               child: Center(
                 child: BackButton(),
-              )
+              ),
             );
           },
-        }
+        },
       )
     );
 
@@ -82,7 +82,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getSemanticsData(find.byType(BackButton)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
       label: 'Back',
       isButton: true,
       hasEnabledState: true,

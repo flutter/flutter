@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class ElevationDemo extends StatefulWidget {
   static const String routeName = '/material/elevation';
 
@@ -23,7 +25,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
       24.0,
     ];
 
-    return elevations.map((double elevation) {
+    return elevations.map<Widget>((double elevation) {
       return Center(
         child: Card(
           margin: const EdgeInsets.all(20.0),
@@ -46,12 +48,13 @@ class _ElevationDemoState extends State<ElevationDemo> {
       appBar: AppBar(
         title: const Text('Elevation'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(ElevationDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() => _showElevation = !_showElevation);
             },
-          )
+          ),
         ],
       ),
       body: ListView(

@@ -56,6 +56,127 @@ void main() {
     });
   });
 
+  group('gradient', () {
+    testWidgets('gradient displays correctly with background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 1.0);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor,
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor,
+      ]);
+    });
+
+    testWidgets('No gradient displays with transparent background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 0.5);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final DecoratedBox decoratedBox = tester.firstWidget(find.byType(DecoratedBox));
+      final BoxDecoration boxDecoration = decoratedBox.decoration;
+      expect(boxDecoration.gradient, isNull);
+      expect(boxDecoration.color, isNotNull);
+    });
+
+    testWidgets('gradient displays correctly with null background color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: null,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      // If the background color is null, the gradient color should be white.
+      const Color backgroundColor = Color(0xFFFFFFFF);
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor,
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor,
+      ]);
+    });
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
@@ -177,7 +298,7 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0);
 
       // The item that was in the center now moved a bit.
       expect(
@@ -194,7 +315,7 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0);
 
       await tester.pumpAndSettle();
 

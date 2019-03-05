@@ -10,6 +10,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'image.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// A widget that paints a [Decoration] either before or after its child paints.
 ///
 /// [Container] insets its child by the widths of the borders; this widget does
@@ -17,7 +20,10 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
-/// ## Sample code
+/// The [child] is not clipped. To clip a child to the shape of a particular
+/// [ShapeDecoration], consider using a [ClipPath] widget.
+///
+/// {@tool sample}
 ///
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
@@ -36,6 +42,7 @@ import 'image.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -55,7 +62,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.decoration,
     this.position = DecorationPosition.background,
-    Widget child
+    Widget child,
   }) : assert(decoration != null),
        assert(position != null),
        super(key: key, child: child);
@@ -138,9 +145,9 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Since [Container] combines a number of other widgets each with their own
 /// layout behavior, [Container]'s layout behavior is somewhat complicated.
 ///
-/// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
-/// the [child], to honor the `width`, `height`, and [constraints], to expand to
-/// fit the parent, to be as small as possible.
+/// Summary: [Container] tries, in order: to honor [alignment], to size itself
+/// to the [child], to honor the `width`, `height`, and [constraints], to expand
+/// to fit the parent, to be as small as possible.
 ///
 /// More specifically:
 ///
@@ -175,7 +182,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// [padding] (e.g. borders in a [BoxDecoration] contribute to the [padding]);
 /// see [Decoration.padding].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows a 48x48 green square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
@@ -192,6 +199,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// This example shows how to use many of the features of [Container] at once.
 /// The [constraints] are set to fit the font size plus ample headroom
@@ -220,6 +229,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -306,6 +316,9 @@ class Container extends StatelessWidget {
   /// A shorthand for specifying just a solid color is available in the
   /// constructor: set the `color` argument instead of the `decoration`
   /// argument.
+  ///
+  /// The [child] is not clipped to the decoration. To clip a child to the shape
+  /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
   final Decoration decoration;
 
   /// The decoration to paint in front of the [child].
@@ -342,7 +355,7 @@ class Container extends StatelessWidget {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: ConstrainedBox(constraints: const BoxConstraints.expand())
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
     }
 
@@ -360,7 +373,7 @@ class Container extends StatelessWidget {
       current = DecoratedBox(
         decoration: foregroundDecoration,
         position: DecorationPosition.foreground,
-        child: current
+        child: current,
       );
     }
 

@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
@@ -191,7 +195,7 @@ void main() {
         when(mockXcode.minorVersion).thenReturn(1);
         expect(deviceUnderTest.supportsScreenshot, false);
       },
-      overrides: <Type, Generator>{Xcode: () => mockXcode}
+      overrides: <Type, Generator>{Xcode: () => mockXcode},
     );
 
     testUsingContext(
@@ -213,7 +217,7 @@ void main() {
               fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
-          workingDirectory: null
+          workingDirectory: null,
         ));
       },
       overrides: <Type, Generator>{
@@ -221,7 +225,7 @@ void main() {
         // Test a real one. Screenshot doesn't require instance states.
         SimControl: () => SimControl(),
         Xcode: () => mockXcode,
-      }
+      },
     );
   });
 

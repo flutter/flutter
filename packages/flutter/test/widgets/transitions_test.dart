@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -97,7 +99,7 @@ void main() {
 
         expect(actualDecoration.color, const Color(0xFF000000));
         expect(actualDecoration.boxShadow, null);
-      }
+      },
     );
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
@@ -252,5 +254,53 @@ void main() {
     controller.value = 1.0;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 1.0);
+  });
+
+  testWidgets('RotationTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = RotationTransition(
+      alignment: Alignment.topRight,
+      turns: controller,
+      child: const Text('Rotation', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(widget);
+    Transform actualRotatedBox = tester.widget(find.byType(Transform));
+    Matrix4 actualTurns = actualRotatedBox.transform;
+    expect(actualTurns, equals(Matrix4.rotationZ(0.0)));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualRotatedBox = tester.widget(find.byType(Transform));
+    actualTurns = actualRotatedBox.transform;
+    expect(actualTurns, Matrix4.rotationZ(math.pi));
+
+    controller.value = 0.75;
+    await tester.pump();
+    actualRotatedBox = tester.widget(find.byType(Transform));
+    actualTurns = actualRotatedBox.transform;
+    expect(actualTurns, Matrix4.rotationZ(math.pi * 1.5));
+  });
+
+  testWidgets('RotationTransition maintains chosen alignment during animation',
+      (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = RotationTransition(
+      alignment: Alignment.topRight,
+      turns: controller,
+      child: const Text('Rotation', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(widget);
+    RotationTransition actualRotatedBox =
+        tester.widget(find.byType(RotationTransition));
+    Alignment actualAlignment = actualRotatedBox.alignment;
+    expect(actualAlignment, const Alignment(1.0, -1.0));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualRotatedBox = tester.widget(find.byType(RotationTransition));
+    actualAlignment = actualRotatedBox.alignment;
+    expect(actualAlignment, const Alignment(1.0, -1.0));
   });
 }

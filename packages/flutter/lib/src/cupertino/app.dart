@@ -8,17 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
-import 'tab_view.dart';
-
-// Based on specs from https://developer.apple.com/design/resources/ for
-// iOS 12.
-const TextStyle _kDefaultTextStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
-  fontSize: 17.0,
-  letterSpacing: -0.38,
-  color: CupertinoColors.black,
-  decoration: TextDecoration.none,
-);
+import 'localizations.dart';
+import 'route.dart';
+import 'theme.dart';
 
 /// An application that uses Cupertino design.
 ///
@@ -74,9 +66,11 @@ class CupertinoApp extends StatefulWidget {
   /// This class creates an instance of [WidgetsApp].
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
-  CupertinoApp({ // can't be const because the asserts use methods on Map :-(
+  const CupertinoApp({
     Key key,
+    this.navigatorKey,
     this.home,
+    this.theme,
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
@@ -88,6 +82,7 @@ class CupertinoApp extends StatefulWidget {
     this.color,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
@@ -97,43 +92,6 @@ class CupertinoApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
-       assert(
-         home == null ||
-         !routes.containsKey(Navigator.defaultRouteName),
-         'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.'
-       ),
-       assert(
-         builder != null ||
-         home != null ||
-         routes.containsKey(Navigator.defaultRouteName) ||
-         onGenerateRoute != null ||
-         onUnknownRoute != null,
-         'Either the home property must be specified, '
-         'or the routes table must include an entry for "/", '
-         'or there must be on onGenerateRoute callback specified, '
-         'or there must be an onUnknownRoute callback specified, '
-         'or the builder property must be specified, '
-         'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.'
-       ),
-       assert(
-         (home != null ||
-          routes.isNotEmpty ||
-          onGenerateRoute != null ||
-          onUnknownRoute != null)
-         ||
-         (builder != null &&
-          initialRoute == null &&
-          navigatorObservers.isEmpty),
-         'If no route is provided using '
-         'home, routes, onGenerateRoute, or onUnknownRoute, '
-         'a non-null callback for the builder property must be provided, '
-         'and the other navigator-related properties, '
-         'navigatorKey, initialRoute, and navigatorObservers, '
-         'must have their initial values '
-         '(null, null, and the empty list, respectively).'
-       ),
        assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -142,32 +100,17 @@ class CupertinoApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        super(key: key);
 
-  /// The widget for the default route of the app ([Navigator.defaultRouteName],
-  /// which is `/`).
-  ///
-  /// This is the route that is displayed first when the application is started
-  /// normally, unless [initialRoute] is specified. It's also the route that's
-  /// displayed if the [initialRoute] can't be displayed.
-  ///
-  /// To be able to directly call [MediaQuery.of], [Navigator.of], etc, in the
-  /// code that sets the [home] argument in the constructor, you can use a
-  /// [Builder] widget to get a [BuildContext].
-  ///
-  /// If [home] is specified, then [routes] must not include an entry for `/`,
-  /// as [home] takes its place.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
-  ///
-  /// The difference between using [home] and using [builder] is that the [home]
-  /// subtree is inserted into the application below a [Navigator] (and thus
-  /// below an [Overlay], which [Navigator] uses). With [home], therefore,
-  /// dialog boxes will work automatically, the [routes] table will be used, and
-  /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
-  /// In contrast, the widget returned from [builder] is inserted _above_ the
-  /// [CupertinoApp]'s [Navigator] (if any).
+  /// {@macro flutter.widgets.widgetsApp.navigatorKey}
+  final GlobalKey<NavigatorState> navigatorKey;
+
+  /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
+
+  /// The top-level [CupertinoTheme] styling.
+  ///
+  /// A null [theme] or unspecified [theme] attributes will default to iOS
+  /// system values.
+  final CupertinoThemeData theme;
 
   /// The application's top-level routing table.
   ///
@@ -176,81 +119,22 @@ class CupertinoApp extends StatefulWidget {
   /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that performs
   /// an appropriate transition, including [Hero] animations, to the new route.
   ///
-  /// If the app only has one page, then you can specify it using [home] instead.
-  ///
-  /// If [home] is specified, then it implies an entry in this table for the
-  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
-  /// redundantly provide such a route in the [routes] table.
-  ///
-  /// If a route is requested that is not specified in this table (or by
-  /// [home]), then the [onGenerateRoute] callback is called to build the page
-  /// instead.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
+  /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder> routes;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [initialRoute] must be null and [builder] must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [Navigator.initialRoute], which is used to implement this property.
-  ///  * [Navigator.push], for pushing additional routes.
-  ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
-  ///
-  /// This is used if [routes] does not contain the requested route.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route, except for the
-  /// [initialRoute].
-  ///
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorObservers] must be the empty list and [builder] must not be null.
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
-  ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
-  ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
-  ///
-  /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. If it is null, routes must be provided using one of
-  /// the other properties listed above.
-  ///
-  /// Unless a [Navigator] is provided, either implicitly from [builder] being
-  /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, widgets and APIs such as
-  /// [Hero], [Navigator.push] and [Navigator.pop], will not function.
   final TransitionBuilder builder;
 
   /// {@macro flutter.widgets.widgetsApp.title}
@@ -271,6 +155,11 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -304,6 +193,12 @@ class CupertinoApp extends StatefulWidget {
 
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
+
+  /// The [HeroController] used for Cupertino page transitions.
+  ///
+  /// Used by [CupertinoTabView] and [CupertinoApp].
+  static HeroController createCupertinoHeroController() =>
+      HeroController(); // Linear tweening.
 }
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
@@ -320,89 +215,99 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
+  HeroController _heroController;
 
   @override
   void initState() {
     super.initState();
+    _heroController = CupertinoApp.createCupertinoHeroController();
     _updateNavigator();
   }
 
   @override
   void didUpdateWidget(CupertinoApp oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey) {
+      // If the Navigator changes, we have to create a new observer, because the
+      // old Navigator won't be disposed (and thus won't unregister with its
+      // observers) until after the new one has been created (because the
+      // Navigator has a GlobalKey).
+      _heroController = CupertinoApp.createCupertinoHeroController();
+    }
     _updateNavigator();
   }
 
-  bool _haveNavigator;
+  List<NavigatorObserver> _navigatorObservers;
+
   void _updateNavigator() {
-    _haveNavigator = widget.home != null ||
-                     widget.routes.isNotEmpty ||
-                     widget.onGenerateRoute != null ||
-                     widget.onUnknownRoute != null;
+    if (widget.home != null ||
+        widget.routes.isNotEmpty ||
+        widget.onGenerateRoute != null ||
+        widget.onUnknownRoute != null) {
+      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
+        ..add(_heroController);
+    } else {
+      _navigatorObservers = const <NavigatorObserver>[];
+    }
   }
 
-  Widget defaultBuilder(BuildContext context, Widget child) {
-    // The `child` coming back out from WidgetsApp will always be null since
-    // we never passed in anything for it to create a Navigator inside
-    // WidgetsApp.
-    assert(child == null);
-    if (_haveNavigator) {
-      // Reuse CupertinoTabView which creates a routing Navigator for us.
-      final Widget navigator = CupertinoTabView(
-        builder: widget.home != null
-            ? (BuildContext context) => widget.home
-            : null,
-        routes: widget.routes,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
-        navigatorObservers: widget.navigatorObservers,
-      );
-      if (widget.builder != null) {
-        return widget.builder(context, navigator);
-      } else {
-        return navigator;
-      }
-    } else {
-      // We asserted that child is null above.
-      return widget.builder(context, null);
-    }
+  // Combine the default localization for Cupertino with the ones contributed
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _CupertinoLocalizationsDelegate.
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
+    if (widget.localizationsDelegates != null)
+      yield* widget.localizationsDelegates;
+    yield DefaultCupertinoLocalizations.delegate;
   }
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
+
     return ScrollConfiguration(
       behavior: _AlwaysCupertinoScrollBehavior(),
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        // We're passing in a builder and nothing else that the WidgetsApp uses
-        // to build its own Navigator because we're building a Navigator with
-        // routes in this class.
-        builder: defaultBuilder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _kDefaultTextStyle,
-        color: widget.color ?? CupertinoColors.activeBlue,
-        locale: widget.locale,
-        localizationsDelegates: widget.localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return CupertinoButton(
-            child: const Icon(
-              CupertinoIcons.search,
-              size: 28.0,
-              color: CupertinoColors.white,
-            ),
-            color: CupertinoColors.activeBlue,
-            padding: EdgeInsets.zero,
-            onPressed: onPressed,
-          );
-        },
+      child: CupertinoTheme(
+        data: effectiveThemeData,
+        child: WidgetsApp(
+          key: GlobalObjectKey(this),
+          navigatorKey: widget.navigatorKey,
+          navigatorObservers: _navigatorObservers,
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+            CupertinoPageRoute<T>(settings: settings, builder: builder),
+          home: widget.home,
+          routes: widget.routes,
+          initialRoute: widget.initialRoute,
+          onGenerateRoute: widget.onGenerateRoute,
+          onUnknownRoute: widget.onUnknownRoute,
+          builder: widget.builder,
+          title: widget.title,
+          onGenerateTitle: widget.onGenerateTitle,
+          textStyle: effectiveThemeData.textTheme.textStyle,
+          color: widget.color ?? CupertinoColors.activeBlue,
+          locale: widget.locale,
+          localizationsDelegates: _localizationsDelegates,
+          localeResolutionCallback: widget.localeResolutionCallback,
+          localeListResolutionCallback: widget.localeListResolutionCallback,
+          supportedLocales: widget.supportedLocales,
+          showPerformanceOverlay: widget.showPerformanceOverlay,
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+          showSemanticsDebugger: widget.showSemanticsDebugger,
+          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+            return CupertinoButton.filled(
+              child: const Icon(
+                CupertinoIcons.search,
+                size: 28.0,
+                color: CupertinoColors.white,
+              ),
+              padding: EdgeInsets.zero,
+              onPressed: onPressed,
+            );
+          },
+        ),
       ),
     );
   }

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const List<String> _defaultMaterials = <String>[
   'poker',
   'tortilla',
@@ -90,7 +92,7 @@ class _ChipsTile extends StatelessWidget {
     ];
     if (children.isNotEmpty) {
       cardChildren.add(Wrap(
-        children: children.map((Widget chip) {
+        children: children.map<Widget>((Widget chip) {
         return Padding(
           padding: const EdgeInsets.all(2.0),
           child: chip,
@@ -115,7 +117,7 @@ class _ChipsTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: cardChildren,
-      )
+      ),
     );
   }
 }
@@ -303,6 +305,7 @@ class _ChipDemoState extends State<ChipDemo> {
       appBar: AppBar(
         title: const Text('Chips'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(ChipDemo.routeName),
           IconButton(
             onPressed: () {
               setState(() {
@@ -310,7 +313,7 @@ class _ChipDemoState extends State<ChipDemo> {
               });
             },
             icon: const Icon(Icons.vignette, semanticLabel: 'Update border shape'),
-          )
+          ),
         ],
       ),
       body: ChipTheme(

@@ -63,7 +63,7 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
         ),
         body: TabBarView(
           controller: _tabController,
-          children: choices.map((Choice choice) {
+          children: choices.map<Widget>((Choice choice) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: ChoiceCard(choice: choice),

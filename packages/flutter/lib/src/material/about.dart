@@ -47,7 +47,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-    this.aboutBoxChildren
+    this.aboutBoxChildren,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -121,9 +121,9 @@ class AboutListTile extends StatelessWidget {
           applicationVersion: applicationVersion,
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
-          children: aboutBoxChildren
+          children: aboutBoxChildren,
         );
-      }
+      },
     );
   }
 }
@@ -163,7 +163,7 @@ void showAboutDialog({
         applicationLegalese: applicationLegalese,
         children: children,
       );
-    }
+    },
   );
 }
 
@@ -185,14 +185,14 @@ void showLicensePage({
   String applicationName,
   String applicationVersion,
   Widget applicationIcon,
-  String applicationLegalese
+  String applicationLegalese,
 }) {
   assert(context != null);
   Navigator.push(context, MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
-      applicationLegalese: applicationLegalese
+      applicationLegalese: applicationLegalese,
     )
   ));
 }
@@ -279,15 +279,15 @@ class AboutDialog extends StatelessWidget {
             Text(name, style: Theme.of(context).textTheme.headline),
             Text(version, style: Theme.of(context).textTheme.body1),
             Container(height: 18.0),
-            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption)
-          ]
-        )
-      )
+            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+          ],
+        ),
+      ),
     ));
     body = <Widget>[
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: body
+        children: body,
       ),
     ];
     if (children != null)
@@ -305,17 +305,17 @@ class AboutDialog extends StatelessWidget {
               applicationName: applicationName,
               applicationVersion: applicationVersion,
               applicationIcon: applicationIcon,
-              applicationLegalese: applicationLegalese
+              applicationLegalese: applicationLegalese,
             );
-          }
+          },
         ),
         FlatButton(
           child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
-          }
+          },
         ),
-      ]
+      ],
     );
   }
 }
@@ -342,7 +342,7 @@ class LicensePage extends StatefulWidget {
     Key key,
     this.applicationName,
     this.applicationVersion,
-    this.applicationLegalese
+    this.applicationLegalese,
   }) : super(key: key);
 
   /// The name of the application.
@@ -379,7 +379,7 @@ class _LicensePageState extends State<LicensePage> {
   final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
-  Future<Null> _initLicenses() async {
+  Future<void> _initLicenses() async {
     final Flow flow = Flow.begin();
     Timeline.timeSync('_initLicenses()', () { }, flow: flow);
     await for (LicenseEntry license in LicenseRegistry.licenses) {
@@ -398,8 +398,8 @@ class _LicensePageState extends State<LicensePage> {
           padding: EdgeInsets.symmetric(vertical: 18.0),
           child: Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
-            textAlign: TextAlign.center
-          )
+            textAlign: TextAlign.center,
+          ),
         ));
         _licenses.add(Container(
           decoration: const BoxDecoration(
@@ -408,8 +408,8 @@ class _LicensePageState extends State<LicensePage> {
           child: Text(
             license.packages.join(', '),
             style: const TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center
-          )
+            textAlign: TextAlign.center,
+          ),
         ));
         for (LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
@@ -418,14 +418,14 @@ class _LicensePageState extends State<LicensePage> {
               child: Text(
                 paragraph.text,
                 style: const TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center
-              )
+                textAlign: TextAlign.center,
+              ),
             ));
           } else {
             assert(paragraph.indent >= 0);
             _licenses.add(Padding(
               padding: EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
-              child: Text(paragraph.text)
+              child: Text(paragraph.text),
             ));
           }
         }
@@ -457,8 +457,8 @@ class _LicensePageState extends State<LicensePage> {
       contents.add(const Padding(
         padding: EdgeInsets.symmetric(vertical: 24.0),
         child: Center(
-          child: CircularProgressIndicator()
-        )
+          child: CircularProgressIndicator(),
+        ),
       ));
     }
     return Scaffold(
@@ -472,10 +472,13 @@ class _LicensePageState extends State<LicensePage> {
         context: context,
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.caption,
-          child: Scrollbar(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              children: contents,
+          child: SafeArea(
+            bottom: false,
+            child: Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                children: contents,
+              ),
             ),
           ),
         ),

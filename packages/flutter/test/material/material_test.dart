@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
   @override
@@ -17,8 +20,10 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(
-    {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
+Widget buildMaterial({
+  double elevation = 0.0,
+  Color shadowColor = const Color(0xFF00FF00),
+}) {
   return Center(
     child: SizedBox(
       height: 100.0,
@@ -53,6 +58,41 @@ class PaintRecorder extends CustomPainter {
 }
 
 void main() {
+  testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const Material().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>['type: canvas']);
+  });
+
+  testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const Material(
+      type: MaterialType.canvas,
+      color: Color(0xFFFFFFFF),
+      textStyle: TextStyle(color: Color(0xff00ff00)),
+      borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'type: canvas',
+      'color: Color(0xffffffff)',
+      'textStyle.inherit: true',
+      'textStyle.color: Color(0xff00ff00)',
+      'borderRadius: BorderRadiusDirectional.circular(10.0)',
+    ]);
+  });
+
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
@@ -237,6 +277,69 @@ void main() {
         ),
       );
     });
+
+    testWidgets('supports directional clips', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+      Widget buildMaterial() {
+        return Material(
+          type: MaterialType.transparency,
+          shape: shape,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
+        );
+      }
+      final Widget material = buildMaterial();
+      // verify that a regular clip works as one would expect
+      logs.add('--0');
+      await tester.pumpWidget(material);
+      // verify that pumping again doesn't recompute the clip
+      // even though the widget itself is new (the shape doesn't change identity)
+      logs.add('--1');
+      await tester.pumpWidget(buildMaterial());
+      // verify that Material passes the TextDirection on to its shape when it's transparent
+      logs.add('--2');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      // verify that changing the text direction from LTR to RTL has an effect
+      // even though the widget itself is identical
+      logs.add('--3');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: material,
+      ));
+      // verify that pumping again with a text direction has no effect
+      logs.add('--4');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: buildMaterial(),
+      ));
+      logs.add('--5');
+      // verify that changing the text direction and the widget at the same time
+      // works as expected
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      expect(logs, <String>[
+        '--0',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        '--1',
+        '--2',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        '--3',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        '--4',
+        '--5',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+      ]);
+    });
   });
 
   group('PhysicalModels', () {
@@ -246,7 +349,7 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.canvas,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
         )
       );
 
@@ -436,7 +539,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -456,7 +559,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -478,6 +581,87 @@ void main() {
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
       expect(box, isNot(paints..circle()));
+    });
+
+    testWidgets('border is painted above child by default', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile('material.border_paint_above.png'),
+        skip: !Platform.isLinux,
+      );
+    });
+
+    testWidgets('border is painted below child when specified', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  borderOnForeground: false,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile('material.border_paint_below.png'),
+        skip: !Platform.isLinux,
+      );
     });
   });
 }

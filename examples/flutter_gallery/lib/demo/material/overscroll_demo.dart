@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
@@ -21,21 +23,21 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
-  Future<Null> _handleRefresh() {
-    final Completer<Null> completer = Completer<Null>();
-    Timer(const Duration(seconds: 3), () { completer.complete(null); });
-    return completer.future.then((_) {
+  Future<void> _handleRefresh() {
+    final Completer<void> completer = Completer<void>();
+    Timer(const Duration(seconds: 3), () { completer.complete(); });
+    return completer.future.then<void>((_) {
        _scaffoldKey.currentState?.showSnackBar(SnackBar(
          content: const Text('Refresh complete'),
          action: SnackBarAction(
            label: 'RETRY',
            onPressed: () {
              _refreshIndicatorKey.currentState.show();
-           }
-         )
+           },
+         ),
        ));
     });
   }
@@ -47,14 +49,15 @@ class OverscrollDemoState extends State<OverscrollDemo> {
       appBar: AppBar(
         title: const Text('Pull to refresh'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(OverscrollDemo.routeName),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
-            }
+            },
           ),
-        ]
+        ],
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,

@@ -25,13 +25,6 @@ const String nothing = '-';
 /// - The Flutter app records the incoming reply echo.
 /// - The platform finally replies to the original message with another echo.
 class TestStepResult {
-  static const TextStyle bold = TextStyle(fontWeight: FontWeight.bold);
-  static const TestStepResult complete = TestStepResult(
-    'Test complete',
-    nothing,
-    TestStatus.complete,
-  );
-
   const TestStepResult(
     this.name,
     this.description,
@@ -70,6 +63,13 @@ class TestStepResult {
   final dynamic messageReceived;
   final dynamic replyEcho;
   final dynamic error;
+
+  static const TextStyle bold = TextStyle(fontWeight: FontWeight.bold);
+  static const TestStepResult complete = TestStepResult(
+    'Test complete',
+    nothing,
+    TestStatus.complete,
+  );
 
   Widget asWidget(BuildContext context) {
     return Column(

@@ -28,10 +28,10 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     try {
       await runCheckedAsync(<String>[
-        'git', 'rev-parse', '@{u}'
+        'git', 'rev-parse', '@{u}',
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
       throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');
@@ -46,7 +46,7 @@ class UpgradeCommand extends FlutterCommand {
     int code = await runCommandAndStreamOutput(
       <String>['git', 'pull', '--ff-only'],
       workingDirectory: Cache.flutterRoot,
-      mapFunction: (String line) => matchesGitLine(line) ? null : line
+      mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
 
     if (code != 0)
@@ -63,7 +63,7 @@ class UpgradeCommand extends FlutterCommand {
         fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
-      allowReentrantFlutter: true
+      allowReentrantFlutter: true,
     );
 
     printStatus('');
@@ -85,6 +85,8 @@ class UpgradeCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
     );
+
+    return null;
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-

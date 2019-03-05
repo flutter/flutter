@@ -11,7 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'constants.dart';
 
 const Duration _kToggleDuration = Duration(milliseconds: 200);
-final Tween<double> _kRadialReactionRadiusTween = Tween<double>(begin: 0.0, end: kRadialReactionRadius);
+final Animatable<double> _kRadialReactionRadiusTween = Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
 /// A base class for material style toggleable controls with toggle animations.
 ///

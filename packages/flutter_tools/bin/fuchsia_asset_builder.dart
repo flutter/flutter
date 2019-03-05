@@ -30,20 +30,19 @@ const List<String> _kRequiredOptions = <String>[
   _kOptionComponentName,
 ];
 
-Future<Null> main(List<String> args) {
-  return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+Future<void> main(List<String> args) {
+  return runInContext<void>(() => run(args), overrides: <Type, Generator>{
     Usage: () => DisabledUsage(),
   });
 }
 
-Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
+Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
   outputFile.createSync(recursive: true);
   final List<int> data = await content.contentsAsBytes();
   outputFile.writeAsBytesSync(data);
-  return null;
 }
 
-Future<Null> run(List<String> args) async {
+Future<void> run(List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionAsset,
@@ -72,18 +71,18 @@ Future<Null> run(List<String> args) async {
     exit(1);
   }
 
-  final List<Future<Null>> calls = <Future<Null>>[];
+  final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
     final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
-  await Future.wait(calls);
+  await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
 }
 
-Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
+Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
 
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);

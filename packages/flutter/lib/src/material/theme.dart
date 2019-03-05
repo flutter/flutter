@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -124,18 +125,17 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme =
-        context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
       return inheritedTheme.theme.data;
     }
 
-    final ThemeData colorTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextTheme geometryTheme = localizations?.localTextGeometry ?? MaterialTextGeometry.englishLike;
-    return ThemeData.localize(colorTheme, geometryTheme);
+    final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
+    final ThemeData theme = inheritedTheme?.theme?.data ?? _kFallbackTheme;
+    return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
   @override
@@ -144,7 +144,15 @@ class Theme extends StatelessWidget {
       theme: this,
       child: IconTheme(
         data: data.iconTheme,
-        child: child,
+        child: CupertinoTheme(
+          // We're using a MaterialBasedCupertinoThemeData here instead of a
+          // CupertinoThemeData because it defers some properties to the Material
+          // ThemeData.
+          data: MaterialBasedCupertinoThemeData(
+            materialTheme: data,
+          ),
+          child: child,
+        ),
       ),
     );
   }
@@ -160,7 +168,7 @@ class _InheritedTheme extends InheritedWidget {
   const _InheritedTheme({
     Key key,
     @required this.theme,
-    @required Widget child
+    @required Widget child,
   }) : assert(theme != null),
        super(key: key, child: child);
 
@@ -248,7 +256,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
     return Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
-      data: _data.evaluate(animation)
+      data: _data.evaluate(animation),
     );
   }
 

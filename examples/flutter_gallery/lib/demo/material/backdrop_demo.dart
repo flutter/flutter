@@ -318,18 +318,15 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     final Size panelSize = constraints.biggest;
     final double panelTop = panelSize.height - panelTitleHeight;
 
-    final Animation<RelativeRect> panelAnimation = RelativeRectTween(
-      begin: RelativeRect.fromLTRB(
-        0.0,
-        panelTop - MediaQuery.of(context).padding.bottom,
-        0.0,
-        panelTop - panelSize.height,
-      ),
-      end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.linear,
+    final Animation<RelativeRect> panelAnimation = _controller.drive(
+      RelativeRectTween(
+        begin: RelativeRect.fromLTRB(
+          0.0,
+          panelTop - MediaQuery.of(context).padding.bottom,
+          0.0,
+          panelTop - panelSize.height,
+        ),
+        end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
       ),
     );
 
@@ -398,6 +395,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
             onPressed: _toggleBackdropPanelVisibility,
             icon: AnimatedIcon(
               icon: AnimatedIcons.close_menu,
+              semanticLabel: 'close',
               progress: _controller.view,
             ),
           ),

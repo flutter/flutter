@@ -40,7 +40,7 @@ IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
   ECHO        The flutter tool requires Git in order to operate properly;
   ECHO        to set up Flutter, run the following command:
-  ECHO        git clone -b beta https://github.com/flutter/flutter.git
+  ECHO        git clone -b stable https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 
@@ -86,13 +86,12 @@ GOTO :after_subroutine
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
   IF !stamp_value! NEQ !revision! GOTO do_snapshot
-  REM Compare "last modified" timestamps
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
-  FOR %%i IN ("%pubspec_yaml_path%") DO SET yaml_timestamp=%%~ti
-  FOR %%i IN ("%pubspec_lock_path%") DO SET lock_timestamp=%%~ti
-  IF !yaml_timestamp! EQU !lock_timestamp! GOTO do_snapshot
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
+  FOR %%i IN (%pubspec_yaml_path%) DO SET pubspec_yaml_timestamp=%%~ti
+  FOR %%i IN (%pubspec_lock_path%) DO SET pubspec_lock_timestamp=%%~ti
+  IF "%pubspec_yaml_timestamp%" == "%pubspec_lock_timestamp%" SET newer_file=""
   IF "%newer_file%" EQU "pubspec.yaml" GOTO do_snapshot
 
   REM Everything is uptodate - exit subroutine
@@ -137,9 +136,9 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade...
-        CALL "%pub%" upgrade "%VERBOSITY%" --no-packages-dir
+        CALL "%pub%" upgrade "%VERBOSITY%"
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
-        ECHO Error Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
+        ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL
         SET /A remaining_tries-=1
         IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted

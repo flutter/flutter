@@ -4,7 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-enum _Location {
+import '../../gallery/demo.dart';
+
+@visibleForTesting
+enum Location {
   Barbados,
   Bahamas,
   Bermuda
@@ -18,7 +21,7 @@ class DualHeaderWithHint extends StatelessWidget {
     this.name,
     this.value,
     this.hint,
-    this.showHint
+    this.showHint,
   });
 
   final String name;
@@ -66,11 +69,11 @@ class DualHeaderWithHint extends StatelessWidget {
             child: _crossFade(
               Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
               Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
-              showHint
-            )
-          )
-        )
-      ]
+              showHint,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -80,7 +83,7 @@ class CollapsibleBody extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
-    this.onCancel
+    this.onCancel,
   });
 
   final EdgeInsets margin;
@@ -99,14 +102,14 @@ class CollapsibleBody extends StatelessWidget {
           margin: const EdgeInsets.only(
             left: 24.0,
             right: 24.0,
-            bottom: 24.0
+            bottom: 24.0,
           ) - margin,
           child: Center(
             child: DefaultTextStyle(
               style: textTheme.caption.copyWith(fontSize: 15.0),
-              child: child
-            )
-          )
+              child: child,
+            ),
+          ),
         ),
         const Divider(height: 1.0),
         Container(
@@ -121,22 +124,22 @@ class CollapsibleBody extends StatelessWidget {
                   child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
                     fontSize: 15.0,
-                    fontWeight: FontWeight.w500
-                  ))
-                )
+                    fontWeight: FontWeight.w500,
+                  )),
+                ),
               ),
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
                 child: FlatButton(
                   onPressed: onSave,
                   textTheme: ButtonTextTheme.accent,
-                  child: const Text('SAVE')
-                )
-              )
-            ]
-          )
-        )
-      ]
+                  child: const Text('SAVE'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -147,7 +150,7 @@ class DemoItem<T> {
     this.value,
     this.hint,
     this.builder,
-    this.valueToString
+    this.valueToString,
   }) : textController = TextEditingController(text: valueToString(value));
 
   final String name;
@@ -164,7 +167,7 @@ class DemoItem<T> {
         name: name,
         value: valueToString(value),
         hint: hint,
-        showHint: isExpanded
+        showHint: isExpanded,
       );
     };
   }
@@ -223,12 +226,12 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           );
         },
       ),
-      DemoItem<_Location>(
+      DemoItem<Location>(
         name: 'Location',
-        value: _Location.Bahamas,
+        value: Location.Bahamas,
         hint: 'Select location',
-        valueToString: (_Location location) => location.toString().split('.')[1],
-        builder: (DemoItem<_Location> item) {
+        valueToString: (Location location) => location.toString().split('.')[1],
+        builder: (DemoItem<Location> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -240,56 +243,41 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 return CollapsibleBody(
                   onSave: () { Form.of(context).save(); close(); },
                   onCancel: () { Form.of(context).reset(); close(); },
-                  child: FormField<_Location>(
+                  child: FormField<Location>(
                     initialValue: item.value,
-                    onSaved: (_Location result) { item.value = result; },
-                    builder: (FormFieldState<_Location> field) {
+                    onSaved: (Location result) { item.value = result; },
+                    builder: (FormFieldState<Location> field) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Bahamas,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Bahamas')
-                            ]
+                          RadioListTile<Location>(
+                            value: Location.Bahamas,
+                            title: const Text('Bahamas'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Barbados,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Barbados')
-                            ]
+                          RadioListTile<Location>(
+                            value: Location.Barbados,
+                            title: const Text('Barbados'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Bermuda,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Bermuda')
-                            ]
-                          )
-                        ]
+                          RadioListTile<Location>(
+                            value: Location.Bermuda,
+                            title: const Text('Bermuda'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
+                          ),
+                        ],
                       );
-                    }
+                    },
                   ),
                 );
               }
-            )
+            ),
           );
-        }
+        },
       ),
       DemoItem<double>(
         name: 'Sun',
@@ -326,17 +314,22 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   ),
                 );
               }
-            )
+            ),
           );
-        }
-      )
+        },
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Expansion panels')),
+      appBar: AppBar(
+        title: const Text('Expansion panels'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(ExpansionPanelsDemo.routeName),
+        ],
+      ),
       body: SingleChildScrollView(
         child: SafeArea(
           top: false,
@@ -349,13 +342,13 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   _demoItems[index].isExpanded = !isExpanded;
                 });
               },
-              children: _demoItems.map((DemoItem<dynamic> item) {
+              children: _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {
                 return ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: item.build()
+                  body: item.build(),
                 );
-              }).toList()
+              }).toList(),
             ),
           ),
         ),

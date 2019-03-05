@@ -24,7 +24,7 @@ void main() {
           child: Center(
             child: FlatButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -64,7 +64,7 @@ void main() {
           child: Center(
             child: RaisedButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -86,7 +86,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ]
       ),
       ignoreId: true,
@@ -214,7 +214,7 @@ void main() {
             areaToCompare: expectedClipRect.inflate(10.0),
         ))
         ..circle(color: directSplashColor)
-        ..rect(color: directHighlightColor)
+        ..rect(color: directHighlightColor),
     );
 
     const Color themeSplashColor1 = Color(0xFF001100);
@@ -251,7 +251,7 @@ void main() {
             areaToCompare: expectedClipRect.inflate(10.0),
         ))
         ..circle(color: themeSplashColor1)
-        ..rect(color: themeHighlightColor1)
+        ..rect(color: themeHighlightColor1),
     );
 
     const Color themeSplashColor2 = Color(0xFF002200);
@@ -275,7 +275,7 @@ void main() {
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..rect(color: themeHighlightColor2)
+        ..rect(color: themeHighlightColor2),
     );
 
     await gesture.up();
@@ -306,7 +306,7 @@ void main() {
 
     expect(
         tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 
@@ -330,7 +330,7 @@ void main() {
     expect(text.text.style.color, Colors.black38);
   });
 
-    testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
+  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
@@ -407,6 +407,73 @@ void main() {
 
 
     semantics.dispose();
+  });
+
+  testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
+    Widget buildFrame({ double minWidth, double height, EdgeInsets padding = EdgeInsets.zero, Widget child }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: MaterialButton(
+            padding: padding,
+            minWidth: minWidth,
+            height: height,
+            onPressed: null,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(minWidth: 8.0, height: 24.0));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 24.0));
+
+    await tester.pumpWidget(buildFrame(minWidth: 8.0));
+    // Default minHeight constraint is 36, see RawMaterialButton.
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 36.0));
+
+    await tester.pumpWidget(buildFrame(height: 8.0));
+    // Default minWidth constraint is 88, see RawMaterialButton.
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 8.0));
+
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 36.0));
+
+    await tester.pumpWidget(buildFrame(padding: const EdgeInsets.all(4.0)));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 36.0));
+
+    // Size is defined by the padding.
+    await tester.pumpWidget(
+      buildFrame(
+        minWidth: 0.0,
+        height: 0.0,
+        padding: const EdgeInsets.all(4.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 8.0));
+
+    // Size is defined by the padded child.
+    await tester.pumpWidget(
+      buildFrame(
+        minWidth: 0.0,
+        height: 0.0,
+        padding: const EdgeInsets.all(4.0),
+        child: const SizedBox(width: 8.0, height: 8.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(16.0, 16.0));
+
+    // Size is defined by the minWidth, height constraints.
+    await tester.pumpWidget(
+      buildFrame(
+        minWidth: 18.0,
+        height: 18.0,
+        padding: const EdgeInsets.all(4.0),
+        child: const SizedBox(width: 8.0, height: 8.0),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), const Size(18.0, 18.0));
   });
 
   testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -549,13 +616,13 @@ void main() {
             child: RaisedButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(RaisedButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

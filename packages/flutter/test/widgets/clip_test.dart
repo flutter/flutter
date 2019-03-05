@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
+import 'test_border.dart' show TestBorder;
 
 final List<String> log = <String>[];
 
@@ -47,7 +48,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>['getClip']));
@@ -67,7 +68,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -89,8 +90,8 @@ void main() {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () { log.add('tap'); },
-          )
-        )
+          ),
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -116,9 +117,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a']));
@@ -140,9 +141,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap']));
@@ -158,9 +159,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -176,9 +177,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -194,9 +195,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b']));
@@ -212,9 +213,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c']));
@@ -238,12 +239,12 @@ void main() {
       ..save()
       ..path() // Placeholder
       ..restore()
-      ..restore()
+      ..restore(),
     );
     debugPaintSizeEnabled = true;
-    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
       ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph()
+      ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });
@@ -685,5 +686,62 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
+  });
+
+  testWidgets('ClipPath.shape', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+    Widget buildClipPath() {
+      return ClipPath.shape(
+        shape: shape,
+        child: const SizedBox(width: 100.0, height: 100.0),
+      );
+    }
+    final Widget clipPath = buildClipPath();
+    // verify that a regular clip works as one would expect
+    logs.add('--0');
+    await tester.pumpWidget(clipPath);
+    // verify that pumping again doesn't recompute the clip
+    // even though the widget itself is new (the shape doesn't change identity)
+    logs.add('--1');
+    await tester.pumpWidget(buildClipPath());
+    // verify that ClipPath passes the TextDirection on to its shape
+    logs.add('--2');
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: clipPath,
+    ));
+    // verify that changing the text direction from LTR to RTL has an effect
+    // even though the widget itself is identical
+    logs.add('--3');
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: clipPath,
+    ));
+    // verify that pumping again with a text direction has no effect
+    logs.add('--4');
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: buildClipPath(),
+    ));
+    logs.add('--5');
+    // verify that changing the text direction and the widget at the same time
+    // works as expected
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: clipPath,
+    ));
+    expect(logs, <String>[
+      '--0',
+      'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+      '--1',
+      '--2',
+      'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+      '--3',
+      'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+      '--4',
+      '--5',
+      'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+    ]);
   });
 }

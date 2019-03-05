@@ -27,7 +27,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
 class AndroidEmulator extends Emulator {
   AndroidEmulator(String id, [this._properties])
-      : super(id, _properties != null && _properties.isNotEmpty);
+    : super(id, _properties != null && _properties.isNotEmpty);
 
   Map<String, String> _properties;
 
@@ -38,7 +38,7 @@ class AndroidEmulator extends Emulator {
   String get manufacturer => _prop('hw.device.manufacturer');
 
   @override
-  String get label => _properties['avd.ini.displayname'];
+  String get label => _prop('avd.ini.displayname');
 
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
@@ -51,12 +51,13 @@ class AndroidEmulator extends Emulator {
                 throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
               }
             });
-    // emulator continues running on a successful launch so if we
-    // haven't quit within 3 seconds we assume that's a success and just
-    // return.
+    // The emulator continues running on a successful launch, so if it hasn't
+    // quit within 3 seconds we assume that's a success and just return. This
+    // means that on a slow machine, a failure that takes more than three
+    // seconds won't be recognized as such... :-/
     return Future.any<void>(<Future<void>>[
       launchResult,
-      Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3)),
     ]);
   }
 }
@@ -112,13 +113,13 @@ Map<String, String> parseIniLines(List<String> contents) {
   final Map<String, String> results = <String, String>{};
 
   final Iterable<List<String>> properties = contents
-      .map((String l) => l.trim())
+      .map<String>((String l) => l.trim())
       // Strip blank lines/comments
       .where((String l) => l != '' && !l.startsWith('#'))
       // Discard anything that isn't simple name=value
       .where((String l) => l.contains('='))
       // Split into name/value
-      .map((String l) => l.split('='));
+      .map<List<String>>((String l) => l.split('='));
 
   for (List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();

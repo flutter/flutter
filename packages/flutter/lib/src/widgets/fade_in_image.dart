@@ -49,7 +49,7 @@ import 'ticker_provider.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// FadeInImage(
@@ -58,6 +58,7 @@ import 'ticker_provider.dart';
 ///   image: NetworkImage('https://backend.example.com/image.png'),
 /// )
 /// ```
+/// {@end-tool}
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading
   /// then cross-fades to display the [image].
@@ -331,7 +332,7 @@ class _ImageProviderResolver {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(
       state.context,
-      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
     ));
     assert(_imageStream != null);
 

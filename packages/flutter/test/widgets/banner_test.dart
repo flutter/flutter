@@ -262,14 +262,14 @@ void main() {
       ..rect(rect: Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
       ..rect(rect: Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
       ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore()
+      ..restore(),
     );
     debugDisableShadows = true;
   });
 
   testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
     debugDisableShadows = false;
-    await tester.pumpWidget(MaterialApp(home: const Placeholder()));
+    await tester.pumpWidget(const MaterialApp(home: Placeholder()));
     expect(find.byType(CheckedModeBanner), paints
       ..save()
       ..translate(x: 800.0, y: 0.0)
@@ -277,7 +277,7 @@ void main() {
       ..rect(rect: Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
       ..rect(rect: Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
       ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore()
+      ..restore(),
     );
     debugDisableShadows = true;
   });

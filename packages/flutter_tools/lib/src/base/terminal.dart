@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show AsciiDecoder;
 
-import 'package:quiver/strings.dart';
-
+import '../convert.dart';
 import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
+import 'utils.dart';
 
 final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
@@ -30,9 +29,62 @@ enum TerminalColor {
   grey,
 }
 
+final OutputPreferences _kOutputPreferences = OutputPreferences();
+
+OutputPreferences get outputPreferences => (context == null || context[OutputPreferences] == null)
+    ? _kOutputPreferences
+    : context[OutputPreferences];
+
+/// A class that contains the context settings for command text output to the
+/// console.
+class OutputPreferences {
+  OutputPreferences({
+    bool wrapText,
+    int wrapColumn,
+    bool showColor,
+  }) : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+       _overrideWrapColumn = wrapColumn,
+       showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+
+  /// If [wrapText] is true, then any text sent to the context's [Logger]
+  /// instance (e.g. from the [printError] or [printStatus] functions) will be
+  /// wrapped (newlines added between words) to be no longer than the
+  /// [wrapColumn] specifies. Defaults to true if there is a terminal. To
+  /// determine if there's a terminal, [OutputPreferences] asks the context's
+  /// stdio to see, and if that's not set, it tries creating a new [io.Stdio]
+  /// and asks it if there is a terminal.
+  final bool wrapText;
+
+  /// The column at which output sent to the context's [Logger] instance
+  /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
+  /// Ignored if [wrapText] is false. Defaults to the width of the output
+  /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
+  /// To find out if we're writing to a terminal, it tries the context's stdio,
+  /// and if that's not set, it tries creating a new [io.Stdio] and asks it, if
+  /// that doesn't have an idea of the terminal width, then we just use a
+  /// default of 100. It will be ignored if [wrapText] is false.
+  final int _overrideWrapColumn;
+  int get wrapColumn {
+    return  _overrideWrapColumn ?? io.stdio?.terminalColumns
+      ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+  }
+
+  /// Whether or not to output ANSI color codes when writing to the output
+  /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if
+  /// writing to a terminal, and false otherwise.
+  final bool showColor;
+
+  @override
+  String toString() {
+    return '$runtimeType[wrapText: $wrapText, wrapColumn: $wrapColumn, showColor: $showColor]';
+  }
+}
+
 class AnsiTerminal {
   static const String bold = '\u001B[1m';
-  static const String reset = '\u001B[0m';
+  static const String resetAll = '\u001B[0m';
+  static const String resetColor = '\u001B[39m';
+  static const String resetBold = '\u001B[22m';
   static const String clear = '\u001B[2J\u001B[H';
 
   static const String red = '\u001b[31m';
@@ -55,15 +107,21 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  bool supportsColor = platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
+  final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   String bolden(String message) {
     assert(message != null);
     if (!supportsColor || message.isEmpty)
       return message;
     final StringBuffer buffer = StringBuffer();
-    for (String line in message.split('\n'))
-      buffer.writeln('$bold$line$reset');
+    for (String line in message.split('\n')) {
+      // If there were bolds or resetBolds in the string before, then nuke them:
+      // they're redundant. This prevents previously embedded resets from
+      // stopping the boldness.
+      line = line.replaceAll(_boldControls, '');
+      buffer.writeln('$bold$line$resetBold');
+    }
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
@@ -76,8 +134,14 @@ class AnsiTerminal {
     if (!supportsColor || color == null || message.isEmpty)
       return message;
     final StringBuffer buffer = StringBuffer();
-    for (String line in message.split('\n'))
-      buffer.writeln('${_colorMap[color]}$line$reset');
+    final String colorCodes = _colorMap[color];
+    for (String line in message.split('\n')) {
+      // If there were resets in the string before, then keep them, but
+      // restart the color right after. This prevents embedded resets from
+      // stopping the colors, and allows nesting of colors.
+      line = line.replaceAll(resetColor, '$resetColor$colorCodes');
+      buffer.writeln('$colorCodes$line$resetColor');
+    }
     final String result = buffer.toString();
     // avoid introducing a new newline to the colored text
     return (!message.endsWith('\n') && result.endsWith('\n'))
@@ -106,30 +170,32 @@ class AnsiTerminal {
   /// Return keystrokes from the console.
   ///
   /// Useful when the console is in [singleCharMode].
-  Stream<String> get onCharInput {
-    _broadcastStdInString ??= io.stdin.transform(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+  Stream<String> get keystrokes {
+    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
-  /// Prompts the user to input a character within the accepted list.
-  /// Reprompts if inputted character is not in the list.
+  /// Prompts the user to input a character within a given list. Re-prompts if
+  /// entered character is not in the list.
   ///
-  /// `prompt` is the text displayed prior to waiting for user input each time.
-  /// `defaultChoiceIndex`, if given, will be the character in `acceptedCharacters`
-  ///     in the index given if the user presses enter without any key input.
-  /// `displayAcceptedCharacters` prints also the accepted keys next to the `prompt` if true.
+  /// The `prompt`, if non-null, is the text displayed prior to waiting for user
+  /// input each time. If `prompt` is non-null and `displayAcceptedCharacters`
+  /// is true, the accepted keys are printed next to the `prompt`.
   ///
-  /// Throws a [TimeoutException] if a `timeout` is provided and its duration
-  /// expired without user input. Duration resets per key press.
+  /// The returned value is the user's input; if `defaultChoiceIndex` is not
+  /// null, and the user presses enter without any other input, the return value
+  /// will be the character in `acceptedCharacters` at the index given by
+  /// `defaultChoiceIndex`.
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
     int defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
-    Duration timeout,
   }) async {
     assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
+    assert(prompt == null || prompt.isNotEmpty);
+    assert(displayAcceptedCharacters != null);
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
@@ -139,17 +205,14 @@ class AnsiTerminal {
     }
     String choice;
     singleCharMode = true;
-    while (isEmpty(choice) || choice.length != 1 || !acceptedCharacters.contains(choice)) {
-      if (isNotEmpty(prompt)) {
+    while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
+      if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)
           printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         printStatus(': ', emphasis: true, newline: false);
       }
-      Future<String> inputFuture = onCharInput.first;
-      if (timeout != null)
-        inputFuture = inputFuture.timeout(timeout);
-      choice = await inputFuture;
+      choice = await keystrokes.first;
       printStatus(choice);
     }
     singleCharMode = false;

@@ -88,7 +88,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
           title: Text('Action Sheet'),
-          message: Text('An action sheet')
+          message: Text('An action sheet'),
         ),
       ),
     );
@@ -873,6 +873,9 @@ void main() {
                   label: 'Alert',
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasImplicitScrolling,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
                           label: 'The title',
@@ -883,6 +886,9 @@ void main() {
                       ],
                     ),
                     TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasImplicitScrolling,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[
@@ -912,7 +918,7 @@ void main() {
                         SemanticsAction.tap,
                       ],
                       label: 'Cancel',
-                    )
+                    ),
                   ],
                 ),
               ],

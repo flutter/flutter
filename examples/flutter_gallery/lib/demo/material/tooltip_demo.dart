@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _introText =
   'Tooltips are short identifying messages that briefly appear in response to '
   'a long press. Tooltip messages are also used by services that make Flutter '
@@ -18,7 +20,8 @@ class TooltipDemo extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tooltips')
+        title: const Text('Tooltips'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: Builder(
         builder: (BuildContext context) {
@@ -36,11 +39,11 @@ class TooltipDemo extends StatelessWidget {
                       child: Icon(
                         Icons.call,
                         size: 18.0,
-                        color: theme.iconTheme.color
-                      )
+                        color: theme.iconTheme.color,
+                      ),
                     ),
-                    Text(' icon.', style: theme.textTheme.subhead)
-                  ]
+                    Text(' icon.', style: theme.textTheme.subhead),
+                  ],
                 ),
                 Center(
                   child: IconButton(
@@ -50,23 +53,23 @@ class TooltipDemo extends StatelessWidget {
                     tooltip: 'Place a phone call',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(const SnackBar(
-                         content: Text('That was an ordinary tap.')
+                         content: Text('That was an ordinary tap.'),
                       ));
-                    }
-                  )
-                )
+                    },
+                  ),
+                ),
               ]
-              .map((Widget widget) {
+              .map<Widget>((Widget widget) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-                  child: widget
+                  child: widget,
                 );
               })
-              .toList()
+              .toList(),
             ),
           );
         }
-      )
+      ),
     );
   }
 }

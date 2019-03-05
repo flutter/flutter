@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart' as test_package show TestFailure;
+import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 /// Compares rasterized image bytes against a golden image file.
 ///
@@ -149,8 +149,8 @@ class LocalFileComparator implements GoldenFileComparator {
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
-      : basedir = _getBasedir(testFile, pathStyle),
-        _path = _getPath(pathStyle);
+    : basedir = _getBasedir(testFile, pathStyle),
+      _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style style) {
     return path.Context(style: style ?? path.Style.platform);
@@ -181,7 +181,7 @@ class LocalFileComparator implements GoldenFileComparator {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual(imageBytes, goldenBytes);
+    return _areListsEqual<int>(imageBytes, goldenBytes);
   }
 
   @override

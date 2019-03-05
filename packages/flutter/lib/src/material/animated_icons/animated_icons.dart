@@ -16,7 +16,7 @@ part of material_animated_icons;
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
-/// ### Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// AnimatedIcon(
@@ -25,6 +25,7 @@ part of material_animated_icons;
 ///   semanticLabel: 'Show menu',
 /// )
 /// ```
+/// {@end-tool}
 ///
 class AnimatedIcon extends StatelessWidget {
 
@@ -188,14 +189,14 @@ class _AnimatedIconPainter extends CustomPainter {
 class _PathFrames {
   const _PathFrames({
     @required this.commands,
-    @required this.opacities
+    @required this.opacities,
   });
 
   final List<_PathCommand> commands;
   final List<double> opacities;
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
-    final double opacity = _interpolate(opacities, progress, lerpDouble);
+    final double opacity = _interpolate<double>(opacities, progress, lerpDouble);
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
@@ -227,7 +228,7 @@ class _PathMoveTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset offset = _interpolate(points, progress, Offset.lerp);
+    final Offset offset = _interpolate<Offset>(points, progress, Offset.lerp);
     path.moveTo(offset.dx, offset.dy);
   }
 }
@@ -241,13 +242,13 @@ class _PathCubicTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset controlPoint1 = _interpolate(controlPoints1, progress, Offset.lerp);
-    final Offset controlPoint2 = _interpolate(controlPoints2, progress, Offset.lerp);
-    final Offset targetPoint = _interpolate(targetPoints, progress, Offset.lerp);
+    final Offset controlPoint1 = _interpolate<Offset>(controlPoints1, progress, Offset.lerp);
+    final Offset controlPoint2 = _interpolate<Offset>(controlPoints2, progress, Offset.lerp);
+    final Offset targetPoint = _interpolate<Offset>(targetPoints, progress, Offset.lerp);
     path.cubicTo(
       controlPoint1.dx, controlPoint1.dy,
       controlPoint2.dx, controlPoint2.dy,
-      targetPoint.dx, targetPoint.dy
+      targetPoint.dx, targetPoint.dy,
     );
   }
 }
@@ -260,7 +261,7 @@ class _PathLineTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset point = _interpolate(points, progress, Offset.lerp);
+    final Offset point = _interpolate<Offset>(points, progress, Offset.lerp);
     path.lineTo(point.dx, point.dy);
   }
 }

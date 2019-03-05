@@ -27,7 +27,7 @@ void main() {
   }
 
   Stream<String> transformToLines(Stream<List<int>> byteStream) {
-    return byteStream.transform(utf8.decoder).transform(const LineSplitter());
+    return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
   }
 
   task(() async {
@@ -39,7 +39,7 @@ void main() {
     final Directory appDir =
         dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -50,20 +50,24 @@ void main() {
           '--verbose',
           '-d',
           device.deviceId,
-          'lib/commands.dart'
+          'lib/commands.dart',
         ],
       );
-      final StreamController<String> stdout =
-          StreamController<String>.broadcast();
+      final StreamController<String> stdout = StreamController<String>.broadcast();
       transformToLines(run.stdout).listen((String line) {
         print('run:stdout: $line');
         stdout.add(line);
         final dynamic json = parseFlutterResponse(line);
-        if (json != null && json['event'] == 'app.debugPort') {
-          vmServicePort = Uri.parse(json['params']['wsUri']).port;
-          print('service protocol connection available at port $vmServicePort');
-        } else if (json != null && json['event'] == 'app.started') {
-          appId = json['params']['appId'];
+        if (json != null) {
+          if (json['event'] == 'app.debugPort') {
+            vmServicePort = Uri.parse(json['params']['wsUri']).port;
+            print('service protocol connection available at port $vmServicePort');
+          } else if (json['event'] == 'app.started') {
+            appId = json['params']['appId'];
+            print('application identifier is $appId');
+          }
+        }
+        if (vmServicePort != null && appId != null && !ready.isCompleted) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
@@ -71,25 +75,24 @@ void main() {
       });
       transformToLines(run.stderr).listen((String line) {
         stderr.writeln('run:stderr: $line');
+        ok = false;
       });
-      run.exitCode.then((int exitCode) {
+      run.exitCode.then<void>((int exitCode) {
         ok = false;
       });
       await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client =
-          VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VMServiceClient client = VMServiceClient.connect(
+        'ws://localhost:$vmServicePort/ws'
+      );
 
       int id = 1;
-      Future<Map<String, dynamic>> sendRequest(
-          String method, dynamic params) async {
+      Future<Map<String, dynamic>> sendRequest(String method, dynamic params) async {
         final int requestId = id++;
-        final Completer<Map<String, dynamic>> response =
-            Completer<Map<String, dynamic>>();
-        final StreamSubscription<String> responseSubscription =
-            stdout.stream.listen((String line) {
+        final Completer<Map<String, dynamic>> response = Completer<Map<String, dynamic>>();
+        final StreamSubscription<String> responseSubscription = stdout.stream.listen((String line) {
           final Map<String, dynamic> json = parseFlutterResponse(line);
           if (json != null && json['id'] == requestId)
             response.complete(json);
@@ -97,7 +100,7 @@ void main() {
         final Map<String, dynamic> req = <String, dynamic>{
           'id': requestId,
           'method': method,
-          'params': params
+          'params': params,
         };
         final String jsonEncoded = json.encode(<Map<String, dynamic>>[req]);
         print('run:stdin: $jsonEncoded');
@@ -108,27 +111,35 @@ void main() {
       }
 
       print('test: sending two hot reloads...');
-      final Future<dynamic> hotReload1 = sendRequest('app.restart',
-          <String, dynamic>{'appId': appId, 'fullRestart': false});
-      final Future<dynamic> hotReload2 = sendRequest('app.restart',
-          <String, dynamic>{'appId': appId, 'fullRestart': false});
-      final Future<List<dynamic>> reloadRequests =
-          Future.wait<dynamic>(<Future<dynamic>>[hotReload1, hotReload2]);
-      final dynamic results = await Future
-          .any<dynamic>(<Future<dynamic>>[run.exitCode, reloadRequests]);
+      final Future<dynamic> hotReload1 = sendRequest(
+        'app.restart',
+        <String, dynamic>{'appId': appId, 'fullRestart': false},
+      );
+      final Future<dynamic> hotReload2 = sendRequest(
+        'app.restart',
+        <String, dynamic>{'appId': appId, 'fullRestart': false},
+      );
+      final Future<List<dynamic>> reloadRequests = Future.wait<dynamic>(<Future<dynamic>>[
+        hotReload1,
+        hotReload2,
+      ]);
+      final dynamic results = await Future.any<dynamic>(<Future<dynamic>>[
+        run.exitCode,
+        reloadRequests,
+      ]);
 
       if (!ok)
-        throw 'App crashed during hot reloads.';
+        throw 'App failed or crashed during hot reloads.';
 
       final List<dynamic> responses = results;
-      final List<dynamic> errorResponses =
-          responses.where((dynamic r) => r['error'] != null).toList();
-      final List<dynamic> successResponses = responses
-          .where((dynamic r) =>
-              r['error'] == null &&
-              r['result'] != null &&
-              r['result']['code'] == 0)
-          .toList();
+      final List<dynamic> errorResponses = responses.where(
+        (dynamic r) => r['error'] != null
+      ).toList();
+      final List<dynamic> successResponses = responses.where(
+        (dynamic r) => r['error'] == null &&
+                       r['result'] != null &&
+                       r['result']['code'] == 0
+      ).toList();
 
       if (errorResponses.length != 1)
         throw 'Did not receive the expected (exactly one) hot reload error response.';
@@ -138,8 +149,10 @@ void main() {
       if (successResponses.length != 1)
         throw 'Did not receive the expected (exactly one) successful hot reload response.';
 
-      final dynamic hotReload3 = await sendRequest('app.restart',
-          <String, dynamic>{'appId': appId, 'fullRestart': false});
+      final dynamic hotReload3 = await sendRequest(
+        'app.restart',
+        <String, dynamic>{'appId': appId, 'fullRestart': false},
+      );
       if (hotReload3['error'] != null)
         throw 'Received an error response from a hot reload after all other hot reloads had completed.';
 
@@ -148,7 +161,7 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
       print('test: validating that the app has in fact closed...');
-      await client.done.timeout(const Duration(seconds: 5));
+      await client.done;
     });
     return TaskResult.success(null);
   });

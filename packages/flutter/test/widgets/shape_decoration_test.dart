@@ -11,8 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
+import 'test_border.dart' show TestBorder;
 
-Future<Null> main() async {
+Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
@@ -34,7 +36,7 @@ Future<Null> main() async {
       paints
         ..drawImageRect(image: rawImage)
         ..rect(color: Colors.black)
-        ..rect(color: Colors.white)
+        ..rect(color: Colors.white),
     );
   });
 
@@ -55,7 +57,7 @@ Future<Null> main() async {
       paints
         ..path(color: Color(Colors.blue.value))
         ..rect(color: Colors.black)
-        ..rect(color: Colors.white)
+        ..rect(color: Colors.white),
     );
   });
 
@@ -75,7 +77,7 @@ Future<Null> main() async {
       log,
       <String>[
         'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr'
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
       ],
     );
   });
@@ -99,39 +101,8 @@ Future<Null> main() async {
       log,
       <String>[
         'getInnerPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl'
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
   });
-}
-
-typedef Logger = void Function(String caller);
-
-class TestBorder extends ShapeBorder {
-  const TestBorder(this.onLog) : assert(onLog != null);
-
-  final Logger onLog;
-
-  @override
-  EdgeInsetsGeometry get dimensions => const EdgeInsetsDirectional.only(start: 1.0);
-
-  @override
-  ShapeBorder scale(double t) => TestBorder(onLog);
-
-  @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    onLog('getInnerPath $rect $textDirection');
-    return Path();
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    onLog('getOuterPath $rect $textDirection');
-    return Path();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    onLog('paint $rect $textDirection');
-  }
 }

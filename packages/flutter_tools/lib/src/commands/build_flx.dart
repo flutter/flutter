@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../globals.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
@@ -18,11 +19,10 @@ class BuildFlxCommand extends BuildSubCommand {
   final String usageFooter = 'FLX archives are deprecated.';
 
   @override
-  Future<Null> runCommand() async {
-    await super.runCommand();
-
+  Future<FlutterCommandResult> runCommand() async {
     printError("'build flx' is no longer supported. Instead, use 'build "
                "bundle' to build and assemble the application code and resources "
                'for your app.');
+    return null;
   }
 }

@@ -42,6 +42,7 @@ void main() {
             data: const MediaQueryData(),
             child: CustomScrollView(
               controller: ScrollController(initialScrollOffset: 3000.0),
+              semanticChildCount: 30,
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildListDelegate(listChildren),
@@ -62,6 +63,11 @@ void main() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    scrollIndex: 15,
+                    scrollChildren: 30,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
@@ -69,67 +75,99 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'Item 13a',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'Item 13a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'item 13b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'item 13b',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'Item 14a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'item 14b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Item 15a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'item 15b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Item 16a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'item 16b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Item 17a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'item 17b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'Item 14a',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'Item 18a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'item 18b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'item 14b',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Item 15a',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'item 15b',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Item 16a',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'item 16b',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Item 17a',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'item 17b',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'Item 18a',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'item 18b',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'Item 19a',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                        label: 'item 19b',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'Item 19a',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                            label: 'item 19b',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -181,7 +219,7 @@ void main() {
               slivers: <Widget>[
                 SliverFixedExtentList(
                   itemExtent: 200.0,
-                  delegate: SliverChildListDelegate(listChildren),
+                  delegate: SliverChildListDelegate(listChildren, addSemanticIndexes: false),
                 ),
               ],
             ),
@@ -199,6 +237,9 @@ void main() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
@@ -325,8 +366,13 @@ void main() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
-                    actions: <SemanticsAction>[SemanticsAction.scrollUp,
-                    SemanticsAction.scrollDown],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
                     children: <TestSemantics>[
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.isHidden],
@@ -457,6 +503,9 @@ void main() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
@@ -589,6 +638,9 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasImplicitScrolling,
+                ],
                 actions: <SemanticsAction>[
                   SemanticsAction.scrollUp,
                   SemanticsAction.scrollDown,
@@ -725,6 +777,9 @@ void main() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,

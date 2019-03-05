@@ -25,7 +25,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   /// The [quarterTurns] argument must not be null.
   RenderRotatedBox({
     @required int quarterTurns,
-    RenderBox child
+    RenderBox child,
   }) : assert(quarterTurns != null),
        _quarterTurns = quarterTurns {
     this.child = child;

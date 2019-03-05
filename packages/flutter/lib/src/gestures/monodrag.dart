@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -48,7 +50,39 @@ typedef GestureDragCancelCallback = void Function();
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
-  DragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// [dragStartBehavior] must not be null.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  DragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+    this.dragStartBehavior = DragStartBehavior.start,
+  }) : assert(dragStartBehavior != null),
+       super(debugOwner: debugOwner, kind: kind);
+
+  /// Configure the behavior of offsets sent to [onStart].
+  ///
+  /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
+  /// position when the gesture detector wins the arena. If [DragStartBehavior.down],
+  /// [onStart] will be called at the time and position when a down event was
+  /// first detected.
+  ///
+  /// For more information about the gesture arena:
+  /// https://flutter.io/docs/development/ui/advanced/gestures#gesture-disambiguation
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// ## Example:
+  ///
+  /// A finger presses down on the screen with offset (500.0, 500.0),
+  /// and then moves to position (510.0, 500.0) before winning the arena.
+  /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
+  /// callback will be called at the time corresponding to the touch's position
+  /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
+  /// [onStart] will be called at the time corresponding to the touch's position
+  /// at (510.0, 500.0).
+  DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen and might begin to move.
   ///
@@ -60,6 +94,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [DragStartDetails] object.
+  ///
+  /// Depending on the value of [dragStartBehavior], this function will be
+  /// called on the initial touch down, if set to [DragStartBehavior.down] or
+  /// when the drag gesture is first detected, if set to
+  /// [DragStartBehavior.start].
   GestureDragStartCallback onStart;
 
   /// A pointer that is in contact with the screen and moving has moved again.
@@ -111,7 +150,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   @override
-  void addPointer(PointerEvent event) {
+  void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _DragState.ready) {
@@ -163,6 +202,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp;
+      Offset updateDelta;
+      switch (dragStartBehavior) {
+        case DragStartBehavior.start:
+          _initialPosition = _initialPosition + delta;
+          updateDelta = Offset.zero;
+          break;
+        case DragStartBehavior.down:
+          updateDelta = _getDeltaForDetails(delta);
+          break;
+      }
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = null;
       if (onStart != null) {
@@ -171,13 +220,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           globalPosition: _initialPosition,
         )));
       }
-      if (delta != Offset.zero && onUpdate != null) {
-        final Offset deltaForDetails = _getDeltaForDetails(delta);
+      if (updateDelta != Offset.zero && onUpdate != null) {
         invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
           sourceTimeStamp: timestamp,
-          delta: deltaForDetails,
-          primaryDelta: _getPrimaryValueFromOffset(delta),
-          globalPosition: _initialPosition + deltaForDetails,
+          delta: updateDelta,
+          primaryDelta: _getPrimaryValueFromOffset(updateDelta),
+          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behaviour
         )));
       }
     }
@@ -232,6 +280,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _velocityTrackers.clear();
     super.dispose();
   }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<DragStartBehavior>('start behavior', dragStartBehavior));
+  }
 }
 
 /// Recognizes movement in the vertical direction.
@@ -246,7 +299,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
-  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  VerticalDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -280,7 +338,12 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  HorizontalDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

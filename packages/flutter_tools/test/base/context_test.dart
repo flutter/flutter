@@ -24,7 +24,7 @@ void main() {
       test('returns root context in child of root zone if zone was manually created', () {
         final Zone rootZone = Zone.current;
         final AppContext rootContext = context;
-        runZoned(() {
+        runZoned<void>(() {
           expect(Zone.current, isNot(rootZone));
           expect(Zone.current.parent, rootZone);
           expect(context, rootContext);
@@ -61,7 +61,7 @@ void main() {
         final AppContext rootContext = context;
         await rootContext.run<void>(name: 'child', body: () {
           final AppContext childContext = context;
-          runZoned(() {
+          runZoned<void>(() {
             expect(context, isNot(rootContext));
             expect(context, same(childContext));
             expect(context.name, 'child');
@@ -79,7 +79,7 @@ void main() {
         String value;
         await context.run<void>(
           body: () {
-            outer.future.then((_) {
+            outer.future.then<void>((_) {
               value = context[String];
               inner.complete();
             });
@@ -158,7 +158,7 @@ void main() {
           fallbacks: <Type, Generator>{
             int: () => int.parse(context[String]),
             String: () => '${context[double]}',
-            double: () => context[int] * 1.0,
+            double: () => (context[int] as int) * 1.0, // ignore: avoid_as
           },
         );
         try {

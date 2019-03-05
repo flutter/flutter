@@ -36,6 +36,15 @@ typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> can
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
+/// Signature for when the draggable is dropped.
+///
+/// The velocity and offset at which the pointer was moving when the draggable
+/// was dropped is available in the [DraggableDetails]. Also included in the
+/// `details` is whether the draggable's [DragTarget] accepted it.
+///
+/// Used by [Draggable.onDragEnd]
+typedef DragEndCallback = void Function(DraggableDetails details);
+
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
@@ -100,6 +109,7 @@ class Draggable<T> extends StatefulWidget {
     this.maxSimultaneousDrags,
     this.onDragStarted,
     this.onDraggableCanceled,
+    this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
@@ -229,6 +239,16 @@ class Draggable<T> extends StatefulWidget {
   /// callback is still in the tree.
   final VoidCallback onDragCompleted;
 
+  /// Called when the draggable is dropped.
+  ///
+  /// The velocity and offset at which the pointer was moving when it was
+  /// dropped is available in the [DraggableDetails]. Also included in the
+  /// `details` is whether the draggable's [DragTarget] accepted it.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true).
+  final DragEndCallback onDragEnd;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -266,6 +286,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
+    DragEndCallback onDragEnd,
     VoidCallback onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
@@ -281,6 +302,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled,
+    onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
@@ -372,11 +394,18 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
+        if (mounted && widget.onDragEnd != null) {
+          widget.onDragEnd(DraggableDetails(
+              wasAccepted: wasAccepted,
+              velocity: velocity,
+              offset: offset,
+          ));
+        }
         if (wasAccepted && widget.onDragCompleted != null)
           widget.onDragCompleted();
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
-      }
+      },
     );
     if (widget.onDragStarted != null)
       widget.onDragStarted();
@@ -391,9 +420,41 @@ class _DraggableState<T> extends State<Draggable<T>> {
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
       onPointerDown: canDrag ? _routePointer : null,
-      child: showChild ? widget.child : widget.childWhenDragging
+      child: showChild ? widget.child : widget.childWhenDragging,
     );
   }
+}
+
+/// Represents the details when a specific pointer event occurred on
+/// the [Draggable].
+///
+/// This includes the [Velocity] at which the pointer was moving and [Offset]
+/// when the draggable event occurred, and whether its [DragTarget] accepted it.
+///
+/// Also, this is the details object for callbacks that use [DragEndCallback].
+class DraggableDetails {
+  /// Creates details for a [DraggableDetails].
+  ///
+  /// If [wasAccepted] is not specified, it will default to `false`.
+  ///
+  /// The [velocity] or [offset] arguments must not be `null`.
+  DraggableDetails({
+    this.wasAccepted = false,
+    @required this.velocity,
+    @required this.offset,
+  }) : assert(velocity != null),
+       assert(offset != null);
+
+  /// Determines whether the [DragTarget] accepted this draggable.
+  final bool wasAccepted;
+
+  /// The velocity at which the pointer was moving when the specific pointer
+  /// event occurred on the draggable.
+  final Velocity velocity;
+
+  /// The global position when the specific pointer event occurred on
+  /// the draggable.
+  final Offset offset;
 }
 
 /// A widget that receives data when a [Draggable] widget is dropped.
@@ -495,7 +556,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars))
+      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars)),
     );
   }
 }
@@ -593,13 +654,11 @@ class _DragAvatar<T> extends Drag {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
-      orElse: _null
+      orElse: () => null,
     );
 
     _activeTarget = newTarget;
   }
-
-  static Null _null() => null;
 
   Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
@@ -619,7 +678,7 @@ class _DragAvatar<T> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag(_DragEndKind endKind, [Velocity velocity]) {
+  void finishDrag(_DragEndKind endKind, [ Velocity velocity ]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget.didDrop(this);
@@ -644,7 +703,7 @@ class _DragAvatar<T> extends Drag {
       child: IgnorePointer(
         child: feedback,
         ignoringSemantics: ignoringFeedbackSemantics,
-      )
+      ),
     );
   }
 

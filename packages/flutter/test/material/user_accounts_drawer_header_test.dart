@@ -12,7 +12,8 @@ const Key avatarA = Key('A');
 const Key avatarC = Key('C');
 const Key avatarD = Key('D');
 
-Future<Null> pumpTestWidget(WidgetTester tester, {
+Future<void> pumpTestWidget(
+  WidgetTester tester, {
   bool withName = true,
   bool withEmail = true,
   bool withOnDetailsPressedHandler = true,
@@ -52,7 +53,7 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
                 ),
                 CircleAvatar(
                   child: Text('E'),
-                )
+                ),
               ],
               accountName: withName ? const Text('name') : null,
               accountEmail: withEmail ? const Text('email') : null,
@@ -103,6 +104,81 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees.
+    expect(transformWidget.transform.getRotation()[0], -1.0);
+    expect(transformWidget.transform.getRotation()[4], -1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
+
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    // Icon starts to rotate down.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate down again still mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up to its original position mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
@@ -145,11 +221,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -158,11 +234,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -172,19 +248,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -204,11 +280,11 @@ void main() {
     ));
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
@@ -256,11 +332,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -269,11 +345,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -283,19 +359,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomRight(find.text('accountEmail')).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -315,11 +391,11 @@ void main() {
     ));
     expect(
       tester.getBottomRight(find.byKey(avatarA)).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
@@ -378,17 +454,17 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
-    expect(tester.getSemanticsData(find.text('B')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('B')), matchesSemantics(
       label: 'B',
       size: const Size(48.0, 48.0),
     ));
 
-    expect(tester.getSemanticsData(find.text('C')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('C')), matchesSemantics(
       label: 'C',
       size: const Size(48.0, 48.0),
     ));
 
-    expect(tester.getSemanticsData(find.text('D')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('D')), matchesSemantics(
       label: 'D',
       size: const Size(48.0, 48.0),
     ));

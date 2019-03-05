@@ -9,10 +9,14 @@ import 'dialog.dart';
 import 'flat_button.dart';
 import 'raised_button.dart';
 
-/// A horizontal arrangement of buttons.
+/// An end-aligned row of buttons.
 ///
 /// Places the buttons horizontally according to the padding in the current
-/// [ButtonTheme].
+/// [ButtonTheme]. The children are laid out in a [Row] with
+/// [MainAxisAlignment.end]. When the [Directionality] is [TextDirection.ltr],
+/// the button bar's children are right justified and the last child becomes
+/// the rightmost child. When the [Directionality] [TextDirection.rtl] the
+/// children are left justified and the last child becomes the leftmost child.
 ///
 /// Used by [Dialog] to arrange the actions at the bottom of the dialog.
 ///
@@ -56,16 +60,16 @@ class ButtonBar extends StatelessWidget {
       children: children.map<Widget>((Widget child) {
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: paddingUnit),
-          child: child
+          child: child,
         );
-      }).toList()
+      }).toList(),
     );
     switch (buttonTheme.layoutBehavior) {
       case ButtonBarLayoutBehavior.padded:
         return Padding(
           padding: EdgeInsets.symmetric(
             vertical: 2.0 * paddingUnit,
-            horizontal: paddingUnit
+            horizontal: paddingUnit,
           ),
           child: child,
         );

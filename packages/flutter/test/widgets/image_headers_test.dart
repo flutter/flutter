@@ -18,7 +18,7 @@ void main() {
   final MockHttpHeaders headers = MockHttpHeaders();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    HttpOverrides.runZoned(() async {
+    HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',
         headers: const <String, String>{'flutter': 'flutter'},
@@ -35,7 +35,7 @@ void main() {
       when(response.listen(any)).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function() onDone = invocation.namedArguments[#onDone];
-        final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
+        final void Function(Object, [ StackTrace ]) onError = invocation.namedArguments[#onError];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
         return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
       });

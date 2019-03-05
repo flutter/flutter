@@ -17,6 +17,7 @@ class _TimePickerLauncher extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       locale: locale,
+      supportedLocales: <Locale>[locale],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: Material(
         child: Center(
@@ -27,27 +28,30 @@ class _TimePickerLauncher extends StatelessWidget {
                 onPressed: () async {
                   onChanged(await showTimePicker(
                     context: context,
-                    initialTime: const TimeOfDay(hour: 7, minute: 0)
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
-                }
+                },
               );
             }
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }
 
-Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged,
-    { Locale locale = const Locale('en', 'US') }) async {
+Future<Offset> startPicker(
+  WidgetTester tester,
+  ValueChanged<TimeOfDay> onChanged, {
+  Locale locale = const Locale('en', 'US'),
+}) async {
   await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return tester.getCenter(find.byKey(const Key('time-picker-dial')));
 }
 
-Future<Null> finishPicker(WidgetTester tester) async {
+Future<void> finishPicker(WidgetTester tester) async {
   final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -130,7 +134,7 @@ void main() {
   const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
   const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
-  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
+  Future<void> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('en', 'US'),

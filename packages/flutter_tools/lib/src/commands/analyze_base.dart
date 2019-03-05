@@ -15,13 +15,13 @@ import '../globals.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
+  AnalyzeBase(this.argResults);
+
   /// The parsed argument results for execution.
   final ArgResults argResults;
 
-  AnalyzeBase(this.argResults);
-
   /// Called by [AnalyzeCommand] to start the analysis process.
-  Future<Null> analyze();
+  Future<void> analyze();
 
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
@@ -44,7 +44,7 @@ abstract class AnalyzeBase {
     final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
-      'missingDartDocs': membersMissingDocumentation
+      'missingDartDocs': membersMissingDocumentation,
     };
     fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');

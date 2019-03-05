@@ -5,6 +5,12 @@
 import 'dart:async';
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
+// The build_runner code generation is provided here to make it easier to
+// avoid introducing the dependency into google3. Not all build* packages
+// are synced internally.
+import 'src/build_runner/build_runner.dart';
+import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -18,7 +24,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
-import 'src/commands/fuchsia_reload.dart';
+import 'src/commands/generate.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
@@ -34,12 +40,13 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
@@ -63,7 +70,7 @@ Future<Null> main(List<String> args) async {
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
-    FuchsiaReloadCommand(),
+    GenerateCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
@@ -79,7 +86,13 @@ Future<Null> main(List<String> args) async {
     TraceCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
+    VersionCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp);
+     verboseHelp: verboseHelp,
+     overrides: <Type, Generator>{
+       // The build runner instance is not supported in google3 because
+       // the build runner packages are not synced internally.
+       CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
+     });
 }

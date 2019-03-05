@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Tile 19'), findsOneWidget);
 
     await tester.pumpWidget(_buildSliverList(
-      items: items.map((int i) => i + 100).toList(),
+      items: items.map<int>((int i) => i + 100).toList(),
       controller: controller,
       itemHeight: itemHeight,
       viewportHeight: viewportHeight,

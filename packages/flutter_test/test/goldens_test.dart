@@ -34,7 +34,7 @@ void main() {
 
   void test(String description, FutureOr<void> body()) {
     test_package.test(description, () {
-      return io.IOOverrides.runZoned(
+      return io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -82,7 +82,7 @@ void main() {
     });
 
     group('compare', () {
-      Future<bool> doComparison([String golden = 'golden.png']) {
+      Future<bool> doComparison([ String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
           Uint8List.fromList(_kExpectedBytes),

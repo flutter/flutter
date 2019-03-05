@@ -33,7 +33,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight,
                   expandedHeight: expandedHeight,
                   snap: snap,
                   bottom: TabBar(
-                    tabs: <String>['A','B','C'].map((String t) => Tab(text: 'TAB $t')).toList(),
+                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -153,8 +153,8 @@ void main() {
           appBar: AppBar(
             centerTitle: true,
             title: const Text('X'),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -318,7 +318,7 @@ void main() {
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
-      const SizedBox(width: 100.0)
+      const SizedBox(width: 100.0),
     ];
     await tester.pumpWidget(buildApp());
 
@@ -383,7 +383,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
@@ -438,7 +438,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopRight(title).dx, 620 + 48 + 48);
@@ -878,7 +878,7 @@ void main() {
             data: topPadding100,
             child: Scaffold(
               primary: true,
-              appBar: AppBar(title: const Text('title'))
+              appBar: AppBar(title: const Text('title')),
           ),
         ),
       ),
@@ -1396,7 +1396,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 
@@ -1412,7 +1412,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: lightTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 
@@ -1421,5 +1421,97 @@ void main() {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark,
     ));
+  });
+
+  testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17598
+
+    const double appBarHeight = 256.0;
+    bool snap = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    expandedHeight: appBarHeight,
+                    pinned: false,
+                    floating: true,
+                    snap: snap,
+                    actions: <Widget>[
+                      FlatButton(
+                        child: const Text('snap=false'),
+                        onPressed: () {
+                          setState(() {
+                            snap = false;
+                          });
+                        },
+                      ),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        height: appBarHeight,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      <Widget>[
+                        Container(height: 1200.0, color: Colors.teal),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+    await gesture.up();
+
+    await tester.tap(find.text('snap=false'));
+    await tester.pumpAndSettle();
+
+    gesture = await tester.startGesture(const Offset(50.0, 400.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('AppBar with shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBar(
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          shape: roundedRectangleBorder,
+          actions: const <Widget>[Text('A1'), Text('A2')],
+        ),
+      ),
+    );
+
+    final Finder appBarFinder = find.byType(AppBar);
+
+    AppBar getAppBarWidget() {
+      return tester.widget<AppBar>(appBarFinder);
+    }
+
+    expect(getAppBarWidget().shape, roundedRectangleBorder);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget() {
+      return tester.widget<Material>(materialFinder);
+    }
+
+    expect(getMaterialWidget().shape, roundedRectangleBorder);
   });
 }

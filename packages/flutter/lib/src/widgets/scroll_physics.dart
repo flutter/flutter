@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
+import 'binding.dart' show WidgetsBinding;
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
@@ -41,6 +41,7 @@ class ScrollPhysics {
   /// ScrollPhysics that has [ancestor] as its parent.
   ///
   /// This method is typically used to define [applyTo] methods like:
+  ///
   /// ```dart
   /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
   ///   return FooScrollPhysics(parent: buildParent(ancestor));
@@ -61,8 +62,8 @@ class ScrollPhysics {
   ///
   /// See also:
   ///
-  ///   * [buildParent], a utility method that's often used to define [applyTo]
-  ///     methods for ScrollPhysics subclasses.
+  ///  * [buildParent], a utility method that's often used to define [applyTo]
+  ///    methods for ScrollPhysics subclasses.
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }
@@ -173,8 +174,8 @@ class ScrollPhysics {
   static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * ui.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / ui.window.devicePixelRatio // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -427,9 +428,9 @@ class ClampingScrollPhysics extends ScrollPhysics {
       return ScrollSpringSimulation(
         spring,
         position.pixels,
-        position.maxScrollExtent,
+        end,
         math.min(0.0, velocity),
-        tolerance: tolerance
+        tolerance: tolerance,
       );
     }
     if (velocity.abs() < tolerance.velocity)

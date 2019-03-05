@@ -26,7 +26,7 @@ void main() {
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
-                  ]
+                  ],
                 ),
               ],
             ),
@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -67,9 +67,9 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         title: 'flutter_tester',
-        home: const Material(child: AboutListTile()),
+        home: Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
@@ -78,19 +78,19 @@ void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
       ]);
     });
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
       ]);
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Center(
+      const MaterialApp(
+        home: Center(
           child: LicensePage(),
         ),
       ),
@@ -107,5 +107,30 @@ void main() {
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
+  });
+
+  testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
+    const double safeareaPadding = 27.0;
+
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.all(safeareaPadding),
+          ),
+          child: LicensePage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
   });
 }

@@ -62,13 +62,13 @@ abstract class OperatingSystemUtils {
     const Map<String, String> osNames = <String, String>{
       'macos': 'Mac OS',
       'linux': 'Linux',
-      'windows': 'Windows'
+      'windows': 'Windows',
     };
     final String osName = platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all = false});
+  List<File> _which(String execName, { bool all = false });
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -83,7 +83,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -92,7 +92,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return const <File>[];
     final String stdout = result.stdout;
-    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -159,14 +159,14 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
       return const <File>[];
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
-      return lines.map((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => fs.file(path.trim())).toList();
     return <File>[fs.file(lines.first.trim())];
   }
 
@@ -264,7 +264,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String findProjectRoot([String directory]) {
+String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {

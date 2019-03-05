@@ -49,7 +49,7 @@ void main() {
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
           )
       )
     );
@@ -60,7 +60,7 @@ void main() {
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
         )
       )
     );
@@ -95,7 +95,7 @@ void main() {
         )
     ));
 
-    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -110,7 +110,7 @@ void main() {
       )
     ));
 
-    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,

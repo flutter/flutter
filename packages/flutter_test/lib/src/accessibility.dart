@@ -17,7 +17,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+    : passed = true,
+      reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -106,11 +108,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
-        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
         return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
+      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
@@ -122,6 +124,41 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   String get description => 'Tappable objects should be at least $size';
+}
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+@visibleForTesting
+class LabeledTapTargetGuideline extends AccessibilityGuideline {
+  const LabeledTapTargetGuideline._();
+
+  @override
+  String get description => 'Tappable widgets should have a semantic label';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+   final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    Evaluation traverse(SemanticsNode node) {
+      Evaluation result = const Evaluation.pass();
+      node.visitChildren((SemanticsNode child) {
+        result += traverse(child);
+        return true;
+      });
+      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden))
+        return result;
+      final SemanticsData data = node.getSemanticsData();
+      // Skip node if it has no actions, or is marked as hidden.
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+        return result;
+      if (data.label == null || data.label.isEmpty) {
+        result += Evaluation.fail(
+          '$node: expected tappable node to have semantic label, but none was found\n',
+        );
+      }
+      return result;
+    }
+    return traverse(root);
+  }
 }
 
 /// A guideline which verifies that all nodes that contribute semantics via text
@@ -168,9 +205,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     });
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
+      Evaluation result = const Evaluation.pass();
+      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
+        return result;
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];
-      Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
         children.add(child);
         return true;
@@ -403,3 +442,7 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();

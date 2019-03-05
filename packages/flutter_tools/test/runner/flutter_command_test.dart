@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import 'utils.dart';
 
 void main() {
-
   group('Flutter Command', () {
-
-    MockCache cache;
+    MockitoCache cache;
+    MockitoUsage usage;
     MockClock clock;
-    MockUsage usage;
     List<int> mockTimes;
 
     setUp(() {
-      cache = MockCache();
+      cache = MockitoCache();
+      usage = MockitoUsage();
       clock = MockClock();
-      usage = MockUsage();
       when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
@@ -63,11 +60,11 @@ void main() {
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
+        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
       );
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -84,7 +81,7 @@ void main() {
                    label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -96,7 +93,7 @@ void main() {
         ExitStatus.success,
         // nulls should be cleaned up.
         timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
-        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500)
+        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
@@ -117,7 +114,7 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
@@ -147,51 +144,15 @@ void main() {
             'flutter',
             'dummy',
             const Duration(milliseconds: 1000),
-            'fail'
-          ]
+            'fail',
+          ],
         );
       }
     },
     overrides: <Type, Generator>{
-      Clock: () => clock,
+      SystemClock: () => clock,
       Usage: () => usage,
     });
 
   });
-
 }
-
-typedef CommandFunction = Future<FlutterCommandResult> Function();
-
-class DummyFlutterCommand extends FlutterCommand {
-
-  DummyFlutterCommand({
-    this.shouldUpdateCache  = false,
-    this.noUsagePath  = false,
-    this.commandFunction,
-  });
-
-  final bool noUsagePath;
-  final CommandFunction commandFunction;
-
-  @override
-  final bool shouldUpdateCache;
-
-  @override
-  String get description => 'does nothing';
-
-  @override
-  Future<String> get usagePath => noUsagePath ? null : super.usagePath;
-
-  @override
-  String get name => 'dummy';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return commandFunction == null ? null : commandFunction();
-  }
-}
-
-class MockCache extends Mock implements Cache {}
-
-class MockUsage extends Mock implements Usage {}

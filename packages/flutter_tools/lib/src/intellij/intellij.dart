@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:archive/archive.dart';
 
 import '../base/file_system.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor.dart';
 
 class IntelliJPlugins {
-  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
+  IntelliJPlugins(this.pluginsPath);
 
   final String pluginsPath;
 
-  IntelliJPlugins(this.pluginsPath);
+  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
 
   void validatePackage(
-      List<ValidationMessage> messages, List<String> packageNames, String title,
-      {Version minVersion}) {
+    List<ValidationMessage> messages,
+    List<String> packageNames,
+    String title, {
+    Version minVersion,
+  }) {
     for (String packageName in packageNames) {
       if (!_hasPackage(packageName)) {
         continue;
