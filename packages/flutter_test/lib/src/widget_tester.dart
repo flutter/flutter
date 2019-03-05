@@ -65,8 +65,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// [WidgetTester].
 /// 
 /// See also:
+/// 
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
-/// timeout and how to manually increase timeout
+/// timeout and how to manually increase timeouts.
 ///
 /// ## Sample code
 ///
