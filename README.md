@@ -1,4 +1,4 @@
-# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# <img src="https://flutter.dev/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
 [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
@@ -9,9 +9,9 @@ Flutter is Google’s mobile app SDK for crafting high-quality native interfaces
 
 ### Documentation
 
-* **Main site: [flutter.io][]**
-* [Install](https://flutter.io/get-started/install/)
-* [Get started](https://flutter.io/get-started/)
+* **Main site: [flutter.dev][]**
+* [Install](https://flutter.dev/get-started/install/)
+* [Get started](https://flutter.dev/get-started/)
 * [Contribute](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#contributing-to-flutter)
 
 ## Fast development
@@ -42,7 +42,7 @@ smooth natural scrolling, and platform awareness.
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
 [<img src="https://github.com/flutter/website/blob/master/src/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter/)
 
-Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
+Browse the <a href="https://flutter.dev/widgets/">widget catalog</a>.
 
 ## Modern, reactive framework
 
@@ -84,9 +84,9 @@ class CounterState extends State<Counter> {
 }
 ```
 
-Browse the <a href="https://flutter.io/widgets/">widget catalog</a>
+Browse the <a href="https://flutter.dev/widgets/">widget catalog</a>
 and learn more about the
-<a href="https://flutter.io/widgets-intro/">functional-reactive framework</a>.
+<a href="https://flutter.dev/widgets-intro/">functional-reactive framework</a>.
 
 ## Access native features and SDKs
 
@@ -113,8 +113,8 @@ Future<Null> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
-write <a href="https://flutter.io/platform-channels/">platform channels</a>,
+Learn how to use <a href="https://flutter.dev/using-packages/">packages</a>, or
+write <a href="https://flutter.dev/platform-channels/">platform channels</a>,
 to access native code, APIs, and SDKs.
 
 ## Unified app development
@@ -170,9 +170,9 @@ existing Java/Kotlin/ObjC/Swift investment.
     * Play Store
 
 Learn more about what makes Flutter special in the
-<a href="https://flutter.io/technical-overview/">technical overview</a>.
+<a href="https://flutter.dev/technical-overview/">technical overview</a>.
 
 Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
 
-[flutter.io]: https://flutter.io/
+[flutter.dev]: https://flutter.dev/
