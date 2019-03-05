@@ -105,6 +105,8 @@ class _DefaultHeroTag {
 /// ```
 /// {@end-tool}
 ///
+/// See FloatingActionButton featured as a Widget of the Week [here](https://youtu.be/2uaoEDOgk_I).
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.

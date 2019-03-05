@@ -30,6 +30,8 @@ const Duration _kShowDuration = Duration(milliseconds: 1500);
 /// representation of the widget, which, for example, can be vocalized by a
 /// screen reader.
 ///
+/// See ToolTip featured as a Widget of the Week [here](https://youtu.be/EeEfD5fI-5Q).
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>

@@ -663,6 +663,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
 ///
+/// See SliverList featured as a Widget of the Week [here](https://youtu.be/ORiTTaVY6mM).
+///
 /// See also:
 ///
 ///  * [SliverFixedExtentList], which is more efficient for children with
@@ -790,6 +792,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// {@end-tool}
 ///
 /// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
+///
+/// See SliverGrid featured as a Widget of the Week [here](https://youtu.be/ORiTTaVY6mM).
 ///
 /// See also:
 ///

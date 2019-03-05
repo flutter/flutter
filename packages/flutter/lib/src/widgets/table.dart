@@ -88,6 +88,9 @@ class _TableElementRow {
 ///
 /// For more details about the table layout algorithm, see [RenderTable].
 /// To control the alignment of children, see [TableCell].
+///
+/// See Table featured as a Widget of the Week [here](https://youtu.be/_lbE0wsVZSw).
+///
 class Table extends RenderObjectWidget {
   /// Creates a table.
   ///

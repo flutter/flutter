@@ -185,6 +185,8 @@ class Directionality extends InheritedWidget {
 /// Drawing content into the offscreen buffer may also trigger render target
 /// switches and such switching is particularly slow in older GPUs.
 ///
+/// See Opacity featured as a Widget of the Week [here](https://youtu.be/9hltevOHQBw).
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
@@ -402,6 +404,8 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
 ///
+/// See BackdropFilter featured as a Widget of the Week [here](https://youtu.be/dYRs7Q1vfYI).
+///
 /// See also:
 ///
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
@@ -480,6 +484,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See CustomPaint featured as a Widget of the Week [here](https://youtu.be/kp14Y4uHpHs).
 ///
 /// See also:
 ///
@@ -634,6 +640,8 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// By default, [ClipRRect] uses its own bounds as the base rectangle for the
 /// clip, but the size and location of the clip can be customized using a custom
 /// [clipper].
+///
+/// See ClipRRect featured as a Widget of the Week [here](https://youtu.be/eI43jkQkrvs).
 ///
 /// See also:
 ///
@@ -1032,6 +1040,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// See Transform featured as a Widget of the Week [here](https://youtu.be/9z_YNlRlWfA).
+///
 /// See also:
 ///
 ///  * [RotatedBox], which rotates the child widget during layout, not just
@@ -1333,6 +1343,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 
 /// Scales and positions its child within itself according to [fit].
 ///
+/// See FittedBox featured as a Widget of the Week [here](https://youtu.be/T4Uehk3_wlY).
+///
 /// See also:
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
@@ -1633,6 +1645,8 @@ class Padding extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See Align featured as a Widget of the Week [here](https://youtu.be/g2E7yl3MwMk).
 ///
 /// See also:
 ///
@@ -4340,6 +4354,8 @@ class Flexible extends ParentDataWidget<Flex> {
 /// ```
 /// {@end-tool}
 ///
+/// See Expanded featured as a Widget of the Week [here](https://youtu.be/_rnZaagadyo).
+///
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
@@ -4399,6 +4415,8 @@ class Expanded extends Flexible {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See Wrap featured as a Widget of the Week [here](https://youtu.be/z5iw2SeFx2M).
 ///
 /// See also:
 ///
@@ -5521,6 +5539,8 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// during layout and paints its child as usual. It just prevents its children
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
+///
+/// See AbsorbPointer featured as a Widget of the Week [here](https://youtu.be/65HoWqBboI8).
 ///
 /// See also:
 ///

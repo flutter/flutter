@@ -409,6 +409,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
 ///
+/// See AnimatedContainer featured as a Widget of the Week [here](https://youtu.be/yI-8QHpGIP4).
+///
 /// See also:
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only

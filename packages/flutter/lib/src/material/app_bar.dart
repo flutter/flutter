@@ -857,6 +857,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///
 /// The property [snap] can only be set to true if [floating] is also true.
 ///
+/// See SliverAppBar featured as a Widget of the Week [here](https://youtu.be/R9C5KMJKluE).
+///
 /// See also:
 ///
 ///  * [CustomScrollView], which integrates the [SliverAppBar] into its

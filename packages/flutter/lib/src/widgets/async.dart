@@ -361,6 +361,8 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// ```
 /// {@end-tool}
 ///
+/// See StreamBuilder featured as a Widget of the Week [here](https://youtu.be/MkKEWHfy99Y).
+///
 /// See also:
 ///
 ///  * [ValueListenableBuilder], which wraps a [ValueListenable] instead of a
@@ -511,6 +513,9 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See FutureBuilder featured as a Widget of the Week [here](https://youtu.be/ek8ZPdWj4Qo).
+///
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of

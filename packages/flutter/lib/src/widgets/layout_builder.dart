@@ -23,6 +23,8 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView].
 ///
+/// See LayoutBuilder featured as a Widget of the Week [here](https://youtu.be/IYDVcriKjsw).
+///
 /// See also:
 ///
 ///  * [Builder], which calls a `builder` function at build time.

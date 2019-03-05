@@ -444,6 +444,9 @@ class SizeTransition extends AnimatedWidget {
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// See FadeTransition featured as a Widget of the Week [here](https://youtu.be/rLwWVbv3xDQ).
+///
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -871,6 +874,9 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See AnimatedBuilder featured as a Widget of the Week [here](https://youtu.be/N-RiyZlv8v8).
+///
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

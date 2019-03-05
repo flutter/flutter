@@ -59,6 +59,9 @@ import 'ticker_provider.dart';
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See FadeInImage featured as a Widget of the Week [here](https://youtu.be/pK738Pg9cxc).
+///
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading
   /// then cross-fades to display the [image].

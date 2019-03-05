@@ -83,6 +83,8 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 ///
 /// Routes must not contain more than one [Hero] for each [tag].
 ///
+/// See Hero featured as a Widget of the Week [here](https://youtu.be/Be9UH1kXFDw).
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for

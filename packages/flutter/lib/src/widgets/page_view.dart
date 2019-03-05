@@ -400,6 +400,8 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// [PageView] is first constructed, and the [PageController.viewportFraction],
 /// which determines the size of the pages as a fraction of the viewport size.
 ///
+/// See PageView featured as a Widget of the Week [here](https://youtu.be/J1gE9xvph-A).
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.

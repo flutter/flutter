@@ -84,6 +84,8 @@ import 'framework.dart';
 /// then changes in the model will cause the widget to be rebuilt
 /// unconditionally.
 ///
+/// See InheritedModel featured as a Widget of the Week [here](https://youtu.be/ml5uefGgkaA).
+///
 /// See also:
 ///
 ///  * [InheritedWidget], an inherited widget that only notifies dependents
