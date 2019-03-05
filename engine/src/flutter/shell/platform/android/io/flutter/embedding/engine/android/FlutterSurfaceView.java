@@ -56,6 +56,7 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+      Log.d(TAG, "SurfaceHolder.Callback.surfaceChanged()");
       if (isAttachedToFlutterRenderer) {
         changeSurfaceSize(width, height);
       }
@@ -97,13 +98,17 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
    * Invoked by the owner of this {@code FlutterSurfaceView} when it wants to begin rendering
    * a Flutter UI to this {@code FlutterSurfaceView}.
    *
-   * If an Android {@link android.view.Surface} is available, this method will begin rendering
-   * {@link FlutterRenderer}'s Flutter UI to this {@code FlutterSurfaceView}.
+   * If an Android {@link android.view.Surface} is available, this method will give that
+   * {@link android.view.Surface} to the given {@link FlutterRenderer} to begin rendering
+   * Flutter's UI to this {@code FlutterSurfaceView}.
    *
    * If no Android {@link android.view.Surface} is available yet, this {@code FlutterSurfaceView}
-   * will wait until a {@link android.view.Surface} becomes available and then begin rendering.
+   * will wait until a {@link android.view.Surface} becomes available and then give that
+   * {@link android.view.Surface} to the given {@link FlutterRenderer} to begin rendering
+   * Flutter's UI to this {@code FlutterSurfaceView}.
    */
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
+    Log.d(TAG, "attachToRenderer");
     if (this.flutterRenderer != null) {
       this.flutterRenderer.detachFromRenderSurface();
     }
@@ -114,6 +119,7 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
     // If we're already attached to an Android window then we're now attached to both a renderer
     // and the Android window. We can begin rendering now.
     if (isSurfaceAvailableForRendering) {
+      Log.d(TAG, "Surface is available for rendering. Connecting.");
       connectSurfaceToRenderer();
     }
   }
@@ -179,5 +185,6 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
   @Override
   public void onFirstFrameRendered() {
     // TODO(mattcarroll): decide where this method should live and what it needs to do.
+    Log.d(TAG, "onFirstFrameRendered()");
   }
 }

@@ -111,11 +111,14 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
    * Invoked by the owner of this {@code FlutterTextureView} when it wants to begin rendering
    * a Flutter UI to this {@code FlutterTextureView}.
    *
-   * If an Android {@link SurfaceTexture} is available, this method will begin rendering
-   * {@link FlutterRenderer}'s Flutter UI to this {@code FlutterTextureView}.
+   * If an Android {@link SurfaceTexture} is available, this method will give that
+   * {@link SurfaceTexture} to the given {@link FlutterRenderer} to begin rendering
+   * Flutter's UI to this {@code FlutterTextureView}.
    *
-   * If no Android {@link SurfaceTexture} is available yet, this {@code FlutterSurfaceView}
-   * will wait until a {@link SurfaceTexture} becomes available and then begin rendering.
+   * If no Android {@link SurfaceTexture} is available yet, this {@code FlutterTextureView}
+   * will wait until a {@link SurfaceTexture} becomes available and then give that
+   * {@link SurfaceTexture} to the given {@link FlutterRenderer} to begin rendering
+   * Flutter's UI to this {@code FlutterTextureView}.
    */
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
     if (this.flutterRenderer != null) {
@@ -193,5 +196,6 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
   @Override
   public void onFirstFrameRendered() {
     // TODO(mattcarroll): decide where this method should live and what it needs to do.
+    Log.d(TAG, "onFirstFrameRendered()");
   }
 }
