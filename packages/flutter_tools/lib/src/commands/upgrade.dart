@@ -69,7 +69,7 @@ class UpgradeCommand extends FlutterCommand {
     final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     try {
       await runCheckedAsync(<String>[
-        'git', 'stash', 'save', stashName
+        'git', 'stash', 'push', '-m', stashName
       ]);
     } catch (e) {
       throwToolExit('Failed to stash local changes: $e');
@@ -87,7 +87,7 @@ class UpgradeCommand extends FlutterCommand {
 
     try {
       await runCheckedAsync(<String>[
-        'git', 'stash', 'pop', stashName,
+        'git', 'stash', 'pop',
       ]);
     } catch (e) {
       printError('Failed to re-apply local changes. State may have been lost.');
