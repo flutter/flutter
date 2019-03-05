@@ -496,7 +496,12 @@ class TextStyle extends Diagnosticable {
   ///
   /// The font provides a base stroke width for decorations which scales off
   /// of the [fontSize]. This property may be used to achieve a thinner or
-  /// thicker decoration stroke, without changing the [fontSize].
+  /// thicker decoration stroke, without changing the [fontSize]. For example,
+  /// a [decorationThickness] of 2.0 will draw a decoration twice as thick as
+  /// the font defined decoration thickness.
+  /// 
+  /// The default [decorationThickness] is 1.0, which will use the font's base
+  /// stroke thickness/width.
   final double decorationThickness;
 
   /// A human-readable description of this text style.
