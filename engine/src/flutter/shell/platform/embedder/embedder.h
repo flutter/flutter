@@ -141,6 +141,14 @@ typedef enum {
   kFlutterSemanticsFlagHasToggledState = 1 << 16,
   // If true, the semantics node is "on". If false, the semantics node is "off".
   kFlutterSemanticsFlagIsToggled = 1 << 17,
+  // Whether the platform can scroll the semantics node when the user attempts
+  // to move the accessibility focus to an offscreen child.
+  //
+  // For example, a |ListView| widget has implicit scrolling so that users can
+  // easily move the accessibility focus to the next set of children. A
+  // |PageView| widget does not have implicit scrolling, so that users don't
+  // navigate to the next page when reaching the end of the current one.
+  kFlutterSemanticsFlagHasImplicitScrolling = 1 << 18,
 } FlutterSemanticsFlag;
 
 typedef enum {

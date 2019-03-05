@@ -264,8 +264,9 @@ class SemanticsAction {
 
 /// A Boolean value that can be associated with a semantics node.
 //
-// When changes are made to this class, the equivalent APIs in each of the
-// embedders *must* be updated.
+// When changes are made to this class, the equivalent APIs in
+// `lib/ui/semantics/semantics_node.h` and in each of the embedders *must* be
+// updated.
 class SemanticsFlag {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
@@ -476,9 +477,9 @@ class SemanticsFlag {
   /// to move focus to an offscreen child.
   ///
   /// For example, a [ListView] widget has implicit scrolling so that users can
-  /// easily move to the next visible set of children. A [TabBar] widget does
-  /// not have implicit scrolling, so that users can navigate into the tab
-  /// body when reaching the end of the tab bar.
+  /// easily move the accessibility focus to the next set of children. A
+  /// [PageView] widget does not have implicit scrolling, so that users don't
+  /// navigate to the next page when reaching the end of the current one.
   static const SemanticsFlag hasImplicitScrolling = const SemanticsFlag._(_kHasImplicitScrollingIndex);
 
   /// The possible semantics flags.
