@@ -123,6 +123,8 @@ class PlatformView {
   SkISize size_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;
 
+  // Unlike all other methods on the platform view, this is called on the GPU
+  // task runner.
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
 
  private:

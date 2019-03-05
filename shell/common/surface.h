@@ -15,7 +15,7 @@
 namespace shell {
 
 /// Represents a Frame that has been fully configured for the underlying client
-/// rendering API. A frame may only be sumitted once.
+/// rendering API. A frame may only be submitted once.
 class SurfaceFrame {
  public:
   using SubmitCallback =
