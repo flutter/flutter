@@ -542,6 +542,7 @@ void main() {
   });
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
