@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.LocaleList;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
@@ -333,6 +334,15 @@ public class FlutterView extends FrameLayout {
     return false;
   }
   //-------- End: Process UI I/O that Flutter cares about. ---------
+
+  //-------- Start: Accessibility -------
+  /**
+   * No-op. Placeholder so that the containing Fragment can call through, but not yet implemented.
+   */
+  public void updateAccessibilityFeatures() {
+    // TODO(mattcarroll): bring in accessibility code from old FlutterView.
+  }
+  //-------- End: Accessibility ---------
 
   /**
    * Connects this {@code FlutterView} to the given {@link FlutterEngine}.
