@@ -446,26 +446,27 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
   };
 
-  auto io_task = [io_manager = io_manager_->GetWeakPtr(),
-                  platform_view = platform_view_->GetWeakPtr(),
+  // Threading: Capture platform view by raw pointer and not the weak pointer.
+  // We are going to use the pointer on the IO thread which is not safe with a
+  // weak pointer. However, we are preventing the platform view from being
+  // collected by using a latch.
+  auto* platform_view = platform_view_.get();
+
+  FML_DCHECK(platform_view);
+
+  auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view,
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task] {
-    if (io_manager) {
+    if (io_manager && !io_manager->GetResourceContext()) {
       io_manager->NotifyResourceContextAvailable(
-          platform_view ? platform_view->CreateResourceContext() : nullptr);
+          platform_view->CreateResourceContext());
     }
     // Step 1: Next, post a task on the UI thread to tell the engine that it has
     // an output surface.
     fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
   };
 
-  // Step 0: If the IOManager doesn't already have a ResourceContext, tell the
-  // IO thread that the PlatformView can make one for it now.
-  // Otherwise, jump right to step 1 on the UI thread.
-  if (!io_manager_->GetResourceContext()) {
-    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetIOTaskRunner(), io_task);
-  } else {
-    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(), ui_task);
-  }
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetIOTaskRunner(), io_task);
+
   latch.Wait();
 }
 
