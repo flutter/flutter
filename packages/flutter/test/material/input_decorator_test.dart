@@ -1026,7 +1026,7 @@ void main() {
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, 128.0);
+    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(128.0, .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
     expect(tester.getTopLeft(find.text('text')).dy, 96); // 12 + 100 - 16
@@ -1076,7 +1076,7 @@ void main() {
     // positioned at 19, and the text is at 19+100-16=103.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, 144);
+    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(144, .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
     expect(tester.getTopLeft(find.text('text')).dy, 103);

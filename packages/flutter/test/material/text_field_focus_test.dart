@@ -113,6 +113,8 @@ void main() {
       builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
+    // TODO(justinmc): The failure happens during this call in this test.
+    // Commenting out or reordering the above tests will cause it to pass.
     await tester.pump();
 
     expect(tester.testTextInput.isVisible, isFalse);
