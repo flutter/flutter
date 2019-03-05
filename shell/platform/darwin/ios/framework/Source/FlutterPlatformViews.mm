@@ -427,7 +427,6 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   [_flutterView touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;
-  [_flutterView touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
