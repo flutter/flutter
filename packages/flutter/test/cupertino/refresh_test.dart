@@ -36,23 +36,22 @@ void main() {
     refreshCompleter = Completer<void>.sync();
     refreshIndicator = Container();
 
-    when(mockHelper.builder(
-            any, any, any, any, any))
-        .thenAnswer((Invocation i) {
-      final double pulledExtent = i.positionalArguments[2];
-      final double refreshTriggerPullDistance = i.positionalArguments[3];
-      final double refreshIndicatorExtent = i.positionalArguments[4];
-      if (pulledExtent < 0.0) {
-        throw TestFailure('The pulledExtent should never be less than 0.0');
-      }
-      if (refreshTriggerPullDistance < 0.0) {
-        throw TestFailure('The refreshTriggerPullDistance should never be less than 0.0');
-      }
-      if (refreshIndicatorExtent < 0.0) {
-        throw TestFailure('The refreshIndicatorExtent should never be less than 0.0');
-      }
-      return refreshIndicator;
-    });
+    when(mockHelper.builder(any, any, any, any, any))
+      .thenAnswer((Invocation i) {
+        final double pulledExtent = i.positionalArguments[2];
+        final double refreshTriggerPullDistance = i.positionalArguments[3];
+        final double refreshIndicatorExtent = i.positionalArguments[4];
+        if (pulledExtent < 0.0) {
+          throw TestFailure('The pulledExtent should never be less than 0.0');
+        }
+        if (refreshTriggerPullDistance < 0.0) {
+          throw TestFailure('The refreshTriggerPullDistance should never be less than 0.0');
+        }
+        if (refreshIndicatorExtent < 0.0) {
+          throw TestFailure('The refreshIndicatorExtent should never be less than 0.0');
+        }
+        return refreshIndicator;
+      });
     when(mockHelper.refreshTask()).thenAnswer((_) => refreshCompleter.future);
   });
 

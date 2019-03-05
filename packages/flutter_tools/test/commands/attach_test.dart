@@ -237,8 +237,8 @@ void main() {
             mockLogReader.addLine(
                 'Observatory listening on http://127.0.0.1:$devicePort');
           });
-        return mockLogReader;
-      });
+          return mockLogReader;
+        });
       final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
