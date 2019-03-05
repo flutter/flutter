@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState, window;
+import 'dart:ui' show AppLifecycleState, window, Window;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -193,9 +193,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     window.onBeginFrame = _handleBeginFrame;
     window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
-    }
+    initLifecycleState();
   }
 
   /// The current [SchedulerBinding], if one has been created.
@@ -227,6 +225,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
+
+  /// Initializes the [lifecycleState] with the data from the window.
+  ///
+  /// An optional [testWindow] may be provided to supply test values.
+  void initLifecycleState([Window testWindow]) {
+    if (_lifecycleState == null && _parseAppLifecycleMessage((testWindow ?? window).initialLifecycleState) != null) {
+      _handleLifecycleMessage((testWindow ?? window).initialLifecycleState);
+    }
+  }
 
   /// Called when the application lifecycle state changes.
   ///

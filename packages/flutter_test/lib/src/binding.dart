@@ -168,6 +168,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // doesn't get generated for tests.
   }
 
+  void forceInitLifecycleState() {
+    initLifecycleState(_window);
+  }
+
   /// Whether there is currently a test executing.
   bool get inTest;
 
