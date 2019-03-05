@@ -215,11 +215,9 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
     switch (locale.languageCode) {
       case 'fr':
         return CupertinoLocalizationsFr.load(locale);
-        return SynchronousFuture<CupertinoLocalizations>(const CupertinoLocalizationsFr());
       case 'en':
       default:
         return DefaultCupertinoLocalizations.load(locale);
-        return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
     }
   }
 
