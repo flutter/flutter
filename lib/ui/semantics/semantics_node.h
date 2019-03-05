@@ -16,7 +16,8 @@
 
 namespace blink {
 
-// Must match the SemanticsAction enum in semantics.dart.
+// Must match the SemanticsAction enum in semantics.dart and in each of the
+// embedders.
 enum class SemanticsAction : int32_t {
   kTap = 1 << 0,
   kLongPress = 1 << 1,
@@ -37,6 +38,8 @@ enum class SemanticsAction : int32_t {
   kDidLoseAccessibilityFocus = 1 << 16,
   kCustomAction = 1 << 17,
   kDismiss = 1 << 18,
+  kMoveCursorForwardByWordIndex = 1 << 19,
+  kMoveCursorBackwardByWordIndex = 1 << 20,
 };
 
 const int kScrollableSemanticsActions =
