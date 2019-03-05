@@ -48,9 +48,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// [StatefulWidget]s.
 ///
 /// The callback can be asynchronous (using `async`/`await` or
-/// using explicit [Future]s). 
+/// using explicit [Future]s).
 /// Tests using the [AutomatedTestWidgetsFlutterBinding]
-/// have a default time out of two seconds, 
+/// have a default time out of two seconds,
 /// which is automatically increased for some expensive operations,
 /// and can also be manually increased by calling
 /// [AutomatedTestWidgetsFlutterBinding.addTime].
@@ -63,9 +63,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// will be given a new instance of [WidgetTester]. The [find] object
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
 /// timeout and how to manually increase timeouts.
 ///
