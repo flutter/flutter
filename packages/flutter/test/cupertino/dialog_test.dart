@@ -74,7 +74,7 @@ void main() {
           CupertinoDialogAction(child: Text('Cancel')),
           CupertinoDialogAction(child: Text('OK')),
         ],
-      )
+      ),
     )));
 
     expect(
@@ -126,7 +126,7 @@ void main() {
       ignoreId: true,
       ignoreRect: true,
       ignoreTransform: true,
-    )
+    ),
   );
 
     semantics.dispose();

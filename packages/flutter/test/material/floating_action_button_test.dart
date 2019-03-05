@@ -131,7 +131,7 @@ void main() {
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
-            highlightElevation: 20.0
+            highlightElevation: 20.0,
           ),
         ),
       ),
@@ -508,7 +508,7 @@ void main() {
             SemanticsFlag.isEnabled,
           ],
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
         ),
       ],
@@ -574,7 +574,7 @@ void main() {
                 TestSemantics(
                   label: 'Add Photo',
                   actions: <SemanticsAction>[
-                    SemanticsAction.tap
+                    SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
@@ -694,13 +694,13 @@ void main() {
             child: FloatingActionButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

@@ -186,7 +186,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
@@ -217,7 +217,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
         findsNothing,
       );
@@ -1008,7 +1008,7 @@ void main() {
 
     await tester.enterText(
       find.widgetWithText(CupertinoTextField, 'field 1'),
-      "j'aime la poutine"
+      "j'aime la poutine",
     );
     await tester.pump();
 
@@ -1537,6 +1537,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
+      // Shows toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
@@ -1607,44 +1608,85 @@ void main() {
   );
 
   testWidgets('force press selects word', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: CupertinoTextField(
-              controller: controller,
-            ),
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
           ),
         ),
-      );
+      ),
+    );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      const int pointerValue = 1;
-      final TestGesture gesture = await tester.createGesture();
-      await gesture.downWithCustomEvent(
-        textfieldStart + const Offset(150.0, 5.0),
-        PointerDownEvent(
-          pointer: pointerValue,
-          position: textfieldStart + const Offset(150.0, 5.0),
-          pressure: 3.0,
-          pressureMax: 6.0,
-          pressureMin: 0.0
+    const int pointerValue = 1;
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      textfieldStart + const Offset(150.0, 5.0),
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 5.0),
+        pressure: 3.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+    // We expect the force press to select a word at the given location.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+
+    await gesture.up();
+    await tester.pump();
+    // Shows toolbar.
+    expect(find.byType(CupertinoButton), findsNWidgets(3));
+  });
+
+  testWidgets('force press on unsupported devices falls back to tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
         ),
-      );
-      // We expect the force press to select a word at the given location.
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 8, extentOffset: 12),
-      );
+      ),
+    );
 
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    const int pointerValue = 1;
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      textfieldStart + const Offset(150.0, 5.0),
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 5.0),
+        // iPhone 6 and below report 0 across the board.
+        pressure: 0,
+        pressureMax: 0,
+        pressureMin: 0,
+      ),
+    );
+    await gesture.up();
+    // Fall back to a single tap which selects the edge of the word.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    await tester.pump();
+    // Falling back to a single tap doesn't trigger a toolbar.
+    expect(find.byType(CupertinoButton), findsNothing);
+  });
 
   testWidgets(
     'text field respects theme',
@@ -1663,7 +1705,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 

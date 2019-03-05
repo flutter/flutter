@@ -792,7 +792,7 @@ class _TimePickerHeader extends StatelessWidget {
             );
           })
           .toList(),
-      )
+      ),
     );
   }
 }
@@ -895,7 +895,7 @@ class _DialPainter extends CustomPainter {
     canvas.drawLine(centerPoint, focusedPoint, selectorPaint);
 
     final Rect focusedRect = Rect.fromCircle(
-      center: focusedPoint, radius: focusedRadius
+      center: focusedPoint, radius: focusedRadius,
     );
     canvas
       ..save()
@@ -999,7 +999,7 @@ class _Dial extends StatefulWidget {
     @required this.selectedTime,
     @required this.mode,
     @required this.use24HourDials,
-    @required this.onChanged
+    @required this.onChanged,
   }) : assert(selectedTime != null);
 
   final TimeOfDay selectedTime;
@@ -1408,7 +1408,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           activeRing: _activeRing,
           textDirection: Directionality.of(context),
         ),
-      )
+      ),
     );
   }
 }
@@ -1425,7 +1425,7 @@ class _TimePickerDialog extends StatefulWidget {
   /// [initialTime] must not be null.
   const _TimePickerDialog({
     Key key,
-    @required this.initialTime
+    @required this.initialTime,
   }) : assert(initialTime != null),
        super(key: key);
 
@@ -1547,8 +1547,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           use24HourDials: use24HourDials,
           selectedTime: _selectedTime,
           onChanged: _handleTimeChanged,
-        )
-      )
+        ),
+      ),
     );
 
     final Widget actions = ButtonTheme.bar(
@@ -1556,14 +1556,14 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         children: <Widget>[
           FlatButton(
             child: Text(localizations.cancelButtonLabel),
-            onPressed: _handleCancel
+            onPressed: _handleCancel,
           ),
           FlatButton(
             child: Text(localizations.okButtonLabel),
-            onPressed: _handleOk
+            onPressed: _handleOk,
           ),
-        ]
-      )
+        ],
+      ),
     );
 
     final Dialog dialog = Dialog(
@@ -1616,8 +1616,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     Expanded(
                       child: pickerAndActions,
                     ),
-                  ]
-                )
+                  ],
+                ),
               );
             case Orientation.landscape:
               return SizedBox(
@@ -1631,13 +1631,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     Flexible(
                       child: pickerAndActions,
                     ),
-                  ]
-                )
+                  ],
+                ),
               );
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(

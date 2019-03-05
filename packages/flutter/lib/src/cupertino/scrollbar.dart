@@ -68,7 +68,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     );
     _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
   }
 

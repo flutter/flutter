@@ -23,11 +23,11 @@ void main() {
               return SizedBox(
                 key: childKey,
                 width: layoutBuilderSize.width / 2.0,
-                height: layoutBuilderSize.height / 2.0
+                height: layoutBuilderSize.height / 2.0,
               );
-            }
-          )
-        )
+            },
+          ),
+        ),
       )
     );
 
@@ -58,12 +58,12 @@ void main() {
                 return SizedBox(
                   key: childKey,
                   width: childWidth,
-                  height: childHeight
+                  height: childHeight,
                 );
               }
             );
-          }
-        )
+          },
+        ),
       )
     );
 
@@ -105,13 +105,13 @@ void main() {
                   return SizedBox(
                     key: childKey,
                     width: layoutBuilderSize.width,
-                    height: layoutBuilderSize.height
+                    height: layoutBuilderSize.height,
                   );
                 }
-              )
+              ),
             );
           }
-        )
+        ),
       )
     );
 
@@ -141,13 +141,13 @@ void main() {
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(400.0, 300.0)),
-      child: target
+      child: target,
     ));
     expect(built, 1);
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(300.0, 400.0)),
-      child: target
+      child: target,
     ));
     expect(built, 1);
   });
@@ -165,13 +165,13 @@ void main() {
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(400.0, 300.0)),
-      child: target
+      child: target,
     ));
     expect(built, 1);
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(300.0, 400.0)),
-      child: target
+      child: target,
     ));
     expect(built, 2);
   });

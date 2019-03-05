@@ -7,8 +7,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:build_modules/build_modules.dart';
 import 'package:build/build.dart';
 import 'package:package_config/packages_file.dart' as packages_file;
 import 'package:meta/meta.dart';
@@ -16,6 +14,7 @@ import 'package:path/path.dart' as path;
 
 const String _kFlutterDillOutputExtension = '.app.dill';
 const String _kPackagesExtension = '.packages';
+const String _kMultirootScheme = 'org-dartlang-app';
 
 /// A builder which creates a kernel and packages file for a Flutter app.
 ///
@@ -85,27 +84,12 @@ class FlutterKernelBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     // Do not resolve dependencies if this does not correspond to the main
-    // entrypoint.
-    if (!mainPath.contains(buildStep.inputId.path)) {
+    // entrypoint. Do not generate kernel if it has been disabled.
+    if (!mainPath.contains(buildStep.inputId.path) || disabled) {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
     final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
-
-    // Use modules to verify dependencies are sound.
-    final AssetId moduleId = buildStep.inputId.changeExtension(moduleExtension(DartPlatform.flutter));
-    final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
-    try {
-      await module.computeTransitiveDependencies(buildStep);
-    } on MissingModulesException catch (err) {
-      log.shout(err);
-      return;
-    }
-
-    // Do not generate kernel if it has been disabled.
-    if (disabled) {
-      return;
-    }
 
     // Create a scratch space file that can be read/written by the frontend server.
     // It is okay to hard-code these file names because we will copy them back
@@ -122,7 +106,7 @@ class FlutterKernelBuilder implements Builder {
     // Note: currently we only replace the root package with a multiroot
     // scheme. To support codegen on arbitrary packages we will need to do
     // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$multiRootScheme:/');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$_kMultirootScheme:/');
     await packagesFile.writeAsString(newPackagesContents);
     String absoluteMainPath;
     if (path.isAbsolute(mainPath)) {
@@ -167,7 +151,7 @@ class FlutterKernelBuilder implements Builder {
       '--filesystem-root',
       generatedRoot,
       '--filesystem-scheme',
-      multiRootScheme,
+      _kMultirootScheme,
     ]);
     if (extraFrontEndOptions != null) {
       arguments.addAll(extraFrontEndOptions);
@@ -175,7 +159,7 @@ class FlutterKernelBuilder implements Builder {
     final Uri mainUri = _PackageUriMapper.findUri(
       absoluteMainPath,
       packagesFile.path,
-      multiRootScheme,
+      _kMultirootScheme,
       <String>[normalRoot, generatedRoot],
     );
     arguments.add(mainUri?.toString() ?? absoluteMainPath);

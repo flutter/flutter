@@ -61,7 +61,7 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
         Color(0x00000000),
         Color(0x04000000),
         Color(0x12000000),
-        Color(0x38000000)
+        Color(0x38000000),
       ],
       stops: <double>[0.0, 0.3, 0.6, 1.0],
     ),
@@ -114,7 +114,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// A title string for this route.
   ///
-  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// Used to auto-populate [CupertinoNavigationBar] and
   /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
   /// one is not manually supplied.
   final String title;
@@ -272,8 +272,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
     _CupertinoBackGestureController<T> backController;
     backController = _CupertinoBackGestureController<T>(
-      navigator: route.navigator,
-      controller: route.controller,
+      route: route,
+      controller: route.controller, // protected access
       onEnded: () {
         backController?.dispose();
         backController = null;
@@ -576,22 +576,15 @@ class _CupertinoBackGestureController<T> {
   ///
   /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
-    @required this.navigator,
+    @required this.route,
     @required this.controller,
     @required this.onEnded,
-  }) : assert(navigator != null),
-       assert(controller != null),
-       assert(onEnded != null) {
-    navigator.didStartUserGesture();
+  }) : assert(route != null), assert(controller != null), assert(onEnded != null) {
+    route.navigator.didStartUserGesture();
   }
 
-  /// The navigator that this object is controlling.
-  final NavigatorState navigator;
-
-  /// The animation controller that the route uses to drive its transition
-  /// animation.
+  final PageRoute<T> route;
   final AnimationController controller;
-
   final VoidCallback onEnded;
 
   bool _animating = false;
@@ -626,8 +619,10 @@ class _CupertinoBackGestureController<T> {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
       // to determine it.
-      final int droppedPageForwardAnimationTime = min(lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
-                                   _kMaxPageBackAnimationTime);
+      final int droppedPageForwardAnimationTime = min(
+        lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
+        _kMaxPageBackAnimationTime,
+      );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
       final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
@@ -652,14 +647,14 @@ class _CupertinoBackGestureController<T> {
     }
     _animating = false;
     if (status == AnimationStatus.dismissed)
-      navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
+      route.navigator.removeRoute(route); // this will cause the route to get disposed, which will dispose us
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 
   void dispose() {
     if (_animating)
       controller.removeStatusListener(_handleStatusChanged);
-    navigator.didStopUserGesture();
+    route.navigator?.didStopUserGesture();
   }
 }
 

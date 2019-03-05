@@ -266,7 +266,7 @@ class _ScrollableScope extends InheritedWidget {
     Key key,
     @required this.scrollable,
     @required this.position,
-    @required Widget child
+    @required Widget child,
   }) : assert(scrollable != null),
        assert(child != null),
        super(key: key, child: child);
@@ -595,7 +595,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.position,
     @required this.allowImplicitScrolling,
     @required this.semanticChildCount,
-    Widget child
+    Widget child,
   }) : assert(position != null),
        super(key: key, child: child);
 

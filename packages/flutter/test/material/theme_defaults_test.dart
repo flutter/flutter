@@ -20,7 +20,7 @@ void main() {
             child: RaisedButton(
               onPressed: () { }, // button.enabled == true
               child: const Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -48,7 +48,7 @@ void main() {
             child: RaisedButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -78,7 +78,7 @@ void main() {
             child: FlatButton(
               onPressed: () { }, // button.enabled == true
               child: const Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -106,7 +106,7 @@ void main() {
             child: FlatButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -140,7 +140,7 @@ void main() {
               // elevation is animated to 2.0.
               highlightElevation: 2.0,
               child: const Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -167,7 +167,7 @@ void main() {
             child: OutlineButton(
               onPressed: () { }, // button.enabled == true
               child: const Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -194,7 +194,7 @@ void main() {
             child: OutlineButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
-            )
+            ),
           ),
         ),
       );
@@ -227,7 +227,7 @@ void main() {
               child: FloatingActionButton(
                 onPressed: () { }, // button.enabled == true
                 child: const Icon(Icons.add),
-              )
+              ),
           ),
         ),
       );
@@ -254,7 +254,7 @@ void main() {
               child: FloatingActionButton(
                 onPressed: null, // button.enabled == false
                 child: Icon(Icons.add),
-              )
+              ),
           ),
         ),
       );

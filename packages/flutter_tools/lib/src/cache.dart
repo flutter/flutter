@@ -622,7 +622,7 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
   r'>'.codeUnitAt(0): '@gt@'.codeUnits,
   r'"'.codeUnitAt(0): '@q@'.codeUnits,
   r'|'.codeUnitAt(0): '@pip@'.codeUnits,
-  r'?'.codeUnitAt(0): '@ques@'.codeUnits
+  r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
 
 /// Given a name containing slashes, colons, and backslashes, expand it into

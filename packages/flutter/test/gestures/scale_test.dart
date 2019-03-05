@@ -220,6 +220,101 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('Rejects scale gestures from unallowed device kinds', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+
+    bool didStartScale = false;
+    scale.onStart = (ScaleStartDetails details) {
+      didStartScale = true;
+    };
+
+    double updatedScale;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedScale = details.scale;
+    };
+
+    final TestPointer mousePointer = TestPointer(1, PointerDeviceKind.mouse);
+
+    final PointerDownEvent down = mousePointer.down(const Offset(0.0, 0.0));
+    scale.addPointer(down);
+    tester.closeArena(1);
+
+    // One-finger panning
+    tester.route(down);
+    expect(didStartScale, isFalse);
+    expect(updatedScale, isNull);
+
+    // Using a mouse, the scale gesture shouldn't even start.
+    tester.route(mousePointer.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isFalse);
+    expect(updatedScale, isNull);
+
+    scale.dispose();
+  });
+
+  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+
+    bool didStartScale = false;
+    Offset updatedFocalPoint;
+    scale.onStart = (ScaleStartDetails details) {
+      didStartScale = true;
+      updatedFocalPoint = details.focalPoint;
+    };
+
+    double updatedScale;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedScale = details.scale;
+      updatedFocalPoint = details.focalPoint;
+    };
+
+    bool didEndScale = false;
+    scale.onEnd = (ScaleEndDetails details) {
+      didEndScale = true;
+    };
+
+    final TestPointer touchPointer = TestPointer(1, PointerDeviceKind.touch);
+
+    final PointerDownEvent down = touchPointer.down(const Offset(0.0, 0.0));
+    scale.addPointer(down);
+    tester.closeArena(1);
+
+    // One-finger panning
+    tester.route(down);
+    expect(didStartScale, isTrue);
+    didStartScale = false;
+    expect(updatedScale, isNull);
+    expect(updatedFocalPoint, const Offset(0.0, 0.0));
+    expect(didEndScale, isFalse);
+
+    // The gesture can start using one touch finger.
+    tester.route(touchPointer.move(const Offset(20.0, 30.0)));
+    expect(updatedFocalPoint, const Offset(20.0, 30.0));
+    updatedFocalPoint = null;
+    expect(updatedScale, 1.0);
+    updatedScale = null;
+    expect(didEndScale, isFalse);
+
+    // Two-finger scaling
+    final TestPointer mousePointer = TestPointer(2, PointerDeviceKind.mouse);
+    final PointerDownEvent down2 = mousePointer.down(const Offset(10.0, 20.0));
+    scale.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+
+    // Mouse-generated events are ignored.
+    expect(didEndScale, isFalse);
+    expect(updatedScale, isNull);
+    expect(didStartScale, isFalse);
+
+    // Zoom in using a mouse doesn't work either.
+    tester.route(mousePointer.move(const Offset(0.0, 10.0)));
+    expect(updatedScale, isNull);
+    expect(didEndScale, isFalse);
+
+    scale.dispose();
+  });
+
   testGesture('Scale gesture competes with drag', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();

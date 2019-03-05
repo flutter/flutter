@@ -431,7 +431,7 @@ class DayPicker extends StatelessWidget {
           itemStyle = themeData.accentTextTheme.body2;
           decoration = BoxDecoration(
             color: themeData.accentColor,
-            shape: BoxShape.circle
+            shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
@@ -573,7 +573,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
     // Setup the fade animation for chevrons
     _chevronOpacityController = AnimationController(
-      duration: const Duration(milliseconds: 250), vsync: this
+      duration: const Duration(milliseconds: 250), vsync: this,
     );
     _chevronOpacityAnimation = _chevronOpacityController.drive(_chevronOpacityTween);
   }
@@ -1072,7 +1072,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(

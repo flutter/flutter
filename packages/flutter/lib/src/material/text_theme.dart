@@ -16,7 +16,7 @@ import 'typography.dart';
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
 ///
-/// The Material Design typography scheme was signficantly changed in the
+/// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
 /// (https://material.io/design/typography).
 ///
@@ -43,7 +43,7 @@ import 'typography.dart';
 ///
 /// The [TextTheme] API is based on the original material (2014)
 /// design spec, which used different text style names. For backwards
-/// compatability's sake, this API continues to use the original
+/// compatibility's sake, this API continues to use the original
 /// names. The table below should help with understanding the API in
 /// terms of the 2018 material spec.
 ///

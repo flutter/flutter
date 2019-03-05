@@ -37,7 +37,7 @@ void main() {
       daemon = Daemon(
         commands.stream,
         responses.add,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -101,7 +101,7 @@ void main() {
       daemon = Daemon(
         commands.stream,
         responses.add,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then<void>((int code) async {
@@ -148,8 +148,8 @@ void main() {
         'id': 0,
         'method': 'app.callServiceExtension',
         'params': <String, String> {
-          'methodName': 'ext.flutter.debugPaint'
-        }
+          'methodName': 'ext.flutter.debugPaint',
+        },
       });
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
@@ -185,7 +185,7 @@ void main() {
       daemon = Daemon(
         commands.stream,
         responses.add,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -222,7 +222,7 @@ void main() {
       daemon = Daemon(
           commands.stream,
           responses.add,
-          notifyingLogger: notifyingLogger
+          notifyingLogger: notifyingLogger,
       );
 
       final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
@@ -255,7 +255,7 @@ void main() {
         commands.stream,
         responses.add,
         daemonCommand: command,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'emulator.launch' });
@@ -272,7 +272,7 @@ void main() {
       daemon = Daemon(
         commands.stream,
         responses.add,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -287,15 +287,15 @@ void main() {
     test('OperationResult', () {
       expect(
         jsonEncodeObject(OperationResult.ok),
-        '{"code":0,"message":""}'
+        '{"code":0,"message":""}',
       );
       expect(
         jsonEncodeObject(OperationResult(1, 'foo')),
-        '{"code":1,"message":"foo"}'
+        '{"code":1,"message":"foo"}',
       );
       expect(
         jsonEncodeObject(OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
-        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}'
+        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}',
       );
     });
   });

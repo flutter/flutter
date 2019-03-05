@@ -22,7 +22,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides noop method implementations.
+/// When used as a mixin, provides no-op method implementations.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
@@ -298,7 +298,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             // This is defined to return a STRING, not a boolean.
             // Devtools, the Intellij plugin, and the flutter tool all depend
             // on it returning a string and not a boolean.
-            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+            'enabled': _needToReportFirstFrame ? 'false' : 'true',
           };
         },
       );
@@ -336,7 +336,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
               return Future<void>.value();
             WidgetsApp.debugShowWidgetInspectorOverride = value;
             return _forceRebuild();
-          }
+          },
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
@@ -732,7 +732,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: rootWidget
+      child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
 
@@ -809,7 +809,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   RenderObjectToWidgetAdapter({
     this.child,
     this.container,
-    this.debugShortDescription
+    this.debugShortDescription,
   }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
@@ -937,7 +937,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: 'attaching to the render tree'
+        context: 'attaching to the render tree',
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

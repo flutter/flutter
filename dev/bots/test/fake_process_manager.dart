@@ -103,7 +103,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
     when(runSync(
       any,
       environment: anyNamed('environment'),
-      workingDirectory: anyNamed('workingDirectory')
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextResultSync);
 
     when(runSync(any)).thenAnswer(_nextResultSync);

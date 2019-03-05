@@ -65,7 +65,7 @@ void main() {
       end: RelativeRect.fromRect(
         Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
         Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
-      )
+      ),
     );
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 10),

@@ -432,7 +432,7 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-        'a.txt', 'b.txt'
+        'a.txt', 'b.txt',
       ]));
       devFS.assetPathsToEvict.clear();
       expect(report.syncedBytes, 22);

@@ -56,7 +56,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                             child: const Text('Cupertino Button'),
                             onPressed: () {
                               setState(() { _pressedCount += 1; });
-                            }
+                            },
                           ),
                           const CupertinoButton(
                             child: Text('Disabled'),
@@ -70,7 +70,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                       child: const Text('With Background'),
                       onPressed: () {
                         setState(() { _pressedCount += 1; });
-                      }
+                      },
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     const CupertinoButton.filled(
@@ -83,7 +83,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

@@ -81,7 +81,7 @@ void main() {
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
-      TextDecoration.lineThrough
+      TextDecoration.lineThrough,
     ]);
 
     final Typography typography = Typography(platform: TargetPlatform.android);

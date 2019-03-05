@@ -444,9 +444,9 @@ class TextStyle extends Diagnosticable {
   /// This property is rarely set. Typically the locale used to select
   /// region-specific glyphs is defined by the text widget's [BuildContext]
   /// using `Localizations.localeOf(context)`. For example [RichText] defines
-  /// its locale this way. However, a rich text widget's [TextSpan]s could specify
-  /// text styles with different explicit locales in order to select different
-  /// region-specifc glyphs for each text span.
+  /// its locale this way. However, a rich text widget's [TextSpan]s could
+  /// specify text styles with different explicit locales in order to select
+  /// different region-specific glyphs for each text span.
   final Locale locale;
 
   /// The paint drawn as a foreground for the text.
@@ -990,7 +990,7 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
-      shadows
+      shadows,
     );
   }
 
