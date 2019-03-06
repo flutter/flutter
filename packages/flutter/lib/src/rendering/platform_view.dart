@@ -301,11 +301,8 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
     assert(viewController != null);
-    final bool needsSemantics = _viewController.id != viewController.id;
     _viewController = viewController;
     markNeedsPaint();
-    if (needsSemantics) {
-      markNeedsSemanticsUpdate();
     }
   }
 
@@ -391,14 +388,6 @@ class RenderUiKitView extends RenderBox {
       _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
-  }
-
-  @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-
-    config.isSemanticBoundary = true;
-    config.platformViewId = _viewController.id;
   }
 
   @override
