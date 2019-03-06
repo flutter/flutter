@@ -1120,7 +1120,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   void didUpdateWidget(CupertinoTimerPicker oldWidget) {
-    final bool controllersEqual = widget.controller == oldWidget.controller;
+    final bool controllersEqual = widget?.controller == oldWidget?.controller;
     if(widget.controller != null && !controllersEqual)
       timerController = widget.controller;
 
