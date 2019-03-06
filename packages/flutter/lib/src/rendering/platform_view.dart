@@ -304,8 +304,9 @@ class RenderUiKitView extends RenderBox {
     final bool needsSemantics = _viewController.id != viewController.id;
     _viewController = viewController;
     markNeedsPaint();
-    if (needsSemantics)
+    if (needsSemantics) {
       markNeedsSemanticsUpdate();
+    }
   }
 
   /// How to behave during hit testing.
@@ -394,7 +395,6 @@ class RenderUiKitView extends RenderBox {
 
   @override
   void describeSemanticsConfiguration (SemanticsConfiguration config) {
-    print('fff');
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = true;
