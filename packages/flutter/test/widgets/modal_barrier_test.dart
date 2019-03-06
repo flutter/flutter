@@ -217,23 +217,23 @@ void main() {
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.pushNamed(context, '/modal');
-    },
-    child: Container(
-      child: const Text('X'),
-    ),
-  );
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/modal');
+      },
+      child: Container(
+        child: const Text('X'),
+      ),
+    );
   }
 }
 
 class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return const ModalBarrier(
-    key: ValueKey<String>('barrier'),
-    dismissible: true,
-  );
+    return const ModalBarrier(
+      key: ValueKey<String>('barrier'),
+      dismissible: true,
+    );
   }
 }
