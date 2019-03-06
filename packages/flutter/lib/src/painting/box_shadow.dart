@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic_types.dart';
 import 'debug.dart';
@@ -34,10 +35,15 @@ class BoxShadow extends ui.Shadow {
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
     this.spreadRadius = 0.0,
-  }) : super(color: color, offset: offset, blurRadius: blurRadius);
+    this.padding = const EdgeInsets.only()
+  }) : assert(padding != null, 'Text shadow padding was null.'),
+        super(color: color, offset: offset, blurRadius: blurRadius);
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
+
+  /// The displacement of the shadow into inside element.
+  final EdgeInsets padding;
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -124,12 +130,13 @@ class BoxShadow extends ui.Shadow {
     return color == typedOther.color &&
            offset == typedOther.offset &&
            blurRadius == typedOther.blurRadius &&
-           spreadRadius == typedOther.spreadRadius;
+           spreadRadius == typedOther.spreadRadius &&
+           padding == typedOther.padding;
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
+  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius, padding);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
+  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius, $padding)';
 }

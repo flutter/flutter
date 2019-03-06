@@ -386,7 +386,13 @@ class _BoxDecorationPainter extends BoxPainter {
       return;
     for (BoxShadow boxShadow in _decoration.boxShadow) {
       final Paint paint = boxShadow.toPaint();
-      final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      final EdgeInsets padding = boxShadow.padding;
+      final Rect bounds = Rect.fromLTRB(
+          rect.left + padding.left,
+          rect.top + padding.top,
+          rect.right - padding.right,
+          rect.bottom - padding.bottom).shift(boxShadow.offset)
+          .inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint, textDirection);
     }
   }
