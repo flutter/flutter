@@ -47,7 +47,7 @@ class HomePage extends StatelessWidget {
             onPressed: (){
               Navigator.pushNamed(context, kCubicBezierRouteName);
             },
-          )
+          ),
         ],
       ),
     );

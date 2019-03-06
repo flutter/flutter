@@ -322,7 +322,7 @@ class FlutterDriver {
         message: 'Flutter Driver extension is taking a long time to become available. '
                  'Ensure your test app (often "lib/main.dart") imports '
                  '"package:flutter_driver/driver_extension.dart" and '
-                 'calls enableFlutterDriverExtension() as the first call in main().'
+                 'calls enableFlutterDriverExtension() as the first call in main().',
       );
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
                isolate.pauseEvent is VMPauseBreakpointEvent ||
@@ -725,7 +725,7 @@ class FlutterDriver {
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
-          'recordedStreams': _timelineStreamsToString(streams)
+          'recordedStreams': _timelineStreamsToString(streams),
         }),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to start tracing...',
@@ -797,7 +797,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<void> clearTimeline({
-    Duration timeout = _kUnusuallyLongTimeout
+    Duration timeout = _kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {

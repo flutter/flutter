@@ -278,4 +278,44 @@ void main() {
       longPressDrag.dispose();
     });
   });
+
+  testGesture('Can filter long press based on device kind', (GestureTester tester) {
+    final LongPressGestureRecognizer mouseLongPress = LongPressGestureRecognizer(kind: PointerDeviceKind.mouse);
+
+    bool mouseLongPressDown = false;
+    mouseLongPress.onLongPress = () {
+      mouseLongPressDown = true;
+    };
+
+    const PointerDownEvent mouseDown = PointerDownEvent(
+      pointer: 5,
+      position: Offset(10, 10),
+      kind: PointerDeviceKind.mouse,
+    );
+    const PointerDownEvent touchDown = PointerDownEvent(
+      pointer: 5,
+      position: Offset(10, 10),
+      kind: PointerDeviceKind.touch,
+    );
+
+    // Touch events shouldn't be recognized.
+    mouseLongPress.addPointer(touchDown);
+    tester.closeArena(5);
+    expect(mouseLongPressDown, isFalse);
+    tester.route(touchDown);
+    expect(mouseLongPressDown, isFalse);
+    tester.async.elapse(const Duration(seconds: 2));
+    expect(mouseLongPressDown, isFalse);
+
+    // Mouse events are still recognized.
+    mouseLongPress.addPointer(mouseDown);
+    tester.closeArena(5);
+    expect(mouseLongPressDown, isFalse);
+    tester.route(mouseDown);
+    expect(mouseLongPressDown, isFalse);
+    tester.async.elapse(const Duration(seconds: 2));
+    expect(mouseLongPressDown, isTrue);
+
+    mouseLongPress.dispose();
+  });
 }

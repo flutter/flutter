@@ -1639,7 +1639,7 @@ void main() {
         of: find.byType(RawChip),
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
-        })
+        }),
       )
     );
     const Color selectScrimColor = Color(0x60191919);
@@ -1648,5 +1648,20 @@ void main() {
     ], excludes: <Offset>[
       const Offset(4, 4),
     ]));
+  });
+
+  testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28646
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: (){},
+            label: const Text('action chip'),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(InkWell), findsOneWidget);
   });
 }

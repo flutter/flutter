@@ -332,7 +332,7 @@ class _ImageProviderResolver {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(
       state.context,
-      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
     ));
     assert(_imageStream != null);
 

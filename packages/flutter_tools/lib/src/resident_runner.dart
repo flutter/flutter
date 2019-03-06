@@ -142,21 +142,21 @@ class FlutterDevice {
   Future<Uri> setupDevFS(
     String fsName,
     Directory rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmServices[0],
       fsName,
       rootDirectory,
-      packagesFilePath: packagesFilePath
+      packagesFilePath: packagesFilePath,
     );
     return devFS.create();
   }
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause = false
+    bool pause = false,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
@@ -165,7 +165,7 @@ class FlutterDevice {
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
         rootLibUri: deviceEntryUri,
-        packagesUri: devicePackagesUri
+        packagesUri: devicePackagesUri,
       );
       reports.add(report);
     }
@@ -287,7 +287,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: hotRunner.applicationBinary
+      applicationBinary: hotRunner.applicationBinary,
     );
 
     if (package == null) {
@@ -341,7 +341,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: coldRunner.applicationBinary
+      applicationBinary: coldRunner.applicationBinary,
     );
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -749,7 +749,7 @@ abstract class ResidentRunner {
         // futures either because they just print to logger and is not critical.
         unawaited(service.done.then<void>(
           _serviceProtocolDone,
-          onError: _serviceProtocolError
+          onError: _serviceProtocolError,
         ).whenComplete(_serviceDisconnected));
       }
     }

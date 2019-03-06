@@ -54,7 +54,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': false, }
+            <String, dynamic>{ 'message': false, },
           ],
         },
       }), false);
@@ -114,7 +114,7 @@ void main() {
       invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
-    when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
+    when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
 
     setUp(() {
@@ -129,7 +129,7 @@ void main() {
       when(mockDevice.supportsHotRestart).thenReturn(false);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       // Expect hot restart failed.
@@ -189,7 +189,7 @@ void main() {
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       expect(result.isOk, false);
@@ -206,7 +206,7 @@ void main() {
       when(mockDevice.supportsHotRestart).thenReturn(true);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       // Expect hot restart successful.
@@ -232,7 +232,7 @@ void main() {
         when(mockDevice.supportsHotRestart).thenReturn(true);
         when(mockDevice.supportsStopApp).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
         ];
         await HotRunner(devices).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
@@ -247,7 +247,7 @@ void main() {
         when(mockDevice.supportsHotRestart).thenReturn(true);
         when(mockDevice.supportsStopApp).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
         ];
         await HotRunner(devices).preStop();
         expect(shutdownTestingConfig.shutdownHookCalled, true);

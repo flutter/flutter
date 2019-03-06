@@ -173,7 +173,7 @@ class HotRunner extends ResidentRunner {
           DebugConnectionInfo(
             httpUri: flutterDevices.first.observatoryUris.first,
             wsUri: flutterDevices.first.vmServices.first.wsAddress,
-            baseUri: baseUris.first.toString()
+            baseUri: baseUris.first.toString(),
           )
         );
       }
@@ -243,7 +243,7 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true
+    bool shouldBuild = true,
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -305,7 +305,7 @@ class HotRunner extends ResidentRunner {
       final Uri uri = await device.setupDevFS(
         fsName,
         fs.directory(projectRootPath),
-        packagesFilePath: packagesFilePath
+        packagesFilePath: packagesFilePath,
       );
       devFSUris.add(uri);
     }
@@ -621,7 +621,7 @@ class HotRunner extends ResidentRunner {
         final Completer<DeviceReloadReport> completer = Completer<DeviceReloadReport>();
         allReportsFutures.add(completer.future);
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: pause
+          entryPath, pause: pause,
         );
         unawaited(Future.wait(reportFutures).then(
           (List<Map<String, dynamic>> reports) async {

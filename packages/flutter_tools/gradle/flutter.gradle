@@ -285,22 +285,6 @@ class FlutterPlugin implements Plugin<Project> {
         return "release"
     }
 
-    /**
-     * Returns a Flutter Jar file path suitable for the specified Android buildMode.
-     */
-    private File flutterJarFor(buildMode) {
-        if (buildMode == "profile") {
-            return profileFlutterJar
-        } else if (buildMode == "dynamicProfile") {
-            return dynamicProfileFlutterJar
-        } else if (buildMode == "dynamicRelease") {
-            return dynamicReleaseFlutterJar
-        } else if (buildMode == "debug") {
-            return debugFlutterJar
-        }
-        return releaseFlutterJar
-    }
-
     private void addFlutterTask(Project project) {
         if (project.state.failure) {
             return
@@ -412,14 +396,6 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
-
-                    File chosenFlutterJar = flutterJarFor(flutterBuildMode)
-                    Task copySharedFlutterAssetsTask = project.tasks.create(name: "copySharedFlutterAssets${variant.name.capitalize()}", type: Copy) {
-                        from(project.zipTree(chosenFlutterJar))
-                        include 'assets/flutter_shared/*'
-                        into "src/${variant.name}"
-                    }
-                    dependsOn copySharedFlutterAssetsTask
                 } else {
                     dependsOn variant.mergeAssets
                     dependsOn "clean${variant.mergeAssets.name.capitalize()}"

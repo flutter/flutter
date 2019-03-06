@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          drawer: Drawer()
+          drawer: Drawer(),
         ),
       ),
     );
@@ -88,7 +88,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-            drawer: Drawer()
+            drawer: Drawer(),
         ),
       ),
     );

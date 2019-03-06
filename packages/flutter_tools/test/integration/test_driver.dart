@@ -502,7 +502,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final dynamic hotReloadResponse = await _sendRequest(
       'app.restart',
-      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause}
+      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
     );
     _debugPrint('${ fullRestart ? "Hot restart" : "Hot reload" } complete.');
 
@@ -565,7 +565,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
       'method': method,
-      'params': params
+      'params': params,
     };
     final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded, topic: '=stdin=>');
@@ -606,7 +606,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
         'test',
         '--machine',
         '-d',
-        'flutter-tester'
+        'flutter-tester',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 

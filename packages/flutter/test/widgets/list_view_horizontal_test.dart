@@ -21,7 +21,7 @@ Widget buildFrame({ bool reverse = false, @required TextDirection textDirection 
           physics: const BouncingScrollPhysics(),
           children: items.map<Widget>((int item) {
             return Container(
-              child: Text('$item')
+              child: Text('$item'),
             );
           }).toList(),
         ),

@@ -87,7 +87,7 @@ void main() {
       Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false
+      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
     });
   });
 }

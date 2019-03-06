@@ -62,7 +62,7 @@ abstract class OperatingSystemUtils {
     const Map<String, String> osNames = <String, String>{
       'macos': 'Mac OS',
       'linux': 'Linux',
-      'windows': 'Windows'
+      'windows': 'Windows',
     };
     final String osName = platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;

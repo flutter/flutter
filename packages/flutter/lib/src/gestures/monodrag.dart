@@ -52,11 +52,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
   /// [dragStartBehavior] must not be null.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   DragGestureRecognizer({
     Object debugOwner,
+    PointerDeviceKind kind,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner);
+       super(debugOwner: debugOwner, kind: kind);
 
   /// Configure the behavior of offsets sent to [onStart].
   ///
@@ -147,7 +150,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   @override
-  void addPointer(PointerEvent event) {
+  void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _DragState.ready) {
@@ -296,7 +299,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
-  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  VerticalDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -330,7 +338,12 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
-  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  HorizontalDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

@@ -35,7 +35,7 @@ void main() {
       expect(linuxWorkflow.canLaunchDevices, true);
       expect(linuxWorkflow.canListDevices, true);
     }, overrides: <Type, Generator>{
-      Platform: () => linuxWithFde
+      Platform: () => linuxWithFde,
     });
   });
 }

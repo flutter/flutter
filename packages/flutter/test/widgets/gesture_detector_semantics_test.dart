@@ -28,7 +28,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown])
+        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]),
     );
 
     final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -62,7 +62,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight])
+        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]),
     );
 
     final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;

@@ -70,7 +70,7 @@ void testWidgets(
   String description,
   WidgetTesterCallback callback, {
   bool skip = false,
-  test_package.Timeout timeout
+  test_package.Timeout timeout,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -87,7 +87,7 @@ void testWidgets(
       );
     },
     skip: skip,
-    timeout: timeout
+    timeout: timeout,
   );
 }
 
@@ -551,7 +551,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_TestTicker>();
+    _tickers ??= <_TestTicker>{};
     final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;

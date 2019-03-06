@@ -83,7 +83,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  final Set<FormFieldState<dynamic>> _fields = Set<FormFieldState<dynamic>>();
+  final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -162,7 +162,7 @@ class _FormScope extends InheritedWidget {
     Key key,
     Widget child,
     FormState formState,
-    int generation
+    int generation,
   }) : _formState = formState,
        _generation = generation,
        super(key: key, child: child);

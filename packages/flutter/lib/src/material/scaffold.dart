@@ -220,7 +220,7 @@ class ScaffoldGeometry {
     final Rect scaledButton = Rect.lerp(
       floatingActionButtonArea.center & Size.zero,
       floatingActionButtonArea,
-      scaleFactor
+      scaleFactor,
     );
     return copyWith(floatingActionButtonArea: scaledButton);
   }
@@ -1368,7 +1368,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         assert(_snackBars.first == controller);
         hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
       },
-      null // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
+      null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
     setState(() {
       _snackBars.addLast(controller);
@@ -1503,7 +1503,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           });
         }
       },
-      builder: builder
+      builder: builder,
     );
 
     if (isLocalHistoryEntry)
@@ -1855,7 +1855,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               child: SafeArea(
                 top: false,
                 child: ButtonBar(
-                  children: widget.persistentFooterButtons
+                  children: widget.persistentFooterButtons,
                 ),
               ),
             ),
@@ -2008,7 +2008,7 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
-    this.builder
+    this.builder,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
@@ -2053,7 +2053,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
         return Align(
           alignment: AlignmentDirectional.topStart,
           heightFactor: widget.animationController.value,
-          child: child
+          child: child,
         );
       },
       child: Semantics(
@@ -2066,9 +2066,9 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
           animationController: widget.animationController,
           enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
-          builder: widget.builder
-        )
-      )
+          builder: widget.builder,
+        ),
+      ),
     );
   }
 

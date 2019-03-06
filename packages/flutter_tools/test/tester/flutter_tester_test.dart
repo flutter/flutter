@@ -161,7 +161,7 @@ void main() {
 Observatory listening on $observatoryUri
 Hello!
 '''
-              .codeUnits
+              .codeUnits,
         ]));
 
         when(mockKernelCompiler.compile(

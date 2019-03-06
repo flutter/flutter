@@ -143,7 +143,7 @@ class AndroidPointerProperties {
   /// All parameters must not be null.
   const AndroidPointerProperties({
     @required this.id,
-    @required this.toolType
+    @required this.toolType,
   }) : assert(id != null),
        assert(toolType != null);
 
@@ -193,7 +193,7 @@ class AndroidPointerCoords {
     @required this.touchMajor,
     @required this.touchMinor,
     @required this.x,
-    @required this.y
+    @required this.y,
   }) : assert(orientation != null),
        assert(pressure != null),
        assert(size != null),
@@ -280,7 +280,7 @@ class AndroidMotionEvent {
     @required this.deviceId,
     @required this.edgeFlags,
     @required this.source,
-    @required this.flags
+    @required this.flags,
   }) : assert(downTime != null),
        assert(eventTime != null),
        assert(action != null),

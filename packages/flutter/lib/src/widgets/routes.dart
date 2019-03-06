@@ -151,11 +151,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           overlayEntries.first.opaque = false;
         break;
       case AnimationStatus.dismissed:
-        // We might still be the current route if a subclass is controlling the
+        // We might still be an active route if a subclass is controlling the
         // the transition and hits the dismissed status. For example, the iOS
         // back gesture drives this animation to the dismissed status before
-        // popping the navigator.
-        if (!isCurrent) {
+        // removing the route and disposing it.
+        if (!isActive) {
           navigator.finalizeRoute(this);
           assert(overlayEntries.isEmpty);
         }
@@ -237,7 +237,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
               assert(newAnimation.currentTrain == nextRoute._animation);
               _secondaryAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
-            }
+            },
           );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
@@ -535,7 +535,7 @@ class _ModalScopeStatus extends InheritedWidget {
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
-    @required Widget child
+    @required Widget child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),
@@ -1363,7 +1363,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, R route) {
     assert(routeAware != null);
     assert(route != null);
-    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => Set<RouteAware>());
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
     }
