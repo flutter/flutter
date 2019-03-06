@@ -1120,17 +1120,25 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   void didUpdateWidget(CupertinoTimerPicker oldWidget) {
-    if(widget.controller != null && widget.controller != oldWidget.controller)
+    final bool controllersEqual = widget.controller == oldWidget.controller;
+    if(widget.controller != null && !controllersEqual)
       timerController = widget.controller;
 
-    if (widget.controller != oldWidget.controller) {
+    if (!controllersEqual) {
       oldWidget.controller.removeListener(_desiredDurationChanged);
-      widget.controller?.addListener(_desiredDurationChanged);
+      timerController.addListener(_desiredDurationChanged);
       _desiredDurationChanged(animate: false);
     }
 
     super.didUpdateWidget(oldWidget);
   }
+
+  @override
+  void dispose() {
+    timerController.removeListener(_desiredDurationChanged);
+    super.dispose();
+  }
+
 
   // Builds a text label with customized scale factor and font weight.
   Widget _buildLabel(String text) {
