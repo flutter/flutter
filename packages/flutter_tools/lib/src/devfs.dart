@@ -386,20 +386,16 @@ class DevFS {
     this.rootDirectory, {
     String packagesFilePath,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
-  }
+       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
     this._operations,
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _httpWriter = null {
-       _packagesFilePath =
-           packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
-  }
+  }) : _httpWriter = null,
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;

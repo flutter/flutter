@@ -156,7 +156,7 @@ task:
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
-    image: high-sierra-xcode-9.4.1
+    image: mojave-xcode-10.1
   git_fetch_script:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD
