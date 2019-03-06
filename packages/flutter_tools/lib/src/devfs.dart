@@ -403,7 +403,7 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
-  final Set<String> assetPathsToEvict = Set<String>();
+  final Set<String> assetPathsToEvict = <String>{};
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       <Future<Map<String, dynamic>>>[];
@@ -533,7 +533,7 @@ class DevFS {
     // run with no changes is supposed to be fast (considering that it is
     // initiated by user key press).
     final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = Set<Uri>();
+    final Set<Uri> filesUris = <Uri>{};
     for (Uri uri in dirtyEntries.keys.toList()) {
       if (!uri.path.startsWith(assetBuildDirPrefix)) {
         final DevFSContent content = dirtyEntries[uri];

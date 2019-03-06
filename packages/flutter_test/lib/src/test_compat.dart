@@ -365,7 +365,7 @@ class _Reporter {
   String _lastProgressSuffix;
 
   /// The set of all subscriptions to various streams.
-  final Set<StreamSubscription<void>> _subscriptions = Set<StreamSubscription<void>>();
+  final Set<StreamSubscription<void>> _subscriptions = <StreamSubscription<void>>{};
 
   /// A callback called when the engine begins running [liveTest].
   void _onTestStarted(LiveTest liveTest) {
