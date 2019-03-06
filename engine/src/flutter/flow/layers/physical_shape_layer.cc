@@ -9,6 +9,9 @@
 
 namespace flow {
 
+const SkScalar kLightHeight = 600;
+const SkScalar kLightRadius = 800;
+
 PhysicalShapeLayer::PhysicalShapeLayer(Clip clip_behavior)
     : isRect_(false), clip_behavior_(clip_behavior) {}
 
@@ -51,11 +54,36 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
     set_needs_system_composite(true);
 #else
     // Add some margin to the paint bounds to leave space for the shadow.
-    // The margin is hardcoded to an arbitrary maximum for now because Skia
-    // doesn't provide a way to calculate it.  We fill this whole region
-    // and clip children to it so we don't need to join the child paint bounds.
+    // We fill this whole region and clip children to it so we don't need to
+    // join the child paint bounds.
+    // The offset is calculated as follows:
+
+    //                   .--                            (kLightRadius = 800)
+    //                 -----                            (light)
+    //                   |                              (kLightHeight = 600)
+    //             -------------                        (layer)
+    //                   |
+    //                   |                              (elevation)
+    //                   |
+    // ------------------------------------------------ (canvas)
+    //  -----------                                     (extent of shadow)
+    //
+    // E = lx        }           x = (r + w/2)/h
+    //                } =>
+    // r + w/2 = hx  }           E = (l/h)(r + w/2)
+    //
+    // Where: E = extent of shadow
+    //        l = elevation of layer
+    //        r = radius of the light source
+    //        w = width of the layer
+    //        h = light height
+    //        x = multiplier for elevation to extent
     SkRect bounds(path_.getBounds());
-    bounds.outset(20.0, 20.0);
+    double ex = (kLightRadius * device_pixel_ratio_ + bounds.width() * 0.5) /
+                kLightHeight;
+    double ey = (kLightRadius * device_pixel_ratio_ + bounds.height() * 0.5) /
+                kLightHeight;
+    bounds.outset(elevation_ * ex, elevation_ * ey);
     set_paint_bounds(bounds);
 #endif  // defined(OS_FUCHSIA)
   }
@@ -145,8 +173,6 @@ void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,
                                     SkScalar dpr) {
   const SkScalar kAmbientAlpha = 0.039f;
   const SkScalar kSpotAlpha = 0.25f;
-  const SkScalar kLightHeight = 600;
-  const SkScalar kLightRadius = 800;
 
   SkShadowFlags flags = transparentOccluder
                             ? SkShadowFlags::kTransparentOccluder_ShadowFlag
