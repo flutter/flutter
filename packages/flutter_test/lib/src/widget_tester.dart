@@ -551,7 +551,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_TestTicker>();
+    _tickers ??= <_TestTicker>{};
     final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;
