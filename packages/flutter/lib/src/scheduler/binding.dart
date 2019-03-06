@@ -226,12 +226,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
 
-  /// Initializes the [lifecycleState] with the initialLifecycleState from the
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
   /// window.
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// initialLifecycleState may already be stale and it no longer makes sense
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
   /// to use the initial state at dart vm startup as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
