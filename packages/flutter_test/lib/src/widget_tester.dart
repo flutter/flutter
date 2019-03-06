@@ -70,7 +70,7 @@ void testWidgets(
   String description,
   WidgetTesterCallback callback, {
   bool skip = false,
-  test_package.Timeout timeout
+  test_package.Timeout timeout,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -87,7 +87,7 @@ void testWidgets(
       );
     },
     skip: skip,
-    timeout: timeout
+    timeout: timeout,
   );
 }
 
@@ -297,9 +297,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     dynamic caughtException;
     void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
 
-    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
-    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
     await idle();
 
     if (caughtException != null) {

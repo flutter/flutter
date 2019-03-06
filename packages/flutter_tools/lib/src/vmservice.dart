@@ -206,7 +206,7 @@ class VMService {
 
       _peer.sendNotification('_registerService', <String, String>{
         'service': 'compileExpression',
-        'alias': 'Flutter Tools'
+        'alias': 'Flutter Tools',
       });
     }
   }
@@ -620,7 +620,12 @@ class ServiceEvent extends ServiceObject {
       _extensionKind = map['extensionKind'];
       _extensionData = map['extensionData'];
     }
-    _timelineEvents = map['timelineEvents'];
+    // map['timelineEvents'] is List<dynamic> which can't be assigned to
+    // List<Map<String, dynamic>> directly. Unfortunately, we previously didn't
+    // catch this exception because json_rpc_2 is hiding all these exceptions
+    // on a Stream.
+    final List<dynamic> dynamicList = map['timelineEvents'];
+    _timelineEvents = dynamicList?.cast<Map<String, dynamic>>();
   }
 
   bool get isPauseEvent {
@@ -880,7 +885,7 @@ class VM extends ServiceObjectOwner {
   Future<Map<String, dynamic>> writeDevFSFile(
     String fsName, {
     @required String path,
-    @required List<int> fileContents
+    @required List<int> fileContents,
   }) {
     assert(path != null);
     assert(fileContents != null);
@@ -927,7 +932,7 @@ class VM extends ServiceObjectOwner {
         'viewId': viewId,
         'mainScript': main.toString(),
         'packagesFile': packages.toString(),
-        'assetDirectory': assetsDirectory.toString()
+        'assetDirectory': assetsDirectory.toString(),
     });
   }
 
@@ -1104,7 +1109,7 @@ class Isolate extends ServiceObjectOwner {
     // Inject the 'isolateId' parameter.
     if (params == null) {
       params = <String, dynamic>{
-        'isolateId': id
+        'isolateId': id,
       };
     } else {
       params['isolateId'] = id;
@@ -1149,7 +1154,7 @@ class Isolate extends ServiceObjectOwner {
   }) async {
     try {
       final Map<String, dynamic> arguments = <String, dynamic>{
-        'pause': pause
+        'pause': pause,
       };
       if (rootLibUri != null) {
         arguments['rootLibUri'] = rootLibUri.toString();
@@ -1293,7 +1298,8 @@ class Isolate extends ServiceObjectOwner {
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
-    return result['enabled'] == 'true';
+    // result might be null when the service extension is not initialized
+    return result != null && result['enabled'] == 'true';
   }
 
   Future<Map<String, dynamic>> uiWindowScheduleFrame() {
@@ -1305,7 +1311,7 @@ class Isolate extends ServiceObjectOwner {
       'ext.flutter.evict',
       params: <String, dynamic>{
         'value': assetPath,
-      }
+      },
     );
   }
 
@@ -1445,7 +1451,7 @@ class FlutterView extends ServiceObject {
         params: <String, dynamic>{
           'isolateId': _uiIsolate.id,
           'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false)
+          'assetDirectory': assetsDirectory.toFilePath(windows: false),
         });
   }
 

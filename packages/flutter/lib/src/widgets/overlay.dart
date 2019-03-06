@@ -202,7 +202,7 @@ class Overlay extends StatefulWidget {
   /// created by the [WidgetsApp] or the [MaterialApp] for the application.
   const Overlay({
     Key key,
-    this.initialEntries = const <OverlayEntry>[]
+    this.initialEntries = const <OverlayEntry>[],
   }) : assert(initialEntries != null),
        super(key: key);
 

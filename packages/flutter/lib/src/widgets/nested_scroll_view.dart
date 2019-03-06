@@ -52,7 +52,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// in the opposite direction (e.g. allowing the user to swipe horizontally
 /// between the pages represented by the tabs, while the list scrolls
 /// vertically), then any list inside that [TabBarView] would not interact with
-/// the outer [ScrollView]. For example, flinginsg the inner list to scroll to
+/// the outer [ScrollView]. For example, flinging the inner list to scroll to
 /// the top would not cause a collapsed [SliverAppBar] in the outer [ScrollView]
 /// to expand.
 ///
@@ -189,7 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -371,7 +371,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,

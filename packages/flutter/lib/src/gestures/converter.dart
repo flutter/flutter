@@ -61,7 +61,7 @@ class PointerEventConverter {
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
     return _pointers.putIfAbsent(
       datum.device,
-      () => _PointerState(position)
+      () => _PointerState(position),
     );
   }
 
@@ -81,6 +81,7 @@ class PointerEventConverter {
       final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
+      assert(datum.change != null);
       if (datum.signalKind == null || datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
@@ -100,7 +101,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.hover:
@@ -122,7 +123,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt
+                tilt: datum.tilt,
               );
             }
             final Offset offset = position - state.lastPosition;
@@ -145,7 +146,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
             state.lastPosition = position;
             break;
@@ -168,7 +169,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt
+                tilt: datum.tilt,
               );
             }
             if (state.lastPosition != position) {
@@ -220,7 +221,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.move:
@@ -314,7 +315,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt
+                tilt: datum.tilt,
               );
             } else {
               yield PointerCancelEvent(
@@ -335,7 +336,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt
+                tilt: datum.tilt,
               );
             }
             break;
@@ -361,7 +362,7 @@ class PointerEventConverter {
                 radiusMin: radiusMin,
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
-                tilt: datum.tilt
+                tilt: datum.tilt,
               );
             }
             _pointers.remove(datum.device);
@@ -374,7 +375,7 @@ class PointerEventConverter {
               pressureMax: datum.pressureMax,
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
-              radiusMax: radiusMax
+              radiusMax: radiusMax,
             );
             break;
         }

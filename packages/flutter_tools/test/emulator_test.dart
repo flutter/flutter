@@ -53,7 +53,7 @@ void main() {
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
-        emulator3
+        emulator3,
       ];
       final TestEmulatorManager testEmulatorManager =
           TestEmulatorManager(emulators);
@@ -204,7 +204,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding
+    Encoding stderrEncoding = systemEncoding,
   }) {
     final String program = command[0];
     final List<String> args = command.sublist(1);

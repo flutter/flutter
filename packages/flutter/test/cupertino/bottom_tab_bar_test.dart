@@ -158,7 +158,7 @@ void main() {
 
     final Image image = tester.widget(find.descendant(
       of: find.widgetWithText(GestureDetector, 'Tab 2'),
-      matching: find.byType(Image)
+      matching: find.byType(Image),
     ));
 
     expect(image.color, const Color(0xFF123456));

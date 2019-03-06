@@ -16,9 +16,9 @@ void main() {
         child: IconTheme(
           data: IconThemeData(
             color: Color(0xFF666666),
-            opacity: 0.5
+            opacity: 0.5,
           ),
-          child: Icon(IconData(0xd0a0, fontFamily: 'Arial'))
+          child: Icon(IconData(0xd0a0, fontFamily: 'Arial')),
         ),
       ),
     );

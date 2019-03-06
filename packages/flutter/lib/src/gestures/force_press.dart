@@ -116,16 +116,19 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The [interpolation] callback must always return a value in the range 0.0
   /// to 1.0 for values of `pressure` that are between `pressureMin` and
   /// `pressureMax`.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
     Object debugOwner,
+    PointerDeviceKind kind,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
        assert(peakPressure > startPressure),
-       super(debugOwner: debugOwner);
+       super(debugOwner: debugOwner, kind: kind);
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [startPressure]. Consequently, if there were other gesture
@@ -205,13 +208,11 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   _ForceState _state = _ForceState.ready;
 
   @override
-  void addPointer(PointerEvent event) {
-    assert(event.pressureMax >= 1.0);
-    // If the device has a maximum pressure of less than or equal to 1,
-    // indicating a faux pressure sensor on this device or a device without a
-    // pressure sensor (ie. on a non iOS device) we want do not want any
-    // callbacks to be called.
-    if (!(event is PointerUpEvent) && event.pressureMax == 1.0) {
+  void addAllowedPointer(PointerEvent event) {
+    // If the device has a maximum pressure of less than or equal to 1, it
+    // doesn't have touch pressure sensing capabilities. Do not participate
+    // in the gesture arena.
+    if (!(event is PointerUpEvent) && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
       startTrackingPointer(event.pointer);

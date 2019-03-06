@@ -467,7 +467,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName)
+      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }

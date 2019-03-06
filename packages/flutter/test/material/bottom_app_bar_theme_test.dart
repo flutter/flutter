@@ -127,7 +127,7 @@ Widget _withTheme(BottomAppBarTheme theme) {
               ],
             ),
           ),
-        )
+        ),
     ),
   );
 }

@@ -17,7 +17,7 @@ void main() {
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
               child: SizedBox(height: 100.0),
-            )
+            ),
           ),
         ),
       ),
@@ -34,7 +34,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -196,7 +196,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -209,7 +209,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 0.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -248,7 +248,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -261,7 +261,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 6.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -300,7 +300,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -415,7 +415,7 @@ class ShapeListenerState extends State<ShapeListener> {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: widget.child,
-      painter: cache
+      painter: cache,
     );
   }
 

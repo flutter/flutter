@@ -82,7 +82,7 @@ class Scrollable extends StatefulWidget {
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -195,7 +195,7 @@ class Scrollable extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
@@ -267,7 +267,7 @@ class _ScrollableScope extends InheritedWidget {
     Key key,
     @required this.scrollable,
     @required this.position,
-    @required Widget child
+    @required Widget child,
   }) : assert(scrollable != null),
        assert(child != null),
        super(key: key, child: child);
@@ -628,7 +628,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.position,
     @required this.allowImplicitScrolling,
     @required this.semanticChildCount,
-    Widget child
+    Widget child,
   }) : assert(position != null),
        super(key: key, child: child);
 

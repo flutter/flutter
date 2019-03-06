@@ -40,12 +40,12 @@ class _TimePickerLauncher extends StatelessWidget {
                     context: context,
                     initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
-                }
+                },
               );
             }
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }

@@ -91,7 +91,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(value)
+      content: Text(value),
     ));
   }
 
@@ -251,7 +251,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
-                    suffixStyle: TextStyle(color: Colors.green)
+                    suffixStyle: TextStyle(color: Colors.green),
                   ),
                   maxLines: 1,
                 ),
@@ -288,7 +288,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 Text(
                   '* indicates required field',
-                  style: Theme.of(context).textTheme.caption
+                  style: Theme.of(context).textTheme.caption,
                 ),
                 const SizedBox(height: 24.0),
               ],
@@ -305,7 +305,7 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   ) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;

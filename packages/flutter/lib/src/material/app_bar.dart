@@ -150,6 +150,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation,
+    this.shape,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
@@ -255,7 +256,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@end-tool}
   final List<Widget> actions;
 
-  /// This widget is stacked behind the toolbar and the tabbar. It's height will
+  /// This widget is stacked behind the toolbar and the tab bar. It's height will
   /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
@@ -285,6 +286,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// if that is also null, the default value is 4, the appropriate elevation
   /// for app bars.
   final double elevation;
+
+  /// The material's shape as well its shadow.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
+  final ShapeBorder shape;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
@@ -325,7 +332,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether this app bar is being displayed at the top of the screen.
   ///
-  /// If true, the appbar's toolbar elements and [bottom] widget will be
+  /// If true, the app bar's toolbar elements and [bottom] widget will be
   /// padded on top by the height of the system status bar. The layout
   /// of the [flexibleSpace] is not affected by the [primary] property.
   final bool primary;
@@ -583,6 +590,7 @@ class _AppBarState extends State<AppBar> {
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
+          shape: widget.shape,
           child: Semantics(
             explicitChildNodes: true,
             child: appBar,
@@ -603,7 +611,7 @@ class _FloatingAppBar extends StatefulWidget {
 }
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
-/// stops the floating appbar's snap-into-view or snap-out-of-view animation.
+// stops the floating app bar's snap-into-view or snap-out-of-view animation.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
 
@@ -954,7 +962,7 @@ class SliverAppBar extends StatefulWidget {
   /// {@end-tool}
   final List<Widget> actions;
 
-  /// This widget is stacked behind the toolbar and the tabbar. It's height will
+  /// This widget is stacked behind the toolbar and the tab bar. It's height will
   /// be the same as the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.

@@ -254,7 +254,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         params: <String, dynamic> {
           'fsName': fsName,
           'uri': deviceUri.toString(),
-          'fileContents': fileContents
+          'fileContents': fileContents,
         },
       );
     } catch (error) {
@@ -384,7 +384,7 @@ class DevFS {
     VMService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =

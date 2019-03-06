@@ -40,7 +40,7 @@ class _DropdownMenuPainter extends CustomPainter {
          // of onChanged callback here.
          color: color,
          borderRadius: BorderRadius.circular(2.0),
-         boxShadow: kElevationToShadow[elevation]
+         boxShadow: kElevationToShadow[elevation],
        ).createBoxPainter(),
        super(repaint: resize);
 
@@ -871,7 +871,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: GestureDetector(
         onTap: _enabled ? _handleTap : null,
         behavior: HitTestBehavior.opaque,
-        child: result
+        child: result,
       ),
     );
   }

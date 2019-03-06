@@ -117,7 +117,7 @@ class _ChipsTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: cardChildren,
-      )
+      ),
     );
   }
 }
@@ -313,7 +313,7 @@ class _ChipDemoState extends State<ChipDemo> {
               });
             },
             icon: const Icon(Icons.vignette, semanticLabel: 'Update border shape'),
-          )
+          ),
         ],
       ),
       body: ChipTheme(

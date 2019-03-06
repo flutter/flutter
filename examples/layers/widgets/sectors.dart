@@ -12,7 +12,7 @@ import '../rendering/src/sector_layout.dart';
 RenderBox initCircle() {
   return RenderBoxToRenderSectorAdapter(
     innerRadius: 25.0,
-    child: RenderSectorRing(padding: 0.0)
+    child: RenderSectorRing(padding: 0.0),
   );
 }
 
@@ -74,7 +74,7 @@ class SectorAppState extends State<SectorApp> {
     ring.add(RenderSolidColor(color, desiredDeltaTheta: kTwoPi * 0.2));
     return RenderBoxToRenderSectorAdapter(
       innerRadius: 5.0,
-      child: ring
+      child: ring,
     );
   }
   RenderBoxToRenderSectorAdapter sectorAddIcon = initSector(const Color(0xFF00DD00));
@@ -104,12 +104,12 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(renderBox: sectorAddIcon)
+                        child: WidgetToRenderBoxAdapter(renderBox: sectorAddIcon),
                       ),
                       const Text('ADD SECTOR'),
-                    ]
-                  )
-                )
+                    ],
+                  ),
+                ),
               ),
               RaisedButton(
                 onPressed: _enabledRemove ? removeSector : null,
@@ -119,16 +119,16 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon)
+                        child: WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon),
                       ),
                       const Text('REMOVE SECTOR'),
-                    ]
-                  )
-                )
+                    ],
+                  ),
+                ),
               ),
             ],
-            mainAxisAlignment: MainAxisAlignment.spaceAround
-          )
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          ),
         ),
         Expanded(
           child: Container(
@@ -139,12 +139,12 @@ class SectorAppState extends State<SectorApp> {
             padding: const EdgeInsets.all(8.0),
             child: WidgetToRenderBoxAdapter(
               renderBox: sectors,
-              onBuild: doUpdates
-            )
-          )
+              onBuild: doUpdates,
+            ),
+          ),
         ),
       ],
-      mainAxisAlignment: MainAxisAlignment.spaceBetween
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
   }
 
@@ -155,10 +155,10 @@ class SectorAppState extends State<SectorApp> {
       title: 'Sector Layout',
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Sector Layout in a Widget Tree')
+          title: const Text('Sector Layout in a Widget Tree'),
         ),
-        body: buildBody()
-      )
+        body: buildBody(),
+      ),
     );
   }
 }

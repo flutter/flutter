@@ -17,19 +17,19 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
-                  duration: Duration(seconds: 2)
+                  duration: Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -63,19 +63,19 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: const Duration(seconds: 2)
+                  duration: const Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -140,19 +140,19 @@ void main() {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: Duration(seconds: time)
+                  duration: Duration(seconds: time),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -224,19 +224,19 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: const Duration(seconds: 2)
+                  duration: const Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -272,15 +272,15 @@ void main() {
                     label: 'ACTION',
                     onPressed: () {
                       ++tapCount;
-                    }
-                  )
+                    },
+                  ),
                 ));
               },
-              child: const Text('X')
+              child: const Text('X'),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
@@ -317,7 +317,7 @@ void main() {
                     ),
                   );
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -359,10 +359,10 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                   ));
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -416,10 +416,10 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                   ));
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -467,17 +467,17 @@ void main() {
                     label: 'ACTION',
                     onPressed: () {
                       actionPressed = true;
-                    }
+                    },
                   ),
                 )).closed.then<void>((SnackBarClosedReason reason) {
                   closedReason = reason;
                 });
               },
-              child: const Text('X')
+              child: const Text('X'),
             );
           },
-        )
-      )
+        ),
+      ),
     ));
 
     // Pop up the snack bar and then press its action button.
@@ -543,16 +543,16 @@ void main() {
                       duration: const Duration(seconds: 1),
                       action: SnackBarAction(
                         label: 'ACTION',
-                        onPressed: () {}
+                        onPressed: () {},
                       ),
                     ));
                   },
-                  child: const Text('X')
+                  child: const Text('X'),
                 );
               },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ));
       await tester.tap(find.text('X'));
       await tester.pump();
@@ -585,16 +585,16 @@ void main() {
                             duration: const Duration(seconds: 1),
                             action: SnackBarAction(
                                 label: 'ACTION',
-                                onPressed: () {}
+                                onPressed: () {},
                             ),
                           ));
                         },
-                        child: const Text('X')
+                        child: const Text('X'),
                     );
                   },
-                )
-            )
-        )
+                ),
+            ),
+        ),
     ));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -620,19 +620,19 @@ void main() {
                   return GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar)
+                            content: Text(helloSnackBar),
                         ));
                       },
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                           height: 100.0,
                           width: 100.0,
-                          key: tapTarget
-                      )
+                          key: tapTarget,
+                      ),
                   );
                 }
-            )
-        )
+            ),
+        ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -677,9 +677,9 @@ void main() {
                             child: const Text('X'),
                         );
                       }
-                  )
-              )
-          )
+                  ),
+              ),
+          ),
       ));
     }
 
@@ -723,7 +723,7 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
+                key: tapTarget,
               ),
             );
           },
