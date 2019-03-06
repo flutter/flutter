@@ -7,13 +7,11 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:watcher/watcher.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
