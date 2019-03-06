@@ -919,14 +919,20 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(String packagesPath) : _packageMap = PackageMap(packagesPath).map;
+  ProjectFileInvalidator(String packagesPath) {
+    if (fs.file(packagesPath).existsSync()) {
+      _packageMap = PackageMap(packagesPath).map;
+    } else {
+      _packageMap = const <String, Uri>{};
+    }
+  }
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
   // because that actually switches the directory and requires a corresponding
   // update to .packages
   static const String _pubCachePath = '.pub-cache';
 
-  final Map<String, Uri> _packageMap;
+  Map<String, Uri> _packageMap;
   final Map<String, int> _updateTime = <String, int>{};
 
   List<String> findInvalidated() {
