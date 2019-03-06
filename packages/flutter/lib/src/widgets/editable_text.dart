@@ -237,13 +237,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 ///
 /// ## Gesture Events Handling
 ///
-/// This widget will provide rudimentary, platform-agnostic gesture event
-/// handling for user actions such as tapping, long pressing and scrolling when
+/// This widget provides rudimentary, platform-agnostic gesture handling for
+/// user actions such as tapping, long-pressing and scrolling when
 /// [rendererIgnoresPointer] is false (false by default). To tightly conform
-/// to the platform behavior with respect to gesture events in text fields, use
+/// to the platform behavior with respect to input gestures in text fields, use
 /// [TextField] or [CupertinoTextField]. For custom selection behavior, call
-/// APIs such as [RenderEditable.selectPosition], [RenderEditable.selectWord]
-/// etc programmatically.
+/// methods such as [RenderEditable.selectPosition],
+/// [RenderEditable.selectWord], etc. programmatically.
 ///
 /// See also:
 ///
@@ -490,13 +490,12 @@ class EditableText extends StatefulWidget {
   /// Optional delegate for building the text selection handles and toolbar.
   ///
   /// The [EditableText] widget used on its own will not trigger the display
-  /// of the selection toolbar by itself. The toolbar can be shown by
-  /// programmatically calling [EditableTextState.showToolbar] in response
-  /// to an appropriate user event.
+  /// of the selection toolbar by itself. The toolbar is shown by calling
+  /// [EditableTextState.showToolbar] in response to an appropriate user event.
   ///
   /// See also:
   ///
-  ///  * [CupertinoTextField], which wraps a [EditableText] and which shows the
+  ///  * [CupertinoTextField], which wraps an [EditableText] and which shows the
   ///    selection toolbar upon user events that are appropriate on the iOS
   ///    platform.
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
