@@ -1,7 +1,7 @@
 Contributing to the Flutter engine
 ==================================
 
-[![Build Status](https://cirrus-ci.com/flutter/engine.svg)][build_status]
+[![Build Status](https://api.cirrus-ci.com/github/flutter/engine.svg)][build_status]
 
 _See also: [Flutter's code of conduct][code_of_conduct]_
 
@@ -16,7 +16,7 @@ the Engine development environment][engine_dev_setup] on our wiki. Those
 instructions are part of the broader onboarding instructions described in the
 contributing guide.
 
-[build_status]: https://cirrus-ci.com/flutter/engine
+[build_status]: https://cirrus-ci.com/github/flutter/engine
 [code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
 [contrib_guide]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
 [engine_dev_setup]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
