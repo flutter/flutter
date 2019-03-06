@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -17,22 +16,14 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../desktop.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
-import '../ios/devices.dart';
-import '../ios/simulators.dart';
-import '../linux/linux_device.dart';
-import '../macos/macos_device.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
-import '../windows/windows_device.dart';
 
 const String protocolVersion = '0.4.2';
 
@@ -104,7 +95,7 @@ class Daemon {
       onDone: () {
         if (!_onExitCompleter.isCompleted)
           _onExitCompleter.complete(0);
-      }
+      },
     );
   }
 
@@ -281,12 +272,12 @@ class DaemonDomain extends Domain {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
             'message': message.message,
-            'stackTrace': message.stackTrace.toString()
+            'stackTrace': message.stackTrace.toString(),
           });
         } else {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
-            'message': message.message
+            'message': message.message,
           });
         }
       }
@@ -312,7 +303,7 @@ class DaemonDomain extends Domain {
 
 typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
-  Completer<void> appStartedCompleter
+  Completer<void> appStartedCompleter,
 });
 
 /// This domain responds to methods like [start] and [stop].
@@ -589,26 +580,20 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
-    addDeviceDiscoverer(FuchsiaDevices());
-    addDeviceDiscoverer(AndroidDevices());
-    addDeviceDiscoverer(IOSDevices());
-    addDeviceDiscoverer(IOSSimulators());
-    addDeviceDiscoverer(FlutterTesterDevices());
-    if (flutterDesktopEnabled) {
-      addDeviceDiscoverer(MacOSDevices());
-      addDeviceDiscoverer(LinuxDevices());
-      addDeviceDiscoverer(WindowsDevices());
-    }
+    // Use the device manager discovery so that client provided device types
+    // are usable via the daemon protocol.
+    deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
-  void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
+  void addDeviceDiscoverer(DeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform)
       return;
 
     _discoverers.add(discoverer);
-
-    discoverer.onAdded.listen(_onDeviceEvent('device.added'));
-    discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
+    if (discoverer is PollingDeviceDiscovery) {
+      discoverer.onAdded.listen(_onDeviceEvent('device.added'));
+      discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
+    }
   }
 
   Future<void> _serializeDeviceEvents = Future<void>.value();
@@ -925,12 +910,12 @@ class _AppRunLogger extends Logger {
         _sendLogEvent(<String, dynamic>{
           'log': message,
           'stackTrace': stackTrace.toString(),
-          'error': true
+          'error': true,
         });
       } else {
         _sendLogEvent(<String, dynamic>{
           'log': message,
-          'error': true
+          'error': true,
         });
       }
     }

@@ -2127,7 +2127,12 @@ abstract class Diagnosticable {
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    String fullString;
+    assert(() {
+      fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+      return true;
+    }());
+    return fullString ?? toStringShort();
   }
 
   /// Returns a debug representation of the object that is used by debugging
@@ -2380,7 +2385,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///
   /// `joiner` specifies the string which is place between each part obtained
   /// from [debugFillProperties]. Passing a string such as `'\n '` will result
-  /// in a multiline string that indents the properties of the object below its
+  /// in a multi-line string that indents the properties of the object below its
   /// name (as per [toString]).
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included

@@ -21,6 +21,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
@@ -50,10 +51,11 @@ class ApplicationPackageFactory {
         return applicationBinary != null
           ? MacOSApp.fromPrebuiltApp(applicationBinary)
           : null;
+      case TargetPlatform.web:
+        return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.web:
         return null;
     }
     assert(platform != null);
@@ -83,7 +85,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -121,7 +123,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -202,7 +204,7 @@ class AndroidApk extends ApplicationPackage {
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 

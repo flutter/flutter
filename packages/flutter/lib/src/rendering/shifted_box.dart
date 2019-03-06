@@ -191,7 +191,7 @@ class RenderPadding extends RenderShiftedBox {
     if (child == null) {
       size = constraints.constrain(Size(
         _resolvedPadding.left + _resolvedPadding.right,
-        _resolvedPadding.top + _resolvedPadding.bottom
+        _resolvedPadding.top + _resolvedPadding.bottom,
       ));
       return;
     }
@@ -201,7 +201,7 @@ class RenderPadding extends RenderShiftedBox {
     childParentData.offset = Offset(_resolvedPadding.left, _resolvedPadding.top);
     size = constraints.constrain(Size(
       _resolvedPadding.left + child.size.width + _resolvedPadding.right,
-      _resolvedPadding.top + child.size.height + _resolvedPadding.bottom
+      _resolvedPadding.top + child.size.height + _resolvedPadding.bottom,
     ));
   }
 
@@ -553,7 +553,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       minWidth: _minWidth ?? constraints.minWidth,
       maxWidth: _maxWidth ?? constraints.maxWidth,
       minHeight: _minHeight ?? constraints.minHeight,
-      maxHeight: _maxHeight ?? constraints.maxHeight
+      maxHeight: _maxHeight ?? constraints.maxHeight,
     );
   }
 
@@ -869,7 +869,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
       minWidth: minWidth,
       maxWidth: maxWidth,
       minHeight: minHeight,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -1032,7 +1032,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
-    @required SingleChildLayoutDelegate delegate
+    @required SingleChildLayoutDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate,
        super(child);

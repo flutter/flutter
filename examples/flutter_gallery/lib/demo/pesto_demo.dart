@@ -129,7 +129,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               bottom: extraPadding,
             ),
             child: Center(
-              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
+              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0)),
             ),
           );
         },
@@ -143,7 +143,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       top: 8.0,
       left: 8.0 + mediaPadding.left,
       right: 8.0 + mediaPadding.right,
-      bottom: 8.0
+      bottom: 8.0,
     );
     return SliverPadding(
       padding: padding,
@@ -206,7 +206,7 @@ class _PestoLogoState extends State<PestoLogo> {
   final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
   final RectTween _textRectTween = RectTween(
     begin: Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
-    end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
+    end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight),
   );
   final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
   final RectTween _imageRectTween = RectTween(
@@ -398,7 +398,7 @@ class _RecipePageState extends State<RecipePage> {
                       ),
                     ),
                   ],
-                )
+                ),
               ),
             ],
           ),
@@ -413,7 +413,7 @@ class _RecipePageState extends State<RecipePage> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 24.0),
-            child: Icon(icon, color: Colors.black54)
+            child: Icon(icon, color: Colors.black54),
           ),
           Text(label, style: menuItemStyle),
         ],
@@ -453,7 +453,7 @@ class RecipeSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
           child: Table(
             columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(64.0)
+              0: FixedColumnWidth(64.0),
             },
             children: <TableRow>[
               TableRow(
@@ -466,12 +466,12 @@ class RecipeSheet extends StatelessWidget {
                       width: 32.0,
                       height: 32.0,
                       alignment: Alignment.centerLeft,
-                      fit: BoxFit.scaleDown
-                    )
+                      fit: BoxFit.scaleDown,
+                    ),
                   ),
                   TableCell(
                     verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Text(recipe.name, style: titleStyle)
+                    child: Text(recipe.name, style: titleStyle),
                   ),
                 ]
               ),
@@ -480,7 +480,7 @@ class RecipeSheet extends StatelessWidget {
                   const SizedBox(),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                    child: Text(recipe.description, style: descriptionStyle)
+                    child: Text(recipe.description, style: descriptionStyle),
                   ),
                 ]
               ),
@@ -489,7 +489,7 @@ class RecipeSheet extends StatelessWidget {
                   const SizedBox(),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                    child: Text('Ingredients', style: headingStyle)
+                    child: Text('Ingredients', style: headingStyle),
                   ),
                 ]
               ),
@@ -503,7 +503,7 @@ class RecipeSheet extends StatelessWidget {
                   const SizedBox(),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                    child: Text('Steps', style: headingStyle)
+                    child: Text('Steps', style: headingStyle),
                   ),
                 ]
               )
@@ -544,7 +544,7 @@ class Recipe {
     this.ingredientsImagePath,
     this.ingredientsImagePackage,
     this.ingredients,
-    this.steps
+    this.steps,
   });
 
   final String name;
@@ -689,7 +689,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     steps: <RecipeStep>[
       RecipeStep(duration: '10 min', description: 'Prep vegetables'),
       RecipeStep(duration: '5 min', description: 'Stir'),
-      RecipeStep(duration: '1 hr 10 min', description: 'Cook')
+      RecipeStep(duration: '1 hr 10 min', description: 'Cook'),
     ],
   ),
   Recipe(
@@ -712,7 +712,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
       RecipeStep(duration: '5 min', description: 'Sauté vegetables'),
       RecipeStep(duration: '3 min', description: 'Stir vegetables and other filling ingredients'),
       RecipeStep(duration: '10 min', description: 'Fill phyllo squares half-full with filling and fold.'),
-      RecipeStep(duration: '40 min', description: 'Bake')
+      RecipeStep(duration: '40 min', description: 'Bake'),
     ],
   ),
 ];

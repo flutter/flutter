@@ -208,7 +208,7 @@ void main() {
                   child: Container(
                     height: 100.0,
                     child: Text('Tile $i'),
-                  )
+                  ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -249,7 +249,7 @@ void main() {
                     child: Container(
                       width: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -290,7 +290,7 @@ void main() {
                     child: Container(
                       height: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -332,7 +332,7 @@ void main() {
                     child: Container(
                       width: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -547,7 +547,7 @@ void main() {
                   ),
                   Container(
                     height: 200.0,
-                  )
+                  ),
                 ],
               ),
             ),

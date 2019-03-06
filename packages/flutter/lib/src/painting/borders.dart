@@ -121,7 +121,7 @@ class BorderSide {
   BorderSide copyWith({
     Color color,
     double width,
-    BorderStyle style
+    BorderStyle style,
   }) {
     assert(width == null || width >= 0.0);
     return BorderSide(

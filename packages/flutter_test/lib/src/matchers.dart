@@ -607,7 +607,7 @@ class _FindsWidgetMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     final Finder finder = matchState[Finder];
     final int count = finder.evaluate().length;
@@ -755,7 +755,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey];
@@ -888,7 +888,7 @@ class _HasGoodToStringDeep extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
       return mismatchDescription.add(
@@ -1216,7 +1216,7 @@ abstract class _FailWithDescriptionMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1505,7 +1505,7 @@ class _CoversSameAreaAs extends Matcher {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
-          j * (areaToCompare.height / sampleSize)
+          j * (areaToCompare.height / sampleSize),
         );
 
         if (!_samplePoint(matchState, actualPath, offset))
@@ -1543,7 +1543,7 @@ class _CoversSameAreaAs extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1855,7 +1855,7 @@ class _MatchesSemanticsData extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }

@@ -102,7 +102,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   if (printOutput) {
     await Future.wait<void>(<Future<void>>[
       stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr)
+      stderr.addStream(process.stderr),
     ]);
   } else {
     savedStdout = process.stdout.toList();

@@ -41,7 +41,7 @@ Future<TaskResult> createFlutterRunTask() async {
     startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
       <String>['run']..addAll(options),
-      environment: null
+      environment: null,
     );
     final Completer<void> finished = Completer<void>();
     final StreamSubscription<void> subscription = device.logcat.listen((String line) {

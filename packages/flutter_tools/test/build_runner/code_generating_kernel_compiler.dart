@@ -35,7 +35,7 @@ void main() {
         linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
         mainPath: anyNamed('mainPath'),
         targetProductVm: anyNamed('targetProductVm'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation')
+        trackWidgetCreation: anyNamed('trackWidgetCreation'),
       )).thenAnswer((Invocation invocation) async {
         return CodeGenerationResult(fs.file('.packages'), fs.file('main.app.dill'));
       });

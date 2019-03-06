@@ -66,7 +66,7 @@ const List<TravelDestination> destinations = <TravelDestination>[
     city: 'Thanjavur',
     location: 'Thanjavur, Tamil Nadu',
     type: CardDemoType.selectable,
-  )
+  ),
 ];
 
 class TravelDestinationItem extends StatelessWidget {
@@ -215,7 +215,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                             Icons.check_circle,
                             color: _isSelected ? colorScheme.primary : Colors.transparent,
                           ),
-                        )
+                        ),
                       ),
                     ],
                   ),
@@ -232,7 +232,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
     Key key,
-    this.title
+    this.title,
   }) : super(key: key);
 
   final String title;
@@ -277,7 +277,7 @@ class TravelDestinationContent extends StatelessWidget {
                 image: AssetImage(destination.assetName, package: destination.assetPackage),
                 fit: BoxFit.cover,
                 child: Container(),
-              )
+              ),
             ),
             Positioned(
               bottom: 16.0,
@@ -408,8 +408,8 @@ class _CardsDemoState extends State<CardsDemo> {
             margin: const EdgeInsets.only(bottom: 8.0),
             child: child,
           );
-        }).toList()
-      )
+        }).toList(),
+      ),
     );
   }
 }

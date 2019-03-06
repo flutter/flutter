@@ -133,7 +133,7 @@ mixin AnimationLocalListenersMixin {
           informationCollector: (StringBuffer information) {
             information.writeln('The $runtimeType notifying listeners was:');
             information.write('  $this');
-          }
+          },
         ));
       }
     }
@@ -199,7 +199,7 @@ mixin AnimationLocalStatusListenersMixin {
           informationCollector: (StringBuffer information) {
             information.writeln('The $runtimeType notifying status listeners was:');
             information.write('  $this');
-          }
+          },
         ));
       }
     }
