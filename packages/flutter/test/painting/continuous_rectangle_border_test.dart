@@ -13,7 +13,7 @@ void main() {
     const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(cornerRadius: 100.0);
     const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(cornerRadius: 150.0);
     const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(cornerRadius: 200.0);
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
