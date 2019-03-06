@@ -422,7 +422,9 @@ String _getCiProviderName() {
 int _getPrNumber() {
   switch(_getCiProvider()) {
     case CiProviders.cirrus:
-      return int.tryParse(Platform.environment['CIRRUS_PR']);
+      return Platform.environment['CIRRUS_PR'] == null
+          ? -1
+          : int.tryParse(Platform.environment['CIRRUS_PR']);
     case CiProviders.luci:
       return -1; // LUCI doesn't know about this.
   }
