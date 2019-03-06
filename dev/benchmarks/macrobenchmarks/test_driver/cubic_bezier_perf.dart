@@ -10,8 +10,8 @@ import 'package:macrobenchmarks/main.dart' as app;
 
 class CubicBezierShaderWarmUp extends DefaultShaderWarmUp {
   @override
-  void warmUpOnCanvas(Canvas canvas) {
-    super.warmUpOnCanvas(canvas);
+  Future<void> warmUpOnCanvas(Canvas canvas) async {
+    await super.warmUpOnCanvas(canvas);
 
     // Warm up the cubic shaders used by CubicBezierPage.
     //

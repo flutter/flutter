@@ -9,14 +9,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' show DefaultShaderWarmUp;
 
-void beginFrame(Duration timeStamp) {
+Future<void> beginFrame(Duration timeStamp) async {
   // PAINT
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Rect paintBounds = ui.Rect.fromLTRB(0, 0, 1000, 1000);
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
   final ui.Paint backgroundPaint = ui.Paint()..color = Colors.white;
   canvas.drawRect(paintBounds, backgroundPaint);
-  const DefaultShaderWarmUp().warmUpOnCanvas(canvas);
+  await const DefaultShaderWarmUp().warmUpOnCanvas(canvas);
   final ui.Picture picture = recorder.endRecording();
 
   // COMPOSITE
@@ -27,7 +27,7 @@ void beginFrame(Duration timeStamp) {
   ui.window.render(sceneBuilder.build());
 }
 
-void main() {
+Future<void> main() async {
   ui.window.onBeginFrame = beginFrame;
   ui.window.scheduleFrame();
 }

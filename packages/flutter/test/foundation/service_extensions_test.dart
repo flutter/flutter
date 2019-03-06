@@ -31,7 +31,7 @@ class TestServiceExtensionsBinding extends BindingBase
   @override
   void registerServiceExtension({
     @required String name,
-    @required ServiceExtensionCallback callback
+    @required ServiceExtensionCallback callback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;

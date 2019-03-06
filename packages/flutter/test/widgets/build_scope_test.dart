@@ -140,7 +140,7 @@ void main() {
     await tester.pumpWidget(FlipWidget(
       key: flipKey,
       left: Container(),
-      right: ProbeWidget()
+      right: ProbeWidget(),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
     final FlipWidgetState flipState1 = flipKey.currentState;

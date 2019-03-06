@@ -23,7 +23,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
   Future<void> _handleRefresh() {
@@ -36,8 +36,8 @@ class OverscrollDemoState extends State<OverscrollDemo> {
            label: 'RETRY',
            onPressed: () {
              _refreshIndicatorKey.currentState.show();
-           }
-         )
+           },
+         ),
        ));
     });
   }
@@ -55,9 +55,9 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
-            }
+            },
           ),
-        ]
+        ],
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,

@@ -585,7 +585,7 @@ void main() {
                           height: 100.0,
                           width: 100.0,
                         );
-                      })
+                      }),
                     );
                   }),
                 ),
@@ -739,7 +739,7 @@ void main() {
                     ),
                     Container(
                       height: 200.0,
-                    )
+                    ),
                   ],
                 ),
               ),

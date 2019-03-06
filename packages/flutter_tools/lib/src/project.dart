@@ -339,7 +339,7 @@ class IosProject {
       target,
       <String, dynamic>{
         'projectName': parent.manifest.appName,
-        'iosIdentifier': parent.manifest.iosBundleIdentifier
+        'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -474,7 +474,7 @@ class WebProject {
 
   final FlutterProject parent;
 
-   Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support
     /// a custom html under the web sub directory.
     final Directory outputDir = fs.directory(getWebBuildDirectory());

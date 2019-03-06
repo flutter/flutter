@@ -509,6 +509,7 @@ class ElasticInOutCurve extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear.mp4}
 ///
 /// See also:
@@ -751,13 +752,13 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_back.mp4}
   static const Cubic easeOutBack = Cubic(0.175, 0.885, 0.32, 1.275);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This is similar to [Curves.easeInOut], but with sinusoidal easing
   /// for a slightly less abrupt beginning and end.
   ///
@@ -766,7 +767,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_sine.mp4}
   static const Cubic easeInOutSine = Cubic(0.445, 0.05, 0.55, 0.95);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuad] as the first
   /// half, and [Curves.easeOutQuad] as the second.
   ///
@@ -777,7 +778,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quad.mp4}
   static const Cubic easeInOutQuad = Cubic(0.455, 0.03, 0.515, 0.955);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInCubic] as the first
   /// half, and [Curves.easeOutCubic] as the second.
   ///
@@ -791,7 +792,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_cubic.mp4}
   static const Cubic easeInOutCubic = Cubic(0.645, 0.045, 0.355, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuart] as the first
   /// half, and [Curves.easeOutQuart] as the second.
   ///
@@ -805,7 +806,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quart.mp4}
   static const Cubic easeInOutQuart = Cubic(0.77, 0.0, 0.175, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuint] as the first
   /// half, and [Curves.easeOutQuint] as the second.
   ///
@@ -816,7 +817,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quint.mp4}
   static const Cubic easeInOutQuint = Cubic(0.86, 0.0, 0.07, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
   ///
   /// Since this curve is arrived at with an exponential function, the midpoint
@@ -830,7 +831,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_expo.mp4}
   static const Cubic easeInOutExpo = Cubic(1.0, 0.0, 0.0, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInCirc] as the first
   /// half, and [Curves.easeOutCirc] as the second.
   ///
@@ -844,7 +845,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_circ.mp4}
   static const Cubic easeInOutCirc = Cubic(0.785, 0.135, 0.15, 0.86);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInBack] as the first
   /// half, and [Curves.easeOutBack] as the second.
   ///
@@ -866,6 +867,12 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
   static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
+
+  /// A cubic animation curve that starts quickly, slows down, and then ends
+  /// quickly.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
+  static const Cubic slowMiddle = Cubic(0.15, 0.85, 0.85, 0.15);
 
   /// An oscillating curve that grows in magnitude.
   ///

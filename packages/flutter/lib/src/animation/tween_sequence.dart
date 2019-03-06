@@ -121,7 +121,7 @@ class TweenSequenceItem<T> {
   /// {@end-tool}
   final Animatable<T> tween;
 
-  /// An abitrary value that indicates the relative percentage of a
+  /// An arbitrary value that indicates the relative percentage of a
   /// [TweenSequence] animation's duration when [tween] will be used.
   ///
   /// The percentage for an individual item is the item's weight divided

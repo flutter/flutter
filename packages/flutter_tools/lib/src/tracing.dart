@@ -35,7 +35,7 @@ class Tracing {
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline({
-    bool awaitFirstFrame = false
+    bool awaitFirstFrame = false,
   }) async {
     if (awaitFirstFrame) {
       final Status status = logger.startProgress(
@@ -96,7 +96,7 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     final List<Map<String, dynamic>> events =
         List<Map<String, dynamic>>.from(timeline['traceEvents']);
     final Map<String, dynamic> event = events.firstWhere(
-      (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null
+      (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null,
     );
     return event == null ? null : event['ts'];
   }

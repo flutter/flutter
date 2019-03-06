@@ -166,7 +166,7 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _kIdeviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions,
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
@@ -253,7 +253,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
-          activeArch: iosArch
+          activeArch: iosArch,
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
@@ -459,7 +459,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
 
     // Match for lines for the runner in syslog.

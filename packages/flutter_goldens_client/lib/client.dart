@@ -80,6 +80,7 @@ class GoldensClient {
           if (currentCommit == null) {
             await _initRepository();
           }
+          await _checkCanSync();
           await _syncTo(goldensCommit);
         }
       } finally {
@@ -115,6 +116,23 @@ class GoldensClient {
       ],
       workingDirectory: repositoryRoot,
     );
+  }
+
+  Future<void> _checkCanSync() async {
+    final io.ProcessResult result = await process.run(
+      <String>['git', 'status', '--porcelain'],
+      workingDirectory: repositoryRoot.path,
+    );
+    if (result.stdout.trim().isNotEmpty) {
+      final StringBuffer buf = StringBuffer();
+      buf
+        ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
+        ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
+        ..writeln('cd ${repositoryRoot.path}')
+        ..writeln('git reset --hard HEAD')
+        ..writeln('git clean -x -d -f -f');
+      throw NonZeroExitCode(1, buf.toString());
+    }
   }
 
   Future<void> _syncTo(String commit) async {
@@ -163,7 +181,7 @@ class NonZeroExitCode implements Exception {
   /// The first argument must be non-zero.
   const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
 
-  /// The code that the process will signal to th eoperating system.
+  /// The code that the process will signal to the operating system.
   ///
   /// By definiton, this is not zero.
   final int exitCode;

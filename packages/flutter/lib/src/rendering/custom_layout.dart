@@ -183,7 +183,7 @@ abstract class MultiChildLayoutDelegate {
     Set<RenderBox> debugPreviousChildrenNeedingLayout;
     assert(() {
       debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
-      _debugChildrenNeedingLayout = Set<RenderBox>();
+      _debugChildrenNeedingLayout = <RenderBox>{};
       return true;
     }());
 
@@ -285,7 +285,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox> children,
-    @required MultiChildLayoutDelegate delegate
+    @required MultiChildLayoutDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate {
     addAll(children);

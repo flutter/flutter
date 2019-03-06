@@ -53,7 +53,7 @@ Future<void> pumpTestWidget(
                 ),
                 CircleAvatar(
                   child: Text('E'),
-                )
+                ),
               ],
               accountName: withName ? const Text('name') : null,
               accountEmail: withEmail ? const Text('email') : null,
@@ -221,11 +221,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -234,11 +234,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -248,19 +248,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -280,11 +280,11 @@ void main() {
     ));
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
@@ -332,11 +332,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -345,11 +345,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -359,19 +359,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomRight(find.text('accountEmail')).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -391,11 +391,11 @@ void main() {
     ));
     expect(
       tester.getBottomRight(find.byKey(avatarA)).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 

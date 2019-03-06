@@ -231,7 +231,7 @@ void test(
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
-@isTest
+@isTestGroup
 void group(Object description, Function body) {
   _declarer.group(description.toString(), body);
 }
@@ -365,7 +365,7 @@ class _Reporter {
   String _lastProgressSuffix;
 
   /// The set of all subscriptions to various streams.
-  final Set<StreamSubscription<void>> _subscriptions = Set<StreamSubscription<void>>();
+  final Set<StreamSubscription<void>> _subscriptions = <StreamSubscription<void>>{};
 
   /// A callback called when the engine begins running [liveTest].
   void _onTestStarted(LiveTest liveTest) {

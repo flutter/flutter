@@ -66,7 +66,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down)
+        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
       ),
     );
 
@@ -94,7 +94,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down)
+        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
       ),
     );
 

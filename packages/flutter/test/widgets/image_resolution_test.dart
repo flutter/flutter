@@ -125,7 +125,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
     data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: const EdgeInsets.all(0.0)
+      padding: const EdgeInsets.all(0.0),
     ),
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),
@@ -134,7 +134,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
           Image(
             key: key,
             excludeFromSemantics: true,
-            image: TestAssetImage(image)
+            image: TestAssetImage(image),
           ) :
           Image(
             key: key,
@@ -142,10 +142,10 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
             image: TestAssetImage(image),
             height: imageSize,
             width: imageSize,
-            fit: BoxFit.fill
-          )
-      )
-    )
+            fit: BoxFit.fill,
+          ),
+      ),
+    ),
   );
 }
 

@@ -35,10 +35,52 @@ import 'theme_data.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
 /// The [clipBehavior] argument must not be null.
+///
+/// {@tool sample}
+///
+/// This example shows a simple [FlatButton].
+///
+/// ```dart
+/// FlatButton(
+///   onPressed: () {
+///     /*...*/
+///   },
+///   child: Text(
+///     "Flat Button",
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+///
+/// This example shows a [FlatButton] that is normally white-on-blue,
+/// with splashes rendered in a different shade of blue.
+/// It turns black-on-grey when disabled.
+/// The button has 8px of padding on each side, and the text is 20px high.
+///
+/// ```dart
+/// FlatButton(
+///   color: Colors.blue,
+///   textColor: Colors.white,
+///   disabledColor: Colors.grey,
+///   disabledTextColor: Colors.black,
+///   padding: EdgeInsets.all(8.0),
+///   splashColor: Colors.blueAccent,
+///   onPressed: () {
+///     /*...*/
+///   },
+///   child: Text(
+///     "Flat Button",
+///     style: TextStyle(fontSize: 20.0),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

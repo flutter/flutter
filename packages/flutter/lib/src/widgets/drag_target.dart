@@ -398,14 +398,14 @@ class _DraggableState<T> extends State<Draggable<T>> {
           widget.onDragEnd(DraggableDetails(
               wasAccepted: wasAccepted,
               velocity: velocity,
-              offset: offset
+              offset: offset,
           ));
         }
         if (wasAccepted && widget.onDragCompleted != null)
           widget.onDragCompleted();
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
-      }
+      },
     );
     if (widget.onDragStarted != null)
       widget.onDragStarted();
@@ -420,7 +420,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
       onPointerDown: canDrag ? _routePointer : null,
-      child: showChild ? widget.child : widget.childWhenDragging
+      child: showChild ? widget.child : widget.childWhenDragging,
     );
   }
 }
@@ -441,7 +441,7 @@ class DraggableDetails {
   DraggableDetails({
     this.wasAccepted = false,
     @required this.velocity,
-    @required this.offset
+    @required this.offset,
   }) : assert(velocity != null),
        assert(offset != null);
 
@@ -556,7 +556,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars))
+      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars)),
     );
   }
 }
@@ -654,7 +654,7 @@ class _DragAvatar<T> extends Drag {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
-      orElse: () => null
+      orElse: () => null,
     );
 
     _activeTarget = newTarget;
@@ -703,7 +703,7 @@ class _DragAvatar<T> extends Drag {
       child: IgnorePointer(
         child: feedback,
         ignoringSemantics: ignoringFeedbackSemantics,
-      )
+      ),
     );
   }
 
