@@ -26,16 +26,15 @@ import 'will_pop_scope.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   // Build a Form widget using the _formKey we created above
 ///   return Form(
 ///     key: _formKey,
 ///     child: Column(
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         TextFormField(
-///         validator: (value) {
-///         if (value.isEmpty) {
-///           return 'Please enter some text';
+///           validator: (value) {
+///             if (value.isEmpty) {
+///               return 'Please enter some text';
 ///             }
 ///           },
 ///         ),
@@ -60,11 +59,10 @@ import 'will_pop_scope.dart';
 /// {@end-tool}
 ///
 /// See also:
+///
 ///  * [GlobalKey], a key that is unique across the entire app.
 ///  * [FormField], a single form field widget that maintains the current state.
-///  * [TextFormField], a convenience widget that wraps a [TextField] widget in
-///  a [FormField].
-///
+///  * [TextFormField], a convenience widget that wraps a [TextField] widget in a [FormField].
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
