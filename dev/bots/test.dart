@@ -332,11 +332,10 @@ Future<void> _runCoverage() async {
 Future<void> _buildRunnerTest(
   String workingDirectory,
   String flutterRoot, {
-   String testPath,
-   bool enableFlutterToolAsserts = false,
+  String testPath,
+  bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
-  }
-) async {
+}) async {
   final List<String> args = <String>['run', 'build_runner', 'test', '--', '-rcompact', '-j1'];
   if (!hasColor) {
     args.add('--no-color');
