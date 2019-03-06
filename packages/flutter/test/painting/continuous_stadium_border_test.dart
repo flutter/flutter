@@ -175,4 +175,66 @@ void main() {
       skip: !Platform.isLinux,
     );
   });
+
+  testWidgets('Golden test small border', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Container(
+          alignment: Alignment.center,
+          child: Material(
+            color: Colors.blueAccent[400],
+            shape: const ContinuousStadiumBorder(
+              side: BorderSide(
+                width: 30.0,
+                color: Colors.pink,
+              ),
+            ),
+            child: const SizedBox(
+              height: 200,
+              width: 200,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('continuous_stadium_border.golden_test_small_border.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Golden test large border', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Container(
+          alignment: Alignment.center,
+          child: Material(
+            color: Colors.blueAccent[400],
+            shape: const ContinuousStadiumBorder(
+              side: BorderSide(
+                width: 150.0,
+                color: Colors.pink,
+              ),
+            ),
+            child: const SizedBox(
+              height: 200,
+              width: 200,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('continuous_stadium_border.golden_test_large_border.png'),
+      skip: !Platform.isLinux,
+    );
+  });
 }

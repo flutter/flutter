@@ -82,18 +82,15 @@ class ContinuousStadiumBorder extends ShapeBorder {
     // rectangle like with the traditional stadium border shape.
     final double sideWidth = side.width;
 
+    // The side width that is capped by the smallest dimension of the rectangle.
+    // It represents the side width value used to render the stroke.
+    final double actualSideWidth = math.min(side.width, math.min(rect.width, rect.height) / 2.0);
+
     // We need to change the dimensions of the rect in the event that the
     // shape has a side width as the stroke is drawn centered on the border of
     // the shape instead of inside as with the rounded rect and stadium.
-    if (sideWidth > 0.0) {
-      final double halfWidth = side.width / 2.0;
-      if (sideWidth * 2.0 < math.min(rect.width, rect.height))
-        rect = rect.deflate(halfWidth);
-      else if (rect.width > rect.height)
-        rect = Rect.fromLTRB(rect.left, rect.top + halfWidth, rect.right, rect.bottom - halfWidth);
-      else
-        rect = Rect.fromLTRB(rect.left + halfWidth, rect.top, rect.right - halfWidth, rect.bottom);
-    }
+    if (sideWidth > 0.0)
+      rect = rect.deflate(actualSideWidth / 2.0);
 
     // The ratio of the declared corner radius to the total affected pixels
     // along each axis to render the corner. For example if the declared radius
@@ -119,15 +116,25 @@ class ContinuousStadiumBorder extends ShapeBorder {
     const double minimalEdgeLengthSideToCornerRadiusRatio = 1.0 / minimalUnclippedSideToCornerRadiusRatio;
 
     // The maximum aspect ratio of the width and height of the given rect before
-    // clamping on one dimension will occur.
+    // clamping on one dimension will occur. Roughly 0.68.
     const double maxEdgeLengthAspectRatio = 1.0 - minimalEdgeLengthSideToCornerRadiusRatio;
 
     final double rectWidth = rect.width;
     final double rectHeight = rect.height;
     final bool widthLessThanHeight = rectWidth < rectHeight;
-    double width = widthLessThanHeight ? rectWidth.clamp(0.0, maxEdgeLengthAspectRatio * rectHeight) : rectWidth;
-    double height = widthLessThanHeight ? rectHeight : rectHeight.clamp(0.0, maxEdgeLengthAspectRatio * rectWidth);
-
+    final double width =
+      widthLessThanHeight ?
+        rectWidth.clamp(
+          0.0,
+          maxEdgeLengthAspectRatio * (rectHeight + actualSideWidth) - actualSideWidth
+        ) : rectWidth;
+    final double height =
+      widthLessThanHeight ?
+        rectHeight :
+        rectHeight.clamp(
+          0.0,
+          maxEdgeLengthAspectRatio * (rectWidth + actualSideWidth) - actualSideWidth
+        );
 
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
