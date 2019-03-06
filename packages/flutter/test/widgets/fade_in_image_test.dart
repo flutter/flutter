@@ -121,7 +121,7 @@ Future<void> main() async {
 
       const String placeholderSemanticText = 'Test placeholder semantic label';
       const String imageSemanticText = 'Test image semantic label';
-      const Duration animationDuration = const Duration(milliseconds: 50);
+      const Duration animationDuration = Duration(milliseconds: 50);
 
       testWidgets('assigned correctly according to placeholder or image', (WidgetTester tester) async {
         // The semantics widget that is created
