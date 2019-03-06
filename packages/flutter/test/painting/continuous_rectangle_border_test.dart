@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Continuous rectangle border scale and lerp', () {
-    const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: BorderSide(width: 10.0), cornerRadius: 100.0);
-    const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: BorderSide(width: 15.0), cornerRadius: 150.0);
-    const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: BorderSide(width: 20.0), cornerRadius: 200.0);
+    const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(cornerRadius: 100.0);
+    const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(cornerRadius: 150.0);
+    const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(cornerRadius: 200.0);
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
