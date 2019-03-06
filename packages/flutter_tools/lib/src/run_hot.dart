@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -958,7 +959,12 @@ class ProjectFileInvalidator {
         final int oldUpdatedAt = _updateTime[entity.path];
         final int updatedAt = fs.statSync(entity.path).modified.millisecondsSinceEpoch;
         if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
-          invalidatedFiles.add(entity.path);
+          // On windows check for leading `/`
+          if (platform.isWindows && entity.path.startsWith(r'/')) {
+            invalidatedFiles.add(entity.path.substring(1));
+          } else {
+            invalidatedFiles.add(entity.path);
+          }
         }
         _updateTime[entity.path] =updatedAt;
       }
