@@ -470,31 +470,6 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
-<<<<<<< HEAD
-
-=======
-    // We run generator even if [dirtyEntries] was empty because we want to
-    // keep logic of accepting/rejecting generator's output simple: we must
-    // accept/reject generator's output after every [update] call.  Incremental
-    // run with no changes is supposed to be fast (considering that it is
-    // initiated by user key press).
-    final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = <Uri>{};
-    for (Uri uri in dirtyEntries.keys.toList()) {
-      if (!uri.path.startsWith(assetBuildDirPrefix)) {
-        final DevFSContent content = dirtyEntries[uri];
-        if (content is DevFSFileContent) {
-          filesUris.add(uri);
-          invalidatedFiles.add(content.file.uri.toString());
-          syncedBytes -= content.size;
-        }
-      }
-    }
-    // No need to send source files because all compilation is done on the
-    // host and result of compilation is single kernel file.
-    filesUris.forEach(dirtyEntries.remove);
-    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
->>>>>>> 427fcebcc544cc2398bfea8c05b8473b0d9e1623
     if (fullRestart) {
       generator.reset();
     }
